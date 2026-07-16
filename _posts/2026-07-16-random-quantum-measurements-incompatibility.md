@@ -451,7 +451,7 @@ Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectr
 
 <figure class="post-figure">
   <img src="/assets/images/off-diagonal-phase.svg" alt="A heat map of the limiting compatibility threshold over the full alpha-beta square. The central disk has value one over square root of two, and the threshold rises toward one in the four exterior corners.">
-  <figcaption><strong>Figure 1.</strong> The limiting surface obtained from the principal-angle blocks for interior rank fractions $0<\alpha,\beta<1$. The central disk is flat at the universal binary minimum. In each exterior corner, the closest endpoint of $[\lambda^-,\lambda^+]$ determines the threshold. On an exact edge of the square, a rank fraction $0$ or $1$ makes one PVM trivial and gives $\tau=1$; that degenerate boundary value is not the interior limit shown by the colours.</figcaption>
+  <figcaption><strong>Figure 1.</strong> The limiting surface obtained from the principal-angle blocks for interior rank fractions $0<\alpha,\beta<1$. The central disk is flat at the universal binary minimum. A power-stretched colour scale ($\gamma=0.35$) makes the small exterior increases visible, while the ticks retain the true values of $\tau_\infty$. On an exact edge of the square, a rank fraction $0$ or $1$ makes one PVM trivial and gives $\tau=1$; that degenerate boundary value is not the interior limit shown by the colours.</figcaption>
 </figure>
 
 <figure class="post-figure">
