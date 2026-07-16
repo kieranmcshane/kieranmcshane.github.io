@@ -1,18 +1,18 @@
 ---
 layout: post
 title: "When Quantum Measurements Refuse to Share a Table"
-subtitle: "Compatibility, noise robustness, and why randomness can be nearly extremal"
+subtitle: "How random measurements approach the compatibility limit"
 date: 2026-07-16 09:00:00 +0200
 categories: [quantum-information]
 tags: [POVMs, incompatibility, random-matrices, free-probability]
-excerpt: "Quantum incompatibility is an operator-valued marginal problem. That viewpoint leads from Pauli measurements to a sharp phase diagram for random projections."
+excerpt: "Quantum incompatibility can be phrased as an operator-valued marginal problem. Random projections then produce a sharp asymptotic phase diagram."
 ---
 
 Quantum incompatibility is often introduced with a slogan: noncommuting observables cannot be measured simultaneously. For general measurements, a more precise question is:
 
 > Can the statistics of several measurements arise as the marginals of one larger measurement?
 
-This is an operator-valued marginal problem. It also gives a natural way to measure incompatibility: ask how much random noise is needed before a joint measurement becomes possible. The Pauli example illustrates the definition, while Clifford constructions give an extremal benchmark for the random-measurement results discussed below.
+This is an operator-valued marginal problem. It also suggests a numerical measure: how much random noise is needed before a joint measurement becomes possible? The Pauli $X/Z$ pair supplies the basic obstruction. Clifford families later provide the benchmark for random measurements.
 
 ## Measurements as positive operator partitions
 
@@ -144,19 +144,27 @@ $$
 
 They behave like exactly perpendicular directions in operator space.
 
-## Three ways to randomize a measurement
+## Random measurement models
 
-There is no unique “uniform random POVM.” The recent work discussed here uses three ensembles, each with a different outcome structure.
+“Random POVM” does not specify a probability distribution. The ensemble determines the number of outcomes and whether the effects are sharp.
 
-1. **Random binary projective measurements.** Choose a Haar-random subspace $E\subset\mathbb C^d$ of prescribed dimension and measure $(P&#95;E,I-P&#95;E)$.
-2. **Random basis measurements.** Draw a Haar-random unitary $U$ and measure the rank-one projections onto its columns.
-3. **Random induced POVMs.** Draw a Haar-random isometry $V:\mathbb C^d\to\mathbb C^k\otimes\mathbb C^n$ and set
+### Binary projective measurements
 
-   $$
-   M_i=V^*(|i\rangle\langle i|\otimes I_n)V.
-   $$
+Choose a Haar-random subspace $E\subset\mathbb C^d$ of prescribed dimension and measure $(P&#95;E,I-P&#95;E)$. This gives a sharp yes/no test.
 
-The first model gives sharp yes/no questions. The second gives a complete $d$-outcome basis readout. The third produces generally unsharp effects and models a system interacting with an environment. Haar invariance is shared; the compatibility thresholds are not.
+### Basis measurements
+
+Draw a Haar-random unitary $U$ and measure the rank-one projections onto its columns. The result is a complete $d$-outcome basis readout.
+
+### Induced POVMs
+
+Draw a Haar-random isometry $V:\mathbb C^d\to\mathbb C^k\otimes\mathbb C^n$ and set
+
+$$
+M_i=V^*(|i\rangle\langle i|\otimes I_n)V.
+$$
+
+These effects are generally unsharp and describe a system coupled to an environment. All of the constructions use Haar invariance, but their compatibility thresholds differ because their outcome structures differ.
 
 ## A phase diagram for two random projections
 
@@ -239,7 +247,7 @@ The uniform-noise degree used here answers a particularly concrete experimental 
 
 ## What remains unresolved
 
-The analysis leaves the following questions open:
+Open questions:
 
 - Is the conjectured polar-plus-equatorial configuration optimal for four binary qubit measurements?
 - Do $g$ balanced random binary PVMs reach the exact value $1/\sqrt g$ for every fixed $g$?
@@ -248,7 +256,7 @@ The analysis leaves the following questions open:
 - Can the gap between compatibility and incompatibility thresholds for induced random POVMs be closed?
 - Which operational tasks are controlled specifically by uniform white-noise robustness rather than generalized robustness?
 
-So the phenomenon is not confined to hand-built Pauli or Clifford families. A random high-dimensional pair can contain the same qubit obstruction. For larger random families, the known bounds have the optimal $1/\sqrt g$ scaling, but the leading constant is still open.
+Randomness can therefore reproduce an obstruction usually associated with engineered measurements. For larger families it recovers the $1/\sqrt g$ scale; whether it gets the constant exactly right is open.
 
 ## References
 
