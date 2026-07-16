@@ -435,10 +435,10 @@ $$
 h(\lambda)=\frac1{\sqrt\lambda+\sqrt{1-\lambda}}
 $$
 
-and let $\lambda&#95;* = \lambda&#95;*(\alpha,\beta)$ be the point of $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$ closest to $1/2$:
+and let $\lambda&#95;{\star}=\lambda&#95;{\star}(\alpha,\beta)$ be the point of $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$ closest to $1/2$:
 
 $$
-\lambda_*=
+\lambda_{\star}=
 \begin{cases}
 \lambda^+_{\alpha,\beta},&\lambda^+_{\alpha,\beta}<1/2,\\[2mm]
 1/2,&\lambda^-_{\alpha,\beta}\leq1/2\leq\lambda^+_{\alpha,\beta},\\[2mm]
@@ -446,15 +446,19 @@ $$
 \end{cases}
 $$
 
-> **Proposition.** Let $0<\alpha,\beta<1$, and for each $d$ let $E&#95;d,F&#95;d\subset\mathbb C^d$ be independent Haar-random subspaces of dimensions $\lfloor\alpha d\rfloor$ and $\lfloor\beta d\rfloor$. Then
+<div class="theorem" markdown="1">
+
+**Proposition.** Let $0<\alpha,\beta<1$, and for each $d$ let $E&#95;d,F&#95;d\subset\mathbb C^d$ be independent Haar-random subspaces of dimensions $\lfloor\alpha d\rfloor$ and $\lfloor\beta d\rfloor$. Then
 
 $$
 \tau(\mathsf P_{E_d},\mathsf P_{F_d})
 \xrightarrow{\mathbb P}
-h(\lambda_*(\alpha,\beta)).
+h(\lambda_{\star}(\alpha,\beta)).
 $$
 
-> If the pairs are constructed together on the product probability space, using independent Haar draws for every $d$, the convergence holds almost surely.
+If the pairs are constructed together on the product probability space, using independent Haar draws for every $d$, the convergence holds almost surely.
+
+</div>
 
 **Proof.** Unitary invariance lets us fix $E&#95;d$ as the coordinate subspace of dimension $\lfloor\alpha d\rfloor$. Write
 
@@ -486,7 +490,7 @@ $$
 \|[p,q]\|
 =\max_{\lambda\in[\lambda^-_{\alpha,\beta},\lambda^+_{\alpha,\beta}]}
 \sqrt{\lambda(1-\lambda)}
-=\sqrt{\lambda_*(1-\lambda_*)}.
+=\sqrt{\lambda_{\star}(1-\lambda_{\star})}.
 $$
 
 Substituting this norm limit into the exact finite-dimensional identity gives
@@ -494,13 +498,13 @@ Substituting this norm limit into the exact finite-dimensional identity gives
 $$
 \tau(\mathsf P_{E_d},\mathsf P_{F_d})
 \longrightarrow
-\frac1{\sqrt{1+2\sqrt{\lambda_*(1-\lambda_*)}}}
-=h(\lambda_*).
+\frac1{\sqrt{1+2\sqrt{\lambda_{\star}(1-\lambda_{\star})}}}
+=h(\lambda_{\star}).
 $$
 
 This is almost-sure convergence under the stated coupling, and therefore convergence in probability for the original sequence of random pairs. $\square$
 
-Inside the disk, $\lambda&#95;*=1/2$ and the proposition gives $1/\sqrt2$. Outside it, $\lambda&#95;*$ is the nearer endpoint. On the diagonal exterior it reduces to the formula stated in the random-measurement paper, with $\lambda&#95;\alpha=4\alpha(1-\alpha)$. That paper does not separately state the full off-diagonal surface; the proposition above is derived from its setup, the exact finite-dimensional identity and the cited strong spectral input.
+Inside the disk, $\lambda&#95;{\star}=1/2$ and the proposition gives $1/\sqrt2$. Outside it, $\lambda&#95;{\star}$ is the nearer endpoint. On the diagonal exterior it reduces to the formula stated in the random-measurement paper, with $\lambda&#95;\alpha=4\alpha(1-\alpha)$. That paper does not separately state the full off-diagonal surface; the proposition above is derived from its setup, the exact finite-dimensional identity and the cited strong spectral input.
 
 <figure class="post-figure">
   <img src="/assets/images/off-diagonal-phase.svg" alt="A heat map of the limiting compatibility threshold over the full alpha-beta square. The central disk has value one over square root of two, and the threshold rises toward one in the four exterior corners.">
@@ -543,7 +547,7 @@ G\succeq0,
 \qquad I-A_t-B_t+G\succeq0.
 $$
 
-The audit maximizes $t$ subject to these constraints and only afterward compares the optimum with $1/\sqrt{1+2\|[P,Q]\|_\infty}$. Across eight seeded projection pairs in dimensions $2,3,4$ and $6$, the largest absolute discrepancy was $1.035\times10^{-8}$. The [CSV output](/assets/data/sdp-validation.csv) records every comparison. This is a numerical check, not part of the proof above.
+The audit maximizes $t$ subject to these constraints and only afterward compares the optimum with $1/\sqrt{1+2\lVert[P,Q]\rVert_\infty}$. Across eight seeded projection pairs in dimensions $2,3,4$ and $6$, the largest absolute discrepancy was $1.035\times10^{-8}$. The [CSV output](/assets/data/sdp-validation.csv) records every comparison. This is a numerical check, not part of the proof above.
 
 To reproduce it:
 
@@ -588,7 +592,7 @@ $$
 \sum_{x=1}^g\operatorname{Tr}(W_xX_x)\leq1.
 $$
 
-To see the normalization rather than merely quote it, let a compatible tuple $X&#95;1,\ldots,X&#95;g$ have a parent POVM $(G&#95;\varepsilon)&#95;{\varepsilon\in\{-1,+1\}^g}$. Its marginals give
+To see the normalization rather than merely quote it, let a compatible tuple $X&#95;1,\ldots,X&#95;g$ have a parent POVM $(G&#95;\varepsilon)&#95;{\varepsilon\in\lbrace-1,+1\rbrace^g}$. Its marginals give
 
 $$
 X_x=\sum_{\varepsilon}\varepsilon_xG_\varepsilon.
