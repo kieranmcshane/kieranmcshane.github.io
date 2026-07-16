@@ -53,6 +53,18 @@ body {
   letter-spacing: 0;
 }
 
+.post-content .theorem {
+  color: var(--ink);
+  background: var(--soft);
+  border-left: 4px solid var(--accent);
+  margin: 1.5rem 0;
+  padding: 0.8rem 1.1rem;
+}
+
+.post-content .theorem > :last-child {
+  margin-bottom: 0;
+}
+
 .post-content code {
   font-size: 0.9em;
 }
