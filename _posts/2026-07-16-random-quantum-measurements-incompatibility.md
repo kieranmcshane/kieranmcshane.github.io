@@ -8,7 +8,9 @@ tags: [POVMs, incompatibility, random-matrices, free-probability]
 excerpt: "A guided introduction to quantum measurement incompatibility, from detector outcomes and effects to random projections and their asymptotic phase diagram."
 ---
 
-Suppose a quantum measuring device has several possible readouts. Can we build one larger device whose output contains the readouts of two different measurements at once? This is the question of **measurement compatibility**.
+Suppose a quantum measuring apparatus has several possible readouts. A Stern–Gerlach apparatus can separate two spin components; a polarizing beam splitter can direct light toward different detectors. Can we build one larger apparatus whose output contains the readouts of two different measurements at once? This is the question of **measurement compatibility**.
+
+In this article, a *measurement* means the statistical rule connecting an input state to the possible readouts. A POVM describes that rule. If we also want to describe how the apparatus changes the state, we need a quantum instrument.
 
 The familiar slogan says that noncommuting observables cannot be measured simultaneously. The more general question is:
 
@@ -52,9 +54,41 @@ $$
 
 so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The assigned probability therefore lies between zero and one for every state. This establishes the allowed range for one outcome. It does not yet show that the probabilities of all outcomes sum to one.
 
-An effect tells us the probability of one outcome. It does not, by itself, tell us the state of the system after that outcome occurs. Describing the state change requires extra information, such as a quantum instrument or Kraus operators.
+An effect tells us the probability of one outcome. It does not, by itself, tell us the state after that outcome occurs. A quantum instrument supplies this extra information. It is a family of completely positive maps $\mathcal I&#95;i$ whose sum preserves trace. The outcome probability and the conditional state are
 
-An effect need not be a projection. If $A&#95;i^2=A&#95;i$, then it is a projection and represents a sharp outcome. A measurement made entirely of projections is called projective or sharp. General effects are not merely defective projections. They also arise naturally after coupling the system to an ancilla or combining several detector outcomes.
+$$
+\Pr(i\mid\rho)=\operatorname{Tr}\!\bigl(\mathcal I_i(\rho)\bigr),
+\qquad
+\rho_i=
+\frac{\mathcal I_i(\rho)}
+{\operatorname{Tr}(\mathcal I_i(\rho))}
+$$
+
+whenever the denominator is nonzero. In a Kraus representation,
+
+$$
+\mathcal I_i(\rho)=\sum_m K_{i,m}\rho K_{i,m}^{\dagger},
+\qquad
+A_i=\sum_m K_{i,m}^{\dagger}K_{i,m}.
+$$
+
+Different instruments can produce the same effect $A&#95;i$. They agree on the probability of the outcome but can disturb the state differently.
+
+An effect is a projection precisely when
+
+$$
+A_i^2=A_i
+\quad\Longleftrightarrow\quad
+\operatorname{spec}(A_i)\subseteq\{0,1\}.
+$$
+
+It then represents a sharp outcome. A measurement made entirely of projections is called projective or sharp. General effects may have eigenvalues strictly between zero and one, but they are not merely defective projections. For example, perform a projective measurement $(P&#95;j)$ and report $i$ with classical probability $p(i\mid j)$. The effective outcome is
+
+$$
+A_i=\sum_j p(i\mid j)P_j,
+$$
+
+which is generally not a projection. Merely merging mutually orthogonal projective outcomes is different: their sum remains a projection. More generally, a POVM can arise by coupling the system to an ancilla and performing a projective measurement on the larger system.
 
 The entire measurement is the collection of its effects:
 
@@ -119,7 +153,21 @@ $$
 \sum_i C_{ij}=B_j.
 $$
 
-Think of $C=(C&#95;{ij})$ as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$. For every state $\rho$,
+Think of $C=(C&#95;{ij})$ as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$:
+
+$$
+\begin{array}{c|ccc|c}
+ & B_1 & \cdots & B_\ell & \text{row sum}\\
+\hline
+A_1 & C_{11} & \cdots & C_{1\ell} & A_1\\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+A_k & C_{k1} & \cdots & C_{k\ell} & A_k\\
+\hline
+\text{column sum} & B_1 & \cdots & B_\ell &
+\end{array}
+$$
+
+Each cell contains a positive operator. The labels at the right and bottom are the prescribed operator-valued marginals. For every state $\rho$,
 
 $$
 p_\rho(i,j)=\operatorname{Tr}(\rho C_{ij})
@@ -131,7 +179,7 @@ The pair $(i,j)$ now labels a joint event: measurement $A$ reports $i$ and measu
 
 The words **for every state** carry the quantum content. Two classical distributions can always be coupled. Quantum compatibility asks for one positive operator table that produces the right distributions simultaneously for every input state.
 
-This is why Sudoku is only a loose analogy. Sudoku has discrete symbols and fixed clues. Here every cell is an unknown positive matrix constrained by operator-valued row and column totals. “Positive coupling problem” is closer to the mathematics.
+This table is the grid behind the informal Sudoku comparison. The resemblance stops at the layout: no discrete symbols or fixed clues are supplied. Every cell is an unknown positive matrix constrained by its row and column totals. An operator-valued contingency table, or a positive coupling problem, is closer to the mathematics.
 
 ## Commutation gives a joint measurement
 
