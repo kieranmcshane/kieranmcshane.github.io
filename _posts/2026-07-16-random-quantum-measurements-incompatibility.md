@@ -1,22 +1,24 @@
 ---
 layout: post
-title: "Quantum Measurement Incompatibility, Step by Step"
-subtitle: "From detector outcomes to random projections"
+title: "Random Binary Projective Measurements and Incompatibility"
+subtitle: "From joint measurability to a principal-angle phase diagram"
 date: 2026-07-16 09:00:00 +0200
 categories: [quantum-information]
 tags: [POVMs, incompatibility, random-matrices, free-probability]
-excerpt: "A guided introduction to quantum measurement incompatibility, from detector outcomes and effects to random projections and their asymptotic phase diagram."
+excerpt: "A guided introduction to joint measurability and the asymptotic incompatibility of random binary projections."
 ---
 
-Suppose a quantum measuring apparatus has several possible readouts. A Stern–Gerlach apparatus can separate two spin components; a polarizing beam splitter can direct light toward different detectors. Can we build one larger apparatus whose output contains the readouts of two different measurements at once? This is the question of **measurement compatibility**.
+Two quantum measurements are compatible when both can be recovered from a single measurement. If the joint measurement reports a pair of outcomes $(i,j)$, ignoring $j$ should reproduce the statistics of the first measurement, while ignoring $i$ should reproduce those of the second. This must hold for every input state.
 
-In this article, a *measurement* means the statistical rule connecting an input state to the possible readouts. A POVM describes that rule. If we also want to describe how the apparatus changes the state, we need a quantum instrument.
+Compatibility therefore concerns outcome probabilities. We represent a measurement by a POVM, a collection of positive operators associated with its possible outcomes. A POVM does not specify the state left behind after an outcome; that additional information belongs to a quantum instrument and is not needed for joint measurability.
 
-A familiar slogan says that “[noncommuting observables cannot be measured simultaneously](https://ar5iv.labs.arxiv.org/html/2510.13980v2#S1.SS1.SSS1.p2).” Taken literally, this is too broad. In the cited passage, the slogan is immediately narrowed to the failure of simultaneous diagonalization. Other experimental notions of simultaneity occur in [continuous weak measurements](https://arxiv.org/abs/2306.06167). The notion studied here is joint measurability of the outcome statistics:
+The article first develops effects, POVMs, compatibility and uniform noise. It then turns to the main subject: random binary projective measurements, their principal-angle geometry and the resulting phase diagram.
 
-> Can the statistics of several measurements arise as the marginals of one larger measurement?
+## Reading guide
 
-Notation often blurs the distinction between a measurement and one of its possible outcomes. The operator attached to that outcome adds another layer. We will introduce each piece separately.
+- [The primer](#from-outcomes-to-effects) introduces the notation and the marginal problem.
+- [The two-projection argument](#a-phase-diagram-for-two-random-projections) contains the main geometric result and the full off-diagonal limit.
+- [The many-measurement section](#many-random-binary-measurements) uses incompatibility witnesses and free probability; the final section explains the operational meaning.
 
 ## From outcomes to effects
 
@@ -179,8 +181,6 @@ The pair $(i,j)$ now labels a joint event: measurement $A$ reports $i$ and measu
 
 The words **for every state** carry the quantum content. Two classical distributions can always be coupled. Quantum compatibility asks for one positive operator table that produces the right distributions simultaneously for every input state.
 
-This table is the grid behind the informal Sudoku comparison. The resemblance stops at the layout: no discrete symbols or fixed clues are supplied. Every cell is an unknown positive matrix constrained by its row and column totals. An operator-valued contingency table, or a positive coupling problem, is closer to the mathematics.
-
 ## Commutation gives a joint measurement
 
 Suppose every $A&#95;i$ commutes with every $B&#95;j$. Set
@@ -198,6 +198,8 @@ $$
 This embeds the familiar statement about commuting sharp observables inside the more general POVM framework.
 
 Commutation is sufficient here, but it is not necessary for general POVMs. For projective measurements, compatibility and commutation are equivalent. For example, the noisy Pauli effects $(I\pm t\sigma&#95;z)/2$ and $(I\pm t\sigma&#95;x)/2$ do not commute when $t>0$, yet they are compatible when $t\leq1/\sqrt2$.
+
+This is the precise setting behind the familiar slogan that “[noncommuting observables cannot be measured simultaneously](https://ar5iv.labs.arxiv.org/html/2510.13980v2#S1.SS1.SSS1.p2).” For sharp observables, the slogan refers to the failure of simultaneous diagonalization and joint measurability. It should not be extended unchanged to noisy POVMs or to other experimental meanings of simultaneity, such as [continuous weak measurement](https://arxiv.org/abs/2306.06167).
 
 ## The simplest obstruction: two Pauli measurements
 
@@ -255,6 +257,8 @@ With probability $t$, one performs $A$; with probability $1-t$, one ignores the 
 $$
 \tau(A,B)=\max\{t:A^{(t)}\text{ and }B^{(t)}\text{ are compatible}\}.
 $$
+
+Throughout this article, **maximally incompatible** means attaining the smallest possible value of this balanced uniform-white-noise degree within the stated class of measurements. It is not a claim that is independent of the noise model or incompatibility measure.
 
 For a family $A^{(1)},\ldots,A^{(g)}$, a parent POVM is indexed by an outcome string $\mathbf i=(i&#95;1,\ldots,i&#95;g)$. Its $x$-th marginal must satisfy
 
@@ -423,7 +427,9 @@ $$
 
 This is the visibility form of [Eq. (11) in Heinosaari, Kiukas, and Reitzner](https://ar5iv.labs.arxiv.org/html/1501.04554#S5.E11). The identity is special to two sharp binary measurements under the uniform-noise model. It should not be read as a general commutator formula for arbitrary POVMs.
 
-This finite formula also resolves the off-diagonal asymptotic surface. Set
+### The full off-diagonal limit
+
+Set
 
 $$
 h(\lambda)=\frac1{\sqrt\lambda+\sqrt{1-\lambda}}
@@ -440,14 +446,61 @@ $$
 \end{cases}
 $$
 
-Weak convergence supplies principal-angle values throughout the limiting support, while strong convergence rules out spectral outliers. Since $h$ is continuous and has its unique minimum at $1/2$, the exact block formula gives
+> **Proposition.** Let $0<\alpha,\beta<1$, and for each $d$ let $E&#95;d,F&#95;d\subset\mathbb C^d$ be independent Haar-random subspaces of dimensions $\lfloor\alpha d\rfloor$ and $\lfloor\beta d\rfloor$. Then
 
 $$
-\tau(\mathsf P_E,\mathsf P_F)
-\longrightarrow h(\lambda_*(\alpha,\beta)).
+\tau(\mathsf P_{E_d},\mathsf P_{F_d})
+\xrightarrow{\mathbb P}
+h(\lambda_*(\alpha,\beta)).
 $$
 
-Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectral endpoint. On the diagonal exterior it reduces to the formula stated in the paper, with $\lambda&#95;\alpha=4\alpha(1-\alpha)$. The paper does not separately state the full off-diagonal formula; the expression above is the direct consequence of its spectral input and the exact reducing-block criterion.
+> If the pairs are constructed together on the product probability space, using independent Haar draws for every $d$, the convergence holds almost surely.
+
+**Proof.** Unitary invariance lets us fix $E&#95;d$ as the coordinate subspace of dimension $\lfloor\alpha d\rfloor$. Write
+
+$$
+P_{E_d}=P_d,
+\qquad
+P_{F_d}=U_dQ_dU_d^*,
+$$
+
+where $P&#95;d$ and $Q&#95;d$ are deterministic coordinate projections with normalized traces tending to $\alpha$ and $\beta$, and $U&#95;d$ is Haar distributed. These deterministic projection sequences have a strong limit. The strong asymptotic-freeness theorem of [Collins and Male](https://ar5iv.labs.arxiv.org/html/1105.4345#S1.Thmtheorem4) therefore gives, almost surely under the product coupling,
+
+$$
+\bigl\|[P_d,U_dQ_dU_d^*]\bigr\|_\infty
+\longrightarrow
+\|[p,q]\|,
+$$
+
+where $p$ and $q$ are free projections of traces $\alpha$ and $\beta$.
+
+[Aubrun’s computation](https://arxiv.org/abs/2109.06535) identifies the nonzero commutator spectrum by applying
+
+$$
+\lambda\longmapsto\pm\sqrt{\lambda(1-\lambda)}
+$$
+
+to the interval $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$. Any atoms at $0$ or $1$ come from commuting intersection or kernel blocks; the map sends both to zero. Hence
+
+$$
+\|[p,q]\|
+=\max_{\lambda\in[\lambda^-_{\alpha,\beta},\lambda^+_{\alpha,\beta}]}
+\sqrt{\lambda(1-\lambda)}
+=\sqrt{\lambda_*(1-\lambda_*)}.
+$$
+
+Substituting this norm limit into the exact finite-dimensional identity gives
+
+$$
+\tau(\mathsf P_{E_d},\mathsf P_{F_d})
+\longrightarrow
+\frac1{\sqrt{1+2\sqrt{\lambda_*(1-\lambda_*)}}}
+=h(\lambda_*).
+$$
+
+This is almost-sure convergence under the stated coupling, and therefore convergence in probability for the original sequence of random pairs. $\square$
+
+Inside the disk, $\lambda&#95;*=1/2$ and the proposition gives $1/\sqrt2$. Outside it, $\lambda&#95;*$ is the nearer endpoint. On the diagonal exterior it reduces to the formula stated in the random-measurement paper, with $\lambda&#95;\alpha=4\alpha(1-\alpha)$. That paper does not separately state the full off-diagonal surface; the proposition above is derived from its setup, the exact finite-dimensional identity and the cited strong spectral input.
 
 <figure class="post-figure">
   <img src="/assets/images/off-diagonal-phase.svg" alt="A heat map of the limiting compatibility threshold over the full alpha-beta square. The central disk has value one over square root of two, and the threshold rises toward one in the four exterior corners.">
@@ -456,12 +509,12 @@ Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectr
 
 <figure class="post-figure">
   <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting principal-angle interval contains one half, producing a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x witness.">
-  <figcaption><strong>Figure 2.</strong> Why the disk gives maximal incompatibility. If the limiting spectrum of squared principal-angle cosines contains $1/2$, a block with $\theta=\pi/4$ appears. On that block, the centered measurements are $\sigma_z$ and $\sigma_x$, forcing $\tau$ down to $1/\sqrt2$.</figcaption>
+  <figcaption><strong>Figure 2.</strong> Why the disk gives maximal incompatibility. If the limiting spectrum of squared principal-angle cosines contains $1/2$, finite-dimensional blocks occur arbitrarily close to $\theta=\pi/4$ with high probability. Their centered measurements approach the $\sigma_z$ and $\sigma_x$ pair, forcing $\tau$ toward $1/\sqrt2$.</figcaption>
 </figure>
 
 <figure class="post-figure">
   <img src="/assets/images/finite-dimension-check.svg" alt="Seeded Monte Carlo medians and ten-to-ninety percent intervals for finite random projection pairs at an interior point, an off-diagonal boundary point, and an exterior point.">
-  <figcaption><strong>Figure 3.</strong> A finite-dimensional check at three parameter choices. Dots are Monte Carlo medians and whiskers show the 10th–90th percentiles. The boundary converges more slowly because $1/2$ sits at a spectral edge. This experiment illustrates finite-size behavior; it is not a proof of a convergence rate.</figcaption>
+  <figcaption><strong>Figure 3.</strong> A finite-dimensional check at three parameter choices. Dots are Monte Carlo medians and whiskers show the 10th–90th percentiles. The boundary data are consistent with slower, edge-controlled convergence because $1/2$ lies at the endpoint of the limiting spectral interval. This experiment illustrates finite-size behavior; it is not a proof of a convergence rate.</figcaption>
 </figure>
 
 **Reproduce Figure 3.** The [Python source](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/random_projection_compatibility.py) contains the exact finite-dimensional formula, the Haar-subspace sampler, and the seeded Monte Carlo experiment. Its [generated CSV file](/assets/data/finite-dimension-check.csv) records every plotted median and 10th–90th percentile. From the repository root, run:
@@ -469,13 +522,41 @@ Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectr
     python3 -m pip install -r assets/code/requirements.txt
     python3 assets/code/random_projection_compatibility.py
 
+### An independent SDP audit
+
+Figure 3 uses the exact commutator formula, so it tests the random spectral behavior but does not independently validate that formula. A separate [CVXPY audit](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/validate_projection_compatibility_sdp.py) instead solves the original joint-measurability problem.
+
+For the noisy effects
+
+$$
+A_t=tP+(1-t)\frac I2,
+\qquad
+B_t=tQ+(1-t)\frac I2,
+$$
+
+binary compatibility is equivalent to the existence of one Hermitian operator $G$ satisfying
+
+$$
+G\succeq0,
+\qquad A_t-G\succeq0,
+\qquad B_t-G\succeq0,
+\qquad I-A_t-B_t+G\succeq0.
+$$
+
+The audit maximizes $t$ subject to these constraints and only afterward compares the optimum with $1/\sqrt{1+2\|[P,Q]\|_\infty}$. Across eight seeded projection pairs in dimensions $2,3,4$ and $6$, the largest absolute discrepancy was $1.035\times10^{-8}$. The [CSV output](/assets/data/sdp-validation.csv) records every comparison. This is a numerical check, not part of the proof above.
+
+To reproduce it:
+
+    python3 -m pip install -r assets/code/sdp-requirements.txt
+    python3 assets/code/validate_projection_compatibility_sdp.py
+
 This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional block where they approach the $\sigma&#95;x$ and $\sigma&#95;z$ pair.
 
 The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. What changes across the circle is the amount of uniform noise needed to erase that incompatibility.
 
 ## Many random binary measurements
 
-Fix $g$, take even $d$, and choose $g$ independent random projections of rank $d/2$. Write $A&#95;x=2P&#95;x-I$. The random-measurement theorem gives, almost surely,
+Fix $g$, take even $d$, and choose $g$ independent random projections of rank $d/2$. Write $D&#95;x=2P&#95;x-I$ for their difference operators. The random-measurement theorem gives, almost surely,
 
 $$
 \limsup_{d\to\infty}\tau(\mathsf P_1,\ldots,\mathsf P_g)
@@ -484,7 +565,7 @@ $$
 
 ([Bluhm, Lancien, and Nechita, 2025](https://arxiv.org/abs/2507.20600)).
 
-Half the eigenvalues of $A&#95;x$ are $+1$ and half are $-1$. Its spectral law is therefore
+Half the eigenvalues of $D&#95;x$ are $+1$ and half are $-1$. Its spectral law is therefore
 
 $$
 b=\frac12(\delta_{-1}+\delta_1).
@@ -493,7 +574,7 @@ $$
 As $d$ grows, independent Haar conjugates become asymptotically free. More is needed here than convergence of empirical eigenvalue distributions. For every fixed sign vector $\varepsilon$, strong asymptotic freeness ([Collins and Male, 2014](https://arxiv.org/abs/1105.4345)) gives
 
 $$
-\left\|\sum_{x=1}^g\varepsilon_xA_x\right\|_\infty
+\left\|\sum_{x=1}^g\varepsilon_xD_x\right\|_\infty
 \longrightarrow 2\sqrt{g-1}
 $$
 
@@ -507,19 +588,40 @@ $$
 \sum_{x=1}^g\operatorname{Tr}(W_xX_x)\leq1.
 $$
 
-For the collinear choice $W&#95;x=sA&#95;x/d$, a sufficient normalization condition is
+To see the normalization rather than merely quote it, let a compatible tuple $X&#95;1,\ldots,X&#95;g$ have a parent POVM $(G&#95;\varepsilon)&#95;{\varepsilon\in\{-1,+1\}^g}$. Its marginals give
 
 $$
-s\left\|\sum_{x=1}^g\varepsilon_xA_x\right\|_\infty\leq1
+X_x=\sum_{\varepsilon}\varepsilon_xG_\varepsilon.
+$$
+
+For the collinear choice $W&#95;x=sD&#95;x/d$,
+
+$$
+\begin{aligned}
+\sum_{x=1}^g\operatorname{Tr}(W_xX_x)
+&=\frac{s}{d}\sum_\varepsilon
+\operatorname{Tr}\!\left[
+\left(\sum_{x=1}^g\varepsilon_xD_x\right)G_\varepsilon
+\right]\\
+&\leq\frac{s}{d}
+\max_\varepsilon\left\|\sum_{x=1}^g\varepsilon_xD_x\right\|_\infty
+\sum_\varepsilon\operatorname{Tr}(G_\varepsilon)\\
+&=s\max_\varepsilon
+\left\|\sum_{x=1}^g\varepsilon_xD_x\right\|_\infty,
+\end{aligned}
+$$
+
+because $\sum&#95;\varepsilon G&#95;\varepsilon=I&#95;d$. A sufficient normalization condition is therefore
+
+$$
+s\left\|\sum_{x=1}^g\varepsilon_xD_x\right\|_\infty\leq1
 \qquad\text{for every sign vector }\varepsilon.
 $$
 
-This condition bounds every deterministic choice of one sign per measurement, which is exactly what appears when a parent POVM is marginalized.
-
-White noise changes the difference operator $A&#95;x$ to $tA&#95;x$. Because $A&#95;x^2=I$, the witness value on the noisy family is
+White noise changes $D&#95;x$ to $tD&#95;x$. Because $D&#95;x^2=I$, the witness value on the noisy family is
 
 $$
-\sum_{x=1}^g\operatorname{Tr}\!\left(\frac{sA_x}{d}\,tA_x\right)=stg.
+\sum_{x=1}^g\operatorname{Tr}\!\left(\frac{sD_x}{d}\,tD_x\right)=stg.
 $$
 
 Choose $s$ asymptotically as $1/(2\sqrt{g-1})$. The witness detects incompatibility when $stg>1$, yielding the stated upper bound.
