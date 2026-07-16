@@ -478,13 +478,19 @@ $$
 
 where $p$ and $q$ are free projections of traces $\alpha$ and $\beta$.
 
-[Aubrun’s computation](https://arxiv.org/abs/2109.06535) identifies the nonzero commutator spectrum by applying
+[Aubrun’s support computation](https://arxiv.org/abs/2109.06535), combined with the principal-angle block form, shows that the nonzero singular values of $[p,q]$ are obtained by applying
 
 $$
-\lambda\longmapsto\pm\sqrt{\lambda(1-\lambda)}
+\lambda\longmapsto\sqrt{\lambda(1-\lambda)}
 $$
 
-to the interval $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$. Any atoms at $0$ or $1$ come from commuting intersection or kernel blocks; the map sends both to zero. Hence
+to the interval $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$. Equivalently, the nonzero spectrum of the self-adjoint operator $i[p,q]$ is obtained by applying
+
+$$
+\lambda\longmapsto\pm\sqrt{\lambda(1-\lambda)}.
+$$
+
+Any atoms at $0$ or $1$ come from commuting intersection or kernel blocks; the map sends both to zero. Hence
 
 $$
 \|[p,q]\|
@@ -512,7 +518,7 @@ Inside the disk, $\lambda&#95;{\star}=1/2$ and the proposition gives $1/\sqrt2$.
 </figure>
 
 <figure class="post-figure">
-  <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting principal-angle interval contains one half, producing a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x witness.">
+  <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting principal-angle interval contains one half, forcing finite-dimensional blocks arbitrarily close to angle pi over four and hence to the Pauli sigma-z and sigma-x obstruction.">
   <figcaption><strong>Figure 2.</strong> Why the disk gives maximal incompatibility. If the limiting spectrum of squared principal-angle cosines contains $1/2$, finite-dimensional blocks occur arbitrarily close to $\theta=\pi/4$ with high probability. Their centered measurements approach the $\sigma_z$ and $\sigma_x$ pair, forcing $\tau$ toward $1/\sqrt2$.</figcaption>
 </figure>
 
