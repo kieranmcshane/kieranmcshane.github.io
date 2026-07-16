@@ -50,7 +50,7 @@ $$
 =1-\operatorname{Tr}(\rho A_i),
 $$
 
-so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The Born-rule expression therefore lies between zero and one for every state.
+so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The Born-rule expression therefore lies between zero and one for every state. This establishes the allowed range for one outcome. It does not yet show that the probabilities of all outcomes sum to one.
 
 An effect tells us the probability of one outcome. It does not, by itself, tell us the state of the system after that outcome occurs. Describing the state change requires extra information, such as a quantum instrument or Kraus operators.
 
@@ -64,7 +64,16 @@ A=(A_1,\ldots,A_k),
 \qquad \sum_{i=1}^k A_i=I_d.
 $$
 
-The condition $\sum&#95;i A&#95;i=I$ makes the outcome probabilities add to one. Such a collection is called a positive operator-valued measure, or POVM. In this notation, $A$ names the whole measurement, while $A&#95;i$ is the effect associated with outcome $i$.
+The condition $\sum&#95;i A&#95;i=I$ is called **completeness**. It supplies the missing normalization:
+
+$$
+\sum_{i=1}^k \Pr(i\mid\rho)
+=\sum_{i=1}^k\operatorname{Tr}(\rho A_i)
+=\operatorname{Tr}\!\left(\rho\sum_{i=1}^k A_i\right)
+=\operatorname{Tr}(\rho I)=1.
+$$
+
+The individual bounds make each Born-rule value lie in $[0,1]$; completeness makes the collection a probability distribution. A collection of effects satisfying completeness is called a positive operator-valued measure, or POVM. In this notation, $A$ names the whole measurement, while $A&#95;i$ is the effect associated with outcome $i$.
 
 For example, the standard computational-basis measurement of a qubit has two effects:
 
