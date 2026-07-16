@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" role="img" aria-labelledby="title description">
   <title id="title">Why the phase disk produces maximal incompatibility</title>
-  <desc id="description">The limiting interval of squared principal-angle cosines contains one half. This gives a two-dimensional block with principal angle pi over four, whose centered observables are the Pauli sigma z and sigma x matrices.</desc>
+  <desc id="description">The limiting interval of squared principal-angle cosines contains one half. Finite-dimensional blocks therefore occur arbitrarily close to principal angle pi over four, and their centered observables approach the Pauli sigma z and sigma x matrices.</desc>
   <style>
     :root {
       color-scheme: light;
