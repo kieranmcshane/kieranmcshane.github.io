@@ -416,6 +416,11 @@ Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectr
   <figcaption><strong>Figure 3.</strong> A finite-dimensional check at three parameter choices. Dots are Monte Carlo medians and whiskers show the 10th–90th percentiles. The boundary converges more slowly because $1/2$ sits at a spectral edge. This experiment illustrates finite-size behavior; it is not a proof of a convergence rate.</figcaption>
 </figure>
 
+**Reproduce Figure 3.** The [Python source](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/random_projection_compatibility.py) contains the exact finite-dimensional formula, the Haar-subspace sampler, and the seeded Monte Carlo experiment. Its [generated CSV file](/assets/data/finite-dimension-check.csv) records every plotted median and 10th–90th percentile. From the repository root, run:
+
+    python3 -m pip install -r assets/code/requirements.txt
+    python3 assets/code/random_projection_compatibility.py
+
 This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional block where they approach the $\sigma&#95;x$ and $\sigma&#95;z$ pair.
 
 The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. What changes across the circle is the amount of uniform noise needed to erase that incompatibility.
