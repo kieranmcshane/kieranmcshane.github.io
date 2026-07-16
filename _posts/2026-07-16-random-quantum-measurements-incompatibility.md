@@ -292,7 +292,7 @@ $$
 
 Because $1/\sqrt2$ is the universal minimum for a binary pair, these random measurements are asymptotically maximally incompatible throughout the disk. The result is not restricted to the balanced point $(1/2,1/2)$.
 
-This is the two-projection phase-diagram theorem of [Bluhm, Lancien, and Nechita](https://arxiv.org/abs/2507.20600).
+This is [Corollary 3.6 of Bluhm, Lancien, and Nechita](https://ar5iv.labs.arxiv.org/html/2507.20600#S3.Thmtheorem6).
 
 ### Why a circle appears
 
@@ -331,7 +331,7 @@ D_E=\sigma_z,
 D_F=\cos(2\theta)\sigma_z+\sin(2\theta)\sigma_x.
 $$
 
-For two unbiased qubit observables with unit Bloch vectors $m$ and $n$, the qubit compatibility criterion used by [Bluhm, Lancien, and Nechita](https://arxiv.org/abs/2507.20600) gives the white-noise threshold
+For two unbiased qubit observables with unit Bloch vectors $m$ and $n$, [Lemma 3.4 of Bluhm, Lancien, and Nechita](https://ar5iv.labs.arxiv.org/html/2507.20600#S3.Thmtheorem4) gives the white-noise threshold
 
 $$
 \tau=\frac{2}{\|m+n\|+\|m-n\|}.
@@ -373,7 +373,7 @@ $$
 }.
 $$
 
-This identity is special to two sharp binary measurements under the uniform-noise model. It should not be read as a general commutator formula for arbitrary POVMs.
+This is the visibility form of [Eq. (11) in Heinosaari, Kiukas, and Reitzner](https://ar5iv.labs.arxiv.org/html/1501.04554#S5.E11). The identity is special to two sharp binary measurements under the uniform-noise model. It should not be read as a general commutator formula for arbitrary POVMs.
 
 This finite formula also resolves the off-diagonal asymptotic surface. Set
 
@@ -491,7 +491,7 @@ I_R(M)=\min\left\{r\geq0:
 \text{ is compatible for some measurement family }N\right\}.
 $$
 
-In the multi-ensemble state-discrimination games with side information studied by [Skrzypczyk, Šupić, and Cavalcanti](https://arxiv.org/abs/1901.00816),
+In the multi-ensemble state-discrimination games with side information studied by Skrzypczyk, Šupić, and Cavalcanti, [their Eq. (5)](https://ar5iv.labs.arxiv.org/html/1901.00816#S2.E5) states that
 
 $$
 \max_{\mathcal E}
@@ -526,6 +526,7 @@ Random measurements can reproduce the same qubit obstruction as an engineered pa
 - Andreas Bluhm and Ion Nechita, [*Joint measurability of quantum effects and the matrix diamond*](https://arxiv.org/abs/1807.01508), 2018.
 - Andreas Bluhm, Cécilia Lancien, and Ion Nechita, [*Random measurements are almost maximally incompatible*](https://arxiv.org/abs/2507.20600), 2025.
 - Guillaume Aubrun, [*Principal angles between random subspaces and polynomials in two free projections*](https://arxiv.org/abs/2109.06535), 2021.
+- Teiko Heinosaari, Jukka Kiukas, and Daniel Reitzner, [*Noise Robustness of the Incompatibility of Quantum Measurements*](https://arxiv.org/abs/1501.04554), 2015.
 - Benoît Collins and Camille Male, [*The strong asymptotic freeness of Haar and deterministic matrices*](https://arxiv.org/abs/1105.4345), 2014.
 - Jessica Bavaresco et al., [*Most incompatible measurements for robust steering tests*](https://arxiv.org/abs/1704.02994), 2017.
 - Paul Skrzypczyk, Ivan Šupić, and Daniel Cavalcanti, [*All sets of incompatible measurements give an advantage in quantum state discrimination*](https://arxiv.org/abs/1901.00816), 2019.
