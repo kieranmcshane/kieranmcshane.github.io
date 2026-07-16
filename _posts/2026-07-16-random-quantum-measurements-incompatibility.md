@@ -1,22 +1,50 @@
 ---
 layout: post
-title: "When Quantum Measurements Refuse to Share a Table"
-subtitle: "How random measurements approach the compatibility limit"
+title: "Quantum Measurement Incompatibility, Step by Step"
+subtitle: "From detector outcomes to random projections"
 date: 2026-07-16 09:00:00 +0200
 categories: [quantum-information]
 tags: [POVMs, incompatibility, random-matrices, free-probability]
-excerpt: "Quantum incompatibility can be phrased as an operator-valued marginal problem. Random projections then produce a sharp asymptotic phase diagram."
+excerpt: "A guided introduction to quantum measurement incompatibility, from detector outcomes and effects to random projections and their asymptotic phase diagram."
 ---
 
-Quantum incompatibility is often introduced with a slogan: noncommuting observables cannot be measured simultaneously. For general measurements, a more precise question is:
+Suppose a quantum measuring device has several possible readouts. Can we build one larger device whose output contains the readouts of two different measurements at once? This is the question of **measurement compatibility**.
+
+The familiar slogan says that noncommuting observables cannot be measured simultaneously. The more general question is:
 
 > Can the statistics of several measurements arise as the marginals of one larger measurement?
 
-This is an operator-valued marginal problem. It also suggests a numerical measure: how much random noise is needed before a joint measurement becomes possible? The Pauli $X/Z$ pair supplies the basic obstruction. Clifford families later provide the benchmark for random measurements.
+Notation often blurs the distinction between a measurement and one of its possible outcomes. The operator attached to that outcome adds another layer. We will introduce each piece separately.
 
-## Measurements as positive operator partitions
+## From outcomes to effects
 
-A quantum measurement with $k$ outcomes on $\mathbb C^d$ is described by a positive operator-valued measure (POVM)
+Imagine that a device has $k$ possible outcomes. We label them
+
+$$
+i=1,\ldots,k.
+$$
+
+When the device is used once, one of these labels is observed. The symbol $i$ is only a label. It means the event “the device reported outcome $i$,” just as “heads” labels an event for a coin toss. It is not a matrix or a physical quantity.
+
+To each outcome $i$, quantum theory assigns an operator $A&#95;i$. This operator is called an **effect**. It satisfies
+
+$$
+0\preceq A_i\preceq I.
+$$
+
+The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is in state $\rho$, then the probability of outcome $i$ is
+
+$$
+\Pr(i\mid\rho)=\operatorname{Tr}(\rho A_i).
+$$
+
+Here $\rho$ is a density matrix: a positive operator with trace one. The bounds on $A&#95;i$ ensure that the trace above is a valid probability for every state.
+
+An effect tells us the probability of one outcome. It does not, by itself, tell us the state of the system after that outcome occurs. Describing the state change requires extra information, such as a quantum instrument or Kraus operators.
+
+An effect need not be a projection. If $A&#95;i^2=A&#95;i$, then it is a projection and represents a sharp outcome. A measurement made entirely of projections is called projective or sharp. General effects also describe imperfect or deliberately noisy readouts.
+
+The entire measurement is the collection of its effects:
 
 $$
 A=(A_1,\ldots,A_k),
@@ -24,25 +52,41 @@ A=(A_1,\ldots,A_k),
 \qquad \sum_{i=1}^k A_i=I_d.
 $$
 
-If the system is in state $\rho$, the Born rule gives
+The condition $\sum&#95;i A&#95;i=I$ makes the outcome probabilities add to one. Such a collection is called a positive operator-valued measure, or POVM. In this notation, $A$ names the whole measurement, while $A&#95;i$ is the effect associated with outcome $i$.
+
+For example, the standard computational-basis measurement of a qubit has two effects:
 
 $$
-\Pr(i\mid\rho)=\operatorname{Tr}(\rho A_i).
+A_0=|0\rangle\langle0|,
+\qquad
+A_1=|1\rangle\langle1|.
 $$
 
-For a binary measurement, only one effect is independent:
+If the qubit is in the pure state $\lvert\psi\rangle=a\lvert0\rangle+b\lvert1\rangle$, the two outcome probabilities are $\lvert a\rvert^2$ and $\lvert b\rvert^2$.
+
+## Binary measurements and the difference operator
+
+A binary measurement has only two outcomes. We may call them $+$ and $-$, or “yes” and “no”:
 
 $$
 A=(A_+,A_-)=(A_+,I-A_+).
 $$
 
-It is convenient to recenter it as
+The effect $A&#95;+$ corresponds to the $+$ outcome and $A&#95;-$ to the $-$ outcome. Because their sum must be $I$, choosing $A&#95;+$ fixes $A&#95;-=I-A&#95;+$. This is why only one of the two effects is independent.
+
+It is often useful to replace the pair by one **difference operator**:
 
 $$
-X=A_+-A_-=2A_+-I.
+D_A=A_+-A_-=2A_+-I.
 $$
 
-Then $X=X^*$ and $-I\preceq X\preceq I$. Conversely, $A&#95;\pm=(I\pm X)/2$. A projective binary measurement has $X^2=I$ and eigenvalues $\pm1$.
+This amounts to assigning the numerical value $+1$ to one outcome and $-1$ to the other. The operator $D&#95;A$ is Hermitian and satisfies $-I\preceq D&#95;A\preceq I$. Conversely,
+
+$$
+A_\pm=\frac{I\pm D_A}{2}.
+$$
+
+If the measurement is sharp, meaning that its effects are projections, then $D&#95;A^2=I$ and its eigenvalues are exactly $\pm1$.
 
 ## Compatibility is an operator-valued coupling
 
@@ -61,6 +105,8 @@ p_\rho(i,j)=\operatorname{Tr}(\rho C_{ij})
 $$
 
 is an ordinary joint distribution with the correct marginals.
+
+The pair $(i,j)$ now labels a joint event: measurement $A$ reports $i$ and measurement $B$ reports $j$. The operator $C&#95;{ij}$ is the effect assigned to that joint event.
 
 The words **for every state** carry the quantum content. Two classical distributions can always be coupled. Quantum compatibility asks for one positive operator table that produces the right distributions simultaneously for every input state.
 
@@ -82,7 +128,7 @@ $$
 
 This embeds the familiar statement about commuting sharp observables inside the more general POVM framework.
 
-## The simplest obstruction: Pauli $X$ and $Z$
+## The simplest obstruction: two Pauli measurements
 
 Consider the qubit measurements
 
@@ -92,17 +138,37 @@ A=(|0\rangle\langle0|,|1\rangle\langle1|),
 B=(|+\rangle\langle+|,|-\rangle\langle-|).
 $$
 
-Their centered observables are $Z$ and $X$. If a joint table existed, its upper-left entry would satisfy
+Here
 
 $$
-0\preceq C_{++}\preceq|0\rangle\langle0|,
+|+\rangle=\frac{|0\rangle+|1\rangle}{\sqrt2},
 \qquad
-0\preceq C_{++}\preceq|+\rangle\langle+|.
+|-\rangle=\frac{|0\rangle-|1\rangle}{\sqrt2}.
 $$
 
-A positive operator dominated by a rank-one projection must be supported on that projection’s range. Thus $C&#95;{++}$ would have to live in both $\operatorname{span}\{\lvert0\rangle\}$ and $\operatorname{span}\{\lvert+\rangle\}$. These one-dimensional subspaces intersect only at zero, so $C&#95;{++}=0$. Repeating the argument for the other entries makes every cell zero, contradicting $\sum&#95;{a,b}C&#95;{ab}=I$.
+Their difference operators are the Pauli matrices
 
-Geometrically, every joint cell must live inside both its row subspace and its column subspace. For sharp $X$ and $Z$, there is nowhere nonzero for it to live.
+$$
+D_A=\sigma_z=
+\begin{pmatrix}1&0\\0&-1\end{pmatrix},
+\qquad
+D_B=\sigma_x=
+\begin{pmatrix}0&1\\1&0\end{pmatrix}.
+$$
+
+The subscript in $\sigma&#95;x$ is a name for this particular Pauli matrix. It is not the generic binary operator from the previous section.
+
+If a joint table existed, the cell associated with outcomes $0$ and $+$ would satisfy
+
+$$
+0\preceq C_{0,+}\preceq|0\rangle\langle0|,
+\qquad
+0\preceq C_{0,+}\preceq|+\rangle\langle+|.
+$$
+
+A positive operator dominated by a rank-one projection must be supported on that projection’s range. Thus $C&#95;{0,+}$ would have to live in both $\operatorname{span}\{\lvert0\rangle\}$ and $\operatorname{span}\{\lvert+\rangle\}$. These one-dimensional subspaces intersect only at zero, so $C&#95;{0,+}=0$. Repeating the argument for the other entries makes every cell zero, contradicting $\sum&#95;{a,b}C&#95;{ab}=I$.
+
+Geometrically, every joint cell must live inside both its row subspace and its column subspace. For the sharp $\sigma&#95;x$ and $\sigma&#95;z$ measurements, there is nowhere nonzero for it to live.
 
 ## Noise buys compatibility by time-sharing
 
@@ -207,11 +273,11 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-The condition says that the limiting principal-angle spectrum reaches $\pi/4$. On a suitable two-dimensional subspace, $A=2P&#95;E-I$ is then exactly Pauli $Z$, while $B=2P&#95;F-I$ approaches Pauli $X$.
+The condition says that the limiting principal-angle spectrum reaches $\pi/4$. On a suitable two-dimensional subspace, the difference operator $2P&#95;E-I$ is then exactly $\sigma&#95;z$, while $2P&#95;F-I$ approaches $\sigma&#95;x$.
 
 That Pauli pair gives the upper bound $1/\sqrt2$. If the original measurements had a parent POVM, compressing it to the same subspace would give a parent POVM there as well. The general theorem for binary measurements supplies the reverse inequality, so the two bounds meet.
 
-This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional subspace where they look like $X$ and $Z$.
+This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional subspace where they look like $\sigma&#95;x$ and $\sigma&#95;z$.
 
 The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from the trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. Outside the disk, that incompatibility is easier to erase with noise. The exterior limit is known along $\alpha=\beta$; for general $\alpha\neq\beta$, it remains open.
 
