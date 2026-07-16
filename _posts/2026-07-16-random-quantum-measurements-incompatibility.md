@@ -2,7 +2,7 @@
 layout: post
 title: "When Quantum Measurements Refuse to Share a Table"
 subtitle: "Compatibility, noise robustness, and why randomness can be nearly extremal"
-date: 2026-07-16 12:00:00 +0200
+date: 2026-07-16 09:00:00 +0200
 categories: [quantum-information]
 tags: [POVMs, incompatibility, random-matrices, free-probability]
 excerpt: "Quantum incompatibility is an operator-valued marginal problem. That viewpoint leads from Pauli measurements to a sharp phase diagram for random projections."
