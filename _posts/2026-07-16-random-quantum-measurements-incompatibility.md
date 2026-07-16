@@ -214,9 +214,9 @@ $$
 
 is a parent POVM for the half-noisy measurements. Operationally, flip a fair coin. If it chooses $A$, genuinely measure $A$ and invent a uniform $B$ outcome; if it chooses $B$, do the reverse. Noise gives the apparatus permission to perform one measurement and fabricate the missing answer.
 
-For $g$ arbitrary POVMs, the same time-sharing protocol gives the universal bound $t=1/g$.
+For $g$ arbitrary POVMs, the same time-sharing protocol makes the noisy family compatible at $t=1/g$. Thus every such family satisfies $\tau\geq1/g$.
 
-Binary measurements do better. Every $g$-tuple of binary POVMs becomes compatible by $t=1/\sqrt g$. Pairwise anticommuting Clifford observables show this can be sharp when the Hilbert-space dimension is large enough. If
+Binary measurements admit a stronger universal guarantee. For every $g$-tuple of binary POVMs, the noisy family is compatible at visibility $t=1/\sqrt g$, so its compatibility degree satisfies $\tau\geq1/\sqrt g$. Pairwise anticommuting Clifford observables attain equality when the Hilbert-space dimension is large enough. If
 
 $$
 \Gamma_x\Gamma_y+\Gamma_y\Gamma_x=0\quad(x\neq y),
@@ -251,7 +251,7 @@ $$
 M_i=V^*(|i\rangle\langle i|\otimes I_n)V.
 $$
 
-These effects are generally unsharp and describe a system coupled to an environment. All of the constructions use Haar invariance, but their compatibility thresholds differ because their outcome structures differ.
+These effects are generally unsharp and describe a system coupled to an environment. All of the constructions use Haar invariance. Their outcome structures differ, so they should not be treated as interchangeable models of random measurements.
 
 ## A phase diagram for two random projections
 
@@ -294,9 +294,9 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-The condition says that the limiting principal-angle spectrum reaches $\pi/4$. On a suitable two-dimensional subspace, the difference operator $2P&#95;E-I$ is then exactly $\sigma&#95;z$, while $2P&#95;F-I$ approaches $\sigma&#95;x$.
+The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional blocks. Inside the disk, one can choose a sequence of blocks whose squared principal-angle cosine tends to $1/2$. After choosing a basis in each block, the compression of $2P&#95;E-I$ equals $\sigma&#95;z$, while the compression of $2P&#95;F-I$ tends to $\sigma&#95;x$.
 
-That Pauli pair gives the upper bound $1/\sqrt2$. If the original measurements had a parent POVM, compressing it to the same subspace would give a parent POVM there as well. The general theorem for binary measurements supplies the reverse inequality, so the two bounds meet.
+This limiting Pauli pair gives the upper bound $1/\sqrt2$. If the original measurements had a parent POVM, compressing it to the same block would give a parent POVM there as well. The general theorem for binary measurements supplies the reverse inequality, so the two bounds meet.
 
 This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional subspace where they look like $\sigma&#95;x$ and $\sigma&#95;z$.
 
