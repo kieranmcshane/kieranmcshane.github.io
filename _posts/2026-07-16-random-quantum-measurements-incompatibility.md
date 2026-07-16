@@ -207,17 +207,17 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-The condition says that the limiting principal-angle spectrum reaches $\pi/4$. One can then find a two-dimensional compression on which $A=2P&#95;E-I$ is exactly Pauli $Z$ and $B=2P&#95;F-I$ approaches Pauli $X$.
+The condition says that the limiting principal-angle spectrum reaches $\pi/4$. On a suitable two-dimensional subspace, $A=2P&#95;E-I$ is then exactly Pauli $Z$, while $B=2P&#95;F-I$ approaches Pauli $X$.
 
-Compatibility cannot be improved by compression: a parent measurement upstairs would compress to a parent measurement downstairs. The embedded Pauli pair therefore gives the upper bound $1/\sqrt2$; the universal binary theorem gives the matching lower bound.
+That Pauli pair gives the upper bound $1/\sqrt2$. If the original measurements had a parent POVM, compressing it to the same subspace would give a parent POVM there as well. The general theorem for binary measurements supplies the reverse inequality, so the two bounds meet.
 
-This mechanism differs from Clifford anticommutation. Random projections almost surely do not anticommute globally. They instead contain a small, asymptotically Pauli-like witness.
+This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional subspace where they look like $X$ and $Z$.
 
-The circle marks a change in noise tolerance, not a transition between compatible and incompatible sharp measurements. Nontrivial independent random projections are generically noncommuting, hence incompatible, on both sides. Outside the disk they are less resistant to white noise. Along $\alpha=\beta$, the exterior limit is known explicitly; the full off-diagonal exterior remains open.
+The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from the trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. Outside the disk, that incompatibility is easier to erase with noise. The exterior limit is known along $\alpha=\beta$; for general $\alpha\neq\beta$, it remains open.
 
 ## Many random binary measurements
 
-Now take $g$ independent balanced random projections, $\operatorname{rank}P&#95;x=d/2$, and let $A&#95;x=2P&#95;x-I$. For fixed $g$, free probability yields
+Take $g$ independent random projections of rank $d/2$ and let $d$ tend to infinity. Write $A&#95;x=2P&#95;x-I$. Free probability gives
 
 $$
 \limsup_{d\to\infty}\tau(\mathsf P_1,\ldots,\mathsf P_g)
@@ -227,36 +227,42 @@ $$
 
 almost surely.
 
-Each $A&#95;x$ has the symmetric Bernoulli spectral law
+Half the eigenvalues of $A&#95;x$ are $+1$ and half are $-1$. Its spectral law is therefore
 
 $$
 b=\frac12(\delta_{-1}+\delta_1).
 $$
 
-Independent Haar conjugates become asymptotically free. For fixed signs $\varepsilon&#95;x$, the signed sum $\sum&#95;x\varepsilon&#95;xA&#95;x$ therefore has limiting law $b^{\boxplus g}$, the Kesten–McKay distribution, whose support ends at $2\sqrt{g-1}$.
+As $d$ grows, independent Haar conjugates become asymptotically free. For any fixed signs $\varepsilon&#95;x$, the sum $\sum&#95;x\varepsilon&#95;xA&#95;x$ converges in distribution to $b^{\boxplus g}$. This is the Kesten–McKay law, and the right endpoint of its support is $2\sqrt{g-1}$.
 
-That spectral edge normalizes an incompatibility witness. Taking $s=1/(2\sqrt{g-1})$, its pairing with the visibility-$t$ measurements is $stg$. Incompatibility is certified once $stg>1$, producing the bound above.
+The endpoint tells us how far the incompatibility witness can be scaled. Set $s=1/(2\sqrt{g-1})$. On the measurements with visibility $t$, the witness has value $stg$. It detects incompatibility as soon as $stg>1$, which gives the bound above.
 
-The result is within a factor two of the universal lower bound $1/\sqrt g$. It proves the optimal scale, not the sharp constant. The conjecture is that balanced Haar-random binary PVMs actually converge to $1/\sqrt g$ for every fixed $g$. For $g=2$, the free-probability bound is trivial; the principal-angle compression is what recovers the exact $1/\sqrt2$.
+For large $g$, this is a factor two above the universal lower bound $1/\sqrt g$. The order in $g$ is right, but the constant may not be. The conjecture is
 
-## What incompatibility buys operationally
+$$
+\tau(\mathsf P_1,\ldots,\mathsf P_g)\longrightarrow\frac1{\sqrt g}
+$$
 
-Compatible measurements are simulations of one parent measurement followed by classical post-processing. Incompatible measurements can outperform every compatible strategy in suitable state-discrimination and communication tasks. For the generalized measure, its value is exactly the optimal advantage in an appropriate discrimination problem.
+for every fixed $g$. When $g=2$, the free-probability estimate gives only the trivial upper bound $1$. The principal-angle argument is what recovers $1/\sqrt2$.
 
-The uniform-noise degree used here answers a particularly concrete experimental question: what fraction of the original measurement can survive depolarization before a joint simulation becomes possible? Its operational ordering need not coincide with every other noise model, so the choice of measure matters.
+## Operational meaning
+
+A compatible family can be implemented by performing one parent measurement and then relabelling its outcome with classical randomness. In a suitable state-discrimination game, an incompatible family can achieve a higher guessing probability than any compatible family. For the generalized measure, the value is exactly the best possible multiplicative advantage.
+
+The uniform-noise degree asks a narrower question: what fraction of the original measurements can survive depolarization before a joint simulation becomes possible? Another noise model may rank the same measurements differently. The choice of measure therefore matters.
 
 ## What remains unresolved
 
 Open questions:
 
-- Is the conjectured polar-plus-equatorial configuration optimal for four binary qubit measurements?
-- Do $g$ balanced random binary PVMs reach the exact value $1/\sqrt g$ for every fixed $g$?
-- What is the limiting function $\tau(\alpha,\beta)$ throughout the off-diagonal exterior of the central disk?
-- Can the two-projection convergence be made quantitatively useful at moderate dimension, especially on the boundary?
-- Can the gap between compatibility and incompatibility thresholds for induced random POVMs be closed?
-- Which operational tasks are controlled specifically by uniform white-noise tolerance rather than the generalized measure?
+- Is the polar-plus-equatorial configuration optimal for four binary qubit measurements?
+- Do balanced random binary PVMs converge to $1/\sqrt g$ for every fixed $g$?
+- What is $\tau(\alpha,\beta)$ outside the disk when $\alpha\neq\beta$?
+- How quickly does the two-projection result appear at finite dimension, particularly on the boundary?
+- Where is the exact threshold for induced random POVMs?
+- Which operational tasks are governed by uniform white noise rather than the generalized measure?
 
-Randomness can therefore reproduce an obstruction usually associated with engineered measurements. For larger families it recovers the $1/\sqrt g$ scale; whether it gets the constant exactly right is open.
+Random measurements can reproduce the same qubit obstruction as an engineered pair, and larger families recover the $1/\sqrt g$ scale. Whether the constant is exactly right is still open.
 
 ## References
 
