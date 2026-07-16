@@ -11,3 +11,22 @@
   };
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('a[href]').forEach(function (link) {
+      try {
+        var destination = new URL(link.getAttribute('href'), window.location.href);
+        var isExternal =
+          (destination.protocol === 'http:' || destination.protocol === 'https:') &&
+          destination.origin !== window.location.origin;
+
+        if (isExternal) {
+          link.target = '_blank';
+          link.relList.add('noopener', 'noreferrer');
+        }
+      } catch (error) {
+        // Leave malformed or nonstandard links unchanged.
+      }
+    });
+  });
+</script>
