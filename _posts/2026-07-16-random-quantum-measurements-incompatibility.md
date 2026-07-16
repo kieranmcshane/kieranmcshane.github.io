@@ -30,7 +30,7 @@ $$
 0\preceq A_i\preceq I.
 $$
 
-The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state $\rho$, then the probability of outcome $i$ is
+The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state $\rho$, the **Born rule** assigns the probability of outcome $i$:
 
 $$
 \Pr(i\mid\rho)=\operatorname{Tr}(\rho A_i).
@@ -50,7 +50,7 @@ $$
 =1-\operatorname{Tr}(\rho A_i),
 $$
 
-so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The Born-rule expression therefore lies between zero and one for every state. This establishes the allowed range for one outcome. It does not yet show that the probabilities of all outcomes sum to one.
+so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The assigned probability therefore lies between zero and one for every state. This establishes the allowed range for one outcome. It does not yet show that the probabilities of all outcomes sum to one.
 
 An effect tells us the probability of one outcome. It does not, by itself, tell us the state of the system after that outcome occurs. Describing the state change requires extra information, such as a quantum instrument or Kraus operators.
 
