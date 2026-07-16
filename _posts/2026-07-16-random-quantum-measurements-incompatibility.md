@@ -213,7 +213,7 @@ Compatibility cannot be improved by compression: a parent measurement upstairs w
 
 This mechanism differs from Clifford anticommutation. Random projections almost surely do not anticommute globally. They instead contain a small, asymptotically Pauli-like witness.
 
-The circle marks a robustness transition, not a transition between compatible and incompatible sharp measurements. Nontrivial independent random projections are generically noncommuting, hence incompatible, on both sides. Outside the disk they are less resistant to white noise. Along $\alpha=\beta$, the exterior limit is known explicitly; the full off-diagonal exterior remains open.
+The circle marks a change in noise tolerance, not a transition between compatible and incompatible sharp measurements. Nontrivial independent random projections are generically noncommuting, hence incompatible, on both sides. Outside the disk they are less resistant to white noise. Along $\alpha=\beta$, the exterior limit is known explicitly; the full off-diagonal exterior remains open.
 
 ## Many random binary measurements
 
@@ -241,9 +241,9 @@ The result is within a factor two of the universal lower bound $1/\sqrt g$. It p
 
 ## What incompatibility buys operationally
 
-Compatible measurements are simulations of one parent measurement followed by classical post-processing. Incompatible measurements can outperform every compatible strategy in suitable state-discrimination and communication tasks. Generalized incompatibility robustness has an exact interpretation as an optimal discrimination advantage.
+Compatible measurements are simulations of one parent measurement followed by classical post-processing. Incompatible measurements can outperform every compatible strategy in suitable state-discrimination and communication tasks. For the generalized measure, its value is exactly the optimal advantage in an appropriate discrimination problem.
 
-The uniform-noise degree used here answers a particularly concrete experimental question: what fraction of the original measurement can survive depolarization before a joint simulation becomes possible? Its operational ordering need not coincide with every other noise model, which is one reason the choice of robustness measure matters.
+The uniform-noise degree used here answers a particularly concrete experimental question: what fraction of the original measurement can survive depolarization before a joint simulation becomes possible? Its operational ordering need not coincide with every other noise model, so the choice of measure matters.
 
 ## What remains unresolved
 
@@ -254,7 +254,7 @@ Open questions:
 - What is the limiting function $\tau(\alpha,\beta)$ throughout the off-diagonal exterior of the central disk?
 - Can the two-projection convergence be made quantitatively useful at moderate dimension, especially on the boundary?
 - Can the gap between compatibility and incompatibility thresholds for induced random POVMs be closed?
-- Which operational tasks are controlled specifically by uniform white-noise robustness rather than generalized robustness?
+- Which operational tasks are controlled specifically by uniform white-noise tolerance rather than the generalized measure?
 
 Randomness can therefore reproduce an obstruction usually associated with engineered measurements. For larger families it recovers the $1/\sqrt g$ scale; whether it gets the constant exactly right is open.
 
@@ -262,5 +262,5 @@ Randomness can therefore reproduce an obstruction usually associated with engine
 
 - Andreas Bluhm and Ion Nechita, [*Joint measurability of quantum effects and the matrix diamond*](https://arxiv.org/abs/1807.01508), 2018.
 - Andreas Bluhm, Cécilia Lancien, and Ion Nechita, [*Random measurements are almost maximally incompatible*](https://arxiv.org/abs/2507.20600), 2025.
-- Jessica Bavaresco et al., [*Most incompatible measurements for robust steering tests*](https://arxiv.org/abs/1704.02994), 2017.
+- Jessica Bavaresco et al., [study of maximally incompatible measurements in steering tests](https://arxiv.org/abs/1704.02994), 2017.
 - Paul Skrzypczyk, Ivan Šupić, and Daniel Cavalcanti, [*All sets of incompatible measurements give an advantage in quantum state discrimination*](https://arxiv.org/abs/1901.00816), 2019.
