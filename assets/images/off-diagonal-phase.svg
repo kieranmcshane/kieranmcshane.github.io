@@ -10338,5 +10338,6 @@
   <text class="tick" x="793.0" y="127.0">1</text>
   <text class="tick" x="793.0" y="517.0">1/√2</text>
   <text class="small muted" x="735.0" y="565.0">white: disk boundary</text>
-  <text class="small muted" x="735.0" y="592.0">dashed: α + β = 1</text>
+  <text class="small muted" x="735.0" y="592.0">dashed: α = β</text>
+  <text class="small muted" x="735.0" y="619.0">colours: interior limit</text>
 </svg>
