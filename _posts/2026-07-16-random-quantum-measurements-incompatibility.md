@@ -54,7 +54,7 @@ so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The Born-rule expression therefore li
 
 An effect tells us the probability of one outcome. It does not, by itself, tell us the state of the system after that outcome occurs. Describing the state change requires extra information, such as a quantum instrument or Kraus operators.
 
-An effect need not be a projection. If $A&#95;i^2=A&#95;i$, then it is a projection and represents a sharp outcome. A measurement made entirely of projections is called projective or sharp. General effects also describe imperfect or deliberately noisy readouts.
+An effect need not be a projection. If $A&#95;i^2=A&#95;i$, then it is a projection and represents a sharp outcome. A measurement made entirely of projections is called projective or sharp. General effects are not merely defective projections. They also arise naturally after coupling the system to an ancilla or combining several detector outcomes.
 
 The entire measurement is the collection of its effects:
 
@@ -107,7 +107,7 @@ $$
 A_\pm=\frac{I\pm D_A}{2}.
 $$
 
-If the measurement is sharp, meaning that its effects are projections, then $D&#95;A^2=I$ and its eigenvalues are exactly $\pm1$.
+If the measurement is sharp, meaning that its effects are projections, then $D&#95;A^2=I$ and its spectrum is contained in $\{-1,+1\}$. Both values occur when both effects have nonzero range; a trivial sharp measurement may have $D&#95;A=I$ or $D&#95;A=-I$.
 
 ## Compatibility is an operator-valued coupling
 
@@ -148,6 +148,8 @@ A_iB_j=B_j^{1/2}A_iB_j^{1/2}\succeq0.
 $$
 
 This embeds the familiar statement about commuting sharp observables inside the more general POVM framework.
+
+Commutation is sufficient here, but it is not necessary for general POVMs. For projective measurements, compatibility and commutation are equivalent. For example, the noisy Pauli effects $(I\pm t\sigma&#95;z)/2$ and $(I\pm t\sigma&#95;x)/2$ do not commute when $t>0$, yet they are compatible when $t\leq1/\sqrt2$.
 
 ## The simplest obstruction: two Pauli measurements
 
@@ -206,6 +208,14 @@ $$
 \tau(A,B)=\max\{t:A^{(t)}\text{ and }B^{(t)}\text{ are compatible}\}.
 $$
 
+For a family $A^{(1)},\ldots,A^{(g)}$, a parent POVM is indexed by an outcome string $\mathbf i=(i&#95;1,\ldots,i&#95;g)$. Its $x$-th marginal must satisfy
+
+$$
+\sum_{\mathbf i:\,i_x=a}G_{\mathbf i}=A^{(x)}_a.
+$$
+
+The compatibility degree of the family is defined by adding the same visibility $t$ to every member and maximizing the values of $t$ for which such a parent exists.
+
 Every pair satisfies $\tau(A,B)\geq1/2$. Indeed,
 
 $$
@@ -216,9 +226,11 @@ is a parent POVM for the half-noisy measurements. Operationally, flip a fair coi
 
 For $g$ arbitrary POVMs, the same time-sharing protocol makes the noisy family compatible at $t=1/g$. Thus every such family satisfies $\tau\geq1/g$.
 
-Binary measurements admit a stronger universal guarantee. For every $g$-tuple of binary POVMs, the noisy family is compatible at visibility $t=1/\sqrt g$, so its compatibility degree satisfies $\tau\geq1/\sqrt g$. Pairwise anticommuting Clifford observables attain equality when the Hilbert-space dimension is large enough. If
+Binary measurements admit a stronger universal guarantee. For every $g$-tuple of binary POVMs, the noisy family is compatible at visibility $t=1/\sqrt g$, so its compatibility degree satisfies $\tau\geq1/\sqrt g$. Pairwise anticommuting Clifford observables attain equality when the Hilbert-space dimension is large enough ([Bluhm and Nechita, 2018](https://arxiv.org/abs/1807.01508)). Let $\Gamma&#95;x$ be Hermitian unitaries satisfying
 
 $$
+\Gamma_x^2=I,
+\qquad
 \Gamma_x\Gamma_y+\Gamma_y\Gamma_x=0\quad(x\neq y),
 $$
 
@@ -245,13 +257,15 @@ Draw a Haar-random unitary $U$ and measure the rank-one projections onto its col
 
 ### Induced POVMs
 
-Draw a Haar-random isometry $V:\mathbb C^d\to\mathbb C^k\otimes\mathbb C^n$ and set
+Assume $d\leq kn$. Draw a Haar-random isometry $V:\mathbb C^d\to\mathbb C^k\otimes\mathbb C^n$ and set
 
 $$
 M_i=V^*(|i\rangle\langle i|\otimes I_n)V.
 $$
 
-These effects are generally unsharp and describe a system coupled to an environment. All of the constructions use Haar invariance. Their outcome structures differ, so they should not be treated as interchangeable models of random measurements.
+These effects are generally unsharp and describe a system coupled to an environment. All of the constructions use Haar invariance. Their effect spectra and rank profiles differ, and the induced model also depends on the ancillary dimension $n$. They should not be treated as interchangeable models of random measurements.
+
+The rest of this article develops the binary-projective model. The basis and induced models are included here only to make clear that the phrase “random POVM” does not identify a unique ensemble.
 
 ## A phase diagram for two random projections
 
@@ -278,9 +292,11 @@ $$
 
 Because $1/\sqrt2$ is the universal minimum for a binary pair, these random measurements are asymptotically maximally incompatible throughout the disk. The result is not restricted to the balanced point $(1/2,1/2)$.
 
+This is the two-projection phase-diagram theorem of [Bluhm, Lancien, and Nechita](https://arxiv.org/abs/2507.20600).
+
 ### Why a circle appears
 
-The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval with endpoints
+The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval with endpoints ([Aubrun, 2021](https://arxiv.org/abs/2109.06535))
 
 $$
 \lambda_{\alpha,\beta}^{\pm}
@@ -294,25 +310,65 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional blocks. Inside the disk, one can choose a sequence of blocks whose squared principal-angle cosine tends to $1/2$. After choosing a basis in each block, the compression of $2P&#95;E-I$ equals $\sigma&#95;z$, while the compression of $2P&#95;F-I$ tends to $\sigma&#95;x$.
+The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional reducing blocks. On a block with principal angle $\theta$, one may choose a basis in which
 
-This limiting Pauli pair gives the upper bound $1/\sqrt2$. If the original measurements had a parent POVM, compressing it to the same block would give a parent POVM there as well. The general theorem for binary measurements supplies the reverse inequality, so the two bounds meet.
+$$
+P_E=
+\begin{pmatrix}1&0\\0&0\end{pmatrix},
+\qquad
+P_F=
+\begin{pmatrix}
+\cos^2\theta&\cos\theta\sin\theta\\
+\cos\theta\sin\theta&\sin^2\theta
+\end{pmatrix}.
+$$
 
-This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional subspace where they look like $\sigma&#95;x$ and $\sigma&#95;z$.
+The corresponding difference operators are
 
-The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from the trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. Outside the disk, that incompatibility is easier to erase with noise. The exterior limit is known along $\alpha=\beta$; for general $\alpha\neq\beta$, it remains open.
+$$
+D_E=\sigma_z,
+\qquad
+D_F=\cos(2\theta)\sigma_z+\sin(2\theta)\sigma_x.
+$$
+
+For two unbiased qubit observables with unit Bloch vectors $m$ and $n$, the qubit compatibility criterion used by [Bluhm, Lancien, and Nechita](https://arxiv.org/abs/2507.20600) gives the white-noise threshold
+
+$$
+\tau=\frac{2}{\|m+n\|+\|m-n\|}.
+$$
+
+On the principal-angle block this becomes
+
+$$
+\tau_\theta=\frac{1}{\cos\theta+\sin\theta}.
+$$
+
+The function is smallest at $\theta=\pi/4$. Inside the disk, there are blocks whose squared principal-angle cosine tends to $1/2$, so their thresholds tend to $1/\sqrt2$. A parent for the full measurements would restrict to a parent on every reducing block, which gives the asymptotic upper bound. The universal binary theorem supplies the matching lower bound.
+
+Conversely, parents on all reducing blocks can be combined by direct sum. Thus, for a fixed finite pair of projections with nontrivial principal angles $\theta&#95;r$,
+
+$$
+\tau(\mathsf P_E,\mathsf P_F)
+=\min\left(\{1\}\cup
+\left\{\frac{1}{\cos\theta_r+\sin\theta_r}:r\right\}\right).
+$$
+
+The value $1$ accounts for the commuting one-dimensional blocks.
+
+This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional block where they approach the $\sigma&#95;x$ and $\sigma&#95;z$ pair.
+
+The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. The 2025 paper works out the exterior regime only along $\alpha=\beta$, explicitly as a simplification. That scope restriction is not evidence that the off-diagonal case is open. The block formula above indicates that its analysis reduces to controlling the extreme principal angles; no general off-diagonal formula from the literature is asserted here.
 
 ## Many random binary measurements
 
-Take $g$ independent random projections of rank $d/2$ and let $d$ tend to infinity. Write $A&#95;x=2P&#95;x-I$. Free probability gives
+Fix $g$, take even $d$, and choose $g$ independent random projections of rank $d/2$. Write $A&#95;x=2P&#95;x-I$. The random-measurement theorem gives, almost surely,
 
 $$
 \limsup_{d\to\infty}\tau(\mathsf P_1,\ldots,\mathsf P_g)
 \leq\frac{2\sqrt{g-1}}{g}
-\sim\frac2{\sqrt g}
 $$
 
-almost surely.
+([Bluhm, Lancien, and Nechita, 2025](https://arxiv.org/abs/2507.20600)).
 
 Half the eigenvalues of $A&#95;x$ are $+1$ and half are $-1$. Its spectral law is therefore
 
@@ -320,11 +376,39 @@ $$
 b=\frac12(\delta_{-1}+\delta_1).
 $$
 
-As $d$ grows, independent Haar conjugates become asymptotically free. For any fixed signs $\varepsilon&#95;x$, the sum $\sum&#95;x\varepsilon&#95;xA&#95;x$ converges in distribution to $b^{\boxplus g}$. This is the Kesten–McKay law, and the right endpoint of its support is $2\sqrt{g-1}$.
+As $d$ grows, independent Haar conjugates become asymptotically free. More is needed here than convergence of empirical eigenvalue distributions. For every fixed sign vector $\varepsilon$, strong asymptotic freeness ([Collins and Male, 2014](https://arxiv.org/abs/1105.4345)) gives
 
-The endpoint tells us how far the incompatibility witness can be scaled. Set $s=1/(2\sqrt{g-1})$. On the measurements with visibility $t$, the witness has value $stg$. It detects incompatibility as soon as $stg>1$, which gives the bound above.
+$$
+\left\|\sum_{x=1}^g\varepsilon_xA_x\right\|_\infty
+\longrightarrow 2\sqrt{g-1}
+$$
 
-For large $g$, this is a factor two above the universal lower bound $1/\sqrt g$. The order in $g$ is right, but the constant may not be. The conjecture is
+almost surely. The limiting law is the Kesten–McKay distribution $b^{\boxplus g}$, whose support has endpoints $\pm2\sqrt{g-1}$. Strong convergence rules out spectral outliers, which ordinary convergence in distribution would not do. Since $g$ is fixed, there are only $2^g$ sign vectors, so the norm convergence holds simultaneously for all of them.
+
+Here is how those signed sums enter the incompatibility test. A tuple of Hermitian operators $W&#95;x$ is normalized as a witness if every compatible tuple of binary difference operators $X&#95;x$ satisfies
+
+$$
+\sum_{x=1}^g\operatorname{Tr}(W_xX_x)\leq1.
+$$
+
+For the collinear choice $W&#95;x=sA&#95;x/d$, a sufficient normalization condition is
+
+$$
+s\left\|\sum_{x=1}^g\varepsilon_xA_x\right\|_\infty\leq1
+\qquad\text{for every sign vector }\varepsilon.
+$$
+
+This condition bounds every deterministic choice of one sign per measurement, which is exactly what appears when a parent POVM is marginalized.
+
+White noise changes the difference operator $A&#95;x$ to $tA&#95;x$. Because $A&#95;x^2=I$, the witness value on the noisy family is
+
+$$
+\sum_{x=1}^g\operatorname{Tr}\!\left(\frac{sA_x}{d}\,tA_x\right)=stg.
+$$
+
+Choose $s$ asymptotically as $1/(2\sqrt{g-1})$. The witness detects incompatibility when $stg>1$, yielding the stated upper bound.
+
+After the $d\to\infty$ limit is taken with $g$ fixed, the upper bound behaves as $2/\sqrt g$ when $g$ grows. This is a factor two above the universal lower bound $1/\sqrt g$. The order in $g$ is right, but the constant may not be. The conjecture is
 
 $$
 \tau(\mathsf P_1,\ldots,\mathsf P_g)\longrightarrow\frac1{\sqrt g}
@@ -334,7 +418,26 @@ for every fixed $g$. When $g=2$, the free-probability estimate gives only the tr
 
 ## Operational meaning
 
-A compatible family can be implemented by performing one parent measurement and then relabelling its outcome with classical randomness. In a suitable state-discrimination game, an incompatible family can achieve a higher guessing probability than any compatible family. For the generalized measure, the value is exactly the best possible multiplicative advantage.
+A compatible family can be implemented by performing one parent measurement and then relabelling its outcome with classical randomness. In a suitable state-discrimination game, an incompatible family can achieve a higher guessing probability than any compatible family.
+
+The precise operational equality concerns the **generalized robustness of incompatibility**, not the white-noise degree $\tau$. For a measurement family $M=(M&#95;{a\mid x})$, define
+
+$$
+I_R(M)=\min\left\{r\geq0:
+\frac{M_{a\mid x}+rN_{a\mid x}}{1+r}
+\text{ is compatible for some measurement family }N\right\}.
+$$
+
+In the multi-ensemble state-discrimination games with side information studied by [Skrzypczyk, Šupić, and Cavalcanti](https://arxiv.org/abs/1901.00816),
+
+$$
+\max_{\mathcal E}
+\frac{P_{\rm guess}(\mathcal E,M)}
+{P_{\rm guess}^{\rm compatible}(\mathcal E)}
+=1+I_R(M).
+$$
+
+Thus $I&#95;R$ is the fractional advantage above the compatible benchmark, while $1+I&#95;R$ is the multiplicative advantage. The equality is for this particular class of discrimination games, not for every discrimination task.
 
 The uniform-noise degree asks a narrower question: what fraction of the original measurements can survive depolarization before a joint simulation becomes possible? Another noise model may rank the same measurements differently. The choice of measure therefore matters.
 
@@ -342,9 +445,7 @@ The uniform-noise degree asks a narrower question: what fraction of the original
 
 Open questions:
 
-- Is the polar-plus-equatorial configuration optimal for four binary qubit measurements?
 - Do balanced random binary PVMs converge to $1/\sqrt g$ for every fixed $g$?
-- What is $\tau(\alpha,\beta)$ outside the disk when $\alpha\neq\beta$?
 - How quickly does the two-projection result appear at finite dimension, particularly on the boundary?
 - Where is the exact threshold for induced random POVMs?
 - Which operational tasks are governed by uniform white noise rather than the generalized measure?
@@ -355,5 +456,7 @@ Random measurements can reproduce the same qubit obstruction as an engineered pa
 
 - Andreas Bluhm and Ion Nechita, [*Joint measurability of quantum effects and the matrix diamond*](https://arxiv.org/abs/1807.01508), 2018.
 - Andreas Bluhm, Cécilia Lancien, and Ion Nechita, [*Random measurements are almost maximally incompatible*](https://arxiv.org/abs/2507.20600), 2025.
-- Jessica Bavaresco et al., [study of maximally incompatible measurements in steering tests](https://arxiv.org/abs/1704.02994), 2017.
+- Guillaume Aubrun, [*Principal angles between random subspaces and polynomials in two free projections*](https://arxiv.org/abs/2109.06535), 2021.
+- Benoît Collins and Camille Male, [*The strong asymptotic freeness of Haar and deterministic matrices*](https://arxiv.org/abs/1105.4345), 2014.
+- Jessica Bavaresco et al., [*Most incompatible measurements for robust steering tests*](https://arxiv.org/abs/1704.02994), 2017.
 - Paul Skrzypczyk, Ivan Šupić, and Daniel Cavalcanti, [*All sets of incompatible measurements give an advantage in quantum state discrimination*](https://arxiv.org/abs/1901.00816), 2019.
