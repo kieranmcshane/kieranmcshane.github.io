@@ -163,11 +163,11 @@ A_1 & C_{11} & \cdots & C_{1\ell} & A_1\\
 \vdots & \vdots & \ddots & \vdots & \vdots\\
 A_k & C_{k1} & \cdots & C_{k\ell} & A_k\\
 \hline
-\text{column sum} & B_1 & \cdots & B_\ell &
+\text{column sum} & B_1 & \cdots & B_\ell & I
 \end{array}
 $$
 
-Each cell contains a positive operator. The labels at the right and bottom are the prescribed operator-valued marginals. For every state $\rho$,
+Each cell contains a positive operator. The labels at the right and bottom are the prescribed operator-valued marginals. Their common grand total is $I$, because both POVMs are complete. For every state $\rho$,
 
 $$
 p_\rho(i,j)=\operatorname{Tr}(\rho C_{ij})
