@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" role="img" aria-labelledby="title description">
+  <title id="title">Finite-dimensional checks of the random-projection threshold</title>
+  <desc id="description">Three panels show Monte Carlo medians and ten-to-ninety percent intervals converging toward the block-formula prediction as dimension increases.</desc>
+  <style>
+    text { fill: #172033; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .axis { stroke: #172033; stroke-width: 2; }
+    .grid { stroke: #c8d0db; stroke-width: 1; }
+    .muted { fill: #5d6878; }
+    .tick { font-size: 18px; }
+    .label { font-size: 22px; }
+    .small { font-size: 16px; }
+    .strong { font-size: 19px; font-weight: 600; }
+  </style>
+  <text class="strong" x="245.0" y="42" text-anchor="middle">inside: (0.50, 0.50)</text>
+  <line class="grid" x1="100.0" y1="355.00" x2="390.0" y2="355.00"/>
+  <text class="tick" x="88.0" y="361.00" text-anchor="end">0.70</text>
+  <line class="grid" x1="100.0" y1="268.85" x2="390.0" y2="268.85"/>
+  <text class="tick" x="88.0" y="274.85" text-anchor="end">0.74</text>
+  <line class="grid" x1="100.0" y1="182.69" x2="390.0" y2="182.69"/>
+  <text class="tick" x="88.0" y="188.69" text-anchor="end">0.78</text>
+  <line class="grid" x1="100.0" y1="96.54" x2="390.0" y2="96.54"/>
+  <text class="tick" x="88.0" y="102.54" text-anchor="end">0.82</text>
+  <line x1="100.0" y1="339.69" x2="390.0" y2="339.69" stroke="#087f8c" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text class="small" x="390.0" y="330.69" text-anchor="end" fill="#087f8c">limit 0.707</text>
+  <line x1="100.00" y1="335.76" x2="100.00" y2="339.59" stroke="#5d6878" stroke-width="2"/>
+  <line x1="94.00" y1="335.76" x2="106.00" y2="335.76" stroke="#5d6878" stroke-width="2"/>
+  <line x1="94.00" y1="339.59" x2="106.00" y2="339.59" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="100.00" cy="338.83" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="100.00" y="386.0" text-anchor="middle">24</text>
+  <line x1="196.67" y1="338.58" x2="196.67" y2="339.69" stroke="#5d6878" stroke-width="2"/>
+  <line x1="190.67" y1="338.58" x2="202.67" y2="338.58" stroke="#5d6878" stroke-width="2"/>
+  <line x1="190.67" y1="339.69" x2="202.67" y2="339.69" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="196.67" cy="339.51" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="196.67" y="386.0" text-anchor="middle">48</text>
+  <line x1="293.33" y1="339.35" x2="293.33" y2="339.69" stroke="#5d6878" stroke-width="2"/>
+  <line x1="287.33" y1="339.35" x2="299.33" y2="339.35" stroke="#5d6878" stroke-width="2"/>
+  <line x1="287.33" y1="339.69" x2="299.33" y2="339.69" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="293.33" cy="339.65" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="293.33" y="386.0" text-anchor="middle">96</text>
+  <line x1="390.00" y1="339.62" x2="390.00" y2="339.69" stroke="#5d6878" stroke-width="2"/>
+  <line x1="384.00" y1="339.62" x2="396.00" y2="339.62" stroke="#5d6878" stroke-width="2"/>
+  <line x1="384.00" y1="339.69" x2="396.00" y2="339.69" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="390.00" cy="339.67" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="390.00" y="386.0" text-anchor="middle">160</text>
+  <polyline points="100.00,338.83 196.67,339.51 293.33,339.65 390.00,339.67" fill="none" stroke="#a33b20" stroke-width="2.5"/>
+  <line class="axis" x1="100.0" y1="355.0" x2="390.0" y2="355.0"/>
+  <line class="axis" x1="100.0" y1="75.0" x2="100.0" y2="355.0"/>
+  <text class="small muted" x="245.0" y="420.0" text-anchor="middle">dimension d</text>
+  <text class="strong" x="635.0" y="42" text-anchor="middle">boundary: (0.90, 0.20)</text>
+  <line class="grid" x1="490.0" y1="355.00" x2="780.0" y2="355.00"/>
+  <line class="grid" x1="490.0" y1="268.85" x2="780.0" y2="268.85"/>
+  <line class="grid" x1="490.0" y1="182.69" x2="780.0" y2="182.69"/>
+  <line class="grid" x1="490.0" y1="96.54" x2="780.0" y2="96.54"/>
+  <line x1="490.0" y1="339.69" x2="780.0" y2="339.69" stroke="#087f8c" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text class="small" x="780.0" y="330.69" text-anchor="end" fill="#087f8c">limit 0.707</text>
+  <line x1="490.00" y1="266.82" x2="490.00" y2="338.40" stroke="#5d6878" stroke-width="2"/>
+  <line x1="484.00" y1="266.82" x2="496.00" y2="266.82" stroke="#5d6878" stroke-width="2"/>
+  <line x1="484.00" y1="338.40" x2="496.00" y2="338.40" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="490.00" cy="313.69" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="490.00" y="386.0" text-anchor="middle">24</text>
+  <line x1="586.67" y1="311.98" x2="586.67" y2="338.69" stroke="#5d6878" stroke-width="2"/>
+  <line x1="580.67" y1="311.98" x2="592.67" y2="311.98" stroke="#5d6878" stroke-width="2"/>
+  <line x1="580.67" y1="338.69" x2="592.67" y2="338.69" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="586.67" cy="327.65" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="586.67" y="386.0" text-anchor="middle">48</text>
+  <line x1="683.33" y1="329.72" x2="683.33" y2="339.59" stroke="#5d6878" stroke-width="2"/>
+  <line x1="677.33" y1="329.72" x2="689.33" y2="329.72" stroke="#5d6878" stroke-width="2"/>
+  <line x1="677.33" y1="339.59" x2="689.33" y2="339.59" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="683.33" cy="336.18" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="683.33" y="386.0" text-anchor="middle">96</text>
+  <line x1="780.00" y1="335.25" x2="780.00" y2="339.60" stroke="#5d6878" stroke-width="2"/>
+  <line x1="774.00" y1="335.25" x2="786.00" y2="335.25" stroke="#5d6878" stroke-width="2"/>
+  <line x1="774.00" y1="339.60" x2="786.00" y2="339.60" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="780.00" cy="337.86" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="780.00" y="386.0" text-anchor="middle">160</text>
+  <polyline points="490.00,313.69 586.67,327.65 683.33,336.18 780.00,337.86" fill="none" stroke="#a33b20" stroke-width="2.5"/>
+  <line class="axis" x1="490.0" y1="355.0" x2="780.0" y2="355.0"/>
+  <line class="axis" x1="490.0" y1="75.0" x2="490.0" y2="355.0"/>
+  <text class="small muted" x="635.0" y="420.0" text-anchor="middle">dimension d</text>
+  <text class="strong" x="1025.0" y="42" text-anchor="middle">outside: (0.95, 0.20)</text>
+  <line class="grid" x1="880.0" y1="355.00" x2="1170.0" y2="355.00"/>
+  <line class="grid" x1="880.0" y1="268.85" x2="1170.0" y2="268.85"/>
+  <line class="grid" x1="880.0" y1="182.69" x2="1170.0" y2="182.69"/>
+  <line class="grid" x1="880.0" y1="96.54" x2="1170.0" y2="96.54"/>
+  <line x1="880.0" y1="332.61" x2="1170.0" y2="332.61" stroke="#087f8c" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text class="small" x="1170.0" y="323.61" text-anchor="end" fill="#087f8c">limit 0.710</text>
+  <line x1="880.00" y1="198.71" x2="880.00" y2="317.09" stroke="#5d6878" stroke-width="2"/>
+  <line x1="874.00" y1="198.71" x2="886.00" y2="198.71" stroke="#5d6878" stroke-width="2"/>
+  <line x1="874.00" y1="317.09" x2="886.00" y2="317.09" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="880.00" cy="274.24" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="880.00" y="386.0" text-anchor="middle">24</text>
+  <line x1="976.67" y1="277.81" x2="976.67" y2="327.14" stroke="#5d6878" stroke-width="2"/>
+  <line x1="970.67" y1="277.81" x2="982.67" y2="277.81" stroke="#5d6878" stroke-width="2"/>
+  <line x1="970.67" y1="327.14" x2="982.67" y2="327.14" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="976.67" cy="301.50" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="976.67" y="386.0" text-anchor="middle">48</text>
+  <line x1="1073.33" y1="308.29" x2="1073.33" y2="324.55" stroke="#5d6878" stroke-width="2"/>
+  <line x1="1067.33" y1="308.29" x2="1079.33" y2="308.29" stroke="#5d6878" stroke-width="2"/>
+  <line x1="1067.33" y1="324.55" x2="1079.33" y2="324.55" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="1073.33" cy="316.30" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="1073.33" y="386.0" text-anchor="middle">96</text>
+  <line x1="1170.00" y1="313.47" x2="1170.00" y2="328.81" stroke="#5d6878" stroke-width="2"/>
+  <line x1="1164.00" y1="313.47" x2="1176.00" y2="313.47" stroke="#5d6878" stroke-width="2"/>
+  <line x1="1164.00" y1="328.81" x2="1176.00" y2="328.81" stroke="#5d6878" stroke-width="2"/>
+  <circle cx="1170.00" cy="321.96" r="5.5" fill="#a33b20"/>
+  <text class="tick" x="1170.00" y="386.0" text-anchor="middle">160</text>
+  <polyline points="880.00,274.24 976.67,301.50 1073.33,316.30 1170.00,321.96" fill="none" stroke="#a33b20" stroke-width="2.5"/>
+  <line class="axis" x1="880.0" y1="355.0" x2="1170.0" y2="355.0"/>
+  <line class="axis" x1="880.0" y1="75.0" x2="880.0" y2="355.0"/>
+  <text class="small muted" x="1025.0" y="420.0" text-anchor="middle">dimension d</text>
+  <text class="small muted" x="600" y="455" text-anchor="middle">dots: median · whiskers: 10th–90th percentiles · 48 samples · seed 20260716</text>
+</svg>

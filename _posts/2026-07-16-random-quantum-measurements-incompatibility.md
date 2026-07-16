@@ -310,16 +310,6 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-<figure class="post-figure">
-  <img src="/assets/images/phase-disk.svg" alt="The alpha-beta unit square with a disk of radius one half centered at one half, one half. Inside the disk, the compatibility threshold tends to one over square root of two.">
-  <figcaption><strong>Figure 1.</strong> Phase diagram for two random binary projective measurements in the high-dimensional limit. Inside $(\alpha-1/2)^2+(\beta-1/2)^2\leq1/4$, the threshold reaches the universal binary minimum: $\tau\to1/\sqrt2$. The theorem does not give a complete off-diagonal formula outside the disk.</figcaption>
-</figure>
-
-<figure class="post-figure">
-  <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting principal-angle interval contains one half, producing a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x witness.">
-  <figcaption><strong>Figure 2.</strong> Why the disk gives maximal incompatibility. If the limiting spectrum of squared principal-angle cosines contains $1/2$, a block with $\theta=\pi/4$ appears. On that two-dimensional block, the centered measurements are $\sigma_z$ and $\sigma_x$, forcing $\tau$ down to $1/\sqrt2$.</figcaption>
-</figure>
-
 The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional reducing blocks. On a block with principal angle $\theta$, one may choose a basis in which
 
 $$
@@ -365,9 +355,50 @@ $$
 
 The value $1$ accounts for the commuting one-dimensional blocks.
 
+This finite formula also resolves the off-diagonal asymptotic surface. Set
+
+$$
+h(\lambda)=\frac1{\sqrt\lambda+\sqrt{1-\lambda}}
+$$
+
+and let $\lambda_* = \lambda_*(\alpha,\beta)$ be the point of $[\lambda^-_{\alpha,\beta},\lambda^+_{\alpha,\beta}]$ closest to $1/2$:
+
+$$
+\lambda_*=
+\begin{cases}
+\lambda^+_{\alpha,\beta},&\lambda^+_{\alpha,\beta}<1/2,\\[2mm]
+1/2,&\lambda^-_{\alpha,\beta}\leq1/2\leq\lambda^+_{\alpha,\beta},\\[2mm]
+\lambda^-_{\alpha,\beta},&\lambda^-_{\alpha,\beta}>1/2.
+\end{cases}
+$$
+
+Weak convergence supplies principal-angle values throughout the limiting support, while strong convergence rules out spectral outliers. Since $h$ is continuous and has its unique minimum at $1/2$, the exact block formula gives
+
+$$
+\tau(\mathsf P_E,\mathsf P_F)
+\longrightarrow h(\lambda_*(\alpha,\beta)).
+$$
+
+Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectral endpoint. On the diagonal exterior it reduces to the formula stated in the paper, with $\lambda_\alpha=4\alpha(1-\alpha)$. The paper does not separately state the full off-diagonal formula; the expression above is the direct consequence of its spectral input and the exact reducing-block criterion.
+
+<figure class="post-figure">
+  <img src="/assets/images/off-diagonal-phase.svg" alt="A heat map of the limiting compatibility threshold over the full alpha-beta square. The central disk has value one over square root of two, and the threshold rises toward one in the four exterior corners.">
+  <figcaption><strong>Figure 1.</strong> The full limiting surface obtained from the principal-angle blocks. The central disk is flat at the universal binary minimum. In each exterior corner, the closest endpoint of $[\lambda^-,\lambda^+]$ determines the threshold.</figcaption>
+</figure>
+
+<figure class="post-figure">
+  <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting principal-angle interval contains one half, producing a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x witness.">
+  <figcaption><strong>Figure 2.</strong> Why the disk gives maximal incompatibility. If the limiting spectrum of squared principal-angle cosines contains $1/2$, a block with $\theta=\pi/4$ appears. On that block, the centered measurements are $\sigma_z$ and $\sigma_x$, forcing $\tau$ down to $1/\sqrt2$.</figcaption>
+</figure>
+
+<figure class="post-figure">
+  <img src="/assets/images/finite-dimension-check.svg" alt="Seeded Monte Carlo medians and ten-to-ninety percent intervals for finite random projection pairs at an interior point, an off-diagonal boundary point, and an exterior point.">
+  <figcaption><strong>Figure 3.</strong> A finite-dimensional check at three parameter choices. Dots are Monte Carlo medians and whiskers show the 10th–90th percentiles. The boundary converges more slowly because $1/2$ sits at a spectral edge. This experiment illustrates finite-size behavior; it is not a proof of a convergence rate.</figcaption>
+</figure>
+
 This is not the Clifford mechanism. The random projections do not anticommute on the full space. What survives is a two-dimensional block where they approach the $\sigma&#95;x$ and $\sigma&#95;z$ pair.
 
-The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. The 2025 paper works out the exterior regime only along $\alpha=\beta$, explicitly as a simplification. That scope restriction is not evidence that the off-diagonal case is open. The block formula above indicates that its analysis reduces to controlling the extreme principal angles; no general off-diagonal formula from the literature is asserted here.
+The disk concerns tolerance to white noise. It does not separate compatible PVMs from incompatible ones. Apart from trivial ranks, two independent random projections fail to commute with probability one, so their PVMs are incompatible throughout the square. What changes across the circle is the amount of uniform noise needed to erase that incompatibility.
 
 ## Many random binary measurements
 
