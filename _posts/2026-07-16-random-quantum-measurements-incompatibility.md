@@ -24,21 +24,33 @@ $$
 i=1,\ldots,k.
 $$
 
-When the device is used once, one of these labels is observed. The symbol $i$ is only a label. It means the event “the device reported outcome $i$,” just as “heads” labels an event for a coin toss. It is not a matrix or a physical quantity.
-
-To each outcome $i$, quantum theory assigns an operator $A&#95;i$. This operator is called an **effect**. It satisfies
+Using the device once returns one label $i$. It names the event “outcome $i$ occurred,” just as “heads” names a coin-toss outcome. Quantum theory associates this outcome with an operator $A&#95;i$, called an **effect**. It satisfies
 
 $$
 0\preceq A_i\preceq I.
 $$
 
-The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is in state $\rho$, then the probability of outcome $i$ is
+The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state $\rho$, then the probability of outcome $i$ is
 
 $$
 \Pr(i\mid\rho)=\operatorname{Tr}(\rho A_i).
 $$
 
-Here $\rho$ is a density matrix: a positive operator with trace one. The bounds on $A&#95;i$ ensure that the trace above is a valid probability for every state.
+Here $\rho$ is a density matrix, meaning a positive operator with trace one. It is fixed in this setup; the measurement outcome $i$ is random. Positivity gives
+
+$$
+\operatorname{Tr}(\rho A_i)
+=\operatorname{Tr}(\rho^{1/2}A_i\rho^{1/2})\geq0.
+$$
+
+Applying the same argument to $I-A&#95;i$ gives
+
+$$
+0\leq\operatorname{Tr}\!\bigl(\rho(I-A_i)\bigr)
+=1-\operatorname{Tr}(\rho A_i),
+$$
+
+so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The Born-rule expression therefore lies between zero and one for every state.
 
 An effect tells us the probability of one outcome. It does not, by itself, tell us the state of the system after that outcome occurs. Describing the state change requires extra information, such as a quantum instrument or Kraus operators.
 
