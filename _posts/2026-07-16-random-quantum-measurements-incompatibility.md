@@ -361,7 +361,7 @@ $$
 h(\lambda)=\frac1{\sqrt\lambda+\sqrt{1-\lambda}}
 $$
 
-and let $\lambda_* = \lambda_*(\alpha,\beta)$ be the point of $[\lambda^-_{\alpha,\beta},\lambda^+_{\alpha,\beta}]$ closest to $1/2$:
+and let $\lambda&#95;* = \lambda&#95;*(\alpha,\beta)$ be the point of $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$ closest to $1/2$:
 
 $$
 \lambda_*=
@@ -379,7 +379,7 @@ $$
 \longrightarrow h(\lambda_*(\alpha,\beta)).
 $$
 
-Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectral endpoint. On the diagonal exterior it reduces to the formula stated in the paper, with $\lambda_\alpha=4\alpha(1-\alpha)$. The paper does not separately state the full off-diagonal formula; the expression above is the direct consequence of its spectral input and the exact reducing-block criterion.
+Inside the disk this reduces to $1/\sqrt2$. Outside it selects the nearer spectral endpoint. On the diagonal exterior it reduces to the formula stated in the paper, with $\lambda&#95;\alpha=4\alpha(1-\alpha)$. The paper does not separately state the full off-diagonal formula; the expression above is the direct consequence of its spectral input and the exact reducing-block criterion.
 
 <figure class="post-figure">
   <img src="/assets/images/off-diagonal-phase.svg" alt="A heat map of the limiting compatibility threshold over the full alpha-beta square. The central disk has value one over square root of two, and the threshold rises toward one in the four exterior corners.">
