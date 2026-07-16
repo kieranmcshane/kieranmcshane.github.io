@@ -79,11 +79,34 @@ body {
   height: auto;
 }
 
+.post-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fdfdfd;
+}
+
 .post-figure figcaption {
   margin-top: 0.65rem;
   color: var(--muted);
   font-size: 0.9em;
   line-height: 1.45;
+}
+
+.animation-transcript {
+  margin: -0.8rem 0 2rem;
+  color: var(--muted);
+  font-size: 0.94em;
+}
+
+.animation-transcript summary {
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.animation-transcript[open] summary {
+  margin-bottom: 0.6rem;
 }
 
 .post-meta,
