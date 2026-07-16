@@ -8,11 +8,11 @@ tags: [POVMs, incompatibility, random-matrices, free-probability]
 excerpt: "Quantum incompatibility is an operator-valued marginal problem. That viewpoint leads from Pauli measurements to a sharp phase diagram for random projections."
 ---
 
-Quantum incompatibility is often introduced with a slogan: noncommuting observables cannot be measured simultaneously. The slogan is useful, but it hides a more general—and more visual—question:
+Quantum incompatibility is often introduced with a slogan: noncommuting observables cannot be measured simultaneously. For general measurements, a more precise question is:
 
 > Can the statistics of several measurements arise as the marginals of one larger measurement?
 
-This turns incompatibility into an operator-valued marginal problem. It also suggests a quantitative question: how much random noise must be added before a joint measurement becomes possible? From there, a surprising landscape appears. Two Pauli measurements have a clean geometric obstruction. Large families of anticommuting observables attain universal bounds. In high dimension, random measurements can approach those bounds without being designed to do so.
+This is an operator-valued marginal problem. It also gives a natural way to measure incompatibility: ask how much random noise is needed before a joint measurement becomes possible. The Pauli example illustrates the definition, while Clifford constructions give an extremal benchmark for the random-measurement results discussed below.
 
 ## Measurements as positive operator partitions
 
@@ -42,11 +42,11 @@ $$
 X=A_+-A_-=2A_+-I.
 $$
 
-Then $X=X^*$ and $-I\preceq X\preceq I$. Conversely, $A_\pm=(I\pm X)/2$. A projective binary measurement has $X^2=I$ and eigenvalues $\pm1$.
+Then $X=X^*$ and $-I\preceq X\preceq I$. Conversely, $A&#95;\pm=(I\pm X)/2$. A projective binary measurement has $X^2=I$ and eigenvalues $\pm1$.
 
 ## Compatibility is an operator-valued coupling
 
-Let $A=(A_i)_{i=1}^k$ and $B=(B_j)_{j=1}^{\ell}$. They are compatible if positive operators $C_{ij}$ exist such that
+Let $A=(A&#95;i)&#95;{i=1}^k$ and $B=(B&#95;j)&#95;{j=1}^{\ell}$. They are compatible if positive operators $C&#95;{ij}$ exist such that
 
 $$
 \sum_j C_{ij}=A_i,
@@ -54,7 +54,7 @@ $$
 \sum_i C_{ij}=B_j.
 $$
 
-Think of $C=(C_{ij})$ as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$. For every state $\rho$,
+Think of $C=(C&#95;{ij})$ as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$. For every state $\rho$,
 
 $$
 p_\rho(i,j)=\operatorname{Tr}(\rho C_{ij})
@@ -68,7 +68,7 @@ This is why Sudoku is only a loose analogy. Sudoku has discrete symbols and fixe
 
 ## Commutation gives a joint measurement
 
-Suppose every $A_i$ commutes with every $B_j$. Set
+Suppose every $A&#95;i$ commutes with every $B&#95;j$. Set
 
 $$
 C_{ij}=A_iB_j.
@@ -100,7 +100,7 @@ $$
 0\preceq C_{++}\preceq|+\rangle\langle+|.
 $$
 
-A positive operator dominated by a rank-one projection must be supported on that projection’s range. Thus $C_{++}$ would have to live simultaneously in $\operatorname{span}\{|0\rangle\}$ and $\operatorname{span}\{|+\rangle\}$. Those distinct one-dimensional subspaces intersect only at zero, so $C_{++}=0$. The same argument kills every cell, contradicting $\sum_{a,b}C_{ab}=I$.
+A positive operator dominated by a rank-one projection must be supported on that projection’s range. Thus $C&#95;{++}$ would have to live in both $\operatorname{span}\{\lvert0\rangle\}$ and $\operatorname{span}\{\lvert+\rangle\}$. These one-dimensional subspaces intersect only at zero, so $C&#95;{++}=0$. Repeating the argument for the other entries makes every cell zero, contradicting $\sum&#95;{a,b}C&#95;{ab}=I$.
 
 Geometrically, every joint cell must live inside both its row subspace and its column subspace. For sharp $X$ and $Z$, there is nowhere nonzero for it to live.
 
@@ -146,9 +146,9 @@ They behave like exactly perpendicular directions in operator space.
 
 ## Three ways to randomize a measurement
 
-There is no unique “uniform random POVM.” Three natural ensembles answer different questions.
+There is no unique “uniform random POVM.” The recent work discussed here uses three ensembles, each with a different outcome structure.
 
-1. **Random binary projective measurements.** Choose a Haar-random subspace $E\subset\mathbb C^d$ of prescribed dimension and measure $(P_E,I-P_E)$.
+1. **Random binary projective measurements.** Choose a Haar-random subspace $E\subset\mathbb C^d$ of prescribed dimension and measure $(P&#95;E,I-P&#95;E)$.
 2. **Random basis measurements.** Draw a Haar-random unitary $U$ and measure the rank-one projections onto its columns.
 3. **Random induced POVMs.** Draw a Haar-random isometry $V:\mathbb C^d\to\mathbb C^k\otimes\mathbb C^n$ and set
 
@@ -168,7 +168,7 @@ $$
 \dim F=\lfloor\beta d\rfloor,
 $$
 
-and let $\mathsf P_E=(P_E,I-P_E)$ and $\mathsf P_F=(P_F,I-P_F)$. If
+and let $\mathsf P&#95;E=(P&#95;E,I-P&#95;E)$ and $\mathsf P&#95;F=(P&#95;F,I-P&#95;F)$. If
 
 $$
 \left(\alpha-\frac12\right)^2+
@@ -181,7 +181,7 @@ $$
 \tau(\mathsf P_E,\mathsf P_F)\longrightarrow\frac1{\sqrt2}.
 $$
 
-Because $1/\sqrt2$ is the universal minimum for a binary pair, these random measurements are asymptotically maximally incompatible throughout the disk—not only at the balanced point $(1/2,1/2)$.
+Because $1/\sqrt2$ is the universal minimum for a binary pair, these random measurements are asymptotically maximally incompatible throughout the disk. The result is not restricted to the balanced point $(1/2,1/2)$.
 
 ### Why a circle appears
 
@@ -199,17 +199,17 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-In other words, the limiting principal-angle spectrum reaches $\pi/4$. One can then find a two-dimensional compression on which $A=2P_E-I$ is exactly Pauli $Z$ and $B=2P_F-I$ approaches Pauli $X$.
+The condition says that the limiting principal-angle spectrum reaches $\pi/4$. One can then find a two-dimensional compression on which $A=2P&#95;E-I$ is exactly Pauli $Z$ and $B=2P&#95;F-I$ approaches Pauli $X$.
 
 Compatibility cannot be improved by compression: a parent measurement upstairs would compress to a parent measurement downstairs. The embedded Pauli pair therefore gives the upper bound $1/\sqrt2$; the universal binary theorem gives the matching lower bound.
 
 This mechanism differs from Clifford anticommutation. Random projections almost surely do not anticommute globally. They instead contain a small, asymptotically Pauli-like witness.
 
-The circle marks a robustness transition, not a transition between compatible and incompatible sharp measurements. Nontrivial independent random projections are generically noncommuting—and hence incompatible—on both sides. Outside the disk they are simply less resistant to white noise. Along $\alpha=\beta$, the exterior limit is known explicitly; the full off-diagonal exterior remains open.
+The circle marks a robustness transition, not a transition between compatible and incompatible sharp measurements. Nontrivial independent random projections are generically noncommuting, hence incompatible, on both sides. Outside the disk they are less resistant to white noise. Along $\alpha=\beta$, the exterior limit is known explicitly; the full off-diagonal exterior remains open.
 
 ## Many random binary measurements
 
-Now take $g$ independent balanced random projections, $\operatorname{rank}P_x=d/2$, and let $A_x=2P_x-I$. For fixed $g$, free probability yields
+Now take $g$ independent balanced random projections, $\operatorname{rank}P&#95;x=d/2$, and let $A&#95;x=2P&#95;x-I$. For fixed $g$, free probability yields
 
 $$
 \limsup_{d\to\infty}\tau(\mathsf P_1,\ldots,\mathsf P_g)
@@ -219,13 +219,13 @@ $$
 
 almost surely.
 
-Each $A_x$ has the symmetric Bernoulli spectral law
+Each $A&#95;x$ has the symmetric Bernoulli spectral law
 
 $$
 b=\frac12(\delta_{-1}+\delta_1).
 $$
 
-Independent Haar conjugates become asymptotically free. For fixed signs $\varepsilon_x$, the signed sum $\sum_x\varepsilon_xA_x$ therefore has limiting law $b^{\boxplus g}$, the Kesten–McKay distribution, whose support ends at $2\sqrt{g-1}$.
+Independent Haar conjugates become asymptotically free. For fixed signs $\varepsilon&#95;x$, the signed sum $\sum&#95;x\varepsilon&#95;xA&#95;x$ therefore has limiting law $b^{\boxplus g}$, the Kesten–McKay distribution, whose support ends at $2\sqrt{g-1}$.
 
 That spectral edge normalizes an incompatibility witness. Taking $s=1/(2\sqrt{g-1})$, its pairing with the visibility-$t$ measurements is $stg$. Incompatibility is certified once $stg>1$, producing the bound above.
 
@@ -239,7 +239,7 @@ The uniform-noise degree used here answers a particularly concrete experimental 
 
 ## What remains unresolved
 
-Several clean questions survive the asymptotic results:
+The analysis leaves the following questions open:
 
 - Is the conjectured polar-plus-equatorial configuration optimal for four binary qubit measurements?
 - Do $g$ balanced random binary PVMs reach the exact value $1/\sqrt g$ for every fixed $g$?
@@ -248,7 +248,7 @@ Several clean questions survive the asymptotic results:
 - Can the gap between compatibility and incompatibility thresholds for induced random POVMs be closed?
 - Which operational tasks are controlled specifically by uniform white-noise robustness rather than generalized robustness?
 
-The larger lesson is already visible. Carefully engineered Pauli strings are not the only route to extreme quantum behavior. In high dimension, randomness can place a maximally incompatible qubit witness inside a much larger measurement—or reproduce the optimal many-measurement scale through free spectral geometry.
+So the phenomenon is not confined to hand-built Pauli or Clifford families. A random high-dimensional pair can contain the same qubit obstruction. For larger random families, the known bounds have the optimal $1/\sqrt g$ scaling, but the leading constant is still open.
 
 ## References
 

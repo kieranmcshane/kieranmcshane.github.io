@@ -1,4 +1,4 @@
-# Kieran McShane — Notes
+# Kieran McShane: Notes
 
 Source for the GitHub Pages site at <https://kieranmcshane.github.io>.
 
