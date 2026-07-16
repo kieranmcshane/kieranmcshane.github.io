@@ -1,0 +1,14 @@
+title: "Kieran McShane — Notes"
+description: "Notes on quantum information, mathematics, and computation."
+author: Kieran McShane
+url: "https://kieranmcshane.github.io"
+baseurl: ""
+theme: minima
+markdown: kramdown
+permalink: /:year/:month/:day/:title/
+show_excerpts: true
+header_pages:
+  - about.md
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
