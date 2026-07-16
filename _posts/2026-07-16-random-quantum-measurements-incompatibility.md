@@ -294,6 +294,11 @@ Because $1/\sqrt2$ is the universal minimum for a binary pair, these random meas
 
 This is the two-projection phase-diagram theorem of [Bluhm, Lancien, and Nechita](https://arxiv.org/abs/2507.20600).
 
+<figure class="post-figure">
+  <img src="/assets/images/compatibility-phase-diagram.svg" alt="A point inside the alpha-beta disk corresponds to a limiting principal-angle interval containing one half, which yields a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x pair.">
+  <figcaption>The disk condition says that the limiting interval contains one half. This supplies a principal-angle block with $\theta=\pi/4$, and therefore the maximally incompatible Pauli pair.</figcaption>
+</figure>
+
 ### Why a circle appears
 
 The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval with endpoints ([Aubrun, 2021](https://arxiv.org/abs/2109.06535))
