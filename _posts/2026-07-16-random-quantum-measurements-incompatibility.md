@@ -19,6 +19,33 @@ The article first develops effects, POVMs, compatibility and uniform noise. It t
 - [The primer](#from-outcomes-to-effects) introduces the notation and the marginal problem.
 - [The two-projection argument](#a-phase-diagram-for-two-random-projections) contains the main geometric result and the full off-diagonal limit.
 - [The many-measurement section](#many-random-binary-measurements) uses incompatibility witnesses and free probability; the final section explains the operational meaning.
+- [The notation glossary](#notation-glossary) collects the recurring symbols and links to their formal definitions.
+
+## Notation glossary
+
+Only the notation that recurs across several sections is linked. Hovering over, or focusing, a linked symbol gives a short reminder; activating it moves to the full definition.
+
+<div class="notation-glossary">
+  <dl>
+    <dt><a href="#definition-rho">$\rho$</a></dt>
+    <dd id="glossary-rho-desc">The input quantum state: a positive operator with trace one.</dd>
+
+    <dt><a href="#definition-effect">$A&#95;i$</a></dt>
+    <dd id="glossary-effect-desc">The effect associated with outcome $i$ of POVM $A$.</dd>
+
+    <dt><a href="#definition-joint-effect">$C&#95;{ij}$</a></dt>
+    <dd id="glossary-joint-effect-desc">The joint effect for outcomes $(i,j)$; its marginals recover $A&#95;i$ and $B&#95;j$.</dd>
+
+    <dt><a href="#definition-tau">$\tau$</a></dt>
+    <dd id="glossary-tau-desc">The largest uniform-noise visibility for which the measurements are jointly measurable.</dd>
+
+    <dt><a href="#definition-rank-fractions">$\alpha,\beta$</a></dt>
+    <dd id="glossary-rank-fractions-desc">The limiting rank fractions of the two random subspaces.</dd>
+
+    <dt><a href="#definition-spectral-endpoints">$\lambda^\pm$</a></dt>
+    <dd id="glossary-spectral-endpoints-desc">The endpoints of the limiting spectrum of squared principal-angle cosines.</dd>
+  </dl>
+</div>
 
 ## From outcomes to effects
 
@@ -29,18 +56,20 @@ i=1,\ldots,k.
 $$
 
 Using the device once returns one label $i$. It names the event “outcome $i$ occurred,” just as “heads” names a coin-toss outcome. Quantum theory associates this outcome with an operator $A&#95;i$, called an **effect**. It satisfies
+{: #definition-effect .definition-target }
 
 $$
 0\preceq A_i\preceq I.
 $$
 
-The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state $\rho$, the **Born rule** assigns the probability of outcome $i$:
+The first inequality says that <a class="notation-ref" href="#definition-effect" data-definition="Effect for outcome i: a positive operator that determines its probability." aria-describedby="glossary-effect-desc">$A&#95;i$</a> is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state <a class="notation-ref" href="#definition-rho" data-definition="Quantum state: a positive operator with trace one." aria-describedby="glossary-rho-desc">$\rho$</a>, the **Born rule** assigns the probability of outcome $i$:
 
 $$
 \Pr(i\mid\rho)=\operatorname{Tr}(\rho A_i).
 $$
 
 Here $\rho$ is a density matrix, meaning a positive operator with trace one. It is fixed in this setup; the measurement outcome $i$ is random. Positivity gives
+{: #definition-rho .definition-target }
 
 $$
 \operatorname{Tr}(\rho A_i)
@@ -148,6 +177,7 @@ If the measurement is sharp, meaning that its effects are projections, then $D&#
 ## Compatibility is an operator-valued coupling
 
 Let $A=(A&#95;i)&#95;{i=1}^k$ and $B=(B&#95;j)&#95;{j=1}^{\ell}$. They are compatible if positive operators $C&#95;{ij}$ exist such that
+{: #definition-joint-effect .definition-target }
 
 $$
 \sum_j C_{ij}=A_i,
@@ -155,7 +185,7 @@ $$
 \sum_i C_{ij}=B_j.
 $$
 
-Think of $C=(C&#95;{ij})$ as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$:
+Think of <a class="notation-ref" href="#definition-joint-effect" data-definition="Joint effect for outcomes (i,j); its row and column sums recover the original POVMs." aria-describedby="glossary-joint-effect-desc">$C=(C&#95;{ij})$</a> as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$:
 
 $$
 \begin{array}{c|ccc|c}
@@ -169,7 +199,7 @@ A_k & C_{k1} & \cdots & C_{k\ell} & A_k\\
 \end{array}
 $$
 
-Each cell contains a positive operator. The labels at the right and bottom are the prescribed operator-valued marginals. Their common grand total is $I$, because both POVMs are complete. For every state $\rho$,
+Each cell contains a positive operator. The labels at the right and bottom are the prescribed operator-valued marginals. Their common grand total is $I$, because both POVMs are complete. For every state <a class="notation-ref" href="#definition-rho" data-definition="Quantum state: a positive operator with trace one." aria-describedby="glossary-rho-desc">$\rho$</a>,
 
 $$
 p_\rho(i,j)=\operatorname{Tr}(\rho C_{ij})
@@ -252,7 +282,8 @@ A_i^{(t)}=tA_i+(1-t)\frac{I}{k},
 \qquad 0\leq t\leq1.
 $$
 
-With probability $t$, one performs $A$; with probability $1-t$, one ignores the state and reports a uniformly random outcome. Define
+With probability $t$, one performs $A$; with probability $1-t$, one ignores the state and reports a uniformly random outcome. The compatibility degree is defined by
+{: #definition-tau .definition-target }
 
 $$
 \tau(A,B)=\max\{t:A^{(t)}\text{ and }B^{(t)}\text{ are compatible}\}.
@@ -268,7 +299,7 @@ $$
 
 The compatibility degree of the family is defined by adding the same visibility $t$ to every member and maximizing the values of $t$ for which such a parent exists.
 
-Every pair satisfies $\tau(A,B)\geq1/2$. Indeed,
+Every pair satisfies <a class="notation-ref" href="#definition-tau" data-definition="Compatibility degree: the largest visibility for which the noisy measurements are jointly measurable." aria-describedby="glossary-tau-desc">$\tau(A,B)$</a> $\geq1/2$. Indeed,
 
 $$
 C_{ij}=\frac{A_i}{2\ell}+\frac{B_j}{2k}
@@ -321,7 +352,8 @@ The rest of this article develops the binary-projective model. The basis and ind
 
 ## A phase diagram for two random projections
 
-Let $E,F\subset\mathbb C^d$ be independent uniformly random subspaces with
+Let $E,F\subset\mathbb C^d$ be independent uniformly random subspaces with rank fractions <a class="notation-ref" href="#definition-rank-fractions" data-definition="Asymptotic rank fractions: dim(E)/d tends to alpha and dim(F)/d tends to beta." aria-describedby="glossary-rank-fractions-desc">$\alpha,\beta$</a> defined by
+{: #definition-rank-fractions .definition-target }
 
 $$
 \dim E=\lfloor\alpha d\rfloor,
@@ -348,7 +380,8 @@ This is [Corollary 3.6 of Bluhm, Lancien, and Nechita](https://ar5iv.labs.arxiv.
 
 ### Why a circle appears
 
-The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval with endpoints ([Aubrun, 2021](https://arxiv.org/abs/2109.06535))
+The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval whose endpoints are denoted <a class="notation-ref" href="#definition-spectral-endpoints" data-definition="Lower and upper endpoints of the limiting squared-principal-angle spectrum." aria-describedby="glossary-spectral-endpoints-desc">$\lambda^\pm$</a> ([Aubrun, 2021](https://arxiv.org/abs/2109.06535)):
+{: #definition-spectral-endpoints .definition-target }
 
 $$
 \lambda_{\alpha,\beta}^{\pm}
@@ -356,7 +389,7 @@ $$
 \pm2\sqrt{\alpha(1-\alpha)\beta(1-\beta)}.
 $$
 
-The disk condition is equivalent to
+In this notation, the disk condition is equivalent to
 
 $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
@@ -435,7 +468,7 @@ $$
 h(\lambda)=\frac1{\sqrt\lambda+\sqrt{1-\lambda}}
 $$
 
-and let $\lambda&#95;{\star}=\lambda&#95;{\star}(\alpha,\beta)$ be the point of $[\lambda^-&#95;{\alpha,\beta},\lambda^+&#95;{\alpha,\beta}]$ closest to $1/2$:
+and let $\lambda&#95;{\star}=\lambda&#95;{\star}(\alpha,\beta)$ be the point of the interval determined by <a class="notation-ref" href="#definition-spectral-endpoints" data-definition="Lower and upper endpoints of the limiting squared-principal-angle spectrum." aria-describedby="glossary-spectral-endpoints-desc">$\lambda^\pm$</a> closest to $1/2$:
 
 $$
 \lambda_{\star}=
@@ -663,7 +696,7 @@ for every fixed $g$. When $g=2$, the free-probability estimate gives only the tr
 
 A compatible family can be implemented by performing one parent measurement and then relabelling its outcome with classical randomness. In a suitable state-discrimination game, an incompatible family can achieve a higher guessing probability than any compatible family.
 
-The precise operational equality concerns the **generalized robustness of incompatibility**, not the white-noise degree $\tau$. For a measurement family $M=(M&#95;{a\mid x})$, define
+The precise operational equality concerns the **generalized robustness of incompatibility**, not the white-noise degree <a class="notation-ref" href="#definition-tau" data-definition="Compatibility degree: the largest visibility for which the noisy measurements are jointly measurable." aria-describedby="glossary-tau-desc">$\tau$</a>. For a measurement family $M=(M&#95;{a\mid x})$, define
 
 $$
 I_R(M)=\min\left\{r\geq0:
