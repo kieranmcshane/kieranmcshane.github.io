@@ -294,11 +294,6 @@ Because $1/\sqrt2$ is the universal minimum for a binary pair, these random meas
 
 This is the two-projection phase-diagram theorem of [Bluhm, Lancien, and Nechita](https://arxiv.org/abs/2507.20600).
 
-<figure class="post-figure">
-  <img src="/assets/images/compatibility-phase-diagram.svg" alt="A point inside the alpha-beta disk corresponds to a limiting principal-angle interval containing one half, which yields a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x pair.">
-  <figcaption>The disk condition says that the limiting interval contains one half. This supplies a principal-angle block with $\theta=\pi/4$, and therefore the maximally incompatible Pauli pair.</figcaption>
-</figure>
-
 ### Why a circle appears
 
 The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval with endpoints ([Aubrun, 2021](https://arxiv.org/abs/2109.06535))
@@ -314,6 +309,16 @@ The disk condition is equivalent to
 $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
+
+<figure class="post-figure">
+  <img src="/assets/images/phase-disk.svg" alt="The alpha-beta unit square with a disk of radius one half centered at one half, one half. Inside the disk, the compatibility threshold tends to one over square root of two.">
+  <figcaption><strong>Figure 1.</strong> Phase diagram for two random binary projective measurements in the high-dimensional limit. Inside $(\alpha-1/2)^2+(\beta-1/2)^2\leq1/4$, the threshold reaches the universal binary minimum: $\tau\to1/\sqrt2$. The theorem does not give a complete off-diagonal formula outside the disk.</figcaption>
+</figure>
+
+<figure class="post-figure">
+  <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting principal-angle interval contains one half, producing a two-dimensional block at angle pi over four and the Pauli sigma-z and sigma-x witness.">
+  <figcaption><strong>Figure 2.</strong> Why the disk gives maximal incompatibility. If the limiting spectrum of squared principal-angle cosines contains $1/2$, a block with $\theta=\pi/4$ appears. On that two-dimensional block, the centered measurements are $\sigma_z$ and $\sigma_x$, forcing $\tau$ down to $1/\sqrt2$.</figcaption>
+</figure>
 
 The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional reducing blocks. On a block with principal angle $\theta$, one may choose a basis in which
 
