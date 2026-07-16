@@ -12,7 +12,7 @@ Suppose a quantum measuring apparatus has several possible readouts. A Stern–G
 
 In this article, a *measurement* means the statistical rule connecting an input state to the possible readouts. A POVM describes that rule. If we also want to describe how the apparatus changes the state, we need a quantum instrument.
 
-The familiar slogan says that noncommuting observables cannot be measured simultaneously. The more general question is:
+A familiar slogan says that “[noncommuting observables cannot be measured simultaneously](https://ar5iv.labs.arxiv.org/html/2510.13980v2#S1.SS1.SSS1.p2).” Taken literally, this is too broad. In the cited passage, the slogan is immediately narrowed to the failure of simultaneous diagonalization. Other experimental notions of simultaneity occur in [continuous weak measurements](https://arxiv.org/abs/2306.06167). The notion studied here is joint measurability of the outcome statistics:
 
 > Can the statistics of several measurements arise as the marginals of one larger measurement?
 
@@ -580,6 +580,8 @@ Random measurements can reproduce the same qubit obstruction as an engineered pa
 - Andreas Bluhm, Cécilia Lancien, and Ion Nechita, [*Random measurements are almost maximally incompatible*](https://arxiv.org/abs/2507.20600), 2025.
 - Guillaume Aubrun, [*Principal angles between random subspaces and polynomials in two free projections*](https://arxiv.org/abs/2109.06535), 2021.
 - Teiko Heinosaari, Jukka Kiukas, and Daniel Reitzner, [*Noise Robustness of the Incompatibility of Quantum Measurements*](https://arxiv.org/abs/1501.04554), 2015.
+- Christopher S. Jackson, [*Sequential Quantum Measurements and the Instrumental Group Algebra*](https://arxiv.org/abs/2510.13980), 2025.
+- Christopher S. Jackson and Carlton M. Caves, [*Simultaneous Measurements of Noncommuting Observables: Positive Transformations and Instrumental Lie Groups*](https://arxiv.org/abs/2306.06167), 2023.
 - Benoît Collins and Camille Male, [*The strong asymptotic freeness of Haar and deterministic matrices*](https://arxiv.org/abs/1105.4345), 2014.
 - Jessica Bavaresco et al., [*Most incompatible measurements for robust steering tests*](https://arxiv.org/abs/1704.02994), 2017.
 - Paul Skrzypczyk, Ivan Šupić, and Daniel Cavalcanti, [*All sets of incompatible measurements give an advantage in quantum state discrimination*](https://arxiv.org/abs/1901.00816), 2019.
