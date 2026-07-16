@@ -355,6 +355,26 @@ $$
 
 The value $1$ accounts for the commuting one-dimensional blocks.
 
+There is an equivalent formula that avoids listing the angles. On a nontrivial block, writing $c=\cos\theta$ and $s=\sin\theta$,
+
+$$
+[P_E,P_F]
+=cs\begin{pmatrix}0&1\\-1&0\end{pmatrix},
+\qquad
+\|[P_E,P_F]\|_\infty=cs.
+$$
+
+Since $(c+s)^2=1+2cs$, taking the worst block gives the exact identity
+
+$$
+\boxed{
+\tau(\mathsf P_E,\mathsf P_F)
+=\frac1{\sqrt{1+2\|[P_E,P_F]\|_\infty}}
+}.
+$$
+
+This identity is special to two sharp binary measurements under the uniform-noise model. It should not be read as a general commutator formula for arbitrary POVMs.
+
 This finite formula also resolves the off-diagonal asymptotic surface. Set
 
 $$
@@ -426,6 +446,8 @@ $$
 
 almost surely. The limiting law is the Kesten–McKay distribution $b^{\boxplus g}$, whose support has endpoints $\pm2\sqrt{g-1}$. Strong convergence rules out spectral outliers, which ordinary convergence in distribution would not do. Since $g$ is fixed, there are only $2^g$ sign vectors, so the norm convergence holds simultaneously for all of them.
 
+> **Free-probability intuition.** Free independence determines the limiting bulk spectrum of a large random-matrix sum. Strong convergence adds the fact needed here: no isolated eigenvalue survives beyond that limiting support. Its edge can therefore control the operator norm used to normalize the witness.
+
 Here is how those signed sums enter the incompatibility test. A tuple of Hermitian operators $W&#95;x$ is normalized as a witness if every compatible tuple of binary difference operators $X&#95;x$ satisfies
 
 $$
@@ -481,6 +503,12 @@ $$
 Thus $I&#95;R$ is the fractional advantage above the compatible benchmark, while $1+I&#95;R$ is the multiplicative advantage. The equality is for this particular class of discrimination games, not for every discrimination task.
 
 The uniform-noise degree asks a narrower question: what fraction of the original measurements can survive depolarization before a joint simulation becomes possible? Another noise model may rank the same measurements differently. The choice of measure therefore matters.
+
+| Quantity | Noise being allowed | What the number means |
+|:--|:--|:--|
+| $\tau$ | Uniform POVM noise | Largest surviving visibility before compatibility |
+| $R&#95;{\rm white}=\tau^{-1}-1$ | The same uniform noise, written as a mixing ratio | Amount of white noise relative to the original measurement |
+| $I&#95;R$ | An arbitrary measurement family | Generalized robustness; $1+I&#95;R$ is the optimal discrimination ratio above |
 
 ## What remains unresolved
 
