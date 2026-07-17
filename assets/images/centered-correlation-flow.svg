@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+  <title id="title">From product-state correlations to a centered covariance bound</title>
+  <desc id="desc">A three-stage diagram. A product state gives a rank-one matrix r s transpose. A separable mixture gives a convex sum of rank-one matrices. Centering subtracts the product of the mean vectors and yields a covariance sum involving local fluctuations.</desc>
+  <rect width="1200" height="500" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#526173"/>
+    </marker>
+  </defs>
+  <style>
+    .heading { font: 600 25px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }
+    .body { font: 400 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #435064; }
+    .math { font: italic 25px Georgia, "Times New Roman", serif; fill: #172033; }
+    .small { font: 400 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #5d6778; }
+    .box { fill: #f7fafb; stroke: #9aa8b7; stroke-width: 2; rx: 14; }
+    .accent { fill: #e5f4f4; stroke: #087f8c; stroke-width: 3; rx: 14; }
+    .arrow { stroke: #526173; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+  </style>
+
+  <rect class="box" x="35" y="80" width="300" height="300"/>
+  <text class="heading" x="185" y="125" text-anchor="middle">Product state</text>
+  <text class="math" x="185" y="185" text-anchor="middle">ρ<tspan baseline-shift="sub" font-size="17">AB</tspan> = ρ<tspan baseline-shift="sub" font-size="17">A</tspan> ⊗ ρ<tspan baseline-shift="sub" font-size="17">B</tspan></text>
+  <text class="math" x="185" y="245" text-anchor="middle">T = r s<tspan baseline-shift="super" font-size="17">T</tspan></text>
+  <line x1="115" y1="290" x2="255" y2="290" stroke="#087f8c" stroke-width="6"/>
+  <circle cx="115" cy="290" r="9" fill="#087f8c"/>
+  <circle cx="255" cy="290" r="9" fill="#087f8c"/>
+  <text class="small" x="185" y="340" text-anchor="middle">one rank-one tensor</text>
+
+  <path class="arrow" d="M345 230 H420"/>
+
+  <rect class="box" x="435" y="80" width="330" height="300"/>
+  <text class="heading" x="600" y="125" text-anchor="middle">Separable mixture</text>
+  <text class="math" x="600" y="185" text-anchor="middle">T = Σ p<tspan baseline-shift="sub" font-size="17">k</tspan> r<tspan baseline-shift="sub" font-size="17">k</tspan> s<tspan baseline-shift="sub" font-size="17">k</tspan><tspan baseline-shift="super" font-size="17">T</tspan></text>
+  <g stroke="#087f8c" stroke-width="4">
+    <line x1="500" y1="265" x2="570" y2="235"/>
+    <line x1="565" y1="285" x2="650" y2="285"/>
+    <line x1="630" y1="245" x2="700" y2="275"/>
+  </g>
+  <g fill="#087f8c">
+    <circle cx="500" cy="265" r="7"/><circle cx="570" cy="235" r="7"/>
+    <circle cx="565" cy="285" r="7"/><circle cx="650" cy="285" r="7"/>
+    <circle cx="630" cy="245" r="7"/><circle cx="700" cy="275" r="7"/>
+  </g>
+  <text class="small" x="600" y="340" text-anchor="middle">convex sum of rank-one tensors</text>
+
+  <path class="arrow" d="M775 230 H850"/>
+
+  <rect class="accent" x="865" y="55" width="300" height="350"/>
+  <text class="heading" x="1015" y="105" text-anchor="middle">Centered covariance</text>
+  <text class="math" x="1015" y="165" text-anchor="middle">C = T − r s<tspan baseline-shift="super" font-size="17">T</tspan></text>
+  <text class="math" x="1015" y="225" text-anchor="middle">= Σ p<tspan baseline-shift="sub" font-size="17">k</tspan>(r<tspan baseline-shift="sub" font-size="17">k</tspan>−r)(s<tspan baseline-shift="sub" font-size="17">k</tspan>−s)<tspan baseline-shift="super" font-size="17">T</tspan></text>
+  <line x1="930" y1="290" x2="1015" y2="250" stroke="#a33b20" stroke-width="5"/>
+  <line x1="1015" y1="250" x2="1100" y2="315" stroke="#087f8c" stroke-width="5"/>
+  <circle cx="1015" cy="250" r="9" fill="#172033"/>
+  <text class="small" x="1015" y="355" text-anchor="middle">local means removed</text>
+
+  <text class="body" x="600" y="460" text-anchor="middle">factorization  →  convexity  →  centering  →  Cauchy–Schwarz</text>
+</svg>
+
