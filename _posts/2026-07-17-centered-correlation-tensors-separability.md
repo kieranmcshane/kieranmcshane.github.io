@@ -8,7 +8,7 @@ tags: [entanglement, separability, tensor-norms, Bloch-representation]
 excerpt: "How the usual correlation-tensor separability test becomes a marginal-dependent covariance bound after centering."
 ---
 
-Deciding whether a mixed quantum state is separable is difficult. Even so, a useful necessary test follows from a short piece of linear algebra. Write the state in local operator bases, collect its two-body correlations in a matrix $T$, and ask how large that matrix can be if the state is a mixture of product states.
+Deciding whether a mixed quantum state is separable is difficult. Even so, a useful necessary test follows from a short piece of linear algebra. Write the state in local operator bases, collect its two-body correlations in a matrix <a class="notation-ref" href="#definition-correlation-matrix" data-definition="Correlation matrix T: the coefficients of traceless observables on both subsystems." aria-describedby="glossary-correlation-desc">$T$</a>, and ask how large that matrix can be if the state is a mixture of product states.
 
 The familiar test controls $T$ itself. A stronger necessary test controls
 
@@ -16,13 +16,14 @@ $$
 C=T-rs^{\mathsf T},
 $$
 
-where $r$ and $s$ are the local Bloch vectors. The subtraction removes the correlation predicted from the local means alone. What remains is a covariance matrix. The centered test is never weaker than the uncentered one and is sometimes strictly stronger.
+where <a class="notation-ref" href="#definition-bloch-vectors" data-definition="Local Bloch vectors r and s: coordinates of the two reduced states." aria-describedby="glossary-bloch-vectors-desc">$r$ and $s$</a> are the local Bloch vectors. The subtraction removes the correlation predicted from the local means alone. What remains is the <a class="notation-ref" href="#definition-centered-correlation" data-definition="Centered correlation matrix C: T with the product of the local means removed." aria-describedby="glossary-centered-desc">centered correlation matrix $C$</a>. The centered test is never weaker than the uncentered one and is sometimes strictly stronger.
 
 This article derives both bounds with one fixed normalization. It then explains why the same language becomes subtler for three or more parties. The centered argument is elementary, but it belongs to a wider line of work on Bloch-representation criteria and covariance matrices; it is not presented here as a new entanglement criterion.
 
 ## Reading guide
 
 - [Bloch coordinates](#one-system-bloch-coordinates) fixes the normalization.
+- [The notation glossary](#notation-glossary) gives short reminders and links each recurring symbol to its full definition.
 - [The uncentered test](#from-product-states-to-the-de-vicente-bound) derives the bipartite nuclear-norm bound.
 - [Centering](#subtracting-the-local-means) turns the correlation matrix into a covariance and gives the marginal-dependent bound.
 - [Equality and examples](#equality-pure-states-and-two-qubit-checks) identifies exact equality cases, proves pure-state detection, and calibrates mixed-state successes and failures.
@@ -30,15 +31,34 @@ This article derives both bounds with one fixed normalization. It then explains 
 - [A practical ladder](#a-practical-ladder-of-multipartite-tests) distinguishes computable tests from principled but still difficult reformulations.
 - [Moment formulation](#a-possible-moment-problem-formulation) sketches a possible hierarchy and labels clearly what remains open.
 
-## Notation at a glance
+## Notation glossary
 
-| Symbol | Meaning |
-|---|---|
-| $r,s$ | Bloch vectors of the two reduced states |
-| $T$ | Matrix of uncentered bipartite correlations |
-| $C=T-rs^{\mathsf T}$ | Centered correlation matrix |
-| $\lVert T\rVert_*$ | Nuclear norm: the sum of the singular values |
-| $\lVert T\rVert_{\pi,2}$ | Projective tensor norm built from Euclidean local norms |
+Only notation that recurs across several sections is linked. Hovering over, or focusing, a linked expression gives a short reminder; activating it moves to the full definition. External papers open in a separate tab.
+
+<div class="notation-glossary">
+  <dl>
+    <dt><a href="#definition-bloch-vectors">$r,s$</a></dt>
+    <dd id="glossary-bloch-vectors-desc">Bloch vectors of the two reduced states.</dd>
+
+    <dt><a href="#definition-correlation-matrix">$T$</a></dt>
+    <dd id="glossary-correlation-desc">The matrix of uncentered bipartite correlations.</dd>
+
+    <dt><a href="#definition-centered-correlation">$C$</a></dt>
+    <dd id="glossary-centered-desc">The centered matrix $T-rs^{\mathsf T}$.</dd>
+
+    <dt><a href="#definition-bloch-radius">$R&#95;d$</a></dt>
+    <dd id="glossary-radius-desc">The largest Euclidean norm of a Bloch vector in dimension $d$.</dd>
+
+    <dt><a href="#definition-nuclear-norm">$\lVert\cdot\rVert&#95;*$</a></dt>
+    <dd id="glossary-nuclear-desc">The nuclear norm: the sum of a matrix's singular values.</dd>
+
+    <dt><a href="#definition-projective-norm">$\lVert\cdot\rVert&#95;{\pi,2}$</a></dt>
+    <dd id="glossary-projective-desc">The projective tensor norm built from Euclidean local norms.</dd>
+
+    <dt><a href="#definition-realignment">$\mathcal R$</a></dt>
+    <dd id="glossary-realignment-desc">The realignment map used by the enhanced realignment and CCNR criteria.</dd>
+  </dl>
+</div>
 
 ## One-system Bloch coordinates
 
@@ -79,6 +99,7 @@ For a pure state, $\operatorname{Tr}(\rho^2)=1$, so
 $$
 \boxed{\|r\|_2=R_d:=\sqrt{\frac{d(d-1)}2}.}
 $$
+{: #definition-bloch-radius .definition-target }
 
 For $d=2$, the generators are the Pauli matrices and $R_2=1$. For $d>2$, not every vector in the outer Euclidean ball is a physical Bloch vector. We will only need the radius bound.
 
@@ -96,6 +117,7 @@ I\otimes I
 $$
 
 The local vectors $r$ and $s$ determine the reduced states:
+{: #definition-bloch-vectors .definition-target }
 
 $$
 \rho_A=\frac1M\left(I+\sum_i r_i\lambda_i\right),
@@ -104,6 +126,7 @@ $$
 $$
 
 The coefficients $t_{ij}$ form the correlation matrix $T$. They encode the part of the expansion that uses traceless observables on both sides.
+{: #definition-correlation-matrix .definition-target }
 
 Orthogonality gives the coefficient formulas directly:
 
@@ -155,6 +178,9 @@ $$
 =\|r\|_2\|s\|_2.
 $$
 
+The nuclear norm $\lVert X\rVert_*$ is the sum of the singular values of a matrix $X$.
+{: #definition-nuclear-norm .definition-target }
+
 This factorization is the basic step behind the separability test.
 
 ![Flow from product-state factorization to the centered covariance bound](/assets/images/centered-correlation-flow.svg)
@@ -164,6 +190,7 @@ This factorization is the basic step behind the separability test.
 ## From product states to the de Vicente bound
 
 A bipartite state is separable if it admits a decomposition
+{: #definition-separable-state .definition-target }
 
 $$
 \rho_{AB}=\sum_k p_k\,\rho_A^{(k)}\otimes\rho_B^{(k)},
@@ -207,6 +234,7 @@ $$
 This is the necessary condition proved by [de Vicente, Theorem 1](https://arxiv.org/pdf/quant-ph/0607195#page=6). A violation certifies entanglement. Satisfaction does not prove separability in general.
 
 There is a tensor-norm way to read the same calculation. For two Euclidean spaces, the projective tensor norm agrees with the nuclear norm after identifying $r\otimes s$ with the matrix $rs^{\mathsf T}$:
+{: #definition-projective-norm .definition-target }
 
 $$
 \|T\|_{\pi,2}=\|T\|_*.
@@ -221,6 +249,7 @@ The matrix $T$ contains two contributions at once. It contains correlations betw
 $$
 \boxed{C:=T-rs^{\mathsf T}.}
 $$
+{: #definition-centered-correlation .definition-target }
 
 For the separable decomposition above,
 
@@ -234,7 +263,7 @@ C
 \end{aligned}
 $$
 
-This is exactly a cross-covariance matrix for the classical random vectors $r_k$ and $s_k$ drawn with probabilities $p_k$. The density matrix is quantum; the index $k$ in a chosen separable decomposition is classical.
+This is exactly a cross-covariance matrix for the classical random vectors $r_k$ and $s_k$ drawn with probabilities $p_k$. The density matrix is quantum; the index $k$ in a chosen <a class="concept-ref" href="#definition-separable-state" data-definition="Separable state: a convex mixture of product states." aria-label="Separable state: a convex mixture of product states.">separable decomposition</a> is classical.
 
 Refining to pure local states makes the variance identities below exact term by term. It is not required for validity: with mixed local states one has $\sum_kp_k\lVert r_k\rVert_2^2\leq R_M^2$ and the same final inequality follows.
 
@@ -310,6 +339,7 @@ $$
 $$
 
 Realignment sends each tensor product to a rank-one matrix,
+{: #definition-realignment .definition-target }
 
 $$
 \mathcal R(\lambda_i\otimes\mu_j)
@@ -371,7 +401,8 @@ $$
 
 Thus every state passing the centered test also passes de Vicente. Equivalently, every violation detected by de Vicente is detected by the centered criterion. The converse fails, as the next example shows. This strict strengthening is proved in the Zhang paper and discussed explicitly in the later covariance-matrix treatment.
 
-The same argument also recovers the hierarchy over CCNR. Writing $P_A=\operatorname{Tr}(\rho_A^2)$ and $P_B=\operatorname{Tr}(\rho_B^2)$,
+The computable cross-norm or realignment (CCNR) criterion says that every separable state satisfies $\lVert\mathcal R(\rho)\rVert_1\leq1$. The centered condition implies this bound as well. Writing $P_A=\operatorname{Tr}(\rho_A^2)$ and $P_B=\operatorname{Tr}(\rho_B^2)$,
+{: #definition-ccnr .definition-target }
 
 $$
 \begin{aligned}
@@ -511,7 +542,7 @@ T=\operatorname{diag}(0.27,-0.27,0.45),
 \|T\|_*=0.99.
 $$
 
-The de Vicente threshold for two qubits is $1$, so that test is silent. The local vectors and centered matrix are
+The de Vicente threshold for two qubits is $1$, so that test is silent. The <a class="notation-ref" href="#definition-bloch-vectors" data-definition="Local Bloch vectors r and s: coordinates of the two reduced states." aria-describedby="glossary-bloch-vectors-desc">local vectors</a> and <a class="notation-ref" href="#definition-centered-correlation" data-definition="Centered correlation matrix C: T with the product of the local means removed." aria-describedby="glossary-centered-desc">centered matrix</a> are
 
 $$
 r=(0,0,0.91),
@@ -599,7 +630,7 @@ $$
 p>0.220937\ldots.
 $$
 
-For example, $p=0.1$ is NPT but passes the centered test. The threshold above is recomputed from the density matrix by the linked script. This is a useful calibration: centering strengthens de Vicente and CCNR, but it is still only a sufficient certificate of entanglement, not a characterization of mixed-state separability.
+For example, $p=0.1$ is NPT but passes the centered test. The threshold above is recomputed from the density matrix by the linked script. This is a useful calibration: centering strengthens de Vicente and <a class="concept-ref" href="#definition-ccnr" data-definition="CCNR: a separable state must have realignment trace norm at most one." aria-label="CCNR: a separable state must have realignment trace norm at most one.">CCNR</a>, but it is still only a sufficient certificate of entanglement, not a characterization of mixed-state separability.
 
 ## What changes for more than two parties
 
@@ -619,9 +650,10 @@ $$
 \prod_{x=1}^g R_{d_x}.
 $$
 
-This is the intrinsic multipartite analogue of the bipartite calculation. Unlike the matrix nuclear norm, it is computationally hard: weak membership and approximation for third-order tensor nuclear-norm balls are NP-hard [in the sense made precise by Friedland and Lim](https://arxiv.org/abs/1410.6072).
+This is the intrinsic multipartite analogue of the bipartite calculation. Unlike the <a class="notation-ref" href="#definition-nuclear-norm" data-definition="Nuclear norm: the sum of a matrix's singular values." aria-describedby="glossary-nuclear-desc">matrix nuclear norm</a>, the full <a class="notation-ref" href="#definition-projective-norm" data-definition="Projective Euclidean tensor norm: the least weighted sum of products of local Euclidean norms." aria-describedby="glossary-projective-desc">projective tensor norm</a> is computationally hard: weak membership and approximation for third-order tensor nuclear-norm balls are NP-hard [in the sense made precise by Friedland and Lim](https://arxiv.org/abs/1410.6072).
 
-Hassan and Joag take a more tractable route. They unfold the tensor into a matrix across each one-versus-the-rest split, compute the nuclear norm of each unfolding, and keep the largest value. Their [Theorem 1](https://arxiv.org/pdf/0704.3942#page=8) yields the same radius product as a necessary condition for full separability.
+Hassan and Joag take a more tractable route. A matrix unfolding groups some tensor factors into row indices and the rest into column indices. They compute the nuclear norm of each one-versus-the-rest unfolding and keep the largest value. Their [Theorem 1](https://arxiv.org/pdf/0704.3942#page=8) yields the same radius product as a necessary condition for full separability.
+{: #definition-unfolding .definition-target }
 
 For every unfolding,
 
@@ -715,7 +747,7 @@ There is no single relaxation that turns the full multipartite projective norm i
 
 | Method | Computation | What it retains |
 |---|---|---|
-| Matrix unfoldings | one SVD per bipartition | correlations visible across each chosen cut |
+| <a class="concept-ref" href="#definition-unfolding" data-definition="Matrix unfolding: regroup tensor indices into row and column indices across a chosen bipartition." aria-label="Matrix unfolding: regroup tensor indices into row and column indices across a chosen bipartition.">Matrix unfoldings</a> | one SVD per bipartition | correlations visible across each chosen cut |
 | Entanglement testers | local contractions followed by an output projective norm | a tunable transformation of the full state |
 | Correlation-tensor moments | traces or moment matrices built from tensor singular data | more spectral information than one norm |
 | Theta-body or moment relaxations | semidefinite programs of increasing order | progressively tighter outer approximations |
@@ -737,7 +769,7 @@ $$
 \leq1.
 $$
 
-Realignment and SIC-POVM criteria fit into this language. The important caveat is that, with three or more output factors, evaluating the Euclidean projective norm can itself remain hard. Testers provide a systematic family of valid criteria and can reduce dimensions or exploit structure; they do not automatically make every multipartite instance polynomial-time.
+<a class="notation-ref" href="#definition-realignment" data-definition="Realignment map: reshuffle bipartite operator indices into a matrix whose trace norm yields a separability test." aria-describedby="glossary-realignment-desc">Realignment</a> and SIC-POVM criteria fit into this language. The important caveat is that, with three or more output factors, evaluating the Euclidean projective norm can itself remain hard. Testers provide a systematic family of valid criteria and can reduce dimensions or exploit structure; they do not automatically make every multipartite instance polynomial-time.
 
 Two other directions complement testers. [Huang and Jing](https://arxiv.org/abs/2402.13162) derive bipartite and multipartite criteria from moments of correlation tensors. [Rauhut and Stojanac](https://arxiv.org/abs/1505.05175) construct theta-body semidefinite relaxations of tensor nuclear-norm balls. The latter work concerns tensor recovery rather than quantum separability, so applying those relaxations to centered Bloch tensors would be a proposed method, not an existing centered criterion.
 
