@@ -2,7 +2,9 @@
   'use strict';
 
   function initializeNotationTooltips() {
-    var references = document.querySelectorAll('.notation-ref[data-definition]');
+    var references = document.querySelectorAll(
+      '.notation-ref[data-definition], .concept-ref[data-definition]'
+    );
 
     if (!references.length) {
       return;
