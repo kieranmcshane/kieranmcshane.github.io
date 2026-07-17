@@ -27,6 +27,7 @@ This article derives both bounds with one fixed normalization. It then explains 
 - [Centering](#subtracting-the-local-means) turns the correlation matrix into a covariance and gives the marginal-dependent bound.
 - [Two qubits](#two-qubit-checks) gives a separating example where centering detects entanglement and the uncentered test does not.
 - [More than two parties](#what-changes-for-more-than-two-parties) separates matrix unfoldings from the full projective tensor norm.
+- [A practical ladder](#a-practical-ladder-of-multipartite-tests) distinguishes computable tests from principled but still difficult reformulations.
 - [Moment formulation](#a-possible-moment-problem-formulation) sketches a possible hierarchy and labels clearly what remains open.
 
 ## Notation at a glance
@@ -228,9 +229,13 @@ $$
 For a pure-state refinement,
 
 $$
+\begin{aligned}
 \sum_kp_k\|r_k-r\|_2^2
-=R_M^2-\|r\|_2^2
-=\frac{M^2}{2}\left(1-\operatorname{Tr}(\rho_A^2)\right),
+&=\sum_kp_k\|r_k\|_2^2
+-\left\|\sum_kp_kr_k\right\|_2^2\\
+&=R_M^2-\|r\|_2^2\\
+&=\frac{M^2}{2}\left(1-\operatorname{Tr}(\rho_A^2)\right).
+\end{aligned}
 $$
 
 and similarly for Bob. The centered bound can therefore be written in variance-deficit form as
@@ -465,6 +470,12 @@ $$
 
 The centered inequality is violated. This is the missing separation: the centered test detects the state while the uncentered test does not.
 
+| Test | Observed quantity | Separable limit | Verdict |
+|---|---:|---:|---|
+| de Vicente | $\lVert T\rVert_*=0.99$ | $1$ | silent |
+| centered | $\lVert C\rVert_*=0.6624$ | $0.3868$ | entangled |
+| partial transpose | $\lambda_{\min}=-0.0552$ | $\lambda_{\min}\geq0$ | entangled |
+
 The state is genuinely entangled. Its partial transpose contains the block
 
 $$
@@ -481,6 +492,19 @@ whose determinant is negative. More generally, this family is NPT for every $p>0
 **Figure 2.** Every interior point of the $(p,\gamma)$ rectangle is NPT entangled. The grey region is missed by both norm criteria. The light teal region is detected only by the centered criterion, and the dark region is detected by both. The marked state is the numerical example above. The axes $p=0$ and $\gamma=0$ are separable.
 
 The [NumPy script](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/centered_correlation_examples.py) constructs each $4\times4$ density matrix, takes its partial trace and partial transpose, and computes $r$, $s$, $T$, $C$ and both criteria from Pauli expectations. It also generates Figure 2 and its [boundary data](/assets/data/centered-detection-regions.csv). This is an independent numerical consistency check, not a proof.
+
+<details markdown="1">
+<summary><strong>Check your own two-qubit density matrix</strong></summary>
+
+Save a Hermitian positive $4\times4$ NumPy array of trace one as `rho.npy`, then run:
+
+```bash
+python3 assets/code/centered_correlation_examples.py --matrix rho.npy
+```
+
+The program validates the input and prints $r$, $s$, $T$, $C$, both norm tests and the smallest partial-transpose eigenvalue. Only NumPy is required.
+
+</details>
 
 ## What changes for more than two parties
 
@@ -524,6 +548,38 @@ $$
 $$
 
 is a natural object, but it does not by itself encode every lower-order centered tensor or the requirement that all of them arise from one common separable decomposition. Those compatibility conditions are part of the real difficulty.
+
+## A practical ladder of multipartite tests
+
+There is no single relaxation that turns the full multipartite projective norm into an SVD. It is more accurate to organize the available approaches as a ladder:
+
+| Method | Computation | What it retains |
+|---|---|---|
+| Matrix unfoldings | one SVD per bipartition | correlations visible across each chosen cut |
+| Entanglement testers | local contractions followed by an output projective norm | a tunable transformation of the full state |
+| Correlation-tensor moments | traces or moment matrices built from tensor singular data | more spectral information than one norm |
+| Theta-body or moment relaxations | semidefinite programs of increasing order | progressively tighter outer approximations |
+
+The tester framework of [Jivulescu, Lancien and Nechita](https://arxiv.org/abs/2010.06365) makes the second line precise. A local tester is a contraction
+
+$$
+\mathcal E_x:S_1^{d_x}\longrightarrow\ell_2^{n_x},
+\qquad
+\|\mathcal E_x\|_{S_1\to\ell_2}=1.
+$$
+
+For fully separable $\rho$,
+
+$$
+\left\|
+(\mathcal E_1\otimes\cdots\otimes\mathcal E_g)(\rho)
+\right\|_{\pi,2}
+\leq1.
+$$
+
+Realignment and SIC-POVM criteria fit into this language. The important caveat is that, with three or more output factors, evaluating the Euclidean projective norm can itself remain hard. Testers provide a systematic family of valid criteria and can reduce dimensions or exploit structure; they do not automatically make every multipartite instance polynomial-time.
+
+Two other directions complement testers. [Huang and Jing](https://arxiv.org/abs/2402.13162) derive bipartite and multipartite criteria from moments of correlation tensors. [Rauhut and Stojanac](https://arxiv.org/abs/1505.05175) construct theta-body semidefinite relaxations of tensor nuclear-norm balls. The latter work concerns tensor recovery rather than quantum separability, so applying those relaxations to centered Bloch tensors would be a proposed method, not an existing centered criterion.
 
 ## A possible moment-problem formulation
 
@@ -592,3 +648,6 @@ This does not yet settle the multipartite program. The full projective norm is h
 - Otfried Gühne, Philipp Hyllus, Oleg Gittsovich and Jens Eisert, [*Covariance matrices and the separability problem*](https://arxiv.org/abs/quant-ph/0611282), *Physical Review Letters* **99** (2007), 130504.
 - Shmuel Friedland and Lek-Heng Lim, [*Nuclear norm of higher-order tensors*](https://arxiv.org/abs/1410.6072), *Mathematics of Computation* **87** (2018), 1255–1281.
 - Andrew C. Doherty, Pablo A. Parrilo and Federico M. Spedalieri, [*A complete family of separability criteria*](https://arxiv.org/abs/quant-ph/0308032), *Physical Review A* **69** (2004), 022308.
+- Maria Anastasia Jivulescu, Cécilia Lancien and Ion Nechita, [*Multipartite entanglement detection via projective tensor norms*](https://arxiv.org/abs/2010.06365), *Annales Henri Poincaré* **23** (2022), 3791–3838.
+- Xiaofen Huang and Naihuan Jing, [*Separability criteria based on the correlation tensor moments for arbitrary dimensional states*](https://arxiv.org/abs/2402.13162), *Quantum Information Processing* **23** (2024), 53.
+- Holger Rauhut and Željka Stojanac, [*Tensor theta norms and low rank recovery*](https://arxiv.org/abs/1505.05175), *Numerical Algorithms* **88** (2021), 25–66.
