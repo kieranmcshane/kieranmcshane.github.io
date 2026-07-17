@@ -16,11 +16,10 @@ manim -qm \
   PrincipalAngleMechanism \
   -o principal-angle-mechanism-source.mp4
 
-# Keep the published version just under 30 seconds so each implication remains
-# on screen long enough to read without pausing.
+# Preserve the deliberate scene timing. The animation is paced as a guided
+# explanation rather than compressed to a fixed short duration.
 ffmpeg -y -hide_banner -loglevel error \
   -i "$source_video" \
-  -vf "setpts=0.95*PTS" \
   -an \
   -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p \
   -movflags +faststart \
@@ -28,13 +27,12 @@ ffmpeg -y -hide_banner -loglevel error \
 
 ffmpeg -y -hide_banner -loglevel error \
   -i "$source_video" \
-  -vf "setpts=0.95*PTS" \
   -an \
   -c:v libvpx-vp9 -crf 34 -b:v 0 -row-mt 1 \
   "$output_dir/principal-angle-mechanism.webm"
 
 ffmpeg -y -hide_banner -loglevel error \
-  -ss 22.8 \
+  -ss 31 \
   -i "$output_dir/principal-angle-mechanism.mp4" \
   -frames:v 1 -q:v 3 \
   "$repo_root/assets/images/principal-angle-mechanism-poster.jpg"
