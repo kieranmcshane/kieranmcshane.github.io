@@ -10,7 +10,7 @@ excerpt: "A guided introduction to joint measurability and the asymptotic incomp
 
 Two quantum measurements are compatible when both can be recovered from a single measurement. If the joint measurement reports a pair of outcomes $(i,j)$, ignoring $j$ should reproduce the statistics of the first measurement, while ignoring $i$ should reproduce those of the second. This must hold for every input state.
 
-Compatibility therefore concerns outcome probabilities. We represent a measurement by a POVM, a collection of positive operators associated with its possible outcomes. A POVM does not specify the state left behind after an outcome; that additional information belongs to a quantum instrument and is not needed for joint measurability.
+Compatibility therefore concerns outcome probabilities. We represent a measurement by a <a class="concept-ref" href="#definition-povm" data-definition="POVM: a measurement represented by positive effects whose sum is the identity." aria-label="POVM: a measurement represented by positive effects whose sum is the identity.">POVM</a>, a collection of positive operators associated with its possible outcomes. A POVM does not specify the state left behind after an outcome; that additional information belongs to a <a class="concept-ref" href="#definition-instrument" data-definition="Quantum instrument: maps that specify both outcome probabilities and the corresponding state changes." aria-label="Quantum instrument: maps that specify both outcome probabilities and the corresponding state changes.">quantum instrument</a> and is not needed for <a class="concept-ref" href="#definition-compatibility" data-definition="Joint measurability: several POVMs arise as marginals of one parent measurement." aria-label="Joint measurability: several POVMs arise as marginals of one parent measurement.">joint measurability</a>.
 
 The article first develops effects, POVMs, compatibility and uniform noise. It then turns to the main subject: random binary projective measurements, their principal-angle geometry and the resulting phase diagram.
 
@@ -23,7 +23,7 @@ The article first develops effects, POVMs, compatibility and uniform noise. It t
 
 ## Notation glossary
 
-Only the notation that recurs across several sections is linked. Hovering over, or focusing, a linked symbol gives a short reminder; activating it moves to the full definition.
+Only the notation that recurs across several sections is linked. Hovering over, or focusing, a linked symbol gives a short reminder; activating it moves to the full definition. Recurring technical terms use the same convention.
 
 <div class="notation-glossary">
   <dl>
@@ -86,6 +86,7 @@ $$
 so $\operatorname{Tr}(\rho A&#95;i)\leq1$. The assigned probability therefore lies between zero and one for every state. This establishes the allowed range for one outcome. It does not yet show that the probabilities of all outcomes sum to one.
 
 An effect tells us the probability of one outcome. It does not, by itself, tell us the state after that outcome occurs. A quantum instrument supplies this extra information. It is a family of completely positive maps $\mathcal I&#95;i$ whose sum preserves trace. The outcome probability and the conditional state are
+{: #definition-instrument .definition-target }
 
 $$
 \Pr(i\mid\rho)=\operatorname{Tr}\!\bigl(\mathcal I_i(\rho)\bigr),
@@ -114,6 +115,7 @@ A_i^2=A_i
 $$
 
 It then represents a sharp outcome. A measurement made entirely of projections is called projective or sharp. General effects may have eigenvalues strictly between zero and one, but they are not merely defective projections. For example, perform a projective measurement $(P&#95;j)$ and report $i$ with classical probability $p(i\mid j)$. The effective outcome is
+{: #definition-pvm .definition-target }
 
 $$
 A_i=\sum_j p(i\mid j)P_j,
@@ -139,6 +141,7 @@ $$
 $$
 
 The individual bounds make each Born-rule value lie in $[0,1]$; completeness makes the collection a probability distribution. A collection of effects satisfying completeness is called a positive operator-valued measure, or POVM. In this notation, $A$ names the whole measurement, while $A&#95;i$ is the effect associated with outcome $i$.
+{: #definition-povm .definition-target }
 
 For example, the standard computational-basis measurement of a qubit has two effects:
 
@@ -175,6 +178,7 @@ $$
 If the measurement is sharp, meaning that its effects are projections, then $D&#95;A^2=I$ and its spectrum is contained in $\{-1,+1\}$. Both values occur when both effects have nonzero range; a trivial sharp measurement may have $D&#95;A=I$ or $D&#95;A=-I$.
 
 ## Compatibility is an operator-valued coupling
+{: #definition-compatibility .definition-target }
 
 Let $A=(A&#95;i)&#95;{i=1}^k$ and $B=(B&#95;j)&#95;{j=1}^{\ell}$. They are compatible if positive operators $C&#95;{ij}$ exist such that
 {: #definition-joint-effect .definition-target }
@@ -275,7 +279,8 @@ Geometrically, every joint cell must live inside both its row subspace and its c
 
 ## Noise buys compatibility by time-sharing
 
-For a $k$-outcome POVM $A$, add uniform white noise:
+For a $k$-outcome POVM $A$, add <a class="concept-ref" href="#definition-uniform-noise" data-definition="Uniform white noise: replace each effect by a visibility-weighted effect plus an equal random outcome." aria-label="Uniform white noise: replace each effect by a visibility-weighted effect plus an equal random outcome.">uniform white noise</a>:
+{: #definition-uniform-noise .definition-target }
 
 $$
 A_i^{(t)}=tA_i+(1-t)\frac{I}{k},
@@ -291,7 +296,8 @@ $$
 
 Throughout this article, **maximally incompatible** means attaining the smallest possible value of this balanced uniform-white-noise degree within the stated class of measurements. It is not a claim that is independent of the noise model or incompatibility measure.
 
-For a family $A^{(1)},\ldots,A^{(g)}$, a parent POVM is indexed by an outcome string $\mathbf i=(i&#95;1,\ldots,i&#95;g)$. Its $x$-th marginal must satisfy
+For a family $A^{(1)},\ldots,A^{(g)}$, a <a class="concept-ref" href="#definition-parent-povm" data-definition="Parent POVM: one joint measurement whose marginals reproduce every POVM in the family." aria-label="Parent POVM: one joint measurement whose marginals reproduce every POVM in the family.">parent POVM</a> is indexed by an outcome string $\mathbf i=(i&#95;1,\ldots,i&#95;g)$. Its $x$-th marginal must satisfy
+{: #definition-parent-povm .definition-target }
 
 $$
 \sum_{\mathbf i:\,i_x=a}G_{\mathbf i}=A^{(x)}_a.
@@ -332,7 +338,7 @@ They behave like exactly perpendicular directions in operator space.
 
 ### Binary projective measurements
 
-Choose a Haar-random subspace $E\subset\mathbb C^d$ of prescribed dimension and measure $(P&#95;E,I-P&#95;E)$. This gives a sharp yes/no test.
+Choose a Haar-random subspace $E\subset\mathbb C^d$ of prescribed dimension and measure $(P&#95;E,I-P&#95;E)$. This gives a <a class="concept-ref" href="#definition-pvm" data-definition="Projective measurement (PVM): a sharp POVM whose effects are orthogonal projections." aria-label="Projective measurement (PVM): a sharp POVM whose effects are orthogonal projections.">sharp projective measurement (PVM)</a>.
 
 ### Basis measurements
 
@@ -395,7 +401,8 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional reducing blocks. On a block with principal angle $\theta$, one may choose a basis in which
+The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional <a class="concept-ref" href="#definition-reducing-block" data-definition="Reducing block: an invariant subspace on which both projections decompose and compatibility can be tested independently." aria-label="Reducing block: an invariant subspace on which both projections decompose and compatibility can be tested independently.">reducing blocks</a>. On a block with principal angle $\theta$, one may choose a basis in which
+{: #definition-reducing-block .definition-target }
 
 $$
 P_E=
@@ -629,7 +636,11 @@ $$
 b=\frac12(\delta_{-1}+\delta_1).
 $$
 
-As $d$ grows, independent Haar conjugates become asymptotically free. More is needed here than convergence of empirical eigenvalue distributions. For every fixed sign vector $\varepsilon$, strong asymptotic freeness ([Collins and Male, 2014](https://arxiv.org/abs/1105.4345)) gives
+As $d$ grows, independent Haar conjugates become <a class="concept-ref" href="#definition-asymptotic-freeness" data-definition="Asymptotic freeness: large random matrices behave like freely independent noncommutative variables in the limit." aria-label="Asymptotic freeness: large random matrices behave like freely independent noncommutative variables in the limit.">asymptotically free</a>.
+{: #definition-asymptotic-freeness .definition-target }
+
+More is needed here than convergence of empirical eigenvalue distributions. For every fixed sign vector $\varepsilon$, <a class="concept-ref" href="#definition-strong-convergence" data-definition="Strong convergence: spectral distributions and operator norms converge, so no outlying eigenvalues survive." aria-label="Strong convergence: spectral distributions and operator norms converge, so no outlying eigenvalues survive.">strong asymptotic freeness</a> ([Collins and Male, 2014](https://arxiv.org/abs/1105.4345)) gives
+{: #definition-strong-convergence .definition-target }
 
 $$
 \left\|\sum_{x=1}^g\varepsilon_xD_x\right\|_\infty
@@ -696,7 +707,8 @@ for every fixed $g$. When $g=2$, the free-probability estimate gives only the tr
 
 A compatible family can be implemented by performing one parent measurement and then relabelling its outcome with classical randomness. In a suitable state-discrimination game, an incompatible family can achieve a higher guessing probability than any compatible family.
 
-The precise operational equality concerns the **generalized robustness of incompatibility**, not the white-noise degree <a class="notation-ref" href="#definition-tau" data-definition="Compatibility degree: the largest visibility for which the noisy measurements are jointly measurable." aria-describedby="glossary-tau-desc">$\tau$</a>. For a measurement family $M=(M&#95;{a\mid x})$, define
+The precise operational equality concerns the <a class="concept-ref" href="#definition-generalized-robustness" data-definition="Generalized robustness: the least arbitrary measurement noise needed to make a family compatible." aria-label="Generalized robustness: the least arbitrary measurement noise needed to make a family compatible."><strong>generalized robustness of incompatibility</strong></a>, not the white-noise degree <a class="notation-ref" href="#definition-tau" data-definition="Compatibility degree: the largest visibility for which the noisy measurements are jointly measurable." aria-describedby="glossary-tau-desc">$\tau$</a>. For a measurement family $M=(M&#95;{a\mid x})$, define
+{: #definition-generalized-robustness .definition-target }
 
 $$
 I_R(M)=\min\left\{r\geq0:
