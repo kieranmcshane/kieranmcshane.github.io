@@ -563,7 +563,7 @@ whose determinant is negative. More generally, this family is NPT for every $p>0
 
 ![Detection regions for the polarized-noise family](/assets/images/centered-detection-regions.svg)
 
-**Figure 2.** Every interior point of the $(p,\gamma)$ rectangle is NPT entangled. The grey region is missed by both norm criteria. The light teal region is detected only by the centered criterion, and the dark region is detected by both. The marked state is the numerical example above. The axes $p=0$ and $\gamma=0$ are separable.
+**Figure 2.** Every interior point of the $(p,\gamma)$ rectangle is NPT entangled. The grey region is missed by both norm criteria. The light teal region is detected only by the centered criterion, and the dark region is detected by both. The marked state is the numerical example above. The axis $\gamma=0$ is different from its right-hand limit: every state on the axis is separable, whereas for arbitrarily small $\gamma>0$ the centered detection threshold tends to $\sqrt5-2$. Open endpoints and the uncoloured vertical axis mark this discontinuity. Angular ticks are exact radian values.
 
 The [NumPy script](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/centered_correlation_examples.py) constructs each $4\times4$ density matrix, takes its partial trace and partial transpose, and computes $r$, $s$, $T$, $C$ and both criteria from Pauli expectations. It also generates Figure 2 and its [boundary data](/assets/data/centered-detection-regions.csv). This is an independent numerical consistency check, not a proof.
 
