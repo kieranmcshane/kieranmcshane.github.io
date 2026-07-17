@@ -36,8 +36,8 @@ This article derives both bounds with one fixed normalization. It then explains 
 | $r,s$ | Bloch vectors of the two reduced states |
 | $T$ | Matrix of uncentered bipartite correlations |
 | $C=T-rs^{\mathsf T}$ | Centered correlation matrix |
-| $\|T\|_*$ | Nuclear norm: the sum of the singular values |
-| $\|T\|_{\pi,2}$ | Projective tensor norm built from Euclidean local norms |
+| $\lVert T\rVert_*$ | Nuclear norm: the sum of the singular values |
+| $\lVert T\rVert_{\pi,2}$ | Projective tensor norm built from Euclidean local norms |
 
 ## One-system Bloch coordinates
 
@@ -210,7 +210,7 @@ $$
 
 This is exactly a cross-covariance matrix for the classical random vectors $r_k$ and $s_k$ drawn with probabilities $p_k$. The density matrix is quantum; the index $k$ in a chosen separable decomposition is classical.
 
-Refining to pure local states makes the variance identities below exact term by term. It is not required for validity: with mixed local states one has $\sum_kp_k\|r_k\|_2^2\leq R_M^2$ and the same final inequality follows.
+Refining to pure local states makes the variance identities below exact term by term. It is not required for validity: with mixed local states one has $\sum_kp_k\lVert r_k\rVert_2^2\leq R_M^2$ and the same final inequality follows.
 
 The triangle inequality, the rank-one norm formula and then Cauchy–Schwarz give
 
@@ -319,7 +319,7 @@ In Bloch coordinates this is the same centering operation, up to the chosen basi
 
 ### Why the centered criterion is stronger
 
-The implication needs only two lines. Let $a=\|r\|_2$ and $b=\|s\|_2$. If the centered inequality holds, then
+The implication needs only two lines. Let $a=\lVert r\rVert_2$ and $b=\lVert s\rVert_2$. If the centered inequality holds, then
 
 $$
 \begin{aligned}
