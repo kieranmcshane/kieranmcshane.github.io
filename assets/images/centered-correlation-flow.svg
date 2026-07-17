@@ -1,59 +1,114 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
-  <title id="title">From product-state correlations to a centered covariance bound</title>
-  <desc id="desc">A three-stage diagram. A product state gives a rank-one matrix r s transpose. A separable mixture gives a convex sum of rank-one matrices. Centering subtracts the product of the mean vectors and yields a covariance sum involving local fluctuations.</desc>
+  <title id="title">From product correlations to centered covariance</title>
+  <desc id="desc">Three panels use the same color convention throughout. In the first panel, Alice's Bloch vector r and Bob's Bloch vector s form the rank-one outer-product matrix r s transpose. In the second, a separable state forms a convex weighted sum of such rank-one matrices. In the third, subtracting the product of the mean vectors replaces r k and s k by their deviations r k minus r and s k minus s, producing the centered covariance matrix.</desc>
   <rect width="1200" height="500" fill="#ffffff"/>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#526173"/>
     </marker>
+    <marker id="teal-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#087f8c"/>
+    </marker>
+    <marker id="orange-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#b33b1e"/>
+    </marker>
   </defs>
   <style>
-    .heading { font: 600 25px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }
-    .body { font: 400 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #435064; }
-    .math { font: italic 25px Georgia, "Times New Roman", serif; fill: #172033; }
-    .small { font: 400 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #5d6778; }
+    .heading { font: 600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }
+    .body { font: 400 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #435064; }
+    .math { font: italic 23px Georgia, "Times New Roman", serif; fill: #172033; }
+    .math-small { font: italic 19px Georgia, "Times New Roman", serif; fill: #172033; }
+    .small { font: 400 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #5d6778; }
     .box { fill: #f7fafb; stroke: #9aa8b7; stroke-width: 2; rx: 14; }
-    .accent { fill: #e5f4f4; stroke: #087f8c; stroke-width: 3; rx: 14; }
-    .arrow { stroke: #526173; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    .accent { fill: #e8f5f5; stroke: #087f8c; stroke-width: 3; rx: 14; }
+    .flow-arrow { stroke: #526173; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    .matrix-cell { stroke: #ffffff; stroke-width: 2; }
   </style>
 
-  <rect class="box" x="35" y="80" width="300" height="300"/>
-  <text class="heading" x="185" y="125" text-anchor="middle">Product state</text>
-  <text class="math" x="185" y="185" text-anchor="middle">ρ<tspan baseline-shift="sub" font-size="17">AB</tspan> = ρ<tspan baseline-shift="sub" font-size="17">A</tspan> ⊗ ρ<tspan baseline-shift="sub" font-size="17">B</tspan></text>
-  <text class="math" x="185" y="245" text-anchor="middle">T = r s<tspan baseline-shift="super" font-size="17">T</tspan></text>
-  <line x1="115" y1="290" x2="255" y2="290" stroke="#087f8c" stroke-width="6"/>
-  <circle cx="115" cy="290" r="9" fill="#087f8c"/>
-  <circle cx="255" cy="290" r="9" fill="#087f8c"/>
-  <text class="small" x="185" y="340" text-anchor="middle">one rank-one tensor</text>
+  <!-- Panel 1: one outer product -->
+  <rect class="box" x="25" y="45" width="300" height="365"/>
+  <text class="heading" x="182" y="85" text-anchor="middle">1. Product state</text>
+  <text class="math" x="182" y="130" text-anchor="middle">T = r s<tspan baseline-shift="super" font-size="16">T</tspan></text>
 
-  <path class="arrow" d="M345 230 H420"/>
+  <text class="math-small" x="105" y="188" text-anchor="middle" fill="#087f8c">r</text>
+  <circle cx="105" cy="220" r="7" fill="#087f8c"/>
+  <circle cx="105" cy="255" r="10" fill="#087f8c"/>
+  <circle cx="105" cy="290" r="5" fill="#087f8c"/>
 
-  <rect class="box" x="435" y="80" width="330" height="300"/>
-  <text class="heading" x="600" y="125" text-anchor="middle">Separable mixture</text>
-  <text class="math" x="600" y="185" text-anchor="middle">T = Σ p<tspan baseline-shift="sub" font-size="17">k</tspan> r<tspan baseline-shift="sub" font-size="17">k</tspan> s<tspan baseline-shift="sub" font-size="17">k</tspan><tspan baseline-shift="super" font-size="17">T</tspan></text>
-  <g stroke="#087f8c" stroke-width="4">
-    <line x1="500" y1="265" x2="570" y2="235"/>
-    <line x1="565" y1="285" x2="650" y2="285"/>
-    <line x1="630" y1="245" x2="700" y2="275"/>
+  <text class="math-small" x="220" y="178" text-anchor="middle" fill="#b33b1e">s<tspan baseline-shift="super" font-size="13">T</tspan></text>
+  <circle cx="175" cy="195" r="9" fill="#b33b1e"/>
+  <circle cx="220" cy="195" r="5" fill="#b33b1e"/>
+  <circle cx="265" cy="195" r="8" fill="#b33b1e"/>
+
+  <rect class="matrix-cell" x="155" y="210" width="42" height="32" fill="#4fa5aa" opacity="0.72"/>
+  <rect class="matrix-cell" x="197" y="210" width="42" height="32" fill="#4fa5aa" opacity="0.38"/>
+  <rect class="matrix-cell" x="239" y="210" width="42" height="32" fill="#4fa5aa" opacity="0.62"/>
+  <rect class="matrix-cell" x="155" y="242" width="42" height="32" fill="#087f8c" opacity="0.92"/>
+  <rect class="matrix-cell" x="197" y="242" width="42" height="32" fill="#087f8c" opacity="0.50"/>
+  <rect class="matrix-cell" x="239" y="242" width="42" height="32" fill="#087f8c" opacity="0.80"/>
+  <rect class="matrix-cell" x="155" y="274" width="42" height="32" fill="#8bc4c6" opacity="0.62"/>
+  <rect class="matrix-cell" x="197" y="274" width="42" height="32" fill="#8bc4c6" opacity="0.30"/>
+  <rect class="matrix-cell" x="239" y="274" width="42" height="32" fill="#8bc4c6" opacity="0.52"/>
+  <path d="M140 210 V306 M140 210 H148 M140 306 H148" fill="none" stroke="#526173" stroke-width="2"/>
+  <path d="M296 210 V306 M288 210 H296 M288 306 H296" fill="none" stroke="#526173" stroke-width="2"/>
+  <text class="small" x="182" y="350" text-anchor="middle">one outer-product matrix</text>
+  <text class="body" x="182" y="382" text-anchor="middle">rank one</text>
+
+  <!-- Arrow 1 -->
+  <text class="small" x="385" y="220" text-anchor="middle">convex mixture</text>
+  <path class="flow-arrow" d="M335 250 H435"/>
+
+  <!-- Panel 2: convex mixture -->
+  <rect class="box" x="445" y="45" width="315" height="365"/>
+  <text class="heading" x="602" y="85" text-anchor="middle">2. Separable mixture</text>
+  <text class="math" x="602" y="130" text-anchor="middle">T = Σ p<tspan baseline-shift="sub" font-size="16">k</tspan> r<tspan baseline-shift="sub" font-size="16">k</tspan> s<tspan baseline-shift="sub" font-size="16">k</tspan><tspan baseline-shift="super" font-size="16">T</tspan></text>
+
+  <text class="math-small" x="492" y="185" text-anchor="middle">p<tspan baseline-shift="sub" font-size="13">1</tspan></text>
+  <g transform="translate(458 200)">
+    <rect class="matrix-cell" x="0" y="0" width="23" height="23" fill="#087f8c" opacity="0.85"/><rect class="matrix-cell" x="23" y="0" width="23" height="23" fill="#087f8c" opacity="0.42"/><rect class="matrix-cell" x="46" y="0" width="23" height="23" fill="#087f8c" opacity="0.68"/>
+    <rect class="matrix-cell" x="0" y="23" width="23" height="23" fill="#087f8c" opacity="0.48"/><rect class="matrix-cell" x="23" y="23" width="23" height="23" fill="#087f8c" opacity="0.24"/><rect class="matrix-cell" x="46" y="23" width="23" height="23" fill="#087f8c" opacity="0.38"/>
+    <rect class="matrix-cell" x="0" y="46" width="23" height="23" fill="#087f8c" opacity="0.66"/><rect class="matrix-cell" x="23" y="46" width="23" height="23" fill="#087f8c" opacity="0.32"/><rect class="matrix-cell" x="46" y="46" width="23" height="23" fill="#087f8c" opacity="0.52"/>
   </g>
-  <g fill="#087f8c">
-    <circle cx="500" cy="265" r="7"/><circle cx="570" cy="235" r="7"/>
-    <circle cx="565" cy="285" r="7"/><circle cx="650" cy="285" r="7"/>
-    <circle cx="630" cy="245" r="7"/><circle cx="700" cy="275" r="7"/>
+  <text class="math" x="547" y="244" text-anchor="middle">+</text>
+
+  <text class="math-small" x="602" y="185" text-anchor="middle">p<tspan baseline-shift="sub" font-size="13">2</tspan></text>
+  <g transform="translate(568 200)">
+    <rect class="matrix-cell" x="0" y="0" width="23" height="23" fill="#4fa5aa" opacity="0.35"/><rect class="matrix-cell" x="23" y="0" width="23" height="23" fill="#4fa5aa" opacity="0.78"/><rect class="matrix-cell" x="46" y="0" width="23" height="23" fill="#4fa5aa" opacity="0.52"/>
+    <rect class="matrix-cell" x="0" y="23" width="23" height="23" fill="#4fa5aa" opacity="0.20"/><rect class="matrix-cell" x="23" y="23" width="23" height="23" fill="#4fa5aa" opacity="0.45"/><rect class="matrix-cell" x="46" y="23" width="23" height="23" fill="#4fa5aa" opacity="0.30"/>
+    <rect class="matrix-cell" x="0" y="46" width="23" height="23" fill="#4fa5aa" opacity="0.42"/><rect class="matrix-cell" x="23" y="46" width="23" height="23" fill="#4fa5aa" opacity="0.90"/><rect class="matrix-cell" x="46" y="46" width="23" height="23" fill="#4fa5aa" opacity="0.60"/>
   </g>
-  <text class="small" x="600" y="340" text-anchor="middle">convex sum of rank-one tensors</text>
+  <text class="math" x="657" y="244" text-anchor="middle">+</text>
 
-  <path class="arrow" d="M775 230 H850"/>
+  <text class="math-small" x="712" y="185" text-anchor="middle">p<tspan baseline-shift="sub" font-size="13">3</tspan></text>
+  <g transform="translate(678 200)">
+    <rect class="matrix-cell" x="0" y="0" width="23" height="23" fill="#8bc4c6" opacity="0.70"/><rect class="matrix-cell" x="23" y="0" width="23" height="23" fill="#8bc4c6" opacity="0.50"/><rect class="matrix-cell" x="46" y="0" width="23" height="23" fill="#8bc4c6" opacity="0.22"/>
+    <rect class="matrix-cell" x="0" y="23" width="23" height="23" fill="#8bc4c6" opacity="0.88"/><rect class="matrix-cell" x="23" y="23" width="23" height="23" fill="#8bc4c6" opacity="0.62"/><rect class="matrix-cell" x="46" y="23" width="23" height="23" fill="#8bc4c6" opacity="0.28"/>
+    <rect class="matrix-cell" x="0" y="46" width="23" height="23" fill="#8bc4c6" opacity="0.40"/><rect class="matrix-cell" x="23" y="46" width="23" height="23" fill="#8bc4c6" opacity="0.28"/><rect class="matrix-cell" x="46" y="46" width="23" height="23" fill="#8bc4c6" opacity="0.13"/>
+  </g>
+  <text class="math-small" x="602" y="310" text-anchor="middle">p<tspan baseline-shift="sub" font-size="13">k</tspan> ≥ 0,  Σp<tspan baseline-shift="sub" font-size="13">k</tspan> = 1</text>
+  <text class="small" x="602" y="350" text-anchor="middle">convex sum of rank-one matrices</text>
 
-  <rect class="accent" x="865" y="55" width="300" height="350"/>
-  <text class="heading" x="1015" y="105" text-anchor="middle">Centered covariance</text>
-  <text class="math" x="1015" y="165" text-anchor="middle">C = T − r s<tspan baseline-shift="super" font-size="17">T</tspan></text>
-  <text class="math" x="1015" y="225" text-anchor="middle">= Σ p<tspan baseline-shift="sub" font-size="17">k</tspan>(r<tspan baseline-shift="sub" font-size="17">k</tspan>−r)(s<tspan baseline-shift="sub" font-size="17">k</tspan>−s)<tspan baseline-shift="super" font-size="17">T</tspan></text>
-  <line x1="930" y1="290" x2="1015" y2="250" stroke="#a33b20" stroke-width="5"/>
-  <line x1="1015" y1="250" x2="1100" y2="315" stroke="#087f8c" stroke-width="5"/>
-  <circle cx="1015" cy="250" r="9" fill="#172033"/>
-  <text class="small" x="1015" y="355" text-anchor="middle">local means removed</text>
+  <!-- Arrow 2 -->
+  <text class="math-small" x="817" y="220" text-anchor="middle">subtract r s<tspan baseline-shift="super" font-size="13">T</tspan></text>
+  <path class="flow-arrow" d="M770 250 H865"/>
 
-  <text class="body" x="600" y="460" text-anchor="middle">factorization  →  convexity  →  centering  →  Cauchy–Schwarz</text>
+  <!-- Panel 3: centered deviations -->
+  <rect class="accent" x="875" y="35" width="300" height="385"/>
+  <text class="heading" x="1010" y="78" text-anchor="middle">3. Center the mixture</text>
+  <text class="math" x="1010" y="122" text-anchor="middle">C = T − r s<tspan baseline-shift="super" font-size="16">T</tspan></text>
+  <text class="math-small" x="1010" y="162" text-anchor="middle">= Σ p<tspan baseline-shift="sub" font-size="13">k</tspan>(r<tspan baseline-shift="sub" font-size="13">k</tspan>−r)(s<tspan baseline-shift="sub" font-size="13">k</tspan>−s)<tspan baseline-shift="super" font-size="13">T</tspan></text>
+
+  <line x1="1010" y1="270" x2="1100" y2="215" stroke="#087f8c" stroke-width="5" marker-end="url(#teal-arrow)"/>
+  <line x1="1010" y1="270" x2="920" y2="320" stroke="#b33b1e" stroke-width="5" marker-end="url(#orange-arrow)"/>
+  <circle cx="1010" cy="270" r="8" fill="#172033"/>
+  <text class="math-small" x="1080" y="205" text-anchor="middle">r<tspan baseline-shift="sub" font-size="13">k</tspan>−r</text>
+  <text class="math-small" x="925" y="347" text-anchor="middle">s<tspan baseline-shift="sub" font-size="13">k</tspan>−s</text>
+  <text class="small" x="1080" y="300" text-anchor="middle">zero after centering</text>
+  <text class="body" x="1010" y="382" text-anchor="middle">covariance of local fluctuations</text>
+
+  <!-- Stable color key -->
+  <line x1="410" y1="462" x2="442" y2="462" stroke="#087f8c" stroke-width="5"/>
+  <text class="small" x="452" y="468">Alice vectors r<tspan baseline-shift="sub" font-size="12">k</tspan></text>
+  <line x1="625" y1="462" x2="657" y2="462" stroke="#b33b1e" stroke-width="5"/>
+  <text class="small" x="667" y="468">Bob vectors s<tspan baseline-shift="sub" font-size="12">k</tspan></text>
 </svg>
-
