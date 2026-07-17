@@ -8,6 +8,10 @@ then computed numerically rather than inserted as closed-form inputs.
 From the repository root:
 
     python3 assets/code/centered_correlation_examples.py --write-artifacts
+
+To inspect an arbitrary two-qubit state stored as a 4 x 4 NumPy array:
+
+    python3 assets/code/centered_correlation_examples.py --matrix rho.npy
 """
 
 from __future__ import annotations
@@ -106,6 +110,44 @@ def evaluate(rho: np.ndarray) -> CriterionValues:
     )
 
 
+def validate_density_matrix(rho: np.ndarray, tolerance: float = 1e-10) -> None:
+    """Reject malformed inputs before reporting separability criteria."""
+    if rho.shape != (4, 4):
+        raise ValueError(f"expected a 4 x 4 matrix, received shape {rho.shape}")
+    if not np.allclose(rho, rho.conj().T, atol=tolerance):
+        raise ValueError("the matrix is not Hermitian")
+    if not np.isclose(np.trace(rho), 1.0, atol=tolerance):
+        raise ValueError("the matrix does not have trace one")
+    minimum = float(np.linalg.eigvalsh(rho).min())
+    if minimum < -tolerance:
+        raise ValueError(f"the matrix is not positive semidefinite (min={minimum:.3e})")
+
+
+def print_report(rho: np.ndarray) -> None:
+    """Print both norm tests and the PPT diagnostic for one two-qubit state."""
+    validate_density_matrix(rho)
+    values = evaluate(rho)
+    options = {"precision": 6, "suppress_small": True}
+    print("r =", np.array2string(values.r, **options))
+    print("s =", np.array2string(values.s, **options))
+    print("T =\n", np.array2string(values.correlation, **options))
+    print("C = T - r s^T =\n", np.array2string(values.centered, **options))
+    print(
+        "de Vicente: "
+        f"{values.devicente_lhs:.8f} <= 1 "
+        f"({'passes' if values.devicente_lhs <= 1.0 + 1e-10 else 'violates'})"
+    )
+    print(
+        "centered: "
+        f"{values.centered_lhs:.8f} <= {values.centered_budget:.8f} "
+        f"({'passes' if values.centered_lhs <= values.centered_budget + 1e-10 else 'violates'})"
+    )
+    print(
+        "minimum partial-transpose eigenvalue: "
+        f"{values.min_partial_transpose_eigenvalue:.8f}"
+    )
+
+
 def classical_separable_state(p: float) -> np.ndarray:
     ket_00 = np.array([1, 0, 0, 0], dtype=COMPLEX)
     ket_11 = np.array([0, 0, 0, 1], dtype=COMPLEX)
@@ -145,7 +187,7 @@ def detection_threshold(gamma: float, criterion: str) -> float:
     return high
 
 
-def validate() -> None:
+def validate(verbose: bool = True) -> None:
     tolerance = 2e-11
 
     for p in np.linspace(0.0, 1.0, 11):
@@ -186,9 +228,10 @@ def validate() -> None:
     if not np.isclose(devicente_threshold, 5.0 / 11.0, atol=2e-9):
         raise AssertionError("de Vicente threshold failed")
 
-    print("11 separable saturation checks passed")
-    print("11 pure entangled-state checks passed")
-    print("separating family and detection thresholds passed")
+    if verbose:
+        print("11 separable saturation checks passed")
+        print("11 pure entangled-state checks passed")
+        print("separating family and detection thresholds passed")
 
 
 def detection_curves() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -337,12 +380,19 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="write the CSV and SVG used by the article",
     )
+    parser.add_argument(
+        "--matrix",
+        type=Path,
+        help="load a 4 x 4 two-qubit density matrix from a NumPy .npy file",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    validate()
+    validate(verbose=args.matrix is None or args.write_artifacts)
+    if args.matrix is not None:
+        print_report(np.asarray(np.load(args.matrix), dtype=COMPLEX))
     if args.write_artifacts:
         repository_root = Path(__file__).resolve().parents[2]
         write_artifacts(repository_root)
