@@ -165,6 +165,33 @@ def polarized_noise_state(p: float, gamma: float) -> np.ndarray:
     return p * schmidt_state(gamma) + (1.0 - p) * product_noise
 
 
+def zhang_false_negative_state(p: float) -> np.ndarray:
+    """Two-qubit family from Zhang et al., entangled for every positive p."""
+    singlet = np.array([0, 1, -1, 0], dtype=COMPLEX) / np.sqrt(2.0)
+    ket_00 = np.array([1, 0, 0, 0], dtype=COMPLEX)
+    ket_01 = np.array([0, 1, 0, 0], dtype=COMPLEX)
+    product_noise = (
+        (2.0 / 3.0) * projector(ket_00) + (1.0 / 3.0) * projector(ket_01)
+    )
+    return p * projector(singlet) + (1.0 - p) * product_noise
+
+
+def random_pure_qubit(rng: np.random.Generator) -> np.ndarray:
+    vector = rng.normal(size=2) + 1j * rng.normal(size=2)
+    return projector(vector / np.linalg.norm(vector))
+
+
+def random_separable_state(
+    rng: np.random.Generator,
+    terms: int = 4,
+) -> np.ndarray:
+    weights = rng.dirichlet(np.ones(terms))
+    state = np.zeros((4, 4), dtype=COMPLEX)
+    for weight in weights:
+        state += weight * np.kron(random_pure_qubit(rng), random_pure_qubit(rng))
+    return state
+
+
 def criterion_margin(p: float, gamma: float, criterion: str) -> float:
     values = evaluate(polarized_noise_state(p, gamma))
     if criterion == "devicente":
@@ -228,10 +255,47 @@ def validate(verbose: bool = True) -> None:
     if not np.isclose(devicente_threshold, 5.0 / 11.0, atol=2e-9):
         raise AssertionError("de Vicente threshold failed")
 
+    low, high = 0.0, 1.0
+    for _ in range(70):
+        midpoint = (low + high) / 2.0
+        sample = evaluate(zhang_false_negative_state(midpoint))
+        if sample.centered_lhs > sample.centered_budget:
+            high = midpoint
+        else:
+            low = midpoint
+    if not np.isclose(high, 0.2209372712, atol=2e-9):
+        raise AssertionError("Zhang false-negative threshold failed")
+    missed = evaluate(zhang_false_negative_state(0.1))
+    if not missed.min_partial_transpose_eigenvalue < -tolerance:
+        raise AssertionError("false-negative example should be NPT")
+    if not missed.centered_lhs <= missed.centered_budget + tolerance:
+        raise AssertionError("centered test should miss the p=0.1 example")
+
+    rng = np.random.default_rng(20260717)
+    for index in range(20):
+        weight = float(rng.random())
+        state = weight * np.kron(random_pure_qubit(rng), random_pure_qubit(rng))
+        state += (1.0 - weight) * np.kron(
+            random_pure_qubit(rng), random_pure_qubit(rng)
+        )
+        sample = evaluate(state)
+        if not np.isclose(sample.centered_lhs, sample.centered_budget, atol=2e-10):
+            raise AssertionError(f"two-term saturation check failed at {index}")
+
+    for index in range(50):
+        sample = evaluate(random_separable_state(rng))
+        if sample.centered_lhs > sample.centered_budget + 2e-10:
+            raise AssertionError(f"random separable centered check failed at {index}")
+        if sample.min_partial_transpose_eigenvalue < -2e-10:
+            raise AssertionError(f"random separable PPT check failed at {index}")
+
     if verbose:
         print("11 separable saturation checks passed")
         print("11 pure entangled-state checks passed")
         print("separating family and detection thresholds passed")
+        print("Zhang false-negative threshold passed")
+        print("20 random two-term saturation checks passed")
+        print("50 random separable-state checks passed")
 
 
 def detection_curves() -> tuple[np.ndarray, np.ndarray, np.ndarray]:

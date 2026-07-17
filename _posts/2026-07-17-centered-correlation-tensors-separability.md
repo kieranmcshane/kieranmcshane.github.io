@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Centered Correlation Tensors and Quantum Separability"
-subtitle: "From Bloch vectors to a covariance bound"
+subtitle: "The enhanced realignment criterion in Bloch coordinates"
 date: 2026-07-17 08:00:00 +0200
 categories: [quantum-information]
 tags: [entanglement, separability, tensor-norms, Bloch-representation]
@@ -25,7 +25,7 @@ This article derives both bounds with one fixed normalization. It then explains 
 - [Bloch coordinates](#one-system-bloch-coordinates) fixes the normalization.
 - [The uncentered test](#from-product-states-to-the-de-vicente-bound) derives the bipartite nuclear-norm bound.
 - [Centering](#subtracting-the-local-means) turns the correlation matrix into a covariance and gives the marginal-dependent bound.
-- [Two qubits](#two-qubit-checks) gives a separating example where centering detects entanglement and the uncentered test does not.
+- [Equality and examples](#equality-pure-states-and-two-qubit-checks) identifies exact equality cases, proves pure-state detection, and calibrates mixed-state successes and failures.
 - [More than two parties](#what-changes-for-more-than-two-parties) separates matrix unfoldings from the full projective tensor norm.
 - [A practical ladder](#a-practical-ladder-of-multipartite-tests) distinguishes computable tests from principled but still difficult reformulations.
 - [Moment formulation](#a-possible-moment-problem-formulation) sketches a possible hierarchy and labels clearly what remains open.
@@ -104,6 +104,31 @@ $$
 $$
 
 The coefficients $t_{ij}$ form the correlation matrix $T$. They encode the part of the expansion that uses traceless observables on both sides.
+
+Orthogonality gives the coefficient formulas directly:
+
+$$
+r_i=\frac M2\operatorname{Tr}(\rho_A\lambda_i),
+\qquad
+s_j=\frac N2\operatorname{Tr}(\rho_B\mu_j),
+$$
+
+and
+
+$$
+t_{ij}=\frac{MN}{4}
+\operatorname{Tr}\!\left(\rho_{AB}\lambda_i\otimes\mu_j\right).
+$$
+
+Consequently, the observable covariance is a scaled entry of the centered matrix:
+
+$$
+\langle\lambda_i\otimes\mu_j\rangle
+-\langle\lambda_i\rangle\langle\mu_j\rangle
+=\frac{4}{MN}C_{ij}.
+$$
+
+Changing either orthonormal generator basis rotates $r$ and $s$ orthogonally and sends $C$ to $O_ACO_B^{\mathsf T}$. The Euclidean and nuclear norms used below therefore do not depend on the chosen generators.
 
 If the state is a product,
 
@@ -346,6 +371,22 @@ $$
 
 Thus every state passing the centered test also passes de Vicente. Equivalently, every violation detected by de Vicente is detected by the centered criterion. The converse fails, as the next example shows. This strict strengthening is proved in the Zhang paper and discussed explicitly in the later covariance-matrix treatment.
 
+The same argument also recovers the hierarchy over CCNR. Writing $P_A=\operatorname{Tr}(\rho_A^2)$ and $P_B=\operatorname{Tr}(\rho_B^2)$,
+
+$$
+\begin{aligned}
+\|\mathcal R(\rho)\|_1
+&\leq
+\|\mathcal R(\rho-\rho_A\otimes\rho_B)\|_1
++\sqrt{P_AP_B}\\
+&\leq
+\sqrt{(1-P_A)(1-P_B)}+\sqrt{P_AP_B}\\
+&\leq1.
+\end{aligned}
+$$
+
+Thus a state satisfying the centered condition necessarily satisfies the CCNR bound as well.
+
 Both tests are invariant under local unitaries. In Bloch coordinates these act by orthogonal transformations
 
 $$
@@ -358,7 +399,7 @@ $$
 
 which preserve the relevant norms and marginal purities. If local filtering brings a state to filter normal form with $r=s=0$, then $C=T$ and the two tests coincide. Centering is not equivalent to filtering, but this explains why its advantage appears when the marginals are polarized.
 
-## Two-qubit checks
+## Equality, pure states, and two-qubit checks
 
 For qubits, $M=N=2$, so a separable state must satisfy
 
@@ -371,35 +412,68 @@ $$
 }.
 $$
 
-### A separable family that saturates the bound
+### Every two-term pure-product mixture saturates
 
-Consider
-
-$$
-\rho_p=p|00\rangle\langle00|+(1-p)|11\rangle\langle11|.
-$$
-
-Here
+This is not an isolated equality case. Let
 
 $$
-r=s=(0,0,2p-1),
+\rho=p\,\rho_A^{(1)}\otimes\rho_B^{(1)}
++q\,\rho_A^{(2)}\otimes\rho_B^{(2)},
+\qquad q=1-p,
+$$
+
+with all four local states pure. If their Bloch vectors are $r_1,r_2,s_1,s_2$, then
+
+$$
+C=pq(r_1-r_2)(s_1-s_2)^{\mathsf T}.
+$$
+
+Hence
+
+$$
+\|C\|_*=pq\|r_1-r_2\|_2\|s_1-s_2\|_2.
+$$
+
+At the same time,
+
+$$
+R_M^2-\|r\|_2^2=pq\|r_1-r_2\|_2^2,
+$$
+
+and similarly for Bob. Equality therefore holds in the centered bound. In particular,
+
+$$
+\rho_p=p|00\rangle\langle00|+(1-p)|11\rangle\langle11|
+$$
+
+saturates it for every $p$. This shows that no smaller right-hand side depending only on the two marginal variances can hold for all separable states.
+
+### Every entangled pure state violates
+
+The opposite extreme is also clean. Write a bipartite pure state in Schmidt form,
+
+$$
+|\psi\rangle=\sum_i\sqrt{\lambda_i}\,|ii\rangle,
 \qquad
-T=\operatorname{diag}(0,0,1).
+P=\sum_i\lambda_i^2.
 $$
 
-Therefore
+In the matrix-unit operator basis, the realigned centered operator has off-diagonal singular values $\sqrt{\lambda_i\lambda_j}$ for $i\neq j$. Its diagonal block is
 
 $$
-C=\operatorname{diag}\bigl(0,0,4p(1-p)\bigr)
+\operatorname{diag}(\lambda)-\lambda\lambda^{\mathsf T}\succeq0,
 $$
 
-and
+whose trace is $1-P$. Thus
 
 $$
-\|C\|_*=4p(1-p).
+\left\|\mathcal R\!\left(
+|\psi\rangle\langle\psi|-\rho_A\otimes\rho_B
+\right)\right\|_1
+=(1-P)+\sum_{i\neq j}\sqrt{\lambda_i\lambda_j}.
 $$
 
-The reduced-state purity is $p^2+(1-p)^2$, so the right-hand side of the centered inequality is also $4p(1-p)$. The family saturates the bound for every $p$.
+The separable upper bound is $1-P$. It is therefore violated exactly when at least two Schmidt coefficients are nonzero. The criterion detects every entangled bipartite pure state.
 
 ### A family detected only after centering
 
@@ -506,6 +580,27 @@ The program validates the input and prints $r$, $s$, $T$, $C$, both norm tests a
 
 </details>
 
+### A calibrated false negative
+
+The criterion is not complete for mixed states. [Zhang and coauthors](https://arxiv.org/abs/0709.3766) consider
+
+$$
+\omega_p
+=p|\psi^-\rangle\langle\psi^-|
++(1-p)\left(
+\frac23|00\rangle\langle00|
++\frac13|01\rangle\langle01|
+\right).
+$$
+
+Its partial transpose has a negative eigenvalue for every $p>0$, so every nontrivial member is entangled. The centered criterion, however, becomes violated only for
+
+$$
+p>0.220937\ldots.
+$$
+
+For example, $p=0.1$ is NPT but passes the centered test. The threshold above is recomputed from the density matrix by the linked script. This is a useful calibration: centering strengthens de Vicente and CCNR, but it is still only a sufficient certificate of entanglement, not a characterization of mixed-state separability.
+
 ## What changes for more than two parties
 
 Suppose a full $g$-party correlation tensor has a separable decomposition
@@ -540,14 +635,79 @@ The reason is simple: every fully factorized tensor decomposition is also a vali
 
 This distinction disappears for two parties, where the two norms coincide. For three or more parties, replacing the maximum unfolding norm by the full projective norm is generally a strengthening, not a change of notation.
 
-Centering is also less automatic in the multipartite case. The third central moment
+Centering itself is canonical order by order. For three parties, the third central tensor is obtained from the raw subset tensors by
 
 $$
-\sum_kp_k
-(r_k-r)\otimes(s_k-s)\otimes(t_k-t)
+\begin{aligned}
+K_{ABC}={}&T_{ABC}
+-r_A\otimes T_{BC}
+-r_B\otimes T_{AC}
+-r_C\otimes T_{AB}\\
+&+2r_A\otimes r_B\otimes r_C,
+\end{aligned}
 $$
 
-is a natural object, but it does not by itself encode every lower-order centered tensor or the requirement that all of them arise from one common separable decomposition. Those compatibility conditions are part of the real difficulty.
+with tensor factors restored to $A,B,C$ order. For a fully separable decomposition this becomes
+
+$$
+K_{ABC}
+=\sum_kp_k
+(r_{A,k}-r_A)\otimes
+(r_{B,k}-r_B)\otimes
+(r_{C,k}-r_C).
+$$
+
+What is not canonical is choosing one tensor that captures the whole hierarchy. For example,
+
+$$
+|\Phi^+\rangle\langle\Phi^+|_{AB}\otimes\frac{I_C}{2}
+$$
+
+is not fully separable, but its traceless three-body tensor and $K_{ABC}$ both vanish. Its entanglement lives in the $AB$ tensor. The natural data are therefore the collection
+
+$$
+\{K_S: S\subseteq\{1,\ldots,g\},\ |S|\geq2\},
+$$
+
+together with the requirement that every member arise from one common separable ensemble.
+
+There is nevertheless an elementary centered bound at every order. For party $a$, set
+
+$$
+V_a=R_{d_a}^2-\|r_a\|_2^2,
+\qquad
+D_a=R_{d_a}+\|r_a\|_2.
+$$
+
+For any subset $S$ with at least two parties, every fully separable state satisfies
+
+$$
+\boxed{
+\|K_S\|_{\pi,2}
+\leq
+\min_{\substack{i,j\in S\\i<j}}
+\left[
+\sqrt{V_iV_j}
+\prod_{\ell\in S\setminus\{i,j\}}D_\ell
+\right].
+}
+$$
+
+Indeed, choose $i,j\in S$, bound every other fluctuation by
+$\lVert r_{\ell,k}-r_\ell\rVert_2\leq D_\ell$, and apply Cauchy–Schwarz to the remaining two factors. For $|S|=2$, this is exactly the bipartite centered inequality.
+
+This estimate is recorded as a direct extension of the calculation, not as a novelty claim; its relation to existing multipartite covariance bounds would need a dedicated literature comparison.
+
+The full norm is hard, but every bipartition flattening gives a computable lower bound:
+
+$$
+\|(K_S)_{P\mid S\setminus P}\|_*
+\leq\|K_S\|_{\pi,2}.
+$$
+
+Thus exceeding the boxed bound with any flattening certifies failure of full separability. For four or more parties, balanced cuts should be checked alongside one-versus-the-rest cuts.
+
+The tensors $K_S$ are central moments. They agree with connected, or cumulant, tensors through order three, but not from order four onward, where products of lower-order covariances must also be subtracted. A complete multipartite formulation must decide whether central moments or cumulants are the better coordinates and must enforce their common-ensemble compatibility.
 
 ## A practical ladder of multipartite tests
 
@@ -584,6 +744,8 @@ Two other directions complement testers. [Huang and Jing](https://arxiv.org/abs/
 ## A possible moment-problem formulation
 
 There is a useful way to state that difficulty. Let $V_d$ denote the set of pure-state Bloch vectors in dimension $d$. It is a real algebraic set: substituting the Bloch expansion into $\rho^2=\rho$ gives polynomial relations in the Bloch coordinates.
+
+The Euclidean radius condition replaces $V_d$ by its outer sphere. For $d>2$, that loses physical information: $V_d$ is a proper, generally non-centrally-symmetric subset of the sphere. The convex hull of product atoms drawn from the actual sets $V_{d_a}$ is therefore more naturally described by an atomic gauge than by a norm.
 
 A bipartite state is separable exactly when there is a probability measure on $V_M\times V_N$ whose first moments are $r$ and $s$ and whose cross-moment is $T$. In this language, separability is a truncated moment problem.
 
@@ -623,7 +785,9 @@ $$
 
 Substituting only the two trace constraints yields the centered nuclear-norm inequality. Retaining the full matrices $K_A$ and $K_B$ keeps more information and moves toward the covariance matrix criterion.
 
-This suggests a research program rather than a theorem claimed here: impose higher moment and localizing-matrix conditions on the pure-state Bloch varieties, keeping common moments across all correlation orders. Such a hierarchy would be a commutative moment counterpart to operator-side relaxations such as the [Doherty–Parrilo–Spedalieri hierarchy](https://arxiv.org/abs/quant-ph/0308032). Establishing the exact relationship, and deciding which centered tensors or cumulants are the right coordinates, remains open.
+This suggests a research program rather than a theorem claimed here: impose higher moment and localizing-matrix conditions on the pure-state Bloch varieties, keeping common moments across all correlation orders. Such a hierarchy would be a commutative moment counterpart to operator-side relaxations such as the [Doherty–Parrilo–Spedalieri hierarchy](https://arxiv.org/abs/quant-ph/0308032).
+
+A precise open problem is to develop computable lower bounds on this physical atomic gauge that exploit the nonspherical qudit Bloch body while enforcing compatibility across all subset tensors. Establishing the relationship with existing separability hierarchies, and deciding whether centered moments or cumulants are the better coordinates, remains open.
 
 ## What this derivation establishes
 
@@ -637,12 +801,14 @@ The logical chain is short:
 
 The first three steps recover the de Vicente criterion. The final two explain why centered criteria depend naturally on the marginal states.
 
-This does not yet settle the multipartite program. The full projective norm is harder to evaluate than matrix unfolding norms, and a useful multipartite centering must organize several correlation orders at once. The moment formulation makes the missing compatibility conditions explicit; turning it into effective criteria is the research problem.
+The equality analysis shows that every mixture of two pure product states saturates the centered bound, while the Schmidt-basis calculation shows that every entangled pure state violates it. The false-negative family records the complementary limitation for mixed states.
+
+The subset bound gives a direct multipartite necessary condition, but it does not settle the compatibility problem. The full projective norm is harder to evaluate than matrix unfolding norms, and a useful multipartite formulation must organize several correlation orders at once. The moment formulation makes the missing common-ensemble constraints explicit; turning them into effective criteria is the research problem.
 
 ## References
 
 - Julio I. de Vicente, [*Separability criteria based on the Bloch representation of density matrices*](https://arxiv.org/abs/quant-ph/0607195), *Quantum Information & Computation* **7** (2007), 624–638.
-- Chang-Jiang Zhang, Yong-Sheng Zhang, Shun Zhang and Guang-Can Guo, [*Entanglement detection beyond the computable cross-norm or realignment criterion*](https://arxiv.org/abs/0709.3766), *Physical Review A* **77** (2008), 060301(R).
+- Cheng-Jie Zhang, Yong-Sheng Zhang, Shun Zhang and Guang-Can Guo, [*Entanglement detection beyond the cross-norm or realignment criterion*](https://arxiv.org/abs/0709.3766), *Physical Review A* **77** (2008), 060301(R).
 - Oleg Gittsovich, Otfried Gühne, Philipp Hyllus and Jens Eisert, [*Unifying several separability conditions using the covariance matrix criterion*](https://arxiv.org/abs/0803.0757), *Physical Review A* **78** (2008), 052319.
 - Ali Saif M. Hassan and Pramod S. Joag, [*Separability Criterion for multipartite quantum states based on the Bloch representation of density matrices*](https://arxiv.org/abs/0704.3942), *Quantum Information & Computation* **8** (2008), 773–790.
 - Otfried Gühne, Philipp Hyllus, Oleg Gittsovich and Jens Eisert, [*Covariance matrices and the separability problem*](https://arxiv.org/abs/quant-ph/0611282), *Physical Review Letters* **99** (2007), 130504.
