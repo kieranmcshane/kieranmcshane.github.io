@@ -563,16 +563,17 @@ Inside the disk, $\lambda&#95;{\star}=1/2$ and the proposition gives $1/\sqrt2$.
     <source src="/assets/video/principal-angle-mechanism.webm" type="video/webm">
     <img src="/assets/images/principal-angle-mechanism.svg" alt="The limiting spectrum contains one half, giving a principal angle near pi over four. Centering the two projections doubles that angle, producing perpendicular Pauli sigma-z and sigma-x directions and the threshold one over square root of two.">
   </video>
-  <figcaption id="principal-angle-animation-caption"><strong>Figure 2 (animated).</strong> Why this reduction matters: a parent measurement for the full pair would restrict to a parent on every reducing block. One Pauli-like block can therefore constrain the entire high-dimensional pair. The animation follows the relevant spectral value through the reduction. If $1/2$ lies in the limiting interval, a two-dimensional block has $\lambda\approx1/2=\cos^2\theta$, hence $\theta\approx\pi/4$. Centering the projections by $D=2P-I$ doubles this angle, giving the perpendicular Pauli directions $\sigma_z$ and $\sigma_x$. Their compatibility degree tends to $1/\sqrt2$. The animation is silent and starts only when requested. A <a href="/assets/images/principal-angle-mechanism.svg">static version</a> is also available.</figcaption>
+  <figcaption id="principal-angle-animation-caption"><strong>Figure 2 (animated).</strong> Why this reduction matters: a parent measurement for the full pair would restrict to a parent on every reducing block. One Pauli-like block can therefore constrain the entire high-dimensional pair. The animation follows the relevant spectral value through four labelled steps, pausing after each completed diagram. If $1/2$ lies in the limiting interval, a two-dimensional block has $\lambda\approx1/2=\cos^2\theta$, hence $\theta\approx\pi/4$. Centering the projections by $D=2P-I$ doubles this angle, giving the perpendicular Pauli directions $\sigma_z$ and $\sigma_x$. Their compatibility degree tends to $1/\sqrt2$. The animation is silent and starts only when requested. A <a href="/assets/images/principal-angle-mechanism.svg">static version</a> is also available.</figcaption>
 </figure>
 
 <details class="animation-transcript" markdown="1">
   <summary>Text description and reproducibility</summary>
   <ol>
-    <li>The interval $[\lambda^-,\lambda^+]$ is drawn on the unit line, and the point $1/2$ is highlighted inside it.</li>
-    <li>Since $\cos^2\theta=1/2$, the corresponding principal angle approaches $\pi/4$.</li>
+    <li>The opening states the local-to-global rule: a parent measurement on the full space must work on every reducing block.</li>
+    <li>The interval $[\lambda^-,\lambda^+]$ is drawn on the unit line. The point $1/2$ is connected explicitly to one two-dimensional block with $\lambda\approx1/2$.</li>
+    <li>Since $\lambda=\cos^2\theta$, that block has a principal angle approaching $\pi/4$, or $45^\circ$.</li>
     <li>Centering doubles the angle between the Bloch directions: $2\theta\approx\pi/2$. The animation draws the full Bloch-sphere equator and identifies the perpendicular directions as $D_E=\sigma_z$ and $D_F=\sigma_x$.</li>
-    <li>The qubit compatibility formula then gives $\tau=1/\sqrt2$, the universal binary minimum for this noise model.</li>
+    <li>The qubit compatibility formula gives $\tau=1/\sqrt2$. The final screen repeats the complete chain and explains why this one block fixes the global upper bound.</li>
   </ol>
   <p>The animation can be rebuilt from the [Manim scene](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/principal_angle_animation.py) using the accompanying [rendering script](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/render_principal_angle_animation.sh).</p>
 </details>
