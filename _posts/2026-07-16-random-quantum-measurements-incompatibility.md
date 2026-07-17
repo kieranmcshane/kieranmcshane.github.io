@@ -62,7 +62,7 @@ $$
 0\preceq A_i\preceq I.
 $$
 
-The first inequality says that <a class="notation-ref" href="#definition-effect" data-definition="Effect for outcome i: a positive operator that determines its probability." aria-describedby="glossary-effect-desc">$A&#95;i$</a> is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state <a class="notation-ref" href="#definition-rho" data-definition="Quantum state: a positive operator with trace one." aria-describedby="glossary-rho-desc">$\rho$</a>, the **Born rule** assigns the probability of outcome $i$:
+The first inequality says that $A&#95;i$ is positive. The second says that $I-A&#95;i$ is positive. Equivalently, the eigenvalues of $A&#95;i$ lie between zero and one. If the system is prepared in state $\rho$, the **Born rule** assigns the probability of outcome $i$:
 
 $$
 \Pr(i\mid\rho)=\operatorname{Tr}(\rho A_i).
@@ -104,7 +104,7 @@ $$
 A_i=\sum_m K_{i,m}^{\dagger}K_{i,m}.
 $$
 
-Different instruments can produce the same effect $A&#95;i$. They agree on the probability of the outcome but can disturb the state differently.
+Different instruments can produce the same <a class="notation-ref" href="#definition-effect" data-definition="Effect for outcome i: a positive operator that determines its probability." aria-describedby="glossary-effect-desc">effect $A&#95;i$</a>. They agree on the probability of the outcome but can disturb the state differently.
 
 An effect is a projection precisely when
 
@@ -189,7 +189,7 @@ $$
 \sum_i C_{ij}=B_j.
 $$
 
-Think of <a class="notation-ref" href="#definition-joint-effect" data-definition="Joint effect for outcomes (i,j); its row and column sums recover the original POVMs." aria-describedby="glossary-joint-effect-desc">$C=(C&#95;{ij})$</a> as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$:
+Think of $C=(C&#95;{ij})$ as an operator-valued contingency table. Its row totals reproduce $A$ and its column totals reproduce $B$:
 
 $$
 \begin{array}{c|ccc|c}
@@ -265,7 +265,7 @@ $$
 
 The subscript in $\sigma&#95;x$ is a name for this particular Pauli matrix. It is not the generic binary operator from the previous section.
 
-If a joint table existed, the cell associated with outcomes $0$ and $+$ would satisfy
+If a joint table existed, the <a class="notation-ref" href="#definition-joint-effect" data-definition="Joint effect for outcomes (i,j); its row and column sums recover the original POVMs." aria-describedby="glossary-joint-effect-desc">cell $C&#95;{0,+}$</a> associated with outcomes $0$ and $+$ would satisfy
 
 $$
 0\preceq C_{0,+}\preceq|0\rangle\langle0|,
@@ -279,7 +279,7 @@ Geometrically, every joint cell must live inside both its row subspace and its c
 
 ## Noise buys compatibility by time-sharing
 
-For a $k$-outcome POVM $A$, add <a class="concept-ref" href="#definition-uniform-noise" data-definition="Uniform white noise: replace each effect by a visibility-weighted effect plus an equal random outcome." aria-label="Uniform white noise: replace each effect by a visibility-weighted effect plus an equal random outcome.">uniform white noise</a>:
+For a $k$-outcome POVM $A$, add uniform white noise:
 {: #definition-uniform-noise .definition-target }
 
 $$
@@ -296,7 +296,7 @@ $$
 
 Throughout this article, **maximally incompatible** means attaining the smallest possible value of this balanced uniform-white-noise degree within the stated class of measurements. It is not a claim that is independent of the noise model or incompatibility measure.
 
-For a family $A^{(1)},\ldots,A^{(g)}$, a <a class="concept-ref" href="#definition-parent-povm" data-definition="Parent POVM: one joint measurement whose marginals reproduce every POVM in the family." aria-label="Parent POVM: one joint measurement whose marginals reproduce every POVM in the family.">parent POVM</a> is indexed by an outcome string $\mathbf i=(i&#95;1,\ldots,i&#95;g)$. Its $x$-th marginal must satisfy
+For a family $A^{(1)},\ldots,A^{(g)}$, a parent POVM is indexed by an outcome string $\mathbf i=(i&#95;1,\ldots,i&#95;g)$. Its $x$-th marginal must satisfy
 {: #definition-parent-povm .definition-target }
 
 $$
@@ -311,7 +311,7 @@ $$
 C_{ij}=\frac{A_i}{2\ell}+\frac{B_j}{2k}
 $$
 
-is a parent POVM for the half-noisy measurements. Operationally, flip a fair coin. If it chooses $A$, genuinely measure $A$ and invent a uniform $B$ outcome; if it chooses $B$, do the reverse. Noise gives the apparatus permission to perform one measurement and fabricate the missing answer.
+is a <a class="concept-ref" href="#definition-parent-povm" data-definition="Parent POVM: one joint measurement whose marginals reproduce every POVM in the family." aria-label="Parent POVM: one joint measurement whose marginals reproduce every POVM in the family.">parent POVM</a> for the half-noisy measurements. Operationally, flip a fair coin. If it chooses $A$, genuinely measure $A$ and invent a uniform $B$ outcome; if it chooses $B$, do the reverse. Noise gives the apparatus permission to perform one measurement and fabricate the missing answer.
 
 For $g$ arbitrary POVMs, the same time-sharing protocol makes the noisy family compatible at $t=1/g$. Thus every such family satisfies $\tau\geq1/g$.
 
@@ -358,7 +358,7 @@ The rest of this article develops the binary-projective model. The basis and ind
 
 ## A phase diagram for two random projections
 
-Let $E,F\subset\mathbb C^d$ be independent uniformly random subspaces with rank fractions <a class="notation-ref" href="#definition-rank-fractions" data-definition="Asymptotic rank fractions: dim(E)/d tends to alpha and dim(F)/d tends to beta." aria-describedby="glossary-rank-fractions-desc">$\alpha,\beta$</a> defined by
+Let $E,F\subset\mathbb C^d$ be independent uniformly random subspaces with rank fractions $\alpha,\beta$ defined by
 {: #definition-rank-fractions .definition-target }
 
 $$
@@ -386,7 +386,7 @@ This is [Corollary 3.6 of Bluhm, Lancien, and Nechita](https://ar5iv.labs.arxiv.
 
 ### Why a circle appears
 
-The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval whose endpoints are denoted <a class="notation-ref" href="#definition-spectral-endpoints" data-definition="Lower and upper endpoints of the limiting squared-principal-angle spectrum." aria-describedby="glossary-spectral-endpoints-desc">$\lambda^\pm$</a> ([Aubrun, 2021](https://arxiv.org/abs/2109.06535)):
+The squared cosines of the nontrivial principal angles between $E$ and $F$ asymptotically fill an interval whose endpoints are denoted $\lambda^\pm$ ([Aubrun, 2021](https://arxiv.org/abs/2109.06535)):
 {: #definition-spectral-endpoints .definition-target }
 
 $$
@@ -401,7 +401,7 @@ $$
 \lambda^-_{\alpha,\beta}\leq\frac12\leq\lambda^+_{\alpha,\beta}.
 $$
 
-The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional <a class="concept-ref" href="#definition-reducing-block" data-definition="Reducing block: an invariant subspace on which both projections decompose and compatibility can be tested independently." aria-label="Reducing block: an invariant subspace on which both projections decompose and compatibility can be tested independently.">reducing blocks</a>. On a block with principal angle $\theta$, one may choose a basis in which
+The principal-angle decomposition organizes the nontrivial parts of $P&#95;E$ and $P&#95;F$ into two-dimensional reducing blocks. On a block with principal angle $\theta$, one may choose a basis in which
 {: #definition-reducing-block .definition-target }
 
 $$
@@ -435,7 +435,7 @@ $$
 \tau_\theta=\frac{1}{\cos\theta+\sin\theta}.
 $$
 
-The function is smallest at $\theta=\pi/4$. Inside the disk, there are blocks whose squared principal-angle cosine tends to $1/2$, so their thresholds tend to $1/\sqrt2$. A parent for the full measurements would restrict to a parent on every reducing block, which gives the asymptotic upper bound. The universal binary theorem supplies the matching lower bound.
+The function is smallest at $\theta=\pi/4$. Inside the disk, there are blocks whose squared principal-angle cosine tends to $1/2$, so their thresholds tend to $1/\sqrt2$. A parent for the full measurements would restrict to a parent on every <a class="concept-ref" href="#definition-reducing-block" data-definition="Reducing block: an invariant subspace on which both projections decompose and compatibility can be tested independently." aria-label="Reducing block: an invariant subspace on which both projections decompose and compatibility can be tested independently.">reducing block</a>, which gives the asymptotic upper bound. The universal binary theorem supplies the matching lower bound.
 
 Conversely, parents on all reducing blocks can be combined by direct sum. Thus, for a fixed finite pair of projections with nontrivial principal angles $\theta&#95;r$,
 
@@ -508,7 +508,7 @@ P_{E_d}=P_d,
 P_{F_d}=U_dQ_dU_d^*,
 $$
 
-where $P&#95;d$ and $Q&#95;d$ are deterministic coordinate projections with normalized traces tending to $\alpha$ and $\beta$, and $U&#95;d$ is Haar distributed. These deterministic projection sequences have a strong limit. The strong asymptotic-freeness theorem of [Collins and Male](https://ar5iv.labs.arxiv.org/html/1105.4345#S1.Thmtheorem4) therefore gives, almost surely under the product coupling,
+where $P&#95;d$ and $Q&#95;d$ are deterministic coordinate projections with normalized traces tending to $\alpha$ and $\beta$, and $U&#95;d$ is Haar distributed. These deterministic projection sequences have a strong limit. The <a class="concept-ref" href="#definition-strong-convergence" data-definition="Strong convergence: spectral distributions and operator norms converge, so no outlying eigenvalues survive." aria-label="Strong convergence: spectral distributions and operator norms converge, so no outlying eigenvalues survive.">strong asymptotic-freeness theorem</a> of [Collins and Male](https://ar5iv.labs.arxiv.org/html/1105.4345#S1.Thmtheorem4) therefore gives, almost surely under the product coupling,
 
 $$
 \bigl\|[P_d,U_dQ_dU_d^*]\bigr\|_\infty
@@ -554,7 +554,7 @@ Inside the disk, $\lambda&#95;{\star}=1/2$ and the proposition gives $1/\sqrt2$.
 
 <figure class="post-figure">
   <img src="/assets/images/off-diagonal-phase.svg" alt="A heat map of the limiting compatibility threshold over the full alpha-beta square. The central disk has value one over square root of two, and the threshold rises toward one in the four exterior corners.">
-  <figcaption><strong>Figure 1.</strong> The limiting surface obtained from the principal-angle blocks for interior rank fractions $0<\alpha,\beta<1$. The central disk is flat at the universal binary minimum. A power-stretched colour scale ($\gamma=0.35$) makes the small exterior increases visible, while the ticks retain the true values of $\tau_\infty$. On an exact edge of the square, a rank fraction $0$ or $1$ makes one PVM trivial and gives $\tau=1$; that degenerate boundary value is not the interior limit shown by the colours.</figcaption>
+  <figcaption><strong>Figure 1.</strong> The limiting surface obtained from the principal-angle blocks for interior <a class="notation-ref" href="#definition-rank-fractions" data-definition="Asymptotic rank fractions: dim(E)/d tends to alpha and dim(F)/d tends to beta." aria-describedby="glossary-rank-fractions-desc">rank fractions $0<\alpha,\beta<1$</a>. The central disk is flat at the universal binary minimum. A power-stretched colour scale ($\gamma=0.35$) makes the small exterior increases visible, while the ticks retain the true values of $\tau_\infty$. On an exact edge of the square, a rank fraction $0$ or $1$ makes one PVM trivial and gives $\tau=1$; that degenerate boundary value is not the interior limit shown by the colours.</figcaption>
 </figure>
 
 <figure class="post-figure">
@@ -636,10 +636,10 @@ $$
 b=\frac12(\delta_{-1}+\delta_1).
 $$
 
-As $d$ grows, independent Haar conjugates become <a class="concept-ref" href="#definition-asymptotic-freeness" data-definition="Asymptotic freeness: large random matrices behave like freely independent noncommutative variables in the limit." aria-label="Asymptotic freeness: large random matrices behave like freely independent noncommutative variables in the limit.">asymptotically free</a>.
+As $d$ grows, independent Haar conjugates become asymptotically free.
 {: #definition-asymptotic-freeness .definition-target }
 
-More is needed here than convergence of empirical eigenvalue distributions. For every fixed sign vector $\varepsilon$, <a class="concept-ref" href="#definition-strong-convergence" data-definition="Strong convergence: spectral distributions and operator norms converge, so no outlying eigenvalues survive." aria-label="Strong convergence: spectral distributions and operator norms converge, so no outlying eigenvalues survive.">strong asymptotic freeness</a> ([Collins and Male, 2014](https://arxiv.org/abs/1105.4345)) gives
+More is needed here than convergence of empirical eigenvalue distributions. For every fixed sign vector $\varepsilon$, strong asymptotic freeness ([Collins and Male, 2014](https://arxiv.org/abs/1105.4345)) gives
 {: #definition-strong-convergence .definition-target }
 
 $$
@@ -707,7 +707,7 @@ for every fixed $g$. When $g=2$, the free-probability estimate gives only the tr
 
 A compatible family can be implemented by performing one parent measurement and then relabelling its outcome with classical randomness. In a suitable state-discrimination game, an incompatible family can achieve a higher guessing probability than any compatible family.
 
-The precise operational equality concerns the <a class="concept-ref" href="#definition-generalized-robustness" data-definition="Generalized robustness: the least arbitrary measurement noise needed to make a family compatible." aria-label="Generalized robustness: the least arbitrary measurement noise needed to make a family compatible."><strong>generalized robustness of incompatibility</strong></a>, not the white-noise degree <a class="notation-ref" href="#definition-tau" data-definition="Compatibility degree: the largest visibility for which the noisy measurements are jointly measurable." aria-describedby="glossary-tau-desc">$\tau$</a>. For a measurement family $M=(M&#95;{a\mid x})$, define
+The precise operational equality concerns the **generalized robustness of incompatibility**, not the white-noise degree <a class="notation-ref" href="#definition-tau" data-definition="Compatibility degree: the largest visibility for which the noisy measurements are jointly measurable." aria-describedby="glossary-tau-desc">$\tau$</a>. For a measurement family $M=(M&#95;{a\mid x})$, define
 {: #definition-generalized-robustness .definition-target }
 
 $$
@@ -727,13 +727,13 @@ $$
 
 Thus $I&#95;R$ is the fractional advantage above the compatible benchmark, while $1+I&#95;R$ is the multiplicative advantage. The equality is for this particular class of discrimination games, not for every discrimination task.
 
-The uniform-noise degree asks a narrower question: what fraction of the original measurements can survive depolarization before a joint simulation becomes possible? Another noise model may rank the same measurements differently. The choice of measure therefore matters.
+The <a class="concept-ref" href="#definition-uniform-noise" data-definition="Uniform white noise: replace each effect by a visibility-weighted effect plus an equal random outcome." aria-label="Uniform white noise: replace each effect by a visibility-weighted effect plus an equal random outcome.">uniform-noise degree</a> asks a narrower question: what fraction of the original measurements can survive depolarization before a joint simulation becomes possible? Another noise model may rank the same measurements differently. The choice of measure therefore matters.
 
 | Quantity | Noise being allowed | What the number means |
 |:--|:--|:--|
 | $\tau$ | Uniform POVM noise | Largest surviving visibility before compatibility |
 | $R&#95;{\rm white}=\tau^{-1}-1$ | The same uniform noise, written as a mixing ratio | Amount of white noise relative to the original measurement |
-| $I&#95;R$ | An arbitrary measurement family | Generalized robustness; $1+I&#95;R$ is the optimal discrimination ratio above |
+| $I&#95;R$ | An arbitrary measurement family | <a class="concept-ref" href="#definition-generalized-robustness" data-definition="Generalized robustness: the least arbitrary measurement noise needed to make a family compatible." aria-label="Generalized robustness: the least arbitrary measurement noise needed to make a family compatible.">Generalized robustness</a>; $1+I&#95;R$ is the optimal discrimination ratio above |
 
 ## What remains unresolved
 
