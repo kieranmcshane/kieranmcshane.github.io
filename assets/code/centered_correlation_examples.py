@@ -255,6 +255,21 @@ def validate(verbose: bool = True) -> None:
     if not np.isclose(devicente_threshold, 5.0 / 11.0, atol=2e-9):
         raise AssertionError("de Vicente threshold failed")
 
+    for p_value in np.linspace(0.0, 1.0, 11):
+        if criterion_margin(float(p_value), 0.0, "centered") > tolerance:
+            raise AssertionError("gamma=0 should not violate the centered criterion")
+        if criterion_margin(float(p_value), 0.0, "devicente") > tolerance:
+            raise AssertionError("gamma=0 should not violate de Vicente")
+    near_zero = 1.0e-5
+    if not np.isclose(
+        detection_threshold(near_zero, "centered"), np.sqrt(5.0) - 2.0, atol=3e-6
+    ):
+        raise AssertionError("centered right-hand limit at gamma=0 failed")
+    if not np.isclose(
+        detection_threshold(near_zero, "devicente"), 1.0, atol=5e-5
+    ):
+        raise AssertionError("de Vicente right-hand limit at gamma=0 failed")
+
     low, high = 0.0, 1.0
     for _ in range(70):
         midpoint = (low + high) / 2.0
@@ -293,25 +308,28 @@ def validate(verbose: bool = True) -> None:
         print("11 separable saturation checks passed")
         print("11 pure entangled-state checks passed")
         print("separating family and detection thresholds passed")
+        print("gamma=0 endpoint and right-hand limits passed")
         print("Zhang false-negative threshold passed")
         print("20 random two-term saturation checks passed")
         print("50 random separable-state checks passed")
 
 
 def detection_curves() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    gamma_degrees = np.linspace(0.0, 45.0, 181)
+    # The exact endpoint gamma=0 is separable for every p.  The plotted curves
+    # describe the entangled interior gamma>0, so we sample strictly inside it.
+    gamma_radians = np.linspace(np.pi / 720.0, np.pi / 4.0, 180)
     centered = np.array(
-        [detection_threshold(np.deg2rad(value), "centered") for value in gamma_degrees]
+        [detection_threshold(value, "centered") for value in gamma_radians]
     )
     devicente = np.array(
-        [detection_threshold(np.deg2rad(value), "devicente") for value in gamma_degrees]
+        [detection_threshold(value, "devicente") for value in gamma_radians]
     )
-    return gamma_degrees, centered, devicente
+    return gamma_radians, centered, devicente
 
 
 def write_csv_file(
     path: Path,
-    gamma_degrees: np.ndarray,
+    gamma_radians: np.ndarray,
     centered: np.ndarray,
     devicente: np.ndarray,
 ) -> None:
@@ -319,9 +337,9 @@ def write_csv_file(
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
         writer.writerow(
-            ["gamma_degrees", "centered_detection_threshold", "devicente_threshold"]
+            ["gamma_radians", "centered_detection_threshold", "devicente_threshold"]
         )
-        for row in zip(gamma_degrees, centered, devicente, strict=True):
+        for row in zip(gamma_radians, centered, devicente, strict=True):
             writer.writerow([f"{value:.10f}" for value in row])
 
 
@@ -339,7 +357,7 @@ def points(
 
 def write_svg_file(
     path: Path,
-    gamma_degrees: np.ndarray,
+    gamma_radians: np.ndarray,
     centered: np.ndarray,
     devicente: np.ndarray,
 ) -> None:
@@ -347,23 +365,29 @@ def write_svg_file(
     left, right, top, bottom = 100, 45, 65, 100
     plot_width = width - left - right
     plot_height = height - top - bottom
-    x_map = lambda value: left + plot_width * value / 45.0
+    x_map = lambda value: left + plot_width * value / (np.pi / 4.0)
     y_map = lambda value: top + plot_height * (1.0 - value)
+
+    # These are right-hand limits as gamma approaches the separable axis.
+    # Open endpoints keep them visually distinct from values at gamma=0.
+    plot_gamma = np.concatenate(([0.0], gamma_radians))
+    plot_centered = np.concatenate(([np.sqrt(5.0) - 2.0], centered))
+    plot_devicente = np.concatenate(([1.0], devicente))
 
     lower_polygon = (
         f"{x_map(0):.2f},{y_map(0):.2f} "
-        f"{x_map(45):.2f},{y_map(0):.2f} "
-        + points(gamma_degrees[::-1], centered[::-1], x_map, y_map)
+        f"{x_map(np.pi / 4):.2f},{y_map(0):.2f} "
+        + points(plot_gamma[::-1], plot_centered[::-1], x_map, y_map)
     )
-    middle_polygon = points(gamma_degrees, centered, x_map, y_map) + " " + points(
-        gamma_degrees[::-1], devicente[::-1], x_map, y_map
+    middle_polygon = points(plot_gamma, plot_centered, x_map, y_map) + " " + points(
+        plot_gamma[::-1], plot_devicente[::-1], x_map, y_map
     )
     upper_polygon = (
-        points(gamma_degrees, devicente, x_map, y_map)
-        + f" {x_map(45):.2f},{y_map(1):.2f} {x_map(0):.2f},{y_map(1):.2f}"
+        points(plot_gamma, plot_devicente, x_map, y_map)
+        + f" {x_map(np.pi / 4):.2f},{y_map(1):.2f} {x_map(0):.2f},{y_map(1):.2f}"
     )
-    centered_line = points(gamma_degrees, centered, x_map, y_map)
-    devicente_line = points(gamma_degrees, devicente, x_map, y_map)
+    centered_line = points(plot_gamma, plot_centered, x_map, y_map)
+    devicente_line = points(plot_gamma, plot_devicente, x_map, y_map)
 
     grid = []
     labels = []
@@ -371,23 +395,30 @@ def write_svg_file(
         y = y_map(float(p_value))
         grid.append(f'<line class="grid" x1="{left}" y1="{y:.2f}" x2="{width-right}" y2="{y:.2f}"/>')
         labels.append(f'<text class="tick" x="{left-18}" y="{y+6:.2f}" text-anchor="end">{p_value:.1f}</text>')
-    for gamma_value in range(0, 46, 5):
+    gamma_ticks = (
+        (0.0, "0"),
+        (np.pi / 12.0, "π/12"),
+        (np.pi / 6.0, "π/6"),
+        (np.pi / 4.0, "π/4"),
+    )
+    for gamma_value, gamma_label in gamma_ticks:
         x = x_map(float(gamma_value))
         grid.append(f'<line class="grid" x1="{x:.2f}" y1="{top}" x2="{x:.2f}" y2="{height-bottom}"/>')
-        labels.append(f'<text class="tick" x="{x:.2f}" y="{height-bottom+32}" text-anchor="middle">{gamma_value}°</text>')
+        labels.append(f'<text class="math-tick" x="{x:.2f}" y="{height-bottom+32}" text-anchor="middle">{gamma_label}</text>')
 
-    example_gamma = float(np.rad2deg(0.5 * np.arcsin(0.6)))
+    example_gamma = float(0.5 * np.arcsin(0.6))
     example_x = x_map(example_gamma)
     example_y = y_map(0.45)
 
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">
   <title id="title">Detection regions for the polarized-noise two-qubit family</title>
-  <desc id="desc">For positive p and gamma the family is NPT entangled. The lower grey region is missed by both norm tests, the middle light teal region is detected only by the centered criterion, and the upper dark teal region is detected by both the centered and de Vicente criteria. A marked example at gamma 18.4 degrees and p 0.45 is detected only by centering.</desc>
+  <desc id="desc">For positive p and gamma the family is NPT entangled. The lower grey region is missed by both norm tests, the middle light teal region is detected only by the centered criterion, and the upper dark teal region is detected by both the centered and de Vicente criteria. The colored regions show right-hand limits near gamma zero; the exact gamma-zero axis is separable and is drawn separately. A marked example at gamma equal to one half arcsine of three fifths and p equal to 0.45 is detected only by centering.</desc>
   <rect width="{width}" height="{height}" fill="#ffffff"/>
   <style>
     .axis {{ stroke: #172033; stroke-width: 2.4; }}
     .grid {{ stroke: #c9d1da; stroke-width: 1; }}
     .tick {{ font: 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #435064; }}
+    .math-tick {{ font: 19px Georgia, "Times New Roman", serif; fill: #435064; }}
     .label {{ font: 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }}
     .region {{ font: 600 21px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }}
     .small {{ font: 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #526173; }}
@@ -401,35 +432,38 @@ def write_svg_file(
   {''.join(grid)}
   <polyline points="{centered_line}" fill="none" stroke="#a33b20" stroke-width="4"/>
   <polyline points="{devicente_line}" fill="none" stroke="#172033" stroke-width="4"/>
+  <line x1="{left}" y1="{top}" x2="{left}" y2="{height-bottom}" stroke="#ffffff" stroke-width="9"/>
   <line class="axis" x1="{left}" y1="{height-bottom}" x2="{width-right}" y2="{height-bottom}"/>
   <line class="axis" x1="{left}" y1="{top}" x2="{left}" y2="{height-bottom}"/>
+  <circle cx="{x_map(0):.2f}" cy="{y_map(np.sqrt(5.0)-2.0):.2f}" r="6" fill="#ffffff" stroke="#a33b20" stroke-width="3"/>
+  <circle cx="{x_map(0):.2f}" cy="{y_map(1.0):.2f}" r="6" fill="#ffffff" stroke="#172033" stroke-width="3"/>
   {''.join(labels)}
-  <text class="label" x="{(left+width-right)/2:.2f}" y="{height-28}" text-anchor="middle">Schmidt angle γ</text>
+  <text class="label" x="{(left+width-right)/2:.2f}" y="{height-28}" text-anchor="middle">Schmidt angle γ (radians)</text>
   <text class="label" transform="translate(30 {(top+height-bottom)/2:.2f}) rotate(-90)" text-anchor="middle">mixture weight p</text>
-  <text class="region" x="{x_map(31):.2f}" y="{y_map(0.78):.2f}" text-anchor="middle" fill="#ffffff">detected by both</text>
-  <text class="region" x="{x_map(30):.2f}" y="{y_map(0.31):.2f}" text-anchor="middle" fill="#172033">centered criterion only</text>
-  <text class="region" x="{x_map(31):.2f}" y="{y_map(0.08):.2f}" text-anchor="middle" fill="#526173">NPT, neither test detects</text>
-  <text class="boundary-centered" x="{x_map(43):.2f}" y="{y_map(float(centered[-9]))-14:.2f}" text-anchor="end">centered boundary</text>
-  <text class="boundary-devicente" x="{x_map(43):.2f}" y="{y_map(float(devicente[-9]))-14:.2f}" text-anchor="end">de Vicente boundary</text>
+  <text class="region" x="{x_map(np.deg2rad(31)):.2f}" y="{y_map(0.78):.2f}" text-anchor="middle" fill="#ffffff">detected by both</text>
+  <text class="region" x="{x_map(np.deg2rad(30)):.2f}" y="{y_map(0.31):.2f}" text-anchor="middle" fill="#172033">centered criterion only</text>
+  <text class="region" x="{x_map(np.deg2rad(31)):.2f}" y="{y_map(0.08):.2f}" text-anchor="middle" fill="#526173">NPT, neither test detects</text>
+  <text class="boundary-centered" x="{x_map(np.deg2rad(43)):.2f}" y="{y_map(float(centered[-9]))-14:.2f}" text-anchor="end">centered boundary</text>
+  <text class="boundary-devicente" x="{x_map(np.deg2rad(43)):.2f}" y="{y_map(float(devicente[-9]))-14:.2f}" text-anchor="end">de Vicente boundary</text>
   <circle cx="{example_x:.2f}" cy="{example_y:.2f}" r="8" fill="#ffffff" stroke="#a33b20" stroke-width="4"/>
   <path d="M {example_x+10:.2f} {example_y-6:.2f} L {example_x+90:.2f} {example_y-70:.2f}" fill="none" stroke="#a33b20" stroke-width="2"/>
-  <text class="annotation" x="{example_x+96:.2f}" y="{example_y-76:.2f}">example: p=0.45, γ≈18.4°</text>
+  <text class="annotation" x="{example_x+96:.2f}" y="{example_y-76:.2f}">example: p=0.45, γ=½ arcsin(3/5)</text>
 </svg>'''
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(svg, encoding="utf-8")
 
 
 def write_artifacts(repository_root: Path) -> None:
-    gamma_degrees, centered, devicente = detection_curves()
+    gamma_radians, centered, devicente = detection_curves()
     write_csv_file(
         repository_root / "assets/data/centered-detection-regions.csv",
-        gamma_degrees,
+        gamma_radians,
         centered,
         devicente,
     )
     write_svg_file(
         repository_root / "assets/images/centered-detection-regions.svg",
-        gamma_degrees,
+        gamma_radians,
         centered,
         devicente,
     )
