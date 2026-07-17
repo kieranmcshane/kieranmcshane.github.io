@@ -159,7 +159,7 @@ This factorization is the basic step behind the separability test.
 
 ![Flow from product-state factorization to the centered covariance bound](/assets/images/centered-correlation-flow.svg)
 
-**Figure 1.** A product state gives one rank-one tensor. A separable state gives a convex mixture of such tensors. Subtracting the product of the mean Bloch vectors rewrites the remainder as a covariance of local fluctuations.
+**Figure 1.** The colors have the same meaning in every panel: teal denotes Alice's Bloch vectors and orange denotes Bob's. A product state produces the outer-product matrix $rs^{\mathsf T}$. A separable state produces a convex weighted sum of such rank-one matrices. Subtracting the outer product of the mean vectors moves both local clouds to zero, leaving outer products of the deviations $r_k-r$ and $s_k-s$—the centered covariance.
 
 ## From product states to the de Vicente bound
 
