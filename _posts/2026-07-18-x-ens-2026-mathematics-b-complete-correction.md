@@ -1508,7 +1508,7 @@ The Weierstrass approximation theorem may not be used in Questions 10–12.
 For $n\ge0$, define
 
 $$
-Q_n(X)=(1-X^n)^{2^n},qquad
+Q_n(X)=(1-X^n)^{2^n},\qquad
 P_n(X)=Q_n\left(\frac{1-X}{2}\right),
 $$
 
