@@ -607,9 +607,14 @@ $H((x-c_i)/\rho_i)=H(x-c_i)$.
 
 ## Part IV
 
-Let $(W_{i,j})_{1\le i\le j}$ be independent, identically distributed
-real random variables with mean zero, variance one, and the moment
-assumptions stated in the paper. Extend them symmetrically by
+Let the upper-triangular entries
+
+$$
+(W_{i,j})_{1\le i\le j}
+$$
+
+be independent, identically distributed real random variables with mean
+zero, variance one, and the moment assumptions stated in the paper. Extend them symmetrically by
 $W_{j,i}=W_{i,j}$ and set
 
 $$
