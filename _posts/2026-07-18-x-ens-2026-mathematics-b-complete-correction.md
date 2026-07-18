@@ -2341,10 +2341,15 @@ v\le\frac k2+1.
 $$
 
 For fixed $k$, there are only finitely many walk patterns up to relabelling
-the vertices in order of first appearance. A pattern with $v$ vertices has
-at most $(n)_v=n(n-1)\cdots(n-v+1)$ injective labellings. Its expectation is
-bounded by a constant depending only on $k$, because all absolute moments of
-$W_{1,1}$ are finite.
+the vertices in order of first appearance. A pattern with $v$ vertices has at
+most
+
+$$
+(n)_v=n(n-1)\cdots(n-v+1)
+$$
+
+injective labellings. Its expectation is bounded by a constant depending only
+on $k$, because all absolute moments of $W_{1,1}$ are finite.
 
 #### Odd moments
 
@@ -2387,8 +2392,16 @@ $$
 C_p=\frac1{p+1}\binom{2p}{p}.
 $$
 
-Each leading pattern has $(n)_{p+1}$ injective labellings, and every edge
-contributes its second moment $\mathbb E(W_{1,1}^2)=1$. It follows that
+Each leading pattern has a falling-factorial number of injective labellings,
+and every edge contributes its second moment:
+
+$$
+(n)_{p+1}=n(n-1)\cdots(n-p),
+\qquad
+\mathbb E(W_{1,1}^2)=1.
+$$
+
+It follows that
 
 $$
 \mathbb E M_{n,2p}
