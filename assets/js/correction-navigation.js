@@ -16,6 +16,44 @@
     });
   }
 
+  function populateQuestionIndex(article) {
+    var container = document.querySelector('[data-question-links]');
+    if (!container || container.children.length) {
+      return;
+    }
+
+    article.querySelectorAll('h3[id]').forEach(function (heading) {
+      var label = heading.textContent
+        .trim()
+        .replace(/^Question\s+/i, '')
+        .replace(/\.$/, '');
+      var link = document.createElement('a');
+      link.href = '#' + heading.id;
+      link.textContent = label;
+      link.setAttribute('aria-label', 'Go to ' + heading.textContent.trim());
+      container.appendChild(link);
+    });
+  }
+
+  function configureResponsiveQuestionIndex() {
+    var details = document.querySelector('.toc-questions');
+    if (!details || !window.matchMedia) {
+      return;
+    }
+
+    var compactLayout = window.matchMedia('(max-width: 1179px)');
+    var synchronize = function (event) {
+      details.open = !event.matches;
+    };
+
+    synchronize(compactLayout);
+    if (compactLayout.addEventListener) {
+      compactLayout.addEventListener('change', synchronize);
+    } else {
+      compactLayout.addListener(synchronize);
+    }
+  }
+
   function initializeSectionHighlighting(article) {
     var links = Array.prototype.slice.call(
       document.querySelectorAll('.correction-toc a[href^="#"]')
@@ -79,7 +117,9 @@
       return;
     }
 
+    populateQuestionIndex(article);
     addQuestionPermalinks(article);
+    configureResponsiveQuestionIndex();
     initializeSectionHighlighting(article);
   }
 
