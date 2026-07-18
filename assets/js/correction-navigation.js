@@ -23,14 +23,18 @@
     }
 
     article.querySelectorAll('h3[id]').forEach(function (heading) {
-      var label = heading.textContent
-        .trim()
+      var headingText = heading.textContent.trim();
+      if (!/^Question\s+/i.test(headingText)) {
+        return;
+      }
+
+      var label = headingText
         .replace(/^Question\s+/i, '')
         .replace(/\.$/, '');
       var link = document.createElement('a');
       link.href = '#' + heading.id;
       link.textContent = label;
-      link.setAttribute('aria-label', 'Go to ' + heading.textContent.trim());
+      link.setAttribute('aria-label', 'Go to ' + headingText);
       container.appendChild(link);
     });
   }
