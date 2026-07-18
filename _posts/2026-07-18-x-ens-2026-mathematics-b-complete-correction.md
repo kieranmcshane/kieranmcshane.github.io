@@ -2991,17 +2991,26 @@ measure seen from an endpoint. This path-graph/Chebyshev structure is also
 the one that appears in Temperley-Lieb and Jones theory, though the exam
 wisely remains self-contained and does not require that language.
 
-For the formal verification record, including the exact compiled suppliers
-for the low-degree Wigner moments and integrability, see the companion article
-[Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/).
-The current local working tree, based on private-repository commit
-`c8e9bd563099a05839ed423656ad0cd7fc8df974`, completes `lake build` and contains
-no `sorry`, `admit`, project-specific axiom or `unsafe` declaration. It also
-contains uncommitted proof developments, so this is deliberately reported as
-a verified working-tree snapshot rather than an immutable release. The files
-`THEOREM_MANIFEST.md` and `TICKET_LEDGER.md` record the distinction between
-direct proofs, interface-supplied results and remaining boundaries. In
-particular, the all-degree closed-walk supplement in this article is not yet a
-directly formalized Lean theorem.
+<aside class="formalization-summary" aria-labelledby="lean-companion-title" markdown="1">
+
+<p class="formalization-eyebrow" id="lean-companion-title">Lean companion</p>
+
+The companion development checks the question-by-question proof graph without
+placeholders. Some analytic inputs remain behind explicit interfaces, and the
+all-degree closed-walk supplement above has not yet been formalized directly.
+
+[Read the formalization notes&nbsp;→](/2026/07/18/formalizing-xens-correction-in-lean/){:.formalization-link}
+
+<details class="formalization-audit" markdown="1">
+<summary>Technical audit</summary>
+
+The audited working-tree snapshot builds successfully and contains no `sorry`,
+`admit`, project-specific axioms or `unsafe` declarations. It is based on
+private commit `c8e9bd5`. The theorem manifest and ticket ledger distinguish
+direct proofs, interface-supplied results and remaining boundaries.
+
+</details>
+
+</aside>
 
 </div>
