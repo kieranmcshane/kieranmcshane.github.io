@@ -104,7 +104,7 @@ puts more mass in the bulk. This statement concerns limiting density, not
 stochastic eigenvalue repulsion.
 
 <figure class="post-figure law-density-figure">
-  <img src="/assets/images/arcsine-semicircle-comparison.svg" alt="On the interval from minus two to two, the arcsine density is U-shaped and diverges at both endpoints, while the semicircle density peaks at zero and vanishes at both endpoints." loading="lazy">
+  <img src="/assets/images/arcsine-semicircle-comparison.svg?v=2" alt="On the interval from minus two to two, the arcsine density is U-shaped and diverges at both endpoints, while the semicircle density peaks at zero and vanishes at both endpoints." loading="lazy">
   <figcaption><strong>Direct comparison.</strong> Both curves use the same axes. The arcsine density leaves the frame near $\pm2$ because it diverges there; the semicircle density vanishes at the endpoints and reaches $1/\pi$ at the centre. Solid and dashed strokes keep the distinction visible without colour. The <a href="/assets/code/generate_arcsine_semicircle_comparison.py">figure source</a> is reproducible.</figcaption>
 </figure>
 
