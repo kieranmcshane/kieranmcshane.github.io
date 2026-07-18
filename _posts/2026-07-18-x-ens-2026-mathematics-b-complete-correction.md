@@ -201,8 +201,6 @@ passage where the object is defined.
 ### Question 1.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Let $\alpha\in\mathbb R$. Consider the real sequence $(u_n)_{n\ge0}$ defined by
 
 $$
@@ -335,8 +333,6 @@ $x=2\cos\theta$. This produces the arcsine density.
 ### Question 2.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Let $f$ be a real-valued continuous function on $[0,1]$. For $n\ge1$, define
 
 $$
@@ -345,8 +341,7 @@ v_n=\frac1n\sum_{k=1}^n f\left(\frac{k}{n+1}\right),
 w_n=\frac1n\sum_{k=1}^n f\left(\frac{2k}{2n+1}\right).
 $$
 
-Show that $(v_n)_{n\ge1}$ and $(w_n)_{n\ge1}$ converge and have the same
-limit.
+Show that both sequences converge and have the same limit.
 </aside>
 
 All estimates below are written for $n\ge1$; changing finitely many
@@ -503,8 +498,6 @@ $$
 ### Question 3a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Let $f$ be a real-valued continuous function on $[-2,2]$. Prove that
 
 $$
@@ -582,8 +575,6 @@ $$
 ### Question 3b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For $n\in\mathbb N$, let $f_n:\mathbb R\to\mathbb R$ be given by
 $f_n(x)=x^n$. Compute $I(f_n)$ for $n=0,1,2$.
 </aside>
@@ -622,8 +613,6 @@ $$
 ### Question 3c.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Compute $I(f_n)$ in terms of $n$ for every integer $n\ge0$.
 </aside>
 
@@ -706,8 +695,6 @@ $$
 ### Question 4a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For each $n\ge1$, let $U_n$ be uniform on $\{1,\ldots,n\}$, so that
 $\mathbb P(U_n=k)=1/n$. If $f$ is a real-valued continuous function on
 $[-2,2]$, prove that
@@ -759,8 +746,6 @@ $$
 ### Question 4b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Prove that, for every $y\in[-2,2]$,
 
 $$
@@ -833,8 +818,6 @@ The recurrence from Question 1 now reappears as a determinant recurrence.
 ### Question 5a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For $n\ge2$, let $T_n$ be the tridiagonal matrix with zeros on the diagonal
 and ones immediately above and below it:
 
@@ -894,8 +877,6 @@ $$
 ### Question 5b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For every integer $n\ge4$, express $\chi_n$ in terms of $\chi_{n-1}$ and
 $\chi_{n-2}$.
 </aside>
@@ -939,9 +920,8 @@ particular this proves the requested recurrence for all $n\ge4$.
 ### Question 5c.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
-Let $\alpha\in\mathbb C$ satisfy $|\alpha|<2$. Establish, for $n\ge2$,
+Let $\alpha\in\mathbb C$ satisfy $\lvert\alpha\rvert<2$. Establish, for
+$n\ge2$,
 
 $$
 \chi_n(\alpha)=\frac1{i\sqrt{4-\alpha^2}}
@@ -1012,8 +992,6 @@ independent of this choice.
 ### Question 5d.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Deduce an exact expression for the coefficients of $\chi_n$. The
 coefficients may be given as sums of products of binomial coefficients.
 </aside>
@@ -1084,8 +1062,6 @@ by Pascal's identity. The induction follows.
 ### Question 6.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Show that, for every integer $n\ge2$, the eigenvalues of $T_n$ are
 
 $$
@@ -1131,8 +1107,6 @@ each eigenvalue having multiplicity $1$.
 ### Question 7.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For a real-valued function $f$ and $M\in M_n(\mathbb R)$, define
 
 $$
@@ -1172,8 +1146,6 @@ $$
 ### Question 8a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For $n\ge2$ and $a,b,c\in\mathbb R$, let
 
 $$
@@ -1213,8 +1185,6 @@ with multiplicities preserved.
 ### Question 8b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Express the spectrum of $T_n(a,b,c)$ in terms of $a$ and the spectrum of
 $T_n(0,bc,1)$.
 </aside>
@@ -1259,8 +1229,6 @@ again with algebraic multiplicities.
 ### Question 8c.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Assume $bc>0$. Express all complex eigenvalues of $T_n(a,b,c)$ in terms of
 $a,b,c$, and $n$. One may first reduce to the case $b=c$.
 </aside>
@@ -1318,8 +1286,6 @@ The eigenvalues are real and simple.
 ### Question 9a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Assume $bc>0$. Prove that, for every real-valued continuous function $f$ on
 $\mathbb R$,
 
@@ -1370,8 +1336,6 @@ $$
 ### Question 9b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Let $y\in\mathbb R$, and let $q_n(y)$ be the number of eigenvalues of
 $T_n(a,b,c)$ in $(-\infty,y]$. Give an asymptotic equivalent of $q_n(y)$ as
 $n\to\infty$.
@@ -1525,8 +1489,6 @@ then replace every step by an explicit polynomial.
 ### Question 10a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 The Weierstrass approximation theorem may not be used in Questions 10–12.
 For $n\ge0$, define
 
@@ -1602,8 +1564,6 @@ $$
 ### Question 10b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Deduce that, for every $0<\eta\le1$, $(P_n)$ converges uniformly to $H$ on
 
 $$
@@ -1654,8 +1614,6 @@ $$
 ### Question 11.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Let $f:[-1,1]\to\mathbb R$ be continuous and let $\varepsilon>0$. Assume in
 this question that $f(-1)=0$. Show that there exist $N\ge1$, points
 
@@ -1746,8 +1704,6 @@ $a_i\in[-\varepsilon,\varepsilon]$.
 ### Question 12.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Deduce that there exists a polynomial $P\in\mathbb R[X]$ such that
 
 $$
@@ -2031,8 +1987,6 @@ paper assumes them for every $k$.
 ### Question 13a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For every $k\ge0$ and $n\ge1$, show the following equality of random
 variables:
 
@@ -2072,8 +2026,6 @@ $$
 ### Question 13b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Compute $\Sigma(f_k)$ in terms of $k$ for every integer $k\ge0$.
 </aside>
 
@@ -2164,8 +2116,6 @@ The even moments are the Catalan numbers.
 ### Question 13c.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Prove $(H_k)$ for $0\le k\le2$. In the remainder of the paper, $(H_k)$ may
 be assumed for every integer $k\ge0$.
 </aside>
@@ -2518,8 +2468,6 @@ it is not among the claims currently proved directly in the Lean companion.
 ### Question 14.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 For $k\ge0$ and $B>0$, define
 
 $$
@@ -2585,8 +2533,6 @@ $$
 ### Question 15.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Deduce that, for every $B>4$ and $\varepsilon>0$,
 
 $$
@@ -2650,8 +2596,6 @@ support.
 ### Question 16.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Show that, for every integer $k\ge0$ and every $\varepsilon>0$,
 
 $$
@@ -2704,8 +2648,6 @@ $$
 ### Question 17a.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Fix $B>4$. Let $f:\mathbb R\to\mathbb R$ be continuous and zero outside
 $[-B,B]$, and fix $\varepsilon>0$. Show that there exist
 $P\in\mathbb R[X]$ and $N\ge0$ such that, for every $n\ge N$,
@@ -2855,8 +2797,6 @@ $$
 ### Question 17b.
 
 <aside class="question-statement" markdown="1">
-<span class="question-statement-label">Question statement · English translation</span>
-
 Conclude that
 
 $$
