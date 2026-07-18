@@ -21,7 +21,7 @@
 \DeclareMathOperator{\Sp}{Sp}
 \DeclareMathOperator{\diag}{diag}
 
-\title{Ecole Polytechnique--ESPCI 2026\\Mathematics B\\V2 Concours-Grade Correction}
+\title{Ecole Polytechnique--ESPCI 2026\\Mathematics B, MP--MPI\\Concours-Grade Correction}
 \author{Detailed English correction}
 \date{}
 
@@ -466,15 +466,23 @@ has the same two initial values and satisfies the same recurrence.  Therefore $\
 Changing the sign of the chosen square root exchanges the two terms and changes the sign of the denominator, so the value is independent of this choice.
 
 \paragraph{Question 5d.}
-From the formula of Question 5c, expanded formally with $D^2=4-X^2$, one obtains
+Fix $\alpha\in(-2,2)$ and put $D=\sqrt{4-\alpha^2}$.  Expanding the formula
+of Question 5c by the binomial theorem gives
 \[
 \begin{aligned}
-  \chi_n(X)
-  &=\frac{(X+iD)^{n+1}-(X-iD)^{n+1}}{iD\,2^{n+1}}\\
+  \chi_n(\alpha)
+  &=\frac{(\alpha+iD)^{n+1}-(\alpha-iD)^{n+1}}{iD\,2^{n+1}}\\
   &=\frac1{2^n}\sum_{s=0}^{\lfloor n/2\rfloor}
-      (-1)^s\binom{n+1}{2s+1}X^{n-2s}(4-X^2)^s.
+      (-1)^s\binom{n+1}{2s+1}\alpha^{n-2s}(4-\alpha^2)^s.
 \end{aligned}
 \]
+The last expression defines a polynomial in $\alpha$ and agrees with
+$\chi_n(\alpha)$ on the infinite set $(-2,2)$.  Hence
+\[
+  \chi_n(X)=\frac1{2^n}\sum_{s=0}^{\lfloor n/2\rfloor}
+      (-1)^s\binom{n+1}{2s+1}X^{n-2s}(4-X^2)^s
+\]
+by the polynomial identity principle.
 Thus the coefficient of $X^{n-2p}$, for $0\le p\le\lfloor n/2\rfloor$, may be written as
 \[
   \frac{(-1)^p4^p}{2^n}
@@ -635,6 +643,13 @@ The sequence $k\mapsto\lambda_{n,k}$ is strictly decreasing.  Define
   L_+=a+2\sqrt{bc}.
 \]
 
+As in the statement, let
+\[
+  q_n(y)=\#\{1\le k\le n:\ \lambda_{n,k}\le y\},
+\]
+the number of eigenvalues of $T_n(a,b,c)$ in $(-\infty,y]$, counted with
+multiplicity.
+
 If $y<L_-$, then $q_n(y)=0$ for every $n$.  If $y\ge L_+$, then $q_n(y)=n$ for every $n$.
 
 Assume now $L_-<y<L_+$.  Put
@@ -653,7 +668,7 @@ Hence
   k\ge \frac{n+1}{\pi}\theta_y\right\}
   =n-\left\lceil\frac{n+1}{\pi}\theta_y\right\rceil+1,
 \]
-up to the harmless convention when the ceiling equals $n+1$, which cannot occur in the present open interval for large $n$.  Dividing by $n$ gives
+and dividing by $n$ gives
 \[
   \frac{q_n(y)}n\longrightarrow 1-\frac{\theta_y}{\pi}.
 \]
@@ -894,11 +909,30 @@ satisfies
 \]
 
 \medskip
-\noindent\emph{Scaling note.}  The proof above uses the scaled polynomials
-$P_m((X-c_i)/\rho_i)$.  This is the same construction as the indicated one, but it keeps the argument of $P_m$ inside $[-1,1]$, where Question 10b applies.  Since $\rho_i>0$, the step function is unchanged:
-$H((x-c_i)/\rho_i)=H(x-c_i)$.
+\noindent\emph{Scaling note.}  The official hint proposes the unscaled terms
+$P_m(X-c_i)$.  Taken literally, Question 10b does not control them on all of
+$[-1,1]$, because $x-c_i$ can leave $[-1,1]$.  The rescaling above repairs
+this domain gap: $P_m((X-c_i)/\rho_i)$ always receives an argument in
+$[-1,1]$.  Since $\rho_i>0$, the target step is unchanged:
+$H((x-c_i)/\rho_i)=H(x-c_i)$.  This is one of the places where formal
+verification forced a hidden domain condition into the open.
 
 \section{Part IV}
+
+We recall the probabilistic assumptions from the statement.  The
+upper-triangular family $(W_{i,j})_{1\le i\le j}$ consists of independent,
+identically distributed, integer-valued random variables such that
+\[
+  \E(W_{1,1})=0,
+  \qquad
+  \E(W_{1,1}^2)=1,
+  \qquad
+  \E(|W_{1,1}|^k)<\infty\quad(k\ge0).
+\]
+The array is extended symmetrically by $W_{j,i}=W_{i,j}$ and
+\[
+  X_n=\frac1{\sqrt n}(W_{i,j})_{1\le i,j\le n}.
+\]
 
 For $k\ge0$, recall
 \[
@@ -913,6 +947,16 @@ For later use, if $c\in\R$ and $j\ge0$, the function
 is continuous on the compact interval $[-2,2]$, hence integrable there.  Thus
 finite linear combinations of monomials may be integrated term by term against
 the semicircle weight.
+
+For every integer $k\ge0$, hypothesis $(H_k)$ is the pair of limits
+\[
+  \boxed{
+  \frac1n\E\!\left[\Tr(X_n^k)\right]\longrightarrow\Sigma(f_k),
+  \qquad
+  \frac1{n^2}\E\!\left[\Tr(X_n^k)^2\right]\longrightarrow\Sigma(f_k)^2.}
+\]
+Question 13c proves these limits for $k=0,1,2$; the remainder of the paper
+assumes them for every $k$.
 
 \paragraph{Question 13a.}
 For every $\omega$, the matrix $X_n(\omega)$ is real symmetric.  Hence it is diagonalizable over $\R$ in an orthonormal basis.  If its eigenvalues are $\lambda_1,\dots,\lambda_n$, repeated with multiplicity, then the eigenvalues of $X_n(\omega)^k$ are $\lambda_1^k,\dots,\lambda_n^k$.  Therefore
@@ -1118,38 +1162,35 @@ Hence
 \]
 
 \paragraph{Question 15.}
-Fix $k\ge0$, $B>4$, and $\varepsilon>0$.  Let $\ell\ge k$.  Since $|x|>B>1$ implies $|x|^k\le |x|^\ell$, we have
+The question asks for $B>4$, but a direct comparison reaches the natural
+threshold $B>2$.  Fix $k\ge0$, $B>2$, and $\varepsilon>0$.  For every
+integer $\ell$ with $2\ell\ge k$, and every $x$ with $|x|>B$,
 \[
-  g_{k,B}\le g_{\ell,B}.
+  |x|^k=|x|^{2\ell}|x|^{k-2\ell}
+  \le B^{k-2\ell}|x|^{2\ell}.
 \]
 Therefore
 \[
-  \Prob(S_n(g_{k,B})\ge\varepsilon)
-  \le \Prob(S_n(g_{\ell,B})\ge\varepsilon).
+  g_{k,B}(x)\le B^{k-2\ell}f_{2\ell}(x).
 \]
-By Question 14,
+Markov's inequality, Question 13a and $(H_{2\ell})$ give
 \[
-  \Prob(S_n(g_{\ell,B})\ge\varepsilon)
-  \le \frac{\E(S_n(f_{2\ell}))}{\varepsilon B^\ell}.
+\begin{aligned}
+\limsup_{n\to\infty}\Prob(S_n(g_{k,B})\ge\varepsilon)
+&\le \frac{B^{k-2\ell}}{\varepsilon}
+   \lim_{n\to\infty}\E(S_n(f_{2\ell}))\\
+&=\frac{B^{k-2\ell}}{\varepsilon}\Sigma(f_{2\ell})\\
+&\le \frac{B^k}{\varepsilon}\left(\frac4{B^2}\right)^\ell.
+\end{aligned}
 \]
-Using Question 13a and hypothesis $(H_{2\ell})$,
+Here $\Sigma(f_{2\ell})=(\ell+1)^{-1}\binom{2\ell}{\ell}\le4^\ell$.
+Letting $\ell\to\infty$ proves
 \[
-  \E(S_n(f_{2\ell}))\longrightarrow\Sigma(f_{2\ell}).
+  \boxed{\Prob(S_n(g_{k,B})\ge\varepsilon)\longrightarrow0
+  \qquad(B>2).}
 \]
-By Question 13b,
-\[
-  \Sigma(f_{2\ell})=\frac1{\ell+1}\binom{2\ell}{\ell}\le \binom{2\ell}{\ell}\le 4^\ell.
-\]
-Taking $\limsup$ in $n$ gives
-\[
-  \limsup_{n\to\infty}\Prob(S_n(g_{k,B})\ge\varepsilon)
-  \le \frac{4^\ell}{\varepsilon B^\ell}
-  =\frac1\varepsilon\left(\frac4B\right)^\ell.
-\]
-Now let $\ell\to\infty$.  Since $B>4$, the right-hand side tends to $0$.  Hence
-\[
-  \boxed{\Prob(S_n(g_{k,B})\ge\varepsilon)\longrightarrow0.}
-\]
+This is stronger than the requested $B>4$, and $2$ is the edge of the
+limiting semicircle support.
 
 \paragraph{Question 16.}
 Let
@@ -1212,7 +1253,7 @@ Indeed, on $[-2,2]$ one has $|f-P|\le\eta$ and
 $\sqrt{4-x^2}\ge0$, hence
 \[
   |\Sigma(f)-\Sigma(P)|
-  \le {1\over 2\pi}\int_{-2}^2 |f(x)-P(x)|\sqrt{4-x^2}\,dx
+  \le \frac1{2\pi}\int_{-2}^2 |f(x)-P(x)|\sqrt{4-x^2}\,dx
   \le \eta\Sigma(1).
 \]
 Here $\Sigma(1)=1$ by Question 13b with $p=0$.  Moreover, because $P$ is a
@@ -1293,7 +1334,7 @@ If $C_1=0$, the quantity is zero.  Otherwise, the event
 \]
 is contained in the union of the events
 \[
-  |S_n(f_j)-\E(S_n(f_j))|\ge\frac{\varepsilon}{4(d+1)\max(1,C_1)}
+  |S_n(f_j)-\E(S_n(f_j))|\ge\frac{\varepsilon}{4\max(1,C_1)}
   \qquad(0\le j\le d),
 \]
 each of which has probability tending to zero by Question 16.  Hence
@@ -1326,7 +1367,53 @@ Combining this with Question 17a yields
 \[
   \boxed{\Prob(|S_n(f)-\Sigma(f)|\ge\varepsilon)\longrightarrow0.}
 \]
-This is the asserted convergence in probability of the spectral averages against every continuous compactly supported test function supported in $[-B,B]$ with $B>4$.
+This is the asserted convergence in probability for every continuous test
+function supported in $[-B,B]$.  Since every compact subset of $\R$ lies in
+such an interval for some $B>4$, the argument covers every $f\in C_c(\R)$.
+
+It also extends to every bounded continuous function.  Question 15 with
+$k=0$ gives
+\[
+  S_n(\one_{|x|>B})\xrightarrow{\Prob}0\qquad(B>2).
+\]
+Fix $B>4$ and choose a continuous cutoff $\varphi_B$ equal to $1$ on
+$[-B,B]$ and vanishing outside a slightly larger compact interval.  Then
+$f\varphi_B\in C_c(\R)$ and
+\[
+  |S_n(f)-S_n(f\varphi_B)|
+  \le \|f\|_\infty S_n(\one_{|x|>B}).
+\]
+Since the semicircle law is supported on $[-2,2]$, one has
+$\Sigma(f\varphi_B)=\Sigma(f)$.  Thus
+\[
+  \boxed{S_n(f)\xrightarrow{\Prob}\Sigma(f)
+  \qquad\text{for every }f\in C_b(\R).}
+\]
+
+\section{What the problem is secretly about}
+
+The recurrence polynomials in Part II are the Chebyshev polynomials of the
+second kind:
+\[
+  \chi_n(X)=U_n\!\left(\frac X2\right).
+\]
+If $q\in\C\setminus\{0,1,-1\}$ and $X=q+q^{-1}$, then
+\[
+  \chi_n(X)=\frac{q^{n+1}-q^{-(n+1)}}{q-q^{-1}}=[n+1]_q,
+\]
+the usual quantum integer.  The zeros in Question 6 are its root-of-unity
+zeros written on the real line.
+
+The matrix $T_n$ is also the adjacency matrix of the path graph $A_n$.
+The normalized trace $n^{-1}\Tr(f(T_n))$ samples the whole cosine grid and
+tends to the arcsine law.  By contrast, the corner moment
+$\langle e_1,T_n^{2p}e_1\rangle$ counts Dyck paths of length $2p$ and,
+once $n$ is large compared with $p$, equals the Catalan number $C_p$, a
+moment of the semicircle law.  Thus the arcsine law is the bulk density of
+states of long paths, while the semicircle law is the limiting spectral
+measure seen from an endpoint.  The same path-graph/Chebyshev structure also
+appears in Temperley--Lieb and Jones theory, though none of that language is
+needed for the exam.
 
 \appendix
 \section{Lean formalisation notes}
@@ -1365,7 +1452,11 @@ entries, identical distribution, and a uniform fourth-moment bound.
 
 \begin{itemize}[leftmargin=2em]
   \item \textbf{T31}: the low-degree moment hypotheses $(H_1)$ and $(H_2)$ are
-  now supplied by \texttt{WignerInputConcrete.lowDegreeMomentAPI}.  The last
+  now supplied by
+  \[
+    \texttt{WignerInputConcrete.lowDegreeMomentAPI}.
+  \]
+  The last
   nontrivial field was the second degree-two trace moment
   \[
     \mathbb E\!\left[\left(\frac1n\operatorname{Tr}(X_n^2)\right)^2\right]
