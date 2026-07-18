@@ -192,16 +192,28 @@ body:has(.correction-post) .post-title {
 }
 
 .correction-post {
-  max-width: 760px;
+  max-width: 68ch;
   margin: 0 auto;
   color: #1c2432;
-  font-size: 17px;
-  line-height: 1.68;
+  font-family: Charter, "Bitstream Charter", "Iowan Old Style", Cambria, Georgia, serif;
+  font-size: 18px;
+  line-height: 1.72;
 }
 
 .correction-post p,
 .correction-post li {
-  max-width: 72ch;
+  max-width: 68ch;
+}
+
+.correction-post h2,
+.correction-post h3,
+.correction-deck,
+.correction-downloads,
+.correction-route,
+.correction-toc,
+.notation-glossary,
+.question-anchor {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .correction-deck {
@@ -323,6 +335,11 @@ body:has(.correction-post) .post-title {
   text-underline-offset: 0.22em;
 }
 
+.correction-toc a[aria-current="location"] {
+  color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
 .law-comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -373,6 +390,7 @@ body:has(.correction-post) .post-title {
 }
 
 .correction-post h3 {
+  position: relative;
   margin: 2.8rem 0 1.25rem;
   padding: 0.62rem 0.8rem;
   border-left: 4px solid var(--accent);
@@ -382,6 +400,27 @@ body:has(.correction-post) .post-title {
   line-height: 1.3;
   letter-spacing: 0;
   scroll-margin-top: 4rem;
+}
+
+.question-anchor {
+  position: absolute;
+  top: 50%;
+  right: 0.72rem;
+  padding: 0.2rem 0.35rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0;
+  text-decoration: none;
+  transform: translateY(-50%);
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.correction-post h3:hover .question-anchor,
+.question-anchor:focus-visible {
+  color: var(--accent);
+  opacity: 1;
 }
 
 .correction-post mjx-container {
@@ -399,6 +438,28 @@ body:has(.correction-post) .post-title {
   padding: 0.2rem 0 0.35rem;
 }
 
+.correction-post .answer {
+  margin: 1.55rem 0 2rem;
+  padding: 0.35rem 0.9rem 0.45rem;
+  overflow-x: auto;
+  border-left: 4px solid #147d73;
+  background: #f2f8f7;
+}
+
+.correction-post .answer mjx-container[display="true"] {
+  margin: 0.7rem 0 !important;
+}
+
+.correction-post .notation-glossary {
+  margin-bottom: 3rem;
+}
+
+.correction-post .notation-glossary a {
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.16em;
+}
+
 .correction-post ol,
 .correction-post ul {
   padding-left: 1.35rem;
@@ -414,7 +475,12 @@ body:has(.correction-post) .post-title {
   }
 
   .correction-post {
-    font-size: 16.5px;
+    font-size: 17px;
+    line-height: 1.68;
+  }
+
+  .question-anchor {
+    opacity: 1;
   }
 
   .correction-route {
