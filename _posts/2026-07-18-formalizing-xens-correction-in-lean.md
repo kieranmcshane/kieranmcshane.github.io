@@ -185,6 +185,16 @@ propext, Classical.choice, Quot.sound
 
 The last line is the usual foundational footprint inherited from Lean and Mathlib. It is not a project-specific mathematical axiom.
 
+This status was rechecked on the local working tree based on
+private-repository commit
+`c8e9bd563099a05839ed423656ad0cd7fc8df974`: `lake build` completed all 8276
+jobs successfully, and the source audit found no `sorry`, `admit`,
+project-specific axiom or `unsafe` declaration. The tree also contains
+uncommitted proof developments, so this is a verified working-tree snapshot,
+not yet an immutable release. The files `THEOREM_MANIFEST.md` and
+`TICKET_LEDGER.md` make the internal audit traceable; they are named here but
+not linked because the repository is private.
+
 That said, "<a class="concept-ref" href="#definition-no-sorry" data-definition="No-sorry: no Lean placeholder proofs such as sorry/admit and no project-specific axioms.">no-sorry</a>" does not mean "every theorem in the written correction has been reproved from first principles in one file." Some analytic parts remain behind explicit interfaces. For instance, parts of the arcsine integral and cosine-grid distribution story are recorded as named APIs. The point is that these assumptions are not invisible. They occur as theorem parameters or typeclass assumptions, and the manifest records where they enter.
 
 This is the difference between a fake completion and an auditable one. A fake completion hides the missing theorem behind a placeholder. An auditable completion says:

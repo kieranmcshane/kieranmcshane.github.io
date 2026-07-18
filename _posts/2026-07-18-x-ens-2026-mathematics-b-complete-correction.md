@@ -12,11 +12,23 @@ excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-
 
 <p class="correction-deck">From tridiagonal spectra to the semicircle law</p>
 
-This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices.
+This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices. The unity is thematic rather than a strict dependency chain: as the official statement notes, Part III is independent of Parts I–II and Part IV is essentially independent of them.
 
 This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case.
 
-A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
+It is a detailed reference correction, not a model of the amount of prose a
+candidate could write during the four-hour examination.
+
+<aside class="scope-note" markdown="1">
+<strong>Scope of Part IV.</strong> In the examination route, Question 13c proves
+the moment hypotheses $(H_k)$ only for $k=0,1,2$; the official statement then
+authorizes candidates to assume $(H_k)$ for every $k$ in Questions 14–17. The
+question-by-question correction follows that instruction. A separate,
+expandable supplement after Question 13c proves all $(H_k)$ directly from the
+entry assumptions, making the final semicircle statement standalone.
+</aside>
+
+A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains the placeholder-free conditional proof graph and its remaining interface boundaries. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
 
 <div class="correction-downloads">
   <span>Paper and correction</span>
@@ -41,6 +53,7 @@ A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18
   <a href="#part-ii-toeplitz-spectra">Toeplitz spectra</a>
   <a href="#part-iii-constructive-approximation">Approximation</a>
   <a href="#part-iv-random-matrices-and-the-semicircle-law">Random matrices</a>
+  <a href="#supplement-closing-the-moment-gap">Moment supplement</a>
   <a href="#what-the-problem-is-secretly-about">Hidden structure</a>
 </nav>
 
@@ -782,10 +795,23 @@ $$
 \chi_n(X)=\det(XI_n-T_n)
 $$
 
-along the first row. The first
-contribution is $X\chi_{n-1}(X)$. The only other nonzero entry in the
-first row is $-1$ in column $2$; its cofactor has determinant
-$-\chi_{n-2}(X)$. Therefore
+along the first row. The first contribution is $X\chi_{n-1}(X)$. The only
+other nonzero entry is $a_{1,2}=-1$. Let $M_{1,2}$ be its minor. After
+deleting row $1$ and column $2$, the first column of $M_{1,2}$ is
+$(-1,0,\ldots,0)^{\mathsf T}$, so
+
+$$
+\det M_{1,2}=-\chi_{n-2}(X).
+$$
+
+The signed cofactor is therefore
+
+$$
+C_{1,2}=(-1)^{1+2}\det M_{1,2}=\chi_{n-2}(X),
+$$
+
+and the complete contribution of the entry is
+$a_{1,2}C_{1,2}=-\chi_{n-2}(X)$. Therefore
 
 <div class="answer" markdown="1">
 
@@ -1167,7 +1193,7 @@ $$
 the number of eigenvalues of $T_n(a,b,c)$ in $(-\infty,y]$, counted with
 multiplicity.
 
-If $y<L_-$, then $q_n(y)=0$ for every $n$. If $y\ge L_+$, then
+If $y\le L_-$, then $q_n(y)=0$ for every $n$. If $y\ge L_+$, then
 $q_n(y)=n$ for every $n$.
 
 Assume now $L_-<y<L_+$. Put
@@ -1190,6 +1216,24 @@ $$
 q_n(y)=\#\left\lbrace 1\le k\le n:
   k\ge \frac{n+1}{\pi}\theta_y\right\rbrace
   =n-\left\lceil\frac{n+1}{\pi}\theta_y\right\rceil+1.
+$$
+
+This formula is exact; it also returns $0$ when the ceiling equals $n+1$.
+Writing
+
+$$
+\delta_n=\left\lceil\frac{n+1}{\pi}\theta_y\right\rceil
+          -\frac{n+1}{\pi}\theta_y,
+\qquad 0\le\delta_n<1,
+$$
+
+gives the sharper estimate
+
+$$
+q_n(y)
+=n\left(1-\frac{\theta_y}{\pi}\right)
+ +\left(1-\frac{\theta_y}{\pi}-\delta_n\right)
+=n\left(1-\frac{\theta_y}{\pi}\right)+O(1).
 $$
 
 The <a class="notation-ref" href="#definition-qn" data-definition="Counting function: the number of eigenvalues of the tridiagonal matrix not exceeding y." aria-describedby="glossary-qn-desc">normalized counting function $q&#95;n(y)/n$</a> therefore satisfies
@@ -1477,7 +1521,7 @@ $$
 
 because $\rho_i>0$.
 
-Choose $\eta>0$ small enough that the intervals
+Choose $0<\eta\le1$ small enough that the intervals
 
 $$
 [c_i-\rho_i\eta,c_i+\rho_i\eta]
@@ -1595,13 +1639,23 @@ in $[-1,1]$. Since $\rho_i>0$, it does not change the target step:
 $H((x-c_i)/\rho_i)=H(x-c_i)$. This is one of the places where the formal
 verification forced a hidden domain condition into the open.
 
+Here “constructive” means that the approximating polynomials are given by
+explicit formulas, not that the construction is numerically efficient. In
+particular, $\deg Q_n=n2^n$, so the degrees grow very rapidly.
+
 ## Part IV: Random matrices and the semicircle law
 
 We now recall the probabilistic assumptions rather than leaving them implicit.
-Let the upper-triangular entries
+Set
 
 $$
-(W_{i,j})_{1\le i\le j}
+\mathcal I=\lbrace(i,j)\in\mathbb N_{\ge1}^2:i\le j\rbrace,
+$$
+
+and let the upper-triangular entries
+
+$$
+(W_{i,j})_{(i,j)\in\mathcal I}
 $$
 
 be independent, identically distributed, integer-valued random variables such
@@ -1943,8 +1997,216 @@ $$
 
 Thus $(H_2)$ holds.
 
-In the remainder of the part, as stated in the problem, we assume
-$(H_k)$ for every $k\ge0$.
+In the remainder of the examination solution, as explicitly authorized by the
+statement, we assume $(H_k)$ for every $k\ge0$. Readers who want a proof from
+the entry assumptions can use the supplement immediately below.
+
+### Supplement: Closing the moment gap
+
+<details class="proof-supplement" markdown="1">
+<summary><strong>Beyond the examination: prove $(H_k)$ for every $k$</strong></summary>
+
+This supplement is not required by the official paper. It removes the
+authorized assumption used in Questions 14–17 and makes the semicircle result
+standalone under the entry hypotheses stated above.
+
+Put
+
+$$
+M_{n,k}=S_n(f_k)=\frac1n\operatorname{Tr}(X_n^k).
+$$
+
+We prove
+
+$$
+\mathbb E M_{n,k}\longrightarrow\Sigma(f_k),
+\qquad
+\operatorname{Var}(M_{n,k})\longrightarrow0.
+$$
+
+These two limits imply $(H_k)$ because
+
+$$
+\mathbb E(M_{n,k}^2)
+=\operatorname{Var}(M_{n,k})+(\mathbb E M_{n,k})^2.
+$$
+
+#### Closed-walk expansion
+
+For $k\ge1$, set $i_{k+1}=i_1$ and write
+
+$$
+\widehat W_{a,b}=W_{\min(a,b),\max(a,b)}.
+$$
+
+Then
+
+$$
+M_{n,k}
+=n^{-1-k/2}
+\sum_{i_1,\ldots,i_k=1}^n
+\prod_{r=1}^k \widehat W_{i_r,i_{r+1}}.
+$$
+
+The sequence $(i_1,\ldots,i_k,i_1)$ is a closed walk. Its associated
+unoriented multigraph has as vertices the distinct indices visited by the
+walk and as edges the distinct unordered pairs
+$\lbrace i_r,i_{r+1}\rbrace$; diagonal loops are allowed. Let $v$ be the
+number of vertices, $e$ the number of distinct edges and $m_a$ the number of
+times edge $a$ is traversed. Thus
+
+$$
+\sum_{a=1}^e m_a=k.
+$$
+
+Independence gives
+
+$$
+\mathbb E\!\left[
+  \prod_{r=1}^k \widehat W_{i_r,i_{r+1}}
+\right]
+=\prod_{a=1}^e\mathbb E(W_{1,1}^{m_a}).
+$$
+
+If an edge occurs exactly once, one factor is $\mathbb E(W_{1,1})=0$.
+Every nonzero contribution therefore satisfies
+
+$$
+m_a\ge2\quad(1\le a\le e),
+\qquad
+e\le\frac k2.
+$$
+
+The walk graph is connected, so $v\le e+1$. Consequently
+
+$$
+v\le\frac k2+1.
+$$
+
+For fixed $k$, there are only finitely many walk patterns up to relabelling
+the vertices in order of first appearance. A pattern with $v$ vertices has
+at most $(n)_v=n(n-1)\cdots(n-v+1)$ injective labellings. Its expectation is
+bounded by a constant depending only on $k$, because all absolute moments of
+$W_{1,1}$ are finite.
+
+#### Odd moments
+
+Let $k=2p+1$. Every nonzero pattern has $v\le p+1$, hence the total
+contribution before normalization is $O(n^{p+1})$. Therefore
+
+$$
+\mathbb E M_{n,2p+1}
+=O\!\left(
+  \frac{n^{p+1}}{n^{p+3/2}}
+\right)
+=O(n^{-1/2})
+\longrightarrow0.
+$$
+
+This is precisely $\Sigma(f_{2p+1})$.
+
+#### Even moments and Catalan paths
+
+Let $k=2p$. Patterns with at most $p$ vertices contribute only $O(n^{-1})$
+after normalization. A leading pattern must therefore have $v=p+1$. The
+inequalities
+
+$$
+v\le e+1\le p+1
+$$
+
+then force $e=p$ and $v=e+1$. Thus the graph is a tree, every edge occurs
+exactly twice, and no loop occurs.
+
+Root the tree at the initial vertex and label vertices in order of first
+appearance. Record an up-step whenever the walk first crosses an edge away
+from the root, and a down-step when it crosses that edge back toward the
+root. Since every tree edge is used once in each direction, this produces a
+Dyck path of length $2p$. Conversely, a Dyck path reconstructs a unique
+canonical walk: create the next vertex on each up-step and return to its
+parent on each down-step. Hence the number of leading patterns is
+
+$$
+C_p=\frac1{p+1}\binom{2p}{p}.
+$$
+
+Each leading pattern has $(n)_{p+1}$ injective labellings, and every edge
+contributes its second moment $\mathbb E(W_{1,1}^2)=1$. It follows that
+
+$$
+\mathbb E M_{n,2p}
+=C_p\frac{(n)_{p+1}}{n^{p+1}}+O(n^{-1})
+\longrightarrow C_p
+=\Sigma(f_{2p}).
+$$
+
+We have therefore proved, for every $k\ge0$,
+
+$$
+\mathbb E M_{n,k}\longrightarrow\Sigma(f_k).
+$$
+
+#### Variance
+
+For a closed walk $\mathbf i$, write
+
+$$
+Y_{\mathbf i}
+=\prod_{r=1}^k\widehat W_{i_r,i_{r+1}}.
+$$
+
+Then
+
+$$
+\operatorname{Var}(M_{n,k})
+=n^{-2-k}
+\sum_{\mathbf i,\mathbf j}
+\operatorname{Cov}(Y_{\mathbf i},Y_{\mathbf j}).
+$$
+
+If the two walks use disjoint sets of matrix-entry variables, the two
+monomials are independent and their covariance is zero. A contributing pair
+must therefore share an edge; the union of its two connected walk graphs is
+then connected.
+
+Moreover, every edge in that union must occur at least twice among the total
+$2k$ traversals. If an edge occurred only once, centering and independence
+would make both the joint expectation and the product of expectations zero.
+If the union has $e$ edges and $v$ vertices, then
+
+$$
+e\le k,
+\qquad
+v\le e+1\le k+1.
+$$
+
+For fixed $k$, there are finitely many paired patterns, their covariances are
+uniformly bounded using moments up to order $2k$, and they have altogether
+$O(n^{k+1})$ labellings. Consequently
+
+$$
+\operatorname{Var}(M_{n,k})
+=O\!\left(\frac{n^{k+1}}{n^{k+2}}\right)
+=O(n^{-1})
+\longrightarrow0.
+$$
+
+Combining expectation and variance gives
+
+<div class="answer" markdown="1">
+
+$$
+\boxed{(H_k)\text{ holds for every }k\ge0.}
+$$
+
+</div>
+
+Thus Questions 14–17 yield the semicircle convergence from the entry
+assumptions themselves, not only from the moment hypotheses authorized in the
+exam. This supplementary combinatorial proof is part of the written article;
+it is not among the claims currently proved directly in the Lean companion.
+
+</details>
 
 ### Question 14.
 
@@ -1998,7 +2260,7 @@ $$
 ### Question 15.
 
 The question asks for $B>4$, but a direct comparison reaches the natural
-threshold $B>2$. Fix $k\ge0$, $B>2$, and $\varepsilon>0$. For every
+threshold $B\ge2$. Fix $k\ge0$, $B\ge2$, and $\varepsilon>0$. For every
 integer $\ell$ with $2\ell\ge k$, and every $x$ with $|x|>B$,
 
 $$
@@ -2022,26 +2284,30 @@ $$
 &\le \frac{B^{k-2\ell}}{\varepsilon}
    \lim_{n\to\infty}\mathbb E\bigl(S_n(f_{2\ell})\bigr)\\
 &=\frac{B^{k-2\ell}}{\varepsilon}\Sigma(f_{2\ell})\\
-&\le \frac{B^k}{\varepsilon}\left(\frac4{B^2}\right)^\ell,
+&\le \frac{B^k}{\varepsilon(\ell+1)}
+       \left(\frac4{B^2}\right)^\ell,
 \end{aligned}
 $$
 
 because the Catalan number
 $\Sigma(f_{2\ell})=(\ell+1)^{-1}\binom{2\ell}{\ell}$ is at most
-$4^\ell$. Letting $\ell\to\infty$ proves
+$4^\ell/(\ell+1)$. If $B>2$, the right-hand side tends geometrically to
+zero. If $B=2$, it is at most $2^k/(\varepsilon(\ell+1))$, which also tends
+to zero. Letting $\ell\to\infty$ proves
 
 <div class="answer" markdown="1">
 
 $$
 \boxed{
 \mathbb P\bigl(S_n(g_{k,B})\ge\varepsilon\bigr)\longrightarrow0
-\qquad(B>2).}
+\qquad(B\ge2).}
 $$
 
 </div>
 
-This is stronger than the requested $B>4$. The number $2$ is also the
-natural threshold: it is the edge of the limiting semicircle support.
+This is stronger than the requested $B>4$. The number $2$ is the natural
+threshold for this estimate and is also the edge of the limiting semicircle
+support.
 
 ### Question 16.
 
@@ -2315,7 +2581,7 @@ Indeed, Question 15 with $k=0$ gives
 
 $$
 S_n(\mathbf 1_{\lbrace |x|>B\rbrace})\xrightarrow{\mathbb P}0
-\qquad(B>2).
+\qquad(B\ge2).
 $$
 
 Fix $B>4$ and choose a continuous cutoff $\varphi_B$ equal to $1$ on $[-B,B]$ and
@@ -2334,8 +2600,12 @@ all $f\in C_b(\mathbb R)$.
 
 ## Conclusion
 
-The final statement is a weak form of the Wigner semicircle law: for every
-bounded continuous function $f$,
+Following only the instructions of the official paper, Questions 14–17 prove
+the next statement conditionally on $(H_k)$ for every $k$, exactly as
+authorized after Question 13c. The supplementary closed-walk argument above
+derives all those hypotheses from the entry assumptions. With that supplement
+included, the final statement is unconditional: for every bounded continuous
+function $f$,
 
 $$
 S_n(f)\xrightarrow{\mathbb P}
@@ -2393,5 +2663,14 @@ wisely remains self-contained and does not require that language.
 For the formal verification record, including the exact compiled suppliers
 for the low-degree Wigner moments and integrability, see the companion article
 [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/).
+The current local working tree, based on private-repository commit
+`c8e9bd563099a05839ed423656ad0cd7fc8df974`, completes `lake build` and contains
+no `sorry`, `admit`, project-specific axiom or `unsafe` declaration. It also
+contains uncommitted proof developments, so this is deliberately reported as
+a verified working-tree snapshot rather than an immutable release. The files
+`THEOREM_MANIFEST.md` and `TICKET_LEDGER.md` record the distinction between
+direct proofs, interface-supplied results and remaining boundaries. In
+particular, the all-degree closed-walk supplement in this article is not yet a
+directly formalized Lean theorem.
 
 </div>
