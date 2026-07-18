@@ -12,7 +12,7 @@ excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-
 
 <p class="correction-deck">From tridiagonal spectra to the semicircle law</p>
 
-<p class="correction-abstract"><strong>Abstract.</strong> This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices. The unity is thematic rather than a strict dependency chain: as the official statement notes, Part III is independent of Parts I–II and Part IV is essentially independent of them.</p>
+<p class="correction-lede">This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices. The unity is thematic rather than a strict dependency chain: as the official statement notes, Part III is independent of Parts I–II and Part IV is essentially independent of them.</p>
 
 This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case.
 
