@@ -14,7 +14,9 @@ excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-
 
 This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices.
 
-This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case. A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile.
+This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case.
+
+A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
 
 <div class="correction-downloads">
   <span>Complete files</span>
@@ -307,6 +309,14 @@ v_n=\frac1n\sum_{k=1}^n f\left(\frac{k}{n+1}\right),
 \qquad
 w_n=\frac1n\sum_{k=1}^n f\left(\frac{2k}{2n+1}\right).
 $$
+
+<aside class="intuition" markdown="1">
+<strong>Before the estimate.</strong> Both expressions sample $f$ on an almost
+uniform mesh of $[0,1]$. As $n$ grows, the mesh size tends to zero and the
+uncovered interval at the right endpoint shrinks to nothing. The proof below
+only quantifies these two facts: uniform continuity controls the oscillation
+inside each mesh interval, and boundedness controls the small missing tail.
+</aside>
 
 Since $[0,1]$ is compact, $f$ is uniformly continuous and
 bounded. Set
@@ -1630,6 +1640,23 @@ f_k(x)=x^k,
   \qquad
   \Sigma(f)=\frac1{2\pi}\int_{-2}^2 f(x)\sqrt{4-x^2}\,dx.
 $$
+
+<aside class="intuition" markdown="1">
+<strong>Probability bridge.</strong> The quantity $S_n(f)$ is now random. The
+goal is not pointwise convergence for every matrix realization, but
+convergence in probability:
+
+$$
+\forall\varepsilon>0,\qquad
+\mathbb P\bigl(\lvert S_n(f)-\Sigma(f)\rvert>\varepsilon\bigr)
+\longrightarrow0.
+$$
+
+The proof has three layers. Moment limits identify the candidate semicircle
+law; second-moment control makes polynomial spectral averages concentrate;
+polynomial approximation and a tail estimate then extend the result to
+continuous test functions. Questions 13–17 build precisely those layers.
+</aside>
 
 For later
 use, if $c\in\mathbb{R}$ and $j\ge0$, the function
