@@ -485,6 +485,23 @@ body:has(.correction-post) .post-title {
   margin: 0.7rem 0 !important;
 }
 
+.correction-post .intuition {
+  margin: 1.5rem 0 1.9rem;
+  padding: 0.8rem 1rem;
+  border-left: 3px solid #b3541e;
+  background: #fbf6f1;
+  color: #303744;
+}
+
+.correction-post .intuition > :last-child {
+  margin-bottom: 0;
+}
+
+.correction-post .intuition strong {
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
 .correction-post .notation-glossary {
   margin-bottom: 3rem;
 }
