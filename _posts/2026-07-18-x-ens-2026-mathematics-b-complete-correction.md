@@ -33,6 +33,7 @@ This post is the complete mathematical correction of the Ecole Polytechnique-ESP
 <nav class="correction-toc" aria-label="Correction sections">
   <span>Jump to</span>
   <a href="#preliminary-question">Recurrence</a>
+  <a href="#arcsine-versus-semicircle">Compare laws</a>
   <a href="#part-i-arcsine-law">Arcsine law</a>
   <a href="#part-ii-toeplitz-spectra">Toeplitz spectra</a>
   <a href="#part-iii-constructive-approximation">Approximation</a>
@@ -62,6 +63,70 @@ $$
 
 </div>
 </div>
+
+## Arcsine versus semicircle
+
+The two limiting laws have the same support, but they distribute mass in
+opposite ways. On the interior of $[-2,2]$ their densities are
+
+$$
+\rho_{\mathrm{arc}}(x)=\frac1{\pi\sqrt{4-x^2}},
+\qquad
+\rho_{\mathrm{sc}}(x)=\frac1{2\pi}\sqrt{4-x^2}.
+$$
+
+The arcsine density is U-shaped and diverges at the two endpoints. The
+semicircle density is largest at $x=0$, where it equals $1/\pi$, and vanishes
+with a square-root profile at the endpoints. Thus the deterministic cosine
+grid is denser near the spectral edges, whereas the Wigner empirical measure
+puts more mass in the bulk. This statement concerns limiting density, not
+stochastic eigenvalue repulsion.
+
+<figure class="post-figure law-density-figure">
+  <img src="/assets/images/arcsine-semicircle-comparison.svg" alt="On the interval from minus two to two, the arcsine density is U-shaped and diverges at both endpoints, while the semicircle density peaks at zero and vanishes at both endpoints." loading="lazy">
+  <figcaption><strong>Direct comparison.</strong> Both curves use the same horizontal and vertical scales. The arcsine curve is clipped at the top because its endpoint values are infinite; arrows indicate the divergence. The solid and dashed strokes keep the distinction visible without colour. The <a href="/assets/code/generate_arcsine_semicircle_comparison.py">figure source</a> is reproducible.</figcaption>
+</figure>
+
+There is an exact pointwise relation, valid for $-2<x<2$:
+
+$$
+\rho_{\mathrm{arc}}(x)\,\rho_{\mathrm{sc}}(x)
+=\frac1{2\pi^2}.
+$$
+
+This reciprocal identity is useful, but calling the laws “duals” would suggest
+more structure than is needed here. The clearest common coordinate is
+$x=2\cos\theta$. Taking absolute values in the change of variables gives
+
+$$
+\rho_{\mathrm{arc}}(2\cos\theta)\,2\sin\theta\,d\theta
+=\frac{d\theta}{\pi},
+\qquad
+\rho_{\mathrm{sc}}(2\cos\theta)\,2\sin\theta\,d\theta
+=\frac2\pi\sin^2\theta\,d\theta.
+$$
+
+So the arcsine law is the pushforward of a uniform angle, while the semicircle
+law uses the same angle with a $\sin^2\theta$ weight. Their moments make the
+contrast equally explicit. Odd moments vanish for both laws, and for $p\ge0$,
+
+$$
+m_{2p}^{\mathrm{arc}}=\binom{2p}{p},
+\qquad
+m_{2p}^{\mathrm{sc}}=\frac1{p+1}\binom{2p}{p}=C_p.
+$$
+
+| Law | Even moment of order $2p$ | First even moments | Mechanism in the paper |
+|---|---:|---|---|
+| Arcsine | $\binom{2p}{p}$ | $1,2,6,20,\ldots$ | Uniform cosine grid for the path-matrix spectrum |
+| Semicircle | $C_p=\frac1{p+1}\binom{2p}{p}$ | $1,1,2,5,\ldots$ | Normalized Wigner trace moments |
+
+This is the conceptual hinge of the paper. Parts I–II average over explicit
+eigenangles and obtain the arcsine law. Part IV changes the matrix model: its
+moment hypotheses select Catalan moments and hence the semicircle law. What the
+two halves share is the toolkit of polynomial approximation and spectral
+averaging, not a claim that adding randomness mechanically transforms one
+density into the other.
 
 ## General conventions
 
