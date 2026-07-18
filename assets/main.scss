@@ -246,18 +246,11 @@ body:has(.correction-post) .post-meta {
   text-align: center;
 }
 
-.correction-abstract {
-  padding-bottom: 1.2rem;
-  border-bottom: 1px solid #d9dee8;
+.correction-lede {
+  margin-bottom: 1.65rem;
   color: #303a4b;
-  font-size: 1rem;
-  line-height: 1.62;
-}
-
-.correction-abstract strong {
-  color: var(--ink);
-  font-variant: small-caps;
-  letter-spacing: 0.02em;
+  font-size: 1.04rem;
+  line-height: 1.64;
 }
 
 .correction-downloads {
