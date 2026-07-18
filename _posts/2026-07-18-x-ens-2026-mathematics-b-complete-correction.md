@@ -8,33 +8,54 @@ tags: [concours, linear-algebra, approximation, probability, random-matrices]
 excerpt: "A detailed question-by-question correction of the X/ENS 2026 Mathematics B paper, including endpoint cases, multiplicities, constructive Weierstrass approximation and the final semicircle-law argument."
 ---
 
+<div class="correction-post" markdown="1">
+
+<p class="correction-deck">From tridiagonal spectra to the semicircle law</p>
+
 This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices.
 
 This post is the complete mathematical correction. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case. A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile.
 
-The complete correction is also available as a [typeset PDF](/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf) and as [LaTeX source](/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex).
+<div class="correction-downloads">
+  <span>Complete files</span>
+  <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf">Typeset PDF</a>
+  <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">LaTeX source</a>
+</div>
 
-## Reading guide
+<div class="correction-route" role="img" aria-label="The proof route goes from a recurrence, to exact tridiagonal spectra, to constructive polynomial approximation, and finally to the semicircle law.">
+  <div><span>01</span><strong>Recurrence</strong><small>closed forms</small></div>
+  <div><span>02</span><strong>Spectra</strong><small>cosine grids</small></div>
+  <div><span>03</span><strong>Approximation</strong><small>explicit polynomials</small></div>
+  <div><span>04</span><strong>Semicircle law</strong><small>moments and tails</small></div>
+</div>
 
-- [Preliminary question](#preliminary-question): solve the recurrence in its hyperbolic, trigonometric, and boundary regimes.
-- [Part I](#part-i): pass from Riemann sums to the arcsine law on $[-2,2]$.
-- [Part II](#part-ii): compute tridiagonal and Toeplitz spectra and their limiting empirical distributions.
-- [Part III](#part-iii-constructive-weierstrass-approximation): prove Weierstrass approximation from explicit step-polynomial approximants.
-- [Part IV](#part-iv): derive the semicircle moments, control spectral tails, and conclude convergence in probability.
+<nav class="correction-toc" aria-label="Correction sections">
+  <span>Jump to</span>
+  <a href="#preliminary-question">Recurrence</a>
+  <a href="#part-i">Arcsine law</a>
+  <a href="#part-ii">Toeplitz spectra</a>
+  <a href="#part-iii-constructive-weierstrass-approximation">Approximation</a>
+  <a href="#part-iv">Random matrices</a>
+</nav>
 
-The paper uses two different limiting measures. Parts I-II lead to the **arcsine law**
+The paper uses two different limiting measures. They should not be confused.
 
+<div class="law-comparison" markdown="1">
+<div class="law-panel" markdown="1">
+<p class="law-stage">Parts I-II</p>
+<p class="law-name">Arcsine law</p>
 $$
 \frac{1}{\pi\sqrt{4-x^2}}\,\mathbf 1_{(-2,2)}(x)\,dx,
 $$
-
-whereas Part IV leads to the **semicircle law**
-
+</div>
+<div class="law-panel" markdown="1">
+<p class="law-stage">Part IV</p>
+<p class="law-name">Semicircle law</p>
 $$
 \frac{1}{2\pi}\sqrt{4-x^2}\,\mathbf 1_{[-2,2]}(x)\,dx.
 $$
-
-Keeping those two densities distinct is one of the main navigational points of the problem.
+</div>
+</div>
 
 ## General conventions
 
@@ -872,3 +893,5 @@ ideas of spectral averaging and polynomial approximation connect them.
 For the formal verification record, including the exact compiled suppliers
 for the low-degree Wigner moments and integrability, see the companion article
 [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/).
+
+</div>
