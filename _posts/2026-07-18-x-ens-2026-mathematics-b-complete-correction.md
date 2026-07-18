@@ -12,7 +12,7 @@ excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-
 
 <p class="correction-deck">From tridiagonal spectra to the semicircle law</p>
 
-This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices. The unity is thematic rather than a strict dependency chain: as the official statement notes, Part III is independent of Parts I–II and Part IV is essentially independent of them.
+<p class="correction-abstract"><strong>Abstract.</strong> This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices. The unity is thematic rather than a strict dependency chain: as the official statement notes, Part III is independent of Parts I–II and Part IV is essentially independent of them.</p>
 
 This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case.
 
@@ -50,17 +50,29 @@ A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18
   <div><span>04</span><strong>Semicircle law</strong><small>moments and tails</small></div>
 </div>
 
-<nav class="correction-toc" aria-label="Correction sections">
-  <span>Jump to</span>
-  <a href="#preliminary-question">Recurrence</a>
-  <a href="#arcsine-versus-semicircle">Compare laws</a>
-  <a href="#part-i-arcsine-law">Arcsine law</a>
-  <a href="#part-ii-toeplitz-spectra">Toeplitz spectra</a>
-  <a href="#part-iii-constructive-approximation">Approximation</a>
-  <a href="#part-iv-random-matrices-and-the-semicircle-law">Random matrices</a>
-  <a href="#supplement-closing-the-moment-gap">Moment supplement</a>
-  <a href="#what-the-problem-is-secretly-about">Hidden structure</a>
+<div class="correction-reading-layout" markdown="1">
+
+<nav class="correction-toc" aria-label="Correction navigation">
+  <div class="toc-sections">
+    <p class="toc-label">Contents</p>
+    <div class="toc-section-links">
+      <a href="#preliminary-question">Recurrence</a>
+      <a href="#arcsine-versus-semicircle">Compare laws</a>
+      <a href="#part-i-arcsine-law">Arcsine law</a>
+      <a href="#part-ii-toeplitz-spectra">Toeplitz spectra</a>
+      <a href="#part-iii-constructive-approximation">Approximation</a>
+      <a href="#part-iv-random-matrices-and-the-semicircle-law">Random matrices</a>
+      <a href="#supplement-closing-the-moment-gap">Moment supplement</a>
+      <a href="#what-the-problem-is-secretly-about">Hidden structure</a>
+    </div>
+  </div>
+  <details class="toc-questions" open>
+    <summary>Questions</summary>
+    <div class="toc-question-links" data-question-links></div>
+  </details>
 </nav>
+
+<div class="correction-main" markdown="1">
 
 The paper uses two different limiting measures. They should not be confused.
 
@@ -3012,5 +3024,9 @@ direct proofs, interface-supplied results and remaining boundaries.
 </details>
 
 </aside>
+
+</div>
+
+</div>
 
 </div>
