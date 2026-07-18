@@ -19,10 +19,11 @@ This post is the complete mathematical correction of the Ecole Polytechnique-ESP
 A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
 
 <div class="correction-downloads">
-  <span>Complete files</span>
-  <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Official paper</a>
-  <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf">Typeset PDF</a>
+  <span>Paper and correction</span>
+  <a href="/assets/files/X_ENS_2026_MP_MPI_Mathematiques_B_sujet_officiel.pdf" target="_blank" rel="noopener">Official paper · PDF · 6 pages</a>
+  <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf" target="_blank" rel="noopener">Complete correction · PDF</a>
   <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">LaTeX source</a>
+  <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Source: Ecole Polytechnique</a>
 </div>
 
 <div class="correction-route" role="img" aria-label="The proof route goes from a recurrence, to exact tridiagonal spectra, to constructive polynomial approximation, and finally to the semicircle law.">
