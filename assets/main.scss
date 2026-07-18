@@ -461,17 +461,20 @@ body:has(.correction-post) .post-title {
 
 .correction-post mjx-container {
   display: inline-block;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  max-width: none;
+  overflow: visible;
   vertical-align: middle;
 }
 
 .correction-post mjx-container[display="true"] {
   display: block;
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   margin: 1.25rem 0 !important;
   padding: 0.2rem 0 0.35rem;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .correction-post .question-statement {
