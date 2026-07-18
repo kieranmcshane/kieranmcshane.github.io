@@ -16,6 +16,10 @@ This paper has an unusually coherent mathematical arc. It starts with a second-o
 
 This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case.
 
+Each solution is preceded by the corresponding question in English. These
+statements come from my English translation of the paper; the original French
+paper remains the authoritative version.
+
 It is a detailed reference correction, not a model of the amount of prose a
 candidate could write during the four-hour examination.
 
@@ -32,7 +36,8 @@ A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18
 
 <div class="correction-downloads">
   <span>Paper and correction</span>
-  <a href="/assets/files/X_ENS_2026_MP_MPI_Mathematiques_B_sujet_officiel.pdf" target="_blank" rel="noopener">Official paper · PDF · 6 pages</a>
+  <a href="/assets/files/X_ENS_2026_MP_MPI_Mathematiques_B_sujet_officiel.pdf" target="_blank" rel="noopener">Official paper · French · PDF · 6 pages</a>
+  <a href="/assets/files/X_ENS_2026_MP_MB_english_translation.pdf" target="_blank" rel="noopener">Paper · English translation · PDF · 6 pages</a>
   <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf" target="_blank" rel="noopener">Complete correction · PDF</a>
   <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">LaTeX source</a>
   <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Source: Ecole Polytechnique</a>
@@ -195,6 +200,21 @@ passage where the object is defined.
 
 ### Question 1.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Let $\alpha\in\mathbb R$. Consider the real sequence $(u_n)_{n\ge0}$ defined by
+
+$$
+u_0=0,\qquad u_1=1,\qquad
+\forall n\ge2,\quad u_n=\alpha u_{n-1}-u_{n-2}.
+$$
+
+Express $u_n$ in terms of $n$ and $\alpha$ for every integer $n\ge0$.
+Carefully distinguish the cases $|\alpha|>2$, $|\alpha|<2$, $\alpha=2$, and
+$\alpha=-2$.
+</aside>
+
 The recurrence
 
 $$
@@ -313,6 +333,21 @@ sums, then transport the uniform measure on an angle interval through
 $x=2\cos\theta$. This produces the arcsine density.
 
 ### Question 2.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Let $f$ be a real-valued continuous function on $[0,1]$. For $n\ge1$, define
+
+$$
+v_n=\frac1n\sum_{k=1}^n f\left(\frac{k}{n+1}\right),
+\qquad
+w_n=\frac1n\sum_{k=1}^n f\left(\frac{2k}{2n+1}\right).
+$$
+
+Show that $(v_n)_{n\ge1}$ and $(w_n)_{n\ge1}$ converge and have the same
+limit.
+</aside>
 
 All estimates below are written for $n\ge1$; changing finitely many
 initial terms has no effect on the limit. Let $f$ be continuous on
@@ -467,6 +502,22 @@ $$
 
 ### Question 3a.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Let $f$ be a real-valued continuous function on $[-2,2]$. Prove that
+
+$$
+I(f)=\frac1\pi\int_{-2}^2\frac{f(x)}{\sqrt{4-x^2}}\,dx
+$$
+
+is convergent and that
+
+$$
+I(f)=\frac1\pi\int_0^\pi f(2\cos\theta)\,d\theta.
+$$
+</aside>
+
 Let $f$ be continuous on $[-2,2]$ and let $M=\sup_{[-2,2]}|f|$. The only
 possible singularities of
 
@@ -530,6 +581,13 @@ $$
 
 ### Question 3b.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For $n\in\mathbb N$, let $f_n:\mathbb R\to\mathbb R$ be given by
+$f_n(x)=x^n$. Compute $I(f_n)$ for $n=0,1,2$.
+</aside>
+
 For $f_0(x)=1$,
 
 $$
@@ -562,6 +620,12 @@ $$
 </div>
 
 ### Question 3c.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Compute $I(f_n)$ in terms of $n$ for every integer $n\ge0$.
+</aside>
 
 If $n$ is odd, the function $x^n/\sqrt{4-x^2}$ is odd on $[-2,2]$, so
 
@@ -641,6 +705,20 @@ $$
 
 ### Question 4a.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For each $n\ge1$, let $U_n$ be uniform on $\{1,\ldots,n\}$, so that
+$\mathbb P(U_n=k)=1/n$. If $f$ is a real-valued continuous function on
+$[-2,2]$, prove that
+
+$$
+\mathbb E\!\left[f\!\left(2\cos\left(\frac{\pi U_n}{n+1}\right)\right)\right]
+\longrightarrow
+\frac1\pi\int_{-2}^2\frac{f(x)}{\sqrt{4-x^2}}\,dx.
+$$
+</aside>
+
 Let $f$ be continuous on $[-2,2]$ and define
 
 $$
@@ -679,6 +757,18 @@ $$
 </div>
 
 ### Question 4b.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Prove that, for every $y\in[-2,2]$,
+
+$$
+\mathbb P\!\left(2\cos\left(\frac{\pi U_n}{n+1}\right)<y\right)
+\longrightarrow
+\frac1\pi\int_{-2}^y\frac{dx}{\sqrt{4-x^2}}.
+$$
+</aside>
 
 Fix $y\in[-2,2]$ and define
 
@@ -742,6 +832,21 @@ The recurrence from Question 1 now reappears as a determinant recurrence.
 
 ### Question 5a.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For $n\ge2$, let $T_n$ be the tridiagonal matrix with zeros on the diagonal
+and ones immediately above and below it:
+
+$$
+(T_n)_{j,k}=\delta_{j,k+1}+\delta_{j+1,k},
+\qquad 1\le j,k\le n.
+$$
+
+Write $\chi_n(X)=\det(XI_n-T_n)$. For $n=2$ and $n=3$, compute $\chi_n$
+and determine the spectrum of $T_n$.
+</aside>
+
 For $n=2$,
 
 $$
@@ -788,6 +893,13 @@ $$
 
 ### Question 5b.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For every integer $n\ge4$, express $\chi_n$ in terms of $\chi_{n-1}$ and
+$\chi_{n-2}$.
+</aside>
+
 It is convenient to set $\chi_0(X)=1$ and $\chi_1(X)=X$. For $n\ge2$,
 expand
 
@@ -825,6 +937,21 @@ In
 particular this proves the requested recurrence for all $n\ge4$.
 
 ### Question 5c.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Let $\alpha\in\mathbb C$ satisfy $|\alpha|<2$. Establish, for $n\ge2$,
+
+$$
+\chi_n(\alpha)=\frac1{i\sqrt{4-\alpha^2}}
+\left[
+\left(\frac{\alpha+i\sqrt{4-\alpha^2}}2\right)^{n+1}
+-
+\left(\frac{\alpha-i\sqrt{4-\alpha^2}}2\right)^{n+1}
+\right].
+$$
+</aside>
 
 Let $\alpha\in\mathbb{C}$ with $\lvert\alpha\rvert<2$, and choose a square root
 $\Delta$ of $4-\alpha^2$. Since $\lvert\alpha\rvert<2$, one has $\alpha\ne\pm2$,
@@ -883,6 +1010,13 @@ two terms and changes the sign of the denominator, so the value is
 independent of this choice.
 
 ### Question 5d.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Deduce an exact expression for the coefficients of $\chi_n$. The
+coefficients may be given as sums of products of binomial coefficients.
+</aside>
 
 Fix $\alpha\in(-2,2)$ and put $D=\sqrt{4-\alpha^2}$. Expanding the formula
 of Question 5c by the binomial theorem gives
@@ -949,6 +1083,17 @@ by Pascal's identity. The induction follows.
 
 ### Question 6.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Show that, for every integer $n\ge2$, the eigenvalues of $T_n$ are
+
+$$
+2\cos\left(\frac{k\pi}{n+1}\right),
+\qquad k=1,\ldots,n.
+$$
+</aside>
+
 Let $\theta\in(0,\pi)$ and set $\alpha=2\cos\theta$. By Question 1 or by
 Question 5c,
 
@@ -985,6 +1130,24 @@ each eigenvalue having multiplicity $1$.
 
 ### Question 7.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For a real-valued function $f$ and $M\in M_n(\mathbb R)$, define
+
+$$
+S_f(M)=\frac1n\sum_{(\lambda,m_\lambda)\in\operatorname{Sp}(M)}
+m_\lambda f(\lambda).
+$$
+
+Prove that, for every continuous $f$ on $[-2,2]$,
+
+$$
+\lim_{n\to\infty}S_f(T_n)
+=\frac1\pi\int_{-2}^2\frac{f(x)}{\sqrt{4-x^2}}\,dx.
+$$
+</aside>
+
 By Question 6, the <a class="notation-ref" href="#definition-sf" data-definition="Spectral average: the mean of f over the eigenvalues, counted with multiplicity." aria-describedby="glossary-sf-desc">spectral average $S&#95;f(T&#95;n)$</a> is
 
 $$
@@ -1007,6 +1170,19 @@ $$
 </div>
 
 ### Question 8a.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For $n\ge2$ and $a,b,c\in\mathbb R$, let
+
+$$
+(T_n(a,b,c))_{i,j}=a\delta_{i,j}+b\delta_{i+1,j}+c\delta_{i,j+1}.
+$$
+
+Express the spectrum of $T_n(a,b,c)$ in terms of $a$ and the spectrum of
+$T_n(0,b,c)$.
+</aside>
 
 We have
 
@@ -1035,6 +1211,13 @@ $$
 with multiplicities preserved.
 
 ### Question 8b.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Express the spectrum of $T_n(a,b,c)$ in terms of $a$ and the spectrum of
+$T_n(0,bc,1)$.
+</aside>
 
 Let
 
@@ -1074,6 +1257,13 @@ $$
 again with algebraic multiplicities.
 
 ### Question 8c.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Assume $bc>0$. Express all complex eigenvalues of $T_n(a,b,c)$ in terms of
+$a,b,c$, and $n$. One may first reduce to the case $b=c$.
+</aside>
 
 Assume $bc>0$. Then $b$ and $c$ have the same sign. Set
 
@@ -1127,6 +1317,19 @@ The eigenvalues are real and simple.
 
 ### Question 9a.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Assume $bc>0$. Prove that, for every real-valued continuous function $f$ on
+$\mathbb R$,
+
+$$
+\lim_{n\to\infty}S_f(T_n(a,b,c))
+=\frac1\pi\int_{-2}^2
+\frac{f(a+\sqrt{bc}\,x)}{\sqrt{4-x^2}}\,dx.
+$$
+</aside>
+
 For $bc>0$, Question 8c gives
 
 $$
@@ -1165,6 +1368,14 @@ $$
 </div>
 
 ### Question 9b.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Let $y\in\mathbb R$, and let $q_n(y)$ be the number of eigenvalues of
+$T_n(a,b,c)$ in $(-\infty,y]$. Give an asymptotic equivalent of $q_n(y)$ as
+$n\to\infty$.
+</aside>
 
 Let
 
@@ -1313,6 +1524,31 @@ then replace every step by an explicit polynomial.
 
 ### Question 10a.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+The Weierstrass approximation theorem may not be used in Questions 10–12.
+For $n\ge0$, define
+
+$$
+Q_n(X)=(1-X^n)^{2^n},qquad
+P_n(X)=Q_n\left(\frac{1-X}{2}\right),
+$$
+
+and let $H:[-1,1]\to\mathbb R$ be the step function
+
+$$
+H(x)=
+\begin{cases}
+0,&x<0,\\
+1,&x\ge0.
+\end{cases}
+$$
+
+Show that, for every $0\le\kappa<1/2$, $(Q_n)$ converges uniformly to $1$
+on $[0,\kappa]$ and uniformly to $0$ on $[1-\kappa,1]$.
+</aside>
+
 Let $0\le\kappa<1/2$.
 
 On $[0,\kappa]$, for $n\ge1$ and $0\le x\le\kappa$,
@@ -1365,6 +1601,16 @@ $$
 
 ### Question 10b.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Deduce that, for every $0<\eta\le1$, $(P_n)$ converges uniformly to $H$ on
+
+$$
+[-1,1]\setminus[-\eta,\eta].
+$$
+</aside>
+
 Let $0<\eta\le1$. For $x\in[-1,1]$ put
 
 $$
@@ -1406,6 +1652,24 @@ $$
 </div>
 
 ### Question 11.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Let $f:[-1,1]\to\mathbb R$ be continuous and let $\varepsilon>0$. Assume in
+this question that $f(-1)=0$. Show that there exist $N\ge1$, points
+
+$$
+-1<c_1<c_2<\cdots<c_N<1,
+$$
+
+and $(a_1,\ldots,a_N)\in[-\varepsilon,\varepsilon]^N$ such that
+
+$$
+\forall x\in[-1,1],\qquad
+\left|f(x)-\sum_{i=1}^N a_iH(x-c_i)\right|\le\varepsilon.
+$$
+</aside>
 
 Assume first that $f(-1)=0$. Since $f$ is continuous on the compact
 interval $[-1,1]$, it is uniformly continuous. Choose $\delta>0$ such
@@ -1480,6 +1744,25 @@ with
 $a_i\in[-\varepsilon,\varepsilon]$.
 
 ### Question 12.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Deduce that there exists a polynomial $P\in\mathbb R[X]$ such that
+
+$$
+\forall x\in[-1,1],\qquad |f(x)-P(x)|\le\varepsilon.
+$$
+
+The official hint suggests considering
+
+$$
+F_{\varepsilon,n}(X)=\sum_{i=1}^N a_iP_n(X-c_i)
+$$
+
+and choosing $\eta>0$ so that the intervals
+$[c_i-\eta,c_i+\eta]$ are pairwise disjoint.
+</aside>
 
 We first prove the result for $f(-1)=0$, then remove this assumption.
 
@@ -1747,6 +2030,17 @@ paper assumes them for every $k$.
 
 ### Question 13a.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For every $k\ge0$ and $n\ge1$, show the following equality of random
+variables:
+
+$$
+S_n(f_k)=\frac1n\operatorname{Tr}(X_n^k).
+$$
+</aside>
+
 For every $\omega$, the matrix $X_n(\omega)$ is real symmetric. Hence it
 is diagonalizable over $\mathbb{R}$ in an orthonormal basis. If its
 eigenvalues are $\lambda_1,\dots,\lambda_n$, repeated with multiplicity,
@@ -1776,6 +2070,12 @@ $$
 </div>
 
 ### Question 13b.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Compute $\Sigma(f_k)$ in terms of $k$ for every integer $k\ge0$.
+</aside>
 
 If $k$ is odd, the integrand $x^k\sqrt{4-x^2}$ is odd on $[-2,2]$, so
 
@@ -1862,6 +2162,13 @@ $$
 The even moments are the Catalan numbers.
 
 ### Question 13c.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Prove $(H_k)$ for $0\le k\le2$. In the remainder of the paper, $(H_k)$ may
+be assumed for every integer $k\ge0$.
+</aside>
 
 We prove $(H_k)$ for $k=0,1,2$.
 
@@ -2210,6 +2517,24 @@ it is not among the claims currently proved directly in the Lean companion.
 
 ### Question 14.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+For $k\ge0$ and $B>0$, define
+
+$$
+g_{k,B}(x)=|x|^k\mathbf 1_{\{|x|>B\}}.
+$$
+
+Show that, for every $\varepsilon>0$,
+
+$$
+\mathbb P\bigl(S_n(g_{k,B})\ge\varepsilon\bigr)
+\le
+\frac{\mathbb E(S_n(f_{2k}))}{\varepsilon B^k}.
+$$
+</aside>
+
 Let $k\ge0$, $B>0$, and
 
 <span id="definition-gkb" class="definition-target" aria-hidden="true"></span>
@@ -2258,6 +2583,19 @@ $$
 </div>
 
 ### Question 15.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Deduce that, for every $B>4$ and $\varepsilon>0$,
+
+$$
+\mathbb P\bigl(S_n(g_{k,B})\ge\varepsilon\bigr)\longrightarrow0.
+$$
+
+One may observe that, for $k\le k'$ and $B>4$, one has
+$g_{k,B}\le g_{k',B}$.
+</aside>
 
 The question asks for $B>4$, but a direct comparison reaches the natural
 threshold $B\ge2$. Fix $k\ge0$, $B\ge2$, and $\varepsilon>0$. For every
@@ -2311,6 +2649,17 @@ support.
 
 ### Question 16.
 
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Show that, for every integer $k\ge0$ and every $\varepsilon>0$,
+
+$$
+\mathbb P\bigl(|S_n(f_k)-\mathbb E(S_n(f_k))|\ge\varepsilon\bigr)
+\longrightarrow0.
+$$
+</aside>
+
 Let
 
 $$
@@ -2353,6 +2702,24 @@ $$
 </div>
 
 ### Question 17a.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Fix $B>4$. Let $f:\mathbb R\to\mathbb R$ be continuous and zero outside
+$[-B,B]$, and fix $\varepsilon>0$. Show that there exist
+$P\in\mathbb R[X]$ and $N\ge0$ such that, for every $n\ge N$,
+
+$$
+\begin{aligned}
+\mathbb P\bigl(|S_n(f)-\Sigma(f)|\ge\varepsilon\bigr)
+&\le
+\mathbb P\bigl(S_n(P\mathbf 1_{\{|x|>B\}})\ge\varepsilon/4\bigr)\\
+&\quad+
+\mathbb P\bigl(|S_n(P)-\mathbb E(S_n(P))|\ge\varepsilon/4\bigr).
+\end{aligned}
+$$
+</aside>
 
 Fix $B>4$, let $f$ be continuous on $\mathbb{R}$ and zero outside
 $[-B,B]$, and fix $\varepsilon>0$.
@@ -2486,6 +2853,17 @@ $$
 </div>
 
 ### Question 17b.
+
+<aside class="question-statement" markdown="1">
+<span class="question-statement-label">Question statement · English translation</span>
+
+Conclude that
+
+$$
+\mathbb P\bigl(|S_n(f)-\Sigma(f)|\ge\varepsilon\bigr)
+\longrightarrow0.
+$$
+</aside>
 
 We prove that the two probabilities on the right-hand side of Question
 17a tend to zero.

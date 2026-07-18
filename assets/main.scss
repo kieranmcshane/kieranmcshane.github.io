@@ -474,6 +474,34 @@ body:has(.correction-post) .post-title {
   padding: 0.2rem 0 0.35rem;
 }
 
+.correction-post .question-statement {
+  margin: -0.2rem 0 1.9rem;
+  padding: 1rem 1.05rem 0.9rem;
+  border-top: 1px solid #cfd6e1;
+  border-bottom: 1px solid #cfd6e1;
+  background: #fafbfd;
+  color: #252e3d;
+}
+
+.correction-post .question-statement > :last-child {
+  margin-bottom: 0;
+}
+
+.correction-post .question-statement-label {
+  display: block;
+  margin-bottom: 0.65rem;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.correction-post .question-statement mjx-container[display="true"] {
+  margin: 0.8rem 0 !important;
+}
+
 .correction-post .answer {
   margin: 1.55rem 0 2rem;
   padding: 0.35rem 0.9rem 0.45rem;
