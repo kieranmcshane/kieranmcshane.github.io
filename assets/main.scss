@@ -427,9 +427,11 @@ body:has(.correction-post) .post-title {
 
 .correction-post h3 {
   position: relative;
-  margin: 2.8rem 0 1.25rem;
-  padding: 0.62rem 0.8rem;
+  margin: 2.8rem 0 0;
+  padding: 0.68rem 0.85rem;
+  border: 1px solid #d7deea;
   border-left: 4px solid var(--accent);
+  border-bottom-color: #e2e6ee;
   background: #f3f6fb;
   color: var(--ink);
   font-size: 1.16rem;
@@ -478,10 +480,12 @@ body:has(.correction-post) .post-title {
 }
 
 .correction-post .question-statement {
-  margin: -0.15rem 0 2.1rem;
-  padding: 0.15rem 0.85rem 0;
-  border: 0;
-  background: transparent;
+  margin: 0 0 2.1rem;
+  padding: 1rem 0.95rem 1.1rem;
+  border: 1px solid #d7deea;
+  border-top: 0;
+  border-left: 4px solid var(--accent);
+  background: #fff;
   color: #252e3d;
 }
 
