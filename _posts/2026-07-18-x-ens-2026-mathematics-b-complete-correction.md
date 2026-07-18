@@ -34,21 +34,24 @@ entry assumptions, making the final semicircle statement standalone.
 
 A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains the placeholder-free conditional proof graph and its remaining interface boundaries. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
 
-<div class="correction-downloads">
-  <span>Paper and correction</span>
-  <a href="/assets/files/X_ENS_2026_MP_MPI_Mathematiques_B_sujet_officiel.pdf" target="_blank" rel="noopener">Official paper · French · PDF · 6 pages</a>
-  <a href="/assets/files/X_ENS_2026_MP_MB_english_translation.pdf" target="_blank" rel="noopener">Paper · English translation · PDF · 6 pages</a>
-  <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf" target="_blank" rel="noopener">Complete correction · PDF</a>
-  <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">LaTeX source</a>
-  <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Source: Ecole Polytechnique</a>
-</div>
-
-<div class="correction-route" role="img" aria-label="The proof route goes from a recurrence, to exact tridiagonal spectra, to constructive polynomial approximation, and finally to the semicircle law.">
-  <div><span>01</span><strong>Recurrence</strong><small>closed forms</small></div>
-  <div><span>02</span><strong>Spectra</strong><small>cosine grids</small></div>
-  <div><span>03</span><strong>Approximation</strong><small>explicit polynomials</small></div>
-  <div><span>04</span><strong>Semicircle law</strong><small>moments and tails</small></div>
-</div>
+<section class="correction-downloads" aria-labelledby="correction-documents-title">
+  <p class="downloads-label" id="correction-documents-title">Documents</p>
+  <div class="document-links">
+    <a class="document-link" href="/assets/files/X_ENS_2026_MP_MPI_Mathematiques_B_sujet_officiel.pdf" target="_blank" rel="noopener">
+      <strong>Official paper</strong><small>French · PDF · 6 pages</small>
+    </a>
+    <a class="document-link" href="/assets/files/X_ENS_2026_MP_MB_english_translation.pdf" target="_blank" rel="noopener">
+      <strong>English version</strong><small>PDF · 6 pages</small>
+    </a>
+    <a class="document-link" href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf" target="_blank" rel="noopener">
+      <strong>Complete correction</strong><small>PDF</small>
+    </a>
+    <a class="document-link" href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">
+      <strong>LaTeX source</strong><small>Editable source</small>
+    </a>
+  </div>
+  <p class="document-source">Original source: <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Ecole Polytechnique</a></p>
+</section>
 
 <div class="correction-reading-layout" markdown="1">
 

@@ -231,7 +231,6 @@ body:has(.correction-post) .post-meta {
 .correction-post h4,
 .correction-deck,
 .correction-downloads,
-.correction-route,
 .correction-toc,
 .notation-glossary,
 .question-anchor {
@@ -262,77 +261,82 @@ body:has(.correction-post) .post-meta {
 }
 
 .correction-downloads {
-  display: flex;
-  align-items: center;
-  gap: 1.15rem;
-  margin: 1.8rem 0 2.2rem;
-  padding: 0.8rem 0;
-  border-top: 1px solid #d9dee8;
-  border-bottom: 1px solid #d9dee8;
-  font-size: 0.9rem;
-}
-
-.correction-downloads span {
-  margin-right: auto;
-  color: var(--muted);
-  font-weight: 650;
-  text-transform: uppercase;
-  letter-spacing: 0;
-}
-
-.correction-downloads a {
-  font-weight: 650;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
-}
-
-.correction-route {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 2.4rem 0 2.6rem;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.7rem 1.4rem;
+  margin: 2rem 0 2.6rem;
+  padding: 1rem 0 1.05rem;
   border-top: 2px solid var(--ink);
   border-bottom: 1px solid #d9dee8;
 }
 
-.correction-route > div {
-  position: relative;
-  min-height: 7.2rem;
-  padding: 1rem 0.8rem 1rem 0;
+.correction-downloads .downloads-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.correction-route > div:not(:last-child) {
-  border-right: 1px solid #d9dee8;
+.document-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem 1.6rem;
 }
 
-.correction-route > div:not(:first-child) {
-  padding-left: 0.8rem;
+.document-link {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
 }
 
-.correction-route span,
-.correction-route strong,
-.correction-route small {
+.document-link strong,
+.document-link small {
   display: block;
 }
 
-.correction-route span {
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-
-.correction-route strong {
-  margin-top: 1rem;
+.document-link strong {
   color: var(--ink);
-  font-size: 0.98rem;
-}
-
-.correction-route small {
-  margin-top: 0.1rem;
-  color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.91rem;
+  font-weight: 680;
   line-height: 1.35;
 }
 
+.document-link small {
+  margin-top: 0.16rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.document-link:hover strong,
+.document-link:focus-visible strong {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.document-link:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--accent);
+  outline-offset: 0.22rem;
+}
+
+.correction-downloads .document-source {
+  grid-column: 2;
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.document-source a {
+  color: inherit;
+  text-underline-offset: 0.16em;
+}
 .correction-reading-layout,
 .correction-main {
   min-width: 0;
@@ -787,29 +791,6 @@ body:has(.correction-post) .post-meta {
     opacity: 1;
   }
 
-  .correction-route {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .correction-route > div {
-    min-height: 6.2rem;
-    padding: 0.85rem;
-    border-bottom: 1px solid #d9dee8;
-  }
-
-  .correction-route > div:not(:first-child) {
-    padding-left: 0.85rem;
-  }
-
-  .correction-route > div:nth-child(2) {
-    border-right: 0;
-  }
-
-  .correction-route > div:nth-child(3),
-  .correction-route > div:nth-child(4) {
-    border-bottom: 0;
-  }
-
   .law-comparison {
     grid-template-columns: 1fr;
   }
@@ -825,12 +806,12 @@ body:has(.correction-post) .post-meta {
   }
 
   .correction-downloads {
-    flex-wrap: wrap;
-    gap: 0.65rem 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
   }
 
-  .correction-downloads span {
-    width: 100%;
+  .correction-downloads .document-source {
+    grid-column: 1;
   }
 }
 
@@ -849,6 +830,10 @@ body:has(.correction-post) .post-meta {
 }
 
 @media (max-width: 520px) {
+  .document-links {
+    grid-template-columns: 1fr;
+  }
+
   .notation-glossary dl {
     grid-template-columns: 3.8rem 1fr;
     column-gap: 0.8rem;
