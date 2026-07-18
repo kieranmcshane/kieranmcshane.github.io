@@ -11,6 +11,9 @@
   };
 </script>
 <script defer src="{{ '/assets/js/notation-tooltips.js' | relative_url }}"></script>
+{% if page.url == '/2026/07/18/x-ens-2026-mathematics-b-complete-correction/' %}
+<script defer src="{{ '/assets/js/correction-navigation.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
+{% endif %}
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 {% if page.url == '/2026/07/18/x-ens-2026-mathematics-b-complete-correction/' %}
 <link rel="stylesheet" href="{{ '/assets/main.css' | relative_url }}?v={{ site.github.build_revision }}">
