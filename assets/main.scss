@@ -185,7 +185,7 @@ body {
 
 /* Long-form concours correction */
 body:has(.correction-post) .post-title {
-  max-width: 24ch;
+  max-width: 30ch;
   font-size: 2.125rem;
   line-height: 1.08;
   letter-spacing: 0;
@@ -384,12 +384,15 @@ body:has(.correction-post) .post-title {
   scroll-margin-top: 4rem;
 }
 
-.correction-post mjx-container[display="true"] {
+.correction-post mjx-container {
   max-width: 100%;
-  margin: 1.25rem 0 !important;
-  padding: 0.2rem 0 0.35rem;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+.correction-post mjx-container[display="true"] {
+  margin: 1.25rem 0 !important;
+  padding: 0.2rem 0 0.35rem;
 }
 
 .correction-post ol,
