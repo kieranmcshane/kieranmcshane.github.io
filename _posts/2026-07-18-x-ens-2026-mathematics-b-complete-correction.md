@@ -12,7 +12,7 @@ This paper has an unusually coherent mathematical arc. It starts with a second-o
 
 This post is the complete mathematical correction. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case. A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile.
 
-The [LaTeX source of the correction](https://github.com/kieranmcshane/xens2026mb/blob/main/docs/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex) is also available.
+The complete correction is also available as a [typeset PDF](/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf) and as [LaTeX source](/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex).
 
 ## Reading guide
 
