@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Ecole Polytechnique-ESPCI 2026 Mathematics B: Complete Correction"
+title: "Ecole Polytechnique-ESPCI 2026 Mathematics B (MP-MPI): Complete Correction"
 subtitle: "From tridiagonal spectra to the semicircle law"
 date: 2026-07-18 12:00:00 +0200
 categories: [mathematics]
 tags: [concours, linear-algebra, approximation, probability, random-matrices]
-excerpt: "A detailed question-by-question correction of the X/ENS 2026 Mathematics B paper, including endpoint cases, multiplicities, constructive Weierstrass approximation and the final semicircle-law argument."
+excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for MP-MPI, including endpoint cases, multiplicities, constructive Weierstrass approximation and the final semicircle-law argument."
 ---
 
 <div class="correction-post" markdown="1">
@@ -14,10 +14,11 @@ excerpt: "A detailed question-by-question correction of the X/ENS 2026 Mathemati
 
 This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices.
 
-This post is the complete mathematical correction. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case. A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile.
+This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case. A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains what changed when this correction was made to compile.
 
 <div class="correction-downloads">
   <span>Complete files</span>
+  <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Official paper</a>
   <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf">Typeset PDF</a>
   <a href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">LaTeX source</a>
 </div>
@@ -36,6 +37,7 @@ This post is the complete mathematical correction. It is written question by que
   <a href="#part-ii">Toeplitz spectra</a>
   <a href="#part-iii-constructive-weierstrass-approximation">Approximation</a>
   <a href="#part-iv">Random matrices</a>
+  <a href="#what-the-problem-is-secretly-about">Hidden structure</a>
 </nav>
 
 The paper uses two different limiting measures. They should not be confused.
@@ -143,7 +145,7 @@ $$R(m,h)=h\sum_{k=1}^m f(kh).$$ Then $$\begin{aligned}
 \end{aligned}$$ For $t\in[(k-1)h,kh]$, both $t$ and $kh$ belong to
 $[0,1]$ and their distance is at most $h$. If $$\omega(\delta)
   =
-  \sup\{|f(x)-f(y)|:\ x,y\in[0,1],\ |x-y|\le\delta\},$$ then
+  \sup\lbrace |f(x)-f(y)|:\ x,y\in[0,1],\ |x-y|\le\delta\rbrace,$$ then
 $\omega(\delta)\to0$ as $\delta\to0$, and the previous bound gives
 $$\left|R(m,h)-\int_0^1 f(t)\,dt\right|
   \le mh\,\omega(h)+M(1-mh).$$ The last term is exactly the contribution
@@ -236,7 +238,7 @@ $$I(f_{2p})=\frac{2^{2p}}\pi\cdot \pi\,2^{-2p}\binom{2p}{p}
 
 Let $f$ be continuous on $[-2,2]$ and define
 $$g(t)=f(2\cos(\pi t)),\qquad t\in[0,1].$$ Then $g$ is continuous on
-$[0,1]$. Since $U_n$ is uniform on $\{1,\dots,n\}$, $$\begin{aligned}
+$[0,1]$. Since $U_n$ is uniform on $\lbrace 1,\dots,n\rbrace$, $$\begin{aligned}
  \mathbb{E}\left(f\left(2\cos\left(\frac{\pi U_n}{n+1}\right)\right)\right)
  &=\frac1n\sum_{k=1}^n f\left(2\cos\left(\frac{\pi k}{n+1}\right)\right)\\
  &=\frac1n\sum_{k=1}^n g\left(\frac{k}{n+1}\right).
@@ -261,7 +263,7 @@ inequality is true for every $k=1,\dots,n$, so the probability is $1$
 for every $n$. The right-hand integral is also $1$.
 
 Assume now $-2<y<2$. Put $a_n=(n+1)\theta_y/\pi$. The number of integers
-$k\in\{1,\dots,n\}$ with $k>a_n$ is $n-\lfloor a_n\rfloor$. Hence
+$k\in\lbrace 1,\dots,n\rbrace$ with $k>a_n$ is $n-\lfloor a_n\rfloor$. Hence
 $$\mathbb{P}\left(2\cos\left(\frac{\pi U_n}{n+1}\right)<y\right)
   =\frac{n-\lfloor a_n\rfloor}{n}
   \longrightarrow 1-\frac{\theta_y}{\pi}.$$ Finally, with
@@ -286,14 +288,14 @@ The recurrence from Question 1 now reappears as a determinant recurrence.
 For $n=2$, $$T_2=\begin{pmatrix}0&1\\1&0\end{pmatrix},
   \qquad
   \chi_2(X)=\det\begin{pmatrix}X&-1\\-1&X\end{pmatrix}=X^2-1.$$ Thus
-$$\boxed{\operatorname{Sp}(T_2)=\{-1,1\}.}$$ For $n=3$,
+$$\boxed{\operatorname{Sp}(T_2)=\lbrace -1,1\rbrace.}$$ For $n=3$,
 $$XI_3-T_3=\begin{pmatrix}
   X&-1&0\\
   -1&X&-1\\
   0&-1&X
   \end{pmatrix}.$$ Expanding the determinant gives
 $$\chi_3(X)=X(X^2-1)-X=X^3-2X=X(X^2-2).$$ Hence
-$$\boxed{\operatorname{Sp}(T_3)=\{-\sqrt2,0,\sqrt2\}.}$$
+$$\boxed{\operatorname{Sp}(T_3)=\lbrace -\sqrt2,0,\sqrt2\rbrace.}$$
 
 ### Question 5b.
 
@@ -334,13 +336,22 @@ independent of this choice.
 
 ### Question 5d.
 
-From the formula of Question 5c, expanded formally with $D^2=4-X^2$, one
-obtains $$\begin{aligned}
-  \chi_n(X)
-  &=\frac{(X+iD)^{n+1}-(X-iD)^{n+1}}{iD\,2^{n+1}}\\
+Fix $\alpha\in(-2,2)$ and put $D=\sqrt{4-\alpha^2}$. Expanding the formula
+of Question 5c by the binomial theorem gives $$\begin{aligned}
+  \chi_n(\alpha)
+  &=\frac{(\alpha+iD)^{n+1}-(\alpha-iD)^{n+1}}{iD\,2^{n+1}}\\
   &=\frac1{2^n}\sum_{s=0}^{\lfloor n/2\rfloor}
+      (-1)^s\binom{n+1}{2s+1}\alpha^{n-2s}(4-\alpha^2)^s.
+\end{aligned}$$ The last expression defines a polynomial in $\alpha$.
+It agrees with $\chi_n(\alpha)$ for every $\alpha\in(-2,2)$, hence on an
+infinite set. The polynomial identity principle therefore gives
+
+$$
+\chi_n(X)=\frac1{2^n}\sum_{s=0}^{\lfloor n/2\rfloor}
       (-1)^s\binom{n+1}{2s+1}X^{n-2s}(4-X^2)^s.
-\end{aligned}$$ Thus the coefficient of $X^{n-2p}$, for
+$$
+
+Thus the coefficient of $X^{n-2p}$, for
 $0\le p\le\lfloor n/2\rfloor$, may be written as $$\frac{(-1)^p4^p}{2^n}
   \sum_{s=p}^{\lfloor n/2\rfloor}
   \binom{n+1}{2s+1}\binom{s}{p}.$$ This is already an exact expression
@@ -366,14 +377,14 @@ $\sin\theta_k\ne0$ and $\sin((n+1)\theta_k)=\sin(k\pi)=0$. Therefore
 $$2\cos\left(\frac{k\pi}{n+1}\right)$$ is a root of $\chi_n$. These $n$
 numbers are distinct because $\cos$ is strictly decreasing on $[0,\pi]$.
 Since $\chi_n$ has degree $n$, they are all the roots. Hence
-$$\boxed{\operatorname{Sp}(T_n)=\left\{2\cos\left(\frac{k\pi}{n+1}\right):1\le k\le n\right\},}$$
+$$\boxed{\operatorname{Sp}(T_n)=\left\lbrace 2\cos\left(\frac{k\pi}{n+1}\right):1\le k\le n\right\rbrace,}$$
 each eigenvalue having multiplicity $1$.
 
 ### Question 7.
 
 By Question 6, $$S_f(T_n)=\frac1n\sum_{k=1}^n
   f\left(2\cos\left(\frac{k\pi}{n+1}\right)\right).$$ This is exactly
-the expectation in Question 4a with $U_n$ uniform on $\{1,\dots,n\}$.
+the expectation in Question 4a with $U_n$ uniform on $\lbrace 1,\dots,n\rbrace$.
 Therefore, for every continuous $f$ on $[-2,2]$, $$\boxed{
   \lim_{n\to\infty}S_f(T_n)
   =\frac1\pi\int_{-2}^2\frac{f(x)}{\sqrt{4-x^2}}\,dx.}$$
@@ -442,6 +453,11 @@ decreasing. Define $$L_-=a-2\sqrt{bc},
   \qquad
   L_+=a+2\sqrt{bc}.$$
 
+As in the statement, let
+$$q_n(y)=\#\lbrace 1\le k\le n:\ \lambda_{n,k}\le y\rbrace,$$
+the number of eigenvalues of $T_n(a,b,c)$ in $(-\infty,y]$, counted with
+multiplicity.
+
 If $y<L_-$, then $q_n(y)=0$ for every $n$. If $y\ge L_+$, then
 $q_n(y)=n$ for every $n$.
 
@@ -449,11 +465,10 @@ Assume now $L_-<y<L_+$. Put
 $$\theta_y=\arccos\left(\frac{y-a}{2\sqrt{bc}}\right)\in(0,\pi).$$ Then
 $$\lambda_{n,k}\le y
   \iff
-  \frac{k\pi}{n+1}\ge \theta_y.$$ Hence $$q_n(y)=\#\left\{1\le k\le n:
-  k\ge \frac{n+1}{\pi}\theta_y\right\}
-  =n-\left\lceil\frac{n+1}{\pi}\theta_y\right\rceil+1,$$ up to the
-harmless convention when the ceiling equals $n+1$, which cannot occur in
-the present open interval for large $n$. Dividing by $n$ gives
+  \frac{k\pi}{n+1}\ge \theta_y.$$ Hence $$q_n(y)=\#\left\lbrace 1\le k\le n:
+  k\ge \frac{n+1}{\pi}\theta_y\right\rbrace
+  =n-\left\lceil\frac{n+1}{\pi}\theta_y\right\rceil+1.$$
+Dividing by $n$ gives
 $$\frac{q_n(y)}n\longrightarrow 1-\frac{\theta_y}{\pi}.$$ Equivalently,
 $$1-\frac{\theta_y}{\pi}
   =\frac1\pi\int_{-2}^{(y-a)/\sqrt{bc}}
@@ -599,23 +614,40 @@ $R$ such that $$|g(x)-R(x)|\le\varepsilon
   \qquad(x\in[-1,1]).$$ Then $$P(X)=R(X)+f(-1)$$ satisfies
 $$\boxed{\forall x\in[-1,1],\qquad |f(x)-P(x)|\le\varepsilon.}$$
 
-*Scaling note.* The proof above uses the scaled polynomials
-$P_m((X-c_i)/\rho_i)$. This is the same construction as the indicated
-one, but it keeps the argument of $P_m$ inside $[-1,1]$, where Question
-10b applies. Since $\rho_i>0$, the step function is unchanged:
-$H((x-c_i)/\rho_i)=H(x-c_i)$.
+*Scaling note.* The official hint proposes the unscaled terms
+$P_m(X-c_i)$. Taken literally, Question 10b does not control them on all
+of $[-1,1]$, because $x-c_i$ can leave $[-1,1]$. The rescaling above
+repairs this domain gap: $P_m((X-c_i)/\rho_i)$ always receives an argument
+in $[-1,1]$. Since $\rho_i>0$, it does not change the target step:
+$H((x-c_i)/\rho_i)=H(x-c_i)$. This is one of the places where the formal
+verification forced a hidden domain condition into the open.
 
 ## Part IV
 
+We now recall the probabilistic assumptions rather than leaving them implicit.
 Let the upper-triangular entries
 
 $$
 (W_{i,j})_{1\le i\le j}
 $$
 
-be independent, identically distributed real random variables with mean
-zero, variance one, and the moment assumptions stated in the paper. Extend them symmetrically by
-$W_{j,i}=W_{i,j}$ and set
+be independent, identically distributed, integer-valued random variables such
+that
+
+$$
+\mathbb E(W_{1,1})=0,\qquad
+\mathbb E(W_{1,1}^2)=1,\qquad
+\mathbb E\lvert W_{1,1}\rvert^k<\infty\quad(k\ge0).
+$$
+
+In particular, Question 13c may use the finite fourth moment. Extend the
+array symmetrically by
+
+$$
+W_{j,i}=W_{i,j},
+$$
+
+and set
 
 $$
 X_n=\frac1{\sqrt n}(W_{i,j})_{1\le i,j\le n}.
@@ -635,6 +667,20 @@ $$x\longmapsto c\,x^j\sqrt{4-x^2}$$ is continuous on the compact
 interval $[-2,2]$, hence integrable there. Thus finite linear
 combinations of monomials may be integrated term by term against the
 semicircle weight.
+
+For every integer $k\ge0$, hypothesis $(H_k)$ is the pair of limits
+
+$$
+\boxed{
+\frac1n\mathbb E\!\left[\operatorname{Tr}(X_n^k)\right]
+  \longrightarrow \Sigma(f_k),
+\qquad
+\frac1{n^2}\mathbb E\!\left[\operatorname{Tr}(X_n^k)^2\right]
+  \longrightarrow \Sigma(f_k)^2.}
+$$
+
+Question 13c proves these limits for $k=0,1,2$; the remainder of the
+paper assumes them for every $k$.
 
 ### Question 13a.
 
@@ -734,7 +780,7 @@ $(H_k)$ for every $k\ge0$.
 
 Let $k\ge0$, $B>0$, and $$g_{k,B}(x)=|x|^k\mathbf{1}_{|x|>B}.$$ For
 every real $x$, $$|x|^k\mathbf{1}_{|x|>B}
-  \le \frac{|x|^{2k}}{B^k}.$$ Indeed, on $\{|x|>B\}$ this is equivalent
+  \le \frac{|x|^{2k}}{B^k}.$$ Indeed, on $\lbrace |x|>B\rbrace$ this is equivalent
 to $B^k\le |x|^k$, and outside this set the left-hand side is zero.
 Therefore, for every $\omega$, $$S_n(g_{k,B})(\omega)
   \le \frac1{B^k}S_n(f_{2k})(\omega).$$ The random variable
@@ -748,23 +794,47 @@ $$\begin{aligned}
 
 ### Question 15.
 
-Fix $k\ge0$, $B>4$, and $\varepsilon>0$. Let $\ell\ge k$. Since
-$|x|>B>1$ implies $|x|^k\le |x|^\ell$, we have
-$$g_{k,B}\le g_{\ell,B}.$$ Therefore
-$$\mathbb{P}(S_n(g_{k,B})\ge\varepsilon)
-  \le \mathbb{P}(S_n(g_{\ell,B})\ge\varepsilon).$$ By Question 14,
-$$\mathbb{P}(S_n(g_{\ell,B})\ge\varepsilon)
-  \le \frac{\mathbb{E}(S_n(f_{2\ell}))}{\varepsilon B^\ell}.$$ Using
-Question 13a and hypothesis $(H_{2\ell})$,
-$$\mathbb{E}(S_n(f_{2\ell}))\longrightarrow\Sigma(f_{2\ell}).$$ By
-Question 13b,
-$$\Sigma(f_{2\ell})=\frac1{\ell+1}\binom{2\ell}{\ell}\le \binom{2\ell}{\ell}\le 4^\ell.$$
-Taking $\limsup$ in $n$ gives
-$$\limsup_{n\to\infty}\mathbb{P}(S_n(g_{k,B})\ge\varepsilon)
-  \le \frac{4^\ell}{\varepsilon B^\ell}
-  =\frac1\varepsilon\left(\frac4B\right)^\ell.$$ Now let
-$\ell\to\infty$. Since $B>4$, the right-hand side tends to $0$. Hence
-$$\boxed{\mathbb{P}(S_n(g_{k,B})\ge\varepsilon)\longrightarrow0.}$$
+The question asks for $B>4$, but a direct comparison reaches the natural
+threshold $B>2$. Fix $k\ge0$, $B>2$, and $\varepsilon>0$. For every
+integer $\ell$ with $2\ell\ge k$, and every $x$ with $|x|>B$,
+
+$$
+|x|^k
+  =|x|^{2\ell}|x|^{k-2\ell}
+  \le B^{k-2\ell}|x|^{2\ell}.
+$$
+
+Thus
+
+$$
+g_{k,B}(x)\le B^{k-2\ell}f_{2\ell}(x).
+$$
+
+Markov's inequality, Question 13a and $(H_{2\ell})$ give
+
+$$
+\begin{aligned}
+\limsup_{n\to\infty}
+\mathbb P\bigl(S_n(g_{k,B})\ge\varepsilon\bigr)
+&\le \frac{B^{k-2\ell}}{\varepsilon}
+   \lim_{n\to\infty}\mathbb E\bigl(S_n(f_{2\ell})\bigr)\\
+&=\frac{B^{k-2\ell}}{\varepsilon}\Sigma(f_{2\ell})\\
+&\le \frac{B^k}{\varepsilon}\left(\frac4{B^2}\right)^\ell,
+\end{aligned}
+$$
+
+because the Catalan number
+$\Sigma(f_{2\ell})=(\ell+1)^{-1}\binom{2\ell}{\ell}$ is at most
+$4^\ell$. Letting $\ell\to\infty$ proves
+
+$$
+\boxed{
+\mathbb P\bigl(S_n(g_{k,B})\ge\varepsilon\bigr)\longrightarrow0
+\qquad(B>2).}
+$$
+
+This is stronger than the requested $B>4$. The number $2$ is also the
+natural threshold: it is the edge of the limiting semicircle support.
 
 ### Question 16.
 
@@ -850,7 +920,7 @@ $$C_1=\sum_{j=0}^d |c_j|,$$ then $$|S_n(P)-\mathbb{E}(S_n(P))|
 the quantity is zero. Otherwise, the event
 $$|S_n(P)-\mathbb{E}(S_n(P))|\ge\varepsilon/4$$ is contained in the
 union of the events
-$$|S_n(f_j)-\mathbb{E}(S_n(f_j))|\ge\frac{\varepsilon}{4(d+1)\max(1,C_1)}
+$$|S_n(f_j)-\mathbb{E}(S_n(f_j))|\ge\frac{\varepsilon}{4\max(1,C_1)}
   \qquad(0\le j\le d),$$ each of which has probability tending to zero
 by Question 16. Hence
 $$\mathbb{P}(|S_n(P)-\mathbb{E}(S_n(P))|\ge\varepsilon/4)\longrightarrow0.$$
@@ -870,13 +940,36 @@ zero. Otherwise Question 15 gives $$\begin{aligned}
 \end{aligned}$$ Combining this with Question 17a yields
 $$\boxed{\mathbb{P}(|S_n(f)-\Sigma(f)|\ge\varepsilon)\longrightarrow0.}$$
 This is the asserted convergence in probability of the spectral averages
-against every continuous compactly supported test function supported in
-$[-B,B]$ with $B>4$.
+against every continuous test function supported in $[-B,B]$.
+
+Every compact subset of $\mathbb R$ is contained in $[-B,B]$ for some
+$B>4$. Therefore the argument covers every $f\in C_c(\mathbb R)$, with no
+extra qualification. It even extends to every bounded continuous function.
+Indeed, Question 15 with $k=0$ gives
+
+$$
+S_n(\mathbf 1_{\lbrace |x|>B\rbrace})\xrightarrow{\mathbb P}0
+\qquad(B>2).
+$$
+
+Fix $B>4$ and choose a continuous cutoff $\varphi_B$ equal to $1$ on $[-B,B]$ and
+vanishing outside a slightly larger compact interval. Then
+$f\varphi_B\in C_c(\mathbb R)$ and
+
+$$
+\lvert S_n(f)-S_n(f\varphi_B)\rvert
+\le \lVert f\rVert_\infty
+   S_n(\mathbf 1_{\lbrace |x|>B\rbrace}).
+$$
+
+Since the semicircle law is supported on $[-2,2]\subset[-B,B]$, one also
+has $\Sigma(f\varphi_B)=\Sigma(f)$. Hence the same convergence holds for
+all $f\in C_b(\mathbb R)$.
 
 ## Conclusion
 
 The final statement is a weak form of the Wigner semicircle law: for every
-continuous compactly supported function $f$ covered by the argument,
+bounded continuous function $f$,
 
 $$
 S_n(f)\xrightarrow{\mathbb P}
@@ -894,6 +987,42 @@ That architecture is the real strength of the problem. The early cosine grid
 produces the arcsine law; the later trace moments produce the Catalan numbers
 and the semicircle law. The two limiting measures are different, but the same
 ideas of spectral averaging and polynomial approximation connect them.
+
+## What the problem is secretly about
+
+The recurrence polynomials in Part II have a standard name:
+
+$$
+\chi_n(X)=U_n\!\left(\frac X2\right),
+$$
+
+where $U_n$ is the Chebyshev polynomial of the second kind. Equivalently,
+if $q\in\mathbb C\setminus\lbrace 0,1,-1\rbrace$ and $X=q+q^{-1}$, then
+
+$$
+\chi_n(X)
+=\frac{q^{n+1}-q^{-(n+1)}}{q-q^{-1}}
+=[n+1]_q,
+$$
+
+the usual quantum integer. The zeros in Question 6 are therefore the
+root-of-unity zeros of $[n+1]_q$ written on the real line.
+
+This is also graph theory. The matrix $T_n$ is the adjacency matrix of the
+path graph $A_n$. Two different ways of observing the same matrices already
+foreshadow the two limiting laws in the paper:
+
+- the normalized trace $n^{-1}\operatorname{Tr}f(T_n)$ samples the whole
+  cosine grid and tends to the arcsine law;
+- the corner moment $\langle e_1,T_n^{2p}e_1\rangle$ counts Dyck paths of
+  length $2p$ and, once $n$ is large compared with $p$, equals the Catalan
+  number $C_p$, the moment of the semicircle law.
+
+So the arcsine and semicircle measures are not unrelated guests. One is the
+bulk density of states of long paths; the other is the limiting spectral
+measure seen from an endpoint. This path-graph/Chebyshev structure is also
+the one that appears in Temperley-Lieb and Jones theory, though the exam
+wisely remains self-contained and does not require that language.
 
 For the formal verification record, including the exact compiled suppliers
 for the low-degree Wigner moments and integrability, see the companion article
