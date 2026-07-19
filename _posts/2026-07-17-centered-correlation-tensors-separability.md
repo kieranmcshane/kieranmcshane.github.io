@@ -26,7 +26,7 @@ The article has a complete bipartite core followed by a research-direction appen
 
 **Bipartite core**
 
-- [Bloch coordinates](#one-system-bloch-coordinates) fixes the normalization; the [notation glossary](#notation-glossary) gives short reminders.
+- [Bloch coordinates](#one-system-bloch-coordinates) fixes the normalization; the [notation glossary](#notation-glossary) provides a compact reference for recurring symbols.
 - [The uncentered test](#from-product-states-to-the-de-vicente-bound) derives the de Vicente nuclear-norm bound.
 - [Centering](#subtracting-the-local-means) turns the correlation matrix into a covariance and gives the marginal-dependent bound.
 - [Equality and examples](#equality-pure-states-and-two-qubit-checks) identifies equality cases and calibrates both successes and false negatives. Readers interested only in the established bipartite criterion can stop after the [calibrated false negative](#a-calibrated-false-negative).
@@ -38,7 +38,7 @@ The article has a complete bipartite core followed by a research-direction appen
 
 ## Notation glossary
 
-Only notation that recurs across several sections is linked. Hovering over, or focusing, a linked expression gives a short reminder; activating it moves to the full definition. External papers open in a separate tab.
+Only notation that recurs across several sections is linked. Hovering over or focusing a linked expression shows a brief definition; activating it moves to the defining passage. External papers open in a separate tab.
 
 <div class="notation-glossary">
   <dl>

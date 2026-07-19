@@ -177,8 +177,8 @@ otherwise hide a zero term.
 ## Notation guide
 
 Only notation that recurs across several questions is collected here. Hovering
-over a linked reuse gives a short reminder; following the link returns to the
-passage where the object is defined.
+over or focusing a linked expression reveals its definition; following the link
+returns to the passage where the object is defined.
 
 <div class="notation-glossary">
   <dl>

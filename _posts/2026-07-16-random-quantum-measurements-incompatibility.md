@@ -25,7 +25,7 @@ This is a layered article; it need not be read from beginning to end. Choose the
 
 ## Notation glossary
 
-Only the notation that recurs across several sections is linked. Hovering over, or focusing, a linked symbol gives a short reminder; activating it moves to the full definition. Recurring technical terms use the same convention.
+Only notation that recurs across several sections is linked. Hovering over or focusing a linked symbol shows its meaning in a tooltip; activating it moves to the defining passage. Recurring technical terms use the same convention.
 
 <div class="notation-glossary">
   <dl>
