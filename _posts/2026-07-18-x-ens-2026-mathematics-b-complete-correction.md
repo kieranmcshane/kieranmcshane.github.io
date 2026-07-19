@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "Ecole Polytechnique-ESPCI 2026 Mathematics B (MP-MPI): Complete Correction"
+title: "École Polytechnique–ESPCI 2026 Mathematics B (MP–MPI): Complete Correction"
 subtitle: "Question-by-question solutions and reference notes"
 date: 2026-07-18 12:00:00 +0200
+last_modified_at: 2026-07-19 16:00:00 +0200
 categories: [mathematics]
-tags: [concours, linear-algebra, approximation, probability, random-matrices]
-excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for MP-MPI, including endpoint cases, multiplicities, constructive Weierstrass approximation and the final semicircle-law argument."
+tags: [concours, tridiagonal-matrices, arcsine-law, Weierstrass-approximation, probability, Wigner-matrices, semicircle-law]
+excerpt: "A question-by-question correction of the École Polytechnique–ESPCI 2026 Mathematics B paper, from tridiagonal spectra and constructive Weierstrass approximation to the arcsine and Wigner semicircle laws."
 ---
 
 <div class="correction-post" markdown="1">
@@ -41,6 +42,17 @@ The correction is designed as a reference. It includes endpoint cases, multiplic
   </div>
   <p class="document-source">Original source: <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Ecole Polytechnique</a></p>
   <p class="document-source">The PDF follows the examination route. This web page is the current reference version; it also contains the optional all-degree moment supplement and later endpoint refinements.</p>
+  <details class="citation-details">
+    <summary>Citation and version</summary>
+    <p>Kieran McShane, “École Polytechnique–ESPCI 2026 Mathematics B (MP–MPI): Complete Correction,” web correction, 18 July 2026, revised 19 July 2026.</p>
+    <pre><code>@misc{mcshane2026xensmathb,
+  author = {Kieran McShane},
+  title = {École Polytechnique--ESPCI 2026 Mathematics B (MP--MPI): Complete Correction},
+  year = {2026},
+  url = {https://kieranmcshane.github.io/2026/07/18/x-ens-2026-mathematics-b-complete-correction/},
+  note = {Web correction, revised 19 July 2026}
+}</code></pre>
+  </details>
 </section>
 
 The [Lean companion](/2026/07/18/formalizing-xens-correction-in-lean/) records which parts have been formally checked and which remain explicit interfaces.
@@ -51,12 +63,12 @@ The [Lean companion](/2026/07/18/formalizing-xens-correction-in-lean/) records w
   <div class="toc-sections">
     <p class="toc-label">Contents</p>
     <div class="toc-section-links">
-      <a href="#preliminary-question">Recurrence</a>
+      <a href="#preliminary-question">Second-order recurrence</a>
       <a href="#part-i-arcsine-law">Arcsine law</a>
-      <a href="#part-ii-toeplitz-spectra">Toeplitz spectra</a>
-      <a href="#part-iii-constructive-approximation">Approximation</a>
-      <a href="#part-iv-random-matrices-and-the-semicircle-law">Random matrices</a>
-      <a href="#supplement-closing-the-moment-gap">Moment supplement</a>
+      <a href="#part-ii-toeplitz-spectra">Tridiagonal Toeplitz spectra</a>
+      <a href="#part-iii-constructive-approximation">Constructive Weierstrass approximation</a>
+      <a href="#part-iv-random-matrices-and-the-semicircle-law">Wigner semicircle law</a>
+      <a href="#supplement-closing-the-moment-gap">Wigner moment supplement</a>
     </div>
   </div>
   <details class="toc-questions" open>
