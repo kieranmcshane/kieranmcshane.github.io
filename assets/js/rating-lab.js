@@ -3,6 +3,7 @@
 
   var root = document.querySelector('.rating-lab');
   if (!root) return;
+  var sports = ['tennis', 'football', 'national-football', 'chess'];
 
   var state = {
     sport: 'tennis',
@@ -27,7 +28,11 @@
     body: document.getElementById('ranking-body'),
     empty: document.getElementById('ranking-empty'),
     caption: document.getElementById('ranking-caption'),
-    detail: document.getElementById('rating-detail')
+    detail: document.getElementById('rating-detail'),
+    eligibility: document.getElementById('rating-eligibility'),
+    parameterBody: document.getElementById('rating-parameter-body'),
+    auditRecord: document.getElementById('rating-audit-record'),
+    dataDownload: document.getElementById('rating-data-download')
   };
 
   function dataUrl(file) {
@@ -163,11 +168,48 @@
       (row.sigma === null ? '' : '<div><dt>Uncertainty σ</dt><dd>' + number(row.sigma, 2) + '</dd></div>') + '</dl>';
   }
 
+  function parameterText(parameters) {
+    return Object.keys(parameters).sort().map(function (key) {
+      var value = parameters[key];
+      return key + '=' + (typeof value === 'number' ? number(value, 4) : String(value));
+    }).join(', ');
+  }
+
+  function renderAudit() {
+    var data = state.datasets[state.sport];
+    var status = state.manifest.sports[state.sport];
+    var modelNames = ['elo', 'trueskill', 'robust'];
+    elements.eligibility.textContent = data.eligibility.rule + ' “Recent” covers ' +
+      number(data.eligibility.recent_window_days, 0) + ' days for this cohort.';
+    elements.parameterBody.innerHTML = modelNames.map(function (model) {
+      var candidates = data.candidate_parameters[model].map(parameterText).join(' · ');
+      return '<tr><th scope="row">' + escapeHtml(data.models[model].label) + '</th>' +
+        '<td><code>' + escapeHtml(parameterText(data.parameters[model])) + '</code></td>' +
+        '<td><code>' + escapeHtml(candidates) + '</code></td></tr>';
+    }).join('');
+    var revision = state.manifest.code_revision || 'unknown';
+    var snapshot = data.source.snapshot_sha256 || 'Published through source API/archive';
+    elements.auditRecord.innerHTML = [
+      ['Schema', data.schema_version],
+      ['Method', state.manifest.methodology_version || '—'],
+      ['Code revision', revision.substring(0, 12)],
+      ['Generated', formatDate(data.generated_at)],
+      ['Data window', formatDate(data.data_window.first_result) + ' – ' + formatDate(data.data_window.last_result)],
+      ['Input size', number(data.data_window.matches, 0) + ' results · ' + number(data.data_window.entities, 0) + ' entities'],
+      ['Source state', status.status],
+      ['Snapshot SHA-256', snapshot]
+    ].map(function (item) {
+      return '<div><dt>' + escapeHtml(item[0]) + '</dt><dd>' + escapeHtml(item[1]) + '</dd></div>';
+    }).join('');
+    elements.dataDownload.href = dataUrl(state.sport + '.json');
+  }
+
   function render() {
     updateFreshness();
     renderMetrics();
     renderTable();
     renderDetail();
+    renderAudit();
   }
 
   elements.sportTabs.addEventListener('click', function (event) {
@@ -225,7 +267,7 @@
     })
     .then(function (manifest) {
       state.manifest = manifest;
-      return Promise.all(['tennis', 'football', 'chess'].map(function (sport) {
+      return Promise.all(sports.map(function (sport) {
         return fetch(dataUrl(sport + '.json')).then(function (response) {
           if (!response.ok) throw new Error(sport + ' ratings could not be loaded.');
           return response.json();

@@ -23,8 +23,10 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Match
 
 
-SCHEMA_VERSION = "1.0.0"
-USER_AGENT = "kieranmcshane-rating-lab/1.0 (+https://kieranmcshane.github.io/rating-lab/)"
+SCHEMA_VERSION = "1.1.0"
+METHODOLOGY_VERSION = "2026-07-20.1"
+SPORTS = ("tennis", "football", "national-football", "chess")
+USER_AGENT = "kieranmcshane-rating-lab/1.1 (+https://kieranmcshane.github.io/rating-lab/)"
 FOOTBALL_COMPETITIONS = {
     "PL": "Premier League",
     "PD": "La Liga",
@@ -253,6 +255,73 @@ def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict
     return matches, entities, meta
 
 
+def _parse_international_results(text: str, start_year: int = 2016) -> tuple[list[Match], dict]:
+    """Parse Mart Jürisoo's CC0 men's full-international results."""
+    matches: list[Match] = []
+    entities: dict[str, dict] = {}
+    today = datetime.now(timezone.utc).date()
+    for row in csv.DictReader(io.StringIO(text)):
+        try:
+            played = date.fromisoformat(row.get("date", ""))
+            home_goals = int(row.get("home_score", ""))
+            away_goals = int(row.get("away_score", ""))
+        except (TypeError, ValueError):
+            continue
+        if played.year < start_year or played > today:
+            continue
+        home_name = (row.get("home_team") or "").strip()
+        away_name = (row.get("away_team") or "").strip()
+        if not home_name or not away_name or home_name == away_name:
+            continue
+        home = f"national-football:{_slug(home_name)}"
+        away = f"national-football:{_slug(away_name)}"
+        entities[home] = {
+            "name": home_name,
+            "country": "",
+            "competition": "Men's national teams",
+        }
+        entities[away] = {
+            "name": away_name,
+            "country": "",
+            "competition": "Men's national teams",
+        }
+        result = 1.0 if home_goals > away_goals else 0.0 if home_goals < away_goals else 0.5
+        neutral = (row.get("neutral") or "").strip().casefold() == "true"
+        competition = (row.get("tournament") or "International").strip()
+        matches.append(
+            Match(
+                played,
+                home,
+                away,
+                result,
+                competition,
+                str(played.year),
+                not neutral,
+                {"neutral": str(neutral).lower()},
+            )
+        )
+    return matches, entities
+
+
+def fetch_national_football(start_year: int = 2016) -> tuple[list[Match], dict, dict]:
+    url = "https://raw.githubusercontent.com/martj42/international_results/master/results.csv"
+    body = _get(url, cache_ttl=21_600)
+    matches, entities = _parse_international_results(body.decode("utf-8-sig"), start_year)
+    if not matches:
+        raise RuntimeError("International results source returned no usable matches")
+    matches = _deduplicate(matches)
+    latest = max(match.date for match in matches)
+    meta = {
+        "source": "International football results by Mart Jürisoo",
+        "source_url": "https://github.com/martj42/international_results",
+        "license": "CC0 1.0",
+        "latest_result": latest.isoformat(),
+        "stale_after_hours": 168,
+        "snapshot_sha256": hashlib.sha256(body).hexdigest(),
+    }
+    return matches, entities, meta
+
+
 def _mark_active_football(matches: list[Match], entities: dict) -> None:
     domestic = set(FOOTBALL_COMPETITIONS.values()) - {"Champions League"}
     latest_season: dict[str, str] = {}
@@ -423,6 +492,16 @@ def _deduplicate(matches: Iterable[Match]) -> list[Match]:
     return list(unique.values())
 
 
+def _match_sort_key(match: Match) -> tuple:
+    return (
+        match.date,
+        match.entity_a,
+        match.entity_b,
+        match.competition,
+        match.score_a,
+    )
+
+
 def _metrics(predictions: list[dict], cutoff: date) -> dict:
     sample = [row for row in predictions if date.fromisoformat(row["date"]) >= cutoff]
     if not sample:
@@ -452,9 +531,10 @@ def _metrics(predictions: list[dict], cutoff: date) -> dict:
 
 
 def _model_candidates(sport: str, model_name: str) -> list[dict]:
-    advantage = 65.0 if sport == "football" else 0.0
-    bayes_advantage = 1.35 if sport == "football" else 0.4 if sport == "chess" else 0.0
-    draw_margin = 1.35 if sport == "football" else 0.75 if sport == "chess" else 0.0
+    football_like = sport in {"football", "national-football"}
+    advantage = 65.0 if football_like else 0.0
+    bayes_advantage = 1.35 if football_like else 0.4 if sport == "chess" else 0.0
+    draw_margin = 1.35 if football_like else 0.75 if sport == "chess" else 0.0
     if model_name == "elo":
         return [{"k": k, "scale": 400.0, "home": advantage} for k in (16.0, 24.0, 32.0)]
     robust = model_name == "robust"
@@ -478,7 +558,7 @@ def _run_model(
     predictions: list[dict] = []
     histories: dict[str, list] = defaultdict(list)
     previous_season = None
-    for match in sorted(matches, key=lambda item: (item.date, item.entity_a, item.entity_b)):
+    for match in sorted(matches, key=_match_sort_key):
         if sport == "chess":
             for entity, key in ((match.entity_a, "rating_a"), (match.entity_b, "rating_b")):
                 if entity in model.states:
@@ -551,17 +631,23 @@ def _compress_history(points: list[list], limit: int = 24) -> list[list]:
 
 
 def build_sport_payload(sport: str, matches: list[Match], entities: dict, source_meta: dict) -> dict:
-    matches = sorted(_deduplicate(matches), key=lambda item: (item.date, item.entity_a, item.entity_b))
+    matches = sorted(_deduplicate(matches), key=_match_sort_key)
     latest = max(match.date for match in matches)
     evaluation_start = latest - timedelta(days=365)
     validation_start = latest - timedelta(days=730)
-    active_cutoff = latest - timedelta(days=365)
+    active_window_days = 730 if sport == "national-football" else 365
+    active_cutoff = latest - timedelta(days=active_window_days)
     recent_counts = defaultdict(int)
     for match in matches:
         if match.date >= active_cutoff:
             recent_counts[match.entity_a] += 1
             recent_counts[match.entity_b] += 1
-    minimum = 10 if sport == "tennis" else 20 if sport == "chess" else 0
+    minimum = (
+        10 if sport == "tennis"
+        else 20 if sport == "chess"
+        else 5 if sport == "national-football"
+        else 0
+    )
     history_entities = {
         entity
         for entity in entities
@@ -632,7 +718,26 @@ def build_sport_payload(sport: str, matches: list[Match], entities: dict, source
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "latest_result": latest.isoformat(),
         "source": source_meta,
+        "data_window": {
+            "first_result": matches[0].date.isoformat(),
+            "last_result": latest.isoformat(),
+            "matches": len(matches),
+            "entities": len(entities),
+        },
+        "eligibility": {
+            "minimum_recent_matches": minimum,
+            "recent_window_days": active_window_days,
+            "rule": {
+                "tennis": "At least 10 ATP matches in the latest 52 weeks.",
+                "football": "Member of a covered current-season domestic competition.",
+                "national-football": "At least 5 men's full internationals in the latest 24 months.",
+                "chess": "FIDE-identified, official rating at least 2200, and 20 games in the latest 12 months.",
+            }[sport],
+        },
         "competitions": sorted({info.get("competition", "") for info in entities.values() if info.get("competition")}),
+        "candidate_parameters": {
+            name: _model_candidates(sport, name) for name in ("elo", "trueskill", "robust")
+        },
         "parameters": selected_parameters,
         "models": model_payloads,
     }
@@ -645,12 +750,32 @@ def validate_payload(payload: dict, schema: dict) -> None:
         raise ValueError(f"Missing payload keys: {', '.join(missing)}")
     if payload["schema_version"] != SCHEMA_VERSION:
         raise ValueError("Unexpected schema version")
+    if payload["sport"] not in SPORTS:
+        raise ValueError("Unexpected sport")
+    allowed = set(schema["properties"])
+    unexpected = sorted(set(payload) - allowed)
+    if unexpected:
+        raise ValueError(f"Unexpected payload keys: {', '.join(unexpected)}")
+    window = payload["data_window"]
+    if not isinstance(window.get("matches"), int) or window["matches"] < 1:
+        raise ValueError("Invalid data window match count")
+    if not isinstance(window.get("entities"), int) or window["entities"] < 2:
+        raise ValueError("Invalid data window entity count")
+    eligibility = payload["eligibility"]
+    if not isinstance(eligibility.get("minimum_recent_matches"), int):
+        raise ValueError("Invalid eligibility minimum")
+    if not isinstance(eligibility.get("recent_window_days"), int):
+        raise ValueError("Invalid eligibility window")
     for name in ("elo", "trueskill", "robust"):
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
         ranks = [row["rank"] for row in payload["models"][name]["rankings"]]
         if ranks != list(range(1, len(ranks) + 1)):
             raise ValueError(f"Non-contiguous {name} ranks")
+        for row in payload["models"][name]["rankings"]:
+            required_row = {"id", "name", "rank", "score", "rating", "sigma", "matches", "recent_matches", "last_played", "history"}
+            if not required_row.issubset(row):
+                raise ValueError(f"Incomplete {name} ranking row")
 
 
 def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int = 36) -> dict:
@@ -660,10 +785,11 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
     loaders = {
         "tennis": lambda: fetch_tennis(),
         "football": lambda: fetch_football(token),
+        "national-football": lambda: fetch_national_football(),
         "chess": lambda: fetch_chess(chess_months),
     }
     statuses = {}
-    for sport in ("tennis", "football", "chess"):
+    for sport in SPORTS:
         existing = output_dir / f"{sport}.json"
         if sport in requested or not existing.exists():
             continue
@@ -674,6 +800,10 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "source": previous.get("source", {}).get("source", "Unknown"),
             "stale_after_hours": previous.get("source", {}).get("stale_after_hours", 0),
             "checked_at": previous.get("generated_at"),
+            "license": previous.get("source", {}).get("license", "Unknown"),
+            "source_url": previous.get("source", {}).get("source_url"),
+            "snapshot_sha256": previous.get("source", {}).get("snapshot_sha256"),
+            "parameters": previous.get("parameters", {}),
         }
     with tempfile.TemporaryDirectory(prefix="rating-lab-") as temporary:
         temporary_path = Path(temporary)
@@ -691,6 +821,10 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     "source": source_meta["source"],
                     "stale_after_hours": source_meta["stale_after_hours"],
                     "checked_at": payload["generated_at"],
+                    "license": source_meta.get("license", "Unknown"),
+                    "source_url": source_meta.get("source_url"),
+                    "snapshot_sha256": source_meta.get("snapshot_sha256"),
+                    "parameters": payload["parameters"],
                 }
             except Exception as error:
                 existing = output_dir / f"{sport}.json"
@@ -704,13 +838,40 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     "stale_after_hours": previous.get("source", {}).get("stale_after_hours", 0),
                     "checked_at": previous.get("generated_at"),
                     "message": str(error)[:240],
+                    "license": previous.get("source", {}).get("license", "Unknown"),
+                    "source_url": previous.get("source", {}).get("source_url"),
+                    "snapshot_sha256": previous.get("source", {}).get("snapshot_sha256"),
+                    "parameters": previous.get("parameters", {}),
                 }
     manifest = {
         "schema_version": SCHEMA_VERSION,
+        "methodology_version": METHODOLOGY_VERSION,
+        "code_revision": os.environ.get("GITHUB_SHA") or _git_revision(),
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "sports": statuses,
         "models": ["elo", "trueskill", "robust"],
+        "replay": {
+            "order": ["date", "entity_a", "entity_b", "competition", "score_a"],
+            "validation_days": 365,
+            "evaluation_days": 365,
+            "quadrature_nodes": 20,
+            "robust_student_t_degrees_of_freedom": 1,
+        },
         "methodology_url": "/rating-lab/#methodology",
     }
+    (output_dir / "schema.json").write_text(json.dumps(schema, indent=2) + "\n")
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
+
+
+def _git_revision() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parents[1],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"

@@ -7,8 +7,8 @@ The site uses GitHub Pages, Jekyll, and the Minima theme. Long-form posts live i
 ## Rating Lab
 
 `/rating-lab/` is a generated, interactive comparison of Elo, Gaussian
-TrueSkill, and robust heavy-tail ratings for ATP tennis, European football,
-and elite over-the-board chess.
+TrueSkill, and robust heavy-tail ratings for ATP tennis, European club
+football, men's national-team football, and elite over-the-board chess.
 
 The scheduled GitHub Actions workflow refreshes the public datasets and deploys
 the complete Jekyll site as a Pages artifact. Repository setup requires:
@@ -18,9 +18,18 @@ the complete Jekyll site as a Pages artifact. Repository setup requires:
 2. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
 3. Run **Refresh ratings and deploy Pages** once manually, or wait for the daily
    schedule. Tennis refreshes on Mondays; football and current chess refresh
-   daily, while finalized Lichess archives are cached.
+   daily, while finalized Lichess archives are cached. National teams use
+   Mart Jürisoo's CC0 full-international results.
 
-For a local refresh, run `python3 scripts/refresh_ratings.py`. Without the
-football token, the script uses the CC0 OpenFootball feed as a development
-fallback. Generated JSON follows `rating_lab/schema.json`; source adapters and
-rating models live in `rating_lab/`.
+For an exact local refresh and verification, run:
+
+```sh
+RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
+python3 -m unittest discover -s tests -v
+```
+
+Without the football token, the script uses the CC0 OpenFootball feed as a
+development fallback. Generated JSON follows `rating_lab/schema.json`; source
+adapters and rating models live in `rating_lab/`. The public manifest records
+the schema and methodology versions, code revision, source freshness, and data
+snapshot hash where a source is distributed as a single file.
