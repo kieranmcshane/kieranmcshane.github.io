@@ -2727,28 +2727,6 @@ S_n(f)\xrightarrow{\mathbb P}
 \frac1{2\pi}\int_{-2}^2 f(x)\sqrt{4-x^2}\,dx.
 $$
 
-<aside class="formalization-summary" aria-labelledby="lean-companion-title" markdown="1">
-
-<p class="formalization-eyebrow" id="lean-companion-title">Lean companion</p>
-
-The companion development checks the question-by-question proof graph without
-placeholders. Some analytic inputs remain behind explicit interfaces, and the
-all-degree closed-walk supplement above has not yet been formalized directly.
-
-[Read the formalization notes&nbsp;→](/2026/07/18/formalizing-xens-correction-in-lean/){:.formalization-link}
-
-<details class="formalization-audit" markdown="1">
-<summary>Technical audit</summary>
-
-The audited working-tree snapshot builds successfully and contains no `sorry`,
-`admit`, project-specific axioms or `unsafe` declarations. It is based on
-private commit `c8e9bd5`. The theorem manifest and ticket ledger distinguish
-direct proofs, interface-supplied results and remaining boundaries.
-
-</details>
-
-</aside>
-
 </div>
 
 </div>
