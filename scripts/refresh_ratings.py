@@ -18,8 +18,8 @@ def main() -> int:
     parser.add_argument(
         "--sports",
         nargs="+",
-        choices=("tennis", "football", "chess"),
-        default=["tennis", "football", "chess"],
+        choices=("tennis", "football", "national-football", "chess"),
+        default=["tennis", "football", "national-football", "chess"],
     )
     parser.add_argument("--output", type=Path, default=ROOT / "assets/data/rating-lab")
     parser.add_argument("--chess-months", type=int, default=36)

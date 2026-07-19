@@ -7,7 +7,14 @@ from pathlib import Path
 import unittest
 
 from rating_lab.models import EloModel, GaussianSkillModel, Match
-from rating_lab.pipeline import _deduplicate, _metrics, _parse_broadcast_pgn, build_sport_payload, validate_payload
+from rating_lab.pipeline import (
+    _deduplicate,
+    _metrics,
+    _parse_broadcast_pgn,
+    _parse_international_results,
+    build_sport_payload,
+    validate_payload,
+)
 
 
 class RatingModelTests(unittest.TestCase):
@@ -58,6 +65,18 @@ class RatingModelTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_international_parser_handles_neutral_venues_and_draws(self):
+        fixture = """date,home_team,away_team,home_score,away_score,tournament,city,country,neutral
+2026-01-10,France,Spain,1,1,Friendly,Paris,France,FALSE
+2026-02-12,Brazil,Argentina,2,1,Friendly,Miami,United States,TRUE
+"""
+        matches, entities = _parse_international_results(fixture, 2020)
+        self.assertEqual(len(matches), 2)
+        self.assertEqual(matches[0].score_a, 0.5)
+        self.assertTrue(matches[0].home_advantage)
+        self.assertFalse(matches[1].home_advantage)
+        self.assertIn("national-football:brazil", entities)
+
     def test_pgn_parser_uses_fide_identity_and_draw(self):
         pgn = """[Event \"Open\"]
 [Date \"2026.06.20\"]
@@ -101,6 +120,24 @@ class PipelineTests(unittest.TestCase):
         schema = json.loads((Path(__file__).parents[1] / "rating_lab/schema.json").read_text())
         validate_payload(payload, schema)
         self.assertEqual(set(payload["models"]), {"elo", "trueskill", "robust"})
+        self.assertIn("candidate_parameters", payload)
+        self.assertEqual(payload["data_window"]["matches"], len(matches))
+
+    def test_national_team_eligibility_uses_two_year_window(self):
+        start = date(2023, 1, 1)
+        matches = [
+            Match(start + timedelta(days=index * 120), "n1", "n2", float(index % 2), "Friendly", str(2023 + index // 3), True)
+            for index in range(12)
+        ]
+        entities = {
+            "n1": {"name": "Nation One", "country": "", "competition": "Men's national teams"},
+            "n2": {"name": "Nation Two", "country": "", "competition": "Men's national teams"},
+        }
+        source = {"source": "Fixture", "source_url": "https://example.test", "license": "CC0", "latest_result": matches[-1].date.isoformat(), "stale_after_hours": 168}
+        payload = build_sport_payload("national-football", matches, entities, source)
+        self.assertEqual(payload["eligibility"]["recent_window_days"], 730)
+        self.assertEqual(payload["eligibility"]["minimum_recent_matches"], 5)
+        self.assertTrue(payload["models"]["elo"]["rankings"])
 
 
 if __name__ == "__main__":

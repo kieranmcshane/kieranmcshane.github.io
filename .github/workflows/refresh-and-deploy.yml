@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .cache/rating-lab
-          key: rating-lab-public-data-v1-${{ runner.os }}
+          key: rating-lab-public-data-v2-${{ runner.os }}
       - name: Install archive reader
         run: sudo apt-get update && sudo apt-get install --yes zstd
       - name: Refresh public ratings
@@ -35,7 +35,7 @@ jobs:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
-          sports="football chess"
+          sports="football national-football chess"
           if [ "$(date -u +%u)" = "1" ] || [ "$GITHUB_EVENT_NAME" != "schedule" ]; then
             sports="tennis $sports"
           fi

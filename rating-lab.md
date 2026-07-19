@@ -2,13 +2,13 @@
 layout: page
 title: Rating Lab
 permalink: /rating-lab/
-description: Live alternative ratings for tennis, football, and chess, tested against real match outcomes.
+description: Live alternative ratings for tennis, club and national-team football, and chess, tested against real match outcomes.
 ---
 
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}">
   <header class="rating-lab-hero">
     <p class="rating-lab-kicker">Live, reproducible sports ratings</p>
-    <h1>Three sports. Three ways to measure strength.</h1>
+    <h1>Across sports. Three ways to measure strength.</h1>
     <p class="rating-lab-deck">Explore current Elo, Gaussian TrueSkill, and robust heavy-tail rankings built from real match results. Every prediction is scored before its result is used to update the model.</p>
     <div class="rating-lab-freshness" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
   </header>
@@ -23,7 +23,8 @@ description: Live alternative ratings for tennis, football, and chess, tested ag
         <span class="rating-lab-control-label">Sport</span>
         <div class="rating-lab-segmented" id="sport-tabs">
           <button type="button" data-sport="tennis" aria-pressed="true">Tennis</button>
-          <button type="button" data-sport="football" aria-pressed="false">Football</button>
+          <button type="button" data-sport="football" aria-pressed="false">Clubs</button>
+          <button type="button" data-sport="national-football" aria-pressed="false">Nations</button>
           <button type="button" data-sport="chess" aria-pressed="false">Chess</button>
         </div>
       </div>
@@ -78,7 +79,7 @@ description: Live alternative ratings for tennis, football, and chess, tested ag
     <div class="rating-lab-method-grid">
       <article>
         <h3>Elo</h3>
-        <p>A direct online update around a logistic win-probability curve. Football includes home advantage and seasonal mean reversion; draws count as half a win.</p>
+        <p>A direct online update around a logistic win-probability curve. Football includes home advantage, club football has seasonal mean reversion, and draws count as half a win.</p>
       </article>
       <article>
         <h3>Gaussian TrueSkill</h3>
@@ -92,12 +93,77 @@ description: Live alternative ratings for tennis, football, and chess, tested ag
     <p class="rating-lab-explainer">Turning a Gaussian rating into a log-normal or Pareto-looking published scale can change the histogram without changing anyone’s rank. A genuinely different ranking requires a different performance model or update rule.</p>
   </section>
 
+  <section class="rating-lab-audit" id="reproducibility" aria-labelledby="audit-heading">
+    <p class="rating-lab-kicker">Open methodology</p>
+    <h2 id="audit-heading">Inspect every assumption. Reproduce every table.</h2>
+    <p class="rating-lab-audit-intro">The browser only reads static JSON. All ratings are rebuilt from public results by deterministic, chronological Python replay; there is no private ranking service or hidden model.</p>
+
+    <div class="rating-lab-equations">
+      <article>
+        <h3>Elo probability and update</h3>
+        <p class="rating-lab-equation" aria-label="p A equals one divided by one plus ten to the power negative rating A plus home advantage minus rating B divided by 400">p<sub>A</sub> = 1 / (1 + 10<sup>−(R<sub>A</sub> + H − R<sub>B</sub>)/400</sup>)</p>
+        <p class="rating-lab-equation" aria-label="new rating A equals rating A plus K times actual score minus predicted probability">R′<sub>A</sub> = R<sub>A</sub> + K(s<sub>A</sub> − p<sub>A</sub>)</p>
+      </article>
+      <article>
+        <h3>Uncertain skill</h3>
+        <p class="rating-lab-equation">s<sub>i</sub> ∼ N(μ<sub>i</sub>, σ<sub>i</sub><sup>2</sup>)</p>
+        <p>Gaussian performance noise uses <span class="rating-lab-formula">ε ∼ N(0, β²)</span>. Robust performance uses <span class="rating-lab-formula">ε ∼ t<sub>ν=1</sub>(0, β)</span>, the Cauchy case. Both publish <span class="rating-lab-formula">μ − 3σ</span>.</p>
+      </article>
+      <article>
+        <h3>Numerical update</h3>
+        <p>The result likelihood—including the draw interval <span class="rating-lab-formula">± margin</span>—is integrated over the skill-difference belief with a fixed 20-node Gauss–Hermite rule, then moment-matched back to Gaussian competitor beliefs.</p>
+      </article>
+    </div>
+
+    <div class="rating-lab-split">
+      <h3>No look-ahead parameter tuning</h3>
+      <ol>
+        <li><strong>Warm-up:</strong> results older than 24 months establish prior rating state.</li>
+        <li><strong>Validation:</strong> months 24–12 choose the candidate with lowest chronological log loss.</li>
+        <li><strong>Evaluation:</strong> the latest 12 months remain untouched until one-step-ahead scoring.</li>
+        <li><strong>Publication:</strong> the selected parameters replay the complete declared data window in the stable sort order.</li>
+      </ol>
+    </div>
+
+    <div class="rating-lab-audit-grid">
+      <article>
+        <h3>Selected parameters</h3>
+        <p id="rating-eligibility">Loading cohort rules…</p>
+        <div class="rating-lab-table-wrap">
+          <table class="rating-lab-parameter-table">
+            <caption>Parameters selected for the current cohort</caption>
+            <thead><tr><th scope="col">Model</th><th scope="col">Selected values</th><th scope="col">Candidates tested</th></tr></thead>
+            <tbody id="rating-parameter-body"></tbody>
+          </table>
+        </div>
+      </article>
+      <article>
+        <h3>Build audit record</h3>
+        <dl id="rating-audit-record"><div><dt>Status</dt><dd>Loading…</dd></div></dl>
+        <div class="rating-lab-downloads">
+          <a id="rating-data-download" href="{{ '/assets/data/rating-lab/tennis.json' | relative_url }}" download>Current cohort JSON</a>
+          <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
+          <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
+          <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/tree/main/rating_lab">Model source</a>
+        </div>
+      </article>
+    </div>
+
+    <h3>Exact local reproduction</h3>
+    <pre class="rating-lab-code"><code>git clone https://github.com/kieranmcshane/kieranmcshane.github.io.git
+cd kieranmcshane.github.io
+RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
+python3 -m unittest discover -s tests -v</code></pre>
+    <p class="rating-lab-audit-note">A <code>FOOTBALL_DATA_TOKEN</code> enables the primary club feed; without it, the documented CC0 OpenFootball fallback is used. Results are deduplicated and sorted by date, competitor IDs, competition, and score. The source snapshot hash is published when the source is a single file. Generated files contain no credentials.</p>
+  </section>
+
   <section class="rating-lab-sources" aria-labelledby="sources-heading">
     <p class="rating-lab-kicker">Open data</p>
     <h2 id="sources-heading">Sources and licences</h2>
     <ul id="rating-source-list">
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
       <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues and the Champions League.</li>
+      <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
     </ul>
     <p>Rankings are independent statistical estimates, not official tour, league, federation, or Lichess ratings. They are informational and are not betting advice.</p>

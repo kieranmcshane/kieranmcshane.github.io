@@ -9,17 +9,36 @@
     "generated_at",
     "latest_result",
     "source",
+    "data_window",
+    "eligibility",
     "competitions",
+    "candidate_parameters",
     "parameters",
     "models"
   ],
   "properties": {
-    "schema_version": { "const": "1.0.0" },
-    "sport": { "enum": ["tennis", "football", "chess"] },
+    "schema_version": { "const": "1.1.0" },
+    "sport": { "enum": ["tennis", "football", "national-football", "chess"] },
     "generated_at": { "type": "string" },
     "latest_result": { "type": "string", "format": "date" },
     "source": { "type": "object" },
+    "data_window": {
+      "type": "object",
+      "required": ["first_result", "last_result", "matches", "entities"],
+      "properties": {
+        "first_result": { "type": "string", "format": "date" },
+        "last_result": { "type": "string", "format": "date" },
+        "matches": { "type": "integer", "minimum": 1 },
+        "entities": { "type": "integer", "minimum": 2 }
+      },
+      "additionalProperties": false
+    },
+    "eligibility": {
+      "type": "object",
+      "required": ["minimum_recent_matches", "recent_window_days", "rule"]
+    },
     "competitions": { "type": "array", "items": { "type": "string" } },
+    "candidate_parameters": { "type": "object" },
     "parameters": { "type": "object" },
     "models": {
       "type": "object",
