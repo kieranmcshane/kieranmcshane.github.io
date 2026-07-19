@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Ecole Polytechnique-ESPCI 2026 Mathematics B (MP-MPI): Complete Correction"
-subtitle: "From tridiagonal spectra to the semicircle law"
+subtitle: "Question-by-question solutions and reference notes"
 date: 2026-07-18 12:00:00 +0200
 categories: [mathematics]
 tags: [concours, linear-algebra, approximation, probability, random-matrices]
@@ -10,40 +10,18 @@ excerpt: "A detailed question-by-question correction of the Ecole Polytechnique-
 
 <div class="correction-post" markdown="1">
 
-<p class="correction-deck">From tridiagonal spectra to the semicircle law</p>
+This page gives a question-by-question correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. Each question is stated in English and followed by a detailed solution. The original French paper remains authoritative.
 
-<p class="correction-lede">This paper has an unusually coherent mathematical arc. It starts with a second-order recurrence, turns that recurrence into the characteristic polynomial of a tridiagonal matrix, reads off an exact cosine grid of eigenvalues, and then uses the same approximation ideas to reach a probabilistic spectral limit for Wigner matrices. The unity is thematic rather than a strict dependency chain: as the official statement notes, Part III is independent of Parts I–II and Part IV is essentially independent of them.</p>
-
-This post is the complete mathematical correction of the Ecole Polytechnique-ESPCI 2026 Mathematics B paper for the MP-MPI streams. It is written question by question and includes the details that matter in a concours solution: endpoint cases, algebraic multiplicities, normalizing factors, tail estimates, and the variance computation in the low-degree Wigner case.
-
-Each solution is preceded by the corresponding question in English. These
-statements come from my English translation of the paper; the original French
-paper remains the authoritative version.
-
-It is a detailed reference correction, not a model of the amount of prose a
-candidate could write during the four-hour examination.
+The correction is designed as a reference. It includes endpoint cases, multiplicities and normalization checks that a candidate would normally present more briefly during the four-hour examination.
 
 <aside class="scope-note" markdown="1">
-<strong>Scope of Part IV.</strong> In the examination route, Question 13c proves
-the moment hypotheses $(H_k)$ only for $k=0,1,2$; the official statement then
-authorizes candidates to assume $(H_k)$ for every $k$ in Questions 14–17. The
-question-by-question correction follows that instruction. A separate,
-expandable supplement after Question 13c proves all $(H_k)$ directly from the
-entry assumptions, making the final semicircle statement standalone.
+<strong>Part IV.</strong> Question 13c proves $(H_k)$ for $k=0,1,2$, after which the paper allows candidates to assume $(H_k)$ for every $k$. The main correction follows that route. An optional supplement proves all the moment hypotheses directly.
 </aside>
 
-## Two ways to use this correction
+## How to use this correction
 
-This page serves two different purposes. The **candidate route** follows the shortest defensible proof spine under the instructions of the paper. The **reference route** keeps endpoint cases, multiplicities, normalization checks, the optional all-moments supplement and the formalization audit. The candidate route below is a map through the correction, not a claim that every displayed derivation should be reproduced in an examination script.
-
-| Part | Candidate proof spine | Additional reference material |
-|---|---|---|
-| I — recurrence and arcsine law | Solve the recurrence trigonometrically, identify the cosine grid, then pass from the Riemann sum to the arcsine integral. | Endpoint bookkeeping and the detailed comparison with the semicircle law. |
-| II — Toeplitz spectra | Exhibit the sine eigenvectors, verify the boundary equations, and use distinctness to obtain the full spectrum. | Characteristic-polynomial checks and complete multiplicity accounting. |
-| III — constructive approximation | Follow the explicit polynomial approximants and retain the error estimate needed by the question. | The full interval-by-interval construction and auxiliary bounds. |
-| IV — random matrices | Prove the low-degree cases requested in Question 13c, then use the authorized hypotheses $(H_k)$ for Questions 14–17. | The expandable supplement proving every $(H_k)$ directly, plus the Lean companion and proof audit. |
-
-A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains the placeholder-free conditional proof graph and its remaining interface boundaries. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
+- **Candidate route:** follow the numbered questions and use the assumptions explicitly authorized by the paper.
+- **Reference route:** also read the endpoint discussions, the optional moment supplement and the formalization notes.
 
 <section class="correction-downloads" aria-labelledby="correction-documents-title">
   <p class="downloads-label" id="correction-documents-title">Documents</p>
@@ -63,6 +41,8 @@ A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18
   </div>
   <p class="document-source">Original source: <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Ecole Polytechnique</a></p>
 </section>
+
+The [Lean companion](/2026/07/18/formalizing-xens-correction-in-lean/) records which parts have been formally checked and which remain explicit interfaces.
 
 <div class="correction-reading-layout" markdown="1">
 
