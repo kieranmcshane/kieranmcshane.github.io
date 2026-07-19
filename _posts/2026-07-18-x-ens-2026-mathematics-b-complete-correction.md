@@ -3,7 +3,7 @@ layout: post
 title: "École Polytechnique–ESPCI 2026 Mathematics B (MP–MPI): Complete Correction"
 subtitle: "Question-by-question solutions and reference notes"
 date: 2026-07-18 12:00:00 +0200
-last_modified_at: 2026-07-19 16:00:00 +0200
+last_modified_at: 2026-07-19 16:14:00 +0200
 categories: [mathematics]
 tags: [concours, tridiagonal-matrices, arcsine-law, Weierstrass-approximation, probability, Wigner-matrices, semicircle-law]
 excerpt: "A question-by-question correction of the École Polytechnique–ESPCI 2026 Mathematics B paper, from tridiagonal spectra and constructive Weierstrass approximation to the arcsine and Wigner semicircle laws."
@@ -95,7 +95,7 @@ u_0=0,\qquad u_1=1,\qquad
 $$
 
 Express $u_n$ in terms of $n$ and $\alpha$ for every integer $n\ge0$.
-Carefully distinguish the cases $|\alpha|>2$, $|\alpha|<2$, $\alpha=2$, and
+Carefully distinguish the cases $\lvert\alpha\rvert>2$, $\lvert\alpha\rvert<2$, $\alpha=2$, and
 $\alpha=-2$.
 </aside>
 
@@ -397,7 +397,7 @@ I(f)=\frac1\pi\int_0^\pi f(2\cos\theta)\,d\theta.
 $$
 </aside>
 
-Let $f$ be continuous on $[-2,2]$ and let $M=\sup_{[-2,2]}|f|$. The only
+Let $f$ be continuous on $[-2,2]$ and let $M=\sup_{[-2,2]}\lvert f\rvert$. The only
 possible singularities of
 
 $$
@@ -1622,7 +1622,7 @@ $$
 -1<c_1<\cdots<c_N<1
 $$
 
-and $a_1,\ldots,a_N$ such that $|a_i|\le\varepsilon/4$ and
+and $a_1,\ldots,a_N$ such that $\lvert a_i\rvert\le\varepsilon/4$ and
 
 $$
 S(x)=\sum_{i=1}^N a_iH(x-c_i),
@@ -1630,7 +1630,7 @@ S(x)=\sum_{i=1}^N a_iH(x-c_i),
 \|f-S\|_\infty\le\frac\varepsilon4.
 $$
 
-Set $\rho_i=1+|c_i|$. Then
+Set $\rho_i=1+\lvert c_i\rvert$. Then
 
 $$
 \frac{x-c_i}{\rho_i}\in[-1,1]\quad(x\in[-1,1]),
@@ -1652,7 +1652,7 @@ $$
 
 By Question 10b and the finiteness of the family, choose $m$ such that,
 for every $i$ and every $x\in[-1,1]$ with
-$|x-c_i|\ge\rho_i\eta$,
+$\lvert x-c_i\rvert\ge\rho_i\eta$,
 
 $$
 \left|P_m\left(\frac{x-c_i}{\rho_i}\right)-H(x-c_i)\right|
@@ -1666,7 +1666,7 @@ R_m(X)=\sum_{i=1}^N a_iP_m\left(\frac{X-c_i}{\rho_i}\right).
 $$
 
 For a fixed $x$, at most one index $j$ can satisfy
-$|x-c_j|<\rho_j\eta$. For every other index the preceding estimate
+$\lvert x-c_j\rvert<\rho_j\eta$. For every other index the preceding estimate
 applies. If such an index $j$ exists, both terms lie in $[0,1]$:
 
 $$
@@ -2025,7 +2025,7 @@ $$
   \mathbb{E}(A_n)=n^2.
 $$
 
-Since $|W_{1,1}|^4$ has finite expectation,
+Since $\lvert W_{1,1}\rvert^4$ has finite expectation,
 $Y_{1,1}$ has finite variance. Let
 
 $$
@@ -2321,8 +2321,8 @@ $$
   \le \frac{|x|^{2k}}{B^k}.
 $$
 
-Indeed, on $\lbrace |x|>B\rbrace$ this is equivalent
-to $B^k\le |x|^k$, and outside this set the left-hand side is zero.
+Indeed, on $\lbrace \lvert x\rvert>B\rbrace$ this is equivalent
+to $B^k\le \lvert x\rvert^k$, and outside this set the left-hand side is zero.
 Therefore, for every $\omega$,
 
 $$
@@ -2367,7 +2367,7 @@ $g_{k,B}\le g_{k',B}$.
 
 The question asks for $B>4$, but a direct comparison reaches the natural
 threshold $B\ge2$. Fix $k\ge0$, $B\ge2$, and $\varepsilon>0$. For every
-integer $\ell$ with $2\ell\ge k$, and every $x$ with $|x|>B$,
+integer $\ell$ with $2\ell\ge k$, and every $x$ with $\lvert x\rvert>B$,
 
 $$
 |x|^k
@@ -2498,7 +2498,7 @@ S_n(af+bg)=aS_n(f)+bS_n(g),\qquad
 $$
 
 and it is normalised by
-$S_n(1)=1$. Consequently, if $|h|\le g$, then
+$S_n(1)=1$. Consequently, if $\lvert h\rvert\le g$, then
 
 $$
 |S_n(h)|\le S_n(g).
@@ -2531,7 +2531,7 @@ $$
 $$
 
 Indeed, on $[-2,2]$ one
-has $|f-P|\le\eta$ and $\sqrt{4-x^2}\ge0$, hence
+has $\lvert f-P\rvert\le\eta$ and $\sqrt{4-x^2}\ge0$, hence
 
 $$
 |\Sigma(f)-\Sigma(P)|
@@ -2563,7 +2563,7 @@ f(x)-P(x)
 $$
 
 because
-$f(x)=0$ when $|x|>B$. Therefore, for every $n$ and every $\omega$,
+$f(x)=0$ when $\lvert x\rvert>B$. Therefore, for every $n$ and every $\omega$,
 
 $$
 |S_n(f)(\omega)-S_n(P)(\omega)|
@@ -2571,7 +2571,7 @@ $$
 $$
 
 Indeed, the part
-$(f-P)\mathbf{1}_{|x|\le B}$ has absolute value at most $\eta$, so
+$(f-P)\mathbf{1}_{\lvert x\rvert\le B}$ has absolute value at most $\eta$, so
 positivity and $S_n(1)=1$ bound its spectral average by $\eta$; the
 remaining term is the polynomial tail. For $n\ge N$, we now write
 
@@ -2672,7 +2672,7 @@ $$
 \mathbb{P}(|S_n(P)-\mathbb{E}(S_n(P))|\ge\varepsilon/4)\longrightarrow0.
 $$
 
-Second, for $|x|>B>1$ and $0\le j\le d$, we have $|x|^j\le |x|^d$.
+Second, for $\lvert x\rvert>B>1$ and $0\le j\le d$, we have $\lvert x\rvert^j\le \lvert x\rvert^d$.
 Therefore
 
 $$
@@ -2689,7 +2689,7 @@ $$
 $$
 
 The first inequality is the estimate
-$|S_n(h)|\le S_n(|h|)$ applied to $h=P\mathbf{1}_{|x|>B}$, and the
+$\lvert S_n(h)\rvert\le S_n(\lvert h\rvert)$ applied to $h=P\mathbf{1}_{\lvert x\rvert>B}$, and the
 second follows from positivity of $S_n$. If $C_1=0$, the probability is
 zero. Otherwise Question 15 gives
 

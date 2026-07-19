@@ -3,7 +3,7 @@ layout: post
 title: "Centered Correlation Tensors and Quantum Separability"
 subtitle: "The enhanced realignment criterion in Bloch coordinates"
 date: 2026-07-17 08:00:00 +0200
-last_modified_at: 2026-07-19 16:10:00 +0200
+last_modified_at: 2026-07-19 16:14:00 +0200
 categories: [quantum-information]
 tags: [entanglement, separability, tensor-norms, Bloch-representation]
 excerpt: "How the usual correlation-tensor separability test becomes a marginal-dependent covariance bound after centering."
@@ -734,7 +734,7 @@ $$
 $$
 
 Indeed, choose $i,j\in S$, bound every other fluctuation by
-$\lVert r_{\ell,k}-r_\ell\rVert_2\leq D_\ell$, and apply Cauchy–Schwarz to the remaining two factors. For $|S|=2$, this is exactly the bipartite centered inequality.
+$\lVert r_{\ell,k}-r_\ell\rVert_2\leq D_\ell$, and apply Cauchy–Schwarz to the remaining two factors. For $\lvert S\rvert=2$, this is exactly the bipartite centered inequality.
 
 This estimate is recorded as a direct extension of the calculation, not as a novelty claim; its relation to existing multipartite covariance bounds would need a dedicated literature comparison.
 
