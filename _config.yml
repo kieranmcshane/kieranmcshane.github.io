@@ -1,5 +1,6 @@
 title: "Kieran McShane: Notes"
 description: "Essays on quantum theory and related mathematics."
+lang: en
 author: Kieran McShane
 url: "https://kieranmcshane.github.io"
 baseurl: ""
@@ -12,3 +13,4 @@ header_pages:
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-sitemap
