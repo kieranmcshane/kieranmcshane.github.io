@@ -32,6 +32,17 @@ expandable supplement after Question 13c proves all $(H_k)$ directly from the
 entry assumptions, making the final semicircle statement standalone.
 </aside>
 
+## Two ways to use this correction
+
+This page serves two different purposes. The **candidate route** follows the shortest defensible proof spine under the instructions of the paper. The **reference route** keeps endpoint cases, multiplicities, normalization checks, the optional all-moments supplement and the formalization audit. The candidate route below is a map through the correction, not a claim that every displayed derivation should be reproduced in an examination script.
+
+| Part | Candidate proof spine | Additional reference material |
+|---|---|---|
+| I — recurrence and arcsine law | Solve the recurrence trigonometrically, identify the cosine grid, then pass from the Riemann sum to the arcsine integral. | Endpoint bookkeeping and the detailed comparison with the semicircle law. |
+| II — Toeplitz spectra | Exhibit the sine eigenvectors, verify the boundary equations, and use distinctness to obtain the full spectrum. | Characteristic-polynomial checks and complete multiplicity accounting. |
+| III — constructive approximation | Follow the explicit polynomial approximants and retain the error estimate needed by the question. | The full interval-by-interval construction and auxiliary bounds. |
+| IV — random matrices | Prove the low-degree cases requested in Question 13c, then use the authorized hypotheses $(H_k)$ for Questions 14–17. | The expandable supplement proving every $(H_k)$ directly, plus the Lean companion and proof audit. |
+
 A separate companion post, [Formalizing an X/ENS Correction in Lean](/2026/07/18/formalizing-xens-correction-in-lean/), explains the placeholder-free conditional proof graph and its remaining interface boundaries. Formalization did more than translate the prose: it exposed a missing scaling condition in Question 12 and forced the random-matrix moment assumptions to be stated explicitly.
 
 <section class="correction-downloads" aria-labelledby="correction-documents-title">
