@@ -1,0 +1,21 @@
+---
+layout: null
+permalink: /llms.txt
+sitemap: false
+---
+# Kieran McShane: Notes
+
+> Expository notes on quantum information, random matrices, formalized mathematics, and related topics. The articles distinguish established results, derived calculations, numerical checks, and open questions.
+
+## Main articles
+
+- [Random Binary Projective Measurements and Incompatibility]({{ '/2026/07/16/random-quantum-measurements-incompatibility/' | absolute_url }}): Joint measurability, uniform-noise robustness, random projections, principal angles, and high-dimensional incompatibility.
+- [Centered Correlation Tensors and Quantum Separability]({{ '/2026/07/17/centered-correlation-tensors-separability/' | absolute_url }}): Bloch-coordinate separability criteria, centered covariance bounds, examples, and multipartite extensions.
+- [Ecole Polytechnique-ESPCI 2026 Mathematics B: Complete Correction]({{ '/2026/07/18/x-ens-2026-mathematics-b-complete-correction/' | absolute_url }}): A question-by-question correction covering recurrences, tridiagonal spectra, polynomial approximation, and the semicircle law.
+- [Formalizing an X/ENS Correction in Lean]({{ '/2026/07/18/formalizing-xens-correction-in-lean/' | absolute_url }}): What the Lean development verifies, which analytic inputs remain explicit, and what formalization changed in the written proof.
+
+## Site information
+
+- [About the author and the site]({{ '/about/' | absolute_url }})
+- [RSS feed]({{ '/feed.xml' | absolute_url }})
+- [XML sitemap]({{ '/sitemap.xml' | absolute_url }})
