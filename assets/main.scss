@@ -330,6 +330,35 @@ body:has(.correction-post) .post-meta {
   color: inherit;
   text-underline-offset: 0.16em;
 }
+
+.correction-downloads .citation-details {
+  grid-column: 2;
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.citation-details summary {
+  width: fit-content;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.citation-details p {
+  margin: 0.65rem 0;
+}
+
+.citation-details pre {
+  margin: 0.65rem 0 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  border: 1px solid #d9dee8;
+  border-radius: 4px;
+  background: #f7f8fa;
+  white-space: pre-wrap;
+}
 .correction-reading-layout,
 .correction-main {
   min-width: 0;
@@ -804,6 +833,10 @@ body:has(.correction-post) .post-meta {
   }
 
   .correction-downloads .document-source {
+    grid-column: 1;
+  }
+
+  .correction-downloads .citation-details {
     grid-column: 1;
   }
 }
