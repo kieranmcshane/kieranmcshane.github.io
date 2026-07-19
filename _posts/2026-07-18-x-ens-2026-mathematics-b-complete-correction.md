@@ -51,13 +51,11 @@ The [Lean companion](/2026/07/18/formalizing-xens-correction-in-lean/) records w
     <p class="toc-label">Contents</p>
     <div class="toc-section-links">
       <a href="#preliminary-question">Recurrence</a>
-      <a href="#arcsine-versus-semicircle">Compare laws</a>
       <a href="#part-i-arcsine-law">Arcsine law</a>
       <a href="#part-ii-toeplitz-spectra">Toeplitz spectra</a>
       <a href="#part-iii-constructive-approximation">Approximation</a>
       <a href="#part-iv-random-matrices-and-the-semicircle-law">Random matrices</a>
       <a href="#supplement-closing-the-moment-gap">Moment supplement</a>
-      <a href="#what-the-problem-is-secretly-about">Hidden structure</a>
     </div>
   </div>
   <details class="toc-questions" open>
@@ -68,139 +66,8 @@ The [Lean companion](/2026/07/18/formalizing-xens-correction-in-lean/) records w
 
 <div class="correction-main" markdown="1">
 
-The paper uses two different limiting measures. They should not be confused.
-
-<div class="law-comparison" markdown="1">
-<div class="law-panel" markdown="1">
-<p class="law-stage">Parts I-II</p>
-<p class="law-name">Arcsine law</p>
-
-$$
-\frac{1}{\pi\sqrt{4-x^2}}\,\mathbf 1_{(-2,2)}(x)\,dx,
-$$
-
-</div>
-<div class="law-panel" markdown="1">
-<p class="law-stage">Part IV</p>
-<p class="law-name">Semicircle law</p>
-
-$$
-\frac{1}{2\pi}\sqrt{4-x^2}\,\mathbf 1_{[-2,2]}(x)\,dx.
-$$
-
-</div>
-</div>
-
-## Arcsine versus semicircle
-
-The two limiting laws have the same support, but they distribute mass in
-opposite ways. On the interior of $[-2,2]$ their densities are
-
-$$
-\rho_{\mathrm{arc}}(x)=\frac1{\pi\sqrt{4-x^2}},
-\qquad
-\rho_{\mathrm{sc}}(x)=\frac1{2\pi}\sqrt{4-x^2}.
-$$
-
-The arcsine density is U-shaped and diverges at the two endpoints. The
-semicircle density is largest at $x=0$, where it equals $1/\pi$, and vanishes
-with a square-root profile at the endpoints. Thus the deterministic cosine
-grid is denser near the spectral edges, whereas the Wigner empirical measure
-puts more mass in the bulk. This statement concerns limiting density, not
-stochastic eigenvalue repulsion.
-
-<figure class="post-figure law-density-figure">
-  <img src="/assets/images/arcsine-semicircle-comparison.svg?v=2" alt="On the interval from minus two to two, the arcsine density is U-shaped and diverges at both endpoints, while the semicircle density peaks at zero and vanishes at both endpoints." loading="lazy">
-  <figcaption><strong>Direct comparison.</strong> Both curves use the same axes. The arcsine density leaves the frame near $\pm2$ because it diverges there; the semicircle density vanishes at the endpoints and reaches $1/\pi$ at the centre. Solid and dashed strokes keep the distinction visible without colour. The <a href="/assets/code/generate_arcsine_semicircle_comparison.py">figure source</a> is reproducible.</figcaption>
-</figure>
-
-There is an exact pointwise relation, valid for $-2<x<2$:
-
-$$
-\rho_{\mathrm{arc}}(x)\,\rho_{\mathrm{sc}}(x)
-=\frac1{2\pi^2}.
-$$
-
-This reciprocal identity is useful, but calling the laws “duals” would suggest
-more structure than is needed here. The clearest common coordinate is
-$x=2\cos\theta$. Taking absolute values in the change of variables gives
-
-$$
-\rho_{\mathrm{arc}}(2\cos\theta)\,2\sin\theta\,d\theta
-=\frac{d\theta}{\pi},
-\qquad
-\rho_{\mathrm{sc}}(2\cos\theta)\,2\sin\theta\,d\theta
-=\frac2\pi\sin^2\theta\,d\theta.
-$$
-
-So the arcsine law is the pushforward of a uniform angle, while the semicircle
-law uses the same angle with a $\sin^2\theta$ weight. Their moments make the
-contrast equally explicit. Odd moments vanish for both laws, and for $p\ge0$,
-
-$$
-m_{2p}^{\mathrm{arc}}=\binom{2p}{p},
-\qquad
-m_{2p}^{\mathrm{sc}}=\frac1{p+1}\binom{2p}{p}=C_p.
-$$
-
-| Law | Even moment of order $2p$ | First even moments | Mechanism in the paper |
-|---|---:|---|---|
-| Arcsine | $\binom{2p}{p}$ | $1,2,6,20,\ldots$ | Uniform cosine grid for the path-matrix spectrum |
-| Semicircle | $C_p=\frac1{p+1}\binom{2p}{p}$ | $1,1,2,5,\ldots$ | Normalized Wigner trace moments |
-
-This is the conceptual hinge of the paper. Parts I–II average over explicit
-eigenangles and obtain the arcsine law. Part IV changes the matrix model: its
-moment hypotheses select Catalan moments and hence the semicircle law. What the
-two halves share is the toolkit of polynomial approximation and spectral
-averaging, not a claim that adding randomness mechanically transforms one
-density into the other.
-
-## General conventions
-
-All spectra below are counted with algebraic multiplicity, as in the
-statement. For a real symmetric matrix $M\in M_n(\mathbb{R})$ and a
-function $f$ defined on the spectrum,
-
-<span id="definition-sf" class="definition-target" aria-hidden="true"></span>
-
-$$
-S_f(M)=\frac1n\sum_{(\lambda,m_\lambda)\in\operatorname{Sp}(M)}m_\lambda f(\lambda).
-$$
-
-In Part IV we write $S_n(f)=S_f(X_n)$. The function $f_k$ is always
-$x\mapsto x^k$.
-
-All limits are taken as $n\to\infty$ unless stated otherwise. Endpoint
-cases are handled separately whenever an asymptotic equivalent would
-otherwise hide a zero term.
-
-## Notation guide
-
-Only notation that recurs across several questions is collected here. Hovering
-over or focusing a linked expression reveals its definition; following the link
-returns to the passage where the object is defined.
-
-<div class="notation-glossary">
-  <dl>
-    <dt><a href="#definition-sf">$S&#95;f(M)$</a></dt>
-    <dd id="glossary-sf-desc">The empirical average of $f$ over the eigenvalues of $M$, counted with multiplicity.</dd>
-
-    <dt><a href="#definition-if">$I(f)$</a></dt>
-    <dd id="glossary-if-desc">Integration against the arcsine law on $[-2,2]$.</dd>
-
-    <dt><a href="#definition-qn">$q&#95;n(y)$</a></dt>
-    <dd id="glossary-qn-desc">The number of eigenvalues of $T&#95;n(a,b,c)$ not exceeding $y$.</dd>
-
-    <dt><a href="#definition-semicircle-functional">$f&#95;k,\ \Sigma$</a></dt>
-    <dd id="glossary-sigma-desc">The monomial $f&#95;k(x)=x^k$ and integration against the semicircle law.</dd>
-
-    <dt><a href="#definition-hk">$(H&#95;k)$</a></dt>
-    <dd id="glossary-hk-desc">The first- and second-moment limits assumed for the normalized trace of $X&#95;n^k$.</dd>
-
-    <dt><a href="#definition-gkb">$g&#95;{k,B}$</a></dt>
-    <dd id="glossary-gkb-desc">The tail test function $|x|^k\mathbf 1&#95;{\lbrace|x|>B\rbrace}$.</dd>
-  </dl>
-</div>
+Throughout, spectra are counted with algebraic multiplicity and limits are
+taken as $n\to\infty$, unless stated otherwise.
 
 ## Preliminary question
 
@@ -1115,6 +982,8 @@ each eigenvalue having multiplicity $1$.
 <aside class="question-statement" markdown="1">
 For a real-valued function $f$ and $M\in M_n(\mathbb R)$, define
 
+<span id="definition-sf" class="definition-target" aria-hidden="true"></span>
+
 $$
 S_f(M)=\frac1n\sum_{(\lambda,m_\lambda)\in\operatorname{Sp}(M)}
 m_\lambda f(\lambda).
@@ -1128,7 +997,7 @@ $$
 $$
 </aside>
 
-By Question 6, the <a class="notation-ref" href="#definition-sf" data-definition="Spectral average: the mean of f over the eigenvalues, counted with multiplicity." aria-describedby="glossary-sf-desc">spectral average $S&#95;f(T&#95;n)$</a> is
+By Question 6, the <a class="notation-ref" href="#definition-sf" data-definition="Spectral average: the mean of f over the eigenvalues, counted with multiplicity.">spectral average $S&#95;f(T&#95;n)$</a> is
 
 $$
 S_f(T_n)=\frac1n\sum_{k=1}^n
@@ -1417,7 +1286,7 @@ q_n(y)
 =n\left(1-\frac{\theta_y}{\pi}\right)+O(1).
 $$
 
-The <a class="notation-ref" href="#definition-qn" data-definition="Counting function: the number of eigenvalues of the tridiagonal matrix not exceeding y." aria-describedby="glossary-qn-desc">normalized counting function $q&#95;n(y)/n$</a> therefore satisfies
+The <a class="notation-ref" href="#definition-qn" data-definition="Counting function: the number of eigenvalues of the tridiagonal matrix not exceeding y.">normalized counting function $q&#95;n(y)/n$</a> therefore satisfies
 
 $$
 \frac{q_n(y)}n\longrightarrow 1-\frac{\theta_y}{\pi}.
@@ -2572,13 +2441,13 @@ $$
   \le B^{k-2\ell}|x|^{2\ell}.
 $$
 
-Thus the <a class="notation-ref" href="#definition-gkb" data-definition="Tail test function: the k-th absolute power outside the interval from minus B to B, and zero inside." aria-describedby="glossary-gkb-desc">tail function $g&#95;{k,B}$</a> satisfies
+Thus the <a class="notation-ref" href="#definition-gkb" data-definition="Tail test function: the k-th absolute power outside the interval from minus B to B, and zero inside.">tail function $g&#95;{k,B}$</a> satisfies
 
 $$
 g_{k,B}(x)\le B^{k-2\ell}f_{2\ell}(x).
 $$
 
-Markov's inequality, Question 13a and <a class="notation-ref" href="#definition-hk" data-definition="Moment hypothesis: convergence of the first two normalized trace moments." aria-describedby="glossary-hk-desc">$(H&#95;{2\ell})$</a> give
+Markov's inequality, Question 13a and <a class="notation-ref" href="#definition-hk" data-definition="Moment hypothesis: convergence of the first two normalized trace moments.">$(H&#95;{2\ell})$</a> give
 
 $$
 \begin{aligned}
@@ -2629,7 +2498,7 @@ $$
 Z_n=S_n(f_k)=\frac1n\operatorname{Tr}(X_n^k).
 $$
 
-By <a class="notation-ref" href="#definition-hk" data-definition="Moment hypothesis: convergence of the first two normalized trace moments." aria-describedby="glossary-hk-desc">$(H&#95;k)$</a>,
+By <a class="notation-ref" href="#definition-hk" data-definition="Moment hypothesis: convergence of the first two normalized trace moments.">$(H&#95;k)$</a>,
 
 $$
 \mathbb{E}(Z_n)=\frac1n\mathbb{E}(\operatorname{Tr}(X_n^k))\longrightarrow\Sigma(f_k),
@@ -2739,7 +2608,7 @@ $$
 Here $\Sigma(1)=1$ by Question 13b with $p=0$.
 Moreover, because $P$ is a finite linear combination of monomials,
 linearity of $S_n$, linearity of expectation, and the first part of
-<a class="notation-ref" href="#definition-hk" data-definition="Moment hypothesis: convergence of the first two normalized trace moments." aria-describedby="glossary-hk-desc">$(H&#95;k)$</a> give
+<a class="notation-ref" href="#definition-hk" data-definition="Moment hypothesis: convergence of the first two normalized trace moments.">$(H&#95;k)$</a> give
 
 $$
 \mathbb{E}(S_n(P))\longrightarrow \Sigma(P).
@@ -2948,54 +2817,6 @@ $$
 S_n(f)\xrightarrow{\mathbb P}
 \frac1{2\pi}\int_{-2}^2 f(x)\sqrt{4-x^2}\,dx.
 $$
-
-The proof is assembled from four ingredients developed by the paper itself:
-
-1. exact trigonometric control of a second-order recurrence;
-2. explicit spectra and Riemann-sum limits for tridiagonal matrices;
-3. constructive polynomial approximation without invoking Weierstrass as a black box;
-4. moment, variance, and tail estimates for random spectral averages.
-
-That architecture is the real strength of the problem. The early cosine grid
-produces the arcsine law; the later trace moments produce the Catalan numbers
-and the semicircle law. The two limiting measures are different, but the same
-ideas of spectral averaging and polynomial approximation connect them.
-
-## What the problem is secretly about
-
-The recurrence polynomials in Part II have a standard name:
-
-$$
-\chi_n(X)=U_n\!\left(\frac X2\right),
-$$
-
-where $U_n$ is the Chebyshev polynomial of the second kind. Equivalently,
-if $q\in\mathbb C\setminus\lbrace 0,1,-1\rbrace$ and $X=q+q^{-1}$, then
-
-$$
-\chi_n(X)
-=\frac{q^{n+1}-q^{-(n+1)}}{q-q^{-1}}
-=[n+1]_q,
-$$
-
-the usual quantum integer. The zeros in Question 6 are therefore the
-root-of-unity zeros of $[n+1]_q$ written on the real line.
-
-This is also graph theory. The matrix $T_n$ is the adjacency matrix of the
-path graph $A_n$. Two different ways of observing the same matrices already
-foreshadow the two limiting laws in the paper:
-
-- the normalized trace $n^{-1}\operatorname{Tr}f(T_n)$ samples the whole
-  cosine grid and tends to the arcsine law;
-- the corner moment $\langle e_1,T_n^{2p}e_1\rangle$ counts Dyck paths of
-  length $2p$ and, once $n$ is large compared with $p$, equals the Catalan
-  number $C_p$, the moment of the semicircle law.
-
-So the arcsine and semicircle measures are not unrelated guests. One is the
-bulk density of states of long paths; the other is the limiting spectral
-measure seen from an endpoint. This path-graph/Chebyshev structure is also
-the one that appears in Temperley-Lieb and Jones theory, though the exam
-wisely remains self-contained and does not require that language.
 
 <aside class="formalization-summary" aria-labelledby="lean-companion-title" markdown="1">
 
