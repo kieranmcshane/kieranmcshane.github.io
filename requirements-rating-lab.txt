@@ -1,0 +1,2 @@
+# The refresh pipeline intentionally uses only the Python standard library.
+# Test tooling is installed separately in CI.
