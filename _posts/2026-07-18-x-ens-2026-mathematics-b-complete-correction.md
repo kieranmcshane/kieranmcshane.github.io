@@ -1595,141 +1595,89 @@ and choosing $\eta>0$ so that the intervals
 $[c_i-\eta,c_i+\eta]$ are pairwise disjoint.
 </aside>
 
-We first prove the result for $f(-1)=0$, then remove this assumption.
-
-Let $\varepsilon>0$ and assume $f(-1)=0$. Apply Question 11 with
-tolerance $\varepsilon/4$. We obtain points
+Assume first that $f(-1)=0$. Applying Question 11 with tolerance
+$\varepsilon/4$, choose
 
 $$
 -1<c_1<\cdots<c_N<1
 $$
 
-and
-coefficients $a_i$ with $|a_i|\le\varepsilon/4$ such that
+and $a_1,\ldots,a_N$ such that $|a_i|\le\varepsilon/4$ and
 
 $$
-\left|f(x)-S(x)\right|\le\frac\varepsilon4,
-  \qquad
-  S(x)=\sum_{i=1}^N a_iH(x-c_i).
+S(x)=\sum_{i=1}^N a_iH(x-c_i),
+\qquad
+\|f-S\|_\infty\le\frac\varepsilon4.
 $$
 
-For each $i$, choose a positive
-number $\rho_i$ such that
+Set $\rho_i=1+|c_i|$. Then
 
 $$
-\frac{x-c_i}{\rho_i}\in[-1,1]
-  \qquad\text{for all }x\in[-1,1].
+\frac{x-c_i}{\rho_i}\in[-1,1]\quad(x\in[-1,1]),
+\qquad
+H\!\left(\frac{x-c_i}{\rho_i}\right)=H(x-c_i),
 $$
 
-For example, one may take
-
-$$
-\rho_i=1+|c_i|.
-$$
-
-Then
-
-$$
-H\left(\frac{x-c_i}{\rho_i}\right)=H(x-c_i),
-$$
-
-because $\rho_i>0$.
-
-Choose $0<\eta\le1$ small enough that the intervals
+because $\rho_i>0$. Choose $0<\eta\le1$ so that the intervals
 
 $$
 [c_i-\rho_i\eta,c_i+\rho_i\eta]
 $$
 
-are pairwise disjoint. This is
-possible because the points $c_i$ are distinct. By Question 10b, for
-each fixed $i$,
-
-$$
-P_m\left(\frac{x-c_i}{\rho_i}\right)
-  \longrightarrow
-  H\left(\frac{x-c_i}{\rho_i}\right)=H(x-c_i)
-$$
-
-uniformly on the set of
-$x\in[-1,1]$ such that $|x-c_i|\ge \rho_i\eta$.
-
-Let
+are pairwise disjoint, and put
 
 $$
 A=\sum_{i=1}^N |a_i|.
 $$
 
-If $A=0$, then $S=0$ and the proof is
-immediate. Otherwise choose $m$ large enough that, simultaneously for
-all $i$ and all $x\in[-1,1]$ with $|x-c_i|\ge \rho_i\eta$,
+By Question 10b and the finiteness of the family, choose $m$ such that,
+for every $i$ and every $x\in[-1,1]$ with
+$|x-c_i|\ge\rho_i\eta$,
 
 $$
 \left|P_m\left(\frac{x-c_i}{\rho_i}\right)-H(x-c_i)\right|
-  \le \frac{\varepsilon}{4A}.
+\le \frac{\varepsilon}{4(A+1)}.
 $$
 
-Define the polynomial
+Define
 
 $$
 R_m(X)=\sum_{i=1}^N a_iP_m\left(\frac{X-c_i}{\rho_i}\right).
 $$
 
-Fix
-$x\in[-1,1]$. Because the intervals $[c_i-\rho_i\eta,c_i+\rho_i\eta]$
-are pairwise disjoint, $x$ belongs to at most one of them. For all
-indices for which $|x-c_i|\ge \rho_i\eta$, the total error is bounded by
+For a fixed $x$, at most one index $j$ can satisfy
+$|x-c_j|<\rho_j\eta$. For every other index the preceding estimate
+applies. If such an index $j$ exists, both terms lie in $[0,1]$:
 
 $$
-\sum_i |a_i|\frac{\varepsilon}{4A}\le\frac\varepsilon4.
+0\le P_m(t)\le1\quad(-1\le t\le1),
+\qquad 0\le H(x-c_j)\le1.
 $$
 
-For the
-possible exceptional index $j$, we use only the elementary bound
+Consequently,
 
 $$
-0\le P_m(t)\le1\qquad(-1\le t\le1),
+|R_m(x)-S(x)|
+\le A\frac{\varepsilon}{4(A+1)}
+   +\max_{1\le i\le N}|a_i|
+\le\frac\varepsilon2,
 $$
 
-which follows from
-$0\le(1-t)/2\le1$. Hence
+where the second term accounts for the possible exceptional index. Therefore
 
 $$
-\left|P_m\left(\frac{x-c_j}{\rho_j}\right)-H(x-c_j)\right|\le1,
+\|f-R_m\|_\infty
+\le\|f-S\|_\infty+\|S-R_m\|_\infty
+\le\frac{3\varepsilon}{4}<\varepsilon.
 $$
 
-and
-its contribution is at most $|a_j|\le\varepsilon/4$. Thus
-
-$$
-|R_m(x)-S(x)|\le\frac\varepsilon2.
-$$
-
-Together with
-$|f(x)-S(x)|\le\varepsilon/4$, this gives
-
-$$
-|f(x)-R_m(x)|\le\frac{3\varepsilon}{4}<\varepsilon.
-$$
-
-This proves the
-result when $f(-1)=0$.
-
-For a general continuous $f$, apply the previous case to
+For a general $f$, apply this result to
 
 $$
 g(x)=f(x)-f(-1),
 $$
 
-which satisfies $g(-1)=0$. There is a polynomial
-$R$ such that
-
-$$
-|g(x)-R(x)|\le\varepsilon
-  \qquad(x\in[-1,1]).
-$$
-
-Then
+and add the constant back. If $\|g-R\|_\infty\le\varepsilon$, then
 
 $$
 P(X)=R(X)+f(-1)
@@ -1745,21 +1693,12 @@ $$
 
 </div>
 
-*Scaling note.* The official hint proposes the unscaled terms
-$P_m(X-c_i)$. Taken literally, Question 10b does not control them on all
-of $[-1,1]$, because $x-c_i$ can leave $[-1,1]$. The rescaling above
-repairs this domain gap: $P_m((X-c_i)/\rho_i)$ always receives an argument
-in $[-1,1]$. Since $\rho_i>0$, it does not change the target step:
-$H((x-c_i)/\rho_i)=H(x-c_i)$. This is one of the places where the formal
-verification forced a hidden domain condition into the open.
-
-Here “constructive” means that the approximating polynomials are given by
-explicit formulas, not that the construction is numerically efficient. In
-particular, $\deg Q_n=n2^n$, so the degrees grow very rapidly.
+The scaling ensures that Question 10b is applied inside $[-1,1]$; the
+unscaled quantity $x-c_i$ need not lie in that interval. Since $\rho_i>0$,
+the scaling does not change the corresponding step function.
 
 ## Part IV: Random matrices and the semicircle law
 
-We now recall the probabilistic assumptions rather than leaving them implicit.
 Set
 
 $$
@@ -1781,8 +1720,7 @@ $$
 \mathbb E\lvert W_{1,1}\rvert^k<\infty\quad(k\ge0).
 $$
 
-In particular, Question 13c may use the finite fourth moment. Extend the
-array symmetrically by
+Extend the array symmetrically by
 
 $$
 W_{j,i}=W_{i,j},
@@ -1809,35 +1747,6 @@ f_k(x)=x^k,
   \qquad
   \Sigma(f)=\frac1{2\pi}\int_{-2}^2 f(x)\sqrt{4-x^2}\,dx.
 $$
-
-<aside class="intuition" markdown="1">
-<strong>Probability bridge.</strong> The quantity $S_n(f)$ is now random. The
-goal is not pointwise convergence for every matrix realization, but
-convergence in probability:
-
-$$
-\forall\varepsilon>0,\qquad
-\mathbb P\bigl(\lvert S_n(f)-\Sigma(f)\rvert>\varepsilon\bigr)
-\longrightarrow0.
-$$
-
-The proof has three layers. Moment limits identify the candidate semicircle
-law; second-moment control makes polynomial spectral averages concentrate;
-polynomial approximation and a tail estimate then extend the result to
-continuous test functions. Questions 13–17 build precisely those layers.
-</aside>
-
-For later
-use, if $c\in\mathbb{R}$ and $j\ge0$, the function
-
-$$
-x\longmapsto c\,x^j\sqrt{4-x^2}
-$$
-
-is continuous on the compact
-interval $[-2,2]$, hence integrable there. Thus finite linear
-combinations of monomials may be integrated term by term against the
-semicircle weight.
 
 <span id="definition-hk" class="definition-target" aria-hidden="true"></span>
 
