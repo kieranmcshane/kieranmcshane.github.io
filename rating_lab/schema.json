@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kieranmcshane.github.io/rating-lab/schema.json",
+  "title": "Rating Lab sport payload",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "sport",
+    "generated_at",
+    "latest_result",
+    "source",
+    "competitions",
+    "parameters",
+    "models"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "sport": { "enum": ["tennis", "football", "chess"] },
+    "generated_at": { "type": "string" },
+    "latest_result": { "type": "string", "format": "date" },
+    "source": { "type": "object" },
+    "competitions": { "type": "array", "items": { "type": "string" } },
+    "parameters": { "type": "object" },
+    "models": {
+      "type": "object",
+      "required": ["elo", "trueskill", "robust"]
+    }
+  },
+  "additionalProperties": false
+}
