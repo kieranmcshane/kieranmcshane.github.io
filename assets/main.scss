@@ -927,6 +927,11 @@ body:has(.rating-lab) .post-content {
   line-height: 1.55;
 }
 
+.rating-lab-hero-link {
+  margin: -0.45rem 0 1.2rem;
+  font-weight: 700;
+}
+
 .rating-lab-freshness {
   display: inline-flex;
   align-items: center;
@@ -967,6 +972,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-explorer > h2,
+.rating-lab-predictor > h2,
 .rating-lab-method > h2,
 .rating-lab-audit > h2,
 .rating-lab-sources > h2 {
@@ -1250,6 +1256,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-method,
+.rating-lab-predictor,
 .rating-lab-audit,
 .rating-lab-sources {
   padding: 3.5rem 0;
@@ -1291,6 +1298,157 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-sources li {
   margin-bottom: 0.5rem;
+}
+
+.rating-lab-predictor-intro {
+  max-width: 780px;
+  color: #435266;
+  font-size: 1.08rem;
+}
+
+.rating-lab-predictor-toolbar {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) auto minmax(220px, 1fr);
+  gap: 1rem;
+  align-items: end;
+  margin: 1.5rem 0 1rem;
+}
+
+.rating-lab-predictor-state {
+  align-self: center;
+  color: #536176;
+  font-size: 0.84rem;
+  font-weight: 650;
+  text-align: right;
+}
+
+.rating-lab-predictor-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1.5rem;
+  background: var(--lab-wash);
+  border-radius: 9px;
+}
+
+.rating-lab-predictor-metrics div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.85rem 1rem;
+}
+
+.rating-lab-predictor-metrics div + div {
+  border-left: 1px solid var(--lab-line);
+}
+
+.rating-lab-predictor-metrics span {
+  color: #657287;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.rating-lab-predictor-metrics strong {
+  font-size: 1.15rem;
+}
+
+.rating-lab-predictor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 1.6rem;
+  align-items: start;
+}
+
+.rating-lab-predictor-table th,
+.rating-lab-predictor-table td {
+  text-align: right;
+}
+
+.rating-lab-predictor-table th:nth-child(2) {
+  text-align: left;
+}
+
+.rating-lab-predictor-table tbody tr {
+  cursor: pointer;
+}
+
+.rating-lab-predictor-team {
+  display: block;
+  width: 100%;
+  padding: 0;
+  color: var(--lab-navy);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rating-lab-probability {
+  position: relative;
+  display: inline-block;
+  min-width: 4.6rem;
+  padding: 0.18rem 0.3rem;
+  overflow: hidden;
+  background: #e7edf4;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rating-lab-probability::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--probability);
+  background: rgba(22, 101, 216, 0.18);
+  content: "";
+}
+
+.rating-lab-probability span {
+  position: relative;
+}
+
+.rating-lab-position-chart {
+  display: flex;
+  gap: 3px;
+  height: 120px;
+  margin: 1.2rem 0 0.45rem;
+  align-items: end;
+}
+
+.rating-lab-position-bar {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: max(2px, var(--height));
+  background: var(--lab-blue);
+  border-radius: 3px 3px 0 0;
+}
+
+.rating-lab-position-bar.is-relegation {
+  background: var(--lab-negative);
+}
+
+.rating-lab-position-axis {
+  display: flex;
+  justify-content: space-between;
+  color: #68758a;
+  font-size: 0.72rem;
+}
+
+.rating-lab-predictor-detail > p {
+  color: #647185;
+}
+
+.rating-lab-predictor-method {
+  max-width: 920px;
+  margin-top: 1.4rem;
+  color: #4c5b70;
+}
+
+.rating-lab-predictor-method summary {
+  color: var(--lab-navy);
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .rating-lab-audit-intro {
@@ -1449,6 +1607,19 @@ body:has(.rating-lab) .post-content {
     grid-template-columns: 1fr;
   }
 
+  .rating-lab-predictor-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rating-lab-predictor-state {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .rating-lab-predictor-grid {
+    grid-template-columns: 1fr;
+  }
+
   .rating-lab-detail {
     position: static;
     min-height: 0;
@@ -1465,11 +1636,25 @@ body:has(.rating-lab) .post-content {
   }
 
   .rating-lab-toolbar,
+  .rating-lab-predictor-toolbar,
   .rating-lab-method-grid,
   .rating-lab-equations,
   .rating-lab-audit-grid,
   .rating-lab-split ol {
     grid-template-columns: 1fr;
+  }
+
+  .rating-lab-predictor-state {
+    grid-column: auto;
+  }
+
+  .rating-lab-predictor-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .rating-lab-predictor-metrics div + div {
+    border-top: 1px solid var(--lab-line);
+    border-left: 0;
   }
 
   .rating-lab-segmented button {

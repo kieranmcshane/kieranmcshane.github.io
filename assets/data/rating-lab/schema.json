@@ -18,7 +18,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.1.0"
+      "const": "1.2.0"
     },
     "sport": {
       "enum": [
@@ -93,6 +93,40 @@
         "trueskill",
         "robust"
       ]
+    },
+    "tournament_predictor": {
+      "type": "object",
+      "required": [
+        "format",
+        "simulations_per_model",
+        "draw_model",
+        "tie_break",
+        "strengths",
+        "competitions"
+      ],
+      "properties": {
+        "format": {
+          "type": "string"
+        },
+        "simulations_per_model": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "draw_model": {
+          "type": "string"
+        },
+        "tie_break": {
+          "type": "string"
+        },
+        "strengths": {
+          "type": "string"
+        },
+        "competitions": {
+          "type": "array",
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
