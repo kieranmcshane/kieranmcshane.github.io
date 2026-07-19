@@ -1,8 +1,8 @@
 {
   "schema_version": "1.2.0",
   "methodology_version": "2026-07-20.2",
-  "code_revision": "d1a66411ff03c2fdcb529a6025471469bd33b637",
-  "generated_at": "2026-07-19T23:59:06+00:00",
+  "code_revision": "ba852d3c637f7dcaae90c9373003f5583a0e839e",
+  "generated_at": "2026-07-19T23:59:54+00:00",
   "sports": {
     "tennis": {
       "status": "current",
@@ -96,7 +96,7 @@
       "latest_result": "2026-05-24",
       "source": "OpenFootball (development fallback)",
       "stale_after_hours": 48,
-      "checked_at": "2026-07-19T23:59:03+00:00",
+      "checked_at": "2026-07-19T23:59:51+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/openfootball/football.json",
       "snapshot_sha256": null,
