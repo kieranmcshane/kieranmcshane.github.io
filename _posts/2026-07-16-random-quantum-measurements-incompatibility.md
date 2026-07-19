@@ -16,10 +16,12 @@ The article first develops effects, POVMs, compatibility and uniform noise. It t
 
 ## Reading guide
 
-- [The primer](#from-outcomes-to-effects) introduces the notation and the marginal problem.
-- [The two-projection argument](#a-phase-diagram-for-two-random-projections) contains the main geometric result and the full off-diagonal limit.
-- [The many-measurement section](#many-random-binary-measurements) uses incompatibility witnesses and free probability; the final section explains the operational meaning.
-- [The notation glossary](#notation-glossary) collects the recurring symbols and links to their formal definitions.
+This is a layered article; it need not be read from beginning to end. Choose the route that matches what you want from it.
+
+- **Primer route.** Start with [effects and POVMs](#from-outcomes-to-effects), then read the [operator-valued coupling formulation](#compatibility-is-an-operator-valued-coupling) and the [time-sharing noise argument](#noise-buys-compatibility-by-time-sharing). This route is self-contained and stops before the random-matrix material.
+- **Two-projection route.** Start with the [random measurement models](#random-measurement-models), then follow the [principal-angle phase diagram](#a-phase-diagram-for-two-random-projections), the [full off-diagonal limit](#the-full-off-diagonal-limit), and the [independent SDP audit](#an-independent-sdp-audit). This is the main research-level thread.
+- **Many-measurement route.** Go directly to [many random binary measurements](#many-random-binary-measurements) for the witness and free-probability argument, then to the [operational interpretation](#operational-meaning).
+- **Reference tools.** The [notation glossary](#notation-glossary) collects recurring symbols and links to their formal definitions.
 
 ## Notation glossary
 

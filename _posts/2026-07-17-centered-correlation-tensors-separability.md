@@ -22,14 +22,19 @@ This article derives both bounds with one fixed normalization. It then explains 
 
 ## Reading guide
 
-- [Bloch coordinates](#one-system-bloch-coordinates) fixes the normalization.
-- [The notation glossary](#notation-glossary) gives short reminders and links each recurring symbol to its full definition.
-- [The uncentered test](#from-product-states-to-the-de-vicente-bound) derives the bipartite nuclear-norm bound.
+The article has a complete bipartite core followed by a research-direction appendix.
+
+**Bipartite core**
+
+- [Bloch coordinates](#one-system-bloch-coordinates) fixes the normalization; the [notation glossary](#notation-glossary) gives short reminders.
+- [The uncentered test](#from-product-states-to-the-de-vicente-bound) derives the de Vicente nuclear-norm bound.
 - [Centering](#subtracting-the-local-means) turns the correlation matrix into a covariance and gives the marginal-dependent bound.
-- [Equality and examples](#equality-pure-states-and-two-qubit-checks) identifies exact equality cases, proves pure-state detection, and calibrates mixed-state successes and failures.
-- [More than two parties](#what-changes-for-more-than-two-parties) separates matrix unfoldings from the full projective tensor norm.
-- [A practical ladder](#a-practical-ladder-of-multipartite-tests) distinguishes computable tests from principled but still difficult reformulations.
-- [Moment formulation](#a-possible-moment-problem-formulation) sketches a possible hierarchy and labels clearly what remains open.
+- [Equality and examples](#equality-pure-states-and-two-qubit-checks) identifies equality cases and calibrates both successes and false negatives. Readers interested only in the established bipartite criterion can stop after the [calibrated false negative](#a-calibrated-false-negative).
+
+**Multipartite research directions**
+
+- [More than two parties](#what-changes-for-more-than-two-parties) separates proved necessary bounds from the harder full projective-norm problem.
+- [A practical ladder](#a-practical-ladder-of-multipartite-tests) compares computable relaxations; the [moment formulation](#a-possible-moment-problem-formulation) is explicitly a proposal rather than a completed criterion.
 
 ## Notation glossary
 
@@ -633,6 +638,8 @@ $$
 For example, $p=0.1$ is NPT but passes the centered test. The threshold above is recomputed from the density matrix by the linked script. This is a useful calibration: centering strengthens de Vicente and <a class="concept-ref" href="#definition-ccnr" data-definition="CCNR: a separable state must have realignment trace norm at most one." aria-label="CCNR: a separable state must have realignment trace norm at most one.">CCNR</a>, but it is still only a sufficient certificate of entanglement, not a characterization of mixed-state separability.
 
 ## What changes for more than two parties
+
+> **Research-direction appendix.** The bipartite criterion, its attribution, equality cases and limitations are complete above. The remaining sections collect proved necessary multipartite bounds, computational relaxations and explicitly labelled proposals. They do not claim a complete multipartite separability criterion.
 
 Suppose a full $g$-party correlation tensor has a separable decomposition
 

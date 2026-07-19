@@ -14,6 +14,8 @@ That is the interesting part. Lean did not merely check that the final line was 
 
 Was a statement a direct theorem? Was it an analytic theorem still imported through an interface? Was an independence assumption just a `Prop`-shaped label, or was it in a form that Mathlib's probability library could actually use? These distinctions are easy to blur in prose. They are much harder to blur in a file that has to build.
 
+> **External verification status.** This is a field report about a build checked in a private working tree, not yet an externally reproducible software release. The precise local evidence and its limitations are recorded in [What is actually verified](#what-is-actually-verified). A reproducible public release would need a frozen source snapshot, its `lake-manifest.json`, a theorem manifest and a CI build tied to the published commit.
+
 ## Reading guide
 
 - [The shape of the correction](#the-shape-of-the-correction) explains the four mathematical blocks.
@@ -254,7 +256,7 @@ First, it is a checked map of the correction. Even where an analytic input is st
 
 Second, it is a source of better prose. The proof dependencies discovered by Lean are exactly the dependencies a careful written solution should make visible.
 
-Third, it gives a practical workflow for formalizing long exam solutions: begin with a scaffold, remove placeholders, replace informal model fields by usable hypotheses, and keep a public manifest of what is direct, conditional and still frontier.
+Third, it gives a practical workflow for formalizing long exam solutions: begin with a scaffold, remove placeholders, replace informal model fields by usable hypotheses, and keep a manifest of what is direct, conditional and still frontier. When the project is ready for an external release, publish that manifest with the frozen source and build environment.
 
 The most recent Wigner work is a good example of that workflow. The final theorem did not change its mathematical meaning. What changed is that two assumptions that used to live in the fog now have concrete suppliers:
 
