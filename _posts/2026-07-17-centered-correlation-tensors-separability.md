@@ -3,6 +3,7 @@ layout: post
 title: "Centered Correlation Tensors and Quantum Separability"
 subtitle: "The enhanced realignment criterion in Bloch coordinates"
 date: 2026-07-17 08:00:00 +0200
+last_modified_at: 2026-07-19 16:10:00 +0200
 categories: [quantum-information]
 tags: [entanglement, separability, tensor-norms, Bloch-representation]
 excerpt: "How the usual correlation-tensor separability test becomes a marginal-dependent covariance bound after centering."
@@ -236,7 +237,7 @@ $$
 }
 $$
 
-This is the necessary condition proved by [de Vicente, Theorem 1](https://arxiv.org/pdf/quant-ph/0607195#page=6). A violation certifies entanglement. Satisfaction does not prove separability in general.
+This is the necessary condition proved by [de Vicente, Theorem 1](https://ar5iv.labs.arxiv.org/html/quant-ph/0607195#S3.p8). A violation certifies entanglement. Satisfaction does not prove separability in general.
 
 There is a tensor-norm way to read the same calculation. For two Euclidean spaces, the projective tensor norm agrees with the nuclear norm after identifying $r\otimes s$ with the matrix $rs^{\mathsf T}$:
 {: #definition-projective-norm .definition-target }
@@ -360,7 +361,7 @@ $$
 =\frac{2}{MN}\|C\|_*.
 $$
 
-The boxed centered inequality is therefore exactly [Theorem 1 of Zhang, Zhang, Zhang and Guo](https://arxiv.org/pdf/0709.3766#page=2), rewritten in the present Bloch normalization:
+The boxed centered inequality is therefore exactly [Theorem 1 of Zhang, Zhang, Zhang and Guo](https://ar5iv.labs.arxiv.org/html/0709.3766#p5), rewritten in the present Bloch normalization:
 
 $$
 \left\|\mathcal R\!\left(
@@ -373,7 +374,7 @@ $$
 }.
 $$
 
-It was also recovered as a consequence of the covariance matrix criterion by [Gittsovich, Gühne, Hyllus and Eisert](https://arxiv.org/abs/0803.0757). The off-diagonal covariance block has entries
+The same inequality appears as [Proposition IV.2](https://ar5iv.labs.arxiv.org/html/0803.0757#S4.Thmthm2) in the covariance-matrix treatment of Gittsovich, Gühne, Hyllus and Eisert; their [Remark IV.3](https://ar5iv.labs.arxiv.org/html/0803.0757#S4.Thmthm3) identifies it with the Zhang–Zhang–Zhang–Guo criterion. The off-diagonal covariance block has entries
 
 $$
 \langle A_i\otimes B_j\rangle
@@ -618,7 +619,7 @@ The program validates the input and prints $r$, $s$, $T$, $C$, both norm tests a
 
 ### A calibrated false negative
 
-The criterion is not complete for mixed states. [Zhang and coauthors](https://arxiv.org/abs/0709.3766) consider
+The criterion is not complete for mixed states. [Example 2 of Zhang and coauthors](https://ar5iv.labs.arxiv.org/html/0709.3766#p14) considers
 
 $$
 \omega_p
@@ -657,9 +658,9 @@ $$
 \prod_{x=1}^g R_{d_x}.
 $$
 
-This is the intrinsic multipartite analogue of the bipartite calculation. Unlike the <a class="notation-ref" href="#definition-nuclear-norm" data-definition="Nuclear norm: the sum of a matrix's singular values." aria-describedby="glossary-nuclear-desc">matrix nuclear norm</a>, the full <a class="notation-ref" href="#definition-projective-norm" data-definition="Projective Euclidean tensor norm: the least weighted sum of products of local Euclidean norms." aria-describedby="glossary-projective-desc">projective tensor norm</a> is computationally hard: weak membership and approximation for third-order tensor nuclear-norm balls are NP-hard [in the sense made precise by Friedland and Lim](https://arxiv.org/abs/1410.6072).
+This is the intrinsic multipartite analogue of the bipartite calculation. Unlike the <a class="notation-ref" href="#definition-nuclear-norm" data-definition="Nuclear norm: the sum of a matrix's singular values." aria-describedby="glossary-nuclear-desc">matrix nuclear norm</a>, the full <a class="notation-ref" href="#definition-projective-norm" data-definition="Projective Euclidean tensor norm: the least weighted sum of products of local Euclidean norms." aria-describedby="glossary-projective-desc">projective tensor norm</a> is computationally hard: already for real tensors of order at least three, computing the spectral and nuclear norms is NP-hard by [Friedland and Lim, Theorem 8.1](https://ar5iv.labs.arxiv.org/html/1410.6072#S8.Thmtheorem1).
 
-Hassan and Joag take a more tractable route. A matrix unfolding groups some tensor factors into row indices and the rest into column indices. They compute the nuclear norm of each one-versus-the-rest unfolding and keep the largest value. Their [Theorem 1](https://arxiv.org/pdf/0704.3942#page=8) yields the same radius product as a necessary condition for full separability.
+Hassan and Joag take a more tractable route. A matrix unfolding groups some tensor factors into row indices and the rest into column indices. They compute the nuclear norm of each one-versus-the-rest unfolding and keep the largest value. Their [Theorem 1](https://ar5iv.labs.arxiv.org/html/0704.3942#S3.p37) yields the same radius product as a necessary condition for full separability.
 {: #definition-unfolding .definition-target }
 
 For every unfolding,
@@ -759,7 +760,7 @@ There is no single relaxation that turns the full multipartite projective norm i
 | Correlation-tensor moments | traces or moment matrices built from tensor singular data | more spectral information than one norm |
 | Theta-body or moment relaxations | semidefinite programs of increasing order | progressively tighter outer approximations |
 
-The tester framework of [Jivulescu, Lancien and Nechita](https://arxiv.org/abs/2010.06365) makes the second line precise. A local tester is a contraction
+The [tester definition of Jivulescu, Lancien and Nechita](https://ar5iv.labs.arxiv.org/html/2010.06365#S3.Thmtheorem1) makes the second line precise. A local tester is a contraction
 
 $$
 \mathcal E_x:S_1^{d_x}\longrightarrow\ell_2^{n_x},
@@ -776,9 +777,11 @@ $$
 \leq1.
 $$
 
+This bound is the specialization to normalized testers of their [Corollary 3.3](https://ar5iv.labs.arxiv.org/html/2010.06365#S3.Thmtheorem3).
+
 <a class="notation-ref" href="#definition-realignment" data-definition="Realignment map: reshuffle bipartite operator indices into a matrix whose trace norm yields a separability test." aria-describedby="glossary-realignment-desc">Realignment</a> and SIC-POVM criteria fit into this language. The important caveat is that, with three or more output factors, evaluating the Euclidean projective norm can itself remain hard. Testers provide a systematic family of valid criteria and can reduce dimensions or exploit structure; they do not automatically make every multipartite instance polynomial-time.
 
-Two other directions complement testers. [Huang and Jing](https://arxiv.org/abs/2402.13162) derive bipartite and multipartite criteria from moments of correlation tensors. [Rauhut and Stojanac](https://arxiv.org/abs/1505.05175) construct theta-body semidefinite relaxations of tensor nuclear-norm balls. The latter work concerns tensor recovery rather than quantum separability, so applying those relaxations to centered Bloch tensors would be a proposed method, not an existing centered criterion.
+Two other directions complement testers. Huang and Jing [define correlation-tensor moments](https://ar5iv.labs.arxiv.org/html/2402.13162#Thmdefi1) and derive a [multipartite criterion in Theorem 3](https://ar5iv.labs.arxiv.org/html/2402.13162#Thmthm3). [Rauhut and Stojanac's theta-body construction](https://ar5iv.labs.arxiv.org/html/1505.05175#S1.p3) gives semidefinite relaxations of tensor nuclear-norm balls. The latter work concerns tensor recovery rather than quantum separability, so applying those relaxations to centered Bloch tensors would be a proposed method, not an existing centered criterion.
 
 ## A possible moment-problem formulation
 
@@ -824,7 +827,7 @@ $$
 
 Substituting only the two trace constraints yields the centered nuclear-norm inequality. Retaining the full matrices $K_A$ and $K_B$ keeps more information and moves toward the covariance matrix criterion.
 
-This suggests a research program rather than a theorem claimed here: impose higher moment and localizing-matrix conditions on the pure-state Bloch varieties, keeping common moments across all correlation orders. Such a hierarchy would be a commutative moment counterpart to operator-side relaxations such as the [Doherty–Parrilo–Spedalieri hierarchy](https://arxiv.org/abs/quant-ph/0308032).
+This suggests a research program rather than a theorem claimed here: impose higher moment and localizing-matrix conditions on the pure-state Bloch varieties, keeping common moments across all correlation orders. Such a hierarchy would be a commutative moment counterpart to operator-side relaxations such as the Doherty–Parrilo–Spedalieri hierarchy, whose completeness is [Theorem 1 of their paper](https://ar5iv.labs.arxiv.org/html/quant-ph/0308032#Thmthm11).
 
 A precise open problem is to develop computable lower bounds on this physical atomic gauge that exploit the nonspherical qudit Bloch body while enforcing compatibility across all subset tensors. Establishing the relationship with existing separability hierarchies, and deciding whether centered moments or cumulants are the better coordinates, remains open.
 
