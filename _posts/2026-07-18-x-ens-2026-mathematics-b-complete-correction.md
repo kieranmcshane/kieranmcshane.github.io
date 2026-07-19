@@ -33,13 +33,14 @@ The correction is designed as a reference. It includes endpoint cases, multiplic
       <strong>English version</strong><small>PDF · 6 pages</small>
     </a>
     <a class="document-link" href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.pdf" target="_blank" rel="noopener">
-      <strong>Complete correction</strong><small>PDF</small>
+      <strong>Exam-route correction</strong><small>PDF · Questions 1–17</small>
     </a>
     <a class="document-link" href="/assets/files/X_ENS_2026_MP_MB_correction_V2_concours_grade.tex">
-      <strong>LaTeX source</strong><small>Editable source</small>
+      <strong>Exam-route LaTeX</strong><small>Editable source</small>
     </a>
   </div>
   <p class="document-source">Original source: <a href="https://www.polytechnique.edu/admission-cycle-ingenieur/sites/admission/files/content/Maths%20B.pdf">Ecole Polytechnique</a></p>
+  <p class="document-source">The PDF follows the examination route. This web page is the current reference version; it also contains the optional all-degree moment supplement and later endpoint refinements.</p>
 </section>
 
 The [Lean companion](/2026/07/18/formalizing-xens-correction-in-lean/) records which parts have been formally checked and which remain explicit interfaces.
@@ -1018,6 +1019,11 @@ $$
 
 </div>
 
+In Questions 8a–8c, characteristic polynomials are considered over
+$\mathbb C$. We write $\operatorname{Sp}_{\mathbb C}(M)$ for the complex
+spectrum, counted with algebraic multiplicity. When the eigenvalues are real,
+this is the same multiset as the real spectrum used elsewhere in the paper.
+
 ### Question 8a.
 
 <aside class="question-statement" markdown="1">
@@ -1050,7 +1056,8 @@ Thus
 <div class="answer" markdown="1">
 
 $$
-\boxed{\operatorname{Sp}(T_n(a,b,c))=a+\operatorname{Sp}(T_n(0,b,c)),}
+\boxed{\operatorname{Sp}_{\mathbb C}(T_n(a,b,c))
+=a+\operatorname{Sp}_{\mathbb C}(T_n(0,b,c)),}
 $$
 
 </div>
@@ -1094,7 +1101,8 @@ gives
 <div class="answer" markdown="1">
 
 $$
-\boxed{\operatorname{Sp}(T_n(a,b,c))=a+\operatorname{Sp}(T_n(0,bc,1)),}
+\boxed{\operatorname{Sp}_{\mathbb C}(T_n(a,b,c))
+=a+\operatorname{Sp}_{\mathbb C}(T_n(0,bc,1)),}
 $$
 
 </div>
@@ -2167,7 +2175,9 @@ exactly twice, and no loop occurs.
 Root the tree at the initial vertex and label vertices in order of first
 appearance. Record an up-step whenever the walk first crosses an edge away
 from the root, and a down-step when it crosses that edge back toward the
-root. Since every tree edge is used once in each direction, this produces a
+root. Indeed, deleting a tree edge separates the vertices into two parts; a
+closed walk crosses that cut equally often in both directions. Since the edge
+is traversed exactly twice, it is used once in each direction. This produces a
 Dyck path of length $2p$. Conversely, a Dyck path reconstructs a unique
 canonical walk: create the next vertex on each up-step and return to its
 parent on each down-step. Hence the number of leading patterns is
@@ -2235,8 +2245,11 @@ v\le e+1\le k+1.
 $$
 
 For fixed $k$, there are finitely many paired patterns, their covariances are
-uniformly bounded using moments up to order $2k$, and they have altogether
-$O(n^{k+1})$ labellings. Consequently
+uniformly bounded using moments up to order $2k$. To see the counting directly,
+replace the vertices of a pair of walks by $1,2,\ldots$ in order of first
+appearance. For fixed $k$ this leaves only finitely many canonical pairs, and
+a pair with $v\le k+1$ vertices has at most $(n)_v=O(n^{k+1})$ injective
+labellings. Consequently
 
 $$
 \operatorname{Var}(M_{n,k})
@@ -2453,7 +2466,7 @@ $$
 \begin{aligned}
 \mathbb P\bigl(|S_n(f)-\Sigma(f)|\ge\varepsilon\bigr)
 &\le
-\mathbb P\bigl(S_n(P\mathbf 1_{\{|x|>B\}})\ge\varepsilon/4\bigr)\\
+\mathbb P\bigl(\left|S_n(P\mathbf 1_{\{|x|>B\}})\right|\ge\varepsilon/4\bigr)\\
 &\quad+
 \mathbb P\bigl(|S_n(P)-\mathbb E(S_n(P))|\ge\varepsilon/4\bigr).
 \end{aligned}
@@ -2699,8 +2712,9 @@ S_n(\mathbf 1_{\lbrace |x|>B\rbrace})\xrightarrow{\mathbb P}0
 \qquad(B\ge2).
 $$
 
-Fix $B>4$ and choose a continuous cutoff $\varphi_B$ equal to $1$ on $[-B,B]$ and
-vanishing outside a slightly larger compact interval. Then
+Fix $B>4$ and choose a continuous cutoff $\varphi_B$ with
+$0\le\varphi_B\le1$, equal to $1$ on $[-B,B]$ and vanishing outside a
+slightly larger compact interval. Then
 $f\varphi_B\in C_c(\mathbb R)$ and
 
 $$
