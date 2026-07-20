@@ -7,7 +7,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}">
   <header class="rating-lab-hero">
-    <p class="rating-lab-kicker">Live, reproducible sports ratings</p>
+    <p class="rating-lab-kicker">A live sports-rating side project</p>
     <h1>Strength, measured four ways.</h1>
     <p class="rating-lab-deck">Rank competitors, compare an A vs B matchup, or forecast a competition using real tennis, football, and chess results.</p>
     <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
@@ -185,10 +185,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
   </section>
 
   <section class="rating-lab-research" id="research" aria-labelledby="research-heading">
-    <p class="rating-lab-kicker">Methods & data</p>
-    <h2 id="research-heading">Transparent when you need it. Quiet when you do not.</h2>
-    <p class="rating-lab-research-intro">The rankings and forecasts above are the working surface. Open any panel below to inspect model assumptions, player-credit limits, exact parameters, source status, licences, and reproduction commands.</p>
-    <div class="rating-lab-research-links" aria-label="Quick audit downloads">
+    <p class="rating-lab-kicker">How it works</p>
+    <h2 id="research-heading">The details, when you want them.</h2>
+    <p class="rating-lab-research-intro">Rating Lab is a side project, but its forecasts should still be inspectable. Open a panel to see the assumptions, parameters, data sources, licences, and exact reproduction steps.</p>
+    <div class="rating-lab-research-links" aria-label="Downloads and code">
       <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
       <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
       <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/tree/main/rating_lab">Model source</a>
@@ -223,7 +223,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   </details>
 
   <details class="rating-lab-disclosure">
-    <summary><span>Research boundary</span><strong>Individual footballer contribution</strong></summary>
+    <summary><span>Not available yet</span><strong>Individual footballer contribution</strong></summary>
   <section class="rating-lab-contribution" id="player-contribution" aria-labelledby="contribution-heading">
     <p class="rating-lab-kicker">Team result → player contribution</p>
     <h2 id="contribution-heading">A valid model, withheld until the data are valid</h2>
@@ -330,7 +330,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <details class="rating-lab-disclosure">
     <summary><span>Reproducibility</span><strong>Equations, parameters, and build audit</strong></summary>
   <section class="rating-lab-audit" id="reproducibility" aria-labelledby="audit-heading">
-    <p class="rating-lab-kicker">Open methodology</p>
+      <p class="rating-lab-kicker">Full details</p>
     <h2 id="audit-heading">Inspect every assumption. Reproduce every table.</h2>
     <p class="rating-lab-audit-intro">The browser only reads static JSON. All ratings are rebuilt from public results by deterministic, chronological Python replay; there is no private ranking service or hidden model.</p>
 
@@ -417,6 +417,18 @@ python3 -m unittest discover -s tests -v</code></pre>
     <p>Rankings are independent statistical estimates, not official tour, league, federation, or Lichess ratings. They are informational and are not betting advice.</p>
   </section>
   </details>
+
+  <aside class="rating-lab-support" aria-labelledby="support-heading">
+    <div>
+      <p class="rating-lab-kicker">Keep it growing</p>
+      <h2 id="support-heading">Enjoying Rating Lab?</h2>
+      <p>This is an independent side project. The most useful support right now is to try it, share it, or suggest the next competition or feature.</p>
+    </div>
+    <div class="rating-lab-support-actions">
+      <a class="is-primary" href="https://github.com/kieranmcshane/kieranmcshane.github.io">View the code</a>
+      <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new">Suggest an idea</a>
+    </div>
+  </aside>
   </section>
 </div>
 
