@@ -28,6 +28,9 @@
     error: document.getElementById('rating-lab-error'),
     sportTabs: document.getElementById('sport-tabs'),
     modelTabs: document.getElementById('model-tabs'),
+    protocolSportTabs: document.getElementById('protocol-sport-tabs'),
+    protocolModelTabs: document.getElementById('protocol-model-tabs'),
+    protocol: document.getElementById('rating-protocol'),
     competition: document.getElementById('competition-filter'),
     search: document.getElementById('rating-search'),
     metrics: document.getElementById('rating-metrics'),
@@ -95,7 +98,7 @@
     var total = sports.reduce(function (sum, sport) {
       return sum + state.datasets[sport].models.elo.rankings.length;
     }, 0);
-    elements.generation.textContent = number(total, 0) + ' eligible competitors · generated ' +
+    elements.generation.textContent = number(total, 0) + ' published rankings · generated ' +
       formatDate(state.manifest.generated_at) + (stale.length ? ' · delayed sources retain their last valid snapshot' : '');
   }
 
@@ -165,7 +168,7 @@
     }).concat(['<div class="rating-lab-metric"><span>Held-out predictions</span><div class="rating-lab-metric-value"><strong>' +
       number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']).join('');
     elements.context.textContent = models[state.model].label + ' · ' +
-      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' eligible competitors';
+      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' published competitors';
   }
 
   function renderMovers() {
@@ -202,7 +205,7 @@
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 50);
     var model = state.datasets[state.sport].models[state.model];
-    elements.caption.textContent = model.label + ' · ' + rows.length + ' eligible competitors';
+    elements.caption.textContent = model.label + ' · ' + rows.length + ' published competitors';
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
     elements.more.textContent = 'Show all ' + number(rows.length, 0) + ' competitors';
@@ -365,6 +368,119 @@
     elements.dataDownload.href = dataUrl(state.sport + '.json');
   }
 
+  function dateBefore(value, days) {
+    var shifted = new Date(value + 'T12:00:00Z');
+    shifted.setUTCDate(shifted.getUTCDate() - days);
+    return shifted.toISOString().slice(0, 10);
+  }
+
+  function protocolSportRules(sport) {
+    var rules = {
+      tennis: {
+        label: 'ATP singles',
+        input: 'Completed tour-level singles results. Player identity uses the source player code; tournament start date is the available chronological date. Surface is retained as metadata but is not used by the models.',
+        venue: 'No home or venue advantage. Draws are not valid tennis outcomes.',
+        initialization: 'Every player starts at Elo 1500 or Bayesian μ=25, σ=8.333.',
+        special: 'No seasonal regression.'
+      },
+      football: {
+        label: 'European club football',
+        input: 'Full-time results from the five covered domestic leagues and Champions League. Club identity uses the source ID, with normalized names only for the documented OpenFootball fallback.',
+        venue: 'The listed home team receives the selected home advantage. A draw is y=0.5.',
+        initialization: 'Every club starts at Elo 1500 or Bayesian μ=25, σ=8.333.',
+        special: 'Only club Elo regresses 25% toward 1500 when the season label changes. Bayesian models do not receive seasonal mean reversion.'
+      },
+      'national-football': {
+        label: "Men's national teams",
+        input: 'Completed men’s full internationals since 2016. Country identity is a normalized team name from the CC0 source.',
+        venue: 'Home advantage applies only when the source does not mark the match neutral. A draw is y=0.5.',
+        initialization: 'Every national team starts at Elo 1500 or Bayesian μ=25, σ=8.333.',
+        special: 'No seasonal regression; all recorded tournament and friendly results receive the same update weight.'
+      },
+      chess: {
+        label: 'Elite over-the-board chess',
+        input: 'Decisive games and draws from official Lichess broadcast PGNs. Both players must have numeric FIDE IDs; online games and engine identities are excluded.',
+        venue: 'White receives the selected color advantage. A draw is y=0.5.',
+        initialization: 'At first appearance, Elo is initialized from the PGN FIDE rating when it is at least 1000. Bayesian μ=25+(FIDE−2000)/80 with σ=3; otherwise the generic prior is retained.',
+        special: 'All valid FIDE-identified broadcast games update ratings; the 2200 official-rating threshold applies to publication eligibility.'
+      }
+    };
+    return rules[sport];
+  }
+
+  function protocolModelRules(model, parameters) {
+    if (model === 'elo') {
+      return {
+        prediction: 'Compute expected score p = 1 / (1 + 10^−((Rₐ + advantage − Rᵦ) / scale)).',
+        update: 'After recording p, update both sides symmetrically: R′ₐ = Rₐ + K(y−p) and R′ᵦ = Rᵦ − K(y−p).',
+        publication: 'Publish and rank the raw Elo rating. Elo has no uncertainty estimate.',
+        constants: 'Initial rating 1500. Selected K=' + number(parameters.k, 4) + ', scale=' + number(parameters.scale, 4) + ', advantage=' + number(parameters.home, 4) + '.'
+      };
+    }
+    var robust = model === 'robust';
+    return {
+      prediction: 'Integrate win, draw, and loss likelihoods over the Gaussian belief for the skill difference using the fixed 20-node Gauss–Hermite rule. Expected score is p(win)+0.5p(draw).',
+      update: 'Before prediction, add τ² × max(days inactive / 7, 1) to each variance. Condition on the observed result, numerically compute the posterior moments, then moment-match back to independent Gaussian beliefs.',
+      publication: 'Publish μ and σ, but rank by the conservative score μ−3σ. More uncertainty therefore lowers the published rank.',
+      constants: 'Initial μ=25 and σ=8.333; τ=0.08333; performance noise ' + (robust ? 'Student-t ν=1 (Cauchy)' : 'Gaussian') +
+        '; β=' + number(parameters.beta, 4) + '; draw margin=' + number(parameters.draw_margin, 4) + '; advantage=' + number(parameters.advantage, 4) + '.'
+    };
+  }
+
+  function protocolParameterMeaning(key) {
+    return {
+      k: 'Maximum Elo response scale for one result',
+      scale: 'Rating-gap width in the Elo logistic curve',
+      home: 'Elo points added only when the advantage flag is true',
+      beta: 'Performance-noise scale; larger values expect more upsets',
+      draw_margin: 'Skill-difference interval treated as a draw',
+      advantage: 'Bayesian skill units added when home/White advantage is active',
+      robust: 'Whether performance noise uses Student-t ν=1 rather than Gaussian'
+    }[key] || key;
+  }
+
+  function renderProtocol() {
+    var data = state.datasets[state.sport];
+    var model = data.models[state.model];
+    var parameters = data.parameters[state.model];
+    var sportRules = protocolSportRules(state.sport);
+    var modelRules = protocolModelRules(state.model, parameters);
+    var latest = data.data_window.last_result;
+    var validationStart = dateBefore(latest, 730);
+    var evaluationStart = dateBefore(latest, 365);
+    var parameterRows = Object.keys(parameters).sort().map(function (key) {
+      var value = parameters[key];
+      return '<div><dt><code>' + escapeHtml(key) + '</code></dt><dd><strong>' +
+        escapeHtml(typeof value === 'number' ? number(value, 4) : String(value)) + '</strong><span>' +
+        escapeHtml(protocolParameterMeaning(key)) + '</span></dd></div>';
+    }).join('');
+    var candidates = data.candidate_parameters[state.model].map(parameterText).join(' · ');
+    var metric = model.metrics;
+    elements.protocol.innerHTML = '<p class="rating-lab-protocol-status"><strong>' + escapeHtml(sportRules.label) +
+      ' · ' + escapeHtml(model.label) + '</strong><span>Source window ' + escapeHtml(formatDate(data.data_window.first_result)) +
+      '–' + escapeHtml(formatDate(latest)) + ' · ' + number(data.data_window.matches, 0) + ' deduplicated results</span></p>' +
+      '<ol class="rating-lab-protocol-flow">' +
+      '<li><span>1</span><div><h3>Accept and identify</h3><p>' + escapeHtml(sportRules.input) + '</p></div></li>' +
+      '<li><span>2</span><div><h3>Order deterministically</h3><p>Deduplicate exact date/entity/score/competition signatures, then sort by date, entity A ID, entity B ID, competition, and score. ' + escapeHtml(sportRules.initialization) + '</p></div></li>' +
+      '<li><span>3</span><div><h3>Predict before learning</h3><p>' + escapeHtml(modelRules.prediction + ' ' + sportRules.venue) + '</p></div></li>' +
+      '<li><span>4</span><div><h3>Apply the result</h3><p>' + escapeHtml(modelRules.update + ' ' + sportRules.special) + '</p></div></li>' +
+      '<li><span>5</span><div><h3>Evaluate and publish</h3><p>' + escapeHtml(modelRules.publication) + ' Histories are display-downsampled to at most 24 points; rating replay itself is not downsampled.</p></div></li>' +
+      '</ol><div class="rating-lab-protocol-grid"><article><h3>Selected parameters</h3><dl class="rating-lab-protocol-parameters">' +
+      parameterRows + '</dl><p class="rating-lab-protocol-fixed"><strong>Fixed constants:</strong> ' + escapeHtml(modelRules.constants) +
+      '</p></article><article><h3>Eligibility and publication</h3><p>' + escapeHtml(data.eligibility.rule) + '</p><p>“Recent” counts the latest ' +
+      number(data.eligibility.recent_window_days, 0) + ' days. After eligibility, the public file retains at most the top 500 entities for each model.</p>' +
+      '<h3>Candidate grid actually tested</h3><p><code>' + escapeHtml(candidates) + '</code></p></article></div>' +
+      '<div class="rating-lab-protocol-evaluation"><h3>Chronological tuning and untouched evaluation</h3><div><p><strong>Warm-up</strong><span>Before ' +
+      escapeHtml(formatDate(validationStart)) + '</span></p><p><strong>Validation</strong><span>' + escapeHtml(formatDate(validationStart)) +
+      '–' + escapeHtml(formatDate(evaluationStart)) + '</span></p><p><strong>Evaluation</strong><span>' + escapeHtml(formatDate(evaluationStart)) +
+      '–' + escapeHtml(formatDate(latest)) + '</span></p></div><p>Choose the declared candidate with the lowest validation log loss. Then score ' +
+      number(metric.predictions, 0) + ' one-step-ahead evaluation predictions: log loss ' + number(metric.log_loss, 4) +
+      ', Brier ' + number(metric.brier, 4) + ', calibration gap ' + number(metric.calibration, 4) +
+      '. Calibration uses 10 equal-width probability bins and a count-weighted absolute predicted-versus-observed gap.</p></div>';
+    setPressed(elements.protocolSportTabs, 'protocolSport', state.sport);
+    setPressed(elements.protocolModelTabs, 'protocolModel', state.model);
+  }
+
   function predictorData() {
     var predictor = state.datasets.football.tournament_predictor;
     var competition = predictor.competitions.find(function (item) {
@@ -439,6 +555,7 @@
     renderMovers();
     renderTable();
     renderDetail();
+    renderProtocol();
     renderAudit();
     renderPredictor();
   }
@@ -459,6 +576,27 @@
     var button = event.target.closest('[data-model]');
     if (!button || button.dataset.model === state.model) return;
     state.model = button.dataset.model;
+    state.expanded = false;
+    setPressed(elements.modelTabs, 'model', state.model);
+    render();
+  });
+
+  elements.protocolSportTabs.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-protocol-sport]');
+    if (!button || button.dataset.protocolSport === state.sport) return;
+    state.sport = button.dataset.protocolSport;
+    state.selected = null;
+    state.pinned = [];
+    state.expanded = false;
+    setPressed(elements.sportTabs, 'sport', state.sport);
+    populateCompetitions();
+    render();
+  });
+
+  elements.protocolModelTabs.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-protocol-model]');
+    if (!button || button.dataset.protocolModel === state.model) return;
+    state.model = button.dataset.protocolModel;
     state.expanded = false;
     setPressed(elements.modelTabs, 'model', state.model);
     render();

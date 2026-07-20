@@ -154,6 +154,45 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-explainer">Turning a Gaussian rating into a log-normal or Pareto-looking published scale can change the histogram without changing anyone’s rank. A genuinely different ranking requires a different performance model or update rule.</p>
   </section>
 
+  <section class="rating-lab-protocol" id="protocol" aria-labelledby="protocol-heading">
+    <p class="rating-lab-kicker">Protocol transparency</p>
+    <h2 id="protocol-heading">From one public result to one published rank</h2>
+    <p class="rating-lab-protocol-intro">Choose a cohort and model to see the exact operational rules. These are descriptions of the running code—not a simplified alternative methodology.</p>
+
+    <div class="rating-lab-protocol-toolbar">
+      <div class="rating-lab-control-group" aria-label="Protocol sport">
+        <span class="rating-lab-control-label">Cohort</span>
+        <div class="rating-lab-segmented" id="protocol-sport-tabs">
+          <button type="button" data-protocol-sport="tennis" aria-pressed="true">Tennis</button>
+          <button type="button" data-protocol-sport="football" aria-pressed="false">Clubs</button>
+          <button type="button" data-protocol-sport="national-football" aria-pressed="false">Nations</button>
+          <button type="button" data-protocol-sport="chess" aria-pressed="false">Chess</button>
+        </div>
+      </div>
+      <div class="rating-lab-control-group" aria-label="Protocol model">
+        <span class="rating-lab-control-label">Model</span>
+        <div class="rating-lab-segmented" id="protocol-model-tabs">
+          <button type="button" data-protocol-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-protocol-model="trueskill" aria-pressed="false">Gaussian</button>
+          <button type="button" data-protocol-model="robust" aria-pressed="false">Robust</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rating-protocol" aria-live="polite"></div>
+
+    <details class="rating-lab-limitations">
+      <summary>Known limitations and deliberate simplifications</summary>
+      <ul>
+        <li>Ratings are result-only: score margin, tennis surface, line-ups, injuries, time controls, and player age are not model inputs.</li>
+        <li>Draws use an actual score of 0.5. Published log loss and Brier score evaluate expected score, not a separate three-class win/draw/loss forecast.</li>
+        <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>
+        <li>The public JSON publishes at most the top 500 eligible entities per model; it is not a complete registry of every entity seen in the source archive.</li>
+        <li>Model selection tests a small declared parameter grid. It does not prove that the selected candidate is globally optimal.</li>
+      </ul>
+    </details>
+  </section>
+
   <section class="rating-lab-audit" id="reproducibility" aria-labelledby="audit-heading">
     <p class="rating-lab-kicker">Open methodology</p>
     <h2 id="audit-heading">Inspect every assumption. Reproduce every table.</h2>
