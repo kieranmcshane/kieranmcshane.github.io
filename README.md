@@ -13,6 +13,15 @@ The same page includes a daily competition predictor for the five covered
 European leagues. It starts from actual results and simulates every remaining
 fixture under each of the three rating protocols.
 
+The page's protocol explorer exposes the running rules for every sport/model
+pair: source identity boundary, deterministic sort order, priors, venue or
+colour advantage, result likelihood, update sequence, inactivity drift,
+seasonal regression, eligibility, candidate parameter grid, exact chronological
+split dates, evaluation definitions, fixed numerical constants, publication
+cap, and known limitations. These descriptions are generated from the same
+published parameters consumed by the leaderboard rather than maintained as a
+separate methodology summary.
+
 The scheduled GitHub Actions workflow refreshes the public datasets and deploys
 the complete Jekyll site as a Pages artifact. Repository setup requires:
 
