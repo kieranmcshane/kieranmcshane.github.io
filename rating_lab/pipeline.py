@@ -12,6 +12,7 @@ import json
 import math
 import os
 from pathlib import Path
+import random
 import re
 import subprocess
 import tempfile
@@ -23,10 +24,10 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Match
 
 
-SCHEMA_VERSION = "1.1.0"
-METHODOLOGY_VERSION = "2026-07-20.1"
+SCHEMA_VERSION = "1.2.0"
+METHODOLOGY_VERSION = "2026-07-20.2"
 SPORTS = ("tennis", "football", "national-football", "chess")
-USER_AGENT = "kieranmcshane-rating-lab/1.1 (+https://kieranmcshane.github.io/rating-lab/)"
+USER_AGENT = "kieranmcshane-rating-lab/1.2 (+https://kieranmcshane.github.io/rating-lab/)"
 FOOTBALL_COMPETITIONS = {
     "PL": "Premier League",
     "PD": "La Liga",
@@ -42,6 +43,29 @@ OPEN_FOOTBALL_CODES = {
     "it.1": "Serie A",
     "fr.1": "Ligue 1",
 }
+OPEN_FOOTBALL_FIXTURES = {
+    "premier-league": (
+        "Premier League",
+        "https://raw.githubusercontent.com/openfootball/england/master/{season}/1-premierleague.txt",
+    ),
+    "la-liga": (
+        "La Liga",
+        "https://raw.githubusercontent.com/openfootball/espana/master/{season}/1-liga.txt",
+    ),
+    "bundesliga": (
+        "Bundesliga",
+        "https://raw.githubusercontent.com/openfootball/deutschland/master/{season}/1-bundesliga.txt",
+    ),
+    "serie-a": (
+        "Serie A",
+        "https://raw.githubusercontent.com/openfootball/italy/master/{season}/1-seriea.txt",
+    ),
+    "ligue-1": (
+        "Ligue 1",
+        "https://raw.githubusercontent.com/openfootball/france/master/france/{season}_fr1.txt",
+    ),
+}
+PREDICTOR_SIMULATIONS = 5_000
 
 
 def _get(
@@ -223,7 +247,7 @@ def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict
                 continue
             for row in payload.get("matches", []):
                 score = row.get("score", {})
-                full_time = score.get("ft") if isinstance(score, dict) else None
+                full_time = score.get("ft") if isinstance(score, dict) else score if isinstance(score, list) else None
                 if not full_time or len(full_time) != 2 or None in full_time:
                     continue
                 try:
@@ -253,6 +277,123 @@ def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict
     matches = _deduplicate(matches)
     _mark_active_football(matches, entities)
     return matches, entities, meta
+
+
+_FIXTURE_DATE = re.compile(r"^\s*(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})(?:\s+(\d{4}))?\s*$")
+_FIXTURE_SCORE = re.compile(r"\s{2,}(\d+)-(\d+)(?:\s+\([^)]*\))?\s*$")
+
+
+def _parse_football_txt(text: str, competition_id: str, label: str, season: str) -> dict:
+    """Parse an OpenFootball league fixture file with optional full-time scores."""
+    fixtures: list[dict] = []
+    current_date: date | None = None
+    current_year = int(season[:4])
+    previous_month = None
+    round_name = ""
+    for raw_line in text.splitlines():
+        line = raw_line.rstrip()
+        if line.strip().startswith("▪"):
+            round_name = line.strip().lstrip("▪").strip()
+            continue
+        date_match = _FIXTURE_DATE.match(line)
+        if date_match:
+            month_name, day_text, explicit_year = date_match.groups()
+            month = datetime.strptime(month_name, "%b").month
+            if explicit_year:
+                current_year = int(explicit_year)
+            elif previous_month is not None and month < previous_month - 6:
+                current_year += 1
+            current_date = date(current_year, month, int(day_text))
+            previous_month = month
+            continue
+        if current_date is None or " v " not in line:
+            continue
+        match_text = re.sub(r"^\s*(?:\d{1,2}:\d{2}\s+)?", "", line)
+        home_name, right = match_text.split(" v ", 1)
+        score_match = _FIXTURE_SCORE.search(right)
+        home_goals = away_goals = None
+        if score_match:
+            home_goals, away_goals = map(int, score_match.groups())
+            away_name = right[: score_match.start()].strip()
+        else:
+            away_name = right.strip()
+        home_name = home_name.strip()
+        if not home_name or not away_name:
+            continue
+        fixtures.append(
+            {
+                "date": current_date.isoformat(),
+                "round": round_name,
+                "home_name": home_name,
+                "away_name": away_name,
+                "home_goals": home_goals,
+                "away_goals": away_goals,
+            }
+        )
+    if not fixtures:
+        raise RuntimeError(f"No fixtures parsed for {label} {season}")
+    teams = sorted({fixture[key] for fixture in fixtures for key in ("home_name", "away_name")})
+    return {
+        "id": competition_id,
+        "label": label,
+        "season": season,
+        "teams": teams,
+        "fixtures": fixtures,
+    }
+
+
+def fetch_league_schedules() -> list[dict]:
+    today = datetime.now(timezone.utc).date()
+    season_start = today.year if today.month >= 7 else today.year - 1
+    season = _season_label(season_start)
+    competitions = []
+    for competition_id, (label, template) in OPEN_FOOTBALL_FIXTURES.items():
+        url = template.format(season=season)
+        body = _get(url, cache_ttl=21_600)
+        competition = _parse_football_txt(body.decode("utf-8-sig"), competition_id, label, season)
+        competition["source_url"] = url
+        competition["license"] = "CC0 1.0"
+        competition["snapshot_sha256"] = hashlib.sha256(body).hexdigest()
+        competitions.append(competition)
+    return competitions
+
+
+def _merge_schedule_results(matches: list[Match], entities: dict, schedules: list[dict]) -> list[Match]:
+    """Add the fixture source's completed results so ratings and table advance together."""
+    entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
+    for info in entities.values():
+        if info.get("competition") in set(OPEN_FOOTBALL_CODES.values()):
+            info["active"] = False
+    for competition in schedules:
+        team_ids = {}
+        for name in competition["teams"]:
+            entity = entity_by_name.get(_slug(name), f"football:name:{_slug(name)}")
+            entity_by_name[_slug(name)] = entity
+            team_ids[name] = entity
+            entities[entity] = {
+                **entities.get(entity, {}),
+                "name": name,
+                "country": entities.get(entity, {}).get("country", ""),
+                "competition": competition["label"],
+                "active": True,
+            }
+        for fixture in competition["fixtures"]:
+            if fixture["home_goals"] is None or fixture["away_goals"] is None:
+                continue
+            home_goals, away_goals = fixture["home_goals"], fixture["away_goals"]
+            result = 1.0 if home_goals > away_goals else 0.0 if home_goals < away_goals else 0.5
+            matches.append(
+                Match(
+                    date.fromisoformat(fixture["date"]),
+                    team_ids[fixture["home_name"]],
+                    team_ids[fixture["away_name"]],
+                    result,
+                    competition["label"],
+                    competition["season"],
+                    True,
+                )
+            )
+    return _deduplicate(matches)
 
 
 def _parse_international_results(text: str, start_year: int = 2016) -> tuple[list[Match], dict]:
@@ -630,7 +771,190 @@ def _compress_history(points: list[list], limit: int = 24) -> list[list]:
     return sampled[-limit:]
 
 
-def build_sport_payload(sport: str, matches: list[Match], entities: dict, source_meta: dict) -> dict:
+def _simulate_league(
+    competition: dict,
+    model,
+    model_name: str,
+    entities: dict,
+    historical_draw_rate: float,
+    simulations: int = PREDICTOR_SIMULATIONS,
+) -> dict:
+    """Simulate a league from its actual table and remaining fixture list."""
+    names = competition["teams"]
+    team_count = len(names)
+    index_by_name = {name: index for index, name in enumerate(names)}
+    entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
+    entity_ids = [entity_by_name.get(_slug(name), f"football:name:{_slug(name)}") for name in names]
+    strengths = []
+    for entity in entity_ids:
+        state = model.state(entity)
+        strengths.append(state.mean)
+
+    base_points = [0] * team_count
+    base_goal_difference = [0] * team_count
+    base_games = [0] * team_count
+    remaining = []
+    completed = 0
+    latest_completed = None
+    for fixture in competition["fixtures"]:
+        home_index = index_by_name[fixture["home_name"]]
+        away_index = index_by_name[fixture["away_name"]]
+        if fixture["home_goals"] is not None and fixture["away_goals"] is not None:
+            home_goals, away_goals = fixture["home_goals"], fixture["away_goals"]
+            base_games[home_index] += 1
+            base_games[away_index] += 1
+            base_goal_difference[home_index] += home_goals - away_goals
+            base_goal_difference[away_index] += away_goals - home_goals
+            if home_goals > away_goals:
+                base_points[home_index] += 3
+            elif home_goals < away_goals:
+                base_points[away_index] += 3
+            else:
+                base_points[home_index] += 1
+                base_points[away_index] += 1
+            completed += 1
+            latest_completed = max(latest_completed or fixture["date"], fixture["date"])
+            continue
+        future_match = Match(
+            date.fromisoformat(fixture["date"]),
+            entity_ids[home_index],
+            entity_ids[away_index],
+            0.5,
+            competition["label"],
+            competition["season"],
+            True,
+        )
+        if isinstance(model, EloModel):
+            probabilities = model.predict_outcomes(future_match, historical_draw_rate)
+        else:
+            probabilities = model.predict_outcomes(future_match)
+        remaining.append((home_index, away_index, probabilities))
+
+    def order(points: list[int], goal_difference: list[int]) -> list[int]:
+        return sorted(
+            range(team_count),
+            key=lambda index: (-points[index], -goal_difference[index], -strengths[index], names[index]),
+        )
+
+    current_order = order(base_points, base_goal_difference)
+    current_rank = [0] * team_count
+    for rank, index in enumerate(current_order, 1):
+        current_rank[index] = rank
+
+    finish_counts = [[0] * team_count for _ in range(team_count)]
+    point_sums = [0] * team_count
+    seed_material = f"{METHODOLOGY_VERSION}|{competition['id']}|{competition['season']}|{model_name}"
+    seed = int.from_bytes(hashlib.sha256(seed_material.encode()).digest()[:8], "big")
+    generator = random.Random(seed)
+    for _ in range(simulations):
+        points = base_points.copy()
+        goal_difference = base_goal_difference.copy()
+        for home_index, away_index, probabilities in remaining:
+            home_win, draw, _away_win = probabilities
+            outcome = generator.random()
+            if outcome < home_win:
+                points[home_index] += 3
+                margin_roll = generator.random()
+                margin = 1 if margin_roll < 0.64 else 2 if margin_roll < 0.92 else 3
+                goal_difference[home_index] += margin
+                goal_difference[away_index] -= margin
+            elif outcome < home_win + draw:
+                points[home_index] += 1
+                points[away_index] += 1
+            else:
+                points[away_index] += 3
+                margin_roll = generator.random()
+                margin = 1 if margin_roll < 0.64 else 2 if margin_roll < 0.92 else 3
+                goal_difference[away_index] += margin
+                goal_difference[home_index] -= margin
+        for position, index in enumerate(order(points, goal_difference)):
+            finish_counts[index][position] += 1
+            point_sums[index] += points[index]
+
+    teams = []
+    for index, name in enumerate(names):
+        position_probabilities = [count / simulations for count in finish_counts[index]]
+        teams.append(
+            {
+                "id": entity_ids[index],
+                "name": name,
+                "current_rank": current_rank[index],
+                "played": base_games[index],
+                "current_points": base_points[index],
+                "expected_points": round(point_sums[index] / simulations, 1),
+                "expected_position": round(
+                    sum((position + 1) * probability for position, probability in enumerate(position_probabilities)),
+                    2,
+                ),
+                "champion": round(position_probabilities[0], 4),
+                "top_four": round(sum(position_probabilities[:4]), 4),
+                "bottom_three": round(sum(position_probabilities[-3:]), 4),
+                "positions": [round(probability, 4) for probability in position_probabilities],
+            }
+        )
+    teams.sort(key=lambda team: (team["expected_position"], team["name"]))
+    return {
+        "seed": f"{seed:016x}",
+        "simulations": simulations,
+        "completed_matches": completed,
+        "remaining_matches": len(remaining),
+        "latest_completed": latest_completed,
+        "teams": teams,
+    }
+
+
+def _build_tournament_predictor(
+    schedules: list[dict],
+    models: dict,
+    entities: dict,
+    matches: list[Match],
+) -> dict:
+    draw_rate = sum(match.score_a == 0.5 for match in matches) / len(matches)
+    competitions = []
+    for schedule in schedules:
+        competition = {
+            key: schedule[key]
+            for key in ("id", "label", "season", "source_url", "license", "snapshot_sha256")
+        }
+        competition["total_matches"] = len(schedule["fixtures"])
+        competition["first_fixture"] = min(row["date"] for row in schedule["fixtures"])
+        competition["last_fixture"] = max(row["date"] for row in schedule["fixtures"])
+        unplayed_dates = [
+            row["date"] for row in schedule["fixtures"] if row["home_goals"] is None
+        ]
+        competition["next_fixture"] = min(unplayed_dates) if unplayed_dates else None
+        competition["models"] = {
+            model_name: _simulate_league(
+                schedule,
+                model,
+                model_name,
+                entities,
+                draw_rate,
+            )
+            for model_name, model in models.items()
+        }
+        completed = competition["models"]["elo"]["completed_matches"]
+        competition["status"] = (
+            "scheduled" if completed == 0 else "complete" if completed == competition["total_matches"] else "live"
+        )
+        competitions.append(competition)
+    return {
+        "format": "round-robin league",
+        "simulations_per_model": PREDICTOR_SIMULATIONS,
+        "draw_model": "Model draw likelihood; Elo uses the historical football draw rate scaled by matchup closeness.",
+        "tie_break": "Points, simulated goal difference, then current model strength.",
+        "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
+        "competitions": competitions,
+    }
+
+
+def build_sport_payload(
+    sport: str,
+    matches: list[Match],
+    entities: dict,
+    source_meta: dict,
+    predictor_schedules: list[dict] | None = None,
+) -> dict:
     matches = sorted(_deduplicate(matches), key=_match_sort_key)
     latest = max(match.date for match in matches)
     evaluation_start = latest - timedelta(days=365)
@@ -663,15 +987,18 @@ def build_sport_payload(sport: str, matches: list[Match], entities: dict, source
     }
     model_payloads = {}
     selected_parameters = {}
+    fitted_models = {}
     for model_name in ("elo", "trueskill", "robust"):
         params = _choose_parameters(matches, sport, model_name, validation_start, evaluation_start)
         selected_parameters[model_name] = params
+        fitted_model = _new_model(model_name, params)
         states, predictions, histories = _run_model(
             matches,
-            _new_model(model_name, params),
+            fitted_model,
             sport,
             history_entities=history_entities,
         )
+        fitted_models[model_name] = fitted_model
         rows = []
         for entity, state in states.items():
             if entity not in entities or recent_counts[entity] < minimum:
@@ -712,7 +1039,7 @@ def build_sport_payload(sport: str, matches: list[Match], entities: dict, source
             "metrics": _metrics(predictions, evaluation_start),
             "rankings": rows,
         }
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         "sport": sport,
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
@@ -741,6 +1068,11 @@ def build_sport_payload(sport: str, matches: list[Match], entities: dict, source
         "parameters": selected_parameters,
         "models": model_payloads,
     }
+    if sport == "football" and predictor_schedules:
+        payload["tournament_predictor"] = _build_tournament_predictor(
+            predictor_schedules, fitted_models, entities, matches
+        )
+    return payload
 
 
 def validate_payload(payload: dict, schema: dict) -> None:
@@ -766,6 +1098,13 @@ def validate_payload(payload: dict, schema: dict) -> None:
         raise ValueError("Invalid eligibility minimum")
     if not isinstance(eligibility.get("recent_window_days"), int):
         raise ValueError("Invalid eligibility window")
+    if payload["sport"] == "football":
+        predictor = payload.get("tournament_predictor")
+        if not predictor or not predictor.get("competitions"):
+            raise ValueError("Missing football tournament predictor")
+        for competition in predictor["competitions"]:
+            if set(competition.get("models", {})) != {"elo", "trueskill", "robust"}:
+                raise ValueError("Incomplete tournament prediction models")
     for name in ("elo", "trueskill", "robust"):
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
@@ -810,7 +1149,16 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         for sport in requested:
             try:
                 matches, entities, source_meta = loaders[sport]()
-                payload = build_sport_payload(sport, matches, entities, source_meta)
+                predictor_schedules = fetch_league_schedules() if sport == "football" else None
+                if predictor_schedules:
+                    matches = _merge_schedule_results(matches, entities, predictor_schedules)
+                payload = build_sport_payload(
+                    sport,
+                    matches,
+                    entities,
+                    source_meta,
+                    predictor_schedules=predictor_schedules,
+                )
                 validate_payload(payload, schema)
                 staged = temporary_path / f"{sport}.json"
                 staged.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n")
@@ -856,6 +1204,11 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "evaluation_days": 365,
             "quadrature_nodes": 20,
             "robust_student_t_degrees_of_freedom": 1,
+        },
+        "tournament_predictor": {
+            "simulations_per_competition_model": PREDICTOR_SIMULATIONS,
+            "seed": "SHA-256(methodology version, competition, season, model), first 64 bits as hexadecimal",
+            "refresh": "daily",
         },
         "methodology_url": "/rating-lab/#methodology",
     }

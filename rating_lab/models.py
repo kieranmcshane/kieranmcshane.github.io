@@ -101,6 +101,12 @@ class EloModel:
         advantage = self.home if match.home_advantage else 0.0
         return 1.0 / (1.0 + 10.0 ** (-(a.mean + advantage - b.mean) / self.scale))
 
+    def predict_outcomes(self, match: Match, draw_rate: float = 0.25) -> tuple[float, float, float]:
+        """Return home-win, draw, away-win probabilities preserving expected score."""
+        expected = self.predict(match)
+        draw = min(draw_rate * 4.0 * expected * (1.0 - expected), 2.0 * min(expected, 1.0 - expected))
+        return expected - 0.5 * draw, draw, 1.0 - expected - 0.5 * draw
+
     def update(self, match: Match) -> float:
         probability = self.predict(match)
         delta = self.k * (match.score_a - probability)
@@ -155,17 +161,21 @@ class GaussianSkillModel:
         signed = difference if score_a == 1.0 else -difference
         return max(cdf((signed - self.draw_margin) / self.beta), 1e-12)
 
-    def predict(self, match: Match) -> float:
+    def predict_outcomes(self, match: Match) -> tuple[float, float, float]:
         a, b = self.state(match.entity_a), self.state(match.entity_b)
         mean = a.mean - b.mean + (self.advantage if match.home_advantage else 0.0)
         variance = a.variance + b.variance
-        win = draw = 0.0
+        win = draw = loss = 0.0
         for node, weight in zip(_GH_X, _GH_W):
             difference = mean + math.sqrt(2.0 * variance) * node
             win += weight * self._outcome_probability(difference, 1.0)
             draw += weight * self._outcome_probability(difference, 0.5)
-        win /= _SQRT_PI
-        draw /= _SQRT_PI
+            loss += weight * self._outcome_probability(difference, 0.0)
+        total = max((win + draw + loss) / _SQRT_PI, 1e-12)
+        return win / _SQRT_PI / total, draw / _SQRT_PI / total, loss / _SQRT_PI / total
+
+    def predict(self, match: Match) -> float:
+        win, draw, _ = self.predict_outcomes(match)
         # Expected score is the quantity comparable with Elo and Brier scoring.
         return min(max(win + 0.5 * draw, 1e-9), 1.0 - 1e-9)
 

@@ -10,6 +10,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-kicker">Live, reproducible sports ratings</p>
     <h1>Across sports. Three ways to measure strength.</h1>
     <p class="rating-lab-deck">Explore current Elo, Gaussian TrueSkill, and robust heavy-tail rankings built from real match results. Every prediction is scored before its result is used to update the model.</p>
+    <p class="rating-lab-hero-link"><a href="#predictor">Forecast the 2026–27 competitions ↓</a></p>
     <div class="rating-lab-freshness" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
   </header>
 
@@ -71,6 +72,59 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <p class="rating-lab-detail-placeholder">Choose a row to inspect its recent rating history.</p>
       </aside>
     </div>
+  </section>
+
+  <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
+    <p class="rating-lab-kicker">Live competition forecast</p>
+    <h2 id="predictor-heading">Tournament predictor</h2>
+    <p class="rating-lab-predictor-intro">Start from the actual table, simulate every remaining fixture with the selected rating protocol, and see how often each team finishes in every position. The forecast refreshes daily as results arrive.</p>
+
+    <div class="rating-lab-predictor-toolbar">
+      <label class="rating-lab-field">
+        <span>Competition</span>
+        <select id="predictor-competition" aria-label="Competition to predict"></select>
+      </label>
+      <div class="rating-lab-control-group" aria-label="Prediction model">
+        <span class="rating-lab-control-label">Model</span>
+        <div class="rating-lab-segmented" id="predictor-model-tabs">
+          <button type="button" data-predictor-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-predictor-model="trueskill" aria-pressed="false">Gaussian</button>
+          <button type="button" data-predictor-model="robust" aria-pressed="false">Robust</button>
+        </div>
+      </div>
+      <div class="rating-lab-predictor-state" id="predictor-state" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="rating-lab-predictor-metrics" id="predictor-metrics" aria-label="Competition simulation state"></div>
+
+    <div class="rating-lab-predictor-grid">
+      <div class="rating-lab-table-wrap">
+        <table class="rating-lab-table rating-lab-predictor-table">
+          <caption id="predictor-caption">Projected final table</caption>
+          <thead>
+            <tr>
+              <th scope="col">Projected</th>
+              <th scope="col">Team</th>
+              <th scope="col">Now</th>
+              <th scope="col">Expected pts</th>
+              <th scope="col">Title</th>
+              <th scope="col" class="rating-lab-optional">Top four</th>
+              <th scope="col" class="rating-lab-optional">Bottom three</th>
+            </tr>
+          </thead>
+          <tbody id="predictor-body"></tbody>
+        </table>
+      </div>
+      <aside class="rating-lab-detail rating-lab-predictor-detail" id="predictor-detail" aria-live="polite">
+        <p class="rating-lab-detail-placeholder">Choose a team to inspect its full finishing-position distribution.</p>
+      </aside>
+    </div>
+
+    <details class="rating-lab-predictor-method">
+      <summary>How the forecast works</summary>
+      <p id="predictor-method-copy"></p>
+      <p>Each model uses the same chronological ratings and home advantage as the leaderboard. Actual points and goal difference are locked in. Future results are sampled from model win/draw/loss probabilities; ties are resolved by points, simulated goal difference, then generation-time model strength. Strength is fixed within one simulation run and refreshed after real results.</p>
+    </details>
   </section>
 
   <section class="rating-lab-method" id="methodology">
@@ -163,6 +217,7 @@ python3 -m unittest discover -s tests -v</code></pre>
     <ul id="rating-source-list">
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
       <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues and the Champions League.</li>
+      <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures used by the competition predictor, CC0 1.0.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
     </ul>

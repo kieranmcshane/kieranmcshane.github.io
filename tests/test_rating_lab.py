@@ -10,8 +10,11 @@ from rating_lab.models import EloModel, GaussianSkillModel, Match
 from rating_lab.pipeline import (
     _deduplicate,
     _metrics,
+    _merge_schedule_results,
     _parse_broadcast_pgn,
+    _parse_football_txt,
     _parse_international_results,
+    _simulate_league,
     build_sport_payload,
     validate_payload,
 )
@@ -63,8 +66,69 @@ class RatingModelTests(unittest.TestCase):
         robust.update(upset)
         self.assertLess(abs(before_r - robust.state("favorite").mean), abs(before_g - gaussian.state("favorite").mean))
 
+    def test_outcome_probabilities_partition_one(self):
+        match = Match(date(2026, 1, 1), "a", "b", 0.5, home_advantage=True)
+        for model in (EloModel(home=65), GaussianSkillModel(draw_margin=1.35, advantage=1.35), GaussianSkillModel(robust=True, draw_margin=1.35, advantage=1.35)):
+            outcomes = model.predict_outcomes(match)
+            self.assertAlmostEqual(sum(outcomes), 1.0, places=8)
+            self.assertTrue(all(0 <= probability <= 1 for probability in outcomes))
+
 
 class PipelineTests(unittest.TestCase):
+    def test_football_txt_parser_preserves_schedule_and_zero_zero_result(self):
+        fixture = """= Test League 2026/27
+▪ Matchday 1
+  Fri Aug 21 2026
+    20:00  Alpha FC               v Beta FC
+  Sat Aug 22
+    15:00  Gamma FC               v Delta FC               0-0
+"""
+        competition = _parse_football_txt(fixture, "test", "Test League", "2026-27")
+        self.assertEqual(len(competition["fixtures"]), 2)
+        self.assertIsNone(competition["fixtures"][0]["home_goals"])
+        self.assertEqual(competition["fixtures"][1]["home_goals"], 0)
+        self.assertEqual(competition["fixtures"][1]["date"], "2026-08-22")
+
+    def test_league_simulation_is_seeded_and_probabilities_sum(self):
+        competition = {
+            "id": "test-league",
+            "label": "Test League",
+            "season": "2026-27",
+            "teams": ["Alpha", "Beta", "Gamma", "Delta"],
+            "fixtures": [
+                {"date": "2026-08-01", "round": "1", "home_name": "Alpha", "away_name": "Beta", "home_goals": None, "away_goals": None},
+                {"date": "2026-08-02", "round": "1", "home_name": "Gamma", "away_name": "Delta", "home_goals": None, "away_goals": None},
+                {"date": "2026-08-08", "round": "2", "home_name": "Alpha", "away_name": "Gamma", "home_goals": None, "away_goals": None},
+                {"date": "2026-08-09", "round": "2", "home_name": "Beta", "away_name": "Delta", "home_goals": None, "away_goals": None},
+            ],
+        }
+        entities = {f"football:name:{name.casefold()}": {"name": name} for name in competition["teams"]}
+        model = EloModel(home=65)
+        model.state("football:name:alpha").mean = 1700
+        first = _simulate_league(competition, model, "elo", entities, 0.25, simulations=250)
+        second = _simulate_league(competition, model, "elo", entities, 0.25, simulations=250)
+        self.assertEqual(first, second)
+        self.assertAlmostEqual(sum(team["champion"] for team in first["teams"]), 1.0, places=3)
+        self.assertEqual(first["remaining_matches"], 4)
+
+    def test_schedule_results_advance_ratings_feed_and_active_membership(self):
+        matches = [Match(date(2025, 1, 1), "football:name:old", "football:name:alpha", 0.0, "Test League", "2025-26", True)]
+        entities = {
+            "football:name:old": {"name": "Old FC", "competition": "Premier League", "active": True},
+            "football:name:alpha": {"name": "Alpha FC", "competition": "Premier League", "active": True},
+        }
+        schedules = [{
+            "label": "Premier League",
+            "season": "2026-27",
+            "teams": ["Alpha FC", "Beta FC"],
+            "fixtures": [{"date": "2026-08-01", "round": "1", "home_name": "Alpha FC", "away_name": "Beta FC", "home_goals": 2, "away_goals": 1}],
+        }]
+        merged = _merge_schedule_results(matches, entities, schedules)
+        self.assertEqual(len(merged), 2)
+        self.assertTrue(entities["football:name:alpha"]["active"])
+        self.assertTrue(entities["football:name:beta-fc"]["active"])
+        self.assertFalse(entities["football:name:old"]["active"])
+
     def test_international_parser_handles_neutral_venues_and_draws(self):
         fixture = """date,home_team,away_team,home_score,away_score,tournament,city,country,neutral
 2026-01-10,France,Spain,1,1,Friendly,Paris,France,FALSE
