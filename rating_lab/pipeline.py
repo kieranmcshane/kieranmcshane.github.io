@@ -24,8 +24,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Match
 
 
-SCHEMA_VERSION = "1.2.0"
-METHODOLOGY_VERSION = "2026-07-20.2"
+SCHEMA_VERSION = "1.3.0"
+METHODOLOGY_VERSION = "2026-07-20.3"
 SPORTS = ("tennis", "football", "national-football", "chess")
 USER_AGENT = "kieranmcshane-rating-lab/1.2 (+https://kieranmcshane.github.io/rating-lab/)"
 FOOTBALL_COMPETITIONS = {
@@ -64,6 +64,27 @@ OPEN_FOOTBALL_FIXTURES = {
         "Ligue 1",
         "https://raw.githubusercontent.com/openfootball/france/master/france/{season}_fr1.txt",
     ),
+}
+PUBLIC_CUP_COMPETITIONS = {
+    "football": {
+        "CL": ("UEFA Champions League", "club cup"),
+    },
+    "national-football": {
+        "WC": ("FIFA World Cup", "national cup"),
+        "EC": ("UEFA European Championship", "national cup"),
+    },
+}
+KNOCKOUT_STAGES = {
+    "LAST_64": 1,
+    "ROUND_OF_64": 1,
+    "LAST_32": 2,
+    "ROUND_OF_32": 2,
+    "PLAYOFFS": 2,
+    "LAST_16": 3,
+    "ROUND_OF_16": 3,
+    "QUARTER_FINALS": 4,
+    "SEMI_FINALS": 5,
+    "FINAL": 6,
 }
 PREDICTOR_SIMULATIONS = 5_000
 
@@ -358,6 +379,99 @@ def fetch_league_schedules() -> list[dict]:
     return competitions
 
 
+def _parse_cup_schedule(payload: dict, code: str, label: str, cohort: str, source_url: str, body: bytes) -> dict | None:
+    """Keep the published knockout field; never manufacture unpublished teams or fixtures."""
+    fixtures = []
+    teams: dict[str, str] = {}
+    season = None
+    for row in payload.get("matches", []):
+        stage = row.get("stage") or "UNKNOWN"
+        home_info = row.get("homeTeam") or {}
+        away_info = row.get("awayTeam") or {}
+        home_name = home_info.get("name")
+        away_name = away_info.get("name")
+        if not home_name or not away_name:
+            continue
+        if cohort == "national-football":
+            home_id = f"national-football:{_slug(home_name)}"
+            away_id = f"national-football:{_slug(away_name)}"
+        else:
+            home_id = f"football:{home_info.get('id')}" if home_info.get("id") else f"football:name:{_slug(home_name)}"
+            away_id = f"football:{away_info.get('id')}" if away_info.get("id") else f"football:name:{_slug(away_name)}"
+        teams[home_id] = home_name
+        teams[away_id] = away_name
+        score = row.get("score") or {}
+        full_time = score.get("fullTime") or {}
+        winner_code = score.get("winner")
+        winner_id = home_id if winner_code == "HOME_TEAM" else away_id if winner_code == "AWAY_TEAM" else None
+        season_info = row.get("season") or payload.get("competition", {}).get("currentSeason") or {}
+        start_date = season_info.get("startDate")
+        if start_date:
+            season = str(start_date)[:4]
+        fixtures.append(
+            {
+                "date": str(row.get("utcDate", ""))[:10],
+                "stage": stage,
+                "group": row.get("group"),
+                "status": row.get("status", "SCHEDULED"),
+                "home_id": home_id,
+                "home_name": home_name,
+                "away_id": away_id,
+                "away_name": away_name,
+                "home_goals": full_time.get("home"),
+                "away_goals": full_time.get("away"),
+                "winner_id": winner_id,
+            }
+        )
+    if len(teams) < 2 or not fixtures:
+        return None
+    knockout_fixtures = [row for row in fixtures if row["stage"] in KNOCKOUT_STAGES]
+    final = next((row for row in knockout_fixtures if row["stage"] == "FINAL" and row["winner_id"]), None)
+    forecast_available = bool(knockout_fixtures)
+    if final:
+        availability = "Final result published; the completed forecast resolves to the recorded champion."
+    elif forecast_available:
+        availability = "A knockout field is published. Known ties are preserved; later unpublished draws are sampled."
+    else:
+        availability = "Waiting for the source to publish a knockout field; no title probability is fabricated from group or qualifying matches alone."
+    dates = [row["date"] for row in fixtures if row["date"]]
+    return {
+        "id": f"{cohort}-{_slug(code)}",
+        "label": label,
+        "season": season or "current",
+        "format": "group + knockout" if code in {"CL", "WC", "EC"} else "knockout cup",
+        "cohort": cohort,
+        "source_url": source_url,
+        "license": "football-data.org terms",
+        "snapshot_sha256": hashlib.sha256(body).hexdigest(),
+        "teams": [{"id": entity, "name": name} for entity, name in sorted(teams.items(), key=lambda item: item[1])],
+        "fixtures": fixtures,
+        "knockout_fixtures": knockout_fixtures,
+        "forecast_available": forecast_available,
+        "availability": availability,
+        "first_fixture": min(dates) if dates else None,
+        "last_fixture": max(dates) if dates else None,
+    }
+
+
+def fetch_cup_schedules(token: str | None, cohort: str) -> list[dict]:
+    """Fetch free-tier club and national cup structures from football-data.org."""
+    if not token:
+        return []
+    competitions = []
+    for code, (label, _kind) in PUBLIC_CUP_COMPETITIONS[cohort].items():
+        url = f"https://api.football-data.org/v4/competitions/{code}/matches"
+        try:
+            body = _get(url, token=token, cache_ttl=21_600)
+            payload = json.loads(body)
+        except (RuntimeError, json.JSONDecodeError):
+            continue
+        schedule = _parse_cup_schedule(payload, code, label, cohort, url, body)
+        if schedule:
+            competitions.append(schedule)
+    return competitions
+
+
 def _merge_schedule_results(matches: list[Match], entities: dict, schedules: list[dict]) -> list[Match]:
     """Add the fixture source's completed results so ratings and table advance together."""
     entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
@@ -615,6 +729,97 @@ def fetch_chess(months: int = 36) -> tuple[list[Match], dict, dict]:
     return matches, entities, meta
 
 
+def fetch_chess_tournament_schedules(limit: int = 3) -> list[dict]:
+    """Build live elite round-robin tables from official Lichess broadcasts."""
+    body = _get("https://lichess.org/api/broadcast", cache_ttl=10_800)
+    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    schedules = []
+    for line in body.decode("utf-8", "replace").splitlines():
+        try:
+            broadcast = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        tour = broadcast.get("tour") or {}
+        info = tour.get("info") or {}
+        raw_format = str(info.get("format", ""))
+        dates = tour.get("dates") or []
+        if tour.get("tier", 0) < 4 or "round-robin" not in raw_format.casefold() or len(dates) != 2:
+            continue
+        if not dates[0] - 2 * 86_400_000 <= now_ms <= dates[1] + 2 * 86_400_000:
+            continue
+        event_matches: list[Match] = []
+        event_entities: dict[str, dict] = {}
+        snapshot = hashlib.sha256(line.encode())
+        for round_info in broadcast.get("rounds", []):
+            try:
+                pgn = _get(
+                    f"https://lichess.org/api/broadcast/round/{round_info['id']}.pgn",
+                    cache_ttl=31_536_000 if round_info.get("finished") else 10_800,
+                )
+            except RuntimeError:
+                continue
+            snapshot.update(pgn)
+            batch, batch_entities = _parse_broadcast_pgn(pgn.decode("utf-8", "replace"))
+            event_matches.extend(batch)
+            event_entities.update(batch_entities)
+        event_matches = _deduplicate(event_matches)
+        if len(event_entities) < 4 or not event_matches:
+            continue
+        name_by_id = {entity: row["name"] for entity, row in event_entities.items()}
+        completed_by_pair = {frozenset((match.entity_a, match.entity_b)): match for match in event_matches}
+        entity_ids = sorted(event_entities, key=lambda entity: name_by_id[entity])
+        fixtures = []
+        end_date = datetime.fromtimestamp(dates[1] / 1000, timezone.utc).date().isoformat()
+        for index, entity_a in enumerate(entity_ids):
+            for entity_b in entity_ids[index + 1:]:
+                played = completed_by_pair.get(frozenset((entity_a, entity_b)))
+                if played:
+                    if played.entity_a == entity_a:
+                        score_a = played.score_a
+                    else:
+                        score_a = 1.0 - played.score_a
+                    fixture_date = played.date.isoformat()
+                    round_name = "Played"
+                else:
+                    score_a = None
+                    fixture_date = end_date
+                    round_name = "Remaining pairing (round-robin inference)"
+                fixtures.append(
+                    {
+                        "date": fixture_date,
+                        "round": round_name,
+                        "home_name": name_by_id[entity_a],
+                        "away_name": name_by_id[entity_b],
+                        "home_goals": score_a,
+                        "away_goals": None if score_a is None else 1.0 - score_a,
+                    }
+                )
+        schedules.append(
+            {
+                "id": f"chess-{tour['id']}",
+                "label": tour.get("name", "Elite chess broadcast"),
+                "season": str(datetime.fromtimestamp(dates[0] / 1000, timezone.utc).year),
+                "format": "round-robin tournament",
+                "forecast_type": "standings",
+                "cohort": "chess",
+                "teams": [name_by_id[entity] for entity in entity_ids],
+                "fixtures": fixtures,
+                "win_points": 1.0,
+                "draw_points": 0.5,
+                "home_advantage": False,
+                "source_url": tour.get("url", "https://lichess.org/broadcast"),
+                "license": "CC BY-SA 4.0",
+                "snapshot_sha256": snapshot.hexdigest(),
+                "forecast_available": True,
+                "availability": "All unplayed pairings are inferred from the published round-robin field; future colours are treated as neutral until published.",
+                "tie_break": "Points, simulated win-loss differential, then generation-time model strength; event-specific official tie-breaks are not available in the broadcast feed.",
+            }
+        )
+        if len(schedules) >= limit:
+            break
+    return schedules
+
+
 def shutil_which(command: str) -> str | None:
     for directory in os.environ.get("PATH", "").split(os.pathsep):
         candidate = Path(directory) / command
@@ -782,6 +987,9 @@ def _simulate_league(
     """Simulate a league from its actual table and remaining fixture list."""
     names = competition["teams"]
     team_count = len(names)
+    win_points = float(competition.get("win_points", 3.0))
+    draw_points = float(competition.get("draw_points", 1.0))
+    use_home_advantage = bool(competition.get("home_advantage", True))
     index_by_name = {name: index for index, name in enumerate(names)}
     entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
     entity_ids = [entity_by_name.get(_slug(name), f"football:name:{_slug(name)}") for name in names]
@@ -790,8 +998,8 @@ def _simulate_league(
         state = model.state(entity)
         strengths.append(state.mean)
 
-    base_points = [0] * team_count
-    base_goal_difference = [0] * team_count
+    base_points = [0.0] * team_count
+    base_goal_difference = [0.0] * team_count
     base_games = [0] * team_count
     remaining = []
     completed = 0
@@ -806,12 +1014,12 @@ def _simulate_league(
             base_goal_difference[home_index] += home_goals - away_goals
             base_goal_difference[away_index] += away_goals - home_goals
             if home_goals > away_goals:
-                base_points[home_index] += 3
+                base_points[home_index] += win_points
             elif home_goals < away_goals:
-                base_points[away_index] += 3
+                base_points[away_index] += win_points
             else:
-                base_points[home_index] += 1
-                base_points[away_index] += 1
+                base_points[home_index] += draw_points
+                base_points[away_index] += draw_points
             completed += 1
             latest_completed = max(latest_completed or fixture["date"], fixture["date"])
             continue
@@ -822,7 +1030,7 @@ def _simulate_league(
             0.5,
             competition["label"],
             competition["season"],
-            True,
+            use_home_advantage,
         )
         if isinstance(model, EloModel):
             probabilities = model.predict_outcomes(future_match, historical_draw_rate)
@@ -830,7 +1038,7 @@ def _simulate_league(
             probabilities = model.predict_outcomes(future_match)
         remaining.append((home_index, away_index, probabilities))
 
-    def order(points: list[int], goal_difference: list[int]) -> list[int]:
+    def order(points: list[float], goal_difference: list[float]) -> list[int]:
         return sorted(
             range(team_count),
             key=lambda index: (-points[index], -goal_difference[index], -strengths[index], names[index]),
@@ -853,18 +1061,18 @@ def _simulate_league(
             home_win, draw, _away_win = probabilities
             outcome = generator.random()
             if outcome < home_win:
-                points[home_index] += 3
+                points[home_index] += win_points
                 margin_roll = generator.random()
-                margin = 1 if margin_roll < 0.64 else 2 if margin_roll < 0.92 else 3
+                margin = 1 if win_points == 1.0 else 1 if margin_roll < 0.64 else 2 if margin_roll < 0.92 else 3
                 goal_difference[home_index] += margin
                 goal_difference[away_index] -= margin
             elif outcome < home_win + draw:
-                points[home_index] += 1
-                points[away_index] += 1
+                points[home_index] += draw_points
+                points[away_index] += draw_points
             else:
-                points[away_index] += 3
+                points[away_index] += win_points
                 margin_roll = generator.random()
-                margin = 1 if margin_roll < 0.64 else 2 if margin_roll < 0.92 else 3
+                margin = 1 if win_points == 1.0 else 1 if margin_roll < 0.64 else 2 if margin_roll < 0.92 else 3
                 goal_difference[away_index] += margin
                 goal_difference[home_index] -= margin
         for position, index in enumerate(order(points, goal_difference)):
@@ -889,17 +1097,143 @@ def _simulate_league(
                 "champion": round(position_probabilities[0], 4),
                 "top_four": round(sum(position_probabilities[:4]), 4),
                 "bottom_three": round(sum(position_probabilities[-3:]), 4),
+                "podium": round(sum(position_probabilities[:3]), 4),
+                "last_place": round(position_probabilities[-1], 4),
                 "positions": [round(probability, 4) for probability in position_probabilities],
             }
         )
     teams.sort(key=lambda team: (team["expected_position"], team["name"]))
     return {
+        "forecast_type": competition.get("forecast_type", "league"),
         "seed": f"{seed:016x}",
         "simulations": simulations,
         "completed_matches": completed,
         "remaining_matches": len(remaining),
         "latest_completed": latest_completed,
         "teams": teams,
+    }
+
+
+def _decisive_probability(model, entity_a: str, entity_b: str) -> float:
+    """Convert a neutral 90-minute W/D/L forecast into a decisive tie probability."""
+    match = Match(date.today(), entity_a, entity_b, 0.5, home_advantage=False)
+    home_win, _draw, away_win = model.predict_outcomes(match)
+    decisive = home_win + away_win
+    return home_win / decisive if decisive else 0.5
+
+
+def _resolved_knockout_ties(competition: dict) -> tuple[set[str], dict[tuple[int, tuple[str, str]], list[dict]]]:
+    grouped: dict[tuple[int, tuple[str, str]], list[dict]] = defaultdict(list)
+    for fixture in competition["knockout_fixtures"]:
+        stage_rank = KNOCKOUT_STAGES[fixture["stage"]]
+        pair = tuple(sorted((fixture["home_id"], fixture["away_id"])))
+        grouped[(stage_rank, pair)].append(fixture)
+    eliminated: set[str] = set()
+    cohort = competition.get("cohort")
+    for (_stage_rank, pair), fixtures in grouped.items():
+        finished = [row for row in fixtures if row["status"] == "FINISHED" and row["winner_id"]]
+        if len(finished) != len(fixtures):
+            continue
+        winner = None
+        if cohort == "national-football" or fixtures[0]["stage"] == "FINAL":
+            winner = finished[-1]["winner_id"] if finished else None
+        elif len(fixtures) >= 2:
+            goals = {pair[0]: 0, pair[1]: 0}
+            for row in finished:
+                goals[row["home_id"]] += row["home_goals"] or 0
+                goals[row["away_id"]] += row["away_goals"] or 0
+            if goals[pair[0]] != goals[pair[1]]:
+                winner = pair[0] if goals[pair[0]] > goals[pair[1]] else pair[1]
+            else:
+                winner = finished[-1]["winner_id"]
+        if winner:
+            eliminated.add(pair[1] if winner == pair[0] else pair[0])
+    return eliminated, grouped
+
+
+def _simulate_knockout(competition: dict, model, model_name: str, simulations: int = PREDICTOR_SIMULATIONS) -> dict:
+    """Forecast a published knockout field and explicitly sample later unpublished draws."""
+    names = {team["id"]: team["name"] for team in competition["teams"]}
+    eliminated, grouped = _resolved_knockout_ties(competition)
+    participants = {
+        entity
+        for fixture in competition["knockout_fixtures"]
+        for entity in (fixture["home_id"], fixture["away_id"])
+    }
+    survivors = sorted(participants - eliminated)
+    final = next(
+        (row for row in competition["knockout_fixtures"] if row["stage"] == "FINAL" and row["status"] == "FINISHED" and row["winner_id"]),
+        None,
+    )
+    seed_material = f"{METHODOLOGY_VERSION}|{competition['id']}|{competition['season']}|{model_name}|knockout"
+    seed = int.from_bytes(hashlib.sha256(seed_material.encode()).digest()[:8], "big")
+    if final:
+        champion_counts = {entity: simulations if entity == final["winner_id"] else 0 for entity in participants}
+        next_counts = {entity: simulations if entity == final["winner_id"] else 0 for entity in participants}
+        current_stage = "complete"
+        unresolved_pairs: list[tuple[str, str]] = []
+    else:
+        unresolved_by_stage: dict[int, list[tuple[str, str]]] = defaultdict(list)
+        for (stage_rank, pair), fixtures in grouped.items():
+            tie_eliminated = set(pair) & eliminated
+            if not tie_eliminated and any(row["status"] != "FINISHED" for row in fixtures):
+                unresolved_by_stage[stage_rank].append(pair)
+        active_rank = min(unresolved_by_stage) if unresolved_by_stage else None
+        unresolved_pairs = sorted(set(unresolved_by_stage.get(active_rank, [])))
+        current_stage = next(
+            (stage for stage, rank in KNOCKOUT_STAGES.items() if rank == active_rank),
+            "draw pending",
+        )
+        champion_counts = {entity: 0 for entity in participants}
+        next_counts = {entity: 0 for entity in participants}
+        generator = random.Random(seed)
+        for _ in range(simulations):
+            field = set(survivors)
+            advanced: list[str] = []
+            paired: set[str] = set()
+            for entity_a, entity_b in unresolved_pairs:
+                if entity_a not in field or entity_b not in field:
+                    continue
+                paired.update((entity_a, entity_b))
+                probability = _decisive_probability(model, entity_a, entity_b)
+                winner = entity_a if generator.random() < probability else entity_b
+                advanced.append(winner)
+                next_counts[winner] += 1
+            for entity in sorted(field - paired):
+                advanced.append(entity)
+                next_counts[entity] += 1
+            while len(advanced) > 1:
+                generator.shuffle(advanced)
+                next_round = []
+                if len(advanced) % 2:
+                    next_round.append(advanced.pop())
+                for index in range(0, len(advanced), 2):
+                    entity_a, entity_b = advanced[index], advanced[index + 1]
+                    probability = _decisive_probability(model, entity_a, entity_b)
+                    next_round.append(entity_a if generator.random() < probability else entity_b)
+                advanced = next_round
+            if advanced:
+                champion_counts[advanced[0]] += 1
+    rows = []
+    for entity in participants:
+        state = model.state(entity)
+        rows.append(
+            {
+                "id": entity,
+                "name": names.get(entity, entity),
+                "rating": round(state.mean, 2),
+                "champion": round(champion_counts[entity] / simulations, 4),
+                "reach_next_stage": round(next_counts[entity] / simulations, 4),
+            }
+        )
+    rows.sort(key=lambda row: (-row["champion"], -row["rating"], row["name"]))
+    return {
+        "forecast_type": "knockout",
+        "seed": f"{seed:016x}",
+        "simulations": simulations,
+        "current_stage": current_stage.replace("_", " ").title(),
+        "published_ties_remaining": len(unresolved_pairs),
+        "participants": rows,
     }
 
 
@@ -912,38 +1246,44 @@ def _build_tournament_predictor(
     draw_rate = sum(match.score_a == 0.5 for match in matches) / len(matches)
     competitions = []
     for schedule in schedules:
-        competition = {
-            key: schedule[key]
-            for key in ("id", "label", "season", "source_url", "license", "snapshot_sha256")
-        }
-        competition["total_matches"] = len(schedule["fixtures"])
-        competition["first_fixture"] = min(row["date"] for row in schedule["fixtures"])
-        competition["last_fixture"] = max(row["date"] for row in schedule["fixtures"])
-        unplayed_dates = [
-            row["date"] for row in schedule["fixtures"] if row["home_goals"] is None
-        ]
-        competition["next_fixture"] = min(unplayed_dates) if unplayed_dates else None
-        competition["models"] = {
-            model_name: _simulate_league(
-                schedule,
-                model,
-                model_name,
-                entities,
-                draw_rate,
-            )
-            for model_name, model in models.items()
-        }
-        completed = competition["models"]["elo"]["completed_matches"]
-        competition["status"] = (
-            "scheduled" if completed == 0 else "complete" if completed == competition["total_matches"] else "live"
+        competition = {key: schedule[key] for key in ("id", "label", "season", "source_url", "license", "snapshot_sha256")}
+        competition["format"] = schedule.get("format", "round-robin league")
+        competition["forecast_available"] = schedule.get("forecast_available", True)
+        competition["availability"] = schedule.get(
+            "availability",
+            "The complete round-robin fixture list is published and forecastable.",
         )
+        competition["tie_break"] = schedule.get("tie_break")
+        competition["total_matches"] = len(schedule["fixtures"])
+        competition["first_fixture"] = schedule.get("first_fixture") or min(row["date"] for row in schedule["fixtures"])
+        competition["last_fixture"] = schedule.get("last_fixture") or max(row["date"] for row in schedule["fixtures"])
+        unplayed_dates = [row["date"] for row in schedule["fixtures"] if row["home_goals"] is None and row["date"]]
+        competition["next_fixture"] = min(unplayed_dates) if unplayed_dates else None
+        if competition["format"] in {"round-robin league", "round-robin tournament"}:
+            competition["models"] = {
+                model_name: _simulate_league(schedule, model, model_name, entities, draw_rate)
+                for model_name, model in models.items()
+            }
+            completed = competition["models"]["elo"]["completed_matches"]
+            competition["status"] = "scheduled" if completed == 0 else "complete" if completed == competition["total_matches"] else "live"
+        elif competition["forecast_available"]:
+            competition["models"] = {
+                model_name: _simulate_knockout(schedule, model, model_name)
+                for model_name, model in models.items()
+            }
+            competition["status"] = "complete" if competition["models"]["elo"]["current_stage"] == "Complete" else "live"
+        else:
+            competition["models"] = {}
+            competition["status"] = "waiting for draw"
         competitions.append(competition)
     return {
-        "format": "round-robin league",
+        "format": "format-aware competition forecast",
         "simulations_per_model": PREDICTOR_SIMULATIONS,
         "draw_model": "Model draw likelihood; Elo uses the historical football draw rate scaled by matchup closeness.",
         "tie_break": "Points, simulated goal difference, then current model strength.",
         "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
+        "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented.",
+        "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
         "competitions": competitions,
     }
 
@@ -1068,7 +1408,7 @@ def build_sport_payload(
         "parameters": selected_parameters,
         "models": model_payloads,
     }
-    if sport == "football" and predictor_schedules:
+    if sport in {"football", "national-football", "chess"} and predictor_schedules:
         payload["tournament_predictor"] = _build_tournament_predictor(
             predictor_schedules, fitted_models, entities, matches
         )
@@ -1102,8 +1442,10 @@ def validate_payload(payload: dict, schema: dict) -> None:
         predictor = payload.get("tournament_predictor")
         if not predictor or not predictor.get("competitions"):
             raise ValueError("Missing football tournament predictor")
+    predictor = payload.get("tournament_predictor")
+    if predictor:
         for competition in predictor["competitions"]:
-            if set(competition.get("models", {})) != {"elo", "trueskill", "robust"}:
+            if competition.get("forecast_available") and set(competition.get("models", {})) != {"elo", "trueskill", "robust"}:
                 raise ValueError("Incomplete tournament prediction models")
     for name in ("elo", "trueskill", "robust"):
         if name not in payload["models"]:
@@ -1149,9 +1491,15 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         for sport in requested:
             try:
                 matches, entities, source_meta = loaders[sport]()
-                predictor_schedules = fetch_league_schedules() if sport == "football" else None
-                if predictor_schedules:
-                    matches = _merge_schedule_results(matches, entities, predictor_schedules)
+                predictor_schedules = None
+                if sport == "football":
+                    league_schedules = fetch_league_schedules()
+                    predictor_schedules = league_schedules + fetch_cup_schedules(token, sport)
+                    matches = _merge_schedule_results(matches, entities, league_schedules)
+                elif sport == "national-football":
+                    predictor_schedules = fetch_cup_schedules(token, sport)
+                elif sport == "chess":
+                    predictor_schedules = fetch_chess_tournament_schedules()
                 payload = build_sport_payload(
                     sport,
                     matches,
@@ -1208,6 +1556,9 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         "tournament_predictor": {
             "simulations_per_competition_model": PREDICTOR_SIMULATIONS,
             "seed": "SHA-256(methodology version, competition, season, model), first 64 bits as hexadecimal",
+            "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup"],
+            "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
+            "availability": "Withhold title probabilities until the public source identifies a knockout field.",
             "refresh": "daily",
         },
         "methodology_url": "/rating-lab/#methodology",
