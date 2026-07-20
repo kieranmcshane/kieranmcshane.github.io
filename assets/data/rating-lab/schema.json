@@ -11,6 +11,7 @@
     "source",
     "data_window",
     "outcome_context",
+    "prediction_contexts",
     "eligibility",
     "competitions",
     "candidate_parameters",
@@ -19,7 +20,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.7.0"
+      "const": "1.8.0"
     },
     "sport": {
       "enum": [
@@ -88,6 +89,47 @@
         "matches": {
           "type": "integer",
           "minimum": 1
+        },
+        "method": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "prediction_contexts": {
+      "type": "object",
+      "required": [
+        "type",
+        "values",
+        "method"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "surface",
+            "venue",
+            "color"
+          ]
+        },
+        "values": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
         },
         "method": {
           "type": "string"

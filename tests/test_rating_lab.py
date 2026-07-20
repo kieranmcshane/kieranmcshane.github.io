@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 import unittest
 
-from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match
+from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.pipeline import (
     _deduplicate,
     _competition_performance,
@@ -22,6 +22,7 @@ from rating_lab.pipeline import (
     _polymarket_search_query,
     _simulate_league,
     _simulate_knockout,
+    _model_candidates,
     build_sport_payload,
     individual_contribution_protocol,
     validate_payload,
@@ -81,6 +82,28 @@ class RatingModelTests(unittest.TestCase):
             self.assertAlmostEqual(sum(outcomes), 1.0, places=8)
             self.assertTrue(all(0 <= probability <= 1 for probability in outcomes))
 
+    def test_home_or_white_advantage_increases_entity_a_probability(self):
+        neutral = Match(date(2026, 1, 1), "a", "b", 0.5)
+        advantaged = Match(date(2026, 1, 1), "a", "b", 0.5, home_advantage=True)
+        for model in (
+            EloModel(home=35),
+            Glicko2Model(home=35),
+            GaussianSkillModel(draw_margin=0.75, advantage=0.4),
+            GaussianSkillModel(robust=True, draw_margin=0.75, advantage=0.4),
+        ):
+            self.assertGreater(model.predict(advantaged), model.predict(neutral))
+
+    def test_surface_blend_learns_opposite_surface_strengths(self):
+        model = SurfaceBlendModel(lambda: EloModel(k=32), surface_weight=0.8)
+        start = date(2026, 1, 1)
+        for offset in range(12):
+            model.update(Match(start + timedelta(days=offset), "a", "b", 1.0, metadata={"surface": "Clay"}))
+            model.update(Match(start + timedelta(days=20 + offset), "a", "b", 0.0, metadata={"surface": "Hard"}))
+        clay = model.predict(Match(date(2026, 3, 1), "a", "b", 0.5, metadata={"surface": "Clay"}))
+        hard = model.predict(Match(date(2026, 3, 1), "a", "b", 0.5, metadata={"surface": "Hard"}))
+        self.assertGreater(clay, 0.5)
+        self.assertLess(hard, 0.5)
+
     def test_glicko2_matches_published_worked_example(self):
         model = Glicko2Model(tau=0.5)
         player = model.state("player")
@@ -110,6 +133,11 @@ class RatingModelTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_context_parameters_cover_chess_color_and_tennis_surface(self):
+        self.assertTrue(all(candidate["home"] == 35.0 for candidate in _model_candidates("chess", "elo")))
+        surface_weights = {candidate["surface_weight"] for candidate in _model_candidates("tennis", "elo")}
+        self.assertEqual(surface_weights, {0.4, 0.7, 0.9})
+
     def test_individual_contribution_protocol_withholds_unverified_player_ranks(self):
         protocol = individual_contribution_protocol()
         self.assertEqual(protocol["status"], "withheld_pending_lineup_source")

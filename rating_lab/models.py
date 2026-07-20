@@ -389,6 +389,96 @@ class Glicko2Model:
         return self.update_period([match])[0]
 
 
+class SurfaceBlendModel:
+    """Blend a global rating with an independently replayed surface rating.
+
+    The global component keeps evidence connected across surfaces.  The
+    surface component captures repeatable clay/grass/hard-court differences;
+    its influence grows only as both players accumulate surface evidence.
+    """
+
+    def __init__(self, model_factory: Callable[[], object], surface_weight: float = 0.7):
+        if not 0.0 <= surface_weight <= 1.0:
+            raise ValueError("surface_weight must be between zero and one")
+        self.model_factory = model_factory
+        self.surface_weight = surface_weight
+        self.global_model = model_factory()
+        self.surface_models: dict[str, object] = {}
+        self.name = self.global_model.name
+        self.states = self.global_model.states
+        self.uses_rating_period = isinstance(self.global_model, Glicko2Model)
+
+    @staticmethod
+    def surface(match: Match) -> str:
+        raw = str(match.metadata.get("surface", "unknown")).strip().casefold()
+        if "clay" in raw:
+            return "clay"
+        if "grass" in raw:
+            return "grass"
+        if "hard" in raw:
+            return "hard"
+        if "carpet" in raw:
+            return "carpet"
+        return "unknown"
+
+    def surface_model(self, surface: str):
+        return self.surface_models.setdefault(surface, self.model_factory())
+
+    def state(self, entity: str) -> RatingState:
+        return self.global_model.state(entity)
+
+    def _weight(self, match: Match) -> float:
+        surface_model = self.surface_model(self.surface(match))
+        matches_a = surface_model.state(match.entity_a).matches
+        matches_b = surface_model.state(match.entity_b).matches
+        evidence = min((matches_a + matches_b) / 20.0, 1.0)
+        return self.surface_weight * evidence
+
+    def predict(self, match: Match) -> float:
+        weight = self._weight(match)
+        global_probability = self.global_model.predict(match)
+        surface_probability = self.surface_model(self.surface(match)).predict(match)
+        return (1.0 - weight) * global_probability + weight * surface_probability
+
+    def predict_outcomes(self, match: Match, draw_rate: float = 0.25) -> tuple[float, float, float]:
+        weight = self._weight(match)
+        surface_model = self.surface_model(self.surface(match))
+        if isinstance(self.global_model, (EloModel, Glicko2Model)):
+            global_outcomes = self.global_model.predict_outcomes(match, draw_rate)
+            surface_outcomes = surface_model.predict_outcomes(match, draw_rate)
+        else:
+            global_outcomes = self.global_model.predict_outcomes(match)
+            surface_outcomes = surface_model.predict_outcomes(match)
+        return tuple(
+            (1.0 - weight) * global_value + weight * surface_value
+            for global_value, surface_value in zip(global_outcomes, surface_outcomes)
+        )
+
+    def update(self, match: Match) -> float:
+        probability = self.predict(match)
+        self.global_model.update(match)
+        self.surface_model(self.surface(match)).update(match)
+        return probability
+
+    def update_period(self, matches: Iterable[Match]) -> list[float]:
+        period = list(matches)
+        predictions = [self.predict(match) for match in period]
+        self.global_model.update_period(period)
+        by_surface: dict[str, list[Match]] = {}
+        for match in period:
+            by_surface.setdefault(self.surface(match), []).append(match)
+        for surface, surface_matches in by_surface.items():
+            self.surface_model(surface).update_period(surface_matches)
+        return predictions
+
+    def age_to(self, played: date) -> None:
+        if hasattr(self.global_model, "age_to"):
+            self.global_model.age_to(played)
+        for model in self.surface_models.values():
+            if hasattr(model, "age_to"):
+                model.age_to(played)
+
+
 def replay(
     matches: Iterable[Match],
     model,

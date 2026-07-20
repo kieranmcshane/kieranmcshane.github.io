@@ -1,15 +1,15 @@
 {
-  "schema_version": "1.7.0",
-  "methodology_version": "2026-07-20.8",
-  "code_revision": "f9055029e286de846b05a3a545f59875aac61cec",
-  "generated_at": "2026-07-20T07:22:12+00:00",
+  "schema_version": "1.8.0",
+  "methodology_version": "2026-07-20.9",
+  "code_revision": "3deba666f812cb70b753b5b622a22e2c4efedd6c",
+  "generated_at": "2026-07-20T07:51:09+00:00",
   "sports": {
     "tennis": {
       "status": "current",
       "latest_result": "2026-07-20",
       "source": "ManTennisData (ATP-derived)",
       "stale_after_hours": 240,
-      "checked_at": "2026-07-20T07:19:42+00:00",
+      "checked_at": "2026-07-20T07:48:35+00:00",
       "license": "MIT",
       "source_url": "https://github.com/msolonskyi/ManTennisData",
       "snapshot_sha256": null,
@@ -17,7 +17,8 @@
         "elo": {
           "k": 32.0,
           "scale": 400.0,
-          "home": 0.0
+          "home": 0.0,
+          "surface_weight": 0.4
         },
         "glicko2": {
           "tau": 0.3,
@@ -25,19 +26,22 @@
           "period_days": 7.0,
           "initial_rating": 1500.0,
           "initial_rd": 350.0,
-          "initial_volatility": 0.06
+          "initial_volatility": 0.06,
+          "surface_weight": 0.4
         },
         "trueskill": {
           "robust": false,
           "beta": 5.0,
           "draw_margin": 0.0,
-          "advantage": 0.0
+          "advantage": 0.0,
+          "surface_weight": 0.4
         },
         "robust": {
           "robust": true,
-          "beta": 4.166666666666667,
+          "beta": 3.5,
           "draw_margin": 0.0,
-          "advantage": 0.0
+          "advantage": 0.0,
+          "surface_weight": 0.4
         }
       }
     },
@@ -46,7 +50,7 @@
       "latest_result": "2026-05-24",
       "source": "OpenFootball (development fallback)",
       "stale_after_hours": 48,
-      "checked_at": "2026-07-20T07:20:19+00:00",
+      "checked_at": "2026-07-20T07:49:04+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/openfootball/football.json",
       "snapshot_sha256": null,
@@ -83,7 +87,7 @@
       "latest_result": "2026-07-19",
       "source": "International football results by Mart J\u00fcrisoo",
       "stale_after_hours": 168,
-      "checked_at": "2026-07-20T07:20:26+00:00",
+      "checked_at": "2026-07-20T07:49:17+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/martj42/international_results",
       "snapshot_sha256": "9bc66b3829f3162f03f43d04591544294bfb2ee14305cf4f3b29cfb2641b8e45",
@@ -117,10 +121,10 @@
     },
     "chess": {
       "status": "current",
-      "latest_result": "2026-07-19",
+      "latest_result": "2026-07-20",
       "source": "Lichess official broadcasts",
       "stale_after_hours": 840,
-      "checked_at": "2026-07-20T07:22:11+00:00",
+      "checked_at": "2026-07-20T07:51:07+00:00",
       "license": "CC BY-SA 4.0",
       "source_url": "https://database.lichess.org/#broadcasts",
       "snapshot_sha256": null,
@@ -128,11 +132,11 @@
         "elo": {
           "k": 32.0,
           "scale": 400.0,
-          "home": 0.0
+          "home": 35.0
         },
         "glicko2": {
           "tau": 0.3,
-          "home": 0.0,
+          "home": 35.0,
           "period_days": 7.0,
           "initial_rating": 1500.0,
           "initial_rd": 350.0,
@@ -174,7 +178,12 @@
     "glicko2_rating_period": "All results on one UTC calendar date are updated simultaneously.",
     "glicko2_inactivity_period_days": 7,
     "glicko2_publication_score": "rating - 2 * rating deviation",
-    "trueskill2_claim": "Not used: the public sports sources do not provide the experience, squad, individual-performance, quitting, or cross-mode observations required by the published TrueSkill 2 model."
+    "trueskill2_claim": "Not used: the public sports sources do not provide the experience, squad, individual-performance, quitting, or cross-mode observations required by the published TrueSkill 2 model.",
+    "competitive_context": {
+      "tennis": "Global and surface-specific beliefs are replayed together. Prediction weight = selected surface_weight * min((surface matches A + surface matches B) / 20, 1).",
+      "football": "The listed home side receives the model's declared home offset; source-marked neutral national matches do not.",
+      "chess": "PGN entity A is White and receives the declared White offset before every prediction and update."
+    }
   },
   "tournament_predictor": {
     "simulations_per_competition_model": 5000,

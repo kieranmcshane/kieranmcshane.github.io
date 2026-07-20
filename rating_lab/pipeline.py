@@ -22,11 +22,11 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from .models import EloModel, GaussianSkillModel, Glicko2Model, Match
+from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.7.0"
-METHODOLOGY_VERSION = "2026-07-20.8"
+SCHEMA_VERSION = "1.8.0"
+METHODOLOGY_VERSION = "2026-07-20.9"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 SCHEDULE_ENTITY_ALIASES = {
@@ -1129,13 +1129,13 @@ def _metrics(predictions: list[dict], cutoff: date) -> dict:
 
 def _model_candidates(sport: str, model_name: str) -> list[dict]:
     football_like = sport in {"football", "national-football"}
-    advantage = 65.0 if football_like else 0.0
+    advantage = 65.0 if football_like else 35.0 if sport == "chess" else 0.0
     bayes_advantage = 1.35 if football_like else 0.4 if sport == "chess" else 0.0
     draw_margin = 1.35 if football_like else 0.75 if sport == "chess" else 0.0
     if model_name == "elo":
-        return [{"k": k, "scale": 400.0, "home": advantage} for k in (16.0, 24.0, 32.0)]
-    if model_name == "glicko2":
-        return [
+        candidates = [{"k": k, "scale": 400.0, "home": advantage} for k in (16.0, 24.0, 32.0)]
+    elif model_name == "glicko2":
+        candidates = [
             {
                 "tau": tau,
                 "home": advantage,
@@ -1146,19 +1146,33 @@ def _model_candidates(sport: str, model_name: str) -> list[dict]:
             }
             for tau in (0.3, 0.5, 0.8)
         ]
-    robust = model_name == "robust"
-    return [
-        {"robust": robust, "beta": beta, "draw_margin": draw_margin, "advantage": bayes_advantage}
-        for beta in (3.5, 25.0 / 6.0, 5.0)
-    ]
+    else:
+        robust = model_name == "robust"
+        candidates = [
+            {"robust": robust, "beta": beta, "draw_margin": draw_margin, "advantage": bayes_advantage}
+            for beta in (3.5, 25.0 / 6.0, 5.0)
+        ]
+    if sport == "tennis":
+        return [
+            {**candidate, "surface_weight": surface_weight}
+            for candidate in candidates
+            for surface_weight in (0.4, 0.7, 0.9)
+        ]
+    return candidates
 
 
-def _new_model(model_name: str, params: dict):
-    if model_name == "elo":
-        return EloModel(**params)
-    if model_name == "glicko2":
-        return Glicko2Model(**params)
-    return GaussianSkillModel(**params)
+def _new_model(model_name: str, params: dict, sport: str | None = None):
+    parameters = dict(params)
+    surface_weight = parameters.pop("surface_weight", None)
+    def factory():
+        if model_name == "elo":
+            return EloModel(**parameters)
+        if model_name == "glicko2":
+            return Glicko2Model(**parameters)
+        return GaussianSkillModel(**parameters)
+    if sport == "tennis" and surface_weight is not None:
+        return SurfaceBlendModel(factory, surface_weight)
+    return factory()
 
 
 def _published_score(model_name: str, state) -> float:
@@ -1184,7 +1198,7 @@ def _run_model(
     while index < len(ordered):
         match = ordered[index]
         period_end = index + 1
-        if isinstance(model, Glicko2Model):
+        if isinstance(model, Glicko2Model) or getattr(model, "uses_rating_period", False):
             while period_end < len(ordered) and ordered[period_end].date == match.date:
                 period_end += 1
         period = ordered[index:period_end]
@@ -1212,7 +1226,7 @@ def _run_model(
             and match.season != previous_season
         ):
             model.regress(0.25)
-        if isinstance(model, Glicko2Model):
+        if isinstance(model, Glicko2Model) or getattr(model, "uses_rating_period", False):
             period_predictions = model.update_period(period)
         else:
             period_predictions = [model.update(match)]
@@ -1243,7 +1257,7 @@ def _choose_parameters(matches: list[Match], sport: str, model_name: str, valida
     for params in _model_candidates(sport, model_name):
         _, predictions, _ = _run_model(
             tuning_matches,
-            _new_model(model_name, params),
+            _new_model(model_name, params, sport),
             sport,
             history_entities=set(),
         )
@@ -1530,6 +1544,11 @@ def _simulate_knockout(competition: dict, model, model_name: str, simulations: i
 
 
 def _model_parameters(model) -> dict:
+    if isinstance(model, SurfaceBlendModel):
+        return {
+            **_model_parameters(model.global_model),
+            "surface_weight": model.surface_weight,
+        }
     if isinstance(model, EloModel):
         return {"k": model.k, "scale": model.scale, "home": model.home}
     if isinstance(model, Glicko2Model):
@@ -1596,9 +1615,9 @@ def _competition_performance(
     first_result = event_matches[0].date
     prior_matches = [match for match in matches if match.date < first_result]
     parameters = _model_parameters(reference_model)
-    prior_model = _new_model(model_name, parameters)
+    prior_model = _new_model(model_name, parameters, sport)
     _run_model(prior_matches, prior_model, sport, history_entities=set())
-    event_model = _new_model(model_name, parameters)
+    event_model = _new_model(model_name, parameters, sport)
     participants = sorted({entity for match in event_matches for entity in (match.entity_a, match.entity_b)})
     event_names = {}
     entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
@@ -2008,14 +2027,14 @@ def build_sport_payload(
     for model_name in MODEL_NAMES:
         params = _choose_parameters(matches, sport, model_name, validation_start, evaluation_start)
         selected_parameters[model_name] = params
-        fitted_model = _new_model(model_name, params)
+        fitted_model = _new_model(model_name, params, sport)
         states, predictions, histories = _run_model(
             matches,
             fitted_model,
             sport,
             history_entities=history_entities,
         )
-        if isinstance(fitted_model, Glicko2Model):
+        if isinstance(fitted_model, Glicko2Model) or getattr(fitted_model, "uses_rating_period", False):
             fitted_model.age_to(latest)
             for entity in history_entities:
                 if entity not in states:
@@ -2042,8 +2061,7 @@ def build_sport_payload(
             full_history = histories.get(entity, [])
             cutoff_point = next((point[1] for point in reversed(full_history) if date.fromisoformat(point[0]) <= latest - timedelta(days=30)), full_history[0][1] if full_history else conservative)
             history = _compress_history(full_history)
-            rows.append(
-                {
+            row = {
                     "id": entity,
                     "name": entities[entity]["name"],
                     "country": entities[entity].get("country", ""),
@@ -2058,7 +2076,21 @@ def build_sport_payload(
                     "last_played": state.last_played.isoformat() if state.last_played else None,
                     "history": history,
                 }
-            )
+            if isinstance(fitted_model, SurfaceBlendModel):
+                row["contexts"] = {}
+                for surface, surface_model in sorted(fitted_model.surface_models.items()):
+                    surface_state = surface_model.states.get(entity)
+                    if not surface_state or not surface_state.matches:
+                        continue
+                    row["contexts"][surface] = {
+                        "rating": round(surface_state.mean, 2),
+                        "sigma": round(surface_state.sigma, 2) if model_name != "elo" else None,
+                        "volatility": round(surface_state.volatility, 6) if model_name == "glicko2" else None,
+                        "score": round(_published_score(model_name, surface_state), 2),
+                        "matches": surface_state.matches,
+                        "last_played": surface_state.last_played.isoformat() if surface_state.last_played else None,
+                    }
+            rows.append(row)
         rows.sort(key=lambda row: (-row["score"], row["name"]))
         rows = rows[:500]
         for rank, row in enumerate(rows, 1):
@@ -2086,6 +2118,32 @@ def build_sport_payload(
             "matches": len(outcome_matches),
             "method": "Completed draws divided by deduplicated replay results where both competitors satisfy the current publication eligibility rules.",
         },
+        "prediction_contexts": {
+            "tennis": {
+                "type": "surface",
+                "values": [
+                    {"id": surface, "label": surface.title()}
+                    for surface in ("hard", "clay", "grass", "carpet")
+                    if any(SurfaceBlendModel.surface(match) == surface for match in matches)
+                ],
+                "method": "Blend the global player belief with an independently replayed surface belief. The selected validation weight is multiplied by min((surface matches A + surface matches B) / 20, 1).",
+            },
+            "football": {
+                "type": "venue",
+                "values": [{"id": "a", "label": "A at home"}, {"id": "neutral", "label": "Neutral"}, {"id": "b", "label": "B at home"}],
+                "method": "Apply the selected home offset to the listed home side before predicting and updating.",
+            },
+            "national-football": {
+                "type": "venue",
+                "values": [{"id": "a", "label": "A at home"}, {"id": "neutral", "label": "Neutral"}, {"id": "b", "label": "B at home"}],
+                "method": "Apply the selected home offset only when the source does not mark the match neutral.",
+            },
+            "chess": {
+                "type": "color",
+                "values": [{"id": "a", "label": "A is White"}, {"id": "b", "label": "B is White"}, {"id": "neutral", "label": "Color unassigned"}],
+                "method": "PGN games are White-first. Apply the declared White offset before predicting and updating.",
+            },
+        }[sport],
         "eligibility": {
             "minimum_recent_matches": minimum,
             "recent_window_days": active_window_days,
@@ -2275,6 +2333,11 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "glicko2_inactivity_period_days": 7,
             "glicko2_publication_score": "rating - 2 * rating deviation",
             "trueskill2_claim": "Not used: the public sports sources do not provide the experience, squad, individual-performance, quitting, or cross-mode observations required by the published TrueSkill 2 model.",
+            "competitive_context": {
+                "tennis": "Global and surface-specific beliefs are replayed together. Prediction weight = selected surface_weight * min((surface matches A + surface matches B) / 20, 1).",
+                "football": "The listed home side receives the model's declared home offset; source-marked neutral national matches do not.",
+                "chess": "PGN entity A is White and receives the declared White offset before every prediction and update.",
+            },
         },
         "tournament_predictor": {
             "simulations_per_competition_model": PREDICTOR_SIMULATIONS,

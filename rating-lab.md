@@ -85,7 +85,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-matchup" id="matchup" aria-labelledby="matchup-heading">
     <p class="rating-lab-kicker">Single-event forecast</p>
     <h2 id="matchup-heading">A vs B probability</h2>
-    <p class="rating-lab-matchup-intro">Compare any two published competitors using the current rating state. Football reports win, draw, and loss; tennis reports either player winning; chess includes the draw and lets you assign White.</p>
+    <p class="rating-lab-matchup-intro">Compare any two published competitors using the current rating state and relevant context. Choose the tennis surface, football venue, or chess color assignment before reading the probabilities.</p>
 
     <div class="rating-lab-matchup-toolbar">
       <label class="rating-lab-field">
@@ -179,7 +179,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <div class="rating-lab-method-grid">
       <article>
         <h3>Elo</h3>
-        <p>A direct online update around a logistic win-probability curve. Football includes home advantage, club football has seasonal mean reversion, and draws count as half a win.</p>
+        <p>A direct online update around a logistic win-probability curve. Football includes home advantage, chess includes White advantage, tennis blends global and surface ratings, club football has seasonal mean reversion, and draws count as half a win.</p>
       </article>
       <article>
         <h3>Glicko-2</h3>
@@ -286,7 +286,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <details class="rating-lab-limitations">
       <summary>Known limitations and deliberate simplifications</summary>
       <ul>
-        <li>Current published team ratings are result-only: score margin, tennis surface, lineups, injuries, time controls, and player age are not model inputs. The withheld player-contribution protocol would add lineups and minutes, but no event statistics.</li>
+        <li>Current ratings use the result plus the declared competitive context: tennis surface, football venue, or chess color. Score margin, lineups, injuries, time controls, and player age are not model inputs. The withheld player-contribution protocol would add lineups and minutes, but no event statistics.</li>
         <li>Draws use an actual score of 0.5. Published log loss and Brier score evaluate expected score, not a separate three-class win/draw/loss forecast.</li>
         <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>
         <li>Glicko-2 is the exception to within-day ordering: all results on one calendar date form a simultaneous rating period. Seven days define one unit of inactivity inflation.</li>

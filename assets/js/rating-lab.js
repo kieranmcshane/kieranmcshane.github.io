@@ -507,10 +507,10 @@
     var rules = {
       tennis: {
         label: 'ATP singles',
-        input: 'Completed tour-level singles results. Player identity uses the source player code; tournament start date is the available chronological date. Surface is retained as metadata but is not used by the models.',
-        venue: 'No home or venue advantage. Draws are not valid tennis outcomes.',
+        input: 'Completed tour-level singles results. Player identity uses the source player code; tournament start date is the available chronological date. Surface is normalized to hard, clay, grass, carpet, or unknown.',
+        venue: 'Each prediction blends the global belief with the selected surface belief; the surface weight grows with surface evidence. Draws are not valid tennis outcomes.',
         initialization: 'Every player starts at Elo/Glicko-2 rating 1500 (Glicko-2 RD 350, volatility 0.06) or Gaussian μ=25, σ=8.333.',
-        special: 'No seasonal regression.'
+        special: 'Every result updates both the global model and its surface-specific model. No seasonal regression.'
       },
       football: {
         label: 'European club football',
@@ -571,6 +571,7 @@
       k: 'Maximum Elo response scale for one result',
       scale: 'Rating-gap width in the Elo logistic curve',
       home: 'Rating points added only when the home/White advantage flag is true',
+      surface_weight: 'Maximum weight assigned to the independently replayed tennis-surface belief; actual weight grows from zero over the first 20 combined surface matches',
       tau: 'Glicko-2 constraint on how quickly volatility may change',
       initial_rating: 'Glicko-2 initial rating',
       initial_rd: 'Glicko-2 initial rating deviation',
@@ -747,10 +748,8 @@
     return Math.max(cdf((signed - parameters.draw_margin) / parameters.beta), 1e-12);
   }
 
-  function matchupOutcomes(rowA, rowB, dataset) {
+  function beliefOutcomes(rowA, rowB, dataset, advantage) {
     var parameters = dataset.parameters[state.model];
-    var advantageDirection = state.matchupVenue === 'a' ? 1 : state.matchupVenue === 'b' ? -1 : 0;
-    var advantage = advantageDirection * (state.model === 'elo' || state.model === 'glicko2' ? parameters.home : parameters.advantage);
     var meanDifference = rowA.rating - rowB.rating + advantage;
     if (state.model === 'elo' || state.model === 'glicko2') {
       var expected;
@@ -794,10 +793,55 @@
     };
   }
 
+  function matchupOutcomes(rowA, rowB, dataset) {
+    var parameters = dataset.parameters[state.model];
+    if (state.sport === 'tennis') {
+      var surface = state.matchupVenue;
+      var contextA = rowA.contexts && rowA.contexts[surface];
+      var contextB = rowB.contexts && rowB.contexts[surface];
+      var globalOutcome = beliefOutcomes(rowA, rowB, dataset, 0);
+      if (!contextA || !contextB) {
+        globalOutcome.surface = surface;
+        globalOutcome.surfaceWeight = 0;
+        globalOutcome.globalExpected = globalOutcome.expected;
+        globalOutcome.surfaceExpected = null;
+        return globalOutcome;
+      }
+      var surfaceOutcome = beliefOutcomes(contextA, contextB, dataset, 0);
+      var evidence = Math.min((contextA.matches + contextB.matches) / 20, 1);
+      var weight = parameters.surface_weight * evidence;
+      return {
+        win: (1 - weight) * globalOutcome.win + weight * surfaceOutcome.win,
+        draw: (1 - weight) * globalOutcome.draw + weight * surfaceOutcome.draw,
+        loss: (1 - weight) * globalOutcome.loss + weight * surfaceOutcome.loss,
+        expected: (1 - weight) * globalOutcome.expected + weight * surfaceOutcome.expected,
+        difference: (1 - weight) * globalOutcome.difference + weight * surfaceOutcome.difference,
+        variance: Number.isFinite(globalOutcome.variance) && Number.isFinite(surfaceOutcome.variance) ?
+          (1 - weight) * globalOutcome.variance + weight * surfaceOutcome.variance : null,
+        empiricalDrawRate: globalOutcome.empiricalDrawRate,
+        parameters: parameters,
+        surface: surface,
+        surfaceWeight: weight,
+        globalExpected: globalOutcome.expected,
+        surfaceExpected: surfaceOutcome.expected,
+        contextA: contextA,
+        contextB: contextB
+      };
+    }
+    var advantageDirection = state.matchupVenue === 'a' ? 1 : state.matchupVenue === 'b' ? -1 : 0;
+    var advantage = advantageDirection * (state.model === 'elo' || state.model === 'glicko2' ? parameters.home : parameters.advantage);
+    return beliefOutcomes(rowA, rowB, dataset, advantage);
+  }
+
   function matchupVenueOptions(rowA, rowB) {
     var nameA = rowA ? rowA.name : 'Competitor A';
     var nameB = rowB ? rowB.name : 'Competitor B';
-    if (state.sport === 'tennis') return [{ value: 'neutral', label: 'Neutral court' }];
+    if (state.sport === 'tennis') {
+      var contexts = state.datasets.tennis.prediction_contexts;
+      return contexts.values.map(function (surface) {
+        return { value: surface.id, label: surface.label + ' court' };
+      });
+    }
     if (state.sport === 'chess') return [
       { value: 'a', label: nameA + ' plays White' },
       { value: 'b', label: nameB + ' plays White' },
@@ -833,7 +877,7 @@
     }).join('');
     elements.matchupVenue.value = state.matchupVenue;
     elements.matchupVenue.disabled = venues.length === 1;
-    elements.matchupVenueLabel.textContent = state.sport === 'chess' ? 'Who plays White?' : 'Venue';
+    elements.matchupVenueLabel.textContent = state.sport === 'chess' ? 'Who plays White?' : state.sport === 'tennis' ? 'Surface' : 'Venue';
     setPressed(elements.matchupModelTabs, 'matchupModel', state.model);
   }
 
@@ -871,12 +915,17 @@
       matches: dataset.data_window.matches,
       method: 'Legacy snapshot fallback; refresh to schema 1.4.0 for cohort draw context.'
     };
-    var ratingA = state.model === 'elo' ? number(rowA.rating, 1) : state.model === 'glicko2' ?
-      'rating ' + number(rowA.rating, 2) + ', RD ' + number(rowA.sigma, 2) + ', volatility ' + number(rowA.volatility, 5) :
-      'μ ' + number(rowA.rating, 2) + ', σ ' + number(rowA.sigma, 2);
-    var ratingB = state.model === 'elo' ? number(rowB.rating, 1) : state.model === 'glicko2' ?
-      'rating ' + number(rowB.rating, 2) + ', RD ' + number(rowB.sigma, 2) + ', volatility ' + number(rowB.volatility, 5) :
-      'μ ' + number(rowB.rating, 2) + ', σ ' + number(rowB.sigma, 2);
+    var beliefLabel = function (row) {
+      return state.model === 'elo' ? number(row.rating, 1) : state.model === 'glicko2' ?
+        'rating ' + number(row.rating, 2) + ', RD ' + number(row.sigma, 2) + ', volatility ' + number(row.volatility, 5) :
+        'μ ' + number(row.rating, 2) + ', σ ' + number(row.sigma, 2);
+    };
+    var ratingA = beliefLabel(rowA);
+    var ratingB = beliefLabel(rowB);
+    if (outcome.contextA && outcome.contextB) {
+      ratingA += '; ' + venue.label + ' ' + beliefLabel(outcome.contextA) + ' from ' + outcome.contextA.matches + ' matches';
+      ratingB += '; ' + venue.label + ' ' + beliefLabel(outcome.contextB) + ' from ' + outcome.contextB.matches + ' matches';
+    }
     var calculation;
     if (state.model === 'elo') {
       calculation = 'Expected score uses 1 / (1 + 10^(−Δ/' + number(parameters.scale, 0) + ')), where Δ includes ' +
@@ -895,6 +944,19 @@
         number(context.draw_rate * 100, 2) + '% (' + number(context.draws, 0) + ' of ' + number(context.matches, 0) +
         '); the Bayesian likelihood is not forced to equal that baseline.';
     }
+    if (state.sport === 'tennis') {
+      var surfaceDetail = outcome.surfaceExpected === null ?
+        'One or both players have no published belief for this surface, so this matchup uses the global belief only.' :
+        'Global expected score ' + number(outcome.globalExpected, 4) + ' and surface expected score ' +
+        number(outcome.surfaceExpected, 4) + ' are blended with actual surface weight ' +
+        number(outcome.surfaceWeight, 4) + '. The maximum selected surface weight is ' +
+        number(parameters.surface_weight, 4) + '; evidence scales it over the first 20 combined surface matches.';
+      calculation = surfaceDetail + ' ' + calculation;
+    }
+    var eventContext = state.sport === 'tennis' ? 'surface' : state.sport === 'chess' ? 'color' : 'venue';
+    var unusedContext = state.sport === 'tennis' ?
+      'It does not use score margin, injuries, player age, or bookmaker information' :
+      'It does not use score margin, line-ups, injuries, time control, player age, or bookmaker information';
     elements.matchupResult.innerHTML = '<div class="rating-lab-matchup-context"><strong>' +
       escapeHtml(dataset.models[state.model].label) + '</strong><span>' + escapeHtml(venue.label) + ' · rating snapshot ' +
       escapeHtml(formatDate(dataset.latest_result)) + '</span></div><div class="rating-lab-outcome-strip" role="img" aria-label="' +
@@ -905,7 +967,7 @@
       '</dd></div></dl><details class="rating-lab-matchup-method"><summary>Exact calculation and assumptions</summary><p>' +
       escapeHtml(calculation) + '</p><p><strong>Published inputs:</strong> A ' + escapeHtml(ratingA) + '; B ' +
       escapeHtml(ratingB) + '; adjusted difference ' + number(outcome.difference, 3) + '. ' + escapeHtml(context.method) +
-      '</p><p>This is a result-only probability for one event at the selected venue/color. The published evaluation scores expected score, not a separately calibrated three-class forecast. It does not use surface, score margin, line-ups, injuries, time control, or bookmaker information, and it contains no betting margin. <a href="#protocol">Inspect the full protocol</a> or <a href="' +
+      '</p><p>This is a result-and-context probability for one event at the selected ' + eventContext + '. The published evaluation scores expected score, not a separately calibrated three-class forecast. ' + unusedContext + ', and it contains no betting margin. <a href="#protocol">Inspect the full protocol</a> or <a href="' +
       escapeHtml(dataset.source.source_url) + '">open the source data</a>.</p></details>';
   }
 
