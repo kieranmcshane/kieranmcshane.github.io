@@ -6,13 +6,13 @@ The site uses GitHub Pages, Jekyll, and the Minima theme. Long-form posts live i
 
 ## Rating Lab
 
-`/rating-lab/` is a generated, interactive comparison of Elo, Gaussian
-TrueSkill, and robust heavy-tail ratings for ATP tennis, European club
+`/rating-lab/` is a generated, interactive comparison of Elo, Glicko-2,
+Gaussian TrueSkill, and robust heavy-tail ratings for ATP tennis, European club
 football, men's national-team football, and elite over-the-board chess.
 The same page includes a daily, format-aware competition predictor. It covers
 the five European league tables plus public football-data.org knockout fields
 for the Champions League, FIFA World Cup, and European Championship. It starts
-from actual results and published fixtures under each of the three rating
+from actual results and published fixtures under each of the four rating
 protocols. During live elite Lichess round-robin broadcasts it also reconstructs
 the remaining all-play-all pairing set and forecasts the final chess table.
 
@@ -57,3 +57,11 @@ ties and results; when a later draw is unpublished, surviving teams are
 uniformly re-drawn in each simulation. Title probabilities are withheld until
 the public feed identifies a knockout field. Every forecast publishes its
 fixture snapshot checksum and deterministic seed for exact reproduction.
+
+Completed competitions replace title odds with a deterministic event replay
+from the strictly pre-event rating state. Before each update, the selected
+protocol records expected result score `p`; the participant residual is
+`sum(actual score - p)`, and the dashboard's diverging chart standardizes it by
+`sqrt(sum(p * (1 - p)))`. Wins, draws, and losses score 1, 0.5, and 0. The
+published JSON retains actual score, expected score, residual, per-match
+residual, variance reference, and standardized surprise for every participant.

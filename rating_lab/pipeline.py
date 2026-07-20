@@ -25,8 +25,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.8.0"
-METHODOLOGY_VERSION = "2026-07-20.9"
+SCHEMA_VERSION = "1.9.0"
+METHODOLOGY_VERSION = "2026-07-20.10"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 SCHEDULE_ENTITY_ALIASES = {
@@ -1644,22 +1644,42 @@ def _competition_performance(
         entity: (event_model.state(entity).mean, event_model.state(entity).sigma, event_model.state(entity).volatility)
         for entity in participants
     }
-    records = defaultdict(lambda: {"wins": 0, "draws": 0, "losses": 0, "points": 0.0, "matches": 0})
+    records = defaultdict(
+        lambda: {
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "points": 0.0,
+            "expected_score": 0.0,
+            "expectation_variance": 0.0,
+            "matches": 0,
+        }
+    )
     event_index = 0
     while event_index < len(event_matches):
         match = event_matches[event_index]
         event_period_end = event_index + 1
+        period_matches = event_matches[event_index:event_period_end]
         if isinstance(event_model, Glicko2Model):
             while event_period_end < len(event_matches) and event_matches[event_period_end].date == match.date:
                 event_period_end += 1
-            event_model.update_period(event_matches[event_index:event_period_end])
+            period_matches = event_matches[event_index:event_period_end]
+            predictions = event_model.update_period(period_matches)
         else:
-            event_model.update(match)
-        for match in event_matches[event_index:event_period_end]:
-            for entity, score in ((match.entity_a, match.score_a), (match.entity_b, 1.0 - match.score_a)):
+            predictions = [event_model.update(match)]
+        for match, prediction_a in zip(period_matches, predictions):
+            # This common score-scale variance reference makes surprise
+            # comparable across protocols while completed draws keep score 0.5.
+            variance_reference = max(prediction_a * (1.0 - prediction_a), 1e-9)
+            for entity, score, expected in (
+                (match.entity_a, match.score_a, prediction_a),
+                (match.entity_b, 1.0 - match.score_a, 1.0 - prediction_a),
+            ):
                 record = records[entity]
                 record["matches"] += 1
                 record["points"] += score
+                record["expected_score"] += expected
+                record["expectation_variance"] += variance_reference
                 if score == 1.0:
                     record["wins"] += 1
                 elif score == 0.5:
@@ -1678,6 +1698,8 @@ def _competition_performance(
         )
         end_score = _published_score(model_name, end)
         record = records[entity]
+        score_residual = record["points"] - record["expected_score"]
+        surprise_index = score_residual / math.sqrt(record["expectation_variance"])
         rows.append(
             {
                 "id": entity,
@@ -1696,6 +1718,11 @@ def _competition_performance(
                 "draws": record["draws"],
                 "losses": record["losses"],
                 "points": round(record["points"], 2),
+                "expected_score": round(record["expected_score"], 4),
+                "score_residual": round(score_residual, 4),
+                "residual_per_match": round(score_residual / record["matches"], 4),
+                "expectation_variance": round(record["expectation_variance"], 6),
+                "surprise_index": round(surprise_index, 4),
                 "score_rate": round(record["points"] / record["matches"], 4),
             }
         )
@@ -1707,6 +1734,7 @@ def _competition_performance(
         "results": len(event_matches),
         "first_result": event_matches[0].date.isoformat(),
         "last_result": event_matches[-1].date.isoformat(),
+        "surprise_method": "For every result, record the selected protocol's expected score immediately before its update. Actual score minus expected score is the signed residual. Divide the cumulative residual by sqrt(sum p(1-p)) to obtain the displayed standardized surprise; draws keep score 0.5, and p(1-p) is the disclosed common Bernoulli-score variance reference.",
         "participants": rows,
     }
 
@@ -1963,7 +1991,7 @@ def _build_tournament_predictor(
             }
             if all(performance_models.values()):
                 competition["performance"] = {
-                    "method": "Initialize every participant from the global rating state after all source results strictly before the first event date, replay only completed event results in deterministic protocol order, and publish final Elo, Glicko-2 rating−2RD, or Gaussian μ−3σ with its change from the event start.",
+                    "method": "Initialize every participant from the global rating state after all source results strictly before the first event date, replay only completed event results in deterministic protocol order, record each selected protocol's pre-update expectation, and publish final Elo, Glicko-2 rating−2RD, or Gaussian μ−3σ with its change from the event start.",
                     "models": performance_models,
                 }
         competitions.append(competition)
