@@ -301,7 +301,7 @@ def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict
 
 
 _FIXTURE_DATE = re.compile(r"^\s*(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})(?:\s+(\d{4}))?\s*$")
-_FIXTURE_SCORE = re.compile(r"\s{2,}(\d+)-(\d+)(?:\s+\([^)]*\))?\s*$")
+_FIXTURE_SCORE = re.compile(r"\s{2,}(\d+)-(\d+)(?=\s|$)")
 
 
 def _parse_football_txt(text: str, competition_id: str, label: str, season: str) -> dict:
@@ -454,22 +454,222 @@ def _parse_cup_schedule(payload: dict, code: str, label: str, cohort: str, sourc
     }
 
 
-def fetch_cup_schedules(token: str | None, cohort: str) -> list[dict]:
-    """Fetch free-tier club and national cup structures from football-data.org."""
-    if not token:
-        return []
+def fetch_cup_schedules(token: str | None, cohort: str, results: list[Match] | None = None) -> list[dict]:
+    """Prefer football-data.org; retain keyless CC0 coverage when no token is configured."""
     competitions = []
-    for code, (label, _kind) in PUBLIC_CUP_COMPETITIONS[cohort].items():
-        url = f"https://api.football-data.org/v4/competitions/{code}/matches"
-        try:
-            body = _get(url, token=token, cache_ttl=21_600)
-            payload = json.loads(body)
-        except (RuntimeError, json.JSONDecodeError):
+    if token:
+        for code, (label, _kind) in PUBLIC_CUP_COMPETITIONS[cohort].items():
+            url = f"https://api.football-data.org/v4/competitions/{code}/matches"
+            try:
+                body = _get(url, token=token, cache_ttl=21_600)
+                payload = json.loads(body)
+            except (RuntimeError, json.JSONDecodeError):
+                continue
+            schedule = _parse_cup_schedule(payload, code, label, cohort, url, body)
+            if schedule:
+                competitions.append(schedule)
+    schedules = competitions or fetch_open_cup_schedules(cohort)
+    return _merge_cup_results(schedules, results or [])
+
+
+def _merge_cup_results(schedules: list[dict], results: list[Match]) -> list[dict]:
+    """Fill a slower fixture snapshot from the already-declared chronological result feed."""
+    lookup = {
+        (match.date.isoformat(), frozenset((match.entity_a, match.entity_b))): match
+        for match in results
+    }
+    for competition in schedules:
+        merged_signatures = []
+        for fixture in competition["fixtures"]:
+            if fixture["status"] == "FINISHED":
+                continue
+            match = lookup.get((fixture["date"], frozenset((fixture["home_id"], fixture["away_id"]))))
+            if not match or match.score_a == 0.5:
+                continue
+            home_won = (match.entity_a == fixture["home_id"] and match.score_a == 1.0) or (
+                match.entity_b == fixture["home_id"] and match.score_a == 0.0
+            )
+            fixture["home_goals"], fixture["away_goals"] = (1, 0) if home_won else (0, 1)
+            fixture["winner_id"] = fixture["home_id"] if home_won else fixture["away_id"]
+            fixture["status"] = "FINISHED"
+            merged_signatures.append(f"{fixture['date']}|{fixture['winner_id']}")
+        if merged_signatures:
+            material = competition["snapshot_sha256"] + "|" + "|".join(sorted(merged_signatures))
+            competition["snapshot_sha256"] = hashlib.sha256(material.encode()).hexdigest()
+            final = next((row for row in competition["knockout_fixtures"] if row["stage"] == "FINAL" and row["winner_id"]), None)
+            if final:
+                competition["availability"] = "Final result merged from the ranking's declared result feed; the completed forecast resolves to the recorded champion."
+    return schedules
+
+
+def _cup_stage(label: str) -> str | None:
+    value = label.casefold().replace("-", " ")
+    if "round of 64" in value or "last 64" in value:
+        return "ROUND_OF_64"
+    if "round of 32" in value or "last 32" in value:
+        return "ROUND_OF_32"
+    if "round of 16" in value or "last 16" in value:
+        return "ROUND_OF_16"
+    if "quarter" in value:
+        return "QUARTER_FINALS"
+    if "semi" in value:
+        return "SEMI_FINALS"
+    if "playoff" in value:
+        return "PLAYOFFS"
+    if value.strip() == "final" or value.rstrip().endswith(", final"):
+        return "FINAL"
+    return None
+
+
+def _open_cup_payload(
+    *,
+    code: str,
+    label: str,
+    season: str,
+    cohort: str,
+    source_url: str,
+    body: bytes,
+    fixtures: list[dict],
+) -> dict | None:
+    if not fixtures:
+        return None
+    teams = {
+        entity: name
+        for row in fixtures
+        for entity, name in ((row["home_id"], row["home_name"]), (row["away_id"], row["away_name"]))
+    }
+    knockout = [row for row in fixtures if row["stage"] in KNOCKOUT_STAGES]
+    final = next((row for row in knockout if row["stage"] == "FINAL" and row["winner_id"]), None)
+    forecast_available = bool(knockout)
+    availability = (
+        "Final result published; the completed forecast resolves to the recorded champion."
+        if final
+        else "A CC0 knockout field is published. Known ties are preserved; later unpublished draws are sampled."
+        if forecast_available
+        else "Waiting for the CC0 source to publish a knockout field; no title probability is fabricated."
+    )
+    dates = [row["date"] for row in fixtures if row["date"]]
+    return {
+        "id": f"{cohort}-{_slug(code)}",
+        "label": label,
+        "season": season,
+        "format": "group + knockout",
+        "cohort": cohort,
+        "source_url": source_url,
+        "license": "CC0 1.0",
+        "snapshot_sha256": hashlib.sha256(body).hexdigest(),
+        "teams": [{"id": entity, "name": name} for entity, name in sorted(teams.items(), key=lambda item: item[1])],
+        "fixtures": fixtures,
+        "knockout_fixtures": knockout,
+        "forecast_available": forecast_available,
+        "availability": availability,
+        "first_fixture": min(dates) if dates else None,
+        "last_fixture": max(dates) if dates else None,
+    }
+
+
+def _parse_open_cup_json(body: bytes, code: str, label: str, season: str) -> dict | None:
+    payload = json.loads(body)
+    fixtures = []
+    placeholder = re.compile(r"^[WLR]\d+$")
+    for row in payload.get("matches", []):
+        home_name = str(row.get("team1") or "").strip()
+        away_name = str(row.get("team2") or "").strip()
+        if not home_name or not away_name or placeholder.match(home_name) or placeholder.match(away_name):
             continue
-        schedule = _parse_cup_schedule(payload, code, label, cohort, url, body)
+        stage = _cup_stage(str(row.get("round", ""))) or "GROUP_STAGE"
+        score = row.get("score") or {}
+        full_time = score.get("ft")
+        deciding = score.get("p") or score.get("et") or full_time
+        home_id = f"national-football:{_slug(home_name)}"
+        away_id = f"national-football:{_slug(away_name)}"
+        winner_id = None
+        if isinstance(deciding, list) and len(deciding) == 2 and deciding[0] != deciding[1]:
+            winner_id = home_id if deciding[0] > deciding[1] else away_id
+        fixtures.append(
+            {
+                "date": str(row.get("date", ""))[:10],
+                "stage": stage,
+                "group": row.get("group"),
+                "status": "FINISHED" if winner_id or (full_time and full_time[0] == full_time[1]) else "SCHEDULED",
+                "home_id": home_id,
+                "home_name": home_name,
+                "away_id": away_id,
+                "away_name": away_name,
+                "home_goals": full_time[0] if full_time else None,
+                "away_goals": full_time[1] if full_time else None,
+                "winner_id": winner_id,
+            }
+        )
+    url = {
+        "WC": "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json",
+        "EC": "https://raw.githubusercontent.com/openfootball/euro.json/master/2024/euro.json",
+    }[code]
+    return _open_cup_payload(code=code, label=label, season=season, cohort="national-football", source_url=url, body=body, fixtures=fixtures)
+
+
+def _parse_open_champions_league(body: bytes, season: str, source_url: str) -> dict | None:
+    parsed = _parse_football_txt(body.decode("utf-8-sig"), "open-cl", "UEFA Champions League", season)
+    fixtures = []
+    for row in parsed["fixtures"]:
+        stage = _cup_stage(row["round"])
+        if not stage:
+            continue
+        home_name = re.sub(r"\s+\([A-Z]{3}\)$", "", row["home_name"]).strip()
+        away_name = re.sub(r"\s+\([A-Z]{3}\)$", "", row["away_name"]).strip()
+        home_id = f"football:name:{_slug(home_name)}"
+        away_id = f"football:name:{_slug(away_name)}"
+        home_goals, away_goals = row["home_goals"], row["away_goals"]
+        winner_id = None
+        if home_goals is not None and home_goals != away_goals:
+            winner_id = home_id if home_goals > away_goals else away_id
+        fixtures.append(
+            {
+                "date": row["date"],
+                "stage": stage,
+                "group": None,
+                "status": "FINISHED" if home_goals is not None else "SCHEDULED",
+                "home_id": home_id,
+                "home_name": home_name,
+                "away_id": away_id,
+                "away_name": away_name,
+                "home_goals": home_goals,
+                "away_goals": away_goals,
+                "winner_id": winner_id,
+            }
+        )
+    return _open_cup_payload(code="CL", label="UEFA Champions League", season=season, cohort="football", source_url=source_url, body=body, fixtures=fixtures)
+
+
+def fetch_open_cup_schedules(cohort: str) -> list[dict]:
+    """Credential-free CC0 cup snapshots used when football-data.org is unavailable."""
+    if cohort == "national-football":
+        rows = []
+        for code, label, season, url in (
+            ("WC", "FIFA World Cup", "2026", "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json"),
+            ("EC", "UEFA European Championship", "2024", "https://raw.githubusercontent.com/openfootball/euro.json/master/2024/euro.json"),
+        ):
+            try:
+                body = _get(url, cache_ttl=21_600)
+                schedule = _parse_open_cup_json(body, code, label, season)
+            except (RuntimeError, json.JSONDecodeError):
+                continue
+            if schedule:
+                rows.append(schedule)
+        return rows
+    today = datetime.now(timezone.utc).date()
+    start_year = today.year if today.month >= 7 else today.year - 1
+    for year in (start_year, start_year - 1):
+        season = _season_label(year)
+        url = f"https://raw.githubusercontent.com/openfootball/champions-league/master/{season}/cl.txt"
+        try:
+            body = _get(url, cache_ttl=21_600)
+            schedule = _parse_open_champions_league(body, season, url)
+        except RuntimeError:
+            continue
         if schedule:
-            competitions.append(schedule)
-    return competitions
+            return [schedule]
+    return []
 
 
 def _merge_schedule_results(matches: list[Match], entities: dict, schedules: list[dict]) -> list[Match]:
@@ -1494,10 +1694,10 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                 predictor_schedules = None
                 if sport == "football":
                     league_schedules = fetch_league_schedules()
-                    predictor_schedules = league_schedules + fetch_cup_schedules(token, sport)
+                    predictor_schedules = league_schedules + fetch_cup_schedules(token, sport, matches)
                     matches = _merge_schedule_results(matches, entities, league_schedules)
                 elif sport == "national-football":
-                    predictor_schedules = fetch_cup_schedules(token, sport)
+                    predictor_schedules = fetch_cup_schedules(token, sport, matches)
                 elif sport == "chess":
                     predictor_schedules = fetch_chess_tournament_schedules()
                 payload = build_sport_payload(

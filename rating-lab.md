@@ -265,7 +265,7 @@ python3 -m unittest discover -s tests -v</code></pre>
     <ul id="rating-source-list">
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
       <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues plus published Champions League, FIFA World Cup, and European Championship stages.</li>
-      <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures used by the competition predictor, CC0 1.0.</li>
+      <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures plus credential-free Champions League, World Cup, and Euro structures, CC0 1.0.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
     </ul>
