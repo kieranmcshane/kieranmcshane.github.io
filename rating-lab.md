@@ -8,9 +8,9 @@ description: Live alternative ratings for tennis, club and national-team footbal
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}">
   <header class="rating-lab-hero">
     <p class="rating-lab-kicker">Live, reproducible sports ratings</p>
-    <h1>Across sports. Three ways to measure strength.</h1>
-    <p class="rating-lab-deck">Explore current Elo, Gaussian TrueSkill, and robust heavy-tail rankings built from real match results. Every prediction is scored before its result is used to update the model.</p>
-    <p class="rating-lab-hero-link"><a href="#predictor">Forecast the 2026–27 competitions ↓</a></p>
+    <h1>Across sports. Four ways to measure strength.</h1>
+    <p class="rating-lab-deck">Explore current Elo, Glicko-2, Gaussian TrueSkill, and robust heavy-tail rankings built from real match results. Every prediction is scored before its result is used to update the model.</p>
+    <p class="rating-lab-hero-link"><a href="#matchup">Estimate A vs B</a> · <a href="#predictor">Forecast competitions ↓</a></p>
     <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
     <p class="rating-lab-generation" id="rating-lab-generation"></p>
   </header>
@@ -37,6 +37,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="model-tabs">
           <button type="button" data-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-model="glicko2" aria-pressed="false">Glicko-2</button>
           <button type="button" data-model="trueskill" aria-pressed="false">Gaussian</button>
           <button type="button" data-model="robust" aria-pressed="false">Robust</button>
         </div>
@@ -81,11 +82,46 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
   </section>
 
+  <section class="rating-lab-matchup" id="matchup" aria-labelledby="matchup-heading">
+    <p class="rating-lab-kicker">Single-event forecast</p>
+    <h2 id="matchup-heading">A vs B probability</h2>
+    <p class="rating-lab-matchup-intro">Compare any two published competitors using the current rating state. Football reports win, draw, and loss; tennis reports either player winning; chess includes the draw and lets you assign White.</p>
+
+    <div class="rating-lab-matchup-toolbar">
+      <label class="rating-lab-field">
+        <span>Competitor A</span>
+        <select id="matchup-a" aria-label="First competitor"></select>
+      </label>
+      <button type="button" class="rating-lab-matchup-swap" id="matchup-swap" aria-label="Swap competitors">⇄<span>Swap</span></button>
+      <label class="rating-lab-field">
+        <span>Competitor B</span>
+        <select id="matchup-b" aria-label="Second competitor"></select>
+      </label>
+      <label class="rating-lab-field">
+        <span id="matchup-venue-label">Venue</span>
+        <select id="matchup-venue" aria-labelledby="matchup-venue-label"></select>
+      </label>
+      <div class="rating-lab-control-group" aria-label="Matchup prediction model">
+        <span class="rating-lab-control-label">Model</span>
+        <div class="rating-lab-segmented" id="matchup-model-tabs">
+          <button type="button" data-matchup-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-matchup-model="glicko2" aria-pressed="false">Glicko-2</button>
+          <button type="button" data-matchup-model="trueskill" aria-pressed="false">Gaussian</button>
+          <button type="button" data-matchup-model="robust" aria-pressed="false">Robust</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rating-lab-matchup-result" id="matchup-result" aria-live="polite">
+      <p>Loading current rating state…</p>
+    </div>
+  </section>
+
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
-    <p class="rating-lab-kicker">Live competition forecast</p>
-    <h2 id="predictor-heading">Tournament predictor</h2>
-    <p class="rating-lab-predictor-intro">Predict leagues, club cups, and national-team tournaments from their actual published state. League tables keep played results and simulate the remaining calendar; knockout forecasts preserve published ties and never invent a title probability before the field exists.</p>
-    <p class="rating-lab-audit-note">Current forecastable structures: five club leagues, public club and national knockout fields, and active elite Lichess round-robin events. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
+    <p class="rating-lab-kicker">Live forecast · completed performance</p>
+    <h2 id="predictor-heading">Competition forecast and performance</h2>
+    <p class="rating-lab-predictor-intro">Scheduled and live competitions receive forward predictions from their actual published state. Where a reliably matched public Polymarket event exists, its snapshot is shown beside—not inside—our model. Once a competition finishes, probabilities are replaced by protocol performance ratings built from the recorded results.</p>
+    <p class="rating-lab-audit-note">Current forward forecasts cover five club leagues, public club and national knockout fields, and active elite Lichess round-robin events. Completed sourced competitions switch to protocol performance ratings. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
 
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">
@@ -96,6 +132,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="predictor-model-tabs">
           <button type="button" data-predictor-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-predictor-model="glicko2" aria-pressed="false">Glicko-2</button>
           <button type="button" data-predictor-model="trueskill" aria-pressed="false">Gaussian</button>
           <button type="button" data-predictor-model="robust" aria-pressed="false">Robust</button>
         </div>
@@ -104,6 +141,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
 
     <div class="rating-lab-predictor-metrics" id="predictor-metrics" aria-label="Competition simulation state"></div>
+    <div class="rating-lab-market" id="predictor-market" aria-live="polite" hidden></div>
 
     <div class="rating-lab-predictor-grid">
       <div class="rating-lab-table-wrap">
@@ -129,7 +167,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
 
     <details class="rating-lab-predictor-method">
-      <summary>How the forecast works</summary>
+      <summary>How this competition view is calculated</summary>
       <p id="predictor-method-copy"></p>
       <p>Every forecast uses the leaderboard’s chronological rating state. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Cups lock every published result and tie. When a later draw is not yet public, survivors are uniformly re-drawn; the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
     </details>
@@ -144,6 +182,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <p>A direct online update around a logistic win-probability curve. Football includes home advantage, club football has seasonal mean reversion, and draws count as half a win.</p>
       </article>
       <article>
+        <h3>Glicko-2</h3>
+        <p>A head-to-head rating with rating deviation and volatility. Calendar-day batches avoid within-day ordering, inactivity increases RD, and rankings use <span class="rating-lab-formula">rating − 2RD</span>.</p>
+      </article>
+      <article>
         <h3>Gaussian TrueSkill</h3>
         <p>Each competitor has a skill mean and uncertainty. Rankings use the conservative score <span class="rating-lab-formula">μ − 3σ</span>, rewarding evidence as well as estimated strength.</p>
       </article>
@@ -152,7 +194,65 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <p>The same uncertain-skill framework uses Student-t performance noise. Its heavy tails expect more upsets, so one surprising result moves the ranking less.</p>
       </article>
     </div>
+    <p class="rating-lab-explainer"><strong>Why this is not labelled TrueSkill 2:</strong> TrueSkill 2’s published Halo improvement uses experience, squads, kills, quitting, and cross-mode skill. These sports sources do not contain equivalent observations. Calling a result-only replay “TrueSkill 2” would not be reproducible. Core TrueSkill does not need those features: given reliable lineups, it can infer player skill from team outcomes alone.</p>
     <p class="rating-lab-explainer">Turning a Gaussian rating into a log-normal or Pareto-looking published scale can change the histogram without changing anyone’s rank. A genuinely different ranking requires a different performance model or update rule.</p>
+  </section>
+
+  <section class="rating-lab-contribution" id="player-contribution" aria-labelledby="contribution-heading">
+    <p class="rating-lab-kicker">Team result → player contribution</p>
+    <h2 id="contribution-heading">A valid model, withheld until the data are valid</h2>
+    <p class="rating-lab-contribution-intro">The rankings above rate each club or national team as one competitor. They do <strong>not</strong> currently claim to measure individual footballers. That is a data boundary, not a limitation of outcome-based modelling.</p>
+
+    <div class="rating-lab-contribution-methods">
+      <article>
+        <p class="rating-lab-method-tag">Win, draw or loss</p>
+        <h3>Lineup TrueSkill</h3>
+        <p>Each player has an uncertain latent skill. A team performance is the minutes-weighted sum of its players’ performances; the observed team result updates every player while accounting for teammates and opponents.</p>
+        <p class="rating-lab-equation">team performance = Σ minutes share × player performance</p>
+      </article>
+      <article>
+        <p class="rating-lab-method-tag">Score differential</p>
+        <h3>RAPM</h3>
+        <p>A regularized regression explains goal difference from who was playing for and against each side. Ridge shrinkage limits unstable estimates when players repeatedly appear in the same combinations.</p>
+        <p class="rating-lab-equation">goal difference = player effects + home effect + error</p>
+      </article>
+    </div>
+
+    <div class="rating-lab-readiness" role="region" aria-labelledby="readiness-heading">
+      <div class="rating-lab-readiness-heading">
+        <div>
+          <p class="rating-lab-method-tag">Publication gate</p>
+          <h3 id="readiness-heading">Player leaderboard status</h3>
+        </div>
+        <span class="rating-lab-status-withheld">Withheld</span>
+      </div>
+      <p>Precise-looking player ratings would be misleading until one declared cohort passes every check below. Failed checks remain visible rather than being filled with assumptions.</p>
+      <div class="rating-lab-table-wrap">
+        <table class="rating-lab-readiness-table">
+          <caption>Minimum data and reproducibility requirements for publishing footballer ratings</caption>
+          <thead><tr><th scope="col">Gate</th><th scope="col">Required standard</th><th scope="col">Current evidence</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Match results</th><td>Complete declared competitions</td><td><span class="is-ready">Ready</span></td></tr>
+            <tr><th scope="row">Stable player IDs</th><td>One identity across clubs and seasons</td><td><span class="is-unverified">Not verified</span></td></tr>
+            <tr><th scope="row">Starting lineups</th><td>At least 95% of eligible matches</td><td><span class="is-unverified">Not verified</span></td></tr>
+            <tr><th scope="row">Substitution minutes</th><td>At least 95% of eligible matches</td><td><span class="is-unverified">Not verified</span></td></tr>
+            <tr><th scope="row">Identification</th><td>Connected lineups plus published collinearity diagnostics</td><td><span class="is-unverified">Not measured</span></td></tr>
+            <tr><th scope="row">Publication rights</th><td>Licence permits public derived ratings and audit metadata</td><td><span class="is-unverified">Source-dependent</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <details class="rating-lab-limitations">
+      <summary>What these player models would—and would not—claim</summary>
+      <ul>
+        <li>Inputs would be outcomes, lineups, and minutes only: no passes, shots, dribbles, expected goals, or tracking data.</li>
+        <li>The estimates would measure net contribution associated with results after controlling for teammates and opponents, not how a player created that contribution.</li>
+        <li>Lineup TrueSkill is the natural sequential rating. RAPM is the complementary retrospective impact estimate; they answer related but different questions.</li>
+        <li>Minutes are needed to avoid assigning a substitute the same exposure as a full-match player. Score differential by on-field stint is preferable for RAPM when legally reproducible.</li>
+        <li>StatsBomb Open Data can support transparent historical experiments for selected seasons, but it is not a complete live feed for the five leagues covered here.</li>
+      </ul>
+    </details>
   </section>
 
   <section class="rating-lab-protocol" id="protocol" aria-labelledby="protocol-heading">
@@ -174,6 +274,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="protocol-model-tabs">
           <button type="button" data-protocol-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-protocol-model="glicko2" aria-pressed="false">Glicko-2</button>
           <button type="button" data-protocol-model="trueskill" aria-pressed="false">Gaussian</button>
           <button type="button" data-protocol-model="robust" aria-pressed="false">Robust</button>
         </div>
@@ -185,9 +286,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <details class="rating-lab-limitations">
       <summary>Known limitations and deliberate simplifications</summary>
       <ul>
-        <li>Ratings are result-only: score margin, tennis surface, line-ups, injuries, time controls, and player age are not model inputs.</li>
+        <li>Current published team ratings are result-only: score margin, tennis surface, lineups, injuries, time controls, and player age are not model inputs. The withheld player-contribution protocol would add lineups and minutes, but no event statistics.</li>
         <li>Draws use an actual score of 0.5. Published log loss and Brier score evaluate expected score, not a separate three-class win/draw/loss forecast.</li>
         <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>
+        <li>Glicko-2 is the exception to within-day ordering: all results on one calendar date form a simultaneous rating period. Seven days define one unit of inactivity inflation.</li>
         <li>The public JSON publishes at most the top 500 eligible entities per model; it is not a complete registry of every entity seen in the source archive.</li>
         <li>Model selection tests a small declared parameter grid. It does not prove that the selected candidate is globally optimal.</li>
         <li>Cup forecasts do not guess unpublished entrants or qualification paths. Once a knockout field exists, published ties are fixed; later unpublished draws use a uniform redraw without seeding, association, or country restrictions.</li>
@@ -205,6 +307,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <h3>Elo probability and update</h3>
         <p class="rating-lab-equation" aria-label="p A equals one divided by one plus ten to the power negative rating A plus home advantage minus rating B divided by 400">p<sub>A</sub> = 1 / (1 + 10<sup>−(R<sub>A</sub> + H − R<sub>B</sub>)/400</sup>)</p>
         <p class="rating-lab-equation" aria-label="new rating A equals rating A plus K times actual score minus predicted probability">R′<sub>A</sub> = R<sub>A</sub> + K(s<sub>A</sub> − p<sub>A</sub>)</p>
+      </article>
+      <article>
+        <h3>Glicko-2 uncertainty</h3>
+        <p>Ratings use <span class="rating-lab-formula">μ=(r−1500)/173.7178</span> and <span class="rating-lab-formula">φ=RD/173.7178</span>. The published iterative volatility update is solved to tolerance <span class="rating-lab-formula">10<sup>−6</sup></span>; rankings use <span class="rating-lab-formula">r−2RD</span>.</p>
       </article>
       <article>
         <h3>Uncertain skill</h3>
@@ -266,8 +372,12 @@ python3 -m unittest discover -s tests -v</code></pre>
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
       <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues plus published Champions League, FIFA World Cup, and European Championship stages.</li>
       <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures plus credential-free Champions League, World Cup, and Euro structures, CC0 1.0.</li>
+      <li><a href="https://github.com/hudl/open-data">Hudl StatsBomb Open Data</a> — lineups and events for selected historical competitions and seasons; a reproducible player-method research source, not the live five-league feed.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
+      <li><a href="https://www.glicko.net/glicko/glicko2.pdf">Glicko-2 specification and worked example</a> — public-domain head-to-head rating protocol.</li>
+      <li><a href="https://www.microsoft.com/en-us/research/publication/trueskill-2-improved-bayesian-skill-rating-system/">Microsoft Research TrueSkill 2 paper</a> — used to delimit features this result-only site does not claim.</li>
+      <li><a href="https://docs.polymarket.com/market-data/overview">Polymarket Gamma API</a> — public outcome-price snapshots used only as an external forecast benchmark.</li>
     </ul>
     <p>Rankings are independent statistical estimates, not official tour, league, federation, or Lichess ratings. They are informational and are not betting advice.</p>
   </section>

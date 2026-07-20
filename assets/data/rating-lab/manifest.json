@@ -1,15 +1,15 @@
 {
-  "schema_version": "1.3.0",
-  "methodology_version": "2026-07-20.3",
-  "code_revision": "93e3573296c8d37eaa37304a5b93a55ac9582343",
-  "generated_at": "2026-07-20T01:58:42+00:00",
+  "schema_version": "1.7.0",
+  "methodology_version": "2026-07-20.8",
+  "code_revision": "f9055029e286de846b05a3a545f59875aac61cec",
+  "generated_at": "2026-07-20T07:22:12+00:00",
   "sports": {
     "tennis": {
       "status": "current",
       "latest_result": "2026-07-20",
       "source": "ManTennisData (ATP-derived)",
       "stale_after_hours": 240,
-      "checked_at": "2026-07-20T01:40:49+00:00",
+      "checked_at": "2026-07-20T07:19:42+00:00",
       "license": "MIT",
       "source_url": "https://github.com/msolonskyi/ManTennisData",
       "snapshot_sha256": null,
@@ -18,6 +18,14 @@
           "k": 32.0,
           "scale": 400.0,
           "home": 0.0
+        },
+        "glicko2": {
+          "tau": 0.3,
+          "home": 0.0,
+          "period_days": 7.0,
+          "initial_rating": 1500.0,
+          "initial_rd": 350.0,
+          "initial_volatility": 0.06
         },
         "trueskill": {
           "robust": false,
@@ -33,41 +41,12 @@
         }
       }
     },
-    "chess": {
-      "status": "current",
-      "latest_result": "2026-07-19",
-      "source": "Lichess official broadcasts",
-      "stale_after_hours": 840,
-      "checked_at": "2026-07-20T01:42:29+00:00",
-      "license": "CC BY-SA 4.0",
-      "source_url": "https://database.lichess.org/#broadcasts",
-      "snapshot_sha256": null,
-      "parameters": {
-        "elo": {
-          "k": 32.0,
-          "scale": 400.0,
-          "home": 0.0
-        },
-        "trueskill": {
-          "robust": false,
-          "beta": 5.0,
-          "draw_margin": 0.75,
-          "advantage": 0.4
-        },
-        "robust": {
-          "robust": true,
-          "beta": 3.5,
-          "draw_margin": 0.75,
-          "advantage": 0.4
-        }
-      }
-    },
     "football": {
       "status": "current",
       "latest_result": "2026-05-24",
       "source": "OpenFootball (development fallback)",
       "stale_after_hours": 48,
-      "checked_at": "2026-07-20T01:58:37+00:00",
+      "checked_at": "2026-07-20T07:20:19+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/openfootball/football.json",
       "snapshot_sha256": null,
@@ -76,6 +55,14 @@
           "k": 24.0,
           "scale": 400.0,
           "home": 65.0
+        },
+        "glicko2": {
+          "tau": 0.3,
+          "home": 65.0,
+          "period_days": 7.0,
+          "initial_rating": 1500.0,
+          "initial_rd": 350.0,
+          "initial_volatility": 0.06
         },
         "trueskill": {
           "robust": false,
@@ -96,7 +83,7 @@
       "latest_result": "2026-07-19",
       "source": "International football results by Mart J\u00fcrisoo",
       "stale_after_hours": 168,
-      "checked_at": "2026-07-20T01:58:42+00:00",
+      "checked_at": "2026-07-20T07:20:26+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/martj42/international_results",
       "snapshot_sha256": "9bc66b3829f3162f03f43d04591544294bfb2ee14305cf4f3b29cfb2641b8e45",
@@ -105,6 +92,14 @@
           "k": 32.0,
           "scale": 400.0,
           "home": 65.0
+        },
+        "glicko2": {
+          "tau": 0.3,
+          "home": 65.0,
+          "period_days": 7.0,
+          "initial_rating": 1500.0,
+          "initial_rd": 350.0,
+          "initial_volatility": 0.06
         },
         "trueskill": {
           "robust": false,
@@ -119,10 +114,48 @@
           "advantage": 1.35
         }
       }
+    },
+    "chess": {
+      "status": "current",
+      "latest_result": "2026-07-19",
+      "source": "Lichess official broadcasts",
+      "stale_after_hours": 840,
+      "checked_at": "2026-07-20T07:22:11+00:00",
+      "license": "CC BY-SA 4.0",
+      "source_url": "https://database.lichess.org/#broadcasts",
+      "snapshot_sha256": null,
+      "parameters": {
+        "elo": {
+          "k": 32.0,
+          "scale": 400.0,
+          "home": 0.0
+        },
+        "glicko2": {
+          "tau": 0.3,
+          "home": 0.0,
+          "period_days": 7.0,
+          "initial_rating": 1500.0,
+          "initial_rd": 350.0,
+          "initial_volatility": 0.06
+        },
+        "trueskill": {
+          "robust": false,
+          "beta": 5.0,
+          "draw_margin": 0.75,
+          "advantage": 0.4
+        },
+        "robust": {
+          "robust": true,
+          "beta": 3.5,
+          "draw_margin": 0.75,
+          "advantage": 0.4
+        }
+      }
     }
   },
   "models": [
     "elo",
+    "glicko2",
     "trueskill",
     "robust"
   ],
@@ -137,7 +170,11 @@
     "validation_days": 365,
     "evaluation_days": 365,
     "quadrature_nodes": 20,
-    "robust_student_t_degrees_of_freedom": 1
+    "robust_student_t_degrees_of_freedom": 1,
+    "glicko2_rating_period": "All results on one UTC calendar date are updated simultaneously.",
+    "glicko2_inactivity_period_days": 7,
+    "glicko2_publication_score": "rating - 2 * rating deviation",
+    "trueskill2_claim": "Not used: the public sports sources do not provide the experience, squad, individual-performance, quitting, or cross-mode observations required by the published TrueSkill 2 model."
   },
   "tournament_predictor": {
     "simulations_per_competition_model": 5000,
@@ -150,7 +187,57 @@
     ],
     "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
     "availability": "Withhold title probabilities until the public source identifies a knockout field.",
+    "completed_competitions": "Replace retrospective title odds with competition-only protocol performance ratings initialized from the strictly pre-event state.",
+    "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
+    "market_quality_fields": [
+      "raw_yes_price_sum",
+      "coverage",
+      "best_bid",
+      "best_ask",
+      "liquidity_usd",
+      "volume_usd",
+      "updated_at"
+    ],
     "refresh": "daily"
+  },
+  "individual_contribution": {
+    "status": "withheld_pending_lineup_source",
+    "scope": "football players",
+    "current_publication_unit": "club or national team",
+    "methods": {
+      "lineup_trueskill": {
+        "input": "match outcome plus the players and minutes on each side",
+        "team_performance": "sum(minutes_share * player_performance)",
+        "uncertainty": "posterior mean and standard deviation per player"
+      },
+      "rapm": {
+        "input": "score differential plus the players and minutes on each side",
+        "estimator": "minutes-weighted ridge regression with chronological validation",
+        "uncertainty": "block bootstrap intervals by match"
+      }
+    },
+    "excluded_inputs": [
+      "passes",
+      "shots",
+      "dribbles",
+      "expected goals",
+      "tracking data"
+    ],
+    "release_gates": {
+      "stable_player_identifiers": "required",
+      "starting_lineup_coverage": ">= 95% of eligible matches",
+      "substitution_minute_coverage": ">= 95% of eligible matches",
+      "lineup_integrity": "11 starters per side and minutes bounded to the match",
+      "identifiability": "connected player-opponent graph and published collinearity diagnostics",
+      "chronology": "no future lineups or outcomes may enter a past update or evaluation prediction",
+      "publication_rights": "source licence must permit derived public ratings and audit metadata"
+    },
+    "source_assessment": {
+      "statsbomb_open_data": "Reproducible historical research archive with selected competitions and seasons; not a complete live five-league feed.",
+      "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
+      "openfootball_fallback": "Results and fixtures only; cannot support player attribution."
+    },
+    "publication_rule": "Do not publish player ranks until every release gate passes for the declared cohort."
   },
   "methodology_url": "/rating-lab/#methodology"
 }

@@ -69,6 +69,7 @@ class RatingState:
     variance: float = 0.0
     matches: int = 0
     last_played: date | None = None
+    volatility: float = 0.0
 
     @property
     def sigma(self) -> float:
@@ -217,6 +218,175 @@ class GaussianSkillModel:
             state.matches += 1
             state.last_played = match.date
         return prediction
+
+
+class Glicko2Model:
+    """Public-domain Glicko-2 with deterministic calendar-day rating periods."""
+
+    name = "glicko2"
+    scale = 173.7178
+
+    def __init__(
+        self,
+        *,
+        tau: float = 0.5,
+        initial_rating: float = 1500.0,
+        initial_rd: float = 350.0,
+        initial_volatility: float = 0.06,
+        home: float = 0.0,
+        period_days: float = 7.0,
+        epsilon: float = 1e-6,
+    ):
+        self.tau = tau
+        self.initial_rating = initial_rating
+        self.initial_rd = initial_rd
+        self.initial_volatility = initial_volatility
+        self.home = home
+        self.period_days = period_days
+        self.epsilon = epsilon
+        self.states: dict[str, RatingState] = {}
+
+    def state(self, entity: str) -> RatingState:
+        return self.states.setdefault(
+            entity,
+            RatingState(
+                self.initial_rating,
+                self.initial_rd**2,
+                volatility=self.initial_volatility,
+            ),
+        )
+
+    @staticmethod
+    def _g(phi: float) -> float:
+        return 1.0 / math.sqrt(1.0 + 3.0 * phi * phi / math.pi**2)
+
+    def _inflate(self, state: RatingState, played: date) -> None:
+        if state.last_played:
+            periods = max((played - state.last_played).days / self.period_days, 1.0)
+            phi = state.sigma / self.scale
+            phi = math.sqrt(phi * phi + state.volatility**2 * periods)
+            state.variance = min((phi * self.scale) ** 2, self.initial_rd**2)
+
+    def age_to(self, played: date) -> None:
+        """Inflate every published RD to a common snapshot date without adding games."""
+        for state in self.states.values():
+            self._inflate(state, played)
+
+    def _expected(self, a: RatingState, b: RatingState, advantage: float = 0.0) -> float:
+        mu_difference = (a.mean + advantage - b.mean) / self.scale
+        opponent_phi = b.sigma / self.scale
+        return 1.0 / (1.0 + math.exp(-self._g(opponent_phi) * mu_difference))
+
+    def predict(self, match: Match) -> float:
+        return min(
+            max(
+                self._expected(
+                    self.state(match.entity_a),
+                    self.state(match.entity_b),
+                    self.home if match.home_advantage else 0.0,
+                ),
+                1e-9,
+            ),
+            1.0 - 1e-9,
+        )
+
+    def predict_outcomes(self, match: Match, draw_rate: float = 0.25) -> tuple[float, float, float]:
+        expected = self.predict(match)
+        draw = min(draw_rate * 4.0 * expected * (1.0 - expected), 2.0 * min(expected, 1.0 - expected))
+        return expected - 0.5 * draw, draw, 1.0 - expected - 0.5 * draw
+
+    def _new_volatility(self, phi: float, volatility: float, variance: float, delta: float) -> float:
+        a = math.log(volatility * volatility)
+
+        def objective(x: float) -> float:
+            exponential = math.exp(x)
+            numerator = exponential * (delta * delta - phi * phi - variance - exponential)
+            denominator = 2.0 * (phi * phi + variance + exponential) ** 2
+            return numerator / denominator - (x - a) / (self.tau * self.tau)
+
+        lower = a
+        if delta * delta > phi * phi + variance:
+            upper = math.log(delta * delta - phi * phi - variance)
+        else:
+            step = 1
+            upper = a - step * self.tau
+            while objective(upper) < 0.0:
+                step += 1
+                upper = a - step * self.tau
+        f_lower, f_upper = objective(lower), objective(upper)
+        while abs(upper - lower) > self.epsilon:
+            candidate = lower + (lower - upper) * f_lower / (f_upper - f_lower)
+            f_candidate = objective(candidate)
+            if f_candidate * f_upper <= 0.0:
+                lower, f_lower = upper, f_upper
+            else:
+                f_lower /= 2.0
+            upper, f_upper = candidate, f_candidate
+        return math.exp(lower / 2.0)
+
+    def update_period(self, matches: Iterable[Match]) -> list[float]:
+        period = list(matches)
+        if not period:
+            return []
+        played = period[0].date
+        if any(match.date != played for match in period):
+            raise ValueError("A Glicko-2 rating period must contain one calendar date")
+        participants = {entity for match in period for entity in (match.entity_a, match.entity_b)}
+        for entity in participants:
+            self._inflate(self.state(entity), played)
+        predictions = [self.predict(match) for match in period]
+        snapshots = {
+            entity: (
+                self.state(entity).mean,
+                self.state(entity).sigma,
+                self.state(entity).volatility,
+            )
+            for entity in participants
+        }
+        results: dict[str, list[tuple[str, float, float]]] = {entity: [] for entity in participants}
+        for match in period:
+            advantage = self.home if match.home_advantage else 0.0
+            results[match.entity_a].append((match.entity_b, match.score_a, advantage))
+            results[match.entity_b].append((match.entity_a, 1.0 - match.score_a, -advantage))
+        updates = {}
+        for entity, games in results.items():
+            rating, rd, volatility = snapshots[entity]
+            mu, phi = (rating - 1500.0) / self.scale, rd / self.scale
+            terms = []
+            for opponent, score, advantage in games:
+                opponent_rating, opponent_rd, _ = snapshots[opponent]
+                opponent_mu = (opponent_rating - 1500.0) / self.scale
+                opponent_phi = opponent_rd / self.scale
+                g_value = self._g(opponent_phi)
+                expected = 1.0 / (
+                    1.0 + math.exp(-g_value * (mu + advantage / self.scale - opponent_mu))
+                )
+                terms.append((g_value, expected, score))
+            variance = 1.0 / sum(g_value * g_value * expected * (1.0 - expected) for g_value, expected, _ in terms)
+            delta = variance * sum(g_value * (score - expected) for g_value, expected, score in terms)
+            new_volatility = self._new_volatility(phi, volatility, variance, delta)
+            phi_star = math.sqrt(phi * phi + new_volatility * new_volatility)
+            new_phi = 1.0 / math.sqrt(1.0 / (phi_star * phi_star) + 1.0 / variance)
+            new_mu = mu + new_phi * new_phi * sum(
+                g_value * (score - expected) for g_value, expected, score in terms
+            )
+            updates[entity] = (
+                1500.0 + self.scale * new_mu,
+                (self.scale * new_phi) ** 2,
+                new_volatility,
+                len(games),
+            )
+        for entity, (rating, variance, volatility, games) in updates.items():
+            state = self.state(entity)
+            state.mean = rating
+            state.variance = variance
+            state.volatility = volatility
+            state.matches += games
+            state.last_played = played
+        return predictions
+
+    def update(self, match: Match) -> float:
+        return self.update_period([match])[0]
 
 
 def replay(
