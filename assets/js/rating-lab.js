@@ -13,6 +13,8 @@
     sort: 'rank',
     direction: 1,
     selected: null,
+    pinned: [],
+    expanded: false,
     predictorCompetition: null,
     predictorModel: 'elo',
     predictorTeam: null,
@@ -22,14 +24,18 @@
 
   var elements = {
     freshness: document.getElementById('rating-lab-freshness'),
+    generation: document.getElementById('rating-lab-generation'),
     error: document.getElementById('rating-lab-error'),
     sportTabs: document.getElementById('sport-tabs'),
     modelTabs: document.getElementById('model-tabs'),
     competition: document.getElementById('competition-filter'),
     search: document.getElementById('rating-search'),
     metrics: document.getElementById('rating-metrics'),
+    movers: document.getElementById('rating-movers'),
+    context: document.getElementById('leaderboard-context'),
     body: document.getElementById('ranking-body'),
     empty: document.getElementById('ranking-empty'),
+    more: document.getElementById('ranking-more'),
     caption: document.getElementById('ranking-caption'),
     detail: document.getElementById('rating-detail'),
     eligibility: document.getElementById('rating-eligibility'),
@@ -76,13 +82,21 @@
 
   function updateFreshness() {
     var statuses = state.manifest.sports;
-    var stale = Object.keys(statuses).filter(function (sport) {
+    var labels = { tennis: 'Tennis', football: 'Clubs', 'national-football': 'Nations', chess: 'Chess' };
+    var stale = sports.filter(function (sport) {
       return statuses[sport].status !== 'current' || isStale(statuses[sport]);
     });
     elements.freshness.classList.toggle('is-stale', stale.length > 0);
-    elements.freshness.textContent = stale.length
-      ? 'Some sources are delayed; the last valid rankings remain available.'
-      : 'Sources current · latest result ' + formatDate(statuses[state.sport].latest_result);
+    elements.freshness.innerHTML = sports.map(function (sport) {
+      var delayed = statuses[sport].status !== 'current' || isStale(statuses[sport]);
+      return '<span class="rating-lab-freshness-chip' + (delayed ? ' is-stale' : '') + '"><i aria-hidden="true"></i>' +
+        escapeHtml(labels[sport]) + ' · ' + escapeHtml(formatDate(statuses[sport].latest_result)) + '</span>';
+    }).join('');
+    var total = sports.reduce(function (sum, sport) {
+      return sum + state.datasets[sport].models.elo.rankings.length;
+    }, 0);
+    elements.generation.textContent = number(total, 0) + ' eligible competitors · generated ' +
+      formatDate(state.manifest.generated_at) + (stale.length ? ' · delayed sources retain their last valid snapshot' : '');
   }
 
   function setPressed(container, key, value) {
@@ -126,28 +140,79 @@
   }
 
   function renderMetrics() {
-    var model = state.datasets[state.sport].models[state.model];
-    var metric = model.metrics;
-    elements.metrics.innerHTML = [
-      ['Brier score', number(metric.brier, 4), 'Lower is better'],
-      ['Log loss', number(metric.log_loss, 4), 'Lower is better'],
-      ['Calibration gap', number(metric.calibration, 4), number(metric.predictions, 0) + ' held-out predictions']
-    ].map(function (item) {
-      return '<div class="rating-lab-metric"><span>' + item[0] + '</span><strong>' + item[1] + '</strong><small>' + item[2] + '</small></div>';
-    }).join('');
+    var models = state.datasets[state.sport].models;
+    var modelKeys = ['elo', 'trueskill', 'robust'];
+    var selected = models[state.model].metrics;
+    var definitions = [
+      ['Brier score', 'brier', 4],
+      ['Log loss', 'log_loss', 4],
+      ['Calibration gap', 'calibration', 4]
+    ];
+    elements.metrics.innerHTML = definitions.map(function (definition) {
+      var values = modelKeys.map(function (key) { return models[key].metrics[definition[1]]; });
+      var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
+      var bars = modelKeys.map(function (key, index) {
+        var relative = max === min ? 100 : 26 + (values[index] - min) / (max - min) * 74;
+        return '<span class="rating-lab-metric-bar' + (key === state.model ? ' is-active' : '') +
+          '" style="--metric-height:' + relative.toFixed(1) + '%" title="' + escapeHtml(models[key].label) +
+          ': ' + number(values[index], definition[2]) + '"></span>';
+      }).join('');
+      return '<div class="rating-lab-metric"><span>' + definition[0] + '</span><div class="rating-lab-metric-value"><strong>' +
+        number(selected[definition[1]], definition[2]) + '</strong><span class="rating-lab-metric-bars" aria-label="' +
+        escapeHtml(definition[0]) + ' comparison: Elo ' + number(values[0], definition[2]) + ', Gaussian ' +
+        number(values[1], definition[2]) + ', Robust ' + number(values[2], definition[2]) + '">' + bars +
+        '</span></div><small>Lower is better · Elo / Gaussian / Robust</small></div>';
+    }).concat(['<div class="rating-lab-metric"><span>Held-out predictions</span><div class="rating-lab-metric-value"><strong>' +
+      number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']).join('');
+    elements.context.textContent = models[state.model].label + ' · ' +
+      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' eligible competitors';
+  }
+
+  function renderMovers() {
+    var rows = currentRows().filter(function (row) { return Number.isFinite(row.change30); });
+    var risers = rows.slice().sort(function (a, b) { return b.change30 - a.change30; }).slice(0, 3);
+    var fallers = rows.slice().sort(function (a, b) { return a.change30 - b.change30; }).slice(0, 3);
+    function group(label, items, positive) {
+      return '<div><p>' + label + '</p><div>' + items.map(function (row) {
+        var value = (positive && row.change30 > 0 ? '+' : '') + number(row.change30, 1);
+        return '<button type="button" data-select="' + escapeHtml(row.id) + '"><span>' + escapeHtml(row.name) +
+          '</span><strong class="' + (positive ? 'is-positive' : 'is-negative') + '">' + value + '</strong></button>';
+      }).join('') + '</div></div>';
+    }
+    elements.movers.innerHTML = group('▲ Biggest risers · 30 days', risers, true) +
+      group('▼ Biggest fallers · 30 days', fallers, false);
+  }
+
+  function miniSparkline(points, label) {
+    if (!points || points.length < 2) return '<span class="rating-lab-mini-empty">—</span>';
+    var recent = points.slice(-14), width = 94, height = 28, pad = 2;
+    var values = recent.map(function (point) { return point[1]; });
+    var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
+    if (max === min) max += 1;
+    var coordinates = recent.map(function (point, index) {
+      return (pad + index / (recent.length - 1) * (width - 2 * pad)).toFixed(1) + ',' +
+        (height - pad - (point[1] - min) / (max - min) * (height - 2 * pad)).toFixed(1);
+    }).join(' ');
+    return '<svg class="rating-lab-mini-chart" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' +
+      escapeHtml(label) + ' recent range ' + number(min, 1) + ' to ' + number(max, 1) + '"><polyline points="' +
+      coordinates + '"></polyline><title>Last ' + recent.length + ' updates · ' + number(min, 1) + ' to ' + number(max, 1) + '</title></svg>';
   }
 
   function renderTable() {
     var rows = currentRows();
+    var displayed = state.expanded ? rows : rows.slice(0, 50);
     var model = state.datasets[state.sport].models[state.model];
     elements.caption.textContent = model.label + ' · ' + rows.length + ' eligible competitors';
     elements.empty.hidden = rows.length > 0;
-    elements.body.innerHTML = rows.map(function (row) {
+    elements.more.hidden = rows.length <= displayed.length;
+    elements.more.textContent = 'Show all ' + number(rows.length, 0) + ' competitors';
+    elements.body.innerHTML = displayed.map(function (row) {
       var deltaClass = row.change30 > 0 ? 'is-positive' : row.change30 < 0 ? 'is-negative' : '';
       var delta = row.change30 > 0 ? '+' + number(row.change30, 1) : number(row.change30, 1);
       return '<tr data-id="' + escapeHtml(row.id) + '"' + (row.id === state.selected ? ' class="is-selected"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td>' +
         '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '"><span>' + escapeHtml(row.name) + '</span><small>' + escapeHtml(row.competition || row.country) + '</small></button></th>' +
+        '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
         '<td><strong>' + number(row.score, 1) + '</strong></td>' +
         '<td class="rating-lab-optional">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1)) + '</td>' +
         '<td class="' + deltaClass + '">' + delta + '</td>' +
@@ -156,35 +221,112 @@
     }).join('');
   }
 
-  function sparkline(points, label) {
-    if (!points || points.length < 2) return '<p class="rating-lab-detail-placeholder">Not enough history to chart yet.</p>';
-    var width = 360, height = 132, padding = 12;
-    var values = points.map(function (point) { return point[1]; });
+  function historyChart(series, label) {
+    var usable = series.filter(function (item) { return item.points && item.points.length > 1; });
+    if (!usable.length) return '<p class="rating-lab-detail-placeholder">Not enough history to chart yet.</p>';
+    var width = 380, height = 178, left = 43, right = 8, top = 10, bottom = 28;
+    var all = usable.reduce(function (items, item) { return items.concat(item.points); }, []);
+    var values = all.map(function (point) { return point[1]; });
     var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
-    if (max === min) max += 1;
-    var coordinates = points.map(function (point, index) {
-      var x = padding + index / (points.length - 1) * (width - 2 * padding);
-      var y = height - padding - (point[1] - min) / (max - min) * (height - 2 * padding);
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    }).join(' ');
-    return '<svg class="rating-lab-chart" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Recent ' + escapeHtml(label) + ' rating history from ' + escapeHtml(formatDate(points[0][0])) + ' to ' + escapeHtml(formatDate(points[points.length - 1][0])) + '">' +
-      '<line x1="' + padding + '" y1="' + (height - padding) + '" x2="' + (width - padding) + '" y2="' + (height - padding) + '"></line>' +
-      '<polyline points="' + coordinates + '"></polyline>' +
-      '<circle cx="' + coordinates.split(' ').pop().split(',')[0] + '" cy="' + coordinates.split(' ').pop().split(',')[1] + '" r="4"></circle>' +
-      '</svg><div class="rating-lab-chart-scale"><span>' + number(min, 1) + '</span><span>' + number(max, 1) + '</span></div>';
+    var range = max - min || 1;
+    min -= range * 0.06;
+    max += range * 0.06;
+    var firstDate = Math.min.apply(null, all.map(function (point) { return new Date(point[0]).getTime(); }));
+    var lastDate = Math.max.apply(null, all.map(function (point) { return new Date(point[0]).getTime(); }));
+    if (lastDate === firstDate) lastDate += 86400000;
+    function x(date) { return left + (new Date(date).getTime() - firstDate) / (lastDate - firstDate) * (width - left - right); }
+    function y(value) { return top + (max - value) / (max - min) * (height - top - bottom); }
+    var grid = [0, 1, 2, 3].map(function (index) {
+      var value = min + (max - min) * index / 3;
+      var yPos = y(value);
+      return '<line class="rating-lab-gridline" x1="' + left + '" y1="' + yPos.toFixed(1) + '" x2="' +
+        (width - right) + '" y2="' + yPos.toFixed(1) + '"></line><text x="' + (left - 6) + '" y="' +
+        (yPos + 3).toFixed(1) + '" text-anchor="end">' + number(value, 0) + '</text>';
+    }).join('');
+    var paths = usable.map(function (item, seriesIndex) {
+      var coordinates = item.points.map(function (point) { return x(point[0]).toFixed(1) + ',' + y(point[1]).toFixed(1); });
+      var points = item.points.map(function (point) {
+        return '<circle class="rating-lab-chart-hit" cx="' + x(point[0]).toFixed(1) + '" cy="' + y(point[1]).toFixed(1) +
+          '" r="7" data-chart-point data-series="' + escapeHtml(item.name) + '" data-date="' + escapeHtml(point[0]) +
+          '" data-value="' + point[1] + '"><title>' + escapeHtml(item.name) + ' · ' + escapeHtml(formatDate(point[0])) +
+          ' · ' + number(point[1], 1) + '</title></circle>';
+      }).join('');
+      return '<polyline class="rating-lab-series-' + (seriesIndex + 1) + '" points="' + coordinates.join(' ') +
+        '"></polyline>' + points;
+    }).join('');
+    var middleDate = new Date((firstDate + lastDate) / 2).toISOString().slice(0, 10);
+    var dateLabels = [new Date(firstDate).toISOString().slice(0, 10), middleDate, new Date(lastDate).toISOString().slice(0, 10)];
+    var axis = dateLabels.map(function (date, index) {
+      return '<text x="' + (left + index * (width - left - right) / 2).toFixed(1) + '" y="' + (height - 6) +
+        '" text-anchor="' + (index === 0 ? 'start' : index === 2 ? 'end' : 'middle') + '">' +
+        escapeHtml(new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' }).format(new Date(date + 'T12:00:00Z'))) + '</text>';
+    }).join('');
+    var legend = usable.length > 1 ? '<div class="rating-lab-chart-legend">' + usable.map(function (item, index) {
+      return '<span><i class="rating-lab-series-' + (index + 1) + '"></i>' + escapeHtml(item.name) + '</span>';
+    }).join('') + '</div>' : '';
+    return '<div class="rating-lab-chart-wrap"><svg class="rating-lab-chart" viewBox="0 0 ' + width + ' ' + height +
+      '" role="img" aria-label="' + escapeHtml(label) + ' with labelled date and rating axes">' + grid + paths + axis +
+      '<line class="rating-lab-crosshair" x1="0" y1="' + top + '" x2="0" y2="' + (height - bottom) + '"></line></svg>' +
+      '<p class="rating-lab-chart-readout" aria-live="polite">Hover a point for its exact date and rating.</p>' + legend + '</div>';
+  }
+
+  function distribution(row, rows) {
+    var values = rows.map(function (item) { return item.score; });
+    var min = Math.min.apply(null, values), max = Math.max.apply(null, values), bins = 12;
+    var width = (max - min || 1) / bins;
+    var counts = Array(bins).fill(0);
+    values.forEach(function (value) { counts[Math.min(bins - 1, Math.floor((value - min) / width))] += 1; });
+    var tallest = Math.max.apply(null, counts) || 1;
+    var selectedBin = Math.min(bins - 1, Math.floor((row.score - min) / width));
+    var bars = counts.map(function (count, index) {
+      var start = min + index * width, end = start + width;
+      return '<button type="button" class="rating-lab-histogram-bar' + (index === selectedBin ? ' is-selected' : '') +
+        '" style="--histogram-height:' + Math.max(4, count / tallest * 100).toFixed(1) + '%" data-histogram="' +
+        number(start, 0) + '–' + number(end, 0) + ' · ' + count + ' competitors" aria-label="Ratings ' +
+        number(start, 0) + ' to ' + number(end, 0) + ': ' + count + ' competitors"></button>';
+    }).join('');
+    return '<div class="rating-lab-distribution"><p class="rating-lab-inspector-label">Rating distribution</p><div class="rating-lab-histogram">' +
+      bars + '</div><div class="rating-lab-histogram-axis"><span>' + number(min, 0) + '</span><span>' + number(max, 0) +
+      '</span></div><p class="rating-lab-histogram-readout">Selected: ' + number(row.score, 1) + '</p></div>';
   }
 
   function renderDetail() {
-    var rows = state.datasets[state.sport].models[state.model].rankings;
+    var dataset = state.datasets[state.sport];
+    var rows = dataset.models[state.model].rankings;
     var row = rows.find(function (candidate) { return candidate.id === state.selected; });
     if (!row) {
-      elements.detail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a row to inspect its recent rating history.</p>';
+      elements.detail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a row to inspect history, compare models, and pin competitors.</p>';
       return;
     }
-    elements.detail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank + '</p><h3>' + escapeHtml(row.name) + '</h3></div><strong>' + number(row.score, 1) + '</strong></div>' +
-      sparkline(row.history, row.name) +
+    var modelKeys = ['elo', 'trueskill', 'robust'];
+    var crossModel = modelKeys.map(function (key) {
+      var modelRow = dataset.models[key].rankings.find(function (candidate) { return candidate.id === row.id; });
+      return '<tr><th scope="row">' + escapeHtml(dataset.models[key].label) + '</th><td>' +
+        (modelRow ? '#' + modelRow.rank : '—') + '</td><td>' + (modelRow ? number(modelRow.score, 1) : '—') +
+        '</td><td>' + (modelRow && modelRow.sigma !== null ? '±' + number(modelRow.sigma, 1) : '—') + '</td></tr>';
+    }).join('');
+    var isPinned = state.pinned.indexOf(row.id) !== -1;
+    var pinnedRows = state.pinned.map(function (id) {
+      return rows.find(function (candidate) { return candidate.id === id; });
+    }).filter(Boolean);
+    var compare = '';
+    if (pinnedRows.length) {
+      compare = '<div class="rating-lab-compare"><div class="rating-lab-compare-heading"><p class="rating-lab-inspector-label">Pinned comparison</p><div>' +
+        pinnedRows.map(function (item) { return '<button type="button" data-unpin="' + escapeHtml(item.id) + '">' +
+          escapeHtml(item.name) + ' ×</button>'; }).join('') + '</div></div>' +
+        (pinnedRows.length === 2 ? historyChart(pinnedRows.map(function (item) { return { name: item.name, points: item.history }; }),
+          pinnedRows[0].name + ' and ' + pinnedRows[1].name + ' rating comparison') :
+          '<p class="rating-lab-detail-placeholder">Pin one more competitor to overlay both histories.</p>') + '</div>';
+    }
+    elements.detail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank +
+      '</p><h3>' + escapeHtml(row.name) + '</h3></div><strong>' + number(row.score, 1) + '</strong></div>' +
+      '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
+      (isPinned ? 'true' : 'false') + '">' + (isPinned ? 'Pinned for comparison' : 'Pin for comparison') + '</button>' +
+      historyChart([{ name: row.name, points: row.history }], row.name + ' rating history') +
+      '<p class="rating-lab-inspector-label">Across all three models</p><table class="rating-lab-model-compare"><thead><tr><th>Model</th><th>Rank</th><th>Score</th><th>±σ</th></tr></thead><tbody>' +
+      crossModel + '</tbody></table>' + distribution(row, rows) +
       '<dl><div><dt>Last played</dt><dd>' + formatDate(row.last_played) + '</dd></div><div><dt>Recent matches</dt><dd>' + row.recent_matches + '</dd></div><div><dt>All matches</dt><dd>' + row.matches + '</dd></div>' +
-      (row.sigma === null ? '' : '<div><dt>Uncertainty σ</dt><dd>' + number(row.sigma, 2) + '</dd></div>') + '</dl>';
+      (row.sigma === null ? '' : '<div><dt>Uncertainty σ</dt><dd>' + number(row.sigma, 2) + '</dd></div>') + '</dl>' + compare;
   }
 
   function parameterText(parameters) {
@@ -294,6 +436,7 @@
   function render() {
     updateFreshness();
     renderMetrics();
+    renderMovers();
     renderTable();
     renderDetail();
     renderAudit();
@@ -305,6 +448,8 @@
     if (!button || button.dataset.sport === state.sport) return;
     state.sport = button.dataset.sport;
     state.selected = null;
+    state.pinned = [];
+    state.expanded = false;
     setPressed(elements.sportTabs, 'sport', state.sport);
     populateCompetitions();
     render();
@@ -314,18 +459,30 @@
     var button = event.target.closest('[data-model]');
     if (!button || button.dataset.model === state.model) return;
     state.model = button.dataset.model;
+    state.expanded = false;
     setPressed(elements.modelTabs, 'model', state.model);
     render();
   });
 
   elements.competition.addEventListener('change', function () {
     state.competition = elements.competition.value;
+    state.expanded = false;
+    renderMetrics();
+    renderMovers();
     renderTable();
     renderDetail();
   });
 
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
+    state.expanded = false;
+    renderMetrics();
+    renderMovers();
+    renderTable();
+  });
+
+  elements.more.addEventListener('click', function () {
+    state.expanded = true;
     renderTable();
   });
 
@@ -335,6 +492,51 @@
     state.selected = button.dataset.select;
     renderTable();
     renderDetail();
+  });
+
+  elements.movers.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-select]');
+    if (!button) return;
+    state.selected = button.dataset.select;
+    renderTable();
+    renderDetail();
+  });
+
+  elements.detail.addEventListener('click', function (event) {
+    var pin = event.target.closest('[data-pin]');
+    var unpin = event.target.closest('[data-unpin]');
+    if (pin) {
+      var index = state.pinned.indexOf(pin.dataset.pin);
+      if (index === -1) {
+        if (state.pinned.length === 2) state.pinned.shift();
+        state.pinned.push(pin.dataset.pin);
+      } else state.pinned.splice(index, 1);
+      renderDetail();
+    } else if (unpin) {
+      state.pinned = state.pinned.filter(function (id) { return id !== unpin.dataset.unpin; });
+      renderDetail();
+    }
+  });
+
+  elements.detail.addEventListener('mouseover', function (event) {
+    var point = event.target.closest('[data-chart-point]');
+    var histogram = event.target.closest('[data-histogram]');
+    if (point) {
+      var chartWrap = point.closest('.rating-lab-chart-wrap');
+      var crosshair = chartWrap.querySelector('.rating-lab-crosshair');
+      var x = point.getAttribute('cx');
+      crosshair.setAttribute('x1', x);
+      crosshair.setAttribute('x2', x);
+      crosshair.classList.add('is-visible');
+      chartWrap.querySelector('.rating-lab-chart-readout').textContent = point.dataset.series + ' · ' +
+        formatDate(point.dataset.date) + ' · ' + number(Number(point.dataset.value), 1);
+    }
+    if (histogram) histogram.closest('.rating-lab-distribution').querySelector('.rating-lab-histogram-readout').textContent = histogram.dataset.histogram;
+  });
+
+  elements.detail.addEventListener('focusin', function (event) {
+    var histogram = event.target.closest('[data-histogram]');
+    if (histogram) histogram.closest('.rating-lab-distribution').querySelector('.rating-lab-histogram-readout').textContent = histogram.dataset.histogram;
   });
 
   elements.predictorCompetition.addEventListener('change', function () {

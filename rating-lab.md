@@ -11,14 +11,18 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <h1>Across sports. Three ways to measure strength.</h1>
     <p class="rating-lab-deck">Explore current Elo, Gaussian TrueSkill, and robust heavy-tail rankings built from real match results. Every prediction is scored before its result is used to update the model.</p>
     <p class="rating-lab-hero-link"><a href="#predictor">Forecast the 2026–27 competitions ↓</a></p>
-    <div class="rating-lab-freshness" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
+    <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
+    <p class="rating-lab-generation" id="rating-lab-generation"></p>
   </header>
 
   <noscript><p class="rating-lab-notice">This interactive leaderboard requires JavaScript.</p></noscript>
   <div id="rating-lab-error" class="rating-lab-notice rating-lab-notice-error" role="alert" hidden></div>
 
   <section class="rating-lab-explorer" aria-labelledby="leaderboard-heading">
-    <h2 id="leaderboard-heading">Leaderboard</h2>
+    <div class="rating-lab-section-heading">
+      <h2 id="leaderboard-heading">Leaderboard</h2>
+      <p id="leaderboard-context">Current ratings and one-step-ahead evidence</p>
+    </div>
     <div class="rating-lab-toolbar">
       <div class="rating-lab-control-group" aria-label="Sport">
         <span class="rating-lab-control-label">Sport</span>
@@ -48,6 +52,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
 
     <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
+    <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
 
     <div class="rating-lab-grid">
       <div class="rating-lab-table-wrap">
@@ -57,6 +62,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
             <tr>
               <th scope="col"><button type="button" data-sort="rank">Rank</button></th>
               <th scope="col"><button type="button" data-sort="name">Player or team</button></th>
+              <th scope="col" class="rating-lab-trend-column">Trend</th>
               <th scope="col"><button type="button" data-sort="score">Rating</button></th>
               <th scope="col" class="rating-lab-optional"><button type="button" data-sort="sigma">Uncertainty</button></th>
               <th scope="col"><button type="button" data-sort="change30">30-day change</button></th>
@@ -66,10 +72,11 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <tbody id="ranking-body"></tbody>
         </table>
         <p id="ranking-empty" class="rating-lab-empty" hidden>No eligible competitors match these filters.</p>
+        <button type="button" id="ranking-more" class="rating-lab-more" hidden>Show all competitors</button>
       </div>
 
       <aside class="rating-lab-detail" id="rating-detail" aria-live="polite">
-        <p class="rating-lab-detail-placeholder">Choose a row to inspect its recent rating history.</p>
+        <p class="rating-lab-detail-placeholder">Choose a row to inspect history, compare models, and pin competitors.</p>
       </aside>
     </div>
   </section>
