@@ -250,7 +250,36 @@ class PipelineTests(unittest.TestCase):
         alpha = next(row for row in result["participants"] if row["name"] == "Alpha")
         self.assertEqual((alpha["wins"], alpha["draws"], alpha["losses"]), (1, 1, 0))
         self.assertGreater(alpha["change"], 0)
+        self.assertGreater(alpha["score_residual"], 0)
+        self.assertGreater(alpha["surprise_index"], 0)
+        self.assertAlmostEqual(sum(row["expected_score"] for row in result["participants"]), 2.0, places=3)
+        self.assertAlmostEqual(sum(row["score_residual"] for row in result["participants"]), 0.0, places=3)
         self.assertAlmostEqual(sum(row["change"] for row in result["participants"]), 0, places=1)
+        self.assertIn("immediately before", result["surprise_method"])
+
+        protocol_models = {
+            "glicko2": Glicko2Model(home=65),
+            "trueskill": GaussianSkillModel(advantage=1.35, draw_margin=1.35),
+            "robust": GaussianSkillModel(robust=True, advantage=1.35, draw_margin=1.35),
+        }
+        for model_name, reference_model in protocol_models.items():
+            with self.subTest(model=model_name):
+                protocol_result = _competition_performance(
+                    schedule, reference_model, model_name, entities, prior
+                )
+                self.assertAlmostEqual(
+                    sum(row["expected_score"] for row in protocol_result["participants"]),
+                    2.0,
+                    places=3,
+                )
+                self.assertAlmostEqual(
+                    sum(row["score_residual"] for row in protocol_result["participants"]),
+                    0.0,
+                    places=3,
+                )
+                self.assertTrue(
+                    all(math.isfinite(row["surprise_index"]) for row in protocol_result["participants"])
+                )
 
     def test_completed_competition_normalizes_schedule_aliases(self):
         schedule = {

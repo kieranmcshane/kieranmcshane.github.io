@@ -76,6 +76,7 @@
     predictorState: document.getElementById('predictor-state'),
     predictorMetrics: document.getElementById('predictor-metrics'),
     predictorMarket: document.getElementById('predictor-market'),
+    predictorPerformanceChart: document.getElementById('predictor-performance-chart'),
     predictorCaption: document.getElementById('predictor-caption'),
     predictorBody: document.getElementById('predictor-body'),
     predictorDetail: document.getElementById('predictor-detail'),
@@ -1053,6 +1054,7 @@
       return;
     }
     var changeClass = team.change > 0 ? 'is-positive' : team.change < 0 ? 'is-negative' : '';
+    var surpriseClass = team.score_residual > 0 ? 'is-positive' : team.score_residual < 0 ? 'is-negative' : '';
     var change = (team.change > 0 ? '+' : '') + number(team.change, 2);
     var isGlicko = model.rating_type === 'glicko2_conservative_r_minus_2rd';
     var startBelief = model.rating_type === 'elo' ? number(team.start_rating, 2) : isGlicko ?
@@ -1065,10 +1067,60 @@
       team.rank + '</p><h3>' + escapeHtml(team.name) + '</h3></div><strong>' + number(team.performance_rating, 2) +
       '</strong></div><dl><div><dt>Event record</dt><dd>' + team.wins + '–' + team.draws + '–' + team.losses +
       '</dd></div><div><dt>Result score</dt><dd>' + number(team.points, 2) + ' / ' + number(team.matches, 0) +
+      '</dd></div><div><dt>Protocol expectation</dt><dd>' + number(team.expected_score, 2) + ' / ' + number(team.matches, 0) +
+      '</dd></div><div><dt>Score residual</dt><dd class="' + surpriseClass + '">' +
+      (team.score_residual > 0 ? '+' : '') + number(team.score_residual, 2) +
+      '</dd></div><div><dt>Standardized surprise</dt><dd class="' + surpriseClass + '">' +
+      (team.surprise_index > 0 ? '+' : '') + number(team.surprise_index, 2) + ' σ' +
       '</dd></div><div><dt>Starting belief</dt><dd>' + escapeHtml(startBelief) + '</dd></div><div><dt>Final belief</dt><dd>' +
       escapeHtml(endBelief) + '</dd></div><div><dt>Published start</dt><dd>' + number(team.start_score, 2) +
       '</dd></div><div><dt>Performance change</dt><dd class="' + changeClass + '">' + change +
       '</dd></div></dl><p class="rating-lab-performance-note">The final published score is Elo, Glicko-2 rating−2RD, or Gaussian μ−3σ after replaying only this competition from the strictly pre-event state. It is not the official competition table or a conventional bookmaker rating.</p>';
+  }
+
+  function renderPerformanceChart(rows, model, competition, sport) {
+    var rankedRows = rows.filter(function (team) {
+      return Number.isFinite(team.surprise_index) && Number.isFinite(team.expected_score);
+    }).slice().sort(function (a, b) {
+      return b.surprise_index - a.surprise_index || a.name.localeCompare(b.name);
+    });
+    if (!rankedRows.length) {
+      elements.predictorPerformanceChart.hidden = true;
+      elements.predictorPerformanceChart.innerHTML = '';
+      return;
+    }
+    var chartRows = rankedRows.filter(function (team) { return team.surprise_index >= 0; }).slice(0, 6)
+      .concat(rankedRows.filter(function (team) { return team.surprise_index < 0; }).slice(-6))
+      .sort(function (a, b) { return b.surprise_index - a.surprise_index || a.name.localeCompare(b.name); });
+    var maxAbs = Math.max(1, Math.max.apply(null, chartRows.map(function (team) {
+      return Math.abs(team.surprise_index);
+    })));
+    var modelLabel = state.datasets[sport].models[state.predictorModel].label;
+    elements.predictorPerformanceChart.hidden = false;
+    elements.predictorPerformanceChart.innerHTML =
+      '<div class="rating-lab-performance-heading"><div><p class="rating-lab-kicker">Actual versus expected</p>' +
+      '<h3 id="predictor-performance-title">Largest completed-event surprises</h3></div>' +
+      '<p>Selected protocol: <strong>' + escapeHtml(modelLabel) + '</strong></p></div>' +
+      '<p class="rating-lab-performance-subtitle">The six largest outperformers and underperformers by signed standardized result-score residual. Solid dark bars point right; outlined light bars point left, so color is not the only cue. The complete participant table remains below.</p>' +
+      '<div class="rating-lab-performance-scroll"><div class="rating-lab-performance-plot" role="group" aria-label="' +
+      escapeHtml(competitionTitle(competition) + ' actual result score versus ' + modelLabel + ' expectation') + '">' +
+      '<div class="rating-lab-performance-axis" aria-hidden="true"><span>Underperformed</span><span>As expected</span><span>Outperformed</span></div>' +
+      chartRows.map(function (team) {
+        var positive = team.surprise_index >= 0;
+        var signedSurprise = (team.surprise_index > 0 ? '+' : '') + number(team.surprise_index, 2) + ' σ';
+        var signedResidual = (team.score_residual > 0 ? '+' : '') + number(team.score_residual, 2);
+        var size = Math.min(Math.abs(team.surprise_index) / maxAbs * 50, 50).toFixed(3) + '%';
+        var label = team.name + ': actual ' + number(team.points, 2) + ', expected ' + number(team.expected_score, 2) +
+          ', residual ' + signedResidual + ', standardized surprise ' + signedSurprise + ', ' + team.matches + ' matches';
+        return '<button type="button" class="rating-lab-performance-row' +
+          (team.id === state.predictorTeam ? ' is-selected' : '') + '" data-predictor-team="' + escapeHtml(team.id) +
+          '" aria-label="' + escapeHtml(label) + '"><span class="rating-lab-performance-name">' + escapeHtml(team.name) +
+          '<small>' + team.matches + ' match' + (team.matches === 1 ? '' : 'es') + ' · ' + number(team.points, 2) +
+          ' actual / ' + number(team.expected_score, 2) + ' expected</small></span><span class="rating-lab-performance-track" aria-hidden="true">' +
+          '<span class="rating-lab-performance-zero"></span><span class="rating-lab-performance-bar ' +
+          (positive ? 'is-outperformer' : 'is-underperformer') + '" style="--bar-size:' + size + '"></span></span>' +
+          '<strong>' + escapeHtml(signedSurprise) + '</strong></button>';
+      }).join('') + '</div></div><p class="rating-lab-performance-footnote">' + escapeHtml(model.surprise_method) + '</p>';
   }
 
   function renderCompletedPerformance(view) {
@@ -1092,6 +1144,7 @@
     }).join('');
     elements.predictorCaption.textContent = competitionTitle(competition) + ' · completed performance by ' +
       state.datasets[view.sport].models[state.predictorModel].label;
+    renderPerformanceChart(rows, model, competition, view.sport);
     elements.predictorBody.innerHTML = rows.map(function (team) {
       var changeClass = team.change > 0 ? 'is-positive' : team.change < 0 ? 'is-negative' : '';
       var change = (team.change > 0 ? '+' : '') + number(team.change, 2);
@@ -1111,6 +1164,8 @@
   function renderPredictor() {
     var view = predictorData();
     if (!view) return;
+    elements.predictorPerformanceChart.hidden = true;
+    elements.predictorPerformanceChart.innerHTML = '';
     var competition = view.competition;
     var model = view.model;
     var competitionFormat = competition.format || (model && model.teams ? 'round-robin league' : 'knockout cup');
@@ -1422,6 +1477,13 @@
   });
 
   elements.predictorBody.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-predictor-team]');
+    if (!button) return;
+    state.predictorTeam = button.dataset.predictorTeam;
+    renderPredictor();
+  });
+
+  elements.predictorPerformanceChart.addEventListener('click', function (event) {
     var button = event.target.closest('[data-predictor-team]');
     if (!button) return;
     state.predictorTeam = button.dataset.predictorTeam;

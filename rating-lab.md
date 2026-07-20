@@ -142,6 +142,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
     <div class="rating-lab-predictor-metrics" id="predictor-metrics" aria-label="Competition simulation state"></div>
     <div class="rating-lab-market" id="predictor-market" aria-live="polite" hidden></div>
+    <section class="rating-lab-performance-chart" id="predictor-performance-chart" aria-labelledby="predictor-performance-title" hidden></section>
 
     <div class="rating-lab-predictor-grid">
       <div class="rating-lab-table-wrap">
@@ -170,6 +171,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <summary>How this competition view is calculated</summary>
       <p id="predictor-method-copy"></p>
       <p>Every forecast uses the leaderboard’s chronological rating state. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Cups lock every published result and tie. When a later draw is not yet public, survivors are uniformly re-drawn; the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
+      <p>For a completed competition, the selected protocol records its expected result score <span class="rating-lab-formula">p<sub>m</sub></span> immediately before every update. Participant surprise is <span class="rating-lab-formula">Z = Σ(s<sub>m</sub> − p<sub>m</sub>) / √Σp<sub>m</sub>(1−p<sub>m</sub>)</span>, where a win scores 1, a draw 0.5, and a loss 0. Positive values are outperformance; negative values are underperformance. The denominator is a disclosed common Bernoulli-score variance reference, not a claim that draws are Bernoulli outcomes.</p>
     </details>
   </section>
 
