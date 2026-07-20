@@ -87,6 +87,11 @@
     }).format(value);
   }
 
+  function competitionTitle(competition) {
+    var season = String(competition.season || '');
+    return season && competition.label.indexOf(season) === -1 ? competition.label + ' ' + season : competition.label;
+  }
+
   function isStale(status) {
     if (!status || !status.checked_at || !status.stale_after_hours) return false;
     return Date.now() - new Date(status.checked_at).getTime() > status.stale_after_hours * 3600000;
@@ -594,7 +599,7 @@
       ].map(function (item) {
         return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
       }).join('');
-      elements.predictorCaption.textContent = competition.label + ' ' + competition.season + ' · waiting for forecastable structure';
+      elements.predictorCaption.textContent = competitionTitle(competition) + ' · waiting for forecastable structure';
       elements.predictorBody.innerHTML = '<tr><td colspan="5"><strong>Waiting for the knockout field.</strong><br>' +
         escapeHtml(competition.availability) + '</td></tr>';
       elements.predictorDetail.innerHTML = '<p>' + escapeHtml(competition.availability) + '</p>';
@@ -617,7 +622,7 @@
       ].map(function (item) {
         return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
       }).join('');
-      elements.predictorCaption.textContent = competition.label + ' ' + competition.season + ' · title forecast by ' +
+      elements.predictorCaption.textContent = competitionTitle(competition) + ' · title forecast by ' +
         state.datasets[view.sport].models[state.predictorModel].label;
       elements.predictorBody.innerHTML = rows.map(function (team, index) {
         return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
@@ -639,7 +644,7 @@
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
-    elements.predictorCaption.textContent = competition.label + ' ' + competition.season + ' · projected by ' +
+    elements.predictorCaption.textContent = competitionTitle(competition) + ' · projected by ' +
       state.datasets[view.sport].models[state.predictorModel].label;
     elements.predictorBody.innerHTML = model.teams.map(function (team, index) {
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
@@ -843,7 +848,7 @@
           (competition.format === 'round-robin league' || (competition.models.elo && competition.models.elo.forecast_type === 'league')) ? 'League' :
           view.sport === 'national-football' ? 'National tournament' : 'Club cup';
         return '<option value="' + escapeHtml(competition.id) + '">' +
-          escapeHtml(kind + ' · ' + competition.label + ' ' + competition.season) + '</option>';
+          escapeHtml(kind + ' · ' + competitionTitle(competition)) + '</option>';
       }).join('');
       state.predictorCompetition = competitions[0].competition.id;
       populateCompetitions();

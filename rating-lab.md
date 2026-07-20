@@ -85,7 +85,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-kicker">Live competition forecast</p>
     <h2 id="predictor-heading">Tournament predictor</h2>
     <p class="rating-lab-predictor-intro">Predict leagues, club cups, and national-team tournaments from their actual published state. League tables keep played results and simulate the remaining calendar; knockout forecasts preserve published ties and never invent a title probability before the field exists.</p>
-    <p class="rating-lab-audit-note">Current forecastable structures: five club leagues, football-data.org club and national knockout fields, and active elite Lichess round-robin events. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
+    <p class="rating-lab-audit-note">Current forecastable structures: five club leagues, public club and national knockout fields, and active elite Lichess round-robin events. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
 
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">
