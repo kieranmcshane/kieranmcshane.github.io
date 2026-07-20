@@ -8,12 +8,18 @@ description: Live alternative ratings for tennis, club and national-team footbal
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}">
   <header class="rating-lab-hero">
     <p class="rating-lab-kicker">Live, reproducible sports ratings</p>
-    <h1>Across sports. Four ways to measure strength.</h1>
-    <p class="rating-lab-deck">Explore current Elo, Glicko-2, Gaussian TrueSkill, and robust heavy-tail rankings built from real match results. Every prediction is scored before its result is used to update the model.</p>
-    <p class="rating-lab-hero-link"><a href="#matchup">Estimate A vs B</a> · <a href="#predictor">Forecast competitions ↓</a></p>
+    <h1>Strength, measured four ways.</h1>
+    <p class="rating-lab-deck">Rank competitors, compare an A vs B matchup, or forecast a competition using real tennis, football, and chess results.</p>
     <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
     <p class="rating-lab-generation" id="rating-lab-generation"></p>
   </header>
+
+  <nav class="rating-lab-local-nav" aria-label="Rating Lab sections">
+    <a href="#leaderboard-heading"><strong>01</strong><span>Rankings</span></a>
+    <a href="#matchup"><strong>02</strong><span>A vs B</span></a>
+    <a href="#predictor"><strong>03</strong><span>Competitions</span></a>
+    <a href="#research"><strong>04</strong><span>Methods & data</span></a>
+  </nav>
 
   <noscript><p class="rating-lab-notice">This interactive leaderboard requires JavaScript.</p></noscript>
   <div id="rating-lab-error" class="rating-lab-notice rating-lab-notice-error" role="alert" hidden></div>
@@ -53,7 +59,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
 
     <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
-    <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
+    <details class="rating-lab-movers-disclosure">
+      <summary>Recent rating movers</summary>
+      <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
+    </details>
 
     <div class="rating-lab-grid">
       <div class="rating-lab-table-wrap">
@@ -175,6 +184,18 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </details>
   </section>
 
+  <section class="rating-lab-research" id="research" aria-labelledby="research-heading">
+    <p class="rating-lab-kicker">Methods & data</p>
+    <h2 id="research-heading">Transparent when you need it. Quiet when you do not.</h2>
+    <p class="rating-lab-research-intro">The rankings and forecasts above are the working surface. Open any panel below to inspect model assumptions, player-credit limits, exact parameters, source status, licences, and reproduction commands.</p>
+    <div class="rating-lab-research-links" aria-label="Quick audit downloads">
+      <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
+      <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
+      <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/tree/main/rating_lab">Model source</a>
+    </div>
+
+  <details class="rating-lab-disclosure">
+    <summary><span>Protocol overview</span><strong>How the four rating models differ</strong></summary>
   <section class="rating-lab-method" id="methodology">
     <p class="rating-lab-kicker">Methodology</p>
     <h2>What changes—and what does not</h2>
@@ -199,7 +220,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-explainer"><strong>Why this is not labelled TrueSkill 2:</strong> TrueSkill 2’s published Halo improvement uses experience, squads, kills, quitting, and cross-mode skill. These sports sources do not contain equivalent observations. Calling a result-only replay “TrueSkill 2” would not be reproducible. Core TrueSkill does not need those features: given reliable lineups, it can infer player skill from team outcomes alone.</p>
     <p class="rating-lab-explainer">Turning a Gaussian rating into a log-normal or Pareto-looking published scale can change the histogram without changing anyone’s rank. A genuinely different ranking requires a different performance model or update rule.</p>
   </section>
+  </details>
 
+  <details class="rating-lab-disclosure">
+    <summary><span>Research boundary</span><strong>Individual footballer contribution</strong></summary>
   <section class="rating-lab-contribution" id="player-contribution" aria-labelledby="contribution-heading">
     <p class="rating-lab-kicker">Team result → player contribution</p>
     <h2 id="contribution-heading">A valid model, withheld until the data are valid</h2>
@@ -256,7 +280,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
       </ul>
     </details>
   </section>
+  </details>
 
+  <details class="rating-lab-disclosure">
+    <summary><span>Interactive specification</span><strong>Exact protocol explorer</strong></summary>
   <section class="rating-lab-protocol" id="protocol" aria-labelledby="protocol-heading">
     <p class="rating-lab-kicker">Protocol transparency</p>
     <h2 id="protocol-heading">From one public result to one published rank</h2>
@@ -298,7 +325,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
       </ul>
     </details>
   </section>
+  </details>
 
+  <details class="rating-lab-disclosure">
+    <summary><span>Reproducibility</span><strong>Equations, parameters, and build audit</strong></summary>
   <section class="rating-lab-audit" id="reproducibility" aria-labelledby="audit-heading">
     <p class="rating-lab-kicker">Open methodology</p>
     <h2 id="audit-heading">Inspect every assumption. Reproduce every table.</h2>
@@ -366,7 +396,10 @@ RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
 python3 -m unittest discover -s tests -v</code></pre>
     <p class="rating-lab-audit-note">A <code>FOOTBALL_DATA_TOKEN</code> enables the primary club feed; without it, the documented CC0 OpenFootball fallback is used. Results are deduplicated and sorted by date, competitor IDs, competition, and score. The source snapshot hash is published when the source is a single file. Generated files contain no credentials.</p>
   </section>
+  </details>
 
+  <details class="rating-lab-disclosure">
+    <summary><span>Provenance</span><strong>Sources and licences</strong></summary>
   <section class="rating-lab-sources" aria-labelledby="sources-heading">
     <p class="rating-lab-kicker">Open data</p>
     <h2 id="sources-heading">Sources and licences</h2>
@@ -382,6 +415,8 @@ python3 -m unittest discover -s tests -v</code></pre>
       <li><a href="https://docs.polymarket.com/market-data/overview">Polymarket Gamma API</a> — public outcome-price snapshots used only as an external forecast benchmark.</li>
     </ul>
     <p>Rankings are independent statistical estimates, not official tour, league, federation, or Lichess ratings. They are informational and are not betting advice.</p>
+  </section>
+  </details>
   </section>
 </div>
 
