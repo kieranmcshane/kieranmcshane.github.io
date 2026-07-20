@@ -52,7 +52,16 @@
     predictorCaption: document.getElementById('predictor-caption'),
     predictorBody: document.getElementById('predictor-body'),
     predictorDetail: document.getElementById('predictor-detail'),
-    predictorMethod: document.getElementById('predictor-method-copy')
+    predictorMethod: document.getElementById('predictor-method-copy'),
+    predictorColumns: {
+      rank: document.getElementById('predictor-col-rank'),
+      team: document.getElementById('predictor-col-team'),
+      now: document.getElementById('predictor-col-now'),
+      value: document.getElementById('predictor-col-value'),
+      title: document.getElementById('predictor-col-title'),
+      secondary: document.getElementById('predictor-col-secondary'),
+      tertiary: document.getElementById('predictor-col-tertiary')
+    }
   };
 
   function dataUrl(file) {
@@ -481,12 +490,24 @@
     setPressed(elements.protocolModelTabs, 'protocolModel', state.model);
   }
 
+  function predictorCompetitions() {
+    return ['football', 'national-football', 'chess'].reduce(function (rows, sport) {
+      var predictor = state.datasets[sport].tournament_predictor;
+      if (!predictor) return rows;
+      predictor.competitions.forEach(function (competition) {
+        rows.push({ sport: sport, predictor: predictor, competition: competition });
+      });
+      return rows;
+    }, []);
+  }
+
   function predictorData() {
-    var predictor = state.datasets.football.tournament_predictor;
-    var competition = predictor.competitions.find(function (item) {
-      return item.id === state.predictorCompetition;
+    var view = predictorCompetitions().find(function (item) {
+      return item.competition.id === state.predictorCompetition;
     });
-    return { predictor: predictor, competition: competition, model: competition.models[state.predictorModel] };
+    if (!view) return null;
+    view.model = view.competition.models[state.predictorModel] || null;
+    return view;
   }
 
   function probabilityCell(value) {
@@ -494,7 +515,7 @@
       (value * 100).toFixed(1) + '%"><span>' + percent(value) + '</span></span>';
   }
 
-  function renderPredictorDetail(team, competition) {
+  function renderLeaguePredictorDetail(team) {
     if (!team) {
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a team to inspect its full finishing-position distribution.</p>';
       return;
@@ -516,37 +537,127 @@
       '</dd></div><div><dt>Current points</dt><dd>' + team.current_points + '</dd></div></dl>';
   }
 
+  function renderStandingsPredictorDetail(team) {
+    if (!team) return renderLeaguePredictorDetail(team);
+    var bars = team.positions.map(function (probability, index) {
+      return '<span class="rating-lab-position-bar" style="--height:' + Math.max(probability * 100, 1).toFixed(1) +
+        '%" aria-label="Position ' + (index + 1) + ': ' + escapeHtml(percent(probability)) + '"></span>';
+    }).join('');
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Expected position ' +
+      number(team.expected_position, 2) + '</p><h3>' + escapeHtml(team.name) + '</h3></div><strong>' +
+      number(team.expected_points, 1) + ' pts</strong></div><div class="rating-lab-position-chart" role="img" aria-label="Final-position probabilities for ' +
+      escapeHtml(team.name) + '">' + bars + '</div><div class="rating-lab-position-axis"><span>Winner</span><span>Position ' +
+      team.positions.length + '</span></div><dl><div><dt>Win event</dt><dd>' + percent(team.champion) +
+      '</dd></div><div><dt>Podium</dt><dd>' + percent(team.podium) + '</dd></div><div><dt>Last place</dt><dd>' +
+      percent(team.last_place) + '</dd></div><div><dt>Current points</dt><dd>' + number(team.current_points, 1) + '</dd></div></dl>';
+  }
+
+  function renderKnockoutPredictorDetail(team, model) {
+    if (!team) {
+      elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a participant to inspect its advancement probabilities.</p>';
+      return;
+    }
+    var nextLabel = model.current_stage === 'Complete' ? 'Recorded champion' : 'Survive published stage';
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
+      escapeHtml(model.current_stage) + '</p><h3>' + escapeHtml(team.name) + '</h3></div><strong>' +
+      percent(team.champion) + '</strong></div><dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
+      '</dd></div><div><dt>' + escapeHtml(nextLabel) + '</dt><dd>' + percent(team.reach_next_stage) +
+      '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>';
+  }
+
+  function setPredictorColumns(type) {
+    var knockout = type === 'knockout';
+    var standings = type === 'standings';
+    elements.predictorColumns.rank.textContent = knockout ? 'Forecast' : 'Projected';
+    elements.predictorColumns.now.textContent = knockout ? 'Rating' : 'Now';
+    elements.predictorColumns.value.textContent = knockout ? 'Next stage' : 'Expected pts';
+    elements.predictorColumns.secondary.textContent = standings ? 'Podium' : 'Top four';
+    elements.predictorColumns.tertiary.textContent = standings ? 'Last place' : 'Bottom three';
+    elements.predictorColumns.secondary.hidden = knockout;
+    elements.predictorColumns.tertiary.hidden = knockout;
+  }
+
   function renderPredictor() {
     var view = predictorData();
+    if (!view) return;
     var competition = view.competition;
     var model = view.model;
-    if (!state.predictorTeam || !model.teams.some(function (team) { return team.id === state.predictorTeam; })) {
-      state.predictorTeam = model.teams[0].id;
-    }
+    var competitionFormat = competition.format || (model && model.teams ? 'round-robin league' : 'knockout cup');
     elements.predictorState.textContent = competition.status.charAt(0).toUpperCase() + competition.status.slice(1) +
-      ' · fixtures through ' + formatDate(competition.last_fixture);
+      ' · ' + competitionFormat + ' · fixtures through ' + formatDate(competition.last_fixture);
+    if (competition.forecast_available === false || !model) {
+      setPredictorColumns('knockout');
+      elements.predictorMetrics.innerHTML = [
+        ['Competition state', competition.status],
+        ['Published fixtures', number(competition.total_matches, 0)],
+        ['Title forecast', 'Withheld']
+      ].map(function (item) {
+        return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+      }).join('');
+      elements.predictorCaption.textContent = competition.label + ' ' + competition.season + ' · waiting for forecastable structure';
+      elements.predictorBody.innerHTML = '<tr><td colspan="5"><strong>Waiting for the knockout field.</strong><br>' +
+        escapeHtml(competition.availability) + '</td></tr>';
+      elements.predictorDetail.innerHTML = '<p>' + escapeHtml(competition.availability) + '</p>';
+      elements.predictorMethod.innerHTML = escapeHtml(view.predictor.availability_rule) + ' <a href="' +
+        escapeHtml(competition.source_url) + '">Open competition source</a>.';
+      return;
+    }
+    var isLeague = model.forecast_type === 'league' || Boolean(model.teams);
+    var isStandings = model.forecast_type === 'standings';
+    var rows = isLeague ? model.teams : model.participants;
+    if (!state.predictorTeam || !rows.some(function (team) { return team.id === state.predictorTeam; })) {
+      state.predictorTeam = rows[0].id;
+    }
+    setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : 'knockout');
+    if (!isLeague) {
+      elements.predictorMetrics.innerHTML = [
+        ['Competition state', model.current_stage],
+        ['Published ties left', number(model.published_ties_remaining, 0)],
+        ['Forecast sample', number(model.simulations, 0) + ' deterministic brackets']
+      ].map(function (item) {
+        return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+      }).join('');
+      elements.predictorCaption.textContent = competition.label + ' ' + competition.season + ' · title forecast by ' +
+        state.datasets[view.sport].models[state.predictorModel].label;
+      elements.predictorBody.innerHTML = rows.map(function (team, index) {
+        return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
+          (index + 1) + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+          escapeHtml(team.id) + '">' + escapeHtml(team.name) + '</button></th><td>' + number(team.rating, 1) +
+          '</td><td>' + probabilityCell(team.reach_next_stage) + '</td><td>' + probabilityCell(team.champion) + '</td></tr>';
+      }).join('');
+      renderKnockoutPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model);
+      elements.predictorMethod.innerHTML = number(model.simulations, 0) + ' simulations. Published ties are locked. ' +
+        escapeHtml(view.predictor.knockout_draw) + ' Fixed seed: <code>' + escapeHtml(String(model.seed)) +
+        '</code>. Snapshot: <code>' + escapeHtml(competition.snapshot_sha256.substring(0, 12)) +
+        '</code>. <a href="' + escapeHtml(competition.source_url) + '">Open competition source</a>.';
+      return;
+    }
     elements.predictorMetrics.innerHTML = [
       ['Competition state', model.completed_matches + ' of ' + competition.total_matches + ' played'],
       ['Next fixture', competition.next_fixture ? formatDate(competition.next_fixture) : 'Competition complete'],
-      ['Forecast sample', number(model.simulations, 0) + ' deterministic seasons']
+      ['Forecast sample', number(model.simulations, 0) + (isStandings ? ' deterministic tournaments' : ' deterministic seasons')]
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
     elements.predictorCaption.textContent = competition.label + ' ' + competition.season + ' · projected by ' +
-      state.datasets.football.models[state.predictorModel].label;
+      state.datasets[view.sport].models[state.predictorModel].label;
     elements.predictorBody.innerHTML = model.teams.map(function (team, index) {
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
         (index + 1) + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
         escapeHtml(team.id) + '">' + escapeHtml(team.name) + '</button></th><td>' +
         (team.played ? team.current_rank : '—') + '</td><td><strong>' + number(team.expected_points, 1) +
         '</strong></td><td>' + probabilityCell(team.champion) + '</td><td class="rating-lab-optional">' +
-        probabilityCell(team.top_four) + '</td><td class="rating-lab-optional">' + probabilityCell(team.bottom_three) + '</td></tr>';
+        probabilityCell(isStandings ? team.podium : team.top_four) + '</td><td class="rating-lab-optional">' +
+        probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td></tr>';
     }).join('');
-    renderPredictorDetail(model.teams.find(function (team) { return team.id === state.predictorTeam; }), competition);
+    var selectedTeam = model.teams.find(function (team) { return team.id === state.predictorTeam; });
+    if (isStandings) renderStandingsPredictorDetail(selectedTeam);
+    else renderLeaguePredictorDetail(selectedTeam);
     elements.predictorMethod.innerHTML = escapeHtml(view.predictor.simulations_per_model) +
       ' simulations per model and competition. Fixed seed: <code>' + escapeHtml(String(model.seed)) +
       '</code>. Fixture snapshot: <code>' + escapeHtml(competition.snapshot_sha256.substring(0, 12)) +
-      '</code>. <a href="' + escapeHtml(competition.source_url) + '">Open fixture source</a>.';
+      '</code>. ' + escapeHtml(competition.availability || '') + (competition.tie_break ? ' ' + escapeHtml(competition.tie_break) : '') +
+      ' <a href="' + escapeHtml(competition.source_url) + '">Open fixture source</a>.';
   }
 
   function render() {
@@ -725,11 +836,16 @@
       }));
     })
     .then(function () {
-      var predictor = state.datasets.football.tournament_predictor;
-      elements.predictorCompetition.innerHTML = predictor.competitions.map(function (competition) {
-        return '<option value="' + escapeHtml(competition.id) + '">' + escapeHtml(competition.label + ' ' + competition.season) + '</option>';
+      var competitions = predictorCompetitions();
+      elements.predictorCompetition.innerHTML = competitions.map(function (view) {
+        var competition = view.competition;
+        var kind = view.sport === 'chess' ? 'Chess tournament' :
+          (competition.format === 'round-robin league' || (competition.models.elo && competition.models.elo.forecast_type === 'league')) ? 'League' :
+          view.sport === 'national-football' ? 'National tournament' : 'Club cup';
+        return '<option value="' + escapeHtml(competition.id) + '">' +
+          escapeHtml(kind + ' · ' + competition.label + ' ' + competition.season) + '</option>';
       }).join('');
-      state.predictorCompetition = predictor.competitions[0].id;
+      state.predictorCompetition = competitions[0].competition.id;
       populateCompetitions();
       render();
     })

@@ -12,9 +12,11 @@ from rating_lab.pipeline import (
     _metrics,
     _merge_schedule_results,
     _parse_broadcast_pgn,
+    _parse_cup_schedule,
     _parse_football_txt,
     _parse_international_results,
     _simulate_league,
+    _simulate_knockout,
     build_sport_payload,
     validate_payload,
 )
@@ -110,6 +112,48 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertAlmostEqual(sum(team["champion"] for team in first["teams"]), 1.0, places=3)
         self.assertEqual(first["remaining_matches"], 4)
+
+    def test_knockout_simulation_preserves_published_ties_and_partitions_title_probability(self):
+        teams = [
+            {"id": "national-football:alpha", "name": "Alpha"},
+            {"id": "national-football:beta", "name": "Beta"},
+            {"id": "national-football:gamma", "name": "Gamma"},
+            {"id": "national-football:delta", "name": "Delta"},
+        ]
+        competition = {
+            "id": "test-cup",
+            "season": "2026",
+            "cohort": "national-football",
+            "teams": teams,
+            "knockout_fixtures": [
+                {"date": "2026-08-01", "stage": "SEMI_FINALS", "status": "SCHEDULED", "home_id": teams[0]["id"], "away_id": teams[1]["id"], "home_goals": None, "away_goals": None, "winner_id": None},
+                {"date": "2026-08-02", "stage": "SEMI_FINALS", "status": "SCHEDULED", "home_id": teams[2]["id"], "away_id": teams[3]["id"], "home_goals": None, "away_goals": None, "winner_id": None},
+            ],
+        }
+        model = EloModel()
+        model.state(teams[0]["id"]).mean = 1750
+        first = _simulate_knockout(competition, model, "elo", simulations=500)
+        second = _simulate_knockout(competition, model, "elo", simulations=500)
+        self.assertEqual(first, second)
+        self.assertEqual(first["published_ties_remaining"], 2)
+        self.assertAlmostEqual(sum(team["champion"] for team in first["participants"]), 1.0, places=3)
+
+    def test_cup_parser_withholds_title_forecast_before_knockout_field(self):
+        payload = {"matches": [{
+            "utcDate": "2026-09-01T18:00:00Z",
+            "status": "SCHEDULED",
+            "stage": "GROUP_STAGE",
+            "group": "A",
+            "homeTeam": {"id": 1, "name": "Alpha"},
+            "awayTeam": {"id": 2, "name": "Beta"},
+            "score": {"winner": None, "fullTime": {"home": None, "away": None}},
+            "season": {"startDate": "2026-08-01"},
+        }]}
+        body = json.dumps(payload).encode()
+        competition = _parse_cup_schedule(payload, "WC", "World Cup", "national-football", "https://example.test", body)
+        self.assertIsNotNone(competition)
+        self.assertFalse(competition["forecast_available"])
+        self.assertIn("no title probability", competition["availability"])
 
     def test_schedule_results_advance_ratings_feed_and_active_membership(self):
         matches = [Match(date(2025, 1, 1), "football:name:old", "football:name:alpha", 0.0, "Test League", "2025-26", True)]

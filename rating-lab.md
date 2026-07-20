@@ -84,7 +84,8 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
     <p class="rating-lab-kicker">Live competition forecast</p>
     <h2 id="predictor-heading">Tournament predictor</h2>
-    <p class="rating-lab-predictor-intro">Start from the actual table, simulate every remaining fixture with the selected rating protocol, and see how often each team finishes in every position. The forecast refreshes daily as results arrive.</p>
+    <p class="rating-lab-predictor-intro">Predict leagues, club cups, and national-team tournaments from their actual published state. League tables keep played results and simulate the remaining calendar; knockout forecasts preserve published ties and never invent a title probability before the field exists.</p>
+    <p class="rating-lab-audit-note">Current forecastable structures: five club leagues, football-data.org club and national knockout fields, and active elite Lichess round-robin events. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
 
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">
@@ -110,13 +111,13 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <caption id="predictor-caption">Projected final table</caption>
           <thead>
             <tr>
-              <th scope="col">Projected</th>
-              <th scope="col">Team</th>
-              <th scope="col">Now</th>
-              <th scope="col">Expected pts</th>
-              <th scope="col">Title</th>
-              <th scope="col" class="rating-lab-optional">Top four</th>
-              <th scope="col" class="rating-lab-optional">Bottom three</th>
+              <th scope="col" id="predictor-col-rank">Projected</th>
+              <th scope="col" id="predictor-col-team">Team</th>
+              <th scope="col" id="predictor-col-now">Now</th>
+              <th scope="col" id="predictor-col-value">Expected pts</th>
+              <th scope="col" id="predictor-col-title">Title</th>
+              <th scope="col" id="predictor-col-secondary" class="rating-lab-optional">Top four</th>
+              <th scope="col" id="predictor-col-tertiary" class="rating-lab-optional">Bottom three</th>
             </tr>
           </thead>
           <tbody id="predictor-body"></tbody>
@@ -130,7 +131,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <details class="rating-lab-predictor-method">
       <summary>How the forecast works</summary>
       <p id="predictor-method-copy"></p>
-      <p>Each model uses the same chronological ratings and home advantage as the leaderboard. Actual points and goal difference are locked in. Future results are sampled from model win/draw/loss probabilities; ties are resolved by points, simulated goal difference, then generation-time model strength. Strength is fixed within one simulation run and refreshed after real results.</p>
+      <p>Every forecast uses the leaderboard’s chronological rating state. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Cups lock every published result and tie. When a later draw is not yet public, survivors are uniformly re-drawn; the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
     </details>
   </section>
 
@@ -189,6 +190,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>
         <li>The public JSON publishes at most the top 500 eligible entities per model; it is not a complete registry of every entity seen in the source archive.</li>
         <li>Model selection tests a small declared parameter grid. It does not prove that the selected candidate is globally optimal.</li>
+        <li>Cup forecasts do not guess unpublished entrants or qualification paths. Once a knockout field exists, published ties are fixed; later unpublished draws use a uniform redraw without seeding, association, or country restrictions.</li>
       </ul>
     </details>
   </section>
@@ -262,7 +264,7 @@ python3 -m unittest discover -s tests -v</code></pre>
     <h2 id="sources-heading">Sources and licences</h2>
     <ul id="rating-source-list">
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
-      <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues and the Champions League.</li>
+      <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues plus published Champions League, FIFA World Cup, and European Championship stages.</li>
       <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures used by the competition predictor, CC0 1.0.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
