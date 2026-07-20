@@ -245,7 +245,7 @@
 
   function renderTable() {
     var rows = currentRows();
-    var displayed = state.expanded ? rows : rows.slice(0, 50);
+    var displayed = state.expanded ? rows : rows.slice(0, 20);
     var model = state.datasets[state.sport].models[state.model];
     elements.caption.textContent = model.label + ' · ' + rows.length + ' published competitors';
     elements.empty.hidden = rows.length > 0;
@@ -1500,6 +1500,16 @@
     }
     renderTable();
   });
+
+  function revealLinkedMethod() {
+    if (!window.location.hash) return;
+    var target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    var disclosure = target && target.closest('.rating-lab-disclosure');
+    if (disclosure) disclosure.open = true;
+  }
+
+  window.addEventListener('hashchange', revealLinkedMethod);
+  revealLinkedMethod();
 
   fetch(dataUrl('manifest.json'))
     .then(function (response) {
