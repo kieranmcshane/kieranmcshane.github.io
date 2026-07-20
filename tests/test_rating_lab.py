@@ -6,9 +6,11 @@ import math
 from pathlib import Path
 import unittest
 
-from rating_lab.models import EloModel, GaussianSkillModel, Match
+from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.pipeline import (
     _deduplicate,
+    _competition_performance,
+    _competition_matches,
     _metrics,
     _merge_schedule_results,
     _parse_broadcast_pgn,
@@ -16,9 +18,13 @@ from rating_lab.pipeline import (
     _parse_football_txt,
     _parse_international_results,
     _parse_open_cup_json,
+    _polymarket_event_snapshot,
+    _polymarket_search_query,
     _simulate_league,
     _simulate_knockout,
+    _model_candidates,
     build_sport_payload,
+    individual_contribution_protocol,
     validate_payload,
 )
 
@@ -71,13 +77,117 @@ class RatingModelTests(unittest.TestCase):
 
     def test_outcome_probabilities_partition_one(self):
         match = Match(date(2026, 1, 1), "a", "b", 0.5, home_advantage=True)
-        for model in (EloModel(home=65), GaussianSkillModel(draw_margin=1.35, advantage=1.35), GaussianSkillModel(robust=True, draw_margin=1.35, advantage=1.35)):
+        for model in (EloModel(home=65), Glicko2Model(home=65), GaussianSkillModel(draw_margin=1.35, advantage=1.35), GaussianSkillModel(robust=True, draw_margin=1.35, advantage=1.35)):
             outcomes = model.predict_outcomes(match)
             self.assertAlmostEqual(sum(outcomes), 1.0, places=8)
             self.assertTrue(all(0 <= probability <= 1 for probability in outcomes))
 
+    def test_home_or_white_advantage_increases_entity_a_probability(self):
+        neutral = Match(date(2026, 1, 1), "a", "b", 0.5)
+        advantaged = Match(date(2026, 1, 1), "a", "b", 0.5, home_advantage=True)
+        for model in (
+            EloModel(home=35),
+            Glicko2Model(home=35),
+            GaussianSkillModel(draw_margin=0.75, advantage=0.4),
+            GaussianSkillModel(robust=True, draw_margin=0.75, advantage=0.4),
+        ):
+            self.assertGreater(model.predict(advantaged), model.predict(neutral))
+
+    def test_surface_blend_learns_opposite_surface_strengths(self):
+        model = SurfaceBlendModel(lambda: EloModel(k=32), surface_weight=0.8)
+        start = date(2026, 1, 1)
+        for offset in range(12):
+            model.update(Match(start + timedelta(days=offset), "a", "b", 1.0, metadata={"surface": "Clay"}))
+            model.update(Match(start + timedelta(days=20 + offset), "a", "b", 0.0, metadata={"surface": "Hard"}))
+        clay = model.predict(Match(date(2026, 3, 1), "a", "b", 0.5, metadata={"surface": "Clay"}))
+        hard = model.predict(Match(date(2026, 3, 1), "a", "b", 0.5, metadata={"surface": "Hard"}))
+        self.assertGreater(clay, 0.5)
+        self.assertLess(hard, 0.5)
+
+    def test_glicko2_matches_published_worked_example(self):
+        model = Glicko2Model(tau=0.5)
+        player = model.state("player")
+        player.mean, player.variance, player.volatility = 1500.0, 200.0**2, 0.06
+        for entity, rating, rd in (("a", 1400.0, 30.0), ("b", 1550.0, 100.0), ("c", 1700.0, 300.0)):
+            state = model.state(entity)
+            state.mean, state.variance, state.volatility = rating, rd**2, 0.06
+        played = date(2022, 1, 1)
+        model.update_period([
+            Match(played, "player", "a", 1.0),
+            Match(played, "player", "b", 0.0),
+            Match(played, "player", "c", 0.0),
+        ])
+        self.assertAlmostEqual(player.mean, 1464.06, places=1)
+        self.assertAlmostEqual(player.sigma, 151.52, places=1)
+        self.assertAlmostEqual(player.volatility, 0.059996, places=5)
+
+    def test_glicko2_inactivity_inflates_rd(self):
+        recent = Glicko2Model(period_days=7)
+        inactive = Glicko2Model(period_days=7)
+        first = Match(date(2025, 1, 1), "a", "b", 1.0)
+        recent.update(first)
+        inactive.update(first)
+        recent.update(Match(date(2025, 1, 8), "a", "b", 1.0))
+        inactive.update(Match(date(2026, 1, 1), "a", "b", 1.0))
+        self.assertGreater(inactive.states["a"].sigma, recent.states["a"].sigma)
+
 
 class PipelineTests(unittest.TestCase):
+    def test_context_parameters_cover_chess_color_and_tennis_surface(self):
+        self.assertTrue(all(candidate["home"] == 35.0 for candidate in _model_candidates("chess", "elo")))
+        surface_weights = {candidate["surface_weight"] for candidate in _model_candidates("tennis", "elo")}
+        self.assertEqual(surface_weights, {0.4, 0.7, 0.9})
+
+    def test_individual_contribution_protocol_withholds_unverified_player_ranks(self):
+        protocol = individual_contribution_protocol()
+        self.assertEqual(protocol["status"], "withheld_pending_lineup_source")
+        self.assertEqual(protocol["current_publication_unit"], "club or national team")
+        self.assertIn("lineup_trueskill", protocol["methods"])
+        self.assertIn("rapm", protocol["methods"])
+        self.assertEqual(protocol["release_gates"]["starting_lineup_coverage"], ">= 95% of eligible matches")
+        self.assertIn("source licence", protocol["release_gates"]["publication_rights"])
+        self.assertNotIn("shots", protocol["methods"]["lineup_trueskill"]["input"])
+
+    def test_polymarket_snapshot_matches_entities_and_preserves_raw_overround(self):
+        competition = {
+            "id": "football-epl",
+            "label": "Premier League",
+            "season": "2026-27",
+            "models": {"elo": {"teams": [
+                {"id": "football:name:arsenal-fc", "name": "Arsenal FC", "champion": 0.5},
+                {"id": "football:name:chelsea-fc", "name": "Chelsea FC", "champion": 0.3},
+                {"id": "football:name:brighton-hove-albion-fc", "name": "Brighton & Hove Albion FC", "champion": 0.2},
+            ]}},
+        }
+        markets = []
+        for index, (name, price) in enumerate((("Arsenal", 0.55), ("Chelsea", 0.32), ("Brighton", 0.18)), 1):
+            markets.append({
+                "id": index,
+                "groupItemTitle": name,
+                "outcomes": json.dumps(["Yes", "No"]),
+                "outcomePrices": json.dumps([str(price), str(1 - price)]),
+                "active": True,
+                "closed": False,
+                "liquidity": "1000",
+                "volume": "5000",
+                "bestBid": str(price - 0.01),
+                "bestAsk": str(price + 0.01),
+                "updatedAt": "2026-07-20T12:00:00Z",
+            })
+        event = {"id": 99, "slug": "epl-2027-champion", "title": "EPL: 2027 Champion", "markets": markets}
+        snapshot = _polymarket_event_snapshot(competition, event)
+        self.assertIsNotNone(snapshot)
+        self.assertAlmostEqual(snapshot["raw_yes_price_sum"], 1.05)
+        self.assertEqual(snapshot["matched_participants"], 3)
+        self.assertEqual({row["entity_id"] for row in snapshot["outcomes"]}, {
+            "football:name:arsenal-fc", "football:name:chelsea-fc", "football:name:brighton-hove-albion-fc"
+        })
+        self.assertAlmostEqual(sum(row["normalized_probability"] for row in snapshot["outcomes"]), 1.0, places=5)
+
+    def test_polymarket_query_uses_season_end_year(self):
+        competition = {"id": "football-epl", "label": "Premier League", "season": "2026-27"}
+        self.assertEqual(_polymarket_search_query(competition), "Premier League 2027 champion")
+
     def test_football_txt_parser_preserves_schedule_and_zero_zero_result(self):
         fixture = """= Test League 2026/27
 ▪ Matchday 1
@@ -113,6 +223,56 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertAlmostEqual(sum(team["champion"] for team in first["teams"]), 1.0, places=3)
         self.assertEqual(first["remaining_matches"], 4)
+
+    def test_completed_competition_performance_replays_from_pre_event_state(self):
+        entities = {
+            "football:name:alpha": {"name": "Alpha"},
+            "football:name:beta": {"name": "Beta"},
+        }
+        prior = [
+            Match(date(2025, 8, 1), "football:name:alpha", "football:name:beta", 0.5, "Old League", "2025-26", True),
+            Match(date(2025, 9, 1), "football:name:beta", "football:name:alpha", 0.0, "Old League", "2025-26", True),
+        ]
+        schedule = {
+            "id": "finished-cup",
+            "label": "Finished Cup",
+            "season": "2025-26",
+            "cohort": "football",
+            "home_advantage": True,
+            "fixtures": [
+                {"date": "2026-02-01", "home_name": "Alpha", "away_name": "Beta", "home_goals": 2, "away_goals": 0},
+                {"date": "2026-02-08", "home_name": "Beta", "away_name": "Alpha", "home_goals": 1, "away_goals": 1},
+            ],
+        }
+        result = _competition_performance(schedule, EloModel(k=24, home=65), "elo", entities, prior)
+        self.assertEqual(result["results"], 2)
+        self.assertEqual(len(result["participants"]), 2)
+        alpha = next(row for row in result["participants"] if row["name"] == "Alpha")
+        self.assertEqual((alpha["wins"], alpha["draws"], alpha["losses"]), (1, 1, 0))
+        self.assertGreater(alpha["change"], 0)
+        self.assertAlmostEqual(sum(row["change"] for row in result["participants"]), 0, places=1)
+
+    def test_completed_competition_normalizes_schedule_aliases(self):
+        schedule = {
+            "label": "World Cup",
+            "season": "2026",
+            "cohort": "national-football",
+            "fixtures": [{
+                "date": "2026-07-01",
+                "home_name": "USA",
+                "away_name": "Spain",
+                "home_id": "national-football:usa",
+                "away_id": "national-football:spain",
+                "home_goals": 1,
+                "away_goals": 2,
+            }],
+        }
+        entities = {
+            "national-football:united-states": {"name": "United States"},
+            "national-football:spain": {"name": "Spain"},
+        }
+        result = _competition_matches(schedule, entities)
+        self.assertEqual(result[0].entity_a, "national-football:united-states")
 
     def test_knockout_simulation_preserves_published_ties_and_partitions_title_probability(self):
         teams = [
@@ -252,9 +412,12 @@ class PipelineTests(unittest.TestCase):
         payload = build_sport_payload("tennis", matches, entities, source)
         schema = json.loads((Path(__file__).parents[1] / "rating_lab/schema.json").read_text())
         validate_payload(payload, schema)
-        self.assertEqual(set(payload["models"]), {"elo", "trueskill", "robust"})
+        self.assertEqual(set(payload["models"]), {"elo", "glicko2", "trueskill", "robust"})
         self.assertIn("candidate_parameters", payload)
         self.assertEqual(payload["data_window"]["matches"], len(matches))
+        self.assertEqual(payload["outcome_context"]["matches"], len(matches))
+        self.assertEqual(payload["outcome_context"]["draw_rate"], 0.0)
+        self.assertIn("publication eligibility", payload["outcome_context"]["method"])
 
     def test_national_team_eligibility_uses_two_year_window(self):
         start = date(2023, 1, 1)

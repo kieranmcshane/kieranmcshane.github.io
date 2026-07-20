@@ -19,14 +19,22 @@ import tempfile
 import time
 from typing import Iterable
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from .models import EloModel, GaussianSkillModel, Match
+from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.3.0"
-METHODOLOGY_VERSION = "2026-07-20.3"
+SCHEMA_VERSION = "1.8.0"
+METHODOLOGY_VERSION = "2026-07-20.9"
 SPORTS = ("tennis", "football", "national-football", "chess")
+MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
+SCHEDULE_ENTITY_ALIASES = {
+    "national-football": {
+        "usa": "united-states",
+        "bosnia-herzegovina": "bosnia-and-herzegovina",
+    },
+}
 USER_AGENT = "kieranmcshane-rating-lab/1.2 (+https://kieranmcshane.github.io/rating-lab/)"
 FOOTBALL_COMPETITIONS = {
     "PL": "Premier League",
@@ -87,6 +95,49 @@ KNOCKOUT_STAGES = {
     "FINAL": 6,
 }
 PREDICTOR_SIMULATIONS = 5_000
+
+
+def individual_contribution_protocol() -> dict:
+    """Publish the exact release gate for outcome-only player contribution ratings."""
+    return {
+        "status": "withheld_pending_lineup_source",
+        "scope": "football players",
+        "current_publication_unit": "club or national team",
+        "methods": {
+            "lineup_trueskill": {
+                "input": "match outcome plus the players and minutes on each side",
+                "team_performance": "sum(minutes_share * player_performance)",
+                "uncertainty": "posterior mean and standard deviation per player",
+            },
+            "rapm": {
+                "input": "score differential plus the players and minutes on each side",
+                "estimator": "minutes-weighted ridge regression with chronological validation",
+                "uncertainty": "block bootstrap intervals by match",
+            },
+        },
+        "excluded_inputs": [
+            "passes",
+            "shots",
+            "dribbles",
+            "expected goals",
+            "tracking data",
+        ],
+        "release_gates": {
+            "stable_player_identifiers": "required",
+            "starting_lineup_coverage": ">= 95% of eligible matches",
+            "substitution_minute_coverage": ">= 95% of eligible matches",
+            "lineup_integrity": "11 starters per side and minutes bounded to the match",
+            "identifiability": "connected player-opponent graph and published collinearity diagnostics",
+            "chronology": "no future lineups or outcomes may enter a past update or evaluation prediction",
+            "publication_rights": "source licence must permit derived public ratings and audit metadata",
+        },
+        "source_assessment": {
+            "statsbomb_open_data": "Reproducible historical research archive with selected competitions and seasons; not a complete live five-league feed.",
+            "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
+            "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
+        },
+        "publication_rule": "Do not publish player ranks until every release gate passes for the declared cohort.",
+    }
 
 
 def _get(
@@ -1078,20 +1129,58 @@ def _metrics(predictions: list[dict], cutoff: date) -> dict:
 
 def _model_candidates(sport: str, model_name: str) -> list[dict]:
     football_like = sport in {"football", "national-football"}
-    advantage = 65.0 if football_like else 0.0
+    advantage = 65.0 if football_like else 35.0 if sport == "chess" else 0.0
     bayes_advantage = 1.35 if football_like else 0.4 if sport == "chess" else 0.0
     draw_margin = 1.35 if football_like else 0.75 if sport == "chess" else 0.0
     if model_name == "elo":
-        return [{"k": k, "scale": 400.0, "home": advantage} for k in (16.0, 24.0, 32.0)]
-    robust = model_name == "robust"
-    return [
-        {"robust": robust, "beta": beta, "draw_margin": draw_margin, "advantage": bayes_advantage}
-        for beta in (3.5, 25.0 / 6.0, 5.0)
-    ]
+        candidates = [{"k": k, "scale": 400.0, "home": advantage} for k in (16.0, 24.0, 32.0)]
+    elif model_name == "glicko2":
+        candidates = [
+            {
+                "tau": tau,
+                "home": advantage,
+                "period_days": 7.0,
+                "initial_rating": 1500.0,
+                "initial_rd": 350.0,
+                "initial_volatility": 0.06,
+            }
+            for tau in (0.3, 0.5, 0.8)
+        ]
+    else:
+        robust = model_name == "robust"
+        candidates = [
+            {"robust": robust, "beta": beta, "draw_margin": draw_margin, "advantage": bayes_advantage}
+            for beta in (3.5, 25.0 / 6.0, 5.0)
+        ]
+    if sport == "tennis":
+        return [
+            {**candidate, "surface_weight": surface_weight}
+            for candidate in candidates
+            for surface_weight in (0.4, 0.7, 0.9)
+        ]
+    return candidates
 
 
-def _new_model(model_name: str, params: dict):
-    return EloModel(**params) if model_name == "elo" else GaussianSkillModel(**params)
+def _new_model(model_name: str, params: dict, sport: str | None = None):
+    parameters = dict(params)
+    surface_weight = parameters.pop("surface_weight", None)
+    def factory():
+        if model_name == "elo":
+            return EloModel(**parameters)
+        if model_name == "glicko2":
+            return Glicko2Model(**parameters)
+        return GaussianSkillModel(**parameters)
+    if sport == "tennis" and surface_weight is not None:
+        return SurfaceBlendModel(factory, surface_weight)
+    return factory()
+
+
+def _published_score(model_name: str, state) -> float:
+    if model_name == "elo":
+        return state.mean
+    if model_name == "glicko2":
+        return state.mean - 2.0 * state.sigma
+    return state.mean - 3.0 * state.sigma
 
 
 def _run_model(
@@ -1104,17 +1193,29 @@ def _run_model(
     predictions: list[dict] = []
     histories: dict[str, list] = defaultdict(list)
     previous_season = None
-    for match in sorted(matches, key=_match_sort_key):
-        if sport == "chess":
-            for entity, key in ((match.entity_a, "rating_a"), (match.entity_b, "rating_b")):
+    ordered = sorted(matches, key=_match_sort_key)
+    index = 0
+    while index < len(ordered):
+        match = ordered[index]
+        period_end = index + 1
+        if isinstance(model, Glicko2Model) or getattr(model, "uses_rating_period", False):
+            while period_end < len(ordered) and ordered[period_end].date == match.date:
+                period_end += 1
+        period = ordered[index:period_end]
+        for period_match in period:
+            if sport != "chess":
+                continue
+            for entity, key in ((period_match.entity_a, "rating_a"), (period_match.entity_b, "rating_b")):
                 if entity in model.states:
                     continue
-                raw_rating = match.metadata.get(key, "")
+                raw_rating = period_match.metadata.get(key, "")
                 if not raw_rating.isdigit() or int(raw_rating) < 1000:
                     continue
                 state = model.state(entity)
-                if isinstance(model, EloModel):
+                if isinstance(model, (EloModel, Glicko2Model)):
                     state.mean = float(raw_rating)
+                    if isinstance(model, Glicko2Model):
+                        state.variance = 100.0**2
                 else:
                     state.mean = 25.0 + (float(raw_rating) - 2000.0) / 80.0
                     state.variance = 9.0
@@ -1125,20 +1226,25 @@ def _run_model(
             and match.season != previous_season
         ):
             model.regress(0.25)
-        probability = model.update(match)
-        predictions.append({"date": match.date.isoformat(), "predicted": probability, "actual": match.score_a})
-        for entity in (match.entity_a, match.entity_b):
+        if isinstance(model, Glicko2Model) or getattr(model, "uses_rating_period", False):
+            period_predictions = model.update_period(period)
+        else:
+            period_predictions = [model.update(match)]
+        for period_match, probability in zip(period, period_predictions):
+            predictions.append({"date": period_match.date.isoformat(), "predicted": probability, "actual": period_match.score_a})
+        for entity in {entity for item in period for entity in (item.entity_a, item.entity_b)}:
             if history_entities is not None and entity not in history_entities:
                 continue
             state = model.states[entity]
-            rating = state.mean if isinstance(model, EloModel) else state.mean - 3 * state.sigma
+            rating = _published_score(model.name, state)
             series = histories[entity]
             point = [match.date.isoformat(), round(rating, 2)]
             if series and series[-1][0] == point[0]:
                 series[-1] = point
             else:
                 series.append(point)
-        previous_season = match.season or previous_season
+        previous_season = period[-1].season or previous_season
+        index = period_end
     return model.states, predictions, histories
 
 
@@ -1151,7 +1257,7 @@ def _choose_parameters(matches: list[Match], sport: str, model_name: str, valida
     for params in _model_candidates(sport, model_name):
         _, predictions, _ = _run_model(
             tuning_matches,
-            _new_model(model_name, params),
+            _new_model(model_name, params, sport),
             sport,
             history_entities=set(),
         )
@@ -1232,7 +1338,7 @@ def _simulate_league(
             competition["season"],
             use_home_advantage,
         )
-        if isinstance(model, EloModel):
+        if isinstance(model, (EloModel, Glicko2Model)):
             probabilities = model.predict_outcomes(future_match, historical_draw_rate)
         else:
             probabilities = model.predict_outcomes(future_match)
@@ -1437,6 +1543,381 @@ def _simulate_knockout(competition: dict, model, model_name: str, simulations: i
     }
 
 
+def _model_parameters(model) -> dict:
+    if isinstance(model, SurfaceBlendModel):
+        return {
+            **_model_parameters(model.global_model),
+            "surface_weight": model.surface_weight,
+        }
+    if isinstance(model, EloModel):
+        return {"k": model.k, "scale": model.scale, "home": model.home}
+    if isinstance(model, Glicko2Model):
+        return {
+            "tau": model.tau,
+            "initial_rating": model.initial_rating,
+            "initial_rd": model.initial_rd,
+            "initial_volatility": model.initial_volatility,
+            "home": model.home,
+            "period_days": model.period_days,
+        }
+    return {
+        "robust": model.robust,
+        "beta": model.beta,
+        "draw_margin": model.draw_margin,
+        "advantage": model.advantage,
+    }
+
+
+def _competition_matches(schedule: dict, entities: dict) -> list[Match]:
+    """Convert completed schedule rows into protocol-ready event results."""
+    cohort = schedule.get("cohort", "football")
+    entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
+    use_advantage = bool(schedule.get("home_advantage", cohort == "football"))
+    results = []
+    for fixture in schedule["fixtures"]:
+        if fixture.get("home_goals") is None or fixture.get("away_goals") is None or not fixture.get("date"):
+            continue
+        home_slug = _slug(fixture["home_name"])
+        away_slug = _slug(fixture["away_name"])
+        aliases = SCHEDULE_ENTITY_ALIASES.get(cohort, {})
+        home = entity_by_name.get(home_slug) or entity_by_name.get(aliases.get(home_slug, "")) or fixture.get("home_id")
+        away = entity_by_name.get(away_slug) or entity_by_name.get(aliases.get(away_slug, "")) or fixture.get("away_id")
+        if not home or not away or home == away:
+            continue
+        home_score, away_score = fixture["home_goals"], fixture["away_goals"]
+        result = 1.0 if home_score > away_score else 0.0 if home_score < away_score else 0.5
+        results.append(
+            Match(
+                date.fromisoformat(fixture["date"]),
+                home,
+                away,
+                result,
+                schedule["label"],
+                schedule["season"],
+                use_advantage,
+            )
+        )
+    return sorted(_deduplicate(results), key=_match_sort_key)
+
+
+def _competition_performance(
+    schedule: dict,
+    reference_model,
+    model_name: str,
+    entities: dict,
+    matches: list[Match],
+) -> dict | None:
+    """Replay a completed event from its strictly pre-event rating state."""
+    event_matches = _competition_matches(schedule, entities)
+    if not event_matches:
+        return None
+    sport = schedule.get("cohort", "football")
+    first_result = event_matches[0].date
+    prior_matches = [match for match in matches if match.date < first_result]
+    parameters = _model_parameters(reference_model)
+    prior_model = _new_model(model_name, parameters, sport)
+    _run_model(prior_matches, prior_model, sport, history_entities=set())
+    event_model = _new_model(model_name, parameters, sport)
+    participants = sorted({entity for match in event_matches for entity in (match.entity_a, match.entity_b)})
+    event_names = {}
+    entity_by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
+    aliases = SCHEDULE_ENTITY_ALIASES.get(sport, {})
+    for fixture in schedule["fixtures"]:
+        for side in ("home", "away"):
+            name = fixture.get(f"{side}_name", "")
+            slug = _slug(name)
+            entity = entity_by_name.get(slug) or entity_by_name.get(aliases.get(slug, "")) or fixture.get(f"{side}_id")
+            if entity and name:
+                event_names[entity] = name
+    for entity in participants:
+        source = prior_model.state(entity)
+        target = event_model.state(entity)
+        target.mean = source.mean
+        target.variance = source.variance
+        target.matches = source.matches
+        target.last_played = source.last_played
+        target.volatility = source.volatility
+    previous_season = next((match.season for match in reversed(prior_matches) if match.season), None)
+    if sport == "football" and isinstance(event_model, EloModel) and previous_season and previous_season != schedule["season"]:
+        event_model.regress(0.25)
+    starts = {
+        entity: (event_model.state(entity).mean, event_model.state(entity).sigma, event_model.state(entity).volatility)
+        for entity in participants
+    }
+    records = defaultdict(lambda: {"wins": 0, "draws": 0, "losses": 0, "points": 0.0, "matches": 0})
+    event_index = 0
+    while event_index < len(event_matches):
+        match = event_matches[event_index]
+        event_period_end = event_index + 1
+        if isinstance(event_model, Glicko2Model):
+            while event_period_end < len(event_matches) and event_matches[event_period_end].date == match.date:
+                event_period_end += 1
+            event_model.update_period(event_matches[event_index:event_period_end])
+        else:
+            event_model.update(match)
+        for match in event_matches[event_index:event_period_end]:
+            for entity, score in ((match.entity_a, match.score_a), (match.entity_b, 1.0 - match.score_a)):
+                record = records[entity]
+                record["matches"] += 1
+                record["points"] += score
+                if score == 1.0:
+                    record["wins"] += 1
+                elif score == 0.5:
+                    record["draws"] += 1
+                else:
+                    record["losses"] += 1
+        event_index = event_period_end
+    rows = []
+    for entity in participants:
+        start_mean, start_sigma, start_volatility = starts[entity]
+        end = event_model.state(entity)
+        start_score = (
+            start_mean if model_name == "elo"
+            else start_mean - 2.0 * start_sigma if model_name == "glicko2"
+            else start_mean - 3.0 * start_sigma
+        )
+        end_score = _published_score(model_name, end)
+        record = records[entity]
+        rows.append(
+            {
+                "id": entity,
+                "name": entities.get(entity, {}).get("name") or event_names.get(entity, entity),
+                "start_rating": round(start_mean, 2),
+                "start_sigma": round(start_sigma, 2) if model_name != "elo" else None,
+                "start_volatility": round(start_volatility, 6) if model_name == "glicko2" else None,
+                "start_score": round(start_score, 2),
+                "end_rating": round(end.mean, 2),
+                "end_sigma": round(end.sigma, 2) if model_name != "elo" else None,
+                "end_volatility": round(end.volatility, 6) if model_name == "glicko2" else None,
+                "performance_rating": round(end_score, 2),
+                "change": round(end_score - start_score, 2),
+                "matches": record["matches"],
+                "wins": record["wins"],
+                "draws": record["draws"],
+                "losses": record["losses"],
+                "points": round(record["points"], 2),
+                "score_rate": round(record["points"] / record["matches"], 4),
+            }
+        )
+    rows.sort(key=lambda row: (-row["performance_rating"], -row["change"], row["name"]))
+    for rank, row in enumerate(rows, 1):
+        row["rank"] = rank
+    return {
+        "rating_type": "elo" if model_name == "elo" else "glicko2_conservative_r_minus_2rd" if model_name == "glicko2" else "conservative_mu_minus_3_sigma",
+        "results": len(event_matches),
+        "first_result": event_matches[0].date.isoformat(),
+        "last_result": event_matches[-1].date.isoformat(),
+        "participants": rows,
+    }
+
+
+def _as_float(value, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _json_array(value) -> list:
+    if isinstance(value, list):
+        return value
+    if not isinstance(value, str):
+        return []
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        return []
+    return parsed if isinstance(parsed, list) else []
+
+
+def _market_identity_tokens(name: str) -> frozenset[str]:
+    ignored = {"fc", "cf", "afc", "sc", "ac", "club"}
+    return frozenset(token for token in _slug(name).split("-") if token and token not in ignored)
+
+
+def _competition_participants(competition: dict) -> list[dict]:
+    model = competition.get("models", {}).get("elo", {})
+    return model.get("teams") or model.get("participants") or []
+
+
+def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
+    participants = _competition_participants(competition)
+    if len(participants) < 2 or not event.get("markets"):
+        return None
+    participant_tokens = [(_market_identity_tokens(row["name"]), row) for row in participants]
+    valid_markets = []
+    for market in event["markets"]:
+        outcomes = _json_array(market.get("outcomes"))
+        prices = _json_array(market.get("outcomePrices"))
+        yes_index = next((index for index, outcome in enumerate(outcomes) if str(outcome).casefold() == "yes"), None)
+        if yes_index is None or yes_index >= len(prices) or market.get("closed") is True or market.get("active") is False:
+            continue
+        liquidity = _as_float(market.get("liquidity"))
+        volume = _as_float(market.get("volume"))
+        if liquidity <= 0 and volume <= 0:
+            continue
+        price = _as_float(prices[yes_index], -1)
+        if not 0 <= price <= 1:
+            continue
+        title = str(market.get("groupItemTitle") or market.get("question") or "").strip()
+        tokens = _market_identity_tokens(title)
+        if not tokens:
+            continue
+        valid_markets.append((market, title, tokens, price, liquidity, volume))
+    raw_sum = sum(item[3] for item in valid_markets)
+    if raw_sum <= 0:
+        return None
+    matched = []
+    used_entities = set()
+    for market, market_title, tokens, price, liquidity, volume in valid_markets:
+        exact = [row for candidate, row in participant_tokens if candidate == tokens]
+        candidates = exact or [
+            row for candidate, row in participant_tokens
+            if tokens.issubset(candidate) or candidate.issubset(tokens)
+        ]
+        candidates = [row for row in candidates if row["id"] not in used_entities]
+        if len(candidates) != 1:
+            continue
+        participant = candidates[0]
+        used_entities.add(participant["id"])
+        matched.append(
+            {
+                "entity_id": participant["id"],
+                "name": participant["name"],
+                "market_id": str(market.get("id", "")),
+                "market_slug": market.get("slug"),
+                "market_label": market_title,
+                "raw_yes_price": round(price, 6),
+                "normalized_probability": round(price / raw_sum, 6),
+                "best_bid": round(_as_float(market.get("bestBid")), 6),
+                "best_ask": round(_as_float(market.get("bestAsk")), 6),
+                "liquidity_usd": round(liquidity, 2),
+                "volume_usd": round(volume, 2),
+                "updated_at": market.get("updatedAt"),
+            }
+        )
+    coverage = len(matched) / len(participants)
+    if len(matched) < 2 or coverage < 0.5:
+        return None
+    matched.sort(key=lambda row: (-row["normalized_probability"], row["name"]))
+    snapshot_material = json.dumps(
+        [(row["market_id"], row["raw_yes_price"], row["updated_at"]) for row in matched],
+        separators=(",", ":"),
+    )
+    return {
+        "competition_id": competition["id"],
+        "event_id": str(event.get("id", "")),
+        "event_title": event.get("title"),
+        "event_slug": event.get("slug"),
+        "event_url": f"https://polymarket.com/event/{event.get('slug')}",
+        "event_updated_at": event.get("updatedAt"),
+        "event_liquidity_usd": round(_as_float(event.get("liquidity")), 2),
+        "event_volume_usd": round(_as_float(event.get("volume")), 2),
+        "raw_yes_price_sum": round(raw_sum, 6),
+        "normalization": "Each active liquid binary winner market's Yes price divided by the sum of Yes prices across all active liquid outcomes in the matched event.",
+        "matched_participants": len(matched),
+        "model_participants": len(participants),
+        "market_outcomes": len(valid_markets),
+        "coverage": round(coverage, 4),
+        "snapshot_sha256": hashlib.sha256(snapshot_material.encode()).hexdigest(),
+        "outcomes": matched,
+    }
+
+
+def _polymarket_search_query(competition: dict) -> str:
+    season = str(competition.get("season", ""))
+    if "-" in season and len(season.rsplit("-", 1)[-1]) == 2:
+        century = season.split("-", 1)[0][:2]
+        year = century + season.rsplit("-", 1)[-1]
+    else:
+        year = season
+    suffix = "winner" if "chess" in competition["id"] else "champion"
+    return " ".join(part for part in (competition["label"], year, suffix) if part)
+
+
+def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
+    """Fetch public winner markets and match them conservatively to our fields."""
+    eligible = [competition for competition in competitions if competition.get("status") in {"live", "scheduled"}]
+    fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    snapshots = []
+    searches = []
+    failures = 0
+    for competition in eligible:
+        query = _polymarket_search_query(competition)
+        api_url = "https://gamma-api.polymarket.com/public-search?" + urlencode(
+            {
+                "q": query,
+                "events_status": "active",
+                "limit_per_type": 10,
+                "search_profiles": "false",
+            }
+        )
+        try:
+            payload = json.loads(_get(api_url, attempts=3, cache_ttl=1800).decode("utf-8"))
+        except (RuntimeError, json.JSONDecodeError):
+            failures += 1
+            searches.append({"competition_id": competition["id"], "query": query, "status": "source_error"})
+            continue
+        candidates = []
+        for event in payload.get("events") or []:
+            if event.get("closed") is True or event.get("active") is False:
+                continue
+            snapshot = _polymarket_event_snapshot(competition, event)
+            if snapshot:
+                candidates.append(snapshot)
+        if candidates:
+            candidates.sort(key=lambda row: (-row["matched_participants"], -row["coverage"], -row["event_liquidity_usd"]))
+            snapshots.append(candidates[0])
+            searches.append({"competition_id": competition["id"], "query": query, "status": "matched", "event_id": candidates[0]["event_id"]})
+        else:
+            searches.append({"competition_id": competition["id"], "query": query, "status": "no_confident_match"})
+    if eligible and failures == len(eligible):
+        raise RuntimeError("Polymarket Gamma API was unavailable for every eligible competition")
+    return {
+        "status": "current",
+        "source": "Polymarket Gamma API",
+        "source_url": "https://docs.polymarket.com/market-data/overview",
+        "api_base": "https://gamma-api.polymarket.com",
+        "fetched_at": fetched_at,
+        "checked_at": fetched_at,
+        "stale_after_hours": 48,
+        "probability_definition": "Public Gamma outcomePrices Yes values, normalized across active liquid mutually exclusive winner markets; these are a market benchmark and never a rating-model input.",
+        "competitions": snapshots,
+        "searches": searches,
+    }
+
+
+def _attach_polymarket_comparison(payload: dict, previous: dict | None) -> None:
+    predictor = payload.get("tournament_predictor")
+    if not predictor:
+        return
+    try:
+        predictor["market_comparison"] = fetch_polymarket_comparison(predictor["competitions"])
+    except RuntimeError as error:
+        retained = (previous or {}).get("tournament_predictor", {}).get("market_comparison")
+        if retained:
+            retained = json.loads(json.dumps(retained))
+            retained["status"] = "retained"
+            retained["checked_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            retained["message"] = str(error)[:240]
+            predictor["market_comparison"] = retained
+        else:
+            checked_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            predictor["market_comparison"] = {
+                "status": "unavailable",
+                "source": "Polymarket Gamma API",
+                "source_url": "https://docs.polymarket.com/market-data/overview",
+                "api_base": "https://gamma-api.polymarket.com",
+                "fetched_at": None,
+                "checked_at": checked_at,
+                "stale_after_hours": 48,
+                "probability_definition": "No market snapshot was available; rating forecasts remain independent.",
+                "competitions": [],
+                "searches": [],
+                "message": str(error)[:240],
+            }
+
+
 def _build_tournament_predictor(
     schedules: list[dict],
     models: dict,
@@ -1475,15 +1956,26 @@ def _build_tournament_predictor(
         else:
             competition["models"] = {}
             competition["status"] = "waiting for draw"
+        if competition["status"] == "complete":
+            performance_models = {
+                model_name: _competition_performance(schedule, model, model_name, entities, matches)
+                for model_name, model in models.items()
+            }
+            if all(performance_models.values()):
+                competition["performance"] = {
+                    "method": "Initialize every participant from the global rating state after all source results strictly before the first event date, replay only completed event results in deterministic protocol order, and publish final Elo, Glicko-2 rating−2RD, or Gaussian μ−3σ with its change from the event start.",
+                    "models": performance_models,
+                }
         competitions.append(competition)
     return {
         "format": "format-aware competition forecast",
         "simulations_per_model": PREDICTOR_SIMULATIONS,
-        "draw_model": "Model draw likelihood; Elo uses the historical football draw rate scaled by matchup closeness.",
+        "draw_model": "Gaussian models use their fitted draw likelihood; Elo and Glicko-2 allocate the historical draw rate by matchup closeness while preserving expected score.",
         "tie_break": "Points, simulated goal difference, then current model strength.",
         "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
         "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented.",
         "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
+        "performance_method": "Completed competitions publish protocol performance ratings instead of retrospective title probabilities.",
         "competitions": competitions,
     }
 
@@ -1525,19 +2017,34 @@ def build_sport_payload(
             )
         )
     }
+    outcome_matches = [
+        match for match in matches
+        if match.entity_a in history_entities and match.entity_b in history_entities
+    ] or matches
     model_payloads = {}
     selected_parameters = {}
     fitted_models = {}
-    for model_name in ("elo", "trueskill", "robust"):
+    for model_name in MODEL_NAMES:
         params = _choose_parameters(matches, sport, model_name, validation_start, evaluation_start)
         selected_parameters[model_name] = params
-        fitted_model = _new_model(model_name, params)
+        fitted_model = _new_model(model_name, params, sport)
         states, predictions, histories = _run_model(
             matches,
             fitted_model,
             sport,
             history_entities=history_entities,
         )
+        if isinstance(fitted_model, Glicko2Model) or getattr(fitted_model, "uses_rating_period", False):
+            fitted_model.age_to(latest)
+            for entity in history_entities:
+                if entity not in states:
+                    continue
+                point = [latest.isoformat(), round(_published_score(model_name, states[entity]), 2)]
+                series = histories[entity]
+                if series and series[-1][0] == point[0]:
+                    series[-1] = point
+                else:
+                    series.append(point)
         fitted_models[model_name] = fitted_model
         rows = []
         for entity, state in states.items():
@@ -1550,18 +2057,18 @@ def build_sport_payload(
                 or entities[entity].get("official_rating", 0) < 2200
             ):
                 continue
-            conservative = state.mean if model_name == "elo" else state.mean - 3 * state.sigma
+            conservative = _published_score(model_name, state)
             full_history = histories.get(entity, [])
             cutoff_point = next((point[1] for point in reversed(full_history) if date.fromisoformat(point[0]) <= latest - timedelta(days=30)), full_history[0][1] if full_history else conservative)
             history = _compress_history(full_history)
-            rows.append(
-                {
+            row = {
                     "id": entity,
                     "name": entities[entity]["name"],
                     "country": entities[entity].get("country", ""),
                     "competition": entities[entity].get("competition", ""),
                     "rating": round(state.mean, 2),
                     "sigma": round(state.sigma, 2) if model_name != "elo" else None,
+                    "volatility": round(state.volatility, 6) if model_name == "glicko2" else None,
                     "score": round(conservative, 2),
                     "change30": round(conservative - cutoff_point, 2),
                     "matches": state.matches,
@@ -1569,13 +2076,27 @@ def build_sport_payload(
                     "last_played": state.last_played.isoformat() if state.last_played else None,
                     "history": history,
                 }
-            )
+            if isinstance(fitted_model, SurfaceBlendModel):
+                row["contexts"] = {}
+                for surface, surface_model in sorted(fitted_model.surface_models.items()):
+                    surface_state = surface_model.states.get(entity)
+                    if not surface_state or not surface_state.matches:
+                        continue
+                    row["contexts"][surface] = {
+                        "rating": round(surface_state.mean, 2),
+                        "sigma": round(surface_state.sigma, 2) if model_name != "elo" else None,
+                        "volatility": round(surface_state.volatility, 6) if model_name == "glicko2" else None,
+                        "score": round(_published_score(model_name, surface_state), 2),
+                        "matches": surface_state.matches,
+                        "last_played": surface_state.last_played.isoformat() if surface_state.last_played else None,
+                    }
+            rows.append(row)
         rows.sort(key=lambda row: (-row["score"], row["name"]))
         rows = rows[:500]
         for rank, row in enumerate(rows, 1):
             row["rank"] = rank
         model_payloads[model_name] = {
-            "label": {"elo": "Elo", "trueskill": "Gaussian TrueSkill", "robust": "Robust TrueSkill"}[model_name],
+            "label": {"elo": "Elo", "glicko2": "Glicko-2", "trueskill": "Gaussian TrueSkill", "robust": "Robust TrueSkill"}[model_name],
             "metrics": _metrics(predictions, evaluation_start),
             "rankings": rows,
         }
@@ -1591,6 +2112,38 @@ def build_sport_payload(
             "matches": len(matches),
             "entities": len(entities),
         },
+        "outcome_context": {
+            "draw_rate": round(sum(match.score_a == 0.5 for match in outcome_matches) / len(outcome_matches), 6),
+            "draws": sum(match.score_a == 0.5 for match in outcome_matches),
+            "matches": len(outcome_matches),
+            "method": "Completed draws divided by deduplicated replay results where both competitors satisfy the current publication eligibility rules.",
+        },
+        "prediction_contexts": {
+            "tennis": {
+                "type": "surface",
+                "values": [
+                    {"id": surface, "label": surface.title()}
+                    for surface in ("hard", "clay", "grass", "carpet")
+                    if any(SurfaceBlendModel.surface(match) == surface for match in matches)
+                ],
+                "method": "Blend the global player belief with an independently replayed surface belief. The selected validation weight is multiplied by min((surface matches A + surface matches B) / 20, 1).",
+            },
+            "football": {
+                "type": "venue",
+                "values": [{"id": "a", "label": "A at home"}, {"id": "neutral", "label": "Neutral"}, {"id": "b", "label": "B at home"}],
+                "method": "Apply the selected home offset to the listed home side before predicting and updating.",
+            },
+            "national-football": {
+                "type": "venue",
+                "values": [{"id": "a", "label": "A at home"}, {"id": "neutral", "label": "Neutral"}, {"id": "b", "label": "B at home"}],
+                "method": "Apply the selected home offset only when the source does not mark the match neutral.",
+            },
+            "chess": {
+                "type": "color",
+                "values": [{"id": "a", "label": "A is White"}, {"id": "b", "label": "B is White"}, {"id": "neutral", "label": "Color unassigned"}],
+                "method": "PGN games are White-first. Apply the declared White offset before predicting and updating.",
+            },
+        }[sport],
         "eligibility": {
             "minimum_recent_matches": minimum,
             "recent_window_days": active_window_days,
@@ -1603,7 +2156,7 @@ def build_sport_payload(
         },
         "competitions": sorted({info.get("competition", "") for info in entities.values() if info.get("competition")}),
         "candidate_parameters": {
-            name: _model_candidates(sport, name) for name in ("elo", "trueskill", "robust")
+            name: _model_candidates(sport, name) for name in MODEL_NAMES
         },
         "parameters": selected_parameters,
         "models": model_payloads,
@@ -1633,6 +2186,11 @@ def validate_payload(payload: dict, schema: dict) -> None:
         raise ValueError("Invalid data window match count")
     if not isinstance(window.get("entities"), int) or window["entities"] < 2:
         raise ValueError("Invalid data window entity count")
+    context = payload["outcome_context"]
+    if not isinstance(context.get("matches"), int) or not 1 <= context["matches"] <= window["matches"]:
+        raise ValueError("Outcome context sample is outside the data window")
+    if not 0 <= context.get("draw_rate", -1) <= 1:
+        raise ValueError("Invalid empirical draw rate")
     eligibility = payload["eligibility"]
     if not isinstance(eligibility.get("minimum_recent_matches"), int):
         raise ValueError("Invalid eligibility minimum")
@@ -1645,9 +2203,25 @@ def validate_payload(payload: dict, schema: dict) -> None:
     predictor = payload.get("tournament_predictor")
     if predictor:
         for competition in predictor["competitions"]:
-            if competition.get("forecast_available") and set(competition.get("models", {})) != {"elo", "trueskill", "robust"}:
+            if competition.get("forecast_available") and set(competition.get("models", {})) != set(MODEL_NAMES):
                 raise ValueError("Incomplete tournament prediction models")
-    for name in ("elo", "trueskill", "robust"):
+            if competition.get("status") == "complete":
+                performance = competition.get("performance", {}).get("models", {})
+                if set(performance) != set(MODEL_NAMES):
+                    raise ValueError("Completed competition is missing protocol performance ratings")
+        market = predictor.get("market_comparison")
+        if market:
+            if market.get("status") not in {"current", "retained", "unavailable"}:
+                raise ValueError("Invalid market comparison status")
+            for competition in market.get("competitions", []):
+                if competition.get("raw_yes_price_sum", 0) <= 0:
+                    raise ValueError("Invalid Polymarket outcome-price sum")
+                entity_ids = [row.get("entity_id") for row in competition.get("outcomes", [])]
+                if len(entity_ids) != len(set(entity_ids)):
+                    raise ValueError("Duplicate Polymarket participant match")
+                if any(not 0 <= row.get("normalized_probability", -1) <= 1 for row in competition.get("outcomes", [])):
+                    raise ValueError("Invalid normalized Polymarket probability")
+    for name in MODEL_NAMES:
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
         ranks = [row["rank"] for row in payload["models"][name]["rankings"]]
@@ -1690,6 +2264,8 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         temporary_path = Path(temporary)
         for sport in requested:
             try:
+                existing = output_dir / f"{sport}.json"
+                previous_payload = json.loads(existing.read_text()) if existing.exists() else None
                 matches, entities, source_meta = loaders[sport]()
                 predictor_schedules = None
                 if sport == "football":
@@ -1707,6 +2283,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     source_meta,
                     predictor_schedules=predictor_schedules,
                 )
+                _attach_polymarket_comparison(payload, previous_payload)
                 validate_payload(payload, schema)
                 staged = temporary_path / f"{sport}.json"
                 staged.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n")
@@ -1745,13 +2322,22 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         "code_revision": os.environ.get("GITHUB_SHA") or _git_revision(),
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "sports": statuses,
-        "models": ["elo", "trueskill", "robust"],
+        "models": list(MODEL_NAMES),
         "replay": {
             "order": ["date", "entity_a", "entity_b", "competition", "score_a"],
             "validation_days": 365,
             "evaluation_days": 365,
             "quadrature_nodes": 20,
             "robust_student_t_degrees_of_freedom": 1,
+            "glicko2_rating_period": "All results on one UTC calendar date are updated simultaneously.",
+            "glicko2_inactivity_period_days": 7,
+            "glicko2_publication_score": "rating - 2 * rating deviation",
+            "trueskill2_claim": "Not used: the public sports sources do not provide the experience, squad, individual-performance, quitting, or cross-mode observations required by the published TrueSkill 2 model.",
+            "competitive_context": {
+                "tennis": "Global and surface-specific beliefs are replayed together. Prediction weight = selected surface_weight * min((surface matches A + surface matches B) / 20, 1).",
+                "football": "The listed home side receives the model's declared home offset; source-marked neutral national matches do not.",
+                "chess": "PGN entity A is White and receives the declared White offset before every prediction and update.",
+            },
         },
         "tournament_predictor": {
             "simulations_per_competition_model": PREDICTOR_SIMULATIONS,
@@ -1759,8 +2345,12 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup"],
             "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
             "availability": "Withhold title probabilities until the public source identifies a knockout field.",
+            "completed_competitions": "Replace retrospective title odds with competition-only protocol performance ratings initialized from the strictly pre-event state.",
+            "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
+            "market_quality_fields": ["raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at"],
             "refresh": "daily",
         },
+        "individual_contribution": individual_contribution_protocol(),
         "methodology_url": "/rating-lab/#methodology",
     }
     (output_dir / "schema.json").write_text(json.dumps(schema, indent=2) + "\n")
