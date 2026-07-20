@@ -15,6 +15,7 @@ from rating_lab.pipeline import (
     _parse_cup_schedule,
     _parse_football_txt,
     _parse_international_results,
+    _parse_open_cup_json,
     _simulate_league,
     _simulate_knockout,
     build_sport_payload,
@@ -154,6 +155,30 @@ class PipelineTests(unittest.TestCase):
         self.assertIsNotNone(competition)
         self.assertFalse(competition["forecast_available"])
         self.assertIn("no title probability", competition["availability"])
+
+    def test_open_cup_json_uses_penalties_to_resolve_final(self):
+        payload = {"matches": [{
+            "round": "Final",
+            "date": "2026-07-19",
+            "team1": "Alpha",
+            "team2": "Beta",
+            "score": {"ft": [1, 1], "et": [1, 1], "p": [5, 4]},
+        }]}
+        competition = _parse_open_cup_json(json.dumps(payload).encode(), "WC", "World Cup", "2026")
+        self.assertTrue(competition["forecast_available"])
+        final = competition["knockout_fixtures"][0]
+        self.assertEqual(final["winner_id"], "national-football:alpha")
+        self.assertEqual(final["status"], "FINISHED")
+
+    def test_football_txt_parser_reads_penalty_score_before_suffix(self):
+        fixture = """= Cup 2025/26
+▪ Finals, Final
+  Sat May 30 2026
+    18:00  Alpha FC (ENG) v Beta FC (ESP)  4-3 pen. 1-1 a.e.t. (1-1, 0-1)
+"""
+        competition = _parse_football_txt(fixture, "cup", "Cup", "2025-26")
+        self.assertEqual(competition["fixtures"][0]["away_name"], "Beta FC (ESP)")
+        self.assertEqual(competition["fixtures"][0]["home_goals"], 4)
 
     def test_schedule_results_advance_ratings_feed_and_active_membership(self):
         matches = [Match(date(2025, 1, 1), "football:name:old", "football:name:alpha", 0.0, "Test League", "2025-26", True)]

@@ -1,8 +1,8 @@
 {
   "schema_version": "1.3.0",
   "methodology_version": "2026-07-20.3",
-  "code_revision": "530e44e3ecfd70839b46e113593740d9f4b10fa2",
-  "generated_at": "2026-07-20T01:42:29+00:00",
+  "code_revision": "93e3573296c8d37eaa37304a5b93a55ac9582343",
+  "generated_at": "2026-07-20T01:58:42+00:00",
   "sports": {
     "tennis": {
       "status": "current",
@@ -33,12 +33,41 @@
         }
       }
     },
+    "chess": {
+      "status": "current",
+      "latest_result": "2026-07-19",
+      "source": "Lichess official broadcasts",
+      "stale_after_hours": 840,
+      "checked_at": "2026-07-20T01:42:29+00:00",
+      "license": "CC BY-SA 4.0",
+      "source_url": "https://database.lichess.org/#broadcasts",
+      "snapshot_sha256": null,
+      "parameters": {
+        "elo": {
+          "k": 32.0,
+          "scale": 400.0,
+          "home": 0.0
+        },
+        "trueskill": {
+          "robust": false,
+          "beta": 5.0,
+          "draw_margin": 0.75,
+          "advantage": 0.4
+        },
+        "robust": {
+          "robust": true,
+          "beta": 3.5,
+          "draw_margin": 0.75,
+          "advantage": 0.4
+        }
+      }
+    },
     "football": {
       "status": "current",
       "latest_result": "2026-05-24",
       "source": "OpenFootball (development fallback)",
       "stale_after_hours": 48,
-      "checked_at": "2026-07-20T01:41:07+00:00",
+      "checked_at": "2026-07-20T01:58:37+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/openfootball/football.json",
       "snapshot_sha256": null,
@@ -67,7 +96,7 @@
       "latest_result": "2026-07-19",
       "source": "International football results by Mart J\u00fcrisoo",
       "stale_after_hours": 168,
-      "checked_at": "2026-07-20T01:41:13+00:00",
+      "checked_at": "2026-07-20T01:58:42+00:00",
       "license": "CC0 1.0",
       "source_url": "https://github.com/martj42/international_results",
       "snapshot_sha256": "9bc66b3829f3162f03f43d04591544294bfb2ee14305cf4f3b29cfb2641b8e45",
@@ -88,35 +117,6 @@
           "beta": 3.5,
           "draw_margin": 1.35,
           "advantage": 1.35
-        }
-      }
-    },
-    "chess": {
-      "status": "current",
-      "latest_result": "2026-07-19",
-      "source": "Lichess official broadcasts",
-      "stale_after_hours": 840,
-      "checked_at": "2026-07-20T01:42:29+00:00",
-      "license": "CC BY-SA 4.0",
-      "source_url": "https://database.lichess.org/#broadcasts",
-      "snapshot_sha256": null,
-      "parameters": {
-        "elo": {
-          "k": 32.0,
-          "scale": 400.0,
-          "home": 0.0
-        },
-        "trueskill": {
-          "robust": false,
-          "beta": 5.0,
-          "draw_margin": 0.75,
-          "advantage": 0.4
-        },
-        "robust": {
-          "robust": true,
-          "beta": 3.5,
-          "draw_margin": 0.75,
-          "advantage": 0.4
         }
       }
     }
