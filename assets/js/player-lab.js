@@ -88,10 +88,12 @@
     var points = rapmRows.filter(function (row) { return trueZ[row.id] !== undefined; }).map(function (row) {
       return { id: row.id, name: row.name, team: row.team, x: trueZ[row.id], y: rapmZ[row.id] };
     });
-    var width = 760, height = 390, pad = 45, extent = 3.2;
+    var mobile = window.matchMedia('(max-width: 650px)').matches;
+    var width = mobile ? Math.max(280, Math.floor(elements.chart.clientWidth || 330)) : 760;
+    var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
     function x(value) { return pad + (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (width - 2 * pad); }
     function y(value) { return height - pad - (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (height - 2 * pad); }
-    var labels = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); }).slice(0, 8);
+    var labels = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); }).slice(0, mobile ? 4 : 8);
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
@@ -100,7 +102,7 @@
         escapeHtml(point.name + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, RAPM ' + point.y.toFixed(2) + ' standard deviations') +
         '"><span></span>' + (labelIds[point.id] ? '<small>' + escapeHtml(point.name) + '</small>' : '') + '</button>';
     }).join('');
-    elements.chart.innerHTML = '<div class="player-lab-chart-frame" style="--chart-width:' + width + ';--chart-height:' + height + '">' +
+    elements.chart.innerHTML = '<div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and RAPM scores">' +
       '<line x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +
       '<line x1="' + pad + '" y1="' + y(0) + '" x2="' + (width - pad) + '" y2="' + y(0) + '"></line>' +
@@ -113,14 +115,15 @@
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 30);
     elements.caption.textContent = cohort.models[state.model].label + ' · ' + rows.length + ' eligible players';
-    elements.scoreHeading.textContent = state.model === 'rapm' ? 'Conservative impact' : 'Conservative score';
+    elements.scoreHeading.textContent = 'Score';
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
     elements.more.textContent = 'Show all ' + rows.length + ' players';
     elements.body.innerHTML = displayed.map(function (row) {
       return '<tr data-player-row="' + escapeHtml(row.id) + '"' + (row.id === state.selected ? ' class="is-selected"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td><th scope="row"><button type="button" class="rating-lab-entity" data-player-id="' +
-        escapeHtml(row.id) + '"><span>' + escapeHtml(row.name) + '</span><small>' + escapeHtml(row.team) + '</small></button></th>' +
+        escapeHtml(row.id) + '"><span>' + escapeHtml(row.name) + '</span><small>' + escapeHtml(row.team) + ' · ±' +
+        number(row.uncertainty, 2) + ' · ' + number(row.minutes, 0) + ' min · ' + row.matches + ' matches</small></button></th>' +
         '<td><strong>' + number(row.score, 2) + '</strong></td><td>±' + number(row.uncertainty, 2) + '</td>' +
         '<td class="rating-lab-optional">' + number(row.minutes, 0) + '</td><td class="rating-lab-optional">' + row.matches + '</td></tr>';
     }).join('');
@@ -163,6 +166,16 @@
     renderGates();
   }
 
+  function revealDetailOnMobile() {
+    if (!window.matchMedia('(max-width: 650px)').matches) return;
+    window.setTimeout(function () {
+      elements.detail.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start'
+      });
+    }, 0);
+  }
+
   elements.cohort.addEventListener('change', function () {
     state.cohort = elements.cohort.value;
     state.selected = null;
@@ -192,6 +205,7 @@
     renderChart();
     renderTable();
     renderDetail();
+    revealDetailOnMobile();
   });
 
   fetch(root.dataset.playerData)

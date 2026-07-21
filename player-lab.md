@@ -14,7 +14,7 @@ description: Outcome-only historical football player ratings from complete Stats
   </header>
 
   <div id="player-lab-error" class="rating-lab-notice rating-lab-notice-error" role="alert" hidden></div>
-  <noscript><p class="rating-lab-notice">This player leaderboard requires JavaScript.</p></noscript>
+  <noscript>This player leaderboard requires JavaScript.</noscript>
 
   <section class="player-lab-explorer" aria-labelledby="player-ranking-heading">
     <div class="rating-lab-section-heading">

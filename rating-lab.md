@@ -23,7 +23,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <a href="#research" aria-label="Methods and data"><strong>05</strong><span data-mobile-label="Methods">Methods & data</span></a>
   </nav>
 
-  <noscript><p class="rating-lab-notice">This interactive leaderboard requires JavaScript.</p></noscript>
+  <noscript>This interactive leaderboard requires JavaScript.</noscript>
   <div id="rating-lab-error" class="rating-lab-notice rating-lab-notice-error" role="alert" hidden></div>
 
   <section class="rating-lab-explorer" aria-labelledby="leaderboard-heading">
@@ -184,6 +184,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
           </thead>
           <tbody id="predictor-body"></tbody>
         </table>
+        <p class="rating-lab-predictor-mobile-hint">Tap a team for title, top-four, relegation, and its full finishing-position distribution.</p>
       </div>
       <aside class="rating-lab-detail rating-lab-predictor-detail" id="predictor-detail" aria-live="polite">
         <p class="rating-lab-detail-placeholder">Choose a team to inspect its full finishing-position distribution.</p>
