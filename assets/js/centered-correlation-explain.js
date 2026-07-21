@@ -5,9 +5,12 @@
   if (!root) return;
 
   var storageKey = root.dataset.storageKey || 'centered-correlation-explain-v2';
-  var conceptIds = ['coordinates', 'identity', 'bound', 'norms', 'compatibility'];
+  var conceptIds = ['coordinates', 'identity', 'triangle', 'cauchy', 'variance', 'bound', 'norms', 'compatibility'];
   var defaultState = {
     proofComplete: false,
+    boundComplete: false,
+    boundProgress: 0,
+    boundMistakes: {},
     fsrsCards: {},
     fsrsReviewed: {},
     fsrsEverPassed: {},
@@ -69,6 +72,75 @@
             ['It is the Schmidt index of the mixed state.', false]
           ],
           explanation: 'The quantum state is represented as a classical mixture of product states. The probabilities $p_k$ turn the local Bloch vectors into ordinary jointly distributed random vectors.'
+        }
+      ]
+    },
+    triangle: {
+      label: 'Nuclear norm and rank one',
+      variants: [
+        {
+          question: 'From $C=\\sum_kp_ku_kv_k^{\\mathsf T}$, what is the first norm estimate that is always valid?',
+          options: [
+            ['$\\lVert C\\rVert_*\\leq\\sum_kp_k\\lVert u_kv_k^{\\mathsf T}\\rVert_*$.', true],
+            ['$\\lVert C\\rVert_*=\\sum_kp_k\\lVert u_kv_k^{\\mathsf T}\\rVert_*$ for every ensemble.', false],
+            ['$\\lVert C\\rVert_*\\leq\\max_k\\lVert u_kv_k^{\\mathsf T}\\rVert_*$.', false]
+          ],
+          explanation: 'The triangle inequality gives the sum. Equality would require special alignment of the summands; a maximum does not control a convex sum in this way.'
+        },
+        {
+          question: 'Why can each summand be replaced by a product of Euclidean norms?',
+          options: [
+            ['$u_kv_k^{\\mathsf T}$ has rank at most one, so its only nonzero singular value is $\\lVert u_k\\rVert_2\\lVert v_k\\rVert_2$.', true],
+            ['Every covariance matrix is diagonal in the Bloch basis.', false],
+            ['Nuclear and operator norms agree for every matrix.', false]
+          ],
+          explanation: 'The rank-one outer-product identity is exact; the inequality enters one line earlier through the triangle inequality.'
+        }
+      ]
+    },
+    cauchy: {
+      label: 'Weighted Cauchy–Schwarz',
+      variants: [
+        {
+          question: 'Which substitution exposes the weighted Cauchy–Schwarz step?',
+          options: [
+            ['$a_k=\\sqrt{p_k}\\lVert r_k-r\\rVert_2$ and $b_k=\\sqrt{p_k}\\lVert s_k-s\\rVert_2$.', true],
+            ['$a_k=p_k\\lVert r_k-r\\rVert_2$ and $b_k=p_k\\lVert s_k-s\\rVert_2$.', false],
+            ['$a_k=\\lVert r\\rVert_2$ and $b_k=\\lVert s\\rVert_2$ for every $k$.', false]
+          ],
+          explanation: 'The square roots place exactly one factor $p_k$ in each product and produce the weighted sums of squared deviations.'
+        },
+        {
+          question: 'What does Cauchy–Schwarz control in the centered proof?',
+          options: [
+            ['The sum of products of local deviations by the product of their root-mean-square sizes.', true],
+            ['The rank of the full correlation matrix by the local dimensions.', false],
+            ['The partial-transpose eigenvalues by the marginal purities.', false]
+          ],
+          explanation: 'It is a classical inequality applied to the two scalar sequences of weighted deviation norms.'
+        }
+      ]
+    },
+    variance: {
+      label: 'Local variance deficit',
+      variants: [
+        {
+          question: 'For a pure local refinement, what is $\\sum_kp_k\\lVert r_k-r\\rVert_2^2$?',
+          options: [
+            ['$R_M^2-\\lVert r\\rVert_2^2$.', true],
+            ['$R_M^2+\\lVert r\\rVert_2^2$.', false],
+            ['$\\lVert r\\rVert_2^2$ independently of the ensemble.', false]
+          ],
+          explanation: 'Expanding the square cancels the cross term using $r=\\sum_kp_kr_k$; purity gives $\\lVert r_k\\rVert_2=R_M$.'
+        },
+        {
+          question: 'Why does a nearly pure marginal tighten the centered bound?',
+          options: [
+            ['Its mean Bloch vector is near the outer radius, leaving a small variance deficit.', true],
+            ['Its correlation matrix must have small rank.', false],
+            ['It makes the other marginal maximally mixed.', false]
+          ],
+          explanation: 'The right-hand side is the product of the two local standard-deviation budgets, not a dimension-only constant.'
         }
       ]
     },
@@ -153,6 +225,16 @@
     proofStepCount: document.getElementById('proof-step-count'),
     proofUndo: document.getElementById('proof-undo'),
     proofReset: document.getElementById('proof-reset'),
+    boundStepLabel: document.getElementById('bound-step-label'),
+    boundTrace: document.getElementById('bound-trace'),
+    boundChallenge: document.getElementById('bound-challenge'),
+    boundContext: document.getElementById('bound-context'),
+    boundFormula: document.getElementById('bound-formula'),
+    boundQuestion: document.getElementById('bound-question'),
+    boundOptions: document.getElementById('bound-options'),
+    boundFeedback: document.getElementById('bound-feedback'),
+    boundComplete: document.getElementById('bound-complete'),
+    boundReset: document.getElementById('bound-reset'),
     progressText: document.getElementById('explain-progress-text'),
     progressBar: document.getElementById('explain-progress-bar'),
     progressTrack: root.querySelector('.explain-progress-track'),
@@ -189,7 +271,8 @@
         fsrsReviewed: saved.fsrsReviewed || {},
         fsrsEverPassed: saved.fsrsEverPassed || {},
         diagnosis: saved.diagnosis || {},
-        builder: saved.builder || {}
+        builder: saved.builder || {},
+        boundMistakes: saved.boundMistakes || {}
       });
     } catch (error) {
       return Object.assign({}, defaultState);
@@ -197,7 +280,7 @@
   }
 
   function saveState() {
-    if (stageStatus().filter(Boolean).length < 4) state.ready = false;
+    if (stageStatus().filter(Boolean).length < 5) state.ready = false;
     try {
       localStorage.setItem(storageKey, JSON.stringify(state));
     } catch (error) {
@@ -215,6 +298,7 @@
   function stageStatus() {
     return [
       state.proofComplete,
+      state.boundComplete,
       conceptIds.every(function (id) { return Boolean(state.fsrsEverPassed[id]); }),
       Array.prototype.every.call(root.querySelectorAll('[data-diagnosis]'), function (card) { return Boolean(state.diagnosis[card.dataset.diagnosis]); }),
       Array.prototype.every.call(root.querySelectorAll('[data-builder]'), function (card) { return Boolean(state.builder[card.dataset.builder]); })
@@ -224,20 +308,21 @@
   function updateProgress() {
     var statuses = stageStatus();
     var complete = statuses.filter(Boolean).length;
-    var labels = ['complete the checked proof puzzle', 'pass the five scheduled concepts', 'diagnose all four claims', 'assemble the explanation'];
+    if (complete < 5) state.ready = false;
+    var labels = ['complete the checked identity', 'recover the six-step bound', 'pass the eight scheduled concepts', 'diagnose all four claims', 'assemble the explanation'];
     var remaining = labels.filter(function (_, index) { return !statuses[index]; });
-    elements.progressText.textContent = complete + ' of 4 stages complete';
+    elements.progressText.textContent = complete + ' of 5 stages complete';
     elements.progressTrack.setAttribute('aria-valuenow', complete);
-    elements.progressBar.style.width = (complete / 4 * 100) + '%';
-    elements.markReady.disabled = complete < 4;
-    elements.readinessCopy.textContent = complete === 4
+    elements.progressBar.style.width = (complete / 5 * 100) + '%';
+    elements.markReady.disabled = complete < 5;
+    elements.readinessCopy.textContent = complete === 5
       ? 'You recovered the same argument through formal rewriting, retrieval, diagnosis and reconstruction.'
       : 'Still to do: ' + remaining.join('; ') + '.';
     if (state.ready) {
       elements.readinessStatus.textContent = 'Marked as reconstructed on this browser. Scheduled reviews remain active.';
       elements.markReady.textContent = 'Reconstructed ✓';
     } else {
-      elements.readinessStatus.textContent = complete === 4 ? 'All four stages are complete.' : '';
+      elements.readinessStatus.textContent = complete === 5 ? 'All five stages are complete.' : '';
       elements.markReady.textContent = 'Mark as reconstructed';
     }
   }
@@ -387,6 +472,7 @@
     renderProofState(action.dataset.productive === 'true'
       ? 'Lean accepts the rewrite. The proof state has advanced.'
       : 'Lean accepts the rewrite, but it is strategically unhelpful.');
+    renderBoundChallenge();
   });
 
   elements.proofUndo.addEventListener('click', function () {
@@ -395,6 +481,7 @@
     proofStateId = previous.state;
     state.proofComplete = false;
     renderProofState('Move undone. Try a different object or rewrite.');
+    renderBoundChallenge();
     saveState();
   });
 
@@ -403,12 +490,168 @@
     proofStateId = 'start';
     state.proofComplete = false;
     renderProofState('Puzzle restarted.');
+    renderBoundChallenge();
     saveState();
+  });
+
+  var boundSteps = [
+    {
+      concept: 'triangle',
+      context: 'Write $u_k=r_k-r$ and $v_k=s_k-s$. The covariance identity is $C=\\sum_kp_ku_kv_k^{\\mathsf T}$.',
+      formula: '$\\left\\lVert\\sum_kp_ku_kv_k^{\\mathsf T}\\right\\rVert_*\\;\\;?$',
+      question: 'What is the strongest unconditional first step?',
+      result: '$\\lVert C\\rVert_*\\leq\\sum_kp_k\\lVert u_kv_k^{\\mathsf T}\\rVert_*$',
+      options: [
+        { label: 'Use the triangle inequality: $\\lVert C\\rVert_*\\leq\\sum_kp_k\\lVert u_kv_k^{\\mathsf T}\\rVert_*$.', correct: true },
+        { label: 'Replace the norm of the sum by the sum of the norms with equality.', correct: false, why: 'Equality requires special alignment of the rank-one summands; separability alone does not provide it.' },
+        { label: 'Bound the sum by the largest single summand.', correct: false, why: 'The weights sum to one, but the quantity being bounded is already a weighted sum of norms; the correct general step is the triangle inequality.' }
+      ]
+    },
+    {
+      concept: 'triangle',
+      context: 'Each summand is an outer product. This is where matrix structure enters.',
+      formula: '$\\lVert u_kv_k^{\\mathsf T}\\rVert_*\\;\\;?$',
+      question: 'Which exact identity applies to each summand?',
+      result: '$\\lVert u_kv_k^{\\mathsf T}\\rVert_*=\\lVert u_k\\rVert_2\\lVert v_k\\rVert_2$',
+      options: [
+        { label: '$\\lVert u_kv_k^{\\mathsf T}\\rVert_*=\\lVert u_k\\rVert_2\\lVert v_k\\rVert_2$ because the matrix has rank at most one.', correct: true },
+        { label: '$\\lVert u_kv_k^{\\mathsf T}\\rVert_*=\\lVert u_k\\rVert_2+\\lVert v_k\\rVert_2$.', correct: false, why: 'An outer product scales multiplicatively, not additively.' },
+        { label: 'Replace the nuclear norm by the operator norm because they agree for every matrix.', correct: false, why: 'They agree here only because this particular matrix has rank at most one.' }
+      ]
+    },
+    {
+      concept: 'cauchy',
+      context: 'The remaining expression is a weighted sum of products of two nonnegative deviations.',
+      formula: '$\\sum_kp_k\\lVert u_k\\rVert_2\\lVert v_k\\rVert_2\\;\\;?$',
+      question: 'Which inequality separates Alice’s and Bob’s fluctuations?',
+      result: '$\\sum_kp_k\\lVert u_k\\rVert_2\\lVert v_k\\rVert_2\\leq\\sqrt{\\sum_kp_k\\lVert u_k\\rVert_2^2}\\sqrt{\\sum_kp_k\\lVert v_k\\rVert_2^2}$',
+      options: [
+        { label: 'Apply weighted Cauchy–Schwarz using $\\sqrt{p_k}\\lVert u_k\\rVert_2$ and $\\sqrt{p_k}\\lVert v_k\\rVert_2$.', correct: true },
+        { label: 'Apply Jensen directly to replace every deviation by the deviation of the means.', correct: false, why: 'The mean deviations vanish; that would erase the covariance rather than bound it.' },
+        { label: 'Use submultiplicativity of the operator norm.', correct: false, why: 'There is no matrix product left at this stage; the expression is a scalar weighted sum.' }
+      ]
+    },
+    {
+      concept: 'variance',
+      context: 'For a pure local refinement, every local Bloch vector has norm $R_M$ or $R_N$.',
+      formula: '$\\sum_kp_k\\lVert r_k-r\\rVert_2^2\\;\\;?$',
+      question: 'What does expanding the square give?',
+      result: '$\\sum_kp_k\\lVert r_k-r\\rVert_2^2=R_M^2-\\lVert r\\rVert_2^2$',
+      options: [
+        { label: '$R_M^2-\\lVert r\\rVert_2^2$: the second moment minus the square of the mean.', correct: true },
+        { label: '$R_M^2+\\lVert r\\rVert_2^2$: both squared terms are positive.', correct: false, why: 'The cross term uses $r=\\sum_kp_kr_k$ and subtracts twice the squared mean.' },
+        { label: '$R_M^2$ because centering does not affect a second moment.', correct: false, why: 'Centering removes the squared norm of the mean; that is precisely the variance deficit.' }
+      ]
+    },
+    {
+      concept: 'bound',
+      context: 'Substitute the two variance identities into the Cauchy–Schwarz estimate.',
+      formula: '$\\lVert C\\rVert_*\\;\\;?$',
+      question: 'Which marginal-dependent criterion follows?',
+      result: '$\\boxed{\\lVert C\\rVert_*\\leq\\sqrt{(R_M^2-\\lVert r\\rVert_2^2)(R_N^2-\\lVert s\\rVert_2^2)}}$',
+      options: [
+        { label: '$\\lVert C\\rVert_*\\leq\\sqrt{(R_M^2-\\lVert r\\rVert_2^2)(R_N^2-\\lVert s\\rVert_2^2)}$.', correct: true },
+        { label: '$\\lVert C\\rVert_*\\leq R_MR_N+\\lVert r\\rVert_2\\lVert s\\rVert_2$.', correct: false, why: 'That discards the variance deficits and is not the centered bound.' },
+        { label: '$\\lVert C\\rVert_*\\leq\\lVert r\\rVert_2\\lVert s\\rVert_2$.', correct: false, why: 'The centered covariance is controlled by fluctuations around the means, not by the product of the means.' }
+      ]
+    },
+    {
+      concept: 'bound',
+      context: 'Finally use $T=C+rs^{\\mathsf T}$ and a two-dimensional Cauchy–Schwarz inequality.',
+      formula: '$\\lVert T\\rVert_*\\leq\\lVert C\\rVert_*+\\lVert r\\rVert_2\\lVert s\\rVert_2\\leq R_MR_N.$',
+      question: 'What is the correct logical comparison between the tests?',
+      result: '$\\text{centered condition}\\Longrightarrow\\text{de Vicente condition}$',
+      options: [
+        { label: 'Passing the centered condition implies passing de Vicente; therefore violating de Vicente also violates the centered condition.', correct: true },
+        { label: 'Passing de Vicente implies passing the centered condition.', correct: false, why: 'This reverses the implication. The centered test is the stronger necessary condition.' },
+        { label: 'The two conditions are equivalent for every state.', correct: false, why: 'They coincide when the marginals are maximally mixed, but not in general.' }
+      ]
+    }
+  ];
+
+  function queueConceptNow(id) {
+    if (state.fsrsCards[id]) state.fsrsCards[id].due = new Date(0).toISOString();
+    delete sessionReviewed[id];
+    if (scheduler) updateSchedule(new Date());
+  }
+
+  function renderBoundChallenge(message) {
+    var progress = Math.min(Number(state.boundProgress || 0), boundSteps.length);
+    state.boundProgress = progress;
+    elements.boundStepLabel.textContent = progress === boundSteps.length ? '6 of 6' : (progress + 1) + ' of ' + boundSteps.length;
+    elements.boundTrace.innerHTML = boundSteps.slice(0, progress).map(function (step, index) {
+      return '<div><span>' + (index + 1) + '</span><p>' + step.result + '</p></div>';
+    }).join('');
+    if (!state.proofComplete) {
+      elements.boundChallenge.hidden = false;
+      elements.boundComplete.hidden = true;
+      elements.boundContext.textContent = 'Complete the covariance-identity puzzle first. The bound starts from the identity proved there.';
+      elements.boundFormula.innerHTML = '$C=\\sum_kp_k(r_k-r)(s_k-s)^{\\mathsf T}$';
+      elements.boundQuestion.textContent = 'This stage is locked until the identity has been recovered.';
+      elements.boundOptions.innerHTML = '';
+      elements.boundFeedback.textContent = '';
+      typeset(document.getElementById('bound-lab'));
+      return;
+    }
+    if (progress === boundSteps.length) {
+      state.boundComplete = true;
+      elements.boundChallenge.hidden = true;
+      elements.boundComplete.hidden = false;
+      saveState();
+      typeset(elements.boundTrace);
+      return;
+    }
+    var step = boundSteps[progress];
+    elements.boundChallenge.hidden = false;
+    elements.boundComplete.hidden = true;
+    elements.boundContext.innerHTML = step.context;
+    elements.boundFormula.innerHTML = step.formula;
+    elements.boundQuestion.textContent = step.question;
+    elements.boundOptions.innerHTML = step.options.map(function (option, index) {
+      return '<button type="button" data-bound-option="' + index + '">' + option.label + '</button>';
+    }).join('');
+    elements.boundFeedback.innerHTML = message || '';
+    typeset(document.getElementById('bound-lab'));
+  }
+
+  elements.boundOptions.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-bound-option]');
+    if (!button || button.disabled) return;
+    var step = boundSteps[state.boundProgress];
+    var option = step.options[Number(button.dataset.boundOption)];
+    elements.boundOptions.querySelectorAll('button').forEach(function (item) { item.disabled = true; });
+    if (!option.correct) {
+      state.boundMistakes[step.concept] = (state.boundMistakes[step.concept] || 0) + 1;
+      queueConceptNow(step.concept);
+      button.classList.add('is-wrong');
+      elements.boundFeedback.innerHTML = '<strong>Valid-looking, but wrong here.</strong> ' + option.why + ' <button type="button" class="explain-text-button" data-bound-retry>Try this bottleneck again</button>';
+      saveState();
+      typeset(elements.boundFeedback);
+      return;
+    }
+    button.classList.add('is-correct');
+    state.boundProgress += 1;
+    if (state.boundProgress === boundSteps.length) state.boundComplete = true;
+    saveState();
+    elements.boundFeedback.innerHTML = '<strong>Recovered.</strong> ' + step.result + ' <button type="button" class="explain-button" data-bound-continue>' + (state.boundComplete ? 'Show the completed derivation' : 'Continue') + '</button>';
+    typeset(elements.boundFeedback);
+  });
+
+  elements.boundFeedback.addEventListener('click', function (event) {
+    if (event.target.closest('[data-bound-retry]')) renderBoundChallenge('Try again without using elimination from the previous layout.');
+    if (event.target.closest('[data-bound-continue]')) renderBoundChallenge();
+  });
+
+  elements.boundReset.addEventListener('click', function () {
+    state.boundProgress = 0;
+    state.boundComplete = false;
+    saveState();
+    renderBoundChallenge('Derivation restarted.');
   });
 
   function initializeFsrs() {
     if (!window.FSRS || !window.FSRS.fsrs) {
-      elements.reviewCard.innerHTML = '<p class="explain-notice">The FSRS scheduler could not be loaded. Reload the page to retry; the other three stages still work.</p>';
+      elements.reviewCard.innerHTML = '<p class="explain-notice">The FSRS scheduler could not be loaded. Reload the page to retry; the other four stages still work.</p>';
       return false;
     }
     scheduler = window.FSRS.fsrs({
@@ -643,7 +886,7 @@
   }
 
   elements.markReady.addEventListener('click', function () {
-    if (stageStatus().filter(Boolean).length < 4) return;
+    if (stageStatus().filter(Boolean).length < 5) return;
     state.ready = true;
     saveState();
   });
@@ -684,6 +927,7 @@
   });
 
   renderProofState(state.proofComplete ? 'Previously completed on this browser. Restart to explore another path.' : '');
+  renderBoundChallenge();
   initializeDiagnosis();
   initializeBuilder();
   if (initializeFsrs()) renderReview();
