@@ -39,10 +39,10 @@ The article has a complete bipartite core followed by a research-direction appen
 
 <aside class="explain-article-cta">
   <div>
-    <strong>Could you explain the argument without the page?</strong>
-    <p>The companion oral trainer asks you to rebuild the proof, answer a short viva, and rehearse a 90-second or three-minute explanation.</p>
+    <strong>Could you reconstruct the argument without the page?</strong>
+    <p>The interactive companion uses proof ordering, error diagnosis and scheduled FSRS reviews. It requires no typing or speaking.</p>
   </div>
-  <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the oral trainer →</a>
+  <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the argument trainer →</a>
 </aside>
 
 ## Notation glossary

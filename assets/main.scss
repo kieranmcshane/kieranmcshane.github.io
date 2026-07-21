@@ -848,6 +848,294 @@ body:has(.correction-post) .post-meta {
   }
 }
 
+/* Click-based FSRS reconstruction cards */
+.fsrs-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1rem;
+  border: 1px solid var(--explain-line);
+  background: #fff;
+}
+
+.fsrs-summary > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+}
+
+.fsrs-summary > div + div {
+  border-left: 1px solid var(--explain-line);
+}
+
+.fsrs-summary span {
+  color: var(--explain-muted);
+  font-size: 0.72rem;
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fsrs-summary strong {
+  color: var(--explain-teal-dark);
+  font-size: 1.22rem;
+}
+
+.fsrs-review-card {
+  min-height: 24rem;
+  padding: 1.6rem 1.75rem;
+  border: 1px solid var(--explain-line);
+  border-top: 4px solid var(--explain-teal);
+  background: #fff;
+}
+
+.fsrs-card-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--explain-muted);
+  font-size: 0.78rem;
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fsrs-card-meta strong {
+  color: var(--explain-teal-dark);
+}
+
+.fsrs-review-card h3 {
+  max-width: 34ch;
+  margin: 1.2rem 0 1.4rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.fsrs-options {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.9rem;
+}
+
+.fsrs-options button,
+.diagnosis-list article > div button,
+.explanation-builder article > div button {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #b9c3d0;
+  border-radius: 4px;
+  color: var(--explain-ink);
+  background: #fff;
+  font-weight: 590;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.fsrs-options button:hover:not(:disabled),
+.diagnosis-list article > div button:hover:not(:disabled),
+.explanation-builder article > div button:hover:not(:disabled) {
+  border-color: var(--explain-teal);
+  background: var(--explain-wash);
+}
+
+.fsrs-options button:focus-visible,
+.diagnosis-list article > div button:focus-visible,
+.explanation-builder article > div button:focus-visible {
+  outline: 3px solid rgba(8, 127, 140, 0.2);
+  outline-offset: 2px;
+}
+
+.fsrs-options button.is-correct,
+.explanation-builder button.is-correct {
+  border-color: var(--explain-teal);
+  background: #eaf6f4;
+}
+
+.fsrs-options button.is-wrong,
+.explanation-builder button.is-wrong {
+  border-color: #c87862;
+  background: #fbf1ee;
+}
+
+.fsrs-answer {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid var(--explain-teal);
+  background: var(--explain-wash);
+}
+
+.fsrs-empty {
+  padding: 2rem;
+  border: 1px solid var(--explain-line);
+  text-align: center;
+  background: var(--explain-wash);
+}
+
+.fsrs-empty strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+}
+
+.fsrs-empty p {
+  margin: 0.55rem 0 1rem;
+  color: var(--explain-muted);
+}
+
+.fsrs-schedule {
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--explain-line);
+  background: #fff;
+}
+
+.fsrs-schedule summary {
+  cursor: pointer;
+  font-weight: 720;
+}
+
+.fsrs-schedule ol {
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fsrs-schedule li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #e6eaf0;
+}
+
+.fsrs-schedule li strong {
+  color: var(--explain-muted);
+  font-size: 0.84rem;
+  font-weight: 620;
+  text-align: right;
+}
+
+.fsrs-schedule > p {
+  color: var(--explain-muted);
+  font-size: 0.82rem;
+}
+
+.diagnosis-list,
+.explanation-builder {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.diagnosis-list article,
+.explanation-builder article {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--explain-line);
+  border-left: 4px solid #aab4c2;
+  background: #fff;
+}
+
+.diagnosis-list article.is-correct,
+.explanation-builder article.is-correct {
+  border-left-color: var(--explain-teal);
+  background: #fbfefe;
+}
+
+.diagnosis-list article.is-wrong,
+.explanation-builder article.is-wrong {
+  border-left-color: var(--explain-orange);
+}
+
+.diagnosis-list article > p {
+  margin: 0 0 0.9rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.diagnosis-list article > div {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.diagnosis-list article > div button {
+  text-align: center;
+}
+
+.diagnosis-list aside {
+  margin-top: 0.85rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--explain-line);
+  color: var(--explain-muted);
+}
+
+.explanation-builder article > span {
+  color: var(--explain-teal-dark);
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.explanation-builder h3 {
+  margin: 0.25rem 0 0.8rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.explanation-builder article > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.explanation-builder article > p {
+  margin: 0.75rem 0 0;
+  color: var(--explain-muted);
+  font-size: 0.88rem;
+}
+
+.assembled-explanation {
+  margin-top: 1rem;
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--explain-teal);
+  background: var(--explain-wash);
+}
+
+.assembled-explanation > p:not(.explain-kicker) {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.06rem;
+  line-height: 1.65;
+}
+
+.assembled-explanation > :last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 650px) {
+  .fsrs-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .fsrs-summary > div + div {
+    border-top: 1px solid var(--explain-line);
+    border-left: 0;
+  }
+
+  .fsrs-review-card {
+    min-height: 0;
+    padding: 1.2rem;
+  }
+
+  .fsrs-card-meta,
+  .fsrs-schedule li {
+    display: grid;
+  }
+
+  .fsrs-schedule li strong {
+    text-align: left;
+  }
+}
+
 @media (hover: none) {
   .notation-ref,
   .concept-ref {
