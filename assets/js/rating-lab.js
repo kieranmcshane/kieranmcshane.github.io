@@ -31,6 +31,7 @@
     selected: null,
     pinned: [],
     expanded: false,
+    visibleRows: 0,
     includeProvisional: false,
     matchupA: null,
     matchupB: null,
@@ -54,8 +55,10 @@
     protocol: document.getElementById('rating-protocol'),
     competition: document.getElementById('competition-filter'),
     search: document.getElementById('rating-search'),
+    metricsDisclosure: document.querySelector('.rating-lab-metrics-disclosure'),
     metrics: document.getElementById('rating-metrics'),
     movers: document.getElementById('rating-movers'),
+    moversDisclosure: document.querySelector('.rating-lab-movers-disclosure'),
     context: document.getElementById('leaderboard-context'),
     rankingTable: document.getElementById('ranking-table'),
     body: document.getElementById('ranking-body'),
@@ -98,6 +101,11 @@
       tertiary: document.getElementById('predictor-col-tertiary')
     }
   };
+
+  if (window.matchMedia('(max-width: 650px)').matches) {
+    elements.metricsDisclosure.open = false;
+    elements.moversDisclosure.open = false;
+  }
 
   function dataUrl(file) {
     return root.dataset.dataRoot.replace(/\/$/, '') + '/' + file;
@@ -448,7 +456,10 @@
 
   function renderTable() {
     var rows = currentRows();
-    var displayed = state.expanded ? rows : rows.slice(0, 20);
+    var mobile = window.matchMedia('(max-width: 650px)').matches;
+    var pageSize = mobile ? 12 : 20;
+    var visibleRows = Math.max(state.visibleRows, pageSize);
+    var displayed = state.expanded ? rows : rows.slice(0, visibleRows);
     var model = state.datasets[state.sport].models[state.model];
     var hiddenProvisional = !state.includeProvisional ? provisionalCount() : 0;
     var provisionalCaption = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
@@ -458,7 +469,9 @@
       (model.ranking_rule || 'Current model ranking rule') + provisionalCaption;
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
-    elements.more.textContent = 'Show all ' + number(rows.length, 0) + ' competitors';
+    elements.more.textContent = mobile ? 'Show ' + number(Math.min(pageSize, rows.length - displayed.length), 0) +
+      ' more · ' + number(rows.length - displayed.length, 0) + ' remaining' :
+      'Show all ' + number(rows.length, 0) + ' competitors';
     elements.body.innerHTML = displayed.map(function (row) {
       var deltaClass = row.change30 > 0 ? 'is-positive' : row.change30 < 0 ? 'is-negative' : '';
       var delta = signedNumber(row.change30, 1);
@@ -951,8 +964,8 @@
       escapeHtml(snapshot.event_url) + '" target="_blank" rel="noopener">Open market ↗</a></div><div class="rating-lab-market-metrics"><div><span>Field coverage</span><strong>' +
       snapshot.matched_participants + ' / ' + snapshot.model_participants + '</strong></div><div><span>Raw Yes total</span><strong>' +
       number(snapshot.raw_yes_price_sum * 100, 1) + '%</strong></div><div><span>Mean absolute gap</span><strong>' +
-      (meanGap === null ? '—' : number(meanGap * 100, 1) + ' pp') + '</strong></div></div><p class="rating-lab-market-note">Snapshot ' +
-      escapeHtml(formatDate(benchmark.fetched_at)) + freshness + '. “Market” divides each public Yes quote by the raw Yes total across all active liquid winner outcomes. The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table;
+      (meanGap === null ? '—' : number(meanGap * 100, 1) + ' pp') + '</strong></div></div><details class="rating-lab-market-detail"><summary>Participant comparison and normalization</summary><p class="rating-lab-market-note">Snapshot ' +
+      escapeHtml(formatDate(benchmark.fetched_at)) + freshness + '. “Market” divides each public Yes quote by the raw Yes total across all active liquid winner outcomes. The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details>';
   }
 
   function errorFunction(value) {
@@ -1617,6 +1630,7 @@
     state.selected = null;
     state.pinned = [];
     state.expanded = false;
+    state.visibleRows = 0;
     state.includeProvisional = false;
     state.matchupA = null;
     state.matchupB = null;
@@ -1640,6 +1654,7 @@
     if (!button || button.dataset.model === state.model) return;
     state.model = button.dataset.model;
     state.expanded = false;
+    state.visibleRows = 0;
     state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
     render();
@@ -1650,6 +1665,7 @@
     if (!button || button.dataset.matchupModel === state.model) return;
     state.model = button.dataset.matchupModel;
     state.expanded = false;
+    state.visibleRows = 0;
     setPressed(elements.modelTabs, 'model', state.model);
     render();
   });
@@ -1693,6 +1709,7 @@
     state.selected = null;
     state.pinned = [];
     state.expanded = false;
+    state.visibleRows = 0;
     state.includeProvisional = false;
     state.matchupA = null;
     state.matchupB = null;
@@ -1707,6 +1724,7 @@
     if (!button || button.dataset.protocolModel === state.model) return;
     state.model = button.dataset.protocolModel;
     state.expanded = false;
+    state.visibleRows = 0;
     state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
     render();
@@ -1715,6 +1733,7 @@
   elements.competition.addEventListener('change', function () {
     state.competition = elements.competition.value;
     state.expanded = false;
+    state.visibleRows = 0;
     renderMetrics();
     renderMovers();
     renderTable();
@@ -1724,6 +1743,7 @@
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
     state.expanded = false;
+    state.visibleRows = 0;
     renderMetrics();
     renderMovers();
     renderTable();
@@ -1732,6 +1752,7 @@
   elements.includeProvisional.addEventListener('change', function () {
     state.includeProvisional = elements.includeProvisional.checked;
     state.expanded = false;
+    state.visibleRows = 0;
     if (!state.includeProvisional) {
       var selected = state.datasets[state.sport].models[state.model].rankings.find(function (row) {
         return row.id === state.selected;
@@ -1746,7 +1767,12 @@
   });
 
   elements.more.addEventListener('click', function () {
-    state.expanded = true;
+    if (window.matchMedia('(max-width: 650px)').matches) {
+      state.visibleRows = Math.max(state.visibleRows, 12) + 12;
+      state.expanded = state.visibleRows >= currentRows().length;
+    } else {
+      state.expanded = true;
+    }
     renderTable();
   });
 

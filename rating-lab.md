@@ -8,19 +8,19 @@ description: Live alternative ratings for tennis, club and national-team footbal
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero">
     <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
-    <h1>Across sports. Four ways to measure strength.</h1>
-    <p class="rating-lab-deck">Compare Elo, Glicko-2, Gaussian, and robust ratings across tennis, football, and chess. Every forecast is scored before its result updates the model.</p>
+    <h1><span class="rating-lab-title-desktop">Across sports. Four ways to measure strength.</span><span class="rating-lab-title-mobile">Live ratings across sports.</span></h1>
+    <p class="rating-lab-deck"><span class="rating-lab-deck-desktop">Compare Elo, Glicko-2, Gaussian, and robust ratings across tennis, football, and chess. Every forecast is scored before its result updates the model.</span><span class="rating-lab-deck-mobile">Four outcome-tested models for tennis, football, and chess.</span></p>
     <p class="rating-lab-hero-link"><a href="#predictor">Forecast current competitions ↓</a></p>
     <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
     <p class="rating-lab-generation" id="rating-lab-generation"></p>
   </header>
 
   <nav class="rating-lab-local-nav" aria-label="Rating Lab sections">
-    <a href="#leaderboard-heading" aria-current="location"><strong>01</strong><span>Rankings</span></a>
-    <a href="#matchup"><strong>02</strong><span>A vs B</span></a>
-    <a href="#predictor"><strong>03</strong><span>Competitions</span></a>
-    <a class="is-external" href="{{ '/rating-lab/players/' | relative_url }}"><strong>04</strong><span>Players ↗</span></a>
-    <a href="#research"><strong>05</strong><span>Methods & data</span></a>
+    <a href="#leaderboard-heading" aria-current="location" aria-label="Rankings"><strong>01</strong><span data-mobile-label="Rankings">Rankings</span></a>
+    <a href="#matchup" aria-label="A vs B"><strong>02</strong><span data-mobile-label="A vs B">A vs B</span></a>
+    <a href="#predictor" aria-label="Competition forecasts"><strong>03</strong><span data-mobile-label="Forecasts">Competitions</span></a>
+    <a class="is-external" href="{{ '/rating-lab/players/' | relative_url }}" aria-label="Player ratings"><strong>04</strong><span data-mobile-label="Players">Players ↗</span></a>
+    <a href="#research" aria-label="Methods and data"><strong>05</strong><span data-mobile-label="Methods">Methods & data</span></a>
   </nav>
 
   <noscript><p class="rating-lab-notice">This interactive leaderboard requires JavaScript.</p></noscript>
@@ -60,7 +60,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
       </label>
     </div>
 
-    <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
+    <details class="rating-lab-metrics-disclosure" open>
+      <summary>Model accuracy</summary>
+      <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
+    </details>
     <details class="rating-lab-movers-disclosure" open>
       <summary>30-day movers</summary>
       <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
@@ -102,7 +105,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-matchup" id="matchup" aria-labelledby="matchup-heading">
     <p class="rating-lab-kicker">Single-event forecast</p>
     <h2 id="matchup-heading">A vs B probability</h2>
-    <p class="rating-lab-matchup-intro">Compare any two published competitors using the current rating state and relevant context. Choose the tennis surface, football venue, or chess color assignment before reading the probabilities.</p>
+    <p class="rating-lab-matchup-intro">Compare two published competitors with the selected model and relevant tennis surface, football venue, or chess color.</p>
 
     <div class="rating-lab-matchup-toolbar">
       <label class="rating-lab-field">
@@ -137,8 +140,11 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
     <p class="rating-lab-kicker">Live forecast · completed performance</p>
     <h2 id="predictor-heading">Competition forecast and performance</h2>
-    <p class="rating-lab-predictor-intro">Scheduled and live competitions receive forward predictions from their actual published state. Where a reliably matched public Polymarket event exists, its snapshot is shown beside—not inside—our model. Once a competition finishes, probabilities are replaced by protocol performance ratings built from the recorded results.</p>
-    <p class="rating-lab-audit-note">Current forward forecasts cover five club leagues, the live UEFA Champions League qualifying round, public club and national knockout fields, and active elite Lichess round-robin events. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. Completed sourced competitions switch to protocol performance ratings. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
+    <p class="rating-lab-predictor-intro">Forecast live and scheduled competitions from current ratings, with confidently matched Polymarket snapshots kept separate. Completed events switch to protocol performance ratings.</p>
+    <details class="rating-lab-coverage-note">
+      <summary>Coverage and forecast limits</summary>
+      <p class="rating-lab-audit-note">Current forward forecasts cover five club leagues, the live UEFA Champions League qualifying round, public club and national knockout fields, and active elite Lichess round-robin events. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. Completed sourced competitions switch to protocol performance ratings. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
+    </details>
 
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">

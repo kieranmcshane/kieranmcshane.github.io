@@ -484,6 +484,7 @@ class PipelineTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         script = (root / "assets/js/rating-lab.js").read_text()
         page = (root / "rating-lab.md").read_text()
+        styles = (root / "assets/main.scss").read_text()
         self.assertIn("function signedNumber(value, digits)", script)
         self.assertIn("Object.is(rounded, -0)", script)
         self.assertIn("row.id === selectedId ? ' selected'", script)
@@ -494,6 +495,12 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("b.champion - a.champion", script)
         self.assertIn("spread reflects starting ratings and schedule priors", script)
         self.assertIn('id="rating-include-provisional"', page)
+        self.assertIn("var pageSize = mobile ? 12 : 20;", script)
+        self.assertIn("elements.metricsDisclosure.open = false;", script)
+        self.assertIn('class="rating-lab-market-detail"', script)
+        self.assertIn('class="rating-lab-title-mobile"', page)
+        self.assertIn('aria-label="Competition forecasts"', page)
+        self.assertIn("Rating Lab mobile-first interaction pass", styles)
         self.assertNotIn("Colors only identify the outcomes", script)
         self.assertIn('autocomplete="off"', page)
 
