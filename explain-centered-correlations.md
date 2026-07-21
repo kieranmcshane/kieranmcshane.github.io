@@ -11,7 +11,7 @@ description: "A click-based FSRS learning companion to the article on centered c
     <h1>Can you reconstruct the argument?</h1>
     <p class="explain-deck">Everything is click-based. Rebuild the proof, choose the missing steps, and diagnose plausible mistakes. FSRS then decides which ideas should return and when.</p>
     <div class="explain-hero-actions">
-      <a class="explain-primary-link" href="#derivation-order">Start the reconstruction</a>
+      <a class="explain-primary-link" href="#learn-puzzle">Start the proof puzzle</a>
       <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Return to the article</a>
     </div>
     <div class="explain-progress" aria-labelledby="explain-progress-label">
@@ -27,7 +27,7 @@ description: "A click-based FSRS learning companion to the article on centered c
   </header>
 
   <nav class="explain-local-nav" aria-label="Learning stages">
-    <a href="#derivation-order"><strong>1</strong><span>Order</span></a>
+    <a href="#learn-puzzle"><strong>1</strong><span>Prove</span></a>
     <a href="#scheduled-review"><strong>2</strong><span>Review</span></a>
     <a href="#diagnose"><strong>3</strong><span>Diagnose</span></a>
     <a href="#build-explanation"><strong>4</strong><span>Assemble</span></a>
@@ -35,23 +35,48 @@ description: "A click-based FSRS learning companion to the article on centered c
 
   <noscript><p class="explain-notice">This learning companion needs JavaScript. The mathematical article remains fully readable without it.</p></noscript>
 
-  <section class="explain-stage" id="derivation-order" aria-labelledby="derivation-heading">
+  <section class="explain-stage" id="learn-puzzle" aria-labelledby="learn-heading">
     <div class="explain-stage-heading">
-      <div><span>Stage 1</span><h2 id="derivation-heading">Put the proof in order</h2></div>
-      <p>Move the statements until each one uses only information established above it.</p>
+      <div><span>Stage 1 · Lean-checked</span><h2 id="learn-heading">Prove the covariance identity</h2></div>
+      <p>Select a mathematical object, inspect the operations that apply to it, and decide which rewrite advances the proof.</p>
     </div>
 
-    <ol class="explain-order-list" id="explain-order-list">
-      <li data-step="4"><div><span class="explain-order-number">?</span><p>Cauchy–Schwarz bounds the projective sum by the product of the two local standard deviations.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move Cauchy–Schwarz step up">↑</button><button type="button" data-move="down" aria-label="Move Cauchy–Schwarz step down">↓</button></div></li>
-      <li data-step="1"><div><span class="explain-order-number">?</span><p>A product state has a rank-one correlation matrix: $T=rs^{\mathsf T}$.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move product-state step up">↑</button><button type="button" data-move="down" aria-label="Move product-state step down">↓</button></div></li>
-      <li data-step="5"><div><span class="explain-order-number">?</span><p>The local variances are $R_M^2-\lVert r\rVert_2^2$ and $R_N^2-\lVert s\rVert_2^2$, giving the centered separability bound.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move variance step up">↑</button><button type="button" data-move="down" aria-label="Move variance step down">↓</button></div></li>
-      <li data-step="2"><div><span class="explain-order-number">?</span><p>A separable state gives one common convex decomposition: $T=\sum_k p_k r_k s_k^{\mathsf T}$, with $r=\sum_kp_kr_k$ and $s=\sum_kp_ks_k$.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move separable-mixture step up">↑</button><button type="button" data-move="down" aria-label="Move separable-mixture step down">↓</button></div></li>
-      <li data-step="3"><div><span class="explain-order-number">?</span><p>Subtracting the means rewrites $C=T-rs^{\mathsf T}$ as $\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move centering step up">↑</button><button type="button" data-move="down" aria-label="Move centering step down">↓</button></div></li>
-    </ol>
-    <div class="explain-stage-actions">
-      <button class="explain-button" type="button" id="check-order">Check the order</button>
-      <button class="explain-button explain-button-secondary" type="button" id="reset-order">Start again</button>
-      <p id="order-feedback" class="explain-feedback" role="status" aria-live="polite"></p>
+    <div class="proof-puzzle" id="proof-puzzle">
+      <header class="proof-puzzle-bar">
+        <div><span>Bounded world</span><strong>Covariance identity</strong></div>
+        <span class="proof-verified-badge">✓ transitions checked by Lean</span>
+      </header>
+      <div class="proof-puzzle-grid">
+        <aside class="proof-hypotheses" aria-labelledby="proof-hypotheses-heading">
+          <h3 id="proof-hypotheses-heading">Available facts</h3>
+          <ol>
+            <li><span>$h_T$</span> $T=\sum_k p_k r_k s_k^{\mathsf T}$</li>
+            <li><span>$h_r$</span> $r=\sum_k p_k r_k$</li>
+            <li><span>$h_s$</span> $s=\sum_k p_k s_k$</li>
+            <li><span>$h_p$</span> $\sum_k p_k=1$</li>
+          </ol>
+          <p>Not every legal rewrite is useful. Undo is always available.</p>
+        </aside>
+        <div class="proof-workspace">
+          <div class="proof-goal-label"><span>Goal</span><strong id="proof-step-count">0 / 3 productive moves</strong></div>
+          <div class="proof-expression" id="proof-expression" aria-live="polite"></div>
+          <div class="proof-action-panel" id="proof-action-panel">
+            <p id="proof-action-prompt">Select a highlighted part of the formula.</p>
+            <div id="proof-actions"></div>
+          </div>
+          <p class="proof-feedback" id="proof-feedback" role="status" aria-live="polite"></p>
+          <ol class="proof-history" id="proof-history" aria-label="Applied proof steps"></ol>
+          <div class="proof-controls">
+            <button type="button" class="explain-button explain-button-secondary" id="proof-undo" disabled>Undo</button>
+            <button type="button" class="explain-text-button" id="proof-reset">Restart puzzle</button>
+            <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/proofs/Proofs/CenteredCorrelationLearn.lean">Read the checked Lean source</a>
+          </div>
+          <details class="proof-verification-note">
+            <summary>What “checked by Lean” means here</summary>
+            <p>This static page replays a bounded transition graph. Every displayed equality is a theorem in the linked Lean file, and GitHub recompiles that file whenever it changes. The browser is not pretending to run an unrestricted Lean search server.</p>
+          </details>
+        </div>
+      </div>
     </div>
   </section>
 
