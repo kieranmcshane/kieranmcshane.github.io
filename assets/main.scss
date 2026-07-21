@@ -42,6 +42,13 @@ body:has(.proof-game) .site-footer {
   line-height: 1.55;
 }
 
+/* The blog article rhythm adds large top margins to headings. The campaign
+   controls its own spacing, so those article margins must not leak into it. */
+.post-content .proof-game h2,
+.post-content .proof-game h3 {
+  margin-top: 0;
+}
+
 .proof-game button {
   font: inherit;
   cursor: pointer;
