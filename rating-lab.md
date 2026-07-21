@@ -7,9 +7,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}">
   <header class="rating-lab-hero">
-    <p class="rating-lab-kicker">A live sports-rating side project</p>
-    <h1>Strength, measured four ways.</h1>
-    <p class="rating-lab-deck">Rank competitors, compare an A vs B matchup, or forecast a competition using real tennis, football, and chess results.</p>
+    <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
+    <h1>Across sports. Four ways to measure strength.</h1>
+    <p class="rating-lab-deck">Current Elo, Glicko-2, Gaussian TrueSkill, and robust heavy-tail rankings for tennis, club and national-team football, and chess—each prediction recorded before its result updates the model.</p>
+    <p class="rating-lab-hero-link"><a href="#predictor">Forecast current competitions ↓</a></p>
     <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
     <p class="rating-lab-generation" id="rating-lab-generation"></p>
   </header>
@@ -60,8 +61,8 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
 
     <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
-    <details class="rating-lab-movers-disclosure">
-      <summary>Recent rating movers</summary>
+    <details class="rating-lab-movers-disclosure" open>
+      <summary>30-day movers</summary>
       <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
     </details>
 
