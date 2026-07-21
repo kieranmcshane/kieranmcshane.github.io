@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.8.0",
-  "methodology_version": "2026-07-20.9",
+  "schema_version": "1.9.0",
+  "methodology_version": "2026-07-21.2",
   "code_revision": "3deba666f812cb70b753b5b622a22e2c4efedd6c",
   "generated_at": "2026-07-20T07:51:09+00:00",
   "sports": {
@@ -196,7 +196,7 @@
     ],
     "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
     "availability": "Withhold title probabilities until the public source identifies a knockout field.",
-    "completed_competitions": "Replace retrospective title odds with competition-only protocol performance ratings initialized from the strictly pre-event state.",
+    "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
     "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
     "market_quality_fields": [
       "raw_yes_price_sum",
@@ -210,19 +210,21 @@
     "refresh": "daily"
   },
   "individual_contribution": {
-    "status": "withheld_pending_lineup_source",
+    "status": "historical_cohorts_published",
     "scope": "football players",
-    "current_publication_unit": "club or national team",
+    "live_publication_unit": "club or national team",
+    "historical_publication_unit": "individual player within one declared complete season",
+    "player_data_url": "/assets/data/rating-lab/player-football.json",
     "methods": {
       "lineup_trueskill": {
         "input": "match outcome plus the players and minutes on each side",
-        "team_performance": "sum(minutes_share * player_performance)",
+        "team_performance": "normalized sum(minutes_share * player performance)",
         "uncertainty": "posterior mean and standard deviation per player"
       },
       "rapm": {
         "input": "score differential plus the players and minutes on each side",
         "estimator": "minutes-weighted ridge regression with chronological validation",
-        "uncertainty": "block bootstrap intervals by match"
+        "uncertainty": "ridge sampling approximation from match-level residual variance"
       }
     },
     "excluded_inputs": [
@@ -242,11 +244,21 @@
       "publication_rights": "source licence must permit derived public ratings and audit metadata"
     },
     "source_assessment": {
-      "statsbomb_open_data": "Reproducible historical research archive with selected competitions and seasons; not a complete live five-league feed.",
+      "statsbomb_open_data": "Complete declared historical Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
       "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
       "openfootball_fallback": "Results and fixtures only; cannot support player attribution."
     },
-    "publication_rule": "Do not publish player ranks until every release gate passes for the declared cohort."
+    "publication_rule": "Publish only declared cohorts that pass every gate; never imply that a historical cohort is a live player ranking."
+  },
+  "player_football": {
+    "status": "current",
+    "checked_at": "2026-07-21T06:09:22+00:00",
+    "source": "StatsBomb Open Data",
+    "cohorts": [
+      "liga-f-2023-24",
+      "wsl-2023-24"
+    ],
+    "data_url": "/assets/data/rating-lab/player-football.json"
   },
   "methodology_url": "/rating-lab/#methodology"
 }

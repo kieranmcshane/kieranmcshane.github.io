@@ -26,7 +26,7 @@ from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBl
 
 
 SCHEMA_VERSION = "1.9.0"
-METHODOLOGY_VERSION = "2026-07-20.10"
+METHODOLOGY_VERSION = "2026-07-21.2"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 SCHEDULE_ENTITY_ALIASES = {
@@ -100,19 +100,21 @@ PREDICTOR_SIMULATIONS = 5_000
 def individual_contribution_protocol() -> dict:
     """Publish the exact release gate for outcome-only player contribution ratings."""
     return {
-        "status": "withheld_pending_lineup_source",
+        "status": "historical_cohorts_published",
         "scope": "football players",
-        "current_publication_unit": "club or national team",
+        "live_publication_unit": "club or national team",
+        "historical_publication_unit": "individual player within one declared complete season",
+        "player_data_url": "/assets/data/rating-lab/player-football.json",
         "methods": {
             "lineup_trueskill": {
                 "input": "match outcome plus the players and minutes on each side",
-                "team_performance": "sum(minutes_share * player_performance)",
+                "team_performance": "normalized sum(minutes_share * player performance)",
                 "uncertainty": "posterior mean and standard deviation per player",
             },
             "rapm": {
                 "input": "score differential plus the players and minutes on each side",
                 "estimator": "minutes-weighted ridge regression with chronological validation",
-                "uncertainty": "block bootstrap intervals by match",
+                "uncertainty": "ridge sampling approximation from match-level residual variance",
             },
         },
         "excluded_inputs": [
@@ -132,11 +134,11 @@ def individual_contribution_protocol() -> dict:
             "publication_rights": "source licence must permit derived public ratings and audit metadata",
         },
         "source_assessment": {
-            "statsbomb_open_data": "Reproducible historical research archive with selected competitions and seasons; not a complete live five-league feed.",
+            "statsbomb_open_data": "Complete declared historical Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
             "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
             "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
         },
-        "publication_rule": "Do not publish player ranks until every release gate passes for the declared cohort.",
+        "publication_rule": "Publish only declared cohorts that pass every gate; never imply that a historical cohort is a live player ranking.",
     }
 
 
@@ -1600,6 +1602,58 @@ def _competition_matches(schedule: dict, entities: dict) -> list[Match]:
     return sorted(_deduplicate(results), key=_match_sort_key)
 
 
+def _copy_competitor_states(source_model, target_model, entities: Iterable[str]) -> None:
+    """Copy fixed pre-event beliefs between fresh instances of one protocol."""
+    for entity in entities:
+        source = source_model.state(entity)
+        target = target_model.state(entity)
+        target.mean = source.mean
+        target.variance = source.variance
+        target.matches = source.matches
+        target.last_played = source.last_played
+        target.volatility = source.volatility
+
+
+def _anchored_performance_rating(
+    anchor_model,
+    entity: str,
+    event_matches: list[Match],
+    actual_score: float,
+    model_name: str,
+) -> tuple[float, str | None]:
+    """Solve the exact TPR equation against fixed pre-event opponent beliefs."""
+    relevant = [match for match in event_matches if entity in (match.entity_a, match.entity_b)]
+    state = anchor_model.state(entity)
+    original_mean = state.mean
+    span = 1_600.0 if model_name in {"elo", "glicko2"} else 60.0
+
+    def expected(candidate: float) -> float:
+        state.mean = candidate
+        total = 0.0
+        for match in relevant:
+            expectation_a = anchor_model.predict(match)
+            total += expectation_a if match.entity_a == entity else 1.0 - expectation_a
+        return total
+
+    low, high = original_mean - span, original_mean + span
+    low_expected, high_expected = expected(low), expected(high)
+    cap = None
+    if actual_score <= low_expected + 1e-9:
+        rating, cap = low, "lower"
+    elif actual_score >= high_expected - 1e-9:
+        rating, cap = high, "upper"
+    else:
+        for _ in range(70):
+            middle = (low + high) / 2.0
+            if expected(middle) < actual_score:
+                low = middle
+            else:
+                high = middle
+        rating = (low + high) / 2.0
+    state.mean = original_mean
+    return rating, cap
+
+
 def _competition_performance(
     schedule: dict,
     reference_model,
@@ -1630,16 +1684,13 @@ def _competition_performance(
             if entity and name:
                 event_names[entity] = name
     for entity in participants:
-        source = prior_model.state(entity)
-        target = event_model.state(entity)
-        target.mean = source.mean
-        target.variance = source.variance
-        target.matches = source.matches
-        target.last_played = source.last_played
-        target.volatility = source.volatility
+        prior_model.state(entity)
+    _copy_competitor_states(prior_model, event_model, participants)
     previous_season = next((match.season for match in reversed(prior_matches) if match.season), None)
     if sport == "football" and isinstance(event_model, EloModel) and previous_season and previous_season != schedule["season"]:
         event_model.regress(0.25)
+    anchor_model = _new_model(model_name, parameters, sport)
+    _copy_competitor_states(event_model, anchor_model, participants)
     starts = {
         entity: (event_model.state(entity).mean, event_model.state(entity).sigma, event_model.state(entity).volatility)
         for entity in participants
@@ -1687,6 +1738,8 @@ def _competition_performance(
                 else:
                     record["losses"] += 1
         event_index = event_period_end
+    reset_model = _new_model(model_name, parameters, sport)
+    _run_model(event_matches, reset_model, sport, history_entities=set())
     rows = []
     for entity in participants:
         start_mean, start_sigma, start_volatility = starts[entity]
@@ -1700,6 +1753,15 @@ def _competition_performance(
         record = records[entity]
         score_residual = record["points"] - record["expected_score"]
         surprise_index = score_residual / math.sqrt(record["expectation_variance"])
+        anchored_rating, anchored_cap = _anchored_performance_rating(
+            anchor_model,
+            entity,
+            event_matches,
+            record["points"],
+            model_name,
+        )
+        reset_state = reset_model.state(entity)
+        reset_score = _published_score(model_name, reset_state)
         rows.append(
             {
                 "id": entity,
@@ -1711,8 +1773,14 @@ def _competition_performance(
                 "end_rating": round(end.mean, 2),
                 "end_sigma": round(end.sigma, 2) if model_name != "elo" else None,
                 "end_volatility": round(end.volatility, 6) if model_name == "glicko2" else None,
-                "performance_rating": round(end_score, 2),
-                "change": round(end_score - start_score, 2),
+                "performance_rating": round(anchored_rating, 2),
+                "performance_rating_cap": anchored_cap,
+                "performance_delta": round(anchored_rating - start_mean, 2),
+                "replay_rating": round(end_score, 2),
+                "replay_change": round(end_score - start_score, 2),
+                "reset_rating": round(reset_score, 2),
+                "reset_mean": round(reset_state.mean, 2),
+                "reset_sigma": round(reset_state.sigma, 2) if model_name != "elo" else None,
                 "matches": record["matches"],
                 "wins": record["wins"],
                 "draws": record["draws"],
@@ -1726,15 +1794,22 @@ def _competition_performance(
                 "score_rate": round(record["points"] / record["matches"], 4),
             }
         )
-    rows.sort(key=lambda row: (-row["performance_rating"], -row["change"], row["name"]))
+    reset_order = sorted(rows, key=lambda row: (-row["reset_rating"], row["name"]))
+    reset_ranks = {row["id"]: rank for rank, row in enumerate(reset_order, 1)}
+    for row in rows:
+        row["reset_rank"] = reset_ranks[row["id"]]
+    rows.sort(key=lambda row: (-row["performance_rating"], -row["performance_delta"], row["name"]))
     for rank, row in enumerate(rows, 1):
         row["rank"] = rank
     return {
         "rating_type": "elo" if model_name == "elo" else "glicko2_conservative_r_minus_2rd" if model_name == "glicko2" else "conservative_mu_minus_3_sigma",
+        "performance_rating_type": "exact anchored expected-score rating in the selected protocol's native mean scale",
         "results": len(event_matches),
         "first_result": event_matches[0].date.isoformat(),
         "last_result": event_matches[-1].date.isoformat(),
         "surprise_method": "For every result, record the selected protocol's expected score immediately before its update. Actual score minus expected score is the signed residual. Divide the cumulative residual by sqrt(sum p(1-p)) to obtain the displayed standardized surprise; draws keep score 0.5, and p(1-p) is the disclosed common Bernoulli-score variance reference.",
+        "performance_rating_method": "Hold every opponent at the selected protocol's strictly pre-event global belief, vary only this participant's rating mean, and solve until summed expected score equals actual event score. Perfect and zero scores are reported at a disclosed finite cap because their exact logistic/probit solution is infinite.",
+        "reset_method": "Start every event participant from the selected protocol's neutral prior and replay only this competition. The reset rank is internal to the event and carries no global-strength anchor.",
         "participants": rows,
     }
 
@@ -1991,7 +2066,7 @@ def _build_tournament_predictor(
             }
             if all(performance_models.values()):
                 competition["performance"] = {
-                    "method": "Initialize every participant from the global rating state after all source results strictly before the first event date, replay only completed event results in deterministic protocol order, record each selected protocol's pre-update expectation, and publish final Elo, Glicko-2 rating−2RD, or Gaussian μ−3σ with its change from the event start.",
+                    "method": "Publish three complementary completed-event views: an exact performance rating anchored to fixed pre-event opponent beliefs, a neutral-prior reset rank based only on this event, and a chronological actual-minus-expected surprise score. The selected protocol and its tuned parameters are used throughout.",
                     "models": performance_models,
                 }
         competitions.append(competition)
@@ -2003,7 +2078,7 @@ def _build_tournament_predictor(
         "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
         "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented.",
         "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
-        "performance_method": "Completed competitions publish protocol performance ratings instead of retrospective title probabilities.",
+        "performance_method": "Completed competitions publish an anchored exact performance rating, a tournament-only reset rank, and chronological actual-versus-expected surprise instead of retrospective title probabilities.",
         "competitions": competitions,
     }
 
@@ -2344,6 +2419,34 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     "snapshot_sha256": previous.get("source", {}).get("snapshot_sha256"),
                     "parameters": previous.get("parameters", {}),
                 }
+    from .player_pipeline import build_player_payload, player_schema, validate_player_payload
+
+    player_path = output_dir / "player-football.json"
+    try:
+        player_payload = build_player_payload(_get)
+        validate_player_payload(player_payload)
+        staged_player = output_dir / ".player-football.json.tmp"
+        staged_player.write_text(json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False) + "\n")
+        staged_player.replace(player_path)
+        player_status = {
+            "status": "current",
+            "checked_at": player_payload["generated_at"],
+            "source": player_payload["source"]["name"],
+            "cohorts": [cohort["id"] for cohort in player_payload["cohorts"]],
+            "data_url": "/assets/data/rating-lab/player-football.json",
+        }
+    except Exception as error:
+        if not player_path.exists():
+            raise
+        previous_player = json.loads(player_path.read_text())
+        player_status = {
+            "status": "retained",
+            "checked_at": previous_player.get("generated_at"),
+            "source": previous_player.get("source", {}).get("name", "StatsBomb Open Data"),
+            "cohorts": [cohort.get("id") for cohort in previous_player.get("cohorts", [])],
+            "data_url": "/assets/data/rating-lab/player-football.json",
+            "message": str(error)[:240],
+        }
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "methodology_version": METHODOLOGY_VERSION,
@@ -2373,15 +2476,17 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup"],
             "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
             "availability": "Withhold title probabilities until the public source identifies a knockout field.",
-            "completed_competitions": "Replace retrospective title odds with competition-only protocol performance ratings initialized from the strictly pre-event state.",
+            "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
             "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
             "market_quality_fields": ["raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at"],
             "refresh": "daily",
         },
         "individual_contribution": individual_contribution_protocol(),
+        "player_football": player_status,
         "methodology_url": "/rating-lab/#methodology",
     }
     (output_dir / "schema.json").write_text(json.dumps(schema, indent=2) + "\n")
+    (output_dir / "player-schema.json").write_text(json.dumps(player_schema(), indent=2) + "\n")
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
 

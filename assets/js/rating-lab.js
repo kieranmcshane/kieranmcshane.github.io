@@ -1037,13 +1037,13 @@
   }
 
   function setPerformanceColumns() {
-    elements.predictorColumns.rank.textContent = 'Performance';
+    elements.predictorColumns.rank.textContent = 'TPR rank';
     elements.predictorColumns.team.textContent = 'Participant';
     elements.predictorColumns.now.textContent = 'W–D–L';
-    elements.predictorColumns.value.textContent = 'Start';
-    elements.predictorColumns.title.textContent = 'Final rating';
-    elements.predictorColumns.secondary.textContent = 'Change';
-    elements.predictorColumns.tertiary.textContent = 'Score';
+    elements.predictorColumns.value.textContent = 'Start rating';
+    elements.predictorColumns.title.textContent = 'Performance rating';
+    elements.predictorColumns.secondary.textContent = 'vs start';
+    elements.predictorColumns.tertiary.textContent = 'Reset rank';
     elements.predictorColumns.secondary.hidden = false;
     elements.predictorColumns.tertiary.hidden = false;
   }
@@ -1053,9 +1053,11 @@
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a participant to inspect its completed-event performance.</p>';
       return;
     }
-    var changeClass = team.change > 0 ? 'is-positive' : team.change < 0 ? 'is-negative' : '';
+    var changeClass = team.performance_delta > 0 ? 'is-positive' : team.performance_delta < 0 ? 'is-negative' : '';
     var surpriseClass = team.score_residual > 0 ? 'is-positive' : team.score_residual < 0 ? 'is-negative' : '';
-    var change = (team.change > 0 ? '+' : '') + number(team.change, 2);
+    var change = (team.performance_delta > 0 ? '+' : '') + number(team.performance_delta, 2);
+    var performanceRating = (team.performance_rating_cap === 'upper' ? '≥' : team.performance_rating_cap === 'lower' ? '≤' : '') +
+      number(team.performance_rating, 2);
     var isGlicko = model.rating_type === 'glicko2_conservative_r_minus_2rd';
     var startBelief = model.rating_type === 'elo' ? number(team.start_rating, 2) : isGlicko ?
       'rating ' + number(team.start_rating, 2) + ' · RD ' + number(team.start_sigma, 2) + ' · volatility ' + number(team.start_volatility, 5) :
@@ -1064,7 +1066,7 @@
       'rating ' + number(team.end_rating, 2) + ' · RD ' + number(team.end_sigma, 2) + ' · volatility ' + number(team.end_volatility, 5) :
       'μ ' + number(team.end_rating, 2) + ' · σ ' + number(team.end_sigma, 2);
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Protocol performance #' +
-      team.rank + '</p><h3>' + escapeHtml(team.name) + '</h3></div><strong>' + number(team.performance_rating, 2) +
+      team.rank + '</p><h3>' + escapeHtml(team.name) + '</h3></div><strong>' + escapeHtml(performanceRating) +
       '</strong></div><dl><div><dt>Event record</dt><dd>' + team.wins + '–' + team.draws + '–' + team.losses +
       '</dd></div><div><dt>Result score</dt><dd>' + number(team.points, 2) + ' / ' + number(team.matches, 0) +
       '</dd></div><div><dt>Protocol expectation</dt><dd>' + number(team.expected_score, 2) + ' / ' + number(team.matches, 0) +
@@ -1072,10 +1074,13 @@
       (team.score_residual > 0 ? '+' : '') + number(team.score_residual, 2) +
       '</dd></div><div><dt>Standardized surprise</dt><dd class="' + surpriseClass + '">' +
       (team.surprise_index > 0 ? '+' : '') + number(team.surprise_index, 2) + ' σ' +
+      '</dd></div><div><dt>Anchored performance rating</dt><dd>' + escapeHtml(performanceRating) +
+      '</dd></div><div><dt>TPR versus start</dt><dd class="' + changeClass + '">' + change +
+      '</dd></div><div><dt>Tournament-only reset</dt><dd>#' + team.reset_rank + ' · ' + number(team.reset_rating, 2) +
       '</dd></div><div><dt>Starting belief</dt><dd>' + escapeHtml(startBelief) + '</dd></div><div><dt>Final belief</dt><dd>' +
       escapeHtml(endBelief) + '</dd></div><div><dt>Published start</dt><dd>' + number(team.start_score, 2) +
-      '</dd></div><div><dt>Performance change</dt><dd class="' + changeClass + '">' + change +
-      '</dd></div></dl><p class="rating-lab-performance-note">The final published score is Elo, Glicko-2 rating−2RD, or Gaussian μ−3σ after replaying only this competition from the strictly pre-event state. It is not the official competition table or a conventional bookmaker rating.</p>';
+      '</dd></div><div><dt>Post-event replay score</dt><dd>' + number(team.replay_rating, 2) +
+      '</dd></div></dl><p class="rating-lab-performance-note">The performance rating solves the exact expected-score equation against opponents held at their pre-event beliefs. The reset rank starts everyone from the selected protocol’s neutral prior and uses only this event. The chronological surprise remains actual score minus the expectation recorded before each update.</p>';
   }
 
   function renderPerformanceChart(rows, model, competition, sport) {
@@ -1138,7 +1143,7 @@
     elements.predictorMetrics.innerHTML = [
       ['Recorded results', number(model.results, 0)],
       ['Participants', number(rows.length, 0)],
-      ['Published rating', model.rating_type === 'elo' ? 'Final Elo' : model.rating_type === 'glicko2_conservative_r_minus_2rd' ? 'Final rating−2RD' : 'Final μ−3σ']
+      ['Performance rating', model.rating_type === 'elo' ? 'Anchored Elo TPR' : model.rating_type === 'glicko2_conservative_r_minus_2rd' ? 'Anchored Glicko rating' : 'Anchored skill mean']
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
@@ -1146,14 +1151,16 @@
       state.datasets[view.sport].models[state.predictorModel].label;
     renderPerformanceChart(rows, model, competition, view.sport);
     elements.predictorBody.innerHTML = rows.map(function (team) {
-      var changeClass = team.change > 0 ? 'is-positive' : team.change < 0 ? 'is-negative' : '';
-      var change = (team.change > 0 ? '+' : '') + number(team.change, 2);
+      var changeClass = team.performance_delta > 0 ? 'is-positive' : team.performance_delta < 0 ? 'is-negative' : '';
+      var change = (team.performance_delta > 0 ? '+' : '') + number(team.performance_delta, 2);
+      var performanceRating = (team.performance_rating_cap === 'upper' ? '≥' : team.performance_rating_cap === 'lower' ? '≤' : '') +
+        number(team.performance_rating, 2);
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
         team.rank + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
         escapeHtml(team.id) + '">' + escapeHtml(team.name) + '</button></th><td>' + team.wins + '–' + team.draws + '–' +
-        team.losses + '</td><td>' + number(team.start_score, 2) + '</td><td><strong>' + number(team.performance_rating, 2) +
+        team.losses + '</td><td>' + number(team.start_rating, 2) + '</td><td><strong>' + escapeHtml(performanceRating) +
         '</strong></td><td class="rating-lab-optional ' + changeClass + '">' + change +
-        '</td><td class="rating-lab-optional">' + percent(team.score_rate) + '</td></tr>';
+        '</td><td class="rating-lab-optional">#' + team.reset_rank + '</td></tr>';
     }).join('');
     renderPerformanceDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model);
     elements.predictorMethod.innerHTML = escapeHtml(competition.performance.method) + ' Selected model parameters are the same ones shown in the protocol section. Snapshot: <code>' +
