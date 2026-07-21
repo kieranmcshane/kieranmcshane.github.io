@@ -37,6 +37,14 @@ The article has a complete bipartite core followed by a research-direction appen
 - [More than two parties](#what-changes-for-more-than-two-parties) separates proved necessary bounds from the harder full projective-norm problem.
 - [A practical ladder](#a-practical-ladder-of-multipartite-tests) compares computable relaxations; the [moment formulation](#a-possible-moment-problem-formulation) is explicitly a proposal rather than a completed criterion.
 
+<aside class="explain-article-cta">
+  <div>
+    <strong>Could you explain the argument without the page?</strong>
+    <p>The companion oral trainer asks you to rebuild the proof, answer a short viva, and rehearse a 90-second or three-minute explanation.</p>
+  </div>
+  <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the oral trainer →</a>
+</aside>
+
 ## Notation glossary
 
 Only notation that recurs across several sections is linked. Hovering over or focusing a linked expression shows a brief definition; activating it moves to the defining passage. External papers open in a separate tab.
