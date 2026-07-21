@@ -7,6 +7,8 @@ from pathlib import Path
 import unittest
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
+from rating_lab.player_models import LineupTrueSkill
+from rating_lab.player_pipeline import _fit_ridge, _merge_minutes, player_schema, validate_player_payload
 from rating_lab.pipeline import (
     _deduplicate,
     _competition_performance,
@@ -138,15 +140,69 @@ class PipelineTests(unittest.TestCase):
         surface_weights = {candidate["surface_weight"] for candidate in _model_candidates("tennis", "elo")}
         self.assertEqual(surface_weights, {0.4, 0.7, 0.9})
 
-    def test_individual_contribution_protocol_withholds_unverified_player_ranks(self):
+    def test_individual_contribution_protocol_publishes_only_valid_historical_cohorts(self):
         protocol = individual_contribution_protocol()
-        self.assertEqual(protocol["status"], "withheld_pending_lineup_source")
-        self.assertEqual(protocol["current_publication_unit"], "club or national team")
+        self.assertEqual(protocol["status"], "historical_cohorts_published")
+        self.assertEqual(protocol["live_publication_unit"], "club or national team")
+        self.assertIn("individual player", protocol["historical_publication_unit"])
         self.assertIn("lineup_trueskill", protocol["methods"])
         self.assertIn("rapm", protocol["methods"])
         self.assertEqual(protocol["release_gates"]["starting_lineup_coverage"], ">= 95% of eligible matches")
         self.assertIn("source licence", protocol["release_gates"]["publication_rights"])
         self.assertNotIn("shots", protocol["methods"]["lineup_trueskill"]["input"])
+
+    def test_lineup_trueskill_rewards_winning_players_and_reduces_uncertainty(self):
+        model = LineupTrueSkill(draw_probability=0.25)
+        team_a = {"a1": 1.0, "a2": 1.0}
+        team_b = {"b1": 1.0, "b2": 1.0}
+        initial = model.state("a1").sigma
+        for _ in range(4):
+            model.update(team_a, team_b, 1.0)
+        self.assertGreater(model.state("a1").mean, model.state("b1").mean)
+        self.assertLess(model.state("a1").sigma, initial)
+
+    def test_lineup_trueskill_probabilities_partition_one(self):
+        probabilities = LineupTrueSkill().probabilities({"a": 1.0}, {"b": 1.0})
+        self.assertAlmostEqual(sum(probabilities.values()), 1.0, places=9)
+        self.assertTrue(all(0 <= value <= 1 for value in probabilities.values()))
+
+    def test_position_segments_merge_without_double_counting_tactical_shifts(self):
+        positions = [
+            {"from": "00:00", "to": "45:00", "end_reason": "Tactical Shift"},
+            {"from": "45:00", "to": None, "end_reason": "Final Whistle", "to_period": None},
+        ]
+        minutes, started, complete = _merge_minutes(positions, 90.0)
+        self.assertAlmostEqual(minutes, 90.0)
+        self.assertTrue(started)
+        self.assertTrue(complete)
+
+    def test_rapm_ridge_assigns_positive_impact_to_repeated_winner(self):
+        rows = [
+            {"home": {"winner": 1.0}, "away": {"loser": 1.0}, "goal_difference": 2.0},
+            {"home": {"loser": 1.0}, "away": {"winner": 1.0}, "goal_difference": -1.0},
+            {"home": {"winner": 1.0}, "away": {"loser": 1.0}, "goal_difference": 1.0},
+        ]
+        fitted = _fit_ridge(rows, ["loser", "winner"], 1.0)
+        self.assertGreater(fitted["coefficients"]["winner"], fitted["coefficients"]["loser"])
+        self.assertGreaterEqual(fitted["uncertainty"]["winner"], 0.0)
+
+    def test_player_schema_is_versioned_and_closed(self):
+        schema = player_schema()
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.0.0")
+        self.assertFalse(schema["additionalProperties"])
+
+    def test_published_player_payload_passes_gates_and_has_contiguous_ranks(self):
+        payload = json.loads((Path(__file__).resolve().parents[1] / "assets/data/rating-lab/player-football.json").read_text())
+        validate_player_payload(payload)
+        for cohort in payload["cohorts"]:
+            self.assertGreaterEqual(cohort["coverage"]["starting_lineups"], 0.95)
+            self.assertGreaterEqual(cohort["coverage"]["player_minutes"], 0.95)
+            self.assertEqual(cohort["coverage"]["player_match_graph_components"], 1)
+            for model in cohort["models"].values():
+                self.assertEqual(
+                    [row["rank"] for row in model["rankings"]],
+                    list(range(1, len(model["rankings"]) + 1)),
+                )
 
     def test_polymarket_snapshot_matches_entities_and_preserves_raw_overround(self):
         competition = {

@@ -18,7 +18,8 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <a href="#leaderboard-heading"><strong>01</strong><span>Rankings</span></a>
     <a href="#matchup"><strong>02</strong><span>A vs B</span></a>
     <a href="#predictor"><strong>03</strong><span>Competitions</span></a>
-    <a href="#research"><strong>04</strong><span>Methods & data</span></a>
+    <a href="{{ '/rating-lab/players/' | relative_url }}"><strong>04</strong><span>Players</span></a>
+    <a href="#research"><strong>05</strong><span>Methods & data</span></a>
   </nav>
 
   <noscript><p class="rating-lab-notice">This interactive leaderboard requires JavaScript.</p></noscript>
@@ -223,11 +224,12 @@ description: Live alternative ratings for tennis, club and national-team footbal
   </details>
 
   <details class="rating-lab-disclosure">
-    <summary><span>Not available yet</span><strong>Individual footballer contribution</strong></summary>
+    <summary><span>Historical cohorts live</span><strong>Individual footballer contribution</strong></summary>
   <section class="rating-lab-contribution" id="player-contribution" aria-labelledby="contribution-heading">
     <p class="rating-lab-kicker">Team result → player contribution</p>
-    <h2 id="contribution-heading">A valid model, withheld until the data are valid</h2>
-    <p class="rating-lab-contribution-intro">The rankings above rate each club or national team as one competitor. They do <strong>not</strong> currently claim to measure individual footballers. That is a data boundary, not a limitation of outcome-based modelling.</p>
+    <h2 id="contribution-heading">Published where the lineups are complete</h2>
+    <p class="rating-lab-contribution-intro">Live club and national-team rankings still treat each team as one competitor. A separate historical player lab now publishes individual estimates for complete declared StatsBomb seasons: Liga F 2023/24 and the FA Women’s Super League 2023/24.</p>
+    <p><a class="rating-lab-contribution-cta" href="{{ '/rating-lab/players/' | relative_url }}">Open historical player ratings →</a></p>
 
     <div class="rating-lab-contribution-methods">
       <article>
@@ -250,33 +252,33 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <p class="rating-lab-method-tag">Publication gate</p>
           <h3 id="readiness-heading">Player leaderboard status</h3>
         </div>
-        <span class="rating-lab-status-withheld">Withheld</span>
+        <span class="rating-lab-status-ready">Historical cohorts live</span>
       </div>
-      <p>Precise-looking player ratings would be misleading until one declared cohort passes every check below. Failed checks remain visible rather than being filled with assumptions.</p>
+      <p>Every published historical cohort passes the checks below. Men’s club samples and the live five-league feed remain excluded because their open lineup coverage is incomplete.</p>
       <div class="rating-lab-table-wrap">
         <table class="rating-lab-readiness-table">
           <caption>Minimum data and reproducibility requirements for publishing footballer ratings</caption>
           <thead><tr><th scope="col">Gate</th><th scope="col">Required standard</th><th scope="col">Current evidence</th></tr></thead>
           <tbody>
             <tr><th scope="row">Match results</th><td>Complete declared competitions</td><td><span class="is-ready">Ready</span></td></tr>
-            <tr><th scope="row">Stable player IDs</th><td>One identity across clubs and seasons</td><td><span class="is-unverified">Not verified</span></td></tr>
-            <tr><th scope="row">Starting lineups</th><td>At least 95% of eligible matches</td><td><span class="is-unverified">Not verified</span></td></tr>
-            <tr><th scope="row">Substitution minutes</th><td>At least 95% of eligible matches</td><td><span class="is-unverified">Not verified</span></td></tr>
-            <tr><th scope="row">Identification</th><td>Connected lineups plus published collinearity diagnostics</td><td><span class="is-unverified">Not measured</span></td></tr>
-            <tr><th scope="row">Publication rights</th><td>Licence permits public derived ratings and audit metadata</td><td><span class="is-unverified">Source-dependent</span></td></tr>
+            <tr><th scope="row">Stable player IDs</th><td>One identity within the declared cohort</td><td><span class="is-ready">Passed</span></td></tr>
+            <tr><th scope="row">Starting lineups</th><td>At least 95% of eligible matches</td><td><span class="is-ready">100%</span></td></tr>
+            <tr><th scope="row">Player minutes</th><td>At least 95% of players used</td><td><span class="is-ready">100%</span></td></tr>
+            <tr><th scope="row">Identification</th><td>Connected player-match graph plus disclosed ridge shrinkage</td><td><span class="is-ready">Passed</span></td></tr>
+            <tr><th scope="row">Publication terms</th><td>StatsBomb attribution and declared historical scope</td><td><span class="is-ready">Passed</span></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
     <details class="rating-lab-limitations">
-      <summary>What these player models would—and would not—claim</summary>
+      <summary>What these player models do—and do not—claim</summary>
       <ul>
-        <li>Inputs would be outcomes, lineups, and minutes only: no passes, shots, dribbles, expected goals, or tracking data.</li>
+        <li>Inputs are outcomes, lineups, and minutes only: no passes, shots, dribbles, expected goals, or tracking data.</li>
         <li>The estimates would measure net contribution associated with results after controlling for teammates and opponents, not how a player created that contribution.</li>
         <li>Lineup TrueSkill is the natural sequential rating. RAPM is the complementary retrospective impact estimate; they answer related but different questions.</li>
         <li>Minutes are needed to avoid assigning a substitute the same exposure as a full-match player. Score differential by on-field stint is preferable for RAPM when legally reproducible.</li>
-        <li>StatsBomb Open Data can support transparent historical experiments for selected seasons, but it is not a complete live feed for the five leagues covered here.</li>
+        <li>StatsBomb Open Data supports these declared historical seasons, but it is not a complete live feed for the five men’s leagues covered by the team rankings.</li>
       </ul>
     </details>
   </section>

@@ -26,7 +26,7 @@ from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBl
 
 
 SCHEMA_VERSION = "1.9.0"
-METHODOLOGY_VERSION = "2026-07-20.10"
+METHODOLOGY_VERSION = "2026-07-21.1"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 SCHEDULE_ENTITY_ALIASES = {
@@ -100,19 +100,21 @@ PREDICTOR_SIMULATIONS = 5_000
 def individual_contribution_protocol() -> dict:
     """Publish the exact release gate for outcome-only player contribution ratings."""
     return {
-        "status": "withheld_pending_lineup_source",
+        "status": "historical_cohorts_published",
         "scope": "football players",
-        "current_publication_unit": "club or national team",
+        "live_publication_unit": "club or national team",
+        "historical_publication_unit": "individual player within one declared complete season",
+        "player_data_url": "/assets/data/rating-lab/player-football.json",
         "methods": {
             "lineup_trueskill": {
                 "input": "match outcome plus the players and minutes on each side",
-                "team_performance": "sum(minutes_share * player_performance)",
+                "team_performance": "normalized sum(minutes_share * player performance)",
                 "uncertainty": "posterior mean and standard deviation per player",
             },
             "rapm": {
                 "input": "score differential plus the players and minutes on each side",
                 "estimator": "minutes-weighted ridge regression with chronological validation",
-                "uncertainty": "block bootstrap intervals by match",
+                "uncertainty": "ridge sampling approximation from match-level residual variance",
             },
         },
         "excluded_inputs": [
@@ -132,11 +134,11 @@ def individual_contribution_protocol() -> dict:
             "publication_rights": "source licence must permit derived public ratings and audit metadata",
         },
         "source_assessment": {
-            "statsbomb_open_data": "Reproducible historical research archive with selected competitions and seasons; not a complete live five-league feed.",
+            "statsbomb_open_data": "Complete declared historical Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
             "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
             "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
         },
-        "publication_rule": "Do not publish player ranks until every release gate passes for the declared cohort.",
+        "publication_rule": "Publish only declared cohorts that pass every gate; never imply that a historical cohort is a live player ranking.",
     }
 
 
@@ -2344,6 +2346,34 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     "snapshot_sha256": previous.get("source", {}).get("snapshot_sha256"),
                     "parameters": previous.get("parameters", {}),
                 }
+    from .player_pipeline import build_player_payload, player_schema, validate_player_payload
+
+    player_path = output_dir / "player-football.json"
+    try:
+        player_payload = build_player_payload(_get)
+        validate_player_payload(player_payload)
+        staged_player = output_dir / ".player-football.json.tmp"
+        staged_player.write_text(json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False) + "\n")
+        staged_player.replace(player_path)
+        player_status = {
+            "status": "current",
+            "checked_at": player_payload["generated_at"],
+            "source": player_payload["source"]["name"],
+            "cohorts": [cohort["id"] for cohort in player_payload["cohorts"]],
+            "data_url": "/assets/data/rating-lab/player-football.json",
+        }
+    except Exception as error:
+        if not player_path.exists():
+            raise
+        previous_player = json.loads(player_path.read_text())
+        player_status = {
+            "status": "retained",
+            "checked_at": previous_player.get("generated_at"),
+            "source": previous_player.get("source", {}).get("name", "StatsBomb Open Data"),
+            "cohorts": [cohort.get("id") for cohort in previous_player.get("cohorts", [])],
+            "data_url": "/assets/data/rating-lab/player-football.json",
+            "message": str(error)[:240],
+        }
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "methodology_version": METHODOLOGY_VERSION,
@@ -2379,9 +2409,11 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "refresh": "daily",
         },
         "individual_contribution": individual_contribution_protocol(),
+        "player_football": player_status,
         "methodology_url": "/rating-lab/#methodology",
     }
     (output_dir / "schema.json").write_text(json.dumps(schema, indent=2) + "\n")
+    (output_dir / "player-schema.json").write_text(json.dumps(player_schema(), indent=2) + "\n")
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
 
