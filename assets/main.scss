@@ -1181,7 +1181,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab {
   --lab-navy: #1d252e;
   --lab-blue: #315f78;
-  --lab-secondary: #667a89;
+  --lab-secondary: #6b6280;
   --lab-line: #d4d8da;
   --lab-wash: #f5f6f5;
   --lab-positive: #27704e;
@@ -1559,6 +1559,54 @@ body:has(.rating-lab) .post-content {
   font: inherit;
   font-size: 0.72rem;
   cursor: pointer;
+}
+
+.rating-lab-movers-empty {
+  color: #697585;
+  font-size: 0.78rem;
+}
+
+.rating-lab-provisional-control {
+  display: flex;
+  gap: 0.75rem 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.7rem 0.8rem;
+  background: #f7f6f9;
+  border: 1px solid #d9d5df;
+  border-left: 3px solid var(--lab-secondary);
+  border-radius: 4px;
+}
+
+.rating-lab-provisional-control[hidden] {
+  display: none;
+}
+
+.rating-lab-provisional-control label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--lab-navy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rating-lab-provisional-control input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--lab-secondary);
+}
+
+.rating-lab-provisional-control p {
+  margin: 0;
+  color: #5d6877;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: right;
 }
 
 .rating-lab-movers button > span {
@@ -2898,7 +2946,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-predictor-toolbar {
   display: grid;
-  grid-template-columns: minmax(190px, 0.8fr) auto minmax(220px, 1fr);
+  grid-template-columns: minmax(280px, 1fr) auto minmax(220px, 0.9fr);
   gap: 1rem;
   align-items: end;
   margin: 1.5rem 0 1rem;
@@ -3631,6 +3679,15 @@ body:has(.rating-lab) .post-content {
 
   .rating-lab-support-actions {
     justify-content: flex-start;
+  }
+
+  .rating-lab-provisional-control {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .rating-lab-provisional-control p {
+    text-align: left;
   }
 
   .rating-lab-toolbar,

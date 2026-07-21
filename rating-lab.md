@@ -66,6 +66,14 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
     </details>
 
+    <div class="rating-lab-provisional-control" id="rating-provisional-control" hidden>
+      <label>
+        <input id="rating-include-provisional" type="checkbox" aria-describedby="rating-provisional-note">
+        <span>Include provisional (<strong id="rating-provisional-count">0</strong>)</span>
+      </label>
+      <p id="rating-provisional-note">Provisional football Elo entries have too little established-network evidence for the default ranking.</p>
+    </div>
+
     <div class="rating-lab-grid">
       <div class="rating-lab-table-wrap">
         <table class="rating-lab-table" id="ranking-table">
