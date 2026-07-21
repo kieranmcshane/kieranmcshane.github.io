@@ -504,6 +504,27 @@ class PipelineTests(unittest.TestCase):
         self.assertNotIn("Colors only identify the outcomes", script)
         self.assertIn('autocomplete="off"', page)
 
+    def test_mobile_audit_guards_keep_core_data_visible(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "rating-lab.md").read_text()
+        player_page = (root / "player-lab.md").read_text()
+        script = (root / "assets/js/rating-lab.js").read_text()
+        player_script = (root / "assets/js/player-lab.js").read_text()
+        styles = (root / "assets/main.scss").read_text()
+
+        self.assertIn("<noscript>This interactive leaderboard requires JavaScript.</noscript>", page)
+        self.assertIn("<noscript>This player leaderboard requires JavaScript.</noscript>", player_page)
+        self.assertNotIn('<noscript><p class="rating-lab-notice">', page + player_page)
+        self.assertIn("Rating Lab mobile audit corrections", styles)
+        self.assertIn("overflow-wrap: anywhere", styles)
+        self.assertIn(".rating-lab-predictor-table.is-league:not(.is-preseason) .rating-lab-optional", styles)
+        self.assertIn(".player-lab-table th:nth-child(n + 4)", styles)
+        self.assertIn("font-size: 16px", styles)
+        self.assertIn("rating-lab-mobile-change", script)
+        self.assertIn('data-label="Candidates tested"', script)
+        self.assertIn("elements.scoreHeading.textContent = 'Score';", player_script)
+        self.assertIn("Math.floor(elements.chart.clientWidth || 330)", player_script)
+
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{
             "round": "Final",

@@ -291,7 +291,8 @@
   }
 
   function entityName(row, sport) {
-    return '<span class="rating-lab-entity-name">' + escapeHtml(row.name) + inlineCountryFlag(row, sport) + '</span>';
+    return '<span class="rating-lab-entity-name"><span class="rating-lab-entity-name-text">' +
+      escapeHtml(row.name) + '</span>' + inlineCountryFlag(row, sport) + '</span>';
   }
 
   function entityInitials(name) {
@@ -480,6 +481,9 @@
       if (row.provisional) rowClasses.push('is-provisional');
       var identityContext = row.provisional ? 'Provisional Elo · ' + row.provisional_reason :
         (row.competition || row.country);
+      var movement = !Number.isFinite(row.change30) ? '• no 30d baseline' :
+        Math.abs(row.change30) < 0.05 ? '• 0.0 · 30d' :
+          (row.change30 > 0 ? '▲ ' : '▼ ') + delta + ' · 30d';
       return '<tr data-id="' + escapeHtml(row.id) + '" data-row-select="' + escapeHtml(row.id) + '" aria-selected="' +
         (row.id === state.selected ? 'true' : 'false') + '"' +
         (rowClasses.length ? ' class="' + rowClasses.join(' ') + '"' : '') + '>' +
@@ -487,7 +491,8 @@
         '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '">' +
         entityBadge(row, state.sport) + '<span class="rating-lab-identity-copy">' + entityName(row, state.sport) +
         '<small' + (row.provisional ? ' class="rating-lab-provisional-label" title="' +
-          escapeHtml(row.provisional_reason) + '"' : '') + '>' + escapeHtml(identityContext) + '</small></span></button></th>' +
+          escapeHtml(row.provisional_reason) + '"' : '') + '>' + escapeHtml(identityContext) + '</small>' +
+        '<small class="rating-lab-mobile-change ' + deltaClass + '">' + escapeHtml(movement) + '</small></span></button></th>' +
         '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
         '<td class="rating-lab-rating-column"><strong>' + ratingNumber(row.score) + '</strong></td>' +
         '<td class="rating-lab-uncertainty-column' + (row.sigma === null ? ' is-empty' : '') + '">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1, 1)) + '</td>' +
@@ -495,6 +500,11 @@
         '<td class="rating-lab-recent-column">' + number(row.recent_matches, 0) + '</td>' +
         '</tr>';
     }).join('');
+    elements.rankingTable.querySelectorAll('thead th').forEach(function (header) {
+      header.removeAttribute('aria-sort');
+    });
+    var activeSort = elements.rankingTable.querySelector('[data-sort="' + state.sort + '"]');
+    if (activeSort) activeSort.closest('th').setAttribute('aria-sort', state.direction === 1 ? 'ascending' : 'descending');
   }
 
   function historyChart(series, label) {
@@ -552,7 +562,8 @@
       '" height="' + (height - top - bottom) + '" tabindex="0" data-chart-surface aria-label="Inspect ' +
       escapeHtml(label) + '. Move across the chart, tap, or use the left and right arrow keys."></rect></svg>' +
       '<div class="rating-lab-chart-tooltip" role="presentation" hidden></div></div>' +
-      '<p class="rating-lab-chart-readout" aria-live="polite">Move across the chart, tap, or use ← → to inspect each update.</p>' + legend + '</div>';
+      '<p class="rating-lab-chart-readout" aria-live="polite"><span class="rating-lab-chart-readout-pointer">Move across the chart, tap, or use ← → to inspect each update.</span>' +
+      '<span class="rating-lab-chart-readout-touch">Tap the chart to inspect each update.</span></p>' + legend + '</div>';
   }
 
   function chartEntries(chartWrap) {
@@ -715,8 +726,8 @@
     elements.parameterBody.innerHTML = modelNames.map(function (model) {
       var candidates = data.candidate_parameters[model].map(parameterText).join(' · ');
       return '<tr><th scope="row">' + escapeHtml(data.models[model].label) + '</th>' +
-        '<td><code>' + escapeHtml(parameterText(data.parameters[model])) + '</code></td>' +
-        '<td><code>' + escapeHtml(candidates) + '</code></td></tr>';
+        '<td data-label="Selected values"><code>' + escapeHtml(parameterText(data.parameters[model])) + '</code></td>' +
+        '<td data-label="Candidates tested"><code>' + escapeHtml(candidates) + '</code></td></tr>';
     }).join('');
     var revision = state.manifest.code_revision || 'unknown';
     var snapshot = data.source.snapshot_sha256 || 'Published through source API/archive';
@@ -1471,11 +1482,14 @@
     elements.predictorPerformanceChart.innerHTML = '';
     var competition = view.competition;
     var model = view.model;
+    var predictorTable = elements.predictorBody.closest('.rating-lab-predictor-table');
+    predictorTable.classList.remove('is-league', 'is-preseason', 'is-knockout', 'is-completed');
     var competitionFormat = competition.format || (model && model.teams ? 'round-robin league' : 'knockout cup');
     elements.predictorState.textContent = competition.status.charAt(0).toUpperCase() + competition.status.slice(1) +
       ' · ' + competitionFormat + ' · ' + (competitionFormat === 'two-legged qualifying round' ? 'official calendar through ' : 'fixtures through ') +
       formatDate(competition.last_fixture);
     if (competition.status === 'complete' && competition.performance && competition.performance.models[state.predictorModel]) {
+      predictorTable.classList.add('is-completed');
       renderCompletedPerformance(view);
       return;
     }
@@ -1513,6 +1527,8 @@
       state.predictorTeam = rows[0].id;
     }
     var isPreseason = isLeague && model.completed_matches === 0;
+    predictorTable.classList.add(isLeague ? 'is-league' : 'is-knockout');
+    if (isPreseason) predictorTable.classList.add('is-preseason');
     setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : isQualifying ? 'qualifying' : 'knockout', model.target_label);
     if (isPreseason) {
       elements.predictorColumns.now.hidden = true;
@@ -1590,11 +1606,12 @@
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
         (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
         escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-        '</span></button></th>' + (isPreseason ? '' : '<td class="rating-lab-predictor-now">' +
+        '</span></button></th>' + (isPreseason ? '' : '<td class="rating-lab-predictor-now" data-label="Now">' +
         (team.played ? team.current_rank : '—') + '</td>') + '<td class="rating-lab-predictor-value"><strong>' + number(team.expected_points, 1, 1) +
-        '</strong></td>' + (isPreseason ? '' : '<td class="rating-lab-predictor-title">' + probabilityCell(team.champion) + '</td><td class="rating-lab-optional">' +
-        probabilityCell(isStandings ? team.podium : team.top_four) + '</td><td class="rating-lab-optional">' +
-        probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td>') + '</tr>';
+        '</strong></td>' + (isPreseason ? '' : '<td class="rating-lab-predictor-title" data-label="Title">' + probabilityCell(team.champion) +
+        '</td><td class="rating-lab-optional" data-label="' + (isStandings ? 'Podium' : 'Top four') + '">' +
+        probabilityCell(isStandings ? team.podium : team.top_four) + '</td><td class="rating-lab-optional" data-label="' +
+        (isStandings ? 'Last' : 'Bottom three') + '">' + probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td>') + '</tr>';
     }).join('');
     var selectedTeam = rows.find(function (team) { return team.id === state.predictorTeam; });
     if (isPreseason) renderLeaguePriorDetail(selectedTeam, view.sport);
@@ -1621,6 +1638,16 @@
     renderProtocol();
     renderAudit();
     renderPredictor();
+  }
+
+  function revealDetailOnMobile() {
+    if (!window.matchMedia('(max-width: 650px)').matches || elements.detail.hidden) return;
+    window.setTimeout(function () {
+      elements.detail.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start'
+      });
+    }, 0);
   }
 
   elements.sportTabs.addEventListener('click', function (event) {
@@ -1782,6 +1809,7 @@
     state.selected = target.dataset.select || target.dataset.rowSelect;
     renderTable();
     renderDetail();
+    revealDetailOnMobile();
   });
 
   elements.movers.addEventListener('click', function (event) {
@@ -1790,6 +1818,7 @@
     state.selected = button.dataset.select;
     renderTable();
     renderDetail();
+    revealDetailOnMobile();
   });
 
   elements.detail.addEventListener('click', function (event) {
