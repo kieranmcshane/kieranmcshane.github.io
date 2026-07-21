@@ -226,9 +226,35 @@
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
+  function entityMedia(row, sport) {
+    if (row && row.media) return row.media;
+    var dataset = state.datasets[sport];
+    if (!dataset || !row || !row.id) return null;
+    var match = dataset.models.elo.rankings.find(function (candidate) { return candidate.id === row.id; });
+    return match ? match.media || null : null;
+  }
+
+  function trustedMediaUrl(value, purpose) {
+    try {
+      var parsed = new URL(String(value || ''), window.location.href);
+      var allowed = purpose === 'image' ? ['crests.football-data.org', 'upload.wikimedia.org'] :
+        ['www.football-data.org', 'football-data.org', 'commons.wikimedia.org'];
+      return parsed.protocol === 'https:' && allowed.indexOf(parsed.hostname) !== -1 ? parsed.href : '';
+    } catch (_error) {
+      return '';
+    }
+  }
+
   function entityBadge(row, sport) {
     var flag = sport === 'national-football' ? nationalTeamFlag(row.name) : '';
     var label = flag || entityInitials(row.name);
+    var media = entityMedia(row, sport);
+    var imageUrl = media && trustedMediaUrl(media.url, 'image');
+    if (imageUrl) {
+      return '<span class="rating-lab-identity is-media is-' + escapeHtml(media.kind) + '" aria-hidden="true">' +
+        '<span class="rating-lab-identity-fallback">' + escapeHtml(label) + '</span><img src="' +
+        escapeHtml(imageUrl) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-entity-image></span>';
+    }
     return '<span class="rating-lab-identity' + (flag ? ' is-flag' : '') + '" aria-hidden="true">' +
       escapeHtml(label) + '</span>';
   }
@@ -236,6 +262,15 @@
   function entityTitle(row, sport) {
     return '<span class="rating-lab-entity-title">' + entityBadge(row, sport) + '<span>' +
       escapeHtml(row.name) + '</span></span>';
+  }
+
+  function mediaCredit(row, sport) {
+    var media = entityMedia(row, sport);
+    var sourceUrl = media && trustedMediaUrl(media.source_url, 'source');
+    if (!media || !sourceUrl) return '';
+    return '<p class="rating-lab-media-credit">' + (media.kind === 'crest' ? 'Crest' : 'Portrait') + ': <a href="' +
+      escapeHtml(sourceUrl) + '" rel="noopener noreferrer">' + escapeHtml(media.attribution || media.source) +
+      '</a> · ' + escapeHtml(media.license) + ' · not a model input</p>';
   }
 
   function currentRows() {
@@ -527,6 +562,7 @@
     }
     elements.detail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank +
       '</p><h3>' + entityTitle(row, state.sport) + '</h3></div><strong>' + number(row.score, 1) + '</strong></div>' +
+      mediaCredit(row, state.sport) +
       '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
       (isPinned ? 'true' : 'false') + '">' + (isPinned ? 'Pinned for comparison' : 'Pin for comparison') + '</button>' +
       historyChart([{ name: row.name, points: row.history }], row.name + ' rating history') +
@@ -1059,7 +1095,7 @@
     }).join('');
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Expected position ' +
       number(team.expected_position, 2) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      number(team.expected_points, 1) + ' pts</strong></div>' +
+      number(team.expected_points, 1) + ' pts</strong></div>' + mediaCredit(team, sport) +
       '<div class="rating-lab-position-chart" role="img" aria-label="Finishing-position probabilities for ' +
       escapeHtml(team.name) + '">' + bars + '</div><div class="rating-lab-position-axis"><span>Champion</span><span>Position ' +
       team.positions.length + '</span></div><dl><div><dt>Title</dt><dd>' + percent(team.champion) +
@@ -1076,7 +1112,7 @@
     }).join('');
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Expected position ' +
       number(team.expected_position, 2) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      number(team.expected_points, 1) + ' pts</strong></div><div class="rating-lab-position-chart" role="img" aria-label="Final-position probabilities for ' +
+      number(team.expected_points, 1) + ' pts</strong></div>' + mediaCredit(team, sport) + '<div class="rating-lab-position-chart" role="img" aria-label="Final-position probabilities for ' +
       escapeHtml(team.name) + '">' + bars + '</div><div class="rating-lab-position-axis"><span>Winner</span><span>Position ' +
       team.positions.length + '</span></div><dl><div><dt>Win event</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>Podium</dt><dd>' + percent(team.podium) + '</dd></div><div><dt>Last place</dt><dd>' +
@@ -1091,7 +1127,7 @@
     var nextLabel = model.current_stage === 'Complete' ? 'Recorded champion' : 'Survive published stage';
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
       escapeHtml(model.current_stage) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      percent(team.champion) + '</strong></div><dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
+      percent(team.champion) + '</strong></div>' + mediaCredit(team, sport) + '<dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>' + escapeHtml(nextLabel) + '</dt><dd>' + percent(team.reach_next_stage) +
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>';
   }
@@ -1103,7 +1139,7 @@
     }
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
       escapeHtml(model.current_stage + ' · ' + team.path + ' path') + '</p><h3>' + entityTitle(team, sport) +
-      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div><dl><div><dt>' +
+      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div>' + mediaCredit(team, sport) + '<dl><div><dt>' +
       escapeHtml(model.target_label) + '</dt><dd>' + percent(team.reach_next_stage) +
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) +
       '</dd></div></dl><p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>';
@@ -1161,7 +1197,7 @@
       'μ ' + number(team.end_rating, 2) + ' · σ ' + number(team.end_sigma, 2);
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Protocol performance #' +
       team.rank + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' + escapeHtml(performanceRating) +
-      '</strong></div><dl><div><dt>Event record</dt><dd>' + team.wins + '–' + team.draws + '–' + team.losses +
+      '</strong></div>' + mediaCredit(team, sport) + '<dl><div><dt>Event record</dt><dd>' + team.wins + '–' + team.draws + '–' + team.losses +
       '</dd></div><div><dt>Result score</dt><dd>' + number(team.points, 2) + ' / ' + number(team.matches, 0) +
       '</dd></div><div><dt>Protocol expectation</dt><dd>' + number(team.expected_score, 2) + ' / ' + number(team.matches, 0) +
       '</dd></div><div><dt>Score residual</dt><dd class="' + surpriseClass + '">' +
@@ -1647,6 +1683,12 @@
 
   window.addEventListener('hashchange', revealLinkedMethod);
   revealLinkedMethod();
+
+  root.addEventListener('error', function (event) {
+    if (event.target && event.target.matches && event.target.matches('[data-entity-image]')) {
+      event.target.hidden = true;
+    }
+  }, true);
 
   fetch(dataUrl('manifest.json'))
     .then(function (response) {

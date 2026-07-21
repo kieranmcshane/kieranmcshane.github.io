@@ -1721,6 +1721,56 @@ body:has(.rating-lab) .post-content {
   line-height: 1;
 }
 
+.rating-lab-identity.is-media {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border-color: #c9ced3;
+}
+
+.rating-lab-identity.is-media img,
+.rating-lab-identity-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rating-lab-identity-fallback {
+  display: grid;
+  color: #fff;
+  background: var(--lab-blue);
+  place-items: center;
+}
+
+.rating-lab-identity.is-media img {
+  z-index: 1;
+  background: #fff;
+  object-fit: cover;
+}
+
+.rating-lab-identity.is-crest {
+  border-radius: 7px;
+}
+
+.rating-lab-identity.is-crest img {
+  padding: 0.18rem;
+  object-fit: contain;
+}
+
+.rating-lab-media-credit {
+  margin: 0.35rem 0 0.8rem;
+  color: #6d7887;
+  font-size: 0.67rem;
+  line-height: 1.45;
+}
+
+.rating-lab-media-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
 .rating-lab-entity-title {
   display: inline-flex;
   gap: 0.55rem;
