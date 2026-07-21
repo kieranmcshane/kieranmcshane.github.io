@@ -145,6 +145,7 @@
 
   var elements = {
     proofExpression: document.getElementById('proof-expression'),
+    proofMoveFamily: document.getElementById('proof-move-family'),
     proofActionPrompt: document.getElementById('proof-action-prompt'),
     proofActions: document.getElementById('proof-actions'),
     proofFeedback: document.getElementById('proof-feedback'),
@@ -241,7 +242,16 @@
     }
   }
 
-  var proofStates = {
+  var proofModule = {
+    id: 'centered-covariance',
+    domain: 'Linear algebra',
+    productiveMoves: 3,
+    phases: [
+      { progress: 0, label: 'Rewrite' },
+      { progress: 1, label: 'Center' },
+      { progress: 2, label: 'Factor' }
+    ],
+    states: {
     start: {
       progress: 0,
       expression: '$C=$ <button type="button" data-proof-object="raw" aria-label="Select T">$T$</button> $-$ <button type="button" data-proof-object="means" aria-label="Select product of means">$rs^{\\mathsf T}$</button>',
@@ -249,15 +259,15 @@
         raw: {
           label: 'You selected $T$. Which matching equality should be used, and in which direction?',
           actions: [
-            { id: 'cross', label: 'Use $h_T$ backwards: replace $T$ by $\\sum_k p_k r_k s_k^{\\mathsf T}$', next: 'cross', theorem: 'rewrite_cross_moment', productive: true },
-            { id: 'circular', label: 'Solve $C=T-rs^{\\mathsf T}$ for $T$, then substitute it back', next: 'circular', theorem: 'rewrite_through_center', productive: false }
+            { id: 'cross', family: 'Rewrite an equality', label: 'Use $h_T$ backwards: replace $T$ by $\\sum_k p_k r_k s_k^{\\mathsf T}$', next: 'cross', theorem: 'rewrite_cross_moment', productive: true },
+            { id: 'circular', family: 'Rewrite an equality', label: 'Solve $C=T-rs^{\\mathsf T}$ for $T$, then substitute it back', next: 'circular', theorem: 'rewrite_through_center', productive: false }
           ]
         },
         means: {
           label: 'You selected $rs^{\\mathsf T}$. Both local-mean rewrites are legal, but do they simplify this goal?',
           actions: [
-            { id: 'left-mean', label: 'Replace $r$ using $h_r$', next: 'leftMean', theorem: 'rewrite_left_mean', productive: false },
-            { id: 'right-mean', label: 'Replace $s$ using $h_s$', next: 'rightMean', theorem: 'rewrite_right_mean', productive: false }
+            { id: 'left-mean', family: 'Substitute a definition', label: 'Replace $r$ using $h_r$', next: 'leftMean', theorem: 'rewrite_left_mean', productive: false },
+            { id: 'right-mean', family: 'Substitute a definition', label: 'Replace $s$ using $h_s$', next: 'rightMean', theorem: 'rewrite_right_mean', productive: false }
           ]
         }
       }
@@ -284,8 +294,8 @@
         'cross-rhs': {
           label: 'The cross-moment is visible. Which equality introduces the centered factors without changing the sum?',
           actions: [
-            { id: 'zero-means', label: 'Insert the two zero first moments from $h_r$, $h_s$, and $h_p$', next: 'expanded', theorem: 'insert_zero_means', productive: true },
-            { id: 'cross-left', label: 'Expand only $r$ as $\\sum_kp_kr_k$', next: 'crossLeft', theorem: 'rewrite_left_mean', productive: false }
+            { id: 'zero-means', family: 'Add zero strategically', label: 'Insert the two zero first moments from $h_r$, $h_s$, and $h_p$', next: 'expanded', theorem: 'insert_zero_means', productive: true },
+            { id: 'cross-left', family: 'Substitute a definition', label: 'Expand only $r$ as $\\sum_kp_kr_k$', next: 'crossLeft', theorem: 'rewrite_left_mean', productive: false }
           ]
         }
       }
@@ -302,8 +312,8 @@
         summand: {
           label: 'You selected one four-term summand. Which local algebraic operation completes the identity?',
           actions: [
-            { id: 'factor', label: 'Factor it as $(r_k-r)(s_k-s)^{\\mathsf T}$', next: 'complete', theorem: 'factor_centered_summand', productive: true },
-            { id: 'distribute', label: 'Distribute the outer sum back into four sums', next: 'distributed', theorem: 'insert_zero_means', productive: false }
+            { id: 'factor', family: 'Factor an expression', label: 'Factor it as $(r_k-r)(s_k-s)^{\\mathsf T}$', next: 'complete', theorem: 'factor_centered_summand', productive: true },
+            { id: 'distribute', family: 'Distribute a sum', label: 'Distribute the outer sum back into four sums', next: 'distributed', theorem: 'insert_zero_means', productive: false }
           ]
         }
       }
@@ -318,12 +328,23 @@
       expression: '$\\boxed{C=\\displaystyle \\sum_k p_k(r_k-r)(s_k-s)^{\\mathsf T}}$',
       complete: true
     }
+    }
   };
+  var proofStates = proofModule.states;
+
+  function updateProofRoute(activeProofState) {
+    root.querySelectorAll('[data-proof-phase]').forEach(function (item) {
+      var phase = Number(item.dataset.proofPhase);
+      item.classList.toggle('is-complete', activeProofState.progress >= phase);
+      item.classList.toggle('is-current', !activeProofState.complete && activeProofState.progress + 1 === phase);
+    });
+  }
 
   function renderProofState(message) {
     var activeProofState = proofStates[proofStateId];
     elements.proofExpression.innerHTML = activeProofState.expression;
-    elements.proofStepCount.textContent = activeProofState.progress + ' / 3 productive moves';
+    elements.proofStepCount.textContent = activeProofState.progress + ' / ' + proofModule.productiveMoves + ' productive moves';
+    elements.proofMoveFamily.textContent = activeProofState.complete ? 'Identity established' : 'Choose an object first';
     elements.proofActions.innerHTML = '';
     elements.proofActionPrompt.innerHTML = activeProofState.complete
       ? '<strong>Proof complete.</strong> Every displayed transition is covered by the checked Lean file.'
@@ -331,8 +352,9 @@
     elements.proofFeedback.textContent = message || '';
     elements.proofUndo.disabled = proofHistory.length === 0;
     elements.proofHistory.innerHTML = proofHistory.map(function (entry) {
-      return '<li><span>' + entry.label + '</span><code>' + entry.theorem + '</code></li>';
+      return '<li><span><small>' + entry.family + '</small>' + entry.label + '</span><code>' + entry.theorem + '</code></li>';
     }).join('');
+    updateProofRoute(activeProofState);
     if (activeProofState.complete) {
       state.proofComplete = true;
       saveState();
@@ -350,8 +372,9 @@
     if (!prompt) return;
     elements.proofActionPrompt.innerHTML = prompt.label;
     elements.proofActions.innerHTML = prompt.actions.map(function (action) {
-      return '<button type="button" data-proof-action="' + action.id + '" data-next="' + action.next + '" data-theorem="' + action.theorem + '" data-productive="' + action.productive + '">' + action.label + '</button>';
+      return '<button type="button" data-proof-action="' + action.id + '" data-next="' + action.next + '" data-theorem="' + action.theorem + '" data-family="' + action.family + '" data-productive="' + action.productive + '"><small>' + action.family + '</small><span>' + action.label + '</span></button>';
     }).join('');
+    elements.proofMoveFamily.textContent = prompt.actions.length === 1 ? prompt.actions[0].family : 'Operations available for this object';
     elements.proofFeedback.textContent = '';
     typeset(document.getElementById('proof-action-panel'));
   });
@@ -359,7 +382,7 @@
   elements.proofActions.addEventListener('click', function (event) {
     var action = event.target.closest('[data-proof-action]');
     if (!action) return;
-    proofHistory.push({ state: proofStateId, label: action.textContent.trim(), theorem: action.dataset.theorem });
+    proofHistory.push({ state: proofStateId, label: action.querySelector('span').textContent.trim(), family: action.dataset.family, theorem: action.dataset.theorem });
     proofStateId = action.dataset.next;
     renderProofState(action.dataset.productive === 'true'
       ? 'Lean accepts the rewrite. The proof state has advanced.'
