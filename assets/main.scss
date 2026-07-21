@@ -1561,7 +1561,7 @@ body:has(.rating-lab) .post-content {
   cursor: pointer;
 }
 
-.rating-lab-movers button span {
+.rating-lab-movers button > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1687,6 +1687,21 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-identity-copy > span {
   font-weight: 700;
+}
+
+.rating-lab-entity-name {
+  display: inline-flex;
+  min-width: 0;
+  gap: 0.34rem;
+  align-items: center;
+}
+
+.rating-lab-country-flag {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 0.88em;
+  font-weight: 400;
+  line-height: 1;
 }
 
 .rating-lab-identity-copy small {
