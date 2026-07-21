@@ -1749,6 +1749,13 @@ body:has(.rating-lab) .post-content {
   object-fit: cover;
 }
 
+// Commons player images are usually full-body or action photographs. Bias the
+// small circular crop upward so it behaves like a portrait avatar instead of
+// selecting the torso at the geometric centre of the source image.
+.rating-lab-identity.is-portrait img {
+  object-position: 50% 18%;
+}
+
 .rating-lab-identity.is-crest {
   border-radius: 7px;
 }
