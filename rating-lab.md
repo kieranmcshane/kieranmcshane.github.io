@@ -9,17 +9,17 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <header class="rating-lab-hero">
     <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
     <h1>Across sports. Four ways to measure strength.</h1>
-    <p class="rating-lab-deck">Current Elo, Glicko-2, Gaussian TrueSkill, and robust heavy-tail rankings for tennis, club and national-team football, and chess—each prediction recorded before its result updates the model.</p>
+    <p class="rating-lab-deck">Compare Elo, Glicko-2, Gaussian, and robust ratings across tennis, football, and chess. Every forecast is scored before its result updates the model.</p>
     <p class="rating-lab-hero-link"><a href="#predictor">Forecast current competitions ↓</a></p>
     <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
     <p class="rating-lab-generation" id="rating-lab-generation"></p>
   </header>
 
   <nav class="rating-lab-local-nav" aria-label="Rating Lab sections">
-    <a href="#leaderboard-heading"><strong>01</strong><span>Rankings</span></a>
+    <a href="#leaderboard-heading" aria-current="location"><strong>01</strong><span>Rankings</span></a>
     <a href="#matchup"><strong>02</strong><span>A vs B</span></a>
     <a href="#predictor"><strong>03</strong><span>Competitions</span></a>
-    <a href="{{ '/rating-lab/players/' | relative_url }}"><strong>04</strong><span>Players</span></a>
+    <a class="is-external" href="{{ '/rating-lab/players/' | relative_url }}"><strong>04</strong><span>Players ↗</span></a>
     <a href="#research"><strong>05</strong><span>Methods & data</span></a>
   </nav>
 
@@ -68,17 +68,17 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
     <div class="rating-lab-grid">
       <div class="rating-lab-table-wrap">
-        <table class="rating-lab-table">
+        <table class="rating-lab-table" id="ranking-table">
           <caption id="ranking-caption">Current rankings</caption>
           <thead>
             <tr>
               <th scope="col"><button type="button" data-sort="rank">Rank</button></th>
               <th scope="col"><button type="button" data-sort="name">Player or team</button></th>
               <th scope="col" class="rating-lab-trend-column">Trend</th>
-              <th scope="col"><button type="button" data-sort="score">Rating</button></th>
-              <th scope="col" class="rating-lab-optional"><button type="button" data-sort="sigma">Uncertainty</button></th>
-              <th scope="col"><button type="button" data-sort="change30">30-day change</button></th>
-              <th scope="col" class="rating-lab-optional"><button type="button" data-sort="recent_matches">Recent</button></th>
+              <th scope="col" class="rating-lab-rating-column"><button type="button" data-sort="score">Rating</button></th>
+              <th scope="col" class="rating-lab-uncertainty-column"><button type="button" data-sort="sigma">Uncertainty</button></th>
+              <th scope="col" class="rating-lab-change-column"><button type="button" data-sort="change30">30-day change</button></th>
+              <th scope="col" class="rating-lab-recent-column"><button type="button" data-sort="recent_matches">Recent</button></th>
             </tr>
           </thead>
           <tbody id="ranking-body"></tbody>
@@ -87,9 +87,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <button type="button" id="ranking-more" class="rating-lab-more" hidden>Show all competitors</button>
       </div>
 
-      <aside class="rating-lab-detail" id="rating-detail" aria-live="polite">
-        <p class="rating-lab-detail-placeholder">Choose a row to inspect history, compare models, and pin competitors.</p>
-      </aside>
+      <aside class="rating-lab-detail" id="rating-detail" aria-live="polite" hidden></aside>
     </div>
   </section>
 
@@ -101,16 +99,16 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <div class="rating-lab-matchup-toolbar">
       <label class="rating-lab-field">
         <span>Competitor A</span>
-        <select id="matchup-a" aria-label="First competitor"></select>
+        <select id="matchup-a" aria-label="First competitor" autocomplete="off"></select>
       </label>
       <button type="button" class="rating-lab-matchup-swap" id="matchup-swap" aria-label="Swap competitors">⇄<span>Swap</span></button>
       <label class="rating-lab-field">
         <span>Competitor B</span>
-        <select id="matchup-b" aria-label="Second competitor"></select>
+        <select id="matchup-b" aria-label="Second competitor" autocomplete="off"></select>
       </label>
       <label class="rating-lab-field">
         <span id="matchup-venue-label">Venue</span>
-        <select id="matchup-venue" aria-labelledby="matchup-venue-label"></select>
+        <select id="matchup-venue" aria-labelledby="matchup-venue-label" autocomplete="off"></select>
       </label>
       <div class="rating-lab-control-group" aria-label="Matchup prediction model">
         <span class="rating-lab-control-label">Model</span>
@@ -137,7 +135,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">
         <span>Competition</span>
-        <select id="predictor-competition" aria-label="Competition to predict"></select>
+        <select id="predictor-competition" aria-label="Competition to predict" autocomplete="off"></select>
       </label>
       <div class="rating-lab-control-group" aria-label="Prediction model">
         <span class="rating-lab-control-label">Model</span>
@@ -161,11 +159,11 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <caption id="predictor-caption">Projected final table</caption>
           <thead>
             <tr>
-              <th scope="col" id="predictor-col-rank">Projected</th>
-              <th scope="col" id="predictor-col-team">Team</th>
-              <th scope="col" id="predictor-col-now">Now</th>
-              <th scope="col" id="predictor-col-value">Expected pts</th>
-              <th scope="col" id="predictor-col-title">Title</th>
+              <th scope="col" id="predictor-col-rank" class="rating-lab-rank">Projected</th>
+              <th scope="col" id="predictor-col-team" class="rating-lab-predictor-entity">Team</th>
+              <th scope="col" id="predictor-col-now" class="rating-lab-predictor-now">Now</th>
+              <th scope="col" id="predictor-col-value" class="rating-lab-predictor-value">Expected pts</th>
+              <th scope="col" id="predictor-col-title" class="rating-lab-predictor-title">Title</th>
               <th scope="col" id="predictor-col-secondary" class="rating-lab-optional">Top four</th>
               <th scope="col" id="predictor-col-tertiary" class="rating-lab-optional">Bottom three</th>
             </tr>

@@ -42,6 +42,7 @@
   };
 
   var elements = {
+    localNav: document.querySelector('.rating-lab-local-nav'),
     freshness: document.getElementById('rating-lab-freshness'),
     generation: document.getElementById('rating-lab-generation'),
     error: document.getElementById('rating-lab-error'),
@@ -55,6 +56,7 @@
     metrics: document.getElementById('rating-metrics'),
     movers: document.getElementById('rating-movers'),
     context: document.getElementById('leaderboard-context'),
+    rankingTable: document.getElementById('ranking-table'),
     body: document.getElementById('ranking-body'),
     empty: document.getElementById('ranking-empty'),
     more: document.getElementById('ranking-more'),
@@ -102,9 +104,26 @@
       .format(new Date(value + (value.length === 10 ? 'T12:00:00Z' : '')));
   }
 
-  function number(value, digits) {
+  function number(value, digits, minimumDigits) {
     if (value === null || value === undefined) return '—';
-    return new Intl.NumberFormat('en', { maximumFractionDigits: digits }).format(value);
+    var threshold = 0.5 * Math.pow(10, -digits);
+    var normalized = Math.abs(value) < threshold ? 0 : value;
+    return new Intl.NumberFormat('en', {
+      minimumFractionDigits: minimumDigits === undefined ? 0 : minimumDigits,
+      maximumFractionDigits: digits
+    }).format(normalized);
+  }
+
+  function ratingNumber(value) {
+    var digits = state.model === 'elo' ? 0 : 1;
+    return number(value, digits, digits);
+  }
+
+  function signedNumber(value, digits) {
+    if (value === null || value === undefined) return '—';
+    var rounded = Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
+    if (Object.is(rounded, -0) || rounded === 0) return '0';
+    return (rounded > 0 ? '+' : '') + number(rounded, digits, digits);
   }
 
   function percent(value) {
@@ -314,9 +333,9 @@
     var media = entityMedia(row, sport);
     var sourceUrl = media && trustedMediaUrl(media.source_url, 'source');
     if (!media || !sourceUrl) return '';
-    return '<p class="rating-lab-media-credit">' + (media.kind === 'crest' ? 'Crest' : 'Portrait') + ': <a href="' +
+    return '<details class="rating-lab-media-credit"><summary>Image credit</summary><p>' + (media.kind === 'crest' ? 'Crest' : 'Portrait') + ': <a href="' +
       escapeHtml(sourceUrl) + '" rel="noopener noreferrer">' + escapeHtml(media.attribution || media.source) +
-      '</a> · ' + escapeHtml(media.license) + ' · not a model input</p>';
+      '</a> · ' + escapeHtml(media.license) + ' · not a model input</p></details>';
   }
 
   function currentRows() {
@@ -351,19 +370,10 @@
     ];
     elements.metrics.innerHTML = definitions.map(function (definition) {
       var values = modelKeys.map(function (key) { return models[key].metrics[definition[1]]; });
-      var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
-      var bars = modelKeys.map(function (key, index) {
-        var relative = max === min ? 100 : 26 + (values[index] - min) / (max - min) * 74;
-        return '<span class="rating-lab-metric-bar' + (key === state.model ? ' is-active' : '') +
-          '" style="--metric-height:' + relative.toFixed(1) + '%" title="' + escapeHtml(models[key].label) +
-          ': ' + number(values[index], definition[2]) + '"></span>';
-      }).join('');
+      var bestIndex = values.indexOf(Math.min.apply(null, values));
       return '<div class="rating-lab-metric"><span>' + definition[0] + '</span><div class="rating-lab-metric-value"><strong>' +
-        number(selected[definition[1]], definition[2]) + '</strong><span class="rating-lab-metric-bars" aria-label="' +
-        escapeHtml(definition[0]) + ' comparison: ' + escapeHtml(modelKeys.map(function (key, index) {
-          return models[key].label + ' ' + number(values[index], definition[2]);
-        }).join(', ')) + '">' + bars +
-        '</span></div><small>Lower is better · all four protocols</small></div>';
+        number(selected[definition[1]], definition[2], definition[2]) + '</strong></div><small>Lower is better · best: ' +
+        escapeHtml(models[modelKeys[bestIndex]].label) + ' ' + number(values[bestIndex], definition[2], definition[2]) + '</small></div>';
     }).concat(['<div class="rating-lab-metric"><span>Held-out predictions</span><div class="rating-lab-metric-value"><strong>' +
       number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']).join('');
     var provisionalNote = state.sport === 'football' && state.model === 'elo' ?
@@ -380,13 +390,13 @@
     var fallers = rows.slice().sort(function (a, b) { return a.change30 - b.change30; }).slice(0, 3);
     function group(label, items, positive) {
       return '<div><p>' + label + '</p><div>' + items.map(function (row) {
-        var value = (positive && row.change30 > 0 ? '+' : '') + number(row.change30, 1);
+        var value = signedNumber(row.change30, 1);
         return '<button type="button" data-select="' + escapeHtml(row.id) + '">' + entityName(row, state.sport) +
           '<strong class="' + (positive ? 'is-positive' : 'is-negative') + '">' + value + '</strong></button>';
       }).join('') + '</div></div>';
     }
-    elements.movers.innerHTML = group('▲ Biggest risers · 30 days', risers, true) +
-      group('▼ Biggest fallers · 30 days', fallers, false);
+    elements.movers.innerHTML = group('▲ Biggest risers', risers, true) +
+      group('▼ Biggest fallers', fallers, false);
   }
 
   function miniSparkline(points, label) {
@@ -408,6 +418,7 @@
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 20);
     var model = state.datasets[state.sport].models[state.model];
+    elements.rankingTable.classList.toggle('has-uncertainty', state.model !== 'elo');
     elements.caption.textContent = model.label + ' · ' + rows.length + ' published competitors · ' +
       (model.ranking_rule || 'Current model ranking rule');
     elements.empty.hidden = rows.length > 0;
@@ -415,7 +426,7 @@
     elements.more.textContent = 'Show all ' + number(rows.length, 0) + ' competitors';
     elements.body.innerHTML = displayed.map(function (row) {
       var deltaClass = row.change30 > 0 ? 'is-positive' : row.change30 < 0 ? 'is-negative' : '';
-      var delta = row.change30 > 0 ? '+' + number(row.change30, 1) : number(row.change30, 1);
+      var delta = signedNumber(row.change30, 1);
       var rowClasses = [];
       if (row.id === state.selected) rowClasses.push('is-selected');
       if (row.provisional) rowClasses.push('is-provisional');
@@ -430,10 +441,10 @@
         '<small' + (row.provisional ? ' class="rating-lab-provisional-label" title="' +
           escapeHtml(row.provisional_reason) + '"' : '') + '>' + escapeHtml(identityContext) + '</small></span></button></th>' +
         '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
-        '<td><strong>' + number(row.score, 1) + '</strong></td>' +
-        '<td class="rating-lab-optional">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1)) + '</td>' +
-        '<td class="' + deltaClass + '">' + delta + '</td>' +
-        '<td class="rating-lab-optional">' + number(row.recent_matches, 0) + '</td>' +
+        '<td class="rating-lab-rating-column"><strong>' + ratingNumber(row.score) + '</strong></td>' +
+        '<td class="rating-lab-uncertainty-column' + (row.sigma === null ? ' is-empty' : '') + '">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1, 1)) + '</td>' +
+        '<td class="rating-lab-change-column ' + deltaClass + '">' + delta + '</td>' +
+        '<td class="rating-lab-recent-column">' + number(row.recent_matches, 0) + '</td>' +
         '</tr>';
     }).join('');
   }
@@ -599,8 +610,10 @@
     var dataset = state.datasets[state.sport];
     var rows = dataset.models[state.model].rankings;
     var row = rows.find(function (candidate) { return candidate.id === state.selected; });
+    elements.detail.hidden = !row;
+    elements.detail.closest('.rating-lab-grid').classList.toggle('has-detail', Boolean(row));
     if (!row) {
-      elements.detail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a row to inspect history, compare models, and pin competitors.</p>';
+      elements.detail.innerHTML = '';
       return;
     }
     var crossModel = modelKeys.map(function (key) {
@@ -626,15 +639,16 @@
     var provisional = row.provisional ? '<p class="rating-lab-provisional-note"><strong>Provisional Elo.</strong> ' +
       escapeHtml(row.provisional_reason) + '. The raw rating remains available for A-vs-B and competition forecasts, but it is ordered after established clubs because Elo has no uncertainty estimate.</p>' : '';
     elements.detail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank +
-      '</p><h3>' + entityTitle(row, state.sport) + '</h3></div><strong>' + number(row.score, 1) + '</strong></div>' +
-      mediaCredit(row, state.sport) + provisional +
+      '</p><h3>' + entityTitle(row, state.sport) + '</h3></div><strong>' + ratingNumber(row.score) + '</strong></div>' +
+      provisional +
       '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
       (isPinned ? 'true' : 'false') + '">' + (isPinned ? 'Pinned for comparison' : 'Pin for comparison') + '</button>' +
       historyChart([{ name: row.name, points: row.history }], row.name + ' rating history') +
       '<p class="rating-lab-inspector-label">Across all four models</p><table class="rating-lab-model-compare"><thead><tr><th>Model</th><th>Rank</th><th>Score</th><th>Uncertainty</th></tr></thead><tbody>' +
       crossModel + '</tbody></table>' + distribution(row, rows) +
       '<dl><div><dt>Last played</dt><dd>' + formatDate(row.last_played) + '</dd></div><div><dt>Recent matches</dt><dd>' + row.recent_matches + '</dd></div><div><dt>All matches</dt><dd>' + row.matches + '</dd></div>' +
-      (row.sigma === null ? '' : '<div><dt>Uncertainty σ</dt><dd>' + number(row.sigma, 2) + '</dd></div>') + '</dl>' + compare;
+      (row.sigma === null ? '' : '<div><dt>Uncertainty σ</dt><dd>' + number(row.sigma, 2) + '</dd></div>') + '</dl>' + compare +
+      mediaCredit(row, state.sport);
   }
 
   function parameterText(parameters) {
@@ -836,9 +850,16 @@
       (value * 100).toFixed(1) + '%"><span>' + percent(value) + '</span></span>';
   }
 
-  function renderMarketComparison(view, modelRows) {
+  function renderMarketComparison(view, modelRows, options) {
     var benchmark = view.predictor.market_comparison;
     elements.predictorMarket.hidden = false;
+    if (options && options.withheld) {
+      elements.predictorMarket.classList.remove('is-stale');
+      elements.predictorMarket.innerHTML = '<div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p>' +
+        '<h3>Market gap withheld before play</h3></div></div><p>' + escapeHtml(options.withheld) +
+        ' The independent market snapshot remains part of the reproducible data file, but a model–market gap is not presented as in-season evidence yet.</p>';
+      return;
+    }
     if (!benchmark) {
       elements.predictorMarket.innerHTML = '<p><strong>Market comparison not in this snapshot.</strong> Refresh the published dataset to check for a confidently matched public market.</p>';
       return;
@@ -880,14 +901,14 @@
     }, 0) / comparisons.length : null;
     var retained = benchmark.status !== 'current' || isStale(benchmark);
     var freshness = retained ? ' · retained or delayed snapshot' : '';
-    var table = comparisons.length ? '<div class="rating-lab-market-table-wrap"><table><caption>Largest model–market differences first</caption><thead><tr><th scope="col">Participant</th><th scope="col">Our model</th><th scope="col">Market</th><th scope="col">Gap</th><th scope="col">Raw quote</th><th scope="col">Bid–ask</th></tr></thead><tbody>' +
+    var table = comparisons.length ? '<div class="rating-lab-market-table-wrap"><table><caption>Largest model–market differences first</caption><thead><tr><th scope="col">Participant</th><th scope="col">Our model</th><th scope="col">Market</th><th scope="col">Gap</th><th scope="col" class="rating-lab-market-raw">Raw quote</th><th scope="col" class="rating-lab-market-spread">Bid–ask</th></tr></thead><tbody>' +
       comparisons.map(function (row) {
         var gapClass = row.gap > 0 ? 'is-positive' : row.gap < 0 ? 'is-negative' : '';
-        var gap = (row.gap > 0 ? '+' : '') + number(row.gap * 100, 1) + ' pp';
+        var gap = signedNumber(row.gap * 100, 1) + ' pp';
         var spread = row.bid > 0 && row.ask > 0 ? number(row.bid * 100, 1) + '–' + number(row.ask * 100, 1) + '%' : '—';
         return '<tr><th scope="row">' + escapeHtml(row.name) + '</th><td>' + percent(row.model) + '</td><td>' +
-          percent(row.market) + '</td><td class="' + gapClass + '">' + escapeHtml(gap) + '</td><td>' +
-          percent(row.raw) + '</td><td>' + escapeHtml(spread) + '</td></tr>';
+          percent(row.market) + '</td><td class="' + gapClass + '">' + escapeHtml(gap) + '</td><td class="rating-lab-market-raw">' +
+          percent(row.raw) + '</td><td class="rating-lab-market-spread">' + escapeHtml(spread) + '</td></tr>';
       }).join('') + '</tbody></table></div>' :
       '<p><strong>A market was matched, but no participant IDs overlap this model output.</strong> The comparison is withheld.</p>';
     elements.predictorMarket.classList.toggle('is-stale', retained);
@@ -1039,14 +1060,16 @@
       state.matchupB = rows.find(function (row) { return row.id !== state.matchupA; });
       state.matchupB = state.matchupB ? state.matchupB.id : null;
     }
-    var options = rows.map(function (row) {
+    function optionsFor(selectedId) {
+      return rows.map(function (row) {
       var sourceCode = state.sport === 'national-football' ? '' : String(row.country || '').trim().toUpperCase();
-      return '<option value="' + escapeHtml(row.id) + '">#' + row.rank + ' · ' +
+      return '<option value="' + escapeHtml(row.id) + '"' + (row.id === selectedId ? ' selected' : '') + '>#' + row.rank + ' · ' +
         (sourceCode ? escapeHtml(sourceCode) + ' · ' : '') + escapeHtml(row.name) +
         (row.provisional ? ' · provisional Elo' : '') + '</option>';
-    }).join('');
-    elements.matchupA.innerHTML = options;
-    elements.matchupB.innerHTML = options;
+      }).join('');
+    }
+    elements.matchupA.innerHTML = optionsFor(state.matchupA);
+    elements.matchupB.innerHTML = optionsFor(state.matchupB);
     elements.matchupA.value = state.matchupA || '';
     elements.matchupB.value = state.matchupB || '';
     var rowA = rows.find(function (row) { return row.id === state.matchupA; });
@@ -1054,20 +1077,26 @@
     var venues = matchupVenueOptions(rowA, rowB);
     if (!venues.some(function (venue) { return venue.value === state.matchupVenue; })) state.matchupVenue = venues[0].value;
     elements.matchupVenue.innerHTML = venues.map(function (venue) {
-      return '<option value="' + venue.value + '">' + escapeHtml(venue.label) + '</option>';
+      return '<option value="' + venue.value + '"' + (venue.value === state.matchupVenue ? ' selected' : '') + '>' + escapeHtml(venue.label) + '</option>';
     }).join('');
     elements.matchupVenue.value = state.matchupVenue;
     elements.matchupVenue.disabled = venues.length === 1;
     elements.matchupVenueLabel.textContent = state.sport === 'chess' ? 'Who plays White?' : state.sport === 'tennis' ? 'Surface' : 'Venue';
     setPressed(elements.matchupModelTabs, 'matchupModel', state.model);
+    return {
+      dataset: state.datasets[state.sport],
+      rows: rows,
+      rowA: rowA,
+      rowB: rowB,
+      venue: venues.find(function (item) { return item.value === state.matchupVenue; })
+    };
   }
 
   function renderMatchup() {
-    var dataset = state.datasets[state.sport];
-    var rows = dataset.models[state.model].rankings;
-    populateMatchupControls();
-    var rowA = rows.find(function (row) { return row.id === state.matchupA; });
-    var rowB = rows.find(function (row) { return row.id === state.matchupB; });
+    var selection = populateMatchupControls();
+    var dataset = selection.dataset;
+    var rowA = selection.rowA;
+    var rowB = selection.rowB;
     if (!rowA || !rowB) {
       elements.matchupResult.innerHTML = '<p>Two published competitors are required for a matchup forecast.</p>';
       return;
@@ -1088,7 +1117,7 @@
         '</span><strong>' + percent(item.value) +
         '</strong><small>' + number(item.value * 100, 2) + '%</small></div>';
     }).join('');
-    var venue = matchupVenueOptions(rowA, rowB).find(function (item) { return item.value === state.matchupVenue; });
+    var venue = selection.venue;
     var parameters = outcome.parameters;
     var context = dataset.outcome_context || {
       draw_rate: state.sport === 'tennis' ? 0 : 0.25,
@@ -1142,7 +1171,7 @@
       escapeHtml(dataset.models[state.model].label) + '</strong><span>' + escapeHtml(venue.label) + ' · rating snapshot ' +
       escapeHtml(formatDate(dataset.latest_result)) + '</span></div><div class="rating-lab-outcome-strip" role="img" aria-label="' +
       escapeHtml(outcomes.map(function (item) { return item.label + ' ' + number(item.value * 100, 2) + ' percent'; }).join(', ')) + '">' +
-      strip + '</div><div class="rating-lab-outcome-cards">' + cards + '</div><p class="rating-lab-outcome-explainer">Colors only identify the outcomes shown above; they do not mean good, bad, certain, or uncertain.</p><dl class="rating-lab-matchup-inputs"><div><dt>' +
+      strip + '</div><div class="rating-lab-outcome-cards">' + cards + '</div><dl class="rating-lab-matchup-inputs"><div><dt>' +
       escapeHtml(rowA.name) + '</dt><dd>' + escapeHtml(ratingA) + '</dd></div><div><dt>Expected score A</dt><dd>' +
       number(outcome.expected, 4) + '</dd></div><div><dt>' + escapeHtml(rowB.name) + '</dt><dd>' + escapeHtml(ratingB) +
       '</dd></div></dl><details class="rating-lab-matchup-method"><summary>Exact calculation and assumptions</summary><p>' +
@@ -1165,13 +1194,26 @@
     }).join('');
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Expected position ' +
       number(team.expected_position, 2) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      number(team.expected_points, 1) + ' pts</strong></div>' + mediaCredit(team, sport) +
+      number(team.expected_points, 1) + ' pts</strong></div>' +
       '<div class="rating-lab-position-chart" role="img" aria-label="Finishing-position probabilities for ' +
       escapeHtml(team.name) + '">' + bars + '</div><div class="rating-lab-position-axis"><span>Champion</span><span>Position ' +
       team.positions.length + '</span></div><dl><div><dt>Title</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>Top four</dt><dd>' + percent(team.top_four) +
       '</dd></div><div><dt>Bottom three</dt><dd>' + percent(team.bottom_three) +
-      '</dd></div><div><dt>Current points</dt><dd>' + team.current_points + '</dd></div></dl>';
+      '</dd></div><div><dt>Current points</dt><dd>' + team.current_points + '</dd></div></dl>' + mediaCredit(team, sport);
+  }
+
+  function renderLeaguePriorDetail(team, sport) {
+    if (!team) {
+      elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a team to inspect its pre-season expected-points prior.</p>';
+      return;
+    }
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Pre-season prior</p><h3>' +
+      entityTitle(team, sport) + '</h3></div><strong>' + number(team.expected_points, 1, 1) + ' pts</strong></div>' +
+      '<dl><div><dt>Expected points</dt><dd>' + number(team.expected_points, 1, 1) + '</dd></div>' +
+      '<div><dt>Matches played</dt><dd>0</dd></div></dl>' +
+      '<p class="rating-lab-performance-note">No result from this season has entered the simulation. Title and finishing-position probabilities are withheld here until the competition starts; expected points remain a model prior, not an in-season forecast.</p>' +
+      mediaCredit(team, sport);
   }
 
   function renderStandingsPredictorDetail(team, sport) {
@@ -1182,11 +1224,11 @@
     }).join('');
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Expected position ' +
       number(team.expected_position, 2) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      number(team.expected_points, 1) + ' pts</strong></div>' + mediaCredit(team, sport) + '<div class="rating-lab-position-chart" role="img" aria-label="Final-position probabilities for ' +
+      number(team.expected_points, 1) + ' pts</strong></div><div class="rating-lab-position-chart" role="img" aria-label="Final-position probabilities for ' +
       escapeHtml(team.name) + '">' + bars + '</div><div class="rating-lab-position-axis"><span>Winner</span><span>Position ' +
       team.positions.length + '</span></div><dl><div><dt>Win event</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>Podium</dt><dd>' + percent(team.podium) + '</dd></div><div><dt>Last place</dt><dd>' +
-      percent(team.last_place) + '</dd></div><div><dt>Current points</dt><dd>' + number(team.current_points, 1) + '</dd></div></dl>';
+      percent(team.last_place) + '</dd></div><div><dt>Current points</dt><dd>' + number(team.current_points, 1) + '</dd></div></dl>' + mediaCredit(team, sport);
   }
 
   function renderKnockoutPredictorDetail(team, model, sport) {
@@ -1197,9 +1239,9 @@
     var nextLabel = model.current_stage === 'Complete' ? 'Recorded champion' : 'Survive published stage';
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
       escapeHtml(model.current_stage) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      percent(team.champion) + '</strong></div>' + mediaCredit(team, sport) + '<dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
+      percent(team.champion) + '</strong></div><dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>' + escapeHtml(nextLabel) + '</dt><dd>' + percent(team.reach_next_stage) +
-      '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>';
+      '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>' + mediaCredit(team, sport);
   }
 
   function renderQualifyingPredictorDetail(team, model, sport) {
@@ -1209,10 +1251,10 @@
     }
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
       escapeHtml(model.current_stage + ' · ' + team.path + ' path') + '</p><h3>' + entityTitle(team, sport) +
-      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div>' + mediaCredit(team, sport) + '<dl><div><dt>' +
+      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div><dl><div><dt>' +
       escapeHtml(model.target_label) + '</dt><dd>' + percent(team.reach_next_stage) +
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) +
-      '</dd></div></dl><p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>';
+      '</dd></div></dl><p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>' + mediaCredit(team, sport);
   }
 
   function setPredictorColumns(type, targetLabel) {
@@ -1226,6 +1268,8 @@
     elements.predictorColumns.title.textContent = standings ? 'Win event' : 'Title';
     elements.predictorColumns.secondary.textContent = standings ? 'Podium' : 'Top four';
     elements.predictorColumns.tertiary.textContent = standings ? 'Last place' : 'Bottom three';
+    elements.predictorColumns.now.hidden = false;
+    elements.predictorColumns.value.hidden = false;
     elements.predictorColumns.secondary.hidden = knockout;
     elements.predictorColumns.tertiary.hidden = knockout;
     elements.predictorColumns.title.hidden = qualifying;
@@ -1243,6 +1287,8 @@
     elements.predictorColumns.title.textContent = 'Performance rating';
     elements.predictorColumns.secondary.textContent = 'vs start';
     elements.predictorColumns.tertiary.textContent = 'Reset rank';
+    elements.predictorColumns.now.hidden = false;
+    elements.predictorColumns.value.hidden = false;
     elements.predictorColumns.title.hidden = false;
     elements.predictorColumns.secondary.hidden = false;
     elements.predictorColumns.tertiary.hidden = false;
@@ -1255,7 +1301,7 @@
     }
     var changeClass = team.performance_delta > 0 ? 'is-positive' : team.performance_delta < 0 ? 'is-negative' : '';
     var surpriseClass = team.score_residual > 0 ? 'is-positive' : team.score_residual < 0 ? 'is-negative' : '';
-    var change = (team.performance_delta > 0 ? '+' : '') + number(team.performance_delta, 2);
+    var change = signedNumber(team.performance_delta, 2);
     var performanceRating = (team.performance_rating_cap === 'upper' ? '≥' : team.performance_rating_cap === 'lower' ? '≤' : '') +
       number(team.performance_rating, 2);
     var isGlicko = model.rating_type === 'glicko2_conservative_r_minus_2rd';
@@ -1267,20 +1313,20 @@
       'μ ' + number(team.end_rating, 2) + ' · σ ' + number(team.end_sigma, 2);
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Protocol performance #' +
       team.rank + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' + escapeHtml(performanceRating) +
-      '</strong></div>' + mediaCredit(team, sport) + '<dl><div><dt>Event record</dt><dd>' + team.wins + '–' + team.draws + '–' + team.losses +
+      '</strong></div><dl><div><dt>Event record</dt><dd>' + team.wins + '–' + team.draws + '–' + team.losses +
       '</dd></div><div><dt>Result score</dt><dd>' + number(team.points, 2) + ' / ' + number(team.matches, 0) +
       '</dd></div><div><dt>Protocol expectation</dt><dd>' + number(team.expected_score, 2) + ' / ' + number(team.matches, 0) +
       '</dd></div><div><dt>Score residual</dt><dd class="' + surpriseClass + '">' +
-      (team.score_residual > 0 ? '+' : '') + number(team.score_residual, 2) +
+      signedNumber(team.score_residual, 2) +
       '</dd></div><div><dt>Standardized surprise</dt><dd class="' + surpriseClass + '">' +
-      (team.surprise_index > 0 ? '+' : '') + number(team.surprise_index, 2) + ' σ' +
+      signedNumber(team.surprise_index, 2) + ' σ' +
       '</dd></div><div><dt>Anchored performance rating</dt><dd>' + escapeHtml(performanceRating) +
       '</dd></div><div><dt>TPR versus start</dt><dd class="' + changeClass + '">' + change +
       '</dd></div><div><dt>Tournament-only reset</dt><dd>#' + team.reset_rank + ' · ' + number(team.reset_rating, 2) +
       '</dd></div><div><dt>Starting belief</dt><dd>' + escapeHtml(startBelief) + '</dd></div><div><dt>Final belief</dt><dd>' +
       escapeHtml(endBelief) + '</dd></div><div><dt>Published start</dt><dd>' + number(team.start_score, 2) +
       '</dd></div><div><dt>Post-event replay score</dt><dd>' + number(team.replay_rating, 2) +
-      '</dd></div></dl><p class="rating-lab-performance-note">The performance rating solves the exact expected-score equation against opponents held at their pre-event beliefs. The reset rank starts everyone from the selected protocol’s neutral prior and uses only this event. The chronological surprise remains actual score minus the expectation recorded before each update.</p>';
+      '</dd></div></dl><p class="rating-lab-performance-note">The performance rating solves the exact expected-score equation against opponents held at their pre-event beliefs. The reset rank starts everyone from the selected protocol’s neutral prior and uses only this event. The chronological surprise remains actual score minus the expectation recorded before each update.</p>' + mediaCredit(team, sport);
   }
 
   function renderPerformanceChart(rows, model, competition, sport) {
@@ -1312,8 +1358,8 @@
       '<div class="rating-lab-performance-axis" aria-hidden="true"><span>Underperformed</span><span>As expected</span><span>Outperformed</span></div>' +
       chartRows.map(function (team) {
         var positive = team.surprise_index >= 0;
-        var signedSurprise = (team.surprise_index > 0 ? '+' : '') + number(team.surprise_index, 2) + ' σ';
-        var signedResidual = (team.score_residual > 0 ? '+' : '') + number(team.score_residual, 2);
+        var signedSurprise = signedNumber(team.surprise_index, 2) + ' σ';
+        var signedResidual = signedNumber(team.score_residual, 2);
         var size = Math.min(Math.abs(team.surprise_index) / maxAbs * 50, 50).toFixed(3) + '%';
         var label = team.name + ': actual ' + number(team.points, 2) + ', expected ' + number(team.expected_score, 2) +
           ', residual ' + signedResidual + ', standardized surprise ' + signedSurprise + ', ' + team.matches + ' matches';
@@ -1353,14 +1399,14 @@
     renderPerformanceChart(rows, model, competition, view.sport);
     elements.predictorBody.innerHTML = rows.map(function (team) {
       var changeClass = team.performance_delta > 0 ? 'is-positive' : team.performance_delta < 0 ? 'is-negative' : '';
-      var change = (team.performance_delta > 0 ? '+' : '') + number(team.performance_delta, 2);
+      var change = signedNumber(team.performance_delta, 2);
       var performanceRating = (team.performance_rating_cap === 'upper' ? '≥' : team.performance_rating_cap === 'lower' ? '≤' : '') +
         number(team.performance_rating, 2);
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
-        team.rank + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+        team.rank + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
         escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-        '</span></button></th><td>' + team.wins + '–' + team.draws + '–' +
-        team.losses + '</td><td>' + number(team.start_rating, 2) + '</td><td><strong>' + escapeHtml(performanceRating) +
+        '</span></button></th><td class="rating-lab-predictor-now">' + team.wins + '–' + team.draws + '–' +
+        team.losses + '</td><td class="rating-lab-predictor-value">' + number(team.start_rating, 2) + '</td><td class="rating-lab-predictor-title"><strong>' + escapeHtml(performanceRating) +
         '</strong></td><td class="rating-lab-optional ' + changeClass + '">' + change +
         '</td><td class="rating-lab-optional">#' + team.reset_rank + '</td></tr>';
     }).join('');
@@ -1406,11 +1452,20 @@
     var isLeague = model.forecast_type === 'league' || Boolean(model.teams);
     var isStandings = model.forecast_type === 'standings';
     var isQualifying = model.forecast_type === 'qualifying_round';
-    var rows = isLeague ? model.teams : model.participants;
+    var rows = isLeague ? model.teams.slice().sort(function (a, b) {
+      return b.expected_points - a.expected_points || a.name.localeCompare(b.name);
+    }) : model.participants;
     if (!state.predictorTeam || !rows.some(function (team) { return team.id === state.predictorTeam; })) {
       state.predictorTeam = rows[0].id;
     }
+    var isPreseason = isLeague && model.completed_matches === 0;
     setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : isQualifying ? 'qualifying' : 'knockout', model.target_label);
+    if (isPreseason) {
+      elements.predictorColumns.now.hidden = true;
+      elements.predictorColumns.title.hidden = true;
+      elements.predictorColumns.secondary.hidden = true;
+      elements.predictorColumns.tertiary.hidden = true;
+    }
     if (!isLeague) {
       if (isQualifying) {
         elements.predictorMetrics.innerHTML = [
@@ -1424,10 +1479,10 @@
           state.datasets[view.sport].models[state.predictorModel].label;
         elements.predictorBody.innerHTML = rows.map(function (team, index) {
           return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
-            (index + 1) + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+            (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
             escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-            '</span></button></th><td>' + number(team.rating, 1) +
-            '</td><td>' + probabilityCell(team.reach_next_stage) + '</td></tr>';
+            '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
+            '</td><td class="rating-lab-predictor-value">' + probabilityCell(team.reach_next_stage) + '</td></tr>';
         }).join('');
         renderQualifyingPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
         renderMarketComparison(view, rows);
@@ -1453,10 +1508,10 @@
         state.datasets[view.sport].models[state.predictorModel].label;
       elements.predictorBody.innerHTML = rows.map(function (team, index) {
         return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
-          (index + 1) + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+          (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
           escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-          '</span></button></th><td>' + number(team.rating, 1) +
-          '</td><td>' + probabilityCell(team.reach_next_stage) + '</td><td>' + probabilityCell(team.champion) + '</td></tr>';
+          '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
+          '</td><td class="rating-lab-predictor-value">' + probabilityCell(team.reach_next_stage) + '</td><td class="rating-lab-predictor-title">' + probabilityCell(team.champion) + '</td></tr>';
       }).join('');
       renderKnockoutPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
       renderMarketComparison(view, rows);
@@ -1466,29 +1521,34 @@
         '</code>. <a href="' + escapeHtml(competition.source_url) + '">Open competition source</a>.';
       return;
     }
+    elements.predictorState.textContent = isPreseason ? 'Pre-season prior · no competition results yet · fixtures through ' +
+      formatDate(competition.last_fixture) : elements.predictorState.textContent;
     elements.predictorMetrics.innerHTML = [
-      ['Competition state', model.completed_matches + ' of ' + competition.total_matches + ' played'],
+      ['Competition state', isPreseason ? 'Pre-season · 0 of ' + competition.total_matches + ' played' : model.completed_matches + ' of ' + competition.total_matches + ' played'],
       ['Next fixture', competition.next_fixture ? formatDate(competition.next_fixture) : 'Competition complete'],
-      ['Forecast sample', number(model.simulations, 0) + (isStandings ? ' deterministic tournaments' : ' deterministic seasons')]
+      [isPreseason ? 'Published view' : 'Forecast sample', isPreseason ? 'Expected points prior' : number(model.simulations, 0) + (isStandings ? ' deterministic tournaments' : ' deterministic seasons')]
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
-    elements.predictorCaption.textContent = competitionTitle(competition) + ' · projected by ' +
+    elements.predictorCaption.textContent = competitionTitle(competition) + (isPreseason ? ' · pre-season expected points prior by ' : ' · projected by ') +
       state.datasets[view.sport].models[state.predictorModel].label;
-    elements.predictorBody.innerHTML = model.teams.map(function (team, index) {
+    elements.predictorBody.innerHTML = rows.map(function (team, index) {
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
-        (index + 1) + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+        (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
         escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-        '</span></button></th><td>' +
-        (team.played ? team.current_rank : '—') + '</td><td><strong>' + number(team.expected_points, 1) +
-        '</strong></td><td>' + probabilityCell(team.champion) + '</td><td class="rating-lab-optional">' +
+        '</span></button></th>' + (isPreseason ? '' : '<td class="rating-lab-predictor-now">' +
+        (team.played ? team.current_rank : '—') + '</td>') + '<td class="rating-lab-predictor-value"><strong>' + number(team.expected_points, 1, 1) +
+        '</strong></td>' + (isPreseason ? '' : '<td class="rating-lab-predictor-title">' + probabilityCell(team.champion) + '</td><td class="rating-lab-optional">' +
         probabilityCell(isStandings ? team.podium : team.top_four) + '</td><td class="rating-lab-optional">' +
-        probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td></tr>';
+        probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td>') + '</tr>';
     }).join('');
-    var selectedTeam = model.teams.find(function (team) { return team.id === state.predictorTeam; });
-    if (isStandings) renderStandingsPredictorDetail(selectedTeam, view.sport);
+    var selectedTeam = rows.find(function (team) { return team.id === state.predictorTeam; });
+    if (isPreseason) renderLeaguePriorDetail(selectedTeam, view.sport);
+    else if (isStandings) renderStandingsPredictorDetail(selectedTeam, view.sport);
     else renderLeaguePredictorDetail(selectedTeam, view.sport);
-    renderMarketComparison(view, model.teams);
+    renderMarketComparison(view, rows, isPreseason ? {
+      withheld: 'This competition has 0 completed matches, so the title distribution is still dominated by starting ratings and schedule assumptions.'
+    } : null);
     elements.predictorMethod.innerHTML = escapeHtml(view.predictor.simulations_per_model) +
       ' simulations per model and competition. Fixed seed: <code>' + escapeHtml(String(model.seed)) +
       '</code>. Fixture snapshot: <code>' + escapeHtml(competition.snapshot_sha256.substring(0, 12)) +
@@ -1521,6 +1581,15 @@
     setPressed(elements.sportTabs, 'sport', state.sport);
     populateCompetitions();
     render();
+  });
+
+  elements.localNav.addEventListener('click', function (event) {
+    var link = event.target.closest('a[href^="#"]');
+    if (!link) return;
+    elements.localNav.querySelectorAll('a[aria-current]').forEach(function (item) {
+      item.removeAttribute('aria-current');
+    });
+    link.setAttribute('aria-current', 'location');
   });
 
   elements.modelTabs.addEventListener('click', function (event) {
@@ -1567,6 +1636,10 @@
   elements.matchupVenue.addEventListener('change', function () {
     state.matchupVenue = elements.matchupVenue.value;
     renderMatchup();
+  });
+
+  window.addEventListener('pageshow', function () {
+    if (state.manifest && state.datasets[state.sport]) renderMatchup();
   });
 
   elements.protocolSportTabs.addEventListener('click', function (event) {
@@ -1778,17 +1851,8 @@
       var competitions = predictorCompetitions();
       elements.predictorCompetition.innerHTML = competitions.map(function (view) {
         var competition = view.competition;
-        var stateLabel = {
-          live: 'Live forecast',
-          scheduled: 'Upcoming forecast',
-          complete: 'Completed performance',
-          'waiting for draw': 'Waiting for field'
-        }[competition.status] || competition.status;
-        var kind = competition.format === 'two-legged qualifying round' ? 'Qualification' : view.sport === 'chess' ? 'Chess tournament' :
-          (competition.format === 'round-robin league' || (competition.models.elo && competition.models.elo.forecast_type === 'league')) ? 'League' :
-          view.sport === 'national-football' ? 'National tournament' : 'Club cup';
-        return '<option value="' + escapeHtml(competition.id) + '">' +
-          escapeHtml(stateLabel + ' · ' + kind + ' · ' + competitionTitle(competition)) + '</option>';
+        return '<option value="' + escapeHtml(competition.id) + '"' + (competition.id === competitions[0].competition.id ? ' selected' : '') + '>' +
+          escapeHtml(competitionTitle(competition)) + '</option>';
       }).join('');
       state.predictorCompetition = competitions[0].competition.id;
       populateCompetitions();

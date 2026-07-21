@@ -286,6 +286,10 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertAlmostEqual(sum(team["champion"] for team in first["teams"]), 1.0, places=3)
         self.assertEqual(first["remaining_matches"], 4)
+        self.assertEqual(
+            [team["expected_points"] for team in first["teams"]],
+            sorted((team["expected_points"] for team in first["teams"]), reverse=True),
+        )
 
     def test_completed_competition_performance_replays_from_pre_event_state(self):
         entities = {
@@ -475,6 +479,18 @@ class PipelineTests(unittest.TestCase):
             self.assertTrue(asset.is_file(), f"Missing vendored flag asset: {code}")
             self.assertIn("<svg", asset.read_text()[:500])
         self.assertIn("MIT License", (root / "assets/vendor/flag-icons/LICENSE").read_text())
+
+    def test_dashboard_trust_guards_are_present(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "assets/js/rating-lab.js").read_text()
+        page = (root / "rating-lab.md").read_text()
+        self.assertIn("function signedNumber(value, digits)", script)
+        self.assertIn("Object.is(rounded, -0)", script)
+        self.assertIn("row.id === selectedId ? ' selected'", script)
+        self.assertIn("var isPreseason = isLeague && model.completed_matches === 0;", script)
+        self.assertIn("Market gap withheld before play", script)
+        self.assertNotIn("Colors only identify the outcomes", script)
+        self.assertIn('autocomplete="off"', page)
 
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{

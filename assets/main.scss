@@ -1181,7 +1181,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab {
   --lab-navy: #1d252e;
   --lab-blue: #315f78;
-  --lab-cyan: #a5693b;
+  --lab-secondary: #667a89;
   --lab-line: #d4d8da;
   --lab-wash: #f5f6f5;
   --lab-positive: #27704e;
@@ -1909,7 +1909,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-chart .rating-lab-series-2 {
-  stroke: var(--lab-cyan);
+  stroke: var(--lab-secondary);
 }
 
 .rating-lab-chart-area {
@@ -1926,7 +1926,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-chart-endpoint.rating-lab-series-2 {
-  fill: var(--lab-cyan);
+  fill: var(--lab-secondary);
   stroke: #f8f7f2;
 }
 
@@ -1955,7 +1955,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-chart-hit.is-active[data-series-index="1"] {
-  fill: var(--lab-cyan);
+  fill: var(--lab-secondary);
 }
 
 .rating-lab-chart-surface {
@@ -2037,7 +2037,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-chart-legend i.rating-lab-series-2 {
-  background: var(--lab-cyan);
+  background: var(--lab-secondary);
 }
 
 .rating-lab-chart-scale {
@@ -2262,7 +2262,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-disclosure > summary::after {
-  color: var(--lab-cyan);
+  color: var(--lab-secondary);
   content: "+";
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 1.15rem;
@@ -2534,7 +2534,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-outcome-strip .is-b {
-  background: var(--lab-cyan);
+  background: var(--lab-secondary);
 }
 
 .rating-lab-outcome-cards {
@@ -2579,7 +2579,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-outcome-cards .is-b i {
-  background: var(--lab-cyan);
+  background: var(--lab-secondary);
 }
 
 .rating-lab-outcome-cards strong {
@@ -2808,6 +2808,28 @@ body:has(.rating-lab) .post-content {
   font-size: 0.78rem;
 }
 
+.rating-lab small,
+.rating-lab dt {
+  font-size: 0.78rem;
+}
+
+.rating-lab-identity {
+  font-size: 0.72rem;
+}
+
+.rating-lab-chart text {
+  font-size: 11px;
+}
+
+.rating-lab-chart-tooltip,
+.rating-lab-model-compare,
+.rating-lab-histogram-axis,
+.rating-lab-matchup-context span,
+.rating-lab-matchup-inputs dt,
+.rating-lab-performance-axis {
+  font-size: 0.78rem;
+}
+
 .rating-lab-protocol-fixed {
   font-size: 0.82rem;
 }
@@ -2933,7 +2955,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-market.is-stale {
-  border-left: 4px solid var(--lab-cyan);
+  border-left: 4px solid var(--lab-secondary);
 }
 
 .rating-lab-market-heading {
@@ -3191,7 +3213,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-performance-bar.is-underperformer {
   right: 50%;
   background: #f3eadc;
-  border: 2px solid var(--lab-cyan);
+  border: 2px solid var(--lab-secondary);
   border-radius: 3px 0 0 3px;
 }
 
@@ -3391,7 +3413,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-split {
   margin: 1.5rem 0 0;
   padding: 1.25rem 1.4rem;
-  border-left: 4px solid var(--lab-cyan);
+  border-left: 4px solid var(--lab-secondary);
 }
 
 .rating-lab-split ol {
@@ -3739,6 +3761,321 @@ body:has(.rating-lab) .post-content {
 
   .rating-lab-trend-column {
     display: none;
+  }
+}
+
+/* Rating Lab trust and responsive-density pass */
+.rating-lab-local-nav a,
+.rating-lab-local-nav span,
+.rating-lab-segmented button,
+.rating-lab-movers-disclosure > summary {
+  white-space: nowrap;
+}
+
+.rating-lab-local-nav a[aria-current="location"] {
+  background: #fff;
+  box-shadow: inset 0 -3px 0 var(--lab-blue);
+}
+
+.rating-lab-local-nav a.is-external span {
+  color: #4e6370;
+}
+
+.rating-lab-control-label,
+.rating-lab-field span,
+.rating-lab-movers p,
+.rating-lab-inspector-label,
+.rating-lab-table thead button,
+.rating-lab-predictor-metrics span,
+.rating-lab-detail dt {
+  font-size: 0.78rem;
+}
+
+.rating-lab-segmented button,
+.rating-lab-table,
+.rating-lab-field select,
+.rating-lab-field input,
+.rating-lab-movers button,
+.rating-lab-pin,
+.rating-lab-more {
+  font-size: 0.82rem;
+}
+
+.rating-lab-freshness-chip,
+.rating-lab-generation,
+.rating-lab-identity-copy small,
+.rating-lab-chart-readout,
+.rating-lab-histogram-readout,
+.rating-lab-chart-legend,
+.rating-lab-position-axis,
+.rating-lab-market-note,
+.rating-lab-performance-axis,
+.rating-lab-performance-name small {
+  font-size: 0.78rem;
+}
+
+.rating-lab-grid:not(.has-detail) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rating-lab-detail[hidden] {
+  display: none;
+}
+
+.rating-lab-grid > .rating-lab-table-wrap,
+.rating-lab-predictor-grid > .rating-lab-table-wrap,
+.rating-lab-market-table-wrap {
+  overflow-x: clip;
+}
+
+.rating-lab-table,
+.rating-lab-market table {
+  table-layout: fixed;
+}
+
+.rating-lab-table th,
+.rating-lab-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#ranking-table th:nth-child(1),
+#ranking-table td:nth-child(1) {
+  width: 3.25rem;
+}
+
+#ranking-table th:nth-child(2),
+#ranking-table td:nth-child(2) {
+  width: 31%;
+}
+
+#ranking-table .rating-lab-trend-column {
+  width: 6.4rem;
+}
+
+#ranking-table .rating-lab-rating-column,
+#ranking-table .rating-lab-uncertainty-column,
+#ranking-table .rating-lab-change-column,
+#ranking-table .rating-lab-recent-column {
+  width: 6.2rem;
+}
+
+#ranking-table:not(.has-uncertainty) .rating-lab-uncertainty-column {
+  display: none;
+}
+
+.rating-lab-entity-name,
+.rating-lab-identity-copy > span,
+.rating-lab-predictor-team > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rating-lab-media-credit {
+  margin: 1rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--lab-line);
+  color: #667487;
+  font-size: 0.75rem;
+}
+
+.rating-lab-media-credit summary {
+  width: fit-content;
+  color: #536176;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rating-lab-media-credit p {
+  margin: 0.45rem 0 0;
+}
+
+.rating-lab-probability {
+  background: #e1e8ed;
+  border: 1px solid #c1cdd5;
+}
+
+.rating-lab-probability::before {
+  background: rgba(49, 95, 120, 0.3);
+}
+
+.rating-lab-outcome-strip {
+  height: 1.2rem;
+  border: 1px solid #bcc8cf;
+}
+
+.rating-lab-outcome-strip .is-b,
+.rating-lab-outcome-cards .is-b i {
+  background: var(--lab-secondary);
+}
+
+.rating-lab-position-chart {
+  gap: 5px;
+  padding: 0 0.2rem;
+  border-bottom: 1px solid #aeb9c0;
+}
+
+.rating-lab-position-bar {
+  min-width: 5px;
+}
+
+.rating-lab-market table {
+  width: 100%;
+}
+
+.rating-lab-support-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(9rem, 1fr));
+}
+
+.rating-lab-support-actions a {
+  display: grid;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  place-items: center;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  #ranking-table .rating-lab-recent-column,
+  .rating-lab-predictor-table .rating-lab-optional,
+  .rating-lab-market-spread {
+    display: none;
+  }
+}
+
+@media (max-width: 1050px) {
+  .rating-lab-grid,
+  .rating-lab-grid.has-detail,
+  .rating-lab-predictor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rating-lab-detail {
+    position: static;
+    min-height: 0;
+    padding: 1.2rem 0 0;
+    border-top: 1px solid var(--lab-line);
+    border-left: 0;
+  }
+
+  .rating-lab-market-raw {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  #ranking-table .rating-lab-change-column {
+    display: none;
+  }
+
+  .rating-lab-local-nav strong {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .rating-lab-hero {
+    padding: 1rem 0 0.8rem;
+  }
+
+  .rating-lab-hero h1 {
+    max-width: 18ch;
+    font-size: clamp(2rem, 10vw, 2.7rem);
+    line-height: 1.02;
+  }
+
+  .rating-lab-deck {
+    font-size: 0.96rem;
+    line-height: 1.42;
+  }
+
+  .rating-lab-freshness-strip {
+    flex-wrap: nowrap;
+    padding-bottom: 0.2rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .rating-lab-freshness-chip {
+    flex: 0 0 auto;
+  }
+
+  .rating-lab-generation {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rating-lab-local-nav a {
+    padding: 0.62rem 0.72rem;
+  }
+
+  .rating-lab-segmented button {
+    min-width: max-content;
+    flex: 0 0 auto;
+  }
+
+  #ranking-table .rating-lab-trend-column,
+  #ranking-table .rating-lab-uncertainty-column {
+    display: none;
+  }
+
+  .rating-lab-predictor-table .rating-lab-rank,
+  .rating-lab-predictor-table .rating-lab-predictor-now {
+    display: none;
+  }
+
+  .rating-lab-predictor-table .rating-lab-predictor-entity {
+    width: auto;
+  }
+
+  .rating-lab-predictor-table .rating-lab-predictor-value,
+  .rating-lab-predictor-table .rating-lab-predictor-title {
+    width: 5.5rem;
+  }
+
+  #ranking-table th:nth-child(2),
+  #ranking-table td:nth-child(2) {
+    width: auto;
+  }
+
+  #ranking-table .rating-lab-rating-column {
+    width: 5.4rem;
+  }
+
+  .rating-lab-table th,
+  .rating-lab-table td {
+    padding: 0.65rem 0.42rem;
+  }
+
+  .rating-lab-identity {
+    width: 1.85rem;
+    height: 1.85rem;
+    flex-basis: 1.85rem;
+    font-size: 0.72rem;
+  }
+
+  .rating-lab-support-actions {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 440px) {
+  #ranking-table th:nth-child(1),
+  #ranking-table td:nth-child(1) {
+    width: 2.55rem;
+  }
+
+  .rating-lab-explorer {
+    padding: 0.8rem;
+  }
+
+  .rating-lab-predictor-table th:first-child,
+  .rating-lab-predictor-table td:first-child {
+    width: 3.5rem;
   }
 }
 
@@ -4993,7 +5330,7 @@ body:has(.explain-lab) .post-header {
   padding: 0.8rem 1rem;
   color: #4d5350;
   background: #f3eadc;
-  border-left: 3px solid var(--lab-cyan);
+  border-left: 3px solid var(--lab-secondary);
   font-size: 0.88rem;
 }
 
@@ -5099,7 +5436,7 @@ body:has(.explain-lab) .post-header {
 .player-lab-point.is-selected > span {
   width: 13px;
   height: 13px;
-  background: var(--lab-cyan);
+  background: var(--lab-secondary);
   opacity: 1;
   outline: 2px solid #fff;
 }

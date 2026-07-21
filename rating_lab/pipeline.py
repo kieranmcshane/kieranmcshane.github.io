@@ -28,7 +28,7 @@ from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBl
 
 
 SCHEMA_VERSION = "1.12.0"
-METHODOLOGY_VERSION = "2026-07-21.6"
+METHODOLOGY_VERSION = "2026-07-21.7"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
@@ -1898,7 +1898,11 @@ def _simulate_league(
                 "positions": [round(probability, 4) for probability in position_probabilities],
             }
         )
-    teams.sort(key=lambda team: (team["expected_position"], team["name"]))
+    # The public table leads with expected points, so its visible order must use
+    # that same statistic. Mean finishing position can disagree slightly after
+    # simulation because it averages a nonlinear rank distribution; it remains
+    # available in the inspector but is not allowed to contradict the table.
+    teams.sort(key=lambda team: (-team["expected_points"], -team["champion"], team["name"]))
     return {
         "forecast_type": competition.get("forecast_type", "league"),
         "seed": f"{seed:016x}",
