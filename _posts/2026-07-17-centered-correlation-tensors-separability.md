@@ -40,7 +40,7 @@ The article has a complete bipartite core followed by a research-direction appen
 <aside class="explain-article-cta">
   <div>
     <strong>Could you reconstruct the argument without the page?</strong>
-    <p>The interactive companion uses proof ordering, error diagnosis and scheduled FSRS reviews. It requires no typing or speaking.</p>
+    <p>The click-based companion uses proof ordering, error diagnosis and scheduled FSRS reviews.</p>
   </div>
   <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the argument trainer →</a>
 </aside>

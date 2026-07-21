@@ -9,7 +9,7 @@ description: "A click-based FSRS learning companion to the article on centered c
   <header class="explain-hero">
     <p class="explain-kicker">Interactive companion to the article</p>
     <h1>Can you reconstruct the argument?</h1>
-    <p class="explain-deck">No essay box and no speaking to the screen. Rebuild the proof, choose the missing steps, and diagnose plausible mistakes. FSRS then decides which ideas should return and when.</p>
+    <p class="explain-deck">Everything is click-based. Rebuild the proof, choose the missing steps, and diagnose plausible mistakes. FSRS then decides which ideas should return and when.</p>
     <div class="explain-hero-actions">
       <a class="explain-primary-link" href="#derivation-order">Start the reconstruction</a>
       <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Return to the article</a>
