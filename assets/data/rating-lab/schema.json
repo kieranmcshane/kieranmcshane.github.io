@@ -21,7 +21,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.11.0"
+        "const": "1.12.0"
     },
     "sport": {
       "enum": [

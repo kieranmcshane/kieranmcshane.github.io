@@ -1657,6 +1657,10 @@ body:has(.rating-lab) .post-content {
   box-shadow: inset 3px 0 0 var(--lab-blue);
 }
 
+.rating-lab-table tbody tr.is-provisional {
+  background: #fffbef;
+}
+
 .rating-lab-table tbody tr[data-row-select] {
   cursor: pointer;
 }
@@ -1711,6 +1715,20 @@ body:has(.rating-lab) .post-content {
   font-size: 0.72rem;
   font-weight: 400;
   text-overflow: ellipsis;
+}
+
+.rating-lab-identity-copy small.rating-lab-provisional-label {
+  color: #8a5a08;
+}
+
+.rating-lab-provisional-note {
+  margin: 0.55rem 0 0.85rem;
+  padding: 0.65rem 0.75rem;
+  color: #664506;
+  background: #fffbef;
+  border-left: 3px solid #d9a11e;
+  font-size: 0.72rem;
+  line-height: 1.5;
 }
 
 .rating-lab-identity {

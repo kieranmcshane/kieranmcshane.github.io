@@ -27,10 +27,11 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.11.0"
-METHODOLOGY_VERSION = "2026-07-21.4"
+SCHEMA_VERSION = "1.12.0"
+METHODOLOGY_VERSION = "2026-07-21.5"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
+FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
 SCHEDULE_ENTITY_ALIASES = {
     "national-football": {
         "usa": "united-states",
@@ -1503,6 +1504,31 @@ def _deduplicate(matches: Iterable[Match]) -> list[Match]:
     return list(unique.values())
 
 
+def _largest_result_component(matches: Iterable[Match]) -> set[str]:
+    """Return the deterministic largest connected component of the result graph."""
+    adjacency: dict[str, set[str]] = defaultdict(set)
+    for match in matches:
+        adjacency[match.entity_a].add(match.entity_b)
+        adjacency[match.entity_b].add(match.entity_a)
+    components: list[set[str]] = []
+    unseen = set(adjacency)
+    while unseen:
+        root = min(unseen)
+        component = set()
+        pending = [root]
+        while pending:
+            entity = pending.pop()
+            if entity in component:
+                continue
+            component.add(entity)
+            pending.extend(sorted(adjacency[entity] - component, reverse=True))
+        unseen -= component
+        components.append(component)
+    if not components:
+        return set()
+    return min(components, key=lambda component: (-len(component), min(component)))
+
+
 def _match_sort_key(match: Match) -> tuple:
     return (
         match.date,
@@ -2651,6 +2677,7 @@ def build_sport_payload(
     validation_start = latest - timedelta(days=730)
     active_window_days = 730 if sport == "national-football" else 365
     active_cutoff = latest - timedelta(days=active_window_days)
+    football_main_component = _largest_result_component(matches) if sport == "football" else set()
     recent_counts = defaultdict(int)
     for match in matches:
         if match.date >= active_cutoff:
@@ -2734,6 +2761,16 @@ def build_sport_payload(
                     "last_played": state.last_played.isoformat() if state.last_played else None,
                     "history": history,
                 }
+            if sport == "football" and model_name == "elo":
+                provisional_reasons = []
+                if state.matches < FOOTBALL_ELO_ESTABLISHED_MATCHES:
+                    provisional_reasons.append(
+                        f"{state.matches} covered results; {FOOTBALL_ELO_ESTABLISHED_MATCHES} required"
+                    )
+                if entity not in football_main_component:
+                    provisional_reasons.append("not yet connected to the main result network")
+                row["provisional"] = bool(provisional_reasons)
+                row["provisional_reason"] = "; ".join(provisional_reasons)
             if entities[entity].get("media"):
                 row["media"] = entities[entity]["media"]
             if isinstance(fitted_model, SurfaceBlendModel):
@@ -2751,12 +2788,21 @@ def build_sport_payload(
                         "last_played": surface_state.last_played.isoformat() if surface_state.last_played else None,
                     }
             rows.append(row)
-        rows.sort(key=lambda row: (-row["score"], row["name"]))
+        rows.sort(key=lambda row: (bool(row.get("provisional")), -row["score"], row["name"]))
         rows = rows[:500]
         for rank, row in enumerate(rows, 1):
             row["rank"] = rank
         model_payloads[model_name] = {
             "label": {"elo": "Elo", "glicko2": "Glicko-2", "trueskill": "Gaussian TrueSkill", "robust": "Robust TrueSkill"}[model_name],
+            "ranking_rule": (
+                "Rank established clubs by raw Elo; retain clubs with fewer than 10 covered results or outside the main connected result network in a provisional tier after the established order."
+                if sport == "football" and model_name == "elo"
+                else "Rank by raw Elo rating."
+                if model_name == "elo"
+                else "Rank by rating minus two rating deviations."
+                if model_name == "glicko2"
+                else "Rank by mean minus three standard deviations."
+            ),
             "metrics": _metrics(predictions, evaluation_start),
             "rankings": rows,
         }
@@ -2807,9 +2853,17 @@ def build_sport_payload(
         "eligibility": {
             "minimum_recent_matches": minimum,
             "recent_window_days": active_window_days,
+            **(
+                {
+                    "football_elo_established_matches": FOOTBALL_ELO_ESTABLISHED_MATCHES,
+                    "football_elo_main_component_entities": len(football_main_component),
+                }
+                if sport == "football"
+                else {}
+            ),
             "rule": {
                 "tennis": "At least 10 ATP matches in the latest 52 weeks.",
-                "football": "Member of a covered current-season domestic competition.",
+                "football": "Member of a covered current-season competition. Football Elo additionally separates provisional clubs with fewer than 10 covered results or no connection to the main result network; forecasts retain them.",
                 "national-football": "At least 5 men's full internationals in the latest 24 months.",
                 "chess": "FIDE-identified, official rating at least 2200, and 20 games in the latest 12 months.",
             }[sport],
