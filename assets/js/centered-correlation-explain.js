@@ -7,7 +7,7 @@
   var storageKey = root.dataset.storageKey || 'centered-correlation-explain-v2';
   var conceptIds = ['coordinates', 'identity', 'bound', 'norms', 'compatibility'];
   var defaultState = {
-    orderComplete: false,
+    proofComplete: false,
     fsrsCards: {},
     fsrsReviewed: {},
     fsrsEverPassed: {},
@@ -22,6 +22,8 @@
   var currentConcept = null;
   var currentOptions = [];
   var currentAttempts = 0;
+  var proofStateId = state.proofComplete ? 'complete' : 'start';
+  var proofHistory = [];
 
   var concepts = {
     coordinates: {
@@ -142,10 +144,14 @@
   };
 
   var elements = {
-    orderList: document.getElementById('explain-order-list'),
-    orderFeedback: document.getElementById('order-feedback'),
-    checkOrder: document.getElementById('check-order'),
-    resetOrder: document.getElementById('reset-order'),
+    proofExpression: document.getElementById('proof-expression'),
+    proofActionPrompt: document.getElementById('proof-action-prompt'),
+    proofActions: document.getElementById('proof-actions'),
+    proofFeedback: document.getElementById('proof-feedback'),
+    proofHistory: document.getElementById('proof-history'),
+    proofStepCount: document.getElementById('proof-step-count'),
+    proofUndo: document.getElementById('proof-undo'),
+    proofReset: document.getElementById('proof-reset'),
     progressText: document.getElementById('explain-progress-text'),
     progressBar: document.getElementById('explain-progress-bar'),
     progressTrack: root.querySelector('.explain-progress-track'),
@@ -207,7 +213,7 @@
 
   function stageStatus() {
     return [
-      state.orderComplete,
+      state.proofComplete,
       conceptIds.every(function (id) { return Boolean(state.fsrsEverPassed[id]); }),
       Array.prototype.every.call(root.querySelectorAll('[data-diagnosis]'), function (card) { return Boolean(state.diagnosis[card.dataset.diagnosis]); }),
       Array.prototype.every.call(root.querySelectorAll('[data-builder]'), function (card) { return Boolean(state.builder[card.dataset.builder]); })
@@ -217,14 +223,14 @@
   function updateProgress() {
     var statuses = stageStatus();
     var complete = statuses.filter(Boolean).length;
-    var labels = ['order the proof', 'pass the five scheduled concepts', 'diagnose all four claims', 'assemble the explanation'];
+    var labels = ['complete the checked proof puzzle', 'pass the five scheduled concepts', 'diagnose all four claims', 'assemble the explanation'];
     var remaining = labels.filter(function (_, index) { return !statuses[index]; });
     elements.progressText.textContent = complete + ' of 4 stages complete';
     elements.progressTrack.setAttribute('aria-valuenow', complete);
     elements.progressBar.style.width = (complete / 4 * 100) + '%';
     elements.markReady.disabled = complete < 4;
     elements.readinessCopy.textContent = complete === 4
-      ? 'You recovered the same argument through ordering, retrieval, diagnosis and reconstruction.'
+      ? 'You recovered the same argument through formal rewriting, retrieval, diagnosis and reconstruction.'
       : 'Still to do: ' + remaining.join('; ') + '.';
     if (state.ready) {
       elements.readinessStatus.textContent = 'Marked as reconstructed on this browser. Scheduled reviews remain active.';
@@ -235,60 +241,145 @@
     }
   }
 
-  function numberOrderItems() {
-    Array.prototype.forEach.call(elements.orderList.children, function (item, index) {
-      item.querySelector('.explain-order-number').textContent = index + 1;
-      item.querySelector('[data-move="up"]').disabled = index === 0;
-      item.querySelector('[data-move="down"]').disabled = index === elements.orderList.children.length - 1;
-    });
+  var proofStates = {
+    start: {
+      progress: 0,
+      expression: '$C=$ <button type="button" data-proof-object="raw" aria-label="Select T">$T$</button> $-$ <button type="button" data-proof-object="means" aria-label="Select product of means">$rs^{\\mathsf T}$</button>',
+      prompts: {
+        raw: {
+          label: 'You selected $T$. Which matching equality should be used, and in which direction?',
+          actions: [
+            { id: 'cross', label: 'Use $h_T$ backwards: replace $T$ by $\\sum_k p_k r_k s_k^{\\mathsf T}$', next: 'cross', theorem: 'rewrite_cross_moment', productive: true },
+            { id: 'circular', label: 'Solve $C=T-rs^{\\mathsf T}$ for $T$, then substitute it back', next: 'circular', theorem: 'rewrite_through_center', productive: false }
+          ]
+        },
+        means: {
+          label: 'You selected $rs^{\\mathsf T}$. Both local-mean rewrites are legal, but do they simplify this goal?',
+          actions: [
+            { id: 'left-mean', label: 'Replace $r$ using $h_r$', next: 'leftMean', theorem: 'rewrite_left_mean', productive: false },
+            { id: 'right-mean', label: 'Replace $s$ using $h_s$', next: 'rightMean', theorem: 'rewrite_right_mean', productive: false }
+          ]
+        }
+      }
+    },
+    circular: {
+      progress: 0,
+      expression: '$C=(C+rs^{\\mathsf T})-rs^{\\mathsf T}$',
+      detour: 'This rewrite is valid, but it only restates the definition and makes no progress. Undo and inspect a different object.'
+    },
+    leftMean: {
+      progress: 0,
+      expression: '$C=T-\\left(\\sum_k p_k r_k\\right)s^{\\mathsf T}$',
+      detour: 'This use of $h_r$ is valid, but it creates a product of sums before the cross-moment has been exposed. Undo and look for a rewrite of $T$.'
+    },
+    rightMean: {
+      progress: 0,
+      expression: '$C=T-r\\left(\\sum_k p_k s_k\\right)^{\\mathsf T}$',
+      detour: 'This use of $h_s$ is valid, but it creates a product of sums before the cross-moment has been exposed. Undo and look for a rewrite of $T$.'
+    },
+    cross: {
+      progress: 1,
+      expression: '$C=$ <button type="button" data-proof-object="cross-rhs" aria-label="Select rewritten right hand side">$\\displaystyle \\sum_k p_k r_k s_k^{\\mathsf T}-rs^{\\mathsf T}$</button>',
+      prompts: {
+        'cross-rhs': {
+          label: 'The cross-moment is visible. Which equality introduces the centered factors without changing the sum?',
+          actions: [
+            { id: 'zero-means', label: 'Insert the two zero first moments from $h_r$, $h_s$, and $h_p$', next: 'expanded', theorem: 'insert_zero_means', productive: true },
+            { id: 'cross-left', label: 'Expand only $r$ as $\\sum_kp_kr_k$', next: 'crossLeft', theorem: 'rewrite_left_mean', productive: false }
+          ]
+        }
+      }
+    },
+    crossLeft: {
+      progress: 1,
+      expression: '$C=\\displaystyle \\sum_kp_kr_ks_k^{\\mathsf T}-\\left(\\sum_kp_kr_k\\right)s^{\\mathsf T}$',
+      detour: 'Still valid, but the cancellation is now hidden inside two separate sums. Undo and use both zero-mean identities together.'
+    },
+    expanded: {
+      progress: 2,
+      expression: '$C=\\displaystyle \\sum_k p_k$ <button type="button" data-proof-object="summand" aria-label="Select four term summand">$\\left(r_ks_k^{\\mathsf T}-r_ks^{\\mathsf T}-rs_k^{\\mathsf T}+rs^{\\mathsf T}\\right)$</button>',
+      prompts: {
+        summand: {
+          label: 'You selected one four-term summand. Which local algebraic operation completes the identity?',
+          actions: [
+            { id: 'factor', label: 'Factor it as $(r_k-r)(s_k-s)^{\\mathsf T}$', next: 'complete', theorem: 'factor_centered_summand', productive: true },
+            { id: 'distribute', label: 'Distribute the outer sum back into four sums', next: 'distributed', theorem: 'insert_zero_means', productive: false }
+          ]
+        }
+      }
+    },
+    distributed: {
+      progress: 2,
+      expression: '$C=\\sum_kp_kr_ks_k^{\\mathsf T}-\\sum_kp_kr_ks^{\\mathsf T}-\\sum_kp_krs_k^{\\mathsf T}+\\sum_kp_krs^{\\mathsf T}$',
+      detour: 'This expansion is valid, but it moves away from the compact covariance form. Undo and factor the selected summand instead.'
+    },
+    complete: {
+      progress: 3,
+      expression: '$\\boxed{C=\\displaystyle \\sum_k p_k(r_k-r)(s_k-s)^{\\mathsf T}}$',
+      complete: true
+    }
+  };
+
+  function renderProofState(message) {
+    var activeProofState = proofStates[proofStateId];
+    elements.proofExpression.innerHTML = activeProofState.expression;
+    elements.proofStepCount.textContent = activeProofState.progress + ' / 3 productive moves';
+    elements.proofActions.innerHTML = '';
+    elements.proofActionPrompt.innerHTML = activeProofState.complete
+      ? '<strong>Proof complete.</strong> Every displayed transition is covered by the checked Lean file.'
+      : activeProofState.detour || 'Select a highlighted part of the formula.';
+    elements.proofFeedback.textContent = message || '';
+    elements.proofUndo.disabled = proofHistory.length === 0;
+    elements.proofHistory.innerHTML = proofHistory.map(function (entry) {
+      return '<li><span>' + entry.label + '</span><code>' + entry.theorem + '</code></li>';
+    }).join('');
+    if (activeProofState.complete) {
+      state.proofComplete = true;
+      saveState();
+    }
+    typeset(elements.proofExpression);
+    typeset(elements.proofActionPrompt);
   }
 
-  function initializeOrder() {
-    if (state.orderComplete) {
-      [1, 2, 3, 4, 5].forEach(function (step) {
-        elements.orderList.appendChild(elements.orderList.querySelector('[data-step="' + step + '"]'));
-      });
-      elements.orderList.classList.add('is-correct');
-      elements.orderFeedback.textContent = 'Correct. You reconstructed the complete chain.';
-    }
-    numberOrderItems();
-  }
+  elements.proofExpression.addEventListener('click', function (event) {
+    var object = event.target.closest('[data-proof-object]');
+    if (!object) return;
+    elements.proofExpression.querySelectorAll('[data-proof-object]').forEach(function (item) { item.classList.remove('is-selected'); });
+    object.classList.add('is-selected');
+    var prompt = proofStates[proofStateId].prompts && proofStates[proofStateId].prompts[object.dataset.proofObject];
+    if (!prompt) return;
+    elements.proofActionPrompt.innerHTML = prompt.label;
+    elements.proofActions.innerHTML = prompt.actions.map(function (action) {
+      return '<button type="button" data-proof-action="' + action.id + '" data-next="' + action.next + '" data-theorem="' + action.theorem + '" data-productive="' + action.productive + '">' + action.label + '</button>';
+    }).join('');
+    elements.proofFeedback.textContent = '';
+    typeset(document.getElementById('proof-action-panel'));
+  });
 
-  elements.orderList.addEventListener('click', function (event) {
-    var button = event.target.closest('button[data-move]');
-    if (!button) return;
-    var item = button.closest('li');
-    if (button.dataset.move === 'up' && item.previousElementSibling) {
-      elements.orderList.insertBefore(item, item.previousElementSibling);
-    } else if (button.dataset.move === 'down' && item.nextElementSibling) {
-      elements.orderList.insertBefore(item.nextElementSibling, item);
-    }
-    state.orderComplete = false;
-    elements.orderList.classList.remove('is-correct');
-    elements.orderFeedback.textContent = '';
-    numberOrderItems();
+  elements.proofActions.addEventListener('click', function (event) {
+    var action = event.target.closest('[data-proof-action]');
+    if (!action) return;
+    proofHistory.push({ state: proofStateId, label: action.textContent.trim(), theorem: action.dataset.theorem });
+    proofStateId = action.dataset.next;
+    renderProofState(action.dataset.productive === 'true'
+      ? 'Lean accepts the rewrite. The proof state has advanced.'
+      : 'Lean accepts the rewrite, but it is strategically unhelpful.');
+  });
+
+  elements.proofUndo.addEventListener('click', function () {
+    var previous = proofHistory.pop();
+    if (!previous) return;
+    proofStateId = previous.state;
+    state.proofComplete = false;
+    renderProofState('Move undone. Try a different object or rewrite.');
     saveState();
   });
 
-  elements.checkOrder.addEventListener('click', function () {
-    var order = Array.prototype.map.call(elements.orderList.children, function (item) { return Number(item.dataset.step); });
-    var firstWrong = order.findIndex(function (step, index) { return step !== index + 1; });
-    state.orderComplete = firstWrong === -1;
-    elements.orderList.classList.toggle('is-correct', state.orderComplete);
-    elements.orderFeedback.textContent = state.orderComplete
-      ? 'Correct. Product → common mixture → centering → Cauchy–Schwarz → variance bound.'
-      : 'Not yet. The first mismatch is at position ' + (firstWrong + 1) + '. Ask what information that line needs.';
-    saveState();
-  });
-
-  elements.resetOrder.addEventListener('click', function () {
-    [4, 1, 5, 2, 3].forEach(function (step) {
-      elements.orderList.appendChild(elements.orderList.querySelector('[data-step="' + step + '"]'));
-    });
-    state.orderComplete = false;
-    elements.orderList.classList.remove('is-correct');
-    elements.orderFeedback.textContent = '';
-    numberOrderItems();
+  elements.proofReset.addEventListener('click', function () {
+    proofHistory = [];
+    proofStateId = 'start';
+    state.proofComplete = false;
+    renderProofState('Puzzle restarted.');
     saveState();
   });
 
@@ -569,7 +660,7 @@
     window.location.reload();
   });
 
-  initializeOrder();
+  renderProofState(state.proofComplete ? 'Previously completed on this browser. Restart to explore another path.' : '');
   initializeDiagnosis();
   initializeBuilder();
   if (initializeFsrs()) renderReview();

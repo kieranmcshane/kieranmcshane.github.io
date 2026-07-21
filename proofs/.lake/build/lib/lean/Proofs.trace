@@ -1,0 +1,32 @@
+{"synthetic": false,
+ "schemaVersion": "2025-09-10",
+ "outputs":
+ {"o": ["a24cf6407b776758.olean"],
+  "i": "a95b9bcaf431238e.ilean",
+  "c": "73c18e7d5249302b.c"},
+ "log":
+ [{"message":
+   ".> LEAN_PATH=/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/Cli/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/batteries/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/Qq/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/aesop/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/proofwidgets/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/importGraph/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/plausible/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/packages/mathlib/.lake/build/lib/lean:/Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/build/lib/lean /Users/kieranmcshane/.elan/toolchains/leanprover--lean4---v4.28.0/bin/lean /Users/kieranmcshane/kieranmcshane.github.io/proofs/Proofs.lean -o /Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/build/lib/lean/Proofs.olean -i /Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/build/lib/lean/Proofs.ilean -c /Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/build/ir/Proofs.c --setup /Users/kieranmcshane/kieranmcshane.github.io/proofs/.lake/build/ir/Proofs.setup.json --json",
+   "level": "trace"}],
+ "inputs":
+ [["Proofs:deps",
+   [["deps",
+     [["article_learning_proofs/Proofs:extraDep",
+       [["@article_learning_proofs:extraDep", "00000000000006bb"]]],
+      ["imports",
+       [["Proofs.CenteredCorrelationLearn transitive imports (legacy)",
+         "12c1ba7185138d42"],
+        ["Proofs.CenteredCorrelationLearn:importAllArts",
+         "a2435975e4b04dcd"]]]]],
+    ["libs",
+     [["import dynlibs", "00000000000006bb"],
+      ["package external libraries", "00000000000006bb"],
+      ["module dynlibs", "00000000000006bb"],
+      ["module plugins", "00000000000006bb"]]]]],
+  ["Lean 4.28.0, commit 7e01a1bf5c70fc6167d49c345d3bf80596e9a79b",
+   "a96bc04a2e5e9630"],
+  ["/Users/kieranmcshane/kieranmcshane.github.io/proofs/Proofs.lean",
+   "cbd50e714939c2e8"],
+  ["options", [["-DrelaxedAutoImplicit=false", "74a2b5546b55be80"]]],
+  ["Module.leanArgs: #[]", "00000000000006bb"]],
+ "depHash": "b9a0035c6013c1f3"}

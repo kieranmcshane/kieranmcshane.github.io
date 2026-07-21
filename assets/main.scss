@@ -3498,7 +3498,7 @@ body:has(.rating-lab) .post-content {
   }
 }
 
-/* Active oral companion for the centered-correlation article */
+/* Interactive learning companion for the centered-correlation article */
 body:has(.explain-lab) .wrapper {
   max-width: 1040px;
 }
@@ -3613,6 +3613,8 @@ body:has(.explain-lab) .post-header {
 .explain-primary-link:focus-visible,
 .explain-text-button:focus-visible,
 .explain-local-nav a:focus-visible,
+.proof-expression button:focus-visible,
+.proof-action-panel button:focus-visible,
 .explain-order-controls button:focus-visible,
 .teach-back-confidence button:focus-visible,
 .viva-rating button:focus-visible {
@@ -3747,6 +3749,222 @@ body:has(.explain-lab) .post-header {
 .explain-stage-heading p {
   margin: 0;
   color: var(--explain-muted);
+}
+
+.proof-puzzle {
+  overflow: hidden;
+  border: 1px solid var(--explain-line);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(23, 32, 51, 0.08);
+}
+
+.proof-puzzle-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--explain-line);
+  background: var(--explain-ink);
+  color: #fff;
+}
+
+.proof-puzzle-bar > div {
+  display: grid;
+}
+
+.proof-puzzle-bar span {
+  color: #b7c5d8;
+  font-size: 0.74rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proof-puzzle-bar .proof-verified-badge {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid rgba(139, 208, 214, 0.45);
+  border-radius: 999px;
+  color: #a9e3e8;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.proof-puzzle-grid {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.7fr);
+}
+
+.proof-hypotheses {
+  padding: 1.25rem;
+  border-right: 1px solid var(--explain-line);
+  background: #f7f9fb;
+}
+
+.proof-hypotheses h3 {
+  margin: 0 0 0.8rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proof-hypotheses ol {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.proof-hypotheses li {
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--explain-line);
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.88rem;
+}
+
+.proof-hypotheses li > span {
+  display: inline-block;
+  min-width: 2.4rem;
+  color: var(--explain-teal-dark);
+  font-weight: 750;
+}
+
+.proof-hypotheses > p {
+  margin: 1rem 0 0;
+  color: var(--explain-muted);
+  font-size: 0.78rem;
+}
+
+.proof-workspace {
+  min-width: 0;
+  padding: 1.35rem;
+}
+
+.proof-goal-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--explain-muted);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+}
+
+.proof-goal-label strong {
+  color: var(--explain-teal-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.proof-expression {
+  min-height: 7.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: center;
+  margin: 0.75rem 0 1rem;
+  padding: 1.25rem;
+  border: 1px solid #bcc8d6;
+  border-radius: 5px;
+  background: #fcfdfe;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  text-align: center;
+}
+
+.proof-expression button {
+  padding: 0.32rem 0.48rem;
+  border: 1px solid #8fbcc1;
+  border-radius: 4px;
+  color: var(--explain-ink);
+  background: #eaf6f6;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.proof-expression button:hover,
+.proof-expression button.is-selected {
+  border-color: var(--explain-teal-dark);
+  background: #d9efef;
+  box-shadow: 0 0 0 3px rgba(8, 127, 140, 0.13);
+}
+
+.proof-action-panel {
+  padding: 1rem;
+  border-left: 4px solid var(--explain-teal);
+  background: var(--explain-wash);
+}
+
+.proof-action-panel > p {
+  margin: 0 0 0.7rem;
+  color: #394457;
+}
+
+.proof-action-panel > div {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.proof-action-panel button {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #a9bbc6;
+  border-radius: 4px;
+  color: var(--explain-ink);
+  background: #fff;
+  text-align: left;
+}
+
+.proof-action-panel button:hover {
+  border-color: var(--explain-teal);
+  background: #fbfefe;
+}
+
+.proof-feedback {
+  min-height: 1.5rem;
+  margin: 0.75rem 0 0;
+  color: var(--explain-teal-dark);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.proof-history {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.85rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.proof-history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: baseline;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--explain-line);
+  color: var(--explain-muted);
+  font-size: 0.78rem;
+}
+
+.proof-history code {
+  color: var(--explain-teal-dark);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.proof-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.proof-controls > a {
+  margin-left: auto;
+  font-size: 0.82rem;
 }
 
 .explain-order-list {
@@ -4232,6 +4450,7 @@ body:has(.explain-lab) .post-header {
 
   .explain-progress,
   .explain-stage-heading,
+  .proof-puzzle-grid,
   .rehearsal-grid,
   .explain-readiness {
     grid-template-columns: 1fr;
@@ -4253,6 +4472,17 @@ body:has(.explain-lab) .post-header {
   .explain-stage-heading {
     gap: 0.75rem;
     align-items: start;
+  }
+
+  .proof-hypotheses {
+    border-right: 0;
+    border-bottom: 1px solid var(--explain-line);
+  }
+
+  .proof-puzzle-bar,
+  .proof-goal-label,
+  .proof-history li {
+    align-items: flex-start;
   }
 
   .explain-order-list li {
@@ -4291,6 +4521,17 @@ body:has(.explain-lab) .post-header {
     display: grid;
   }
 
+  .proof-puzzle-bar,
+  .proof-goal-label,
+  .proof-history li {
+    display: grid;
+  }
+
+  .proof-controls > a {
+    width: 100%;
+    margin-left: 0;
+  }
+
   .explain-order-controls {
     justify-content: flex-end;
   }
@@ -4317,6 +4558,8 @@ body:has(.explain-lab) .post-header {
   .explain-privacy,
   .explain-order-controls,
   .explain-stage-actions,
+  .proof-action-panel,
+  .proof-controls,
   .reveal-rubric,
   .teach-back-confidence,
   .viva-rating,

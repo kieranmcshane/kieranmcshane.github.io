@@ -1,0 +1,14 @@
+name = "article_learning_proofs"
+version = "0.1.0"
+defaultTargets = ["Proofs"]
+
+[leanOptions]
+relaxedAutoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.28.0"
+
+[[lean_lib]]
+name = "Proofs"
