@@ -71,6 +71,10 @@ description: "A click-based FSRS learning companion to the article on centered c
             <button type="button" class="explain-text-button" id="proof-reset">Restart puzzle</button>
             <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/proofs/Proofs/CenteredCorrelationLearn.lean">Read the checked Lean source</a>
           </div>
+          <details class="proof-verification-note">
+            <summary>What “checked by Lean” means here</summary>
+            <p>This static page replays a bounded transition graph. Every displayed equality is a theorem in the linked Lean file, and GitHub recompiles that file whenever it changes. The browser is not pretending to run an unrestricted Lean search server.</p>
+          </details>
         </div>
       </div>
     </div>

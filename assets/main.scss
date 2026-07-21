@@ -3967,6 +3967,24 @@ body:has(.explain-lab) .post-header {
   font-size: 0.82rem;
 }
 
+.proof-verification-note {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--explain-line);
+  color: var(--explain-muted);
+  font-size: 0.8rem;
+}
+
+.proof-verification-note summary {
+  cursor: pointer;
+  color: var(--explain-ink);
+  font-weight: 700;
+}
+
+.proof-verification-note p {
+  margin: 0.55rem 0 0;
+}
+
 .explain-order-list {
   margin: 0;
   padding: 0;
