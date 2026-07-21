@@ -489,6 +489,11 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("row.id === selectedId ? ' selected'", script)
         self.assertIn("var isPreseason = isLeague && model.completed_matches === 0;", script)
         self.assertIn("Market gap withheld before play", script)
+        self.assertIn("if (!state.includeProvisional)", script)
+        self.assertIn("Math.abs(row.change30) >= 0.05", script)
+        self.assertIn("b.champion - a.champion", script)
+        self.assertIn("spread reflects starting ratings and schedule priors", script)
+        self.assertIn('id="rating-include-provisional"', page)
         self.assertNotIn("Colors only identify the outcomes", script)
         self.assertIn('autocomplete="off"', page)
 

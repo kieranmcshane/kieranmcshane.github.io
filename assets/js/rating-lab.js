@@ -31,6 +31,7 @@
     selected: null,
     pinned: [],
     expanded: false,
+    includeProvisional: false,
     matchupA: null,
     matchupB: null,
     matchupVenue: 'neutral',
@@ -61,6 +62,10 @@
     empty: document.getElementById('ranking-empty'),
     more: document.getElementById('ranking-more'),
     caption: document.getElementById('ranking-caption'),
+    provisionalControl: document.getElementById('rating-provisional-control'),
+    includeProvisional: document.getElementById('rating-include-provisional'),
+    provisionalCount: document.getElementById('rating-provisional-count'),
+    provisionalNote: document.getElementById('rating-provisional-note'),
     detail: document.getElementById('rating-detail'),
     eligibility: document.getElementById('rating-eligibility'),
     parameterBody: document.getElementById('rating-parameter-body'),
@@ -136,7 +141,8 @@
 
   function competitionTitle(competition) {
     var season = String(competition.season || '');
-    return season && competition.label.indexOf(season) === -1 ? competition.label + ' ' + season : competition.label;
+    var label = String(competition.label || '').replace(/\s*\|\s*/g, ' · ');
+    return season && label.indexOf(season) === -1 ? label + ' ' + season : label;
   }
 
   function isStale(status) {
@@ -338,13 +344,24 @@
       '</a> · ' + escapeHtml(media.license) + ' · not a model input</p></details>';
   }
 
-  function currentRows() {
+  function filteredRows() {
     var rows = state.datasets[state.sport].models[state.model].rankings.slice();
     var query = state.query.trim().toLocaleLowerCase();
-    rows = rows.filter(function (row) {
+    return rows.filter(function (row) {
       return (!state.competition || row.competition === state.competition) &&
         (!query || row.name.toLocaleLowerCase().indexOf(query) !== -1 || row.country.toLocaleLowerCase().indexOf(query) !== -1);
     });
+  }
+
+  function provisionalCount() {
+    return filteredRows().filter(function (row) { return Boolean(row.provisional); }).length;
+  }
+
+  function currentRows() {
+    var rows = filteredRows();
+    if (!state.includeProvisional) {
+      rows = rows.filter(function (row) { return !row.provisional; });
+    }
     rows.sort(function (a, b) {
       if (state.sport === 'football' && state.model === 'elo' && state.sort === 'score' &&
           Boolean(a.provisional) !== Boolean(b.provisional)) {
@@ -358,6 +375,17 @@
       return (left - right) * state.direction;
     });
     return rows;
+  }
+
+  function renderProvisionalControl() {
+    var count = provisionalCount();
+    elements.provisionalControl.hidden = count === 0;
+    elements.includeProvisional.checked = state.includeProvisional;
+    elements.provisionalCount.textContent = number(count, 0);
+    var minimum = state.datasets[state.sport].eligibility.football_elo_established_matches || 10;
+    elements.provisionalNote.textContent = count + ' entr' + (count === 1 ? 'y is' : 'ies are') +
+      ' below the established football Elo gate: fewer than ' + minimum +
+      ' matches against established opponents, or not yet connected to that result network.';
   }
 
   function renderMetrics() {
@@ -376,24 +404,28 @@
         escapeHtml(models[modelKeys[bestIndex]].label) + ' ' + number(values[bestIndex], definition[2], definition[2]) + '</small></div>';
     }).concat(['<div class="rating-lab-metric"><span>Held-out predictions</span><div class="rating-lab-metric-value"><strong>' +
       number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']).join('');
-    var provisionalNote = state.sport === 'football' && state.model === 'elo' ?
-      ' · established network first; provisional clubs retained' : '';
+    var hiddenProvisional = !state.includeProvisional ? provisionalCount() : 0;
+    var provisionalNote = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
+      (provisionalCount() ? ' · provisional included' : '');
     elements.context.textContent = models[state.model].label + ' · ' +
-      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' published competitors' + provisionalNote;
+      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' shown competitors' + provisionalNote;
   }
 
   function renderMovers() {
     var rows = currentRows().filter(function (row) {
-      return Number.isFinite(row.change30) && !row.provisional;
+      return Number.isFinite(row.change30) && !row.provisional && Math.abs(row.change30) >= 0.05;
     });
-    var risers = rows.slice().sort(function (a, b) { return b.change30 - a.change30; }).slice(0, 3);
-    var fallers = rows.slice().sort(function (a, b) { return a.change30 - b.change30; }).slice(0, 3);
+    var risers = rows.filter(function (row) { return row.change30 >= 0.05; })
+      .sort(function (a, b) { return b.change30 - a.change30; }).slice(0, 3);
+    var fallers = rows.filter(function (row) { return row.change30 <= -0.05; })
+      .sort(function (a, b) { return a.change30 - b.change30; }).slice(0, 3);
     function group(label, items, positive) {
-      return '<div><p>' + label + '</p><div>' + items.map(function (row) {
+      var content = items.length ? items.map(function (row) {
         var value = signedNumber(row.change30, 1);
         return '<button type="button" data-select="' + escapeHtml(row.id) + '">' + entityName(row, state.sport) +
           '<strong class="' + (positive ? 'is-positive' : 'is-negative') + '">' + value + '</strong></button>';
-      }).join('') + '</div></div>';
+      }).join('') : '<span class="rating-lab-movers-empty">No material movement</span>';
+      return '<div><p>' + label + '</p><div>' + content + '</div></div>';
     }
     elements.movers.innerHTML = group('▲ Biggest risers', risers, true) +
       group('▼ Biggest fallers', fallers, false);
@@ -418,9 +450,12 @@
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 20);
     var model = state.datasets[state.sport].models[state.model];
+    var hiddenProvisional = !state.includeProvisional ? provisionalCount() : 0;
+    var provisionalCaption = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
+      (provisionalCount() ? ' · provisional included' : '');
     elements.rankingTable.classList.toggle('has-uncertainty', state.model !== 'elo');
-    elements.caption.textContent = model.label + ' · ' + rows.length + ' published competitors · ' +
-      (model.ranking_rule || 'Current model ranking rule');
+    elements.caption.textContent = model.label + ' · ' + rows.length + ' shown competitors · ' +
+      (model.ranking_rule || 'Current model ranking rule') + provisionalCaption;
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
     elements.more.textContent = 'Show all ' + number(rows.length, 0) + ' competitors';
@@ -1454,7 +1489,13 @@
     var isQualifying = model.forecast_type === 'qualifying_round';
     var rows = isLeague ? model.teams.slice().sort(function (a, b) {
       return b.expected_points - a.expected_points || a.name.localeCompare(b.name);
-    }) : model.participants;
+    }) : model.participants.slice().sort(function (a, b) {
+      if (isQualifying) {
+        return b.reach_next_stage - a.reach_next_stage || b.rating - a.rating || a.name.localeCompare(b.name);
+      }
+      return b.champion - a.champion || b.reach_next_stage - a.reach_next_stage ||
+        b.rating - a.rating || a.name.localeCompare(b.name);
+    });
     if (!state.predictorTeam || !rows.some(function (team) { return team.id === state.predictorTeam; })) {
       state.predictorTeam = rows[0].id;
     }
@@ -1521,7 +1562,7 @@
         '</code>. <a href="' + escapeHtml(competition.source_url) + '">Open competition source</a>.';
       return;
     }
-    elements.predictorState.textContent = isPreseason ? 'Pre-season prior · no competition results yet · fixtures through ' +
+    elements.predictorState.textContent = isPreseason ? 'Pre-season prior · spread reflects starting ratings and schedule priors · fixtures through ' +
       formatDate(competition.last_fixture) : elements.predictorState.textContent;
     elements.predictorMetrics.innerHTML = [
       ['Competition state', isPreseason ? 'Pre-season · 0 of ' + competition.total_matches + ' played' : model.completed_matches + ' of ' + competition.total_matches + ' played'],
@@ -1530,7 +1571,7 @@
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
-    elements.predictorCaption.textContent = competitionTitle(competition) + (isPreseason ? ' · pre-season expected points prior by ' : ' · projected by ') +
+    elements.predictorCaption.textContent = competitionTitle(competition) + (isPreseason ? ' · pre-season expected points; spread reflects priors · ' : ' · projected by ') +
       state.datasets[view.sport].models[state.predictorModel].label;
     elements.predictorBody.innerHTML = rows.map(function (team, index) {
       return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
@@ -1547,7 +1588,7 @@
     else if (isStandings) renderStandingsPredictorDetail(selectedTeam, view.sport);
     else renderLeaguePredictorDetail(selectedTeam, view.sport);
     renderMarketComparison(view, rows, isPreseason ? {
-      withheld: 'This competition has 0 completed matches, so the title distribution is still dominated by starting ratings and schedule assumptions.'
+      withheld: 'This competition has 0 completed matches. The visible expected-points spread reflects starting ratings and schedule priors; title comparisons are withheld until play begins.'
     } : null);
     elements.predictorMethod.innerHTML = escapeHtml(view.predictor.simulations_per_model) +
       ' simulations per model and competition. Fixed seed: <code>' + escapeHtml(String(model.seed)) +
@@ -1558,6 +1599,7 @@
 
   function render() {
     updateFreshness();
+    renderProvisionalControl();
     renderMetrics();
     renderMovers();
     renderTable();
@@ -1575,6 +1617,7 @@
     state.selected = null;
     state.pinned = [];
     state.expanded = false;
+    state.includeProvisional = false;
     state.matchupA = null;
     state.matchupB = null;
     state.matchupVenue = 'neutral';
@@ -1597,6 +1640,7 @@
     if (!button || button.dataset.model === state.model) return;
     state.model = button.dataset.model;
     state.expanded = false;
+    state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
     render();
   });
@@ -1649,6 +1693,7 @@
     state.selected = null;
     state.pinned = [];
     state.expanded = false;
+    state.includeProvisional = false;
     state.matchupA = null;
     state.matchupB = null;
     state.matchupVenue = 'neutral';
@@ -1662,6 +1707,7 @@
     if (!button || button.dataset.protocolModel === state.model) return;
     state.model = button.dataset.protocolModel;
     state.expanded = false;
+    state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
     render();
   });
@@ -1681,6 +1727,22 @@
     renderMetrics();
     renderMovers();
     renderTable();
+  });
+
+  elements.includeProvisional.addEventListener('change', function () {
+    state.includeProvisional = elements.includeProvisional.checked;
+    state.expanded = false;
+    if (!state.includeProvisional) {
+      var selected = state.datasets[state.sport].models[state.model].rankings.find(function (row) {
+        return row.id === state.selected;
+      });
+      if (selected && selected.provisional) state.selected = null;
+    }
+    renderProvisionalControl();
+    renderMetrics();
+    renderMovers();
+    renderTable();
+    renderDetail();
   });
 
   elements.more.addEventListener('click', function () {

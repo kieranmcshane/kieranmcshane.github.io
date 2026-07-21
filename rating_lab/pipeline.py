@@ -28,7 +28,7 @@ from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBl
 
 
 SCHEMA_VERSION = "1.12.0"
-METHODOLOGY_VERSION = "2026-07-21.7"
+METHODOLOGY_VERSION = "2026-07-21.8"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
