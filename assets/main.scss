@@ -1195,6 +1195,11 @@ body:has(.rating-lab) .post-content {
   padding: 2rem 0 1.25rem;
 }
 
+.rating-lab-title-mobile,
+.rating-lab-deck-mobile {
+  display: none;
+}
+
 .rating-lab-kicker {
   margin: 0 0 0.45rem;
   color: var(--lab-blue);
@@ -1455,6 +1460,10 @@ body:has(.rating-lab) .post-content {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border-top: 1px solid var(--lab-navy);
   border-bottom: 1px solid var(--lab-line);
+}
+
+.rating-lab-metrics-disclosure > summary {
+  display: none;
 }
 
 .rating-lab-metric {
@@ -3054,6 +3063,18 @@ body:has(.rating-lab) .post-content {
   font-size: 0.78rem;
 }
 
+.rating-lab-market-detail {
+  margin-top: 0.8rem;
+}
+
+.rating-lab-market-detail > summary {
+  width: fit-content;
+  color: var(--lab-blue);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .rating-lab-market-table-wrap {
   max-height: 24rem;
   overflow: auto;
@@ -3562,6 +3583,23 @@ body:has(.rating-lab) .post-content {
   font-size: 0.88rem;
 }
 
+.rating-lab-coverage-note {
+  max-width: 900px;
+  margin: 0.7rem 0 1rem;
+}
+
+.rating-lab-coverage-note summary {
+  width: fit-content;
+  color: #536176;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rating-lab-coverage-note .rating-lab-audit-note {
+  margin: 0.6rem 0 0;
+}
+
 .rating-lab h1,
 .rating-lab h2,
 .rating-lab h3,
@@ -3797,6 +3835,27 @@ body:has(.rating-lab) .post-content {
 
   .rating-lab-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rating-lab-metrics-disclosure > summary {
+    display: flex;
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0.55rem 0;
+    color: #596771;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .rating-lab-metrics-disclosure[open] > summary {
+    border-bottom: 1px solid var(--lab-line);
+  }
+
+  .rating-lab-metrics-disclosure[open] .rating-lab-metrics {
+    padding-top: 0.55rem;
   }
 
   .rating-lab-metric + .rating-lab-metric {
@@ -5842,5 +5901,434 @@ body:has(.explain-lab) .post-header {
   .player-lab-gates article:nth-child(4) {
     border-top: 1px solid var(--lab-line);
     border-left: 0;
+  }
+}
+
+/* Rating Lab mobile-first interaction pass */
+@media (max-width: 650px) {
+  body:has(.rating-lab) .post-content {
+    font-size: 15px;
+  }
+
+  .rating-lab-title-desktop,
+  .rating-lab-deck-desktop {
+    display: none;
+  }
+
+  .rating-lab-title-mobile,
+  .rating-lab-deck-mobile {
+    display: inline;
+  }
+
+  .rating-lab-hero {
+    padding: 0.65rem 0 0.55rem;
+  }
+
+  .rating-lab-kicker {
+    margin-bottom: 0.3rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.055em;
+    white-space: nowrap;
+  }
+
+  .rating-lab-hero h1 {
+    max-width: none;
+    font-size: 2.1rem;
+    line-height: 1.02;
+  }
+
+  .rating-lab-deck {
+    margin: 0.55rem 0 0.35rem;
+    font-size: 0.94rem;
+    line-height: 1.35;
+  }
+
+  .rating-lab-hero-link {
+    margin: 0.45rem 0;
+    font-size: 0.9rem;
+  }
+
+  .rating-lab-freshness-strip {
+    gap: 0.35rem;
+  }
+
+  .rating-lab-freshness-chip {
+    min-height: 32px;
+    box-sizing: border-box;
+    padding: 0.28rem 0.52rem;
+    font-size: 0.7rem;
+  }
+
+  .rating-lab-generation {
+    margin-top: 0.35rem;
+  }
+
+  .rating-lab-local-nav {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-bottom: 0.7rem;
+    overflow: visible;
+    box-shadow: 0 1px 8px rgba(29, 37, 46, 0.08);
+  }
+
+  .rating-lab-local-nav a {
+    min-width: 0;
+    min-height: 46px;
+    box-sizing: border-box;
+    justify-content: center;
+    padding: 0.5rem 0.12rem;
+    text-align: center;
+  }
+
+  .rating-lab-local-nav strong {
+    display: none;
+  }
+
+  .rating-lab-local-nav span {
+    overflow: hidden;
+    font-size: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rating-lab-local-nav span::after {
+    font-size: 0.68rem;
+    content: attr(data-mobile-label);
+  }
+
+  .rating-lab-explorer,
+  .rating-lab-matchup,
+  .rating-lab-predictor,
+  .rating-lab-research {
+    scroll-margin-top: 3.5rem;
+  }
+
+  .rating-lab-explorer {
+    padding: 0.75rem;
+  }
+
+  .rating-lab-section-heading {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .rating-lab-section-heading h2 {
+    font-size: 1.55rem;
+  }
+
+  .rating-lab-section-heading p {
+    margin: 0;
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
+  .rating-lab-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 0.8rem 0;
+  }
+
+  .rating-lab-toolbar .rating-lab-control-group {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-control-label,
+  .rating-lab-field span {
+    font-size: 0.7rem;
+  }
+
+  .rating-lab-toolbar .rating-lab-segmented {
+    overflow: hidden;
+  }
+
+  .rating-lab-toolbar .rating-lab-segmented button,
+  .rating-lab-predictor-toolbar .rating-lab-segmented button,
+  .rating-lab-matchup-toolbar .rating-lab-segmented button {
+    min-width: 0;
+    min-height: 44px;
+    flex: 1 1 0;
+    padding: 0.5rem 0.2rem;
+    font-size: 0.75rem;
+  }
+
+  .rating-lab-field select,
+  .rating-lab-field input {
+    min-height: 44px;
+    padding: 0.55rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .rating-lab-metrics {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.1rem 0 0.45rem;
+    overflow-x: auto;
+    border: 0;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .rating-lab-metric {
+    min-height: 94px;
+    box-sizing: border-box;
+    flex: 0 0 9.4rem;
+    padding: 0.65rem 0.7rem;
+    background: #f7f8f7;
+    border: 1px solid var(--lab-line);
+    border-radius: 5px;
+    scroll-snap-align: start;
+  }
+
+  .rating-lab-metric + .rating-lab-metric,
+  .rating-lab-metric:nth-child(3),
+  .rating-lab-metric:nth-child(4) {
+    border: 1px solid var(--lab-line);
+  }
+
+  .rating-lab-metric strong {
+    font-size: 1.2rem;
+  }
+
+  .rating-lab-metric span,
+  .rating-lab-metric small {
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+
+  .rating-lab-movers-disclosure {
+    margin-top: 0.1rem;
+  }
+
+  .rating-lab-movers-disclosure > summary {
+    display: flex;
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0.55rem 0;
+  }
+
+  .rating-lab-movers-disclosure[open] {
+    padding-bottom: 0.7rem;
+  }
+
+  .rating-lab-movers {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding-top: 0.65rem;
+  }
+
+  .rating-lab-movers button {
+    min-height: 44px;
+    padding: 0.55rem;
+  }
+
+  .rating-lab-provisional-control {
+    margin-top: 0.65rem;
+  }
+
+  .rating-lab-grid {
+    margin-top: 0.7rem;
+  }
+
+  .rating-lab-table caption {
+    padding-bottom: 0.45rem;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  #ranking-table th:nth-child(1),
+  #ranking-table td:nth-child(1) {
+    width: 2.25rem;
+  }
+
+  #ranking-table th:nth-child(2),
+  #ranking-table td:nth-child(2) {
+    width: auto;
+  }
+
+  #ranking-table .rating-lab-rating-column {
+    width: 4.7rem;
+  }
+
+  .rating-lab-table th,
+  .rating-lab-table td {
+    padding: 0.58rem 0.28rem;
+  }
+
+  .rating-lab-table thead button {
+    font-size: 0.7rem;
+  }
+
+  .rating-lab-more {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .rating-lab-matchup > h2,
+  .rating-lab-predictor > h2,
+  .rating-lab-research > h2 {
+    font-size: 1.75rem;
+    line-height: 1.08;
+  }
+
+  .rating-lab-matchup-intro,
+  .rating-lab-predictor-intro,
+  .rating-lab-research-intro {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .rating-lab-matchup-toolbar {
+    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+    gap: 0.65rem 0.45rem;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-field:nth-of-type(1) {
+    grid-column: 1;
+  }
+
+  .rating-lab-matchup-swap {
+    grid-column: 2;
+    width: 44px;
+    height: 44px;
+    align-self: end;
+  }
+
+  .rating-lab-matchup-swap span {
+    display: none;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-field:nth-of-type(2) {
+    grid-column: 3;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-field:nth-of-type(3),
+  .rating-lab-matchup-toolbar .rating-lab-control-group {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-outcome-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rating-lab-outcome-cards:has(> div:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rating-lab-outcome-cards div,
+  .rating-lab-outcome-cards div + div {
+    padding: 0.55rem 0.2rem;
+    border-bottom: 0;
+  }
+
+  .rating-lab-outcome-cards strong {
+    font-size: 1.35rem;
+  }
+
+  .rating-lab-matchup-inputs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .rating-lab-matchup-inputs div:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .rating-lab-coverage-note {
+    margin: 0.45rem 0 0.8rem;
+  }
+
+  .rating-lab-coverage-note summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .rating-lab-predictor-toolbar {
+    gap: 0.75rem;
+    margin: 1rem 0 0.8rem;
+  }
+
+  .rating-lab-predictor-state {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .rating-lab-predictor-metrics {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    background: transparent;
+    scrollbar-width: thin;
+  }
+
+  .rating-lab-predictor-metrics div {
+    min-height: 76px;
+    box-sizing: border-box;
+    flex: 0 0 10rem;
+    padding: 0.7rem;
+    background: var(--lab-wash);
+    border: 1px solid var(--lab-line);
+    border-radius: 5px;
+  }
+
+  .rating-lab-predictor-metrics div + div {
+    border-left: 1px solid var(--lab-line);
+  }
+
+  .rating-lab-predictor-metrics strong {
+    font-size: 1rem;
+  }
+
+  .rating-lab-market {
+    padding: 0.85rem;
+  }
+
+  .rating-lab-market-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rating-lab-market-metrics div {
+    padding: 0.55rem 0.4rem;
+  }
+
+  .rating-lab-market-metrics div + div {
+    border-top: 0;
+    border-left: 1px solid var(--lab-line);
+  }
+
+  .rating-lab-market-metrics span {
+    font-size: 0.62rem;
+    line-height: 1.2;
+  }
+
+  .rating-lab-market-metrics strong {
+    font-size: 0.95rem;
+  }
+
+  .rating-lab-market-heading {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .rating-lab-market-heading > a {
+    width: fit-content;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .rating-lab-market-detail > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
   }
 }
