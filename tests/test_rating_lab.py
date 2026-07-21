@@ -20,10 +20,12 @@ from rating_lab.pipeline import (
     _parse_football_txt,
     _parse_international_results,
     _parse_open_cup_json,
+    _parse_uefa_ucl_qualifying,
     _polymarket_event_snapshot,
     _polymarket_search_query,
     _simulate_league,
     _simulate_knockout,
+    _simulate_qualifying_round,
     _model_candidates,
     build_sport_payload,
     individual_contribution_protocol,
@@ -393,6 +395,41 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(first["published_ties_remaining"], 2)
         self.assertAlmostEqual(sum(team["champion"] for team in first["participants"]), 1.0, places=3)
+
+    def test_uefa_qualifying_parser_and_current_round_forecast(self):
+        article = b"""
+<h2><b>First qualifying round</b></h2>
+<h3><b>First legs</b></h3><p><b>Tuesday 7 July</b></p><p><b>Champions path</b></p>
+<p><a href="https://www.uefa.com/uefachampionsleague/match/1--alpha-vs-beta/">Alpha 2-0 Beta</a></p>
+<h3><b>Second legs</b></h3><p><b>Tuesday 14 July</b></p>
+<p><a href="https://www.uefa.com/uefachampionsleague/match/2--beta-vs-alpha/">Beta 1-1 <b>Alpha</b> (agg: 1-3)</a></p>
+<h2><b>Second qualifying round</b></h2>
+<h3><b>First legs</b></h3><p><b>Tuesday 21 July</b></p><p><b>League path</b></p>
+<p><a href="https://www.uefa.com/uefachampionsleague/match/3--alpha-vs-gamma/">Alpha vs Gamma</a></p>
+<h3><b>Second legs</b></h3><p><b>Tuesday 28 July</b></p>
+<p><a href="https://www.uefa.com/uefachampionsleague/match/4--gamma-vs-alpha/">Gamma vs Alpha</a></p>
+"""
+        competition = _parse_uefa_ucl_qualifying(article)
+        self.assertIsNotNone(competition)
+        self.assertEqual(competition["active_round"], "SECOND_QUALIFYING")
+        self.assertEqual(competition["next_fixture"], "2026-07-21")
+        self.assertEqual(len(competition["fixtures"]), 4)
+        self.assertEqual(competition["fixtures"][1]["away_name"], "Alpha")
+        model = EloModel(home=65)
+        model.state("football:name:alpha").mean = 1700
+        first = _simulate_qualifying_round(competition, model, "elo", simulations=300)
+        second = _simulate_qualifying_round(competition, model, "elo", simulations=300)
+        self.assertEqual(first, second)
+        self.assertEqual(first["current_stage"], "Second qualifying round")
+        self.assertEqual(first["target_label"], "Reach third qualifying round")
+        self.assertEqual(first["published_ties_remaining"], 1)
+        self.assertAlmostEqual(sum(row["reach_next_stage"] for row in first["participants"]), 1.0, places=3)
+        between_rounds = _parse_uefa_ucl_qualifying(
+            article.replace(b"Alpha vs Gamma", b"Alpha 1-0 Gamma").replace(b"Gamma vs Alpha", b"Gamma 0-0 Alpha")
+        )
+        self.assertEqual(between_rounds["active_round"], "THIRD_QUALIFYING")
+        self.assertFalse(between_rounds["forecast_available"])
+        self.assertIn("waiting for UEFA", between_rounds["availability"])
 
     def test_cup_parser_withholds_title_forecast_before_knockout_field(self):
         payload = {"matches": [{

@@ -1022,18 +1022,37 @@
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>';
   }
 
-  function setPredictorColumns(type) {
+  function renderQualifyingPredictorDetail(team, model) {
+    if (!team) {
+      elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a club to inspect its current-round advancement probability.</p>';
+      return;
+    }
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
+      escapeHtml(model.current_stage + ' · ' + team.path + ' path') + '</p><h3>' + escapeHtml(team.name) +
+      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div><dl><div><dt>' +
+      escapeHtml(model.target_label) + '</dt><dd>' + percent(team.reach_next_stage) +
+      '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) +
+      '</dd></div></dl><p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>';
+  }
+
+  function setPredictorColumns(type, targetLabel) {
     var knockout = type === 'knockout';
+    var qualifying = type === 'qualifying';
     var standings = type === 'standings';
-    elements.predictorColumns.rank.textContent = knockout ? 'Forecast' : 'Projected';
-    elements.predictorColumns.team.textContent = knockout ? 'Participant' : standings ? 'Player' : 'Team';
-    elements.predictorColumns.now.textContent = knockout ? 'Rating' : 'Now';
-    elements.predictorColumns.value.textContent = knockout ? 'Next stage' : 'Expected pts';
+    elements.predictorColumns.rank.textContent = knockout || qualifying ? 'Forecast' : 'Projected';
+    elements.predictorColumns.team.textContent = knockout || qualifying ? 'Participant' : standings ? 'Player' : 'Team';
+    elements.predictorColumns.now.textContent = knockout || qualifying ? 'Rating' : 'Now';
+    elements.predictorColumns.value.textContent = qualifying ? targetLabel : knockout ? 'Next stage' : 'Expected pts';
     elements.predictorColumns.title.textContent = standings ? 'Win event' : 'Title';
     elements.predictorColumns.secondary.textContent = standings ? 'Podium' : 'Top four';
     elements.predictorColumns.tertiary.textContent = standings ? 'Last place' : 'Bottom three';
     elements.predictorColumns.secondary.hidden = knockout;
     elements.predictorColumns.tertiary.hidden = knockout;
+    elements.predictorColumns.title.hidden = qualifying;
+    if (qualifying) {
+      elements.predictorColumns.secondary.hidden = true;
+      elements.predictorColumns.tertiary.hidden = true;
+    }
   }
 
   function setPerformanceColumns() {
@@ -1044,6 +1063,7 @@
     elements.predictorColumns.title.textContent = 'Performance rating';
     elements.predictorColumns.secondary.textContent = 'vs start';
     elements.predictorColumns.tertiary.textContent = 'Reset rank';
+    elements.predictorColumns.title.hidden = false;
     elements.predictorColumns.secondary.hidden = false;
     elements.predictorColumns.tertiary.hidden = false;
   }
@@ -1177,7 +1197,8 @@
     var model = view.model;
     var competitionFormat = competition.format || (model && model.teams ? 'round-robin league' : 'knockout cup');
     elements.predictorState.textContent = competition.status.charAt(0).toUpperCase() + competition.status.slice(1) +
-      ' · ' + competitionFormat + ' · fixtures through ' + formatDate(competition.last_fixture);
+      ' · ' + competitionFormat + ' · ' + (competitionFormat === 'two-legged qualifying round' ? 'official calendar through ' : 'fixtures through ') +
+      formatDate(competition.last_fixture);
     if (competition.status === 'complete' && competition.performance && competition.performance.models[state.predictorModel]) {
       renderCompletedPerformance(view);
       return;
@@ -1202,12 +1223,42 @@
     }
     var isLeague = model.forecast_type === 'league' || Boolean(model.teams);
     var isStandings = model.forecast_type === 'standings';
+    var isQualifying = model.forecast_type === 'qualifying_round';
     var rows = isLeague ? model.teams : model.participants;
     if (!state.predictorTeam || !rows.some(function (team) { return team.id === state.predictorTeam; })) {
       state.predictorTeam = rows[0].id;
     }
-    setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : 'knockout');
+    setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : isQualifying ? 'qualifying' : 'knockout', model.target_label);
     if (!isLeague) {
+      if (isQualifying) {
+        elements.predictorMetrics.innerHTML = [
+          ['Current round', model.current_stage],
+          ['Official ties', number(model.published_ties_remaining, 0)],
+          ['Next fixture', competition.next_fixture ? formatDate(competition.next_fixture) : 'Awaiting official update']
+        ].map(function (item) {
+          return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+        }).join('');
+        elements.predictorCaption.textContent = competitionTitle(competition) + ' · current-round advancement by ' +
+          state.datasets[view.sport].models[state.predictorModel].label;
+        elements.predictorBody.innerHTML = rows.map(function (team, index) {
+          return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
+            (index + 1) + '</td><th scope="row"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+            escapeHtml(team.id) + '">' + escapeHtml(team.name) + '</button></th><td>' + number(team.rating, 1) +
+            '</td><td>' + probabilityCell(team.reach_next_stage) + '</td></tr>';
+        }).join('');
+        renderQualifyingPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model);
+        renderMarketComparison(view, rows);
+        var timeline = (competition.round_timeline || []).map(function (round) {
+          return round.label + ': draw ' + formatDate(round.draw_date) + '; matches ' +
+            round.match_dates.map(formatDate).join(', ');
+        }).join(' ');
+        elements.predictorMethod.innerHTML = number(model.simulations, 0) + ' deterministic current-round simulations. ' +
+          escapeHtml(model.scoreline_method) + ' ' + escapeHtml(competition.availability) + ' Official calendar: ' +
+          escapeHtml(timeline) + ' Fixed seed: <code>' + escapeHtml(String(model.seed)) + '</code>. Snapshot: <code>' +
+          escapeHtml(competition.snapshot_sha256.substring(0, 12)) + '</code>. <a href="' +
+          escapeHtml(competition.source_url) + '">Open UEFA fixture source</a>.';
+        return;
+      }
       elements.predictorMetrics.innerHTML = [
         ['Competition state', model.current_stage],
         ['Published ties left', number(model.published_ties_remaining, 0)],
@@ -1542,7 +1593,7 @@
           complete: 'Completed performance',
           'waiting for draw': 'Waiting for field'
         }[competition.status] || competition.status;
-        var kind = view.sport === 'chess' ? 'Chess tournament' :
+        var kind = competition.format === 'two-legged qualifying round' ? 'Qualification' : view.sport === 'chess' ? 'Chess tournament' :
           (competition.format === 'round-robin league' || (competition.models.elo && competition.models.elo.forecast_type === 'league')) ? 'League' :
           view.sport === 'national-football' ? 'National tournament' : 'Club cup';
         return '<option value="' + escapeHtml(competition.id) + '">' +
