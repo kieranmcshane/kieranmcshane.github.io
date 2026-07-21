@@ -205,7 +205,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <div class="rating-lab-method-grid">
       <article>
         <h3>Elo</h3>
-        <p>A direct online update around a logistic win-probability curve. Football includes home advantage, chess includes White advantage, tennis blends global and surface ratings, club football has seasonal mean reversion, and draws count as half a win.</p>
+        <p>A direct online update around a logistic win-probability curve. Football includes home advantage, chess includes White advantage, tennis blends global and surface ratings, club football has seasonal mean reversion, and draws count as half a win. Since Elo has no uncertainty estimate, football clubs with fewer than 10 covered results or no path into the main connected result network remain visibly provisional and are ordered after established clubs; their raw ratings still drive forecasts.</p>
       </article>
       <article>
         <h3>Glicko-2</h3>
@@ -320,6 +320,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <summary>Known limitations and deliberate simplifications</summary>
       <ul>
         <li>Current ratings use the result plus the declared competitive context: tennis surface, football venue, or chess color. Score margin, lineups, injuries, time controls, and player age are not model inputs. The withheld player-contribution protocol would add lineups and minutes, but no event statistics.</li>
+        <li>Football Elo values are comparable only inside a connected result network. A new qualifying tie between two unseen clubs forms an isolated component around the arbitrary 1500 prior. Those clubs remain available to forecasts but stay in a provisional tier until they have 10 covered results and connect to the main network.</li>
         <li>Crests, portraits, and source-coded flags are presentational metadata, never model inputs. External images are restricted to the declared football-data.org and Wikimedia hosts, carry source and rights metadata in the public JSON, and fall back to source-coded flags or initials if unavailable.</li>
         <li>Draws use an actual score of 0.5. Published log loss and Brier score evaluate expected score, not a separate three-class win/draw/loss forecast.</li>
         <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>

@@ -322,6 +322,10 @@
         (!query || row.name.toLocaleLowerCase().indexOf(query) !== -1 || row.country.toLocaleLowerCase().indexOf(query) !== -1);
     });
     rows.sort(function (a, b) {
+      if (state.sport === 'football' && state.model === 'elo' && state.sort === 'score' &&
+          Boolean(a.provisional) !== Boolean(b.provisional)) {
+        return a.provisional ? 1 : -1;
+      }
       var left = a[state.sort];
       var right = b[state.sort];
       if (left === null || left === undefined) return 1;
@@ -357,12 +361,16 @@
         '</span></div><small>Lower is better · all four protocols</small></div>';
     }).concat(['<div class="rating-lab-metric"><span>Held-out predictions</span><div class="rating-lab-metric-value"><strong>' +
       number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']).join('');
+    var provisionalNote = state.sport === 'football' && state.model === 'elo' ?
+      ' · established network first; provisional clubs retained' : '';
     elements.context.textContent = models[state.model].label + ' · ' +
-      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' published competitors';
+      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' published competitors' + provisionalNote;
   }
 
   function renderMovers() {
-    var rows = currentRows().filter(function (row) { return Number.isFinite(row.change30); });
+    var rows = currentRows().filter(function (row) {
+      return Number.isFinite(row.change30) && !row.provisional;
+    });
     var risers = rows.slice().sort(function (a, b) { return b.change30 - a.change30; }).slice(0, 3);
     var fallers = rows.slice().sort(function (a, b) { return a.change30 - b.change30; }).slice(0, 3);
     function group(label, items, positive) {
@@ -395,19 +403,27 @@
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 20);
     var model = state.datasets[state.sport].models[state.model];
-    elements.caption.textContent = model.label + ' · ' + rows.length + ' published competitors';
+    elements.caption.textContent = model.label + ' · ' + rows.length + ' published competitors · ' +
+      (model.ranking_rule || 'Current model ranking rule');
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
     elements.more.textContent = 'Show all ' + number(rows.length, 0) + ' competitors';
     elements.body.innerHTML = displayed.map(function (row) {
       var deltaClass = row.change30 > 0 ? 'is-positive' : row.change30 < 0 ? 'is-negative' : '';
       var delta = row.change30 > 0 ? '+' + number(row.change30, 1) : number(row.change30, 1);
+      var rowClasses = [];
+      if (row.id === state.selected) rowClasses.push('is-selected');
+      if (row.provisional) rowClasses.push('is-provisional');
+      var identityContext = row.provisional ? 'Provisional Elo · ' + row.provisional_reason :
+        (row.competition || row.country);
       return '<tr data-id="' + escapeHtml(row.id) + '" data-row-select="' + escapeHtml(row.id) + '" aria-selected="' +
-        (row.id === state.selected ? 'true' : 'false') + '"' + (row.id === state.selected ? ' class="is-selected"' : '') + '>' +
+        (row.id === state.selected ? 'true' : 'false') + '"' +
+        (rowClasses.length ? ' class="' + rowClasses.join(' ') + '"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td>' +
         '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '">' +
         entityBadge(row, state.sport) + '<span class="rating-lab-identity-copy">' + entityName(row, state.sport) +
-        '<small>' + escapeHtml(row.competition || row.country) + '</small></span></button></th>' +
+        '<small' + (row.provisional ? ' class="rating-lab-provisional-label" title="' +
+          escapeHtml(row.provisional_reason) + '"' : '') + '>' + escapeHtml(identityContext) + '</small></span></button></th>' +
         '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
         '<td><strong>' + number(row.score, 1) + '</strong></td>' +
         '<td class="rating-lab-optional">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1)) + '</td>' +
@@ -585,7 +601,8 @@
     var crossModel = modelKeys.map(function (key) {
       var modelRow = dataset.models[key].rankings.find(function (candidate) { return candidate.id === row.id; });
       return '<tr><th scope="row">' + escapeHtml(dataset.models[key].label) + '</th><td>' +
-        (modelRow ? '#' + modelRow.rank : '—') + '</td><td>' + (modelRow ? number(modelRow.score, 1) : '—') +
+        (modelRow ? '#' + modelRow.rank + (modelRow.provisional ? ' · provisional' : '') : '—') +
+        '</td><td>' + (modelRow ? number(modelRow.score, 1) : '—') +
         '</td><td>' + (modelRow && modelRow.sigma !== null ? '±' + number(modelRow.sigma, 1) : '—') + '</td></tr>';
     }).join('');
     var isPinned = state.pinned.indexOf(row.id) !== -1;
@@ -601,9 +618,11 @@
           pinnedRows[0].name + ' and ' + pinnedRows[1].name + ' rating comparison') :
           '<p class="rating-lab-detail-placeholder">Pin one more competitor to overlay both histories.</p>') + '</div>';
     }
+    var provisional = row.provisional ? '<p class="rating-lab-provisional-note"><strong>Provisional Elo.</strong> ' +
+      escapeHtml(row.provisional_reason) + '. The raw rating remains available for A-vs-B and competition forecasts, but it is ordered after established clubs because Elo has no uncertainty estimate.</p>' : '';
     elements.detail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank +
       '</p><h3>' + entityTitle(row, state.sport) + '</h3></div><strong>' + number(row.score, 1) + '</strong></div>' +
-      mediaCredit(row, state.sport) +
+      mediaCredit(row, state.sport) + provisional +
       '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
       (isPinned ? 'true' : 'false') + '">' + (isPinned ? 'Pinned for comparison' : 'Pin for comparison') + '</button>' +
       historyChart([{ name: row.name, points: row.history }], row.name + ' rating history') +
@@ -669,7 +688,7 @@
         input: 'Full-time results from the five covered domestic leagues and Champions League. Club identity uses the source ID, with normalized names only for the documented OpenFootball fallback.',
         venue: 'The listed home team receives the selected home advantage. A draw is y=0.5.',
         initialization: 'Every club starts at Elo/Glicko-2 rating 1500 (Glicko-2 RD 350, volatility 0.06) or Gaussian μ=25, σ=8.333.',
-        special: 'Only club Elo regresses 25% toward 1500 when the season label changes. Glicko-2 instead responds through RD and volatility; Gaussian models do not receive seasonal mean reversion.'
+        special: 'Only club Elo regresses 25% toward 1500 when the season label changes. Because Elo has no uncertainty term, clubs with fewer than 10 covered results or outside the main connected result network remain in a disclosed provisional tier after established clubs. Forecasts retain them.'
       },
       'national-football': {
         label: "Men's national teams",
@@ -689,12 +708,14 @@
     return rules[sport];
   }
 
-  function protocolModelRules(model, parameters) {
+  function protocolModelRules(model, parameters, sport) {
     if (model === 'elo') {
       return {
         prediction: 'Compute expected score p = 1 / (1 + 10^−((Rₐ + advantage − Rᵦ) / scale)).',
         update: 'After recording p, update both sides symmetrically: R′ₐ = Rₐ + K(y−p) and R′ᵦ = Rᵦ − K(y−p).',
-        publication: 'Publish and rank the raw Elo rating. Elo has no uncertainty estimate.',
+        publication: sport === 'football' ?
+          'Publish the raw Elo rating. Rank clubs with at least 10 covered results in the main connected result network first; retain all other current entrants in a provisional tier. This prevents an isolated two-team rating component from being presented as comparable with the established network.' :
+          'Publish and rank the raw Elo rating. Elo has no uncertainty estimate.',
         constants: 'Initial rating 1500. Selected K=' + number(parameters.k, 4) + ', scale=' + number(parameters.scale, 4) + ', advantage=' + number(parameters.home, 4) + '.'
       };
     }
@@ -741,7 +762,7 @@
     var model = data.models[state.model];
     var parameters = data.parameters[state.model];
     var sportRules = protocolSportRules(state.sport);
-    var modelRules = protocolModelRules(state.model, parameters);
+    var modelRules = protocolModelRules(state.model, parameters, state.sport);
     var latest = data.data_window.last_result;
     var validationStart = dateBefore(latest, 730);
     var evaluationStart = dateBefore(latest, 365);
@@ -1016,7 +1037,8 @@
     var options = rows.map(function (row) {
       var flag = state.sport === 'national-football' ? nationalTeamFlag(row.name) : countryFlag(row.country);
       return '<option value="' + escapeHtml(row.id) + '">#' + row.rank + ' · ' +
-        (flag ? escapeHtml(flag) + ' ' : '') + escapeHtml(row.name) + '</option>';
+        (flag ? escapeHtml(flag) + ' ' : '') + escapeHtml(row.name) +
+        (row.provisional ? ' · provisional Elo' : '') + '</option>';
     }).join('');
     elements.matchupA.innerHTML = options;
     elements.matchupB.innerHTML = options;

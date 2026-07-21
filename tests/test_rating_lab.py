@@ -565,6 +565,66 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(payload["outcome_context"]["draw_rate"], 0.0)
         self.assertIn("publication eligibility", payload["outcome_context"]["method"])
 
+    def test_football_elo_separates_small_disconnected_components(self):
+        start = date(2026, 1, 1)
+        established_pairs = (("a", "b"), ("b", "c"), ("c", "a"))
+        matches = [
+            Match(
+                start + timedelta(days=index),
+                *established_pairs[index % len(established_pairs)],
+                0.5,
+                "Premier League",
+                "2025",
+                True,
+            )
+            for index in range(18)
+        ]
+        matches.extend(
+            Match(
+                start + timedelta(days=20 + index),
+                "new-a",
+                "new-b",
+                1.0,
+                "Champions League qualifying",
+                "2025",
+                True,
+            )
+            for index in range(2)
+        )
+        entities = {
+            entity: {
+                "name": entity,
+                "country": "",
+                "competition": "Premier League" if entity in {"a", "b", "c"} else "Champions League qualifying",
+                "active": True,
+            }
+            for entity in ("a", "b", "c", "new-a", "new-b")
+        }
+        source = {
+            "source": "Fixture",
+            "source_url": "https://example.test",
+            "license": "Test",
+            "latest_result": matches[-1].date.isoformat(),
+            "stale_after_hours": 48,
+        }
+
+        payload = build_sport_payload("football", matches, entities, source)
+        elo_rows = {row["id"]: row for row in payload["models"]["elo"]["rankings"]}
+
+        self.assertGreater(elo_rows["new-a"]["rating"], elo_rows["a"]["rating"])
+        self.assertTrue(elo_rows["new-a"]["provisional"])
+        self.assertIn("not yet connected", elo_rows["new-a"]["provisional_reason"])
+        self.assertGreater(
+            elo_rows["new-a"]["rank"],
+            max(elo_rows[entity]["rank"] for entity in ("a", "b", "c")),
+        )
+        self.assertFalse(elo_rows["a"]["provisional"])
+        self.assertNotIn(
+            "provisional",
+            next(row for row in payload["models"]["trueskill"]["rankings"] if row["id"] == "new-a"),
+        )
+        self.assertEqual(payload["eligibility"]["football_elo_established_matches"], 10)
+
     def test_national_team_eligibility_uses_two_year_window(self):
         start = date(2023, 1, 1)
         matches = [
