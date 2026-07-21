@@ -7,6 +7,7 @@ import csv
 from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 import hashlib
+from html.parser import HTMLParser
 import io
 import json
 import math
@@ -25,8 +26,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.9.0"
-METHODOLOGY_VERSION = "2026-07-21.2"
+SCHEMA_VERSION = "1.10.0"
+METHODOLOGY_VERSION = "2026-07-21.3"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 SCHEDULE_ENTITY_ALIASES = {
@@ -95,6 +96,37 @@ KNOCKOUT_STAGES = {
     "FINAL": 6,
 }
 PREDICTOR_SIMULATIONS = 5_000
+UEFA_UCL_QUALIFYING_URL = (
+    "https://www.uefa.com/uefachampionsleague/news/"
+    "02a6-20e5a8be4e63-ae971c582f8c-1000--champions-league-qualifying-fixtures-results-dates-how-it-/"
+)
+UCL_QUALIFYING_ROUNDS = {
+    "FIRST_QUALIFYING": {
+        "label": "First qualifying round",
+        "draw_date": "2026-06-16",
+        "match_dates": ["2026-07-07", "2026-07-08", "2026-07-14", "2026-07-15"],
+        "next_label": "Reach second qualifying round",
+    },
+    "SECOND_QUALIFYING": {
+        "label": "Second qualifying round",
+        "draw_date": "2026-06-17",
+        "match_dates": ["2026-07-21", "2026-07-22", "2026-07-28", "2026-07-29"],
+        "next_label": "Reach third qualifying round",
+    },
+    "THIRD_QUALIFYING": {
+        "label": "Third qualifying round",
+        "draw_date": "2026-07-20",
+        "match_dates": ["2026-08-04", "2026-08-05", "2026-08-11"],
+        "next_label": "Reach play-off round",
+    },
+    "QUALIFYING_PLAYOFFS": {
+        "label": "Play-off round",
+        "draw_date": "2026-08-03",
+        "match_dates": ["2026-08-18", "2026-08-19", "2026-08-25", "2026-08-26"],
+        "next_label": "Reach league phase",
+    },
+}
+UCL_QUALIFYING_ORDER = tuple(UCL_QUALIFYING_ROUNDS)
 
 
 def individual_contribution_protocol() -> dict:
@@ -507,6 +539,205 @@ def _parse_cup_schedule(payload: dict, code: str, label: str, cohort: str, sourc
     }
 
 
+class _UEFAQualifyingArticleParser(HTMLParser):
+    """Extract only official match links while retaining their round/date context."""
+
+    def __init__(self, year: int):
+        super().__init__(convert_charrefs=True)
+        self.year = year
+        self.current_round: str | None = None
+        self.current_leg: str | None = None
+        self.current_date: str | None = None
+        self.current_path: str | None = None
+        self.block_tag: str | None = None
+        self.block_parts: list[str] = []
+        self.anchor_href: str | None = None
+        self.anchor_parts: list[str] = []
+        self.links: list[dict] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in {"h2", "h3", "p"} and self.block_tag is None:
+            self.block_tag = tag
+            self.block_parts = []
+        if tag == "a":
+            href = dict(attrs).get("href") or ""
+            if "/uefachampionsleague/match/" in href:
+                self.anchor_href = href
+                self.anchor_parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self.block_tag:
+            self.block_parts.append(data)
+        if self.anchor_href:
+            self.anchor_parts.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self.anchor_href:
+            self.links.append(
+                {
+                    "href": self.anchor_href,
+                    "text": " ".join("".join(self.anchor_parts).split()),
+                    "round": self.current_round,
+                    "leg": self.current_leg,
+                    "date": self.current_date,
+                    "path": self.current_path,
+                }
+            )
+            self.anchor_href = None
+            self.anchor_parts = []
+        if tag != self.block_tag:
+            return
+        text = " ".join("".join(self.block_parts).split())
+        lowered = text.casefold()
+        if tag == "h2":
+            round_lookup = {
+                "first qualifying round": "FIRST_QUALIFYING",
+                "second qualifying round": "SECOND_QUALIFYING",
+                "third qualifying round": "THIRD_QUALIFYING",
+                "play-off round": "QUALIFYING_PLAYOFFS",
+            }
+            self.current_round = next((key for label, key in round_lookup.items() if label in lowered), None)
+            self.current_leg = None
+            self.current_date = None
+            self.current_path = None
+        elif tag == "h3":
+            self.current_leg = "first" if "first leg" in lowered else "second" if "second leg" in lowered else None
+        elif tag == "p":
+            date_match = re.search(
+                r"(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(\d{1,2})\s+(July|August)",
+                text,
+                re.IGNORECASE,
+            )
+            if date_match:
+                parsed = datetime.strptime(
+                    f"{date_match.group(1)} {date_match.group(2)} {self.year}", "%d %B %Y"
+                ).date()
+                self.current_date = parsed.isoformat()
+            if lowered == "champions path":
+                self.current_path = "champions"
+            elif lowered == "league path":
+                self.current_path = "league"
+        self.block_tag = None
+        self.block_parts = []
+
+
+def _clean_uefa_team_name(value: str) -> str:
+    value = re.sub(r"\s*\(agg[: ]?.*$", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"\s*\*+$", "", value)
+    return " ".join(value.split()).strip()
+
+
+def _parse_uefa_ucl_qualifying(body: bytes, season: str = "2026-27") -> dict | None:
+    """Build a current-round forecast surface from UEFA's official qualifying article."""
+    year = int(season.split("-")[0])
+    parser = _UEFAQualifyingArticleParser(year)
+    parser.feed(body.decode("utf-8", errors="replace"))
+    fixtures: list[dict] = []
+    result_pattern = re.compile(r"^(.*?)\s+(\d+)-(\d+)(?:aet)?\s+(.*)$", re.IGNORECASE)
+    for link in parser.links:
+        if not link["round"] or not link["date"] or not link["leg"]:
+            continue
+        text = link["text"]
+        score_match = result_pattern.match(text)
+        if score_match:
+            home_name = _clean_uefa_team_name(score_match.group(1))
+            away_name = _clean_uefa_team_name(score_match.group(4))
+            home_goals, away_goals = int(score_match.group(2)), int(score_match.group(3))
+            status = "FINISHED"
+        elif re.search(r"\s+vs\s+", text, re.IGNORECASE):
+            home_name, away_name = (
+                _clean_uefa_team_name(part)
+                for part in re.split(r"\s+vs\s+", text, maxsplit=1, flags=re.IGNORECASE)
+            )
+            home_goals = away_goals = None
+            status = "SCHEDULED"
+        else:
+            continue
+        home_id = f"football:name:{_slug(home_name)}"
+        away_id = f"football:name:{_slug(away_name)}"
+        fixtures.append(
+            {
+                "date": link["date"],
+                "stage": link["round"],
+                "round": link["round"],
+                "leg": link["leg"],
+                "path": link["path"],
+                "status": status,
+                "home_id": home_id,
+                "home_name": home_name,
+                "away_id": away_id,
+                "away_name": away_name,
+                "home_goals": home_goals,
+                "away_goals": away_goals,
+                "winner_id": home_id if home_goals is not None and home_goals > away_goals else away_id if away_goals is not None and away_goals > home_goals else None,
+                "source_match_url": link["href"],
+            }
+        )
+    if not fixtures:
+        return None
+    active_round = next(
+        (
+            round_id
+            for round_id in UCL_QUALIFYING_ORDER
+            if any(row["round"] == round_id and row["status"] != "FINISHED" for row in fixtures)
+        ),
+        None,
+    )
+    if not active_round:
+        published_rounds = [row["round"] for row in fixtures]
+        latest_index = max(UCL_QUALIFYING_ORDER.index(round_id) for round_id in published_rounds)
+        active_round = UCL_QUALIFYING_ORDER[latest_index + 1] if latest_index + 1 < len(UCL_QUALIFYING_ORDER) else UCL_QUALIFYING_ORDER[-1]
+    active_fixtures = [row for row in fixtures if row["round"] == active_round]
+    teams = {
+        entity: name
+        for row in fixtures
+        for entity, name in ((row["home_id"], row["home_name"]), (row["away_id"], row["away_name"]))
+    }
+    dates = [row["date"] for row in fixtures]
+    next_dates = [row["date"] for row in active_fixtures if row["status"] != "FINISHED"] or [
+        scheduled_date
+        for scheduled_date in UCL_QUALIFYING_ROUNDS[active_round]["match_dates"]
+        if date.fromisoformat(scheduled_date) >= datetime.now(timezone.utc).date()
+    ]
+    forecast_available = bool(active_fixtures) and any(row["status"] != "FINISHED" for row in active_fixtures)
+    return {
+        "id": "football-cl-qualifying",
+        "label": "UEFA Champions League qualifying",
+        "season": season,
+        "format": "two-legged qualifying round",
+        "cohort": "football",
+        "source_url": UEFA_UCL_QUALIFYING_URL,
+        "license": "UEFA website terms",
+        "snapshot_sha256": hashlib.sha256(body).hexdigest(),
+        "teams": [{"id": entity, "name": name} for entity, name in sorted(teams.items(), key=lambda item: item[1])],
+        "fixtures": fixtures,
+        "active_round": active_round,
+        "active_round_fixtures": active_fixtures,
+        "round_timeline": [
+            {"id": round_id, **UCL_QUALIFYING_ROUNDS[round_id]}
+            for round_id in UCL_QUALIFYING_ORDER
+        ],
+        "forecast_available": forecast_available,
+        "availability": (
+            "Only advancement through the current officially published round is forecast. "
+            "Later entrants, play-off pairings, and league-phase title odds are not invented."
+            if forecast_available
+            else "The previous qualifying round is complete; waiting for UEFA to publish the next round's named fixtures. No teams or probabilities are inferred."
+        ),
+        "first_fixture": min(dates),
+        "last_fixture": max(UCL_QUALIFYING_ROUNDS["QUALIFYING_PLAYOFFS"]["match_dates"]),
+        "next_fixture": min(next_dates) if next_dates else None,
+    }
+
+
+def fetch_uefa_ucl_qualifying() -> dict | None:
+    try:
+        body = _get(UEFA_UCL_QUALIFYING_URL, cache_ttl=3_600)
+        return _parse_uefa_ucl_qualifying(body)
+    except RuntimeError:
+        return None
+
+
 def fetch_cup_schedules(token: str | None, cohort: str, results: list[Match] | None = None) -> list[dict]:
     """Prefer football-data.org; retain keyless CC0 coverage when no token is configured."""
     competitions = []
@@ -522,6 +753,10 @@ def fetch_cup_schedules(token: str | None, cohort: str, results: list[Match] | N
             if schedule:
                 competitions.append(schedule)
     schedules = competitions or fetch_open_cup_schedules(cohort)
+    if cohort == "football":
+        qualifying = fetch_uefa_ucl_qualifying()
+        if qualifying:
+            schedules.append(qualifying)
     return _merge_cup_results(schedules, results or [])
 
 
@@ -733,10 +968,13 @@ def _merge_schedule_results(matches: list[Match], entities: dict, schedules: lis
             info["active"] = False
     for competition in schedules:
         team_ids = {}
-        for name in competition["teams"]:
+        for team in competition["teams"]:
+            name = team["name"] if isinstance(team, dict) else team
             entity = entity_by_name.get(_slug(name), f"football:name:{_slug(name)}")
             entity_by_name[_slug(name)] = entity
             team_ids[name] = entity
+            if isinstance(team, dict):
+                team["id"] = entity
             entities[entity] = {
                 **entities.get(entity, {}),
                 "name": name,
@@ -745,6 +983,14 @@ def _merge_schedule_results(matches: list[Match], entities: dict, schedules: lis
                 "active": True,
             }
         for fixture in competition["fixtures"]:
+            fixture["home_id"] = team_ids[fixture["home_name"]]
+            fixture["away_id"] = team_ids[fixture["away_name"]]
+            if fixture["home_goals"] is not None and fixture["away_goals"] is not None:
+                fixture["winner_id"] = (
+                    fixture["home_id"] if fixture["home_goals"] > fixture["away_goals"]
+                    else fixture["away_id"] if fixture["away_goals"] > fixture["home_goals"]
+                    else None
+                )
             if fixture["home_goals"] is None or fixture["away_goals"] is None:
                 continue
             home_goals, away_goals = fixture["home_goals"], fixture["away_goals"]
@@ -1422,10 +1668,13 @@ def _simulate_league(
     }
 
 
-def _decisive_probability(model, entity_a: str, entity_b: str) -> float:
+def _decisive_probability(model, entity_a: str, entity_b: str, draw_rate: float = 0.25) -> float:
     """Convert a neutral 90-minute W/D/L forecast into a decisive tie probability."""
     match = Match(date.today(), entity_a, entity_b, 0.5, home_advantage=False)
-    home_win, _draw, away_win = model.predict_outcomes(match)
+    if isinstance(model, (EloModel, Glicko2Model)):
+        home_win, _draw, away_win = model.predict_outcomes(match, draw_rate)
+    else:
+        home_win, _draw, away_win = model.predict_outcomes(match)
     decisive = home_win + away_win
     return home_win / decisive if decisive else 0.5
 
@@ -1542,6 +1791,139 @@ def _simulate_knockout(competition: dict, model, model_name: str, simulations: i
         "current_stage": current_stage.replace("_", " ").title(),
         "published_ties_remaining": len(unresolved_pairs),
         "participants": rows,
+    }
+
+
+def _poisson_score_distribution(model, home_id: str, away_id: str, draw_rate: float) -> list[tuple[int, int, float]]:
+    """Fit a transparent independent-Poisson bridge to a protocol's W/D/L probabilities."""
+    match = Match(date.today(), home_id, away_id, 0.5, home_advantage=True)
+    if isinstance(model, (EloModel, Glicko2Model)):
+        target_home, target_draw, target_away = model.predict_outcomes(match, draw_rate)
+    else:
+        target_home, target_draw, target_away = model.predict_outcomes(match)
+
+    def poisson(lam: float) -> list[float]:
+        values = [math.exp(-lam)]
+        for goals in range(1, 7):
+            values.append(values[-1] * lam / goals)
+        values.append(max(0.0, 1.0 - sum(values)))
+        return values
+
+    candidates = [0.35 + step * 0.15 for step in range(24)]
+    best: tuple[float, float, list[float], list[float]] | None = None
+    best_loss = float("inf")
+    for home_lambda in candidates:
+        home_probs = poisson(home_lambda)
+        for away_lambda in candidates:
+            away_probs = poisson(away_lambda)
+            predicted = [0.0, 0.0, 0.0]
+            for home_goals, home_probability in enumerate(home_probs):
+                for away_goals, away_probability in enumerate(away_probs):
+                    index = 0 if home_goals > away_goals else 1 if home_goals == away_goals else 2
+                    predicted[index] += home_probability * away_probability
+            loss = (
+                (predicted[0] - target_home) ** 2
+                + (predicted[1] - target_draw) ** 2
+                + (predicted[2] - target_away) ** 2
+            )
+            if loss < best_loss:
+                best_loss = loss
+                best = (home_lambda, away_lambda, home_probs, away_probs)
+    assert best is not None
+    distribution = [
+        (home_goals, away_goals, home_probability * away_probability)
+        for home_goals, home_probability in enumerate(best[2])
+        for away_goals, away_probability in enumerate(best[3])
+    ]
+    total = sum(row[2] for row in distribution)
+    return [(home, away, probability / total) for home, away, probability in distribution]
+
+
+def _sample_scoreline(generator: random.Random, distribution: list[tuple[int, int, float]]) -> tuple[int, int]:
+    threshold = generator.random()
+    cumulative = 0.0
+    for home_goals, away_goals, probability in distribution:
+        cumulative += probability
+        if threshold <= cumulative:
+            return home_goals, away_goals
+    return distribution[-1][0], distribution[-1][1]
+
+
+def _simulate_qualifying_round(
+    competition: dict,
+    model,
+    model_name: str,
+    draw_rate: float = 0.25,
+    simulations: int = PREDICTOR_SIMULATIONS,
+) -> dict:
+    """Forecast only the current published two-leg round, without inventing later fields."""
+    fixtures = competition["active_round_fixtures"]
+    grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    for fixture in fixtures:
+        grouped[tuple(sorted((fixture["home_id"], fixture["away_id"])))].append(fixture)
+    names = {team["id"]: team["name"] for team in competition["teams"]}
+    round_id = competition["active_round"]
+    seed_material = f"{METHODOLOGY_VERSION}|{competition['id']}|{competition['season']}|{model_name}|{round_id}"
+    seed = int.from_bytes(hashlib.sha256(seed_material.encode()).digest()[:8], "big")
+    generator = random.Random(seed)
+    advance_counts = {entity: 0 for pair in grouped for entity in pair}
+    score_distributions = {
+        id(fixture): _poisson_score_distribution(model, fixture["home_id"], fixture["away_id"], draw_rate)
+        for tie in grouped.values()
+        for fixture in tie
+        if fixture["status"] != "FINISHED"
+    }
+    decisive_probabilities = {
+        pair: _decisive_probability(model, pair[0], pair[1], draw_rate)
+        for pair in grouped
+    }
+    for _ in range(simulations):
+        for pair, tie in grouped.items():
+            goals = {pair[0]: 0, pair[1]: 0}
+            for fixture in tie:
+                if fixture["status"] == "FINISHED":
+                    home_goals, away_goals = fixture["home_goals"], fixture["away_goals"]
+                else:
+                    home_goals, away_goals = _sample_scoreline(generator, score_distributions[id(fixture)])
+                goals[fixture["home_id"]] += home_goals
+                goals[fixture["away_id"]] += away_goals
+            if goals[pair[0]] == goals[pair[1]]:
+                winner = pair[0] if generator.random() < decisive_probabilities[pair] else pair[1]
+            else:
+                winner = pair[0] if goals[pair[0]] > goals[pair[1]] else pair[1]
+            advance_counts[winner] += 1
+    participants = []
+    paths = {
+        entity: fixture.get("path") or "published path"
+        for fixture in fixtures
+        for entity in (fixture["home_id"], fixture["away_id"])
+    }
+    for entity, count in advance_counts.items():
+        participants.append(
+            {
+                "id": entity,
+                "name": names.get(entity, entity),
+                "path": paths[entity],
+                "rating": round(model.state(entity).mean, 2),
+                "reach_next_stage": round(count / simulations, 4),
+            }
+        )
+    participants.sort(key=lambda row: (-row["reach_next_stage"], -row["rating"], row["name"]))
+    return {
+        "forecast_type": "qualifying_round",
+        "seed": f"{seed:016x}",
+        "simulations": simulations,
+        "current_stage": UCL_QUALIFYING_ROUNDS[round_id]["label"],
+        "target_label": UCL_QUALIFYING_ROUNDS[round_id]["next_label"],
+        "published_ties_remaining": len(grouped),
+        "completed_legs": sum(row["status"] == "FINISHED" for row in fixtures),
+        "remaining_legs": sum(row["status"] != "FINISHED" for row in fixtures),
+        "participants": participants,
+        "scoreline_method": (
+            "Each selected rating protocol supplies home/draw/away probabilities. An independent-Poisson scoreline "
+            "bridge is fitted to those three probabilities for each unplayed leg; aggregate scores decide the tie, "
+            "with the protocol's neutral decisive probability used only if the aggregate remains level."
+        ),
     }
 
 
@@ -2042,7 +2424,7 @@ def _build_tournament_predictor(
         competition["first_fixture"] = schedule.get("first_fixture") or min(row["date"] for row in schedule["fixtures"])
         competition["last_fixture"] = schedule.get("last_fixture") or max(row["date"] for row in schedule["fixtures"])
         unplayed_dates = [row["date"] for row in schedule["fixtures"] if row["home_goals"] is None and row["date"]]
-        competition["next_fixture"] = min(unplayed_dates) if unplayed_dates else None
+        competition["next_fixture"] = schedule.get("next_fixture") or min(unplayed_dates) if unplayed_dates else schedule.get("next_fixture")
         if competition["format"] in {"round-robin league", "round-robin tournament"}:
             competition["models"] = {
                 model_name: _simulate_league(schedule, model, model_name, entities, draw_rate)
@@ -2050,6 +2432,13 @@ def _build_tournament_predictor(
             }
             completed = competition["models"]["elo"]["completed_matches"]
             competition["status"] = "scheduled" if completed == 0 else "complete" if completed == competition["total_matches"] else "live"
+        elif competition["format"] == "two-legged qualifying round" and competition["forecast_available"]:
+            competition["round_timeline"] = schedule["round_timeline"]
+            competition["models"] = {
+                model_name: _simulate_qualifying_round(schedule, model, model_name, draw_rate)
+                for model_name, model in models.items()
+            }
+            competition["status"] = "live"
         elif competition["forecast_available"]:
             competition["models"] = {
                 model_name: _simulate_knockout(schedule, model, model_name)
@@ -2076,7 +2465,7 @@ def _build_tournament_predictor(
         "draw_model": "Gaussian models use their fitted draw likelihood; Elo and Glicko-2 allocate the historical draw rate by matchup closeness while preserving expected score.",
         "tie_break": "Points, simulated goal difference, then current model strength.",
         "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
-        "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented.",
+        "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented. Qualifying-round forecasts stop at the next stage and never invent later entrants or pairings.",
         "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
         "performance_method": "Completed competitions publish an anchored exact performance rating, a tournament-only reset rank, and chronological actual-versus-expected surprise instead of retrospective title probabilities.",
         "competitions": competitions,
@@ -2374,7 +2763,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                 if sport == "football":
                     league_schedules = fetch_league_schedules()
                     predictor_schedules = league_schedules + fetch_cup_schedules(token, sport, matches)
-                    matches = _merge_schedule_results(matches, entities, league_schedules)
+                    matches = _merge_schedule_results(matches, entities, predictor_schedules)
                 elif sport == "national-football":
                     predictor_schedules = fetch_cup_schedules(token, sport, matches)
                 elif sport == "chess":
@@ -2473,9 +2862,11 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         "tournament_predictor": {
             "simulations_per_competition_model": PREDICTOR_SIMULATIONS,
             "seed": "SHA-256(methodology version, competition, season, model), first 64 bits as hexadecimal",
-            "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup"],
+            "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup", "two-legged qualifying round"],
             "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
-            "availability": "Withhold title probabilities until the public source identifies a knockout field.",
+            "availability": "Withhold title probabilities until the public source identifies a knockout field. Qualifying rounds publish only current-tie advancement probabilities.",
+            "qualifying_rounds": "UEFA's official named ties and results are replayed only for the active two-leg round. Future entrants and draws are withheld until published.",
+            "qualifying_scoreline_bridge": "Fit an independent-Poisson scoreline distribution to each protocol's home/draw/away probabilities for unplayed legs; use actual aggregate scores and a neutral decisive probability only when still level.",
             "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
             "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
             "market_quality_fields": ["raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at"],

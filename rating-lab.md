@@ -131,7 +131,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-kicker">Live forecast · completed performance</p>
     <h2 id="predictor-heading">Competition forecast and performance</h2>
     <p class="rating-lab-predictor-intro">Scheduled and live competitions receive forward predictions from their actual published state. Where a reliably matched public Polymarket event exists, its snapshot is shown beside—not inside—our model. Once a competition finishes, probabilities are replaced by protocol performance ratings built from the recorded results.</p>
-    <p class="rating-lab-audit-note">Current forward forecasts cover five club leagues, public club and national knockout fields, and active elite Lichess round-robin events. Completed sourced competitions switch to protocol performance ratings. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
+    <p class="rating-lab-audit-note">Current forward forecasts cover five club leagues, the live UEFA Champions League qualifying round, public club and national knockout fields, and active elite Lichess round-robin events. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. Completed sourced competitions switch to protocol performance ratings. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
 
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">
@@ -323,7 +323,8 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <li>Glicko-2 is the exception to within-day ordering: all results on one calendar date form a simultaneous rating period. Seven days define one unit of inactivity inflation.</li>
         <li>The public JSON publishes at most the top 500 eligible entities per model; it is not a complete registry of every entity seen in the source archive.</li>
         <li>Model selection tests a small declared parameter grid. It does not prove that the selected candidate is globally optimal.</li>
-        <li>Cup forecasts do not guess unpublished entrants or qualification paths. Once a knockout field exists, published ties are fixed; later unpublished draws use a uniform redraw without seeding, association, or country restrictions.</li>
+        <li>Cup forecasts do not guess unpublished entrants or qualification paths. The live Champions League qualifying view forecasts survival of the current official two-leg tie only. For a fully published knockout field, known ties are fixed; later unpublished draws use a uniform redraw without seeding, association, or country restrictions.</li>
+        <li>For two-leg qualifying ties, the selected protocol supplies home/draw/away probabilities. A disclosed independent-Poisson bridge fits those probabilities for each unplayed leg, aggregate goals determine advancement, and a neutral decisive probability is used only if the aggregate remains level.</li>
       </ul>
     </details>
   </section>
@@ -408,6 +409,7 @@ python3 -m unittest discover -s tests -v</code></pre>
     <ul id="rating-source-list">
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
       <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues plus published Champions League, FIFA World Cup, and European Championship stages.</li>
+      <li><a href="https://www.uefa.com/uefachampionsleague/accesslist/">UEFA</a> — official 2026/27 Champions League qualifying results, published ties, draw dates, and match calendar.</li>
       <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures plus credential-free Champions League, World Cup, and Euro structures, CC0 1.0.</li>
       <li><a href="https://github.com/hudl/open-data">Hudl StatsBomb Open Data</a> — lineups and events for selected historical competitions and seasons; a reproducible player-method research source, not the live five-league feed.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
