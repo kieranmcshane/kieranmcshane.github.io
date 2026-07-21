@@ -1,17 +1,17 @@
 ---
 layout: page
-title: "Explain Centered Correlation Tensors"
+title: "Reconstruct the Centered-Correlation Argument"
 permalink: /explain/centered-correlations/
-description: "An active-recall and oral-rehearsal companion to the article on centered correlation tensors and quantum separability."
+description: "A click-based FSRS learning companion to the article on centered correlation tensors and quantum separability."
 ---
 
-<div class="explain-lab" data-storage-key="centered-correlation-explain-v1">
+<div class="explain-lab" data-storage-key="centered-correlation-explain-v2">
   <header class="explain-hero">
-    <p class="explain-kicker">Active companion to the article</p>
-    <h1>Can you explain the argument without looking?</h1>
-    <p class="explain-deck">Reading the derivation is not the same as being able to reconstruct it. This page asks you to put the proof back together, explain its hinges, and rehearse a short oral account.</p>
+    <p class="explain-kicker">Interactive companion to the article</p>
+    <h1>Can you reconstruct the argument?</h1>
+    <p class="explain-deck">No essay box and no speaking to the screen. Rebuild the proof, choose the missing steps, and diagnose plausible mistakes. FSRS then decides which ideas should return and when.</p>
     <div class="explain-hero-actions">
-      <a class="explain-primary-link" href="#derivation-order">Start with the proof</a>
+      <a class="explain-primary-link" href="#derivation-order">Start the reconstruction</a>
       <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Return to the article</a>
     </div>
     <div class="explain-progress" aria-labelledby="explain-progress-label">
@@ -23,45 +23,30 @@ description: "An active-recall and oral-rehearsal companion to the article on ce
         <span id="explain-progress-bar"></span>
       </div>
     </div>
-    <p class="explain-privacy">No account is required. Your profile and progress stay in this browser. Audio is never uploaded.</p>
+    <p class="explain-privacy">Progress and the FSRS review history stay in this browser. They can be exported and imported without creating an account.</p>
   </header>
 
-  <nav class="explain-local-nav" aria-label="Oral trainer stages">
-    <a href="#derivation-order"><strong>1</strong><span>Rebuild</span></a>
-    <a href="#teach-back"><strong>2</strong><span>Explain</span></a>
-    <a href="#viva"><strong>3</strong><span>Defend</span></a>
-    <a href="#oral-rehearsal"><strong>4</strong><span>Rehearse</span></a>
+  <nav class="explain-local-nav" aria-label="Learning stages">
+    <a href="#derivation-order"><strong>1</strong><span>Order</span></a>
+    <a href="#scheduled-review"><strong>2</strong><span>Review</span></a>
+    <a href="#diagnose"><strong>3</strong><span>Diagnose</span></a>
+    <a href="#build-explanation"><strong>4</strong><span>Assemble</span></a>
   </nav>
 
-  <noscript><p class="explain-notice">This oral trainer needs JavaScript. The mathematical article itself remains fully readable without it.</p></noscript>
+  <noscript><p class="explain-notice">This learning companion needs JavaScript. The mathematical article remains fully readable without it.</p></noscript>
 
   <section class="explain-stage" id="derivation-order" aria-labelledby="derivation-heading">
     <div class="explain-stage-heading">
-      <div><span>Stage 1</span><h2 id="derivation-heading">Rebuild the proof</h2></div>
-      <p>Put the five statements in logical order. Do not consult the article until you have made a first attempt.</p>
+      <div><span>Stage 1</span><h2 id="derivation-heading">Put the proof in order</h2></div>
+      <p>Move the statements until each one uses only information established above it.</p>
     </div>
 
     <ol class="explain-order-list" id="explain-order-list">
-      <li data-step="4">
-        <div><span class="explain-order-number">?</span><p>Cauchy–Schwarz bounds the projective sum by the product of the two local standard deviations.</p></div>
-        <div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move Cauchy–Schwarz step up">↑</button><button type="button" data-move="down" aria-label="Move Cauchy–Schwarz step down">↓</button></div>
-      </li>
-      <li data-step="1">
-        <div><span class="explain-order-number">?</span><p>A product state has a rank-one correlation matrix: $T=rs^{\mathsf T}$.</p></div>
-        <div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move product-state step up">↑</button><button type="button" data-move="down" aria-label="Move product-state step down">↓</button></div>
-      </li>
-      <li data-step="5">
-        <div><span class="explain-order-number">?</span><p>The local variances are $R_M^2-\lVert r\rVert_2^2$ and $R_N^2-\lVert s\rVert_2^2$, giving the centered separability bound.</p></div>
-        <div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move variance step up">↑</button><button type="button" data-move="down" aria-label="Move variance step down">↓</button></div>
-      </li>
-      <li data-step="2">
-        <div><span class="explain-order-number">?</span><p>A separable state gives one common convex decomposition: $T=\sum_k p_k r_k s_k^{\mathsf T}$, with $r=\sum_kp_kr_k$ and $s=\sum_kp_ks_k$.</p></div>
-        <div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move separable-mixture step up">↑</button><button type="button" data-move="down" aria-label="Move separable-mixture step down">↓</button></div>
-      </li>
-      <li data-step="3">
-        <div><span class="explain-order-number">?</span><p>Subtracting the means rewrites $C=T-rs^{\mathsf T}$ as $\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$.</p></div>
-        <div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move centering step up">↑</button><button type="button" data-move="down" aria-label="Move centering step down">↓</button></div>
-      </li>
+      <li data-step="4"><div><span class="explain-order-number">?</span><p>Cauchy–Schwarz bounds the projective sum by the product of the two local standard deviations.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move Cauchy–Schwarz step up">↑</button><button type="button" data-move="down" aria-label="Move Cauchy–Schwarz step down">↓</button></div></li>
+      <li data-step="1"><div><span class="explain-order-number">?</span><p>A product state has a rank-one correlation matrix: $T=rs^{\mathsf T}$.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move product-state step up">↑</button><button type="button" data-move="down" aria-label="Move product-state step down">↓</button></div></li>
+      <li data-step="5"><div><span class="explain-order-number">?</span><p>The local variances are $R_M^2-\lVert r\rVert_2^2$ and $R_N^2-\lVert s\rVert_2^2$, giving the centered separability bound.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move variance step up">↑</button><button type="button" data-move="down" aria-label="Move variance step down">↓</button></div></li>
+      <li data-step="2"><div><span class="explain-order-number">?</span><p>A separable state gives one common convex decomposition: $T=\sum_k p_k r_k s_k^{\mathsf T}$, with $r=\sum_kp_kr_k$ and $s=\sum_kp_ks_k$.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move separable-mixture step up">↑</button><button type="button" data-move="down" aria-label="Move separable-mixture step down">↓</button></div></li>
+      <li data-step="3"><div><span class="explain-order-number">?</span><p>Subtracting the means rewrites $C=T-rs^{\mathsf T}$ as $\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$.</p></div><div class="explain-order-controls"><button type="button" data-move="up" aria-label="Move centering step up">↑</button><button type="button" data-move="down" aria-label="Move centering step down">↓</button></div></li>
     </ol>
     <div class="explain-stage-actions">
       <button class="explain-button" type="button" id="check-order">Check the order</button>
@@ -70,153 +55,95 @@ description: "An active-recall and oral-rehearsal companion to the article on ce
     </div>
   </section>
 
-  <section class="explain-stage" id="teach-back" aria-labelledby="teach-back-heading">
+  <section class="explain-stage" id="scheduled-review" aria-labelledby="review-heading">
     <div class="explain-stage-heading">
-      <div><span>Stage 2</span><h2 id="teach-back-heading">Explain the five hinges</h2></div>
-      <p>Write a short answer from memory. The comparison grid appears only after you have committed to an explanation.</p>
+      <div><span>Stage 2 · FSRS-6</span><h2 id="review-heading">Review the ideas when they are due</h2></div>
+      <p>Choose an answer. A first-attempt success is recorded as <em>Good</em>; a corrected answer as <em>Hard</em>; revealing the answer as <em>Again</em>. FSRS schedules the next appearance.</p>
     </div>
 
-    <div class="teach-back-list" id="teach-back-list">
-      <article class="teach-back-card" data-card="coordinates">
-        <header><span>01</span><h3>What are $r$, $s$, $T$, and $C$?</h3><em data-card-state>Not attempted</em></header>
-        <label><span>Your explanation</span><textarea rows="4" placeholder="Explain the four objects and what centering removes."></textarea></label>
-        <button type="button" class="explain-button reveal-rubric" disabled>Compare with the essentials</button>
-        <div class="teach-back-rubric" hidden>
-          <p>A sound answer should make all three points:</p>
-          <label><input type="checkbox"> $r$ and $s$ are the Bloch coordinates of the reduced states.</label>
-          <label><input type="checkbox"> $T$ contains the coefficients of traceless observables on both subsystems.</label>
-          <label><input type="checkbox"> $C=T-rs^{\mathsf T}$ removes the product of the local means, leaving connected correlations.</label>
-          <div class="teach-back-confidence"><button type="button" data-confidence="review">I need another pass</button><button type="button" data-confidence="mastered">I can explain this aloud</button></div>
-        </div>
-      </article>
-
-      <article class="teach-back-card" data-card="identity">
-        <header><span>02</span><h3>Why is $C$ a covariance for a separable state?</h3><em data-card-state>Not attempted</em></header>
-        <label><span>Your explanation</span><textarea rows="4" placeholder="Start from a common separable decomposition and do the algebra."></textarea></label>
-        <button type="button" class="explain-button reveal-rubric" disabled>Compare with the essentials</button>
-        <div class="teach-back-rubric" hidden>
-          <p>A sound answer should make all three points:</p>
-          <label><input type="checkbox"> Use the same probabilities $p_k$ for $r$, $s$, and $T$.</label>
-          <label><input type="checkbox"> State $T=\sum_kp_kr_ks_k^{\mathsf T}$, $r=\sum_kp_kr_k$, and $s=\sum_kp_ks_k$.</label>
-          <label><input type="checkbox"> Expand to obtain $C=\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$.</label>
-          <div class="teach-back-confidence"><button type="button" data-confidence="review">I need another pass</button><button type="button" data-confidence="mastered">I can explain this aloud</button></div>
-        </div>
-      </article>
-
-      <article class="teach-back-card" data-card="bound">
-        <header><span>03</span><h3>How does the separability bound follow?</h3><em data-card-state>Not attempted</em></header>
-        <label><span>Your explanation</span><textarea rows="5" placeholder="Name the rank-one norm identity, the two inequalities, and the variance calculation."></textarea></label>
-        <button type="button" class="explain-button reveal-rubric" disabled>Compare with the essentials</button>
-        <div class="teach-back-rubric" hidden>
-          <p>A sound answer should make all four points:</p>
-          <label><input type="checkbox"> Use $\lVert uv^{\mathsf T}\rVert_*=\lVert u\rVert_2\lVert v\rVert_2$ and the triangle inequality.</label>
-          <label><input type="checkbox"> Apply Cauchy–Schwarz to the weighted sum of the two fluctuation norms.</label>
-          <label><input type="checkbox"> Identify the variance deficits $R_M^2-\lVert r\rVert_2^2$ and $R_N^2-\lVert s\rVert_2^2$.</label>
-          <label><input type="checkbox"> Conclude $\lVert C\rVert_*\leq\sqrt{(R_M^2-\lVert r\rVert_2^2)(R_N^2-\lVert s\rVert_2^2)}$.</label>
-          <div class="teach-back-confidence"><button type="button" data-confidence="review">I need another pass</button><button type="button" data-confidence="mastered">I can explain this aloud</button></div>
-        </div>
-      </article>
-
-      <article class="teach-back-card" data-card="norms">
-        <header><span>04</span><h3>What is equivalent to de Vicente, and what is stronger multipartitely?</h3><em data-card-state>Not attempted</em></header>
-        <label><span>Your explanation</span><textarea rows="5" placeholder="Separate the bipartite matrix statement from the higher-order tensor statement."></textarea></label>
-        <button type="button" class="explain-button reveal-rubric" disabled>Compare with the essentials</button>
-        <div class="teach-back-rubric" hidden>
-          <p>A sound answer should make all three points:</p>
-          <label><input type="checkbox"> For two Euclidean factors, the projective tensor norm equals the matrix nuclear norm.</label>
-          <label><input type="checkbox"> Thus the uncentered bipartite projective-norm statement is exactly de Vicente in different language.</label>
-          <label><input type="checkbox"> For three or more factors, each unfolding nuclear norm is only a lower bound on the full projective norm, so replacing unfoldings by the full norm can strengthen the test.</label>
-          <div class="teach-back-confidence"><button type="button" data-confidence="review">I need another pass</button><button type="button" data-confidence="mastered">I can explain this aloud</button></div>
-        </div>
-      </article>
-
-      <article class="teach-back-card" data-card="compatibility">
-        <header><span>05</span><h3>What remains unresolved beyond the bipartite bound?</h3><em data-card-state>Not attempted</em></header>
-        <label><span>Your explanation</span><textarea rows="5" placeholder="Explain why separate bounds at each tensor order are not enough."></textarea></label>
-        <button type="button" class="explain-button reveal-rubric" disabled>Compare with the essentials</button>
-        <div class="teach-back-rubric" hidden>
-          <p>A sound answer should make all three points:</p>
-          <label><input type="checkbox"> A multipartite state carries a family of subset tensors, not only the top-order tensor.</label>
-          <label><input type="checkbox"> Separate decompositions for different orders do not prove that one separable ensemble generates them all.</label>
-          <label><input type="checkbox"> The remaining problem is a common-moment or common-decomposition constraint across tensor orders.</label>
-          <div class="teach-back-confidence"><button type="button" data-confidence="review">I need another pass</button><button type="button" data-confidence="mastered">I can explain this aloud</button></div>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <section class="explain-stage" id="viva" aria-labelledby="viva-heading">
-    <div class="explain-stage-heading">
-      <div><span>Stage 3</span><h2 id="viva-heading">Defend it in a mini-viva</h2></div>
-      <p>Answer aloud before revealing the model answer. The next question is chosen from the conceptual points readers most often blur.</p>
+    <div class="fsrs-summary" aria-live="polite">
+      <div><span>Due now</span><strong id="fsrs-due-count">5</strong></div>
+      <div><span>Reviewed</span><strong id="fsrs-reviewed-count">0 / 5</strong></div>
+      <div><span>Next review</span><strong id="fsrs-next-date">today</strong></div>
     </div>
 
-    <div class="viva-card">
-      <p class="viva-count" id="viva-count">Question 1</p>
-      <h3 id="viva-question">Why does a product state give a rank-one correlation matrix?</h3>
-      <button type="button" class="explain-button" id="reveal-viva">Reveal the answer</button>
-      <div class="viva-answer" id="viva-answer" hidden></div>
-      <div class="viva-rating" id="viva-rating" hidden>
-        <span>How did your answer compare?</span>
-        <button type="button" data-viva-rating="missed">Missed</button>
-        <button type="button" data-viva-rating="partial">Partial</button>
-        <button type="button" data-viva-rating="correct">Correct</button>
-      </div>
-    </div>
-    <div class="viva-score" aria-live="polite"><strong id="viva-score">0</strong><span>answers rated correct</span></div>
-  </section>
-
-  <section class="explain-stage" id="oral-rehearsal" aria-labelledby="rehearsal-heading">
-    <div class="explain-stage-heading">
-      <div><span>Stage 4</span><h2 id="rehearsal-heading">Give the explanation</h2></div>
-      <p>Choose a length, speak without notes, then inspect the outline. You can record yourself, but the audio remains on this device and disappears when the page is closed.</p>
+    <div class="fsrs-review-card" id="fsrs-review-card">
+      <div class="fsrs-card-meta"><span id="fsrs-concept-label">Concept 1 of 5</span><strong id="fsrs-card-status">New</strong></div>
+      <h3 id="fsrs-question">Which statement best describes the centered matrix?</h3>
+      <div class="fsrs-options" id="fsrs-options"></div>
+      <button type="button" class="explain-text-button" id="fsrs-reveal">Show the answer</button>
+      <div class="fsrs-answer" id="fsrs-answer" hidden></div>
+      <button type="button" class="explain-button" id="fsrs-next" hidden>Next concept</button>
     </div>
 
-    <div class="rehearsal-grid">
-      <div class="rehearsal-controls">
-        <fieldset>
-          <legend>Length</legend>
-          <label><input type="radio" name="rehearsal-length" value="90" checked> 90 seconds</label>
-          <label><input type="radio" name="rehearsal-length" value="180"> 3 minutes</label>
-          <label><input type="radio" name="rehearsal-length" value="300"> 5 minutes</label>
-        </fieldset>
-        <label class="local-profile-field"><span>Name for this local profile <small>(optional)</small></span><input type="text" id="learner-name" autocomplete="name" maxlength="80" placeholder="Your name"></label>
-        <div class="rehearsal-buttons">
-          <button type="button" class="explain-button" id="start-rehearsal">Start timer</button>
-          <button type="button" class="explain-button explain-button-secondary" id="record-rehearsal">Record audio</button>
-          <button type="button" class="explain-button explain-button-secondary" id="finish-rehearsal" disabled>Finish</button>
-        </div>
-        <p id="recording-status" class="explain-feedback" role="status" aria-live="polite"></p>
-      </div>
-      <div class="rehearsal-timer">
-        <span>Time remaining</span>
-        <strong id="rehearsal-clock" role="timer">01:30</strong>
-        <p>Explain the result to a colleague who knows density matrices but has not read the article.</p>
-      </div>
+    <div class="fsrs-empty" id="fsrs-empty" hidden>
+      <strong>You are caught up.</strong>
+      <p id="fsrs-empty-copy">The next scheduled concept will appear here when it is due.</p>
+      <button type="button" class="explain-button explain-button-secondary" id="fsrs-practise-all">Practise all concepts now</button>
     </div>
-    <audio id="rehearsal-audio" controls hidden></audio>
 
-    <details class="rehearsal-outline" id="rehearsal-outline">
-      <summary>Open the comparison outline after speaking</summary>
-      <ol>
-        <li><strong>Set up:</strong> define the Bloch vectors $r,s$, correlation matrix $T$, and centered matrix $C$.</li>
-        <li><strong>Product and mixture:</strong> explain $T=rs^{\mathsf T}$ for a product state and the common convex decomposition for a separable state.</li>
-        <li><strong>Center:</strong> derive $C=\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$.</li>
-        <li><strong>Bound:</strong> use the rank-one norm identity, triangle inequality, Cauchy–Schwarz, and the local variance deficits.</li>
-        <li><strong>Locate the result:</strong> bipartitely, the projective norm is the nuclear norm; multipartitely, the full projective norm can be stronger than unfoldings.</li>
-        <li><strong>State the open point:</strong> several tensor orders must come from one common separable ensemble.</li>
-      </ol>
+    <details class="fsrs-schedule">
+      <summary>See the five-concept schedule</summary>
+      <ol id="fsrs-schedule-list"></ol>
+      <p>Scheduling uses the official <a href="https://github.com/open-spaced-repetition/ts-fsrs">ts-fsrs</a> implementation of FSRS-6 with 90% requested retention. No personal parameter optimization is attempted with so little data.</p>
     </details>
   </section>
 
-  <section class="explain-readiness" aria-labelledby="readiness-heading">
-    <div>
-      <p class="explain-kicker">Self-assessed readiness</p>
-      <h2 id="readiness-heading">Ready means you can reconstruct, not recognize.</h2>
-      <p id="readiness-copy">Complete all four stages to mark this article as ready to explain.</p>
+  <section class="explain-stage" id="diagnose" aria-labelledby="diagnose-heading">
+    <div class="explain-stage-heading">
+      <div><span>Stage 3</span><h2 id="diagnose-heading">Find what is wrong</h2></div>
+      <p>The difficult misconceptions are plausible statements, not absurd ones. Decide whether each claim survives the article’s argument.</p>
     </div>
+
+    <div class="diagnosis-list" id="diagnosis-list">
+      <article data-diagnosis="nonlinear" data-correct="false">
+        <p>“The map $\rho_{AB}\mapsto C=T-rs^{\mathsf T}$ is linear, so all centered correlation matrices of separable states form one fixed convex body.”</p>
+        <div><button type="button" data-answer="true">Sound</button><button type="button" data-answer="false">There is a flaw</button></div>
+        <aside hidden>The flaw is the product $rs^{\mathsf T}$: both vectors depend on the state, so centering is nonlinear. For fixed marginals there is a clean norm ball; globally one must qualify the convex-body language.</aside>
+      </article>
+      <article data-diagnosis="flattening" data-correct="false">
+        <p>“For a third-order tensor, the full Euclidean projective norm is just the largest nuclear norm among its matrix unfoldings.”</p>
+        <div><button type="button" data-answer="true">Sound</button><button type="button" data-answer="false">There is a flaw</button></div>
+        <aside hidden>Every unfolding norm is bounded above by the full projective norm, but equality is not general. A matrix rank-one term across a cut need not factor across every individual party.</aside>
+      </article>
+      <article data-diagnosis="complete" data-correct="false">
+        <p>“Because every entangled pure bipartite state violates the centered bound, the criterion characterizes entanglement for arbitrary mixed states.”</p>
+        <div><button type="button" data-answer="true">Sound</button><button type="button" data-answer="false">There is a flaw</button></div>
+        <aside hidden>The pure-state statement does not extend to mixed states. The article gives NPT mixed states that still pass the centered test.</aside>
+      </article>
+      <article data-diagnosis="common" data-correct="true">
+        <p>“Bounding every subset tensor separately still does not show that one common separable ensemble generates all tensor orders.”</p>
+        <div><button type="button" data-answer="true">Sound</button><button type="button" data-answer="false">There is a flaw</button></div>
+        <aside hidden>This is sound. Compatibility across orders is the remaining common-decomposition, or truncated-moment, constraint.</aside>
+      </article>
+    </div>
+    <p class="explain-feedback" id="diagnosis-feedback" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="explain-stage" id="build-explanation" aria-labelledby="builder-heading">
+    <div class="explain-stage-heading">
+      <div><span>Stage 4</span><h2 id="builder-heading">Assemble a concise explanation</h2></div>
+      <p>For each paragraph, choose the sentence that actually advances the argument. The completed version appears only after all four choices are correct.</p>
+    </div>
+
+    <div class="explanation-builder" id="explanation-builder">
+      <article data-builder="1" data-correct="product"><span>Opening</span><h3>What is the elementary starting point?</h3><div><button type="button" data-choice="commute">Separable states are built from commuting density matrices.</button><button type="button" data-choice="product">A product state factorizes the correlation matrix as $T=rs^{\mathsf T}$.</button><button type="button" data-choice="pure">Every pure state has a rank-one correlation matrix.</button></div><p hidden></p></article>
+      <article data-builder="2" data-correct="common"><span>Mixtures</span><h3>What does separability add?</h3><div><button type="button" data-choice="separate">Each marginal and tensor may use an unrelated optimal decomposition.</button><button type="button" data-choice="common">One ensemble gives $r$, $s$, and $T$ simultaneously as first and cross-moments.</button><button type="button" data-choice="orthogonal">The product Bloch vectors can always be chosen orthogonal.</button></div><p hidden></p></article>
+      <article data-builder="3" data-correct="covariance"><span>Centering</span><h3>What is gained by subtracting $rs^{\mathsf T}$?</h3><div><button type="button" data-choice="linear">It makes the state-to-tensor map linear.</button><button type="button" data-choice="erase">It erases every classical correlation.</button><button type="button" data-choice="covariance">It turns the remainder into the covariance $\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$.</button></div><p hidden></p></article>
+      <article data-builder="4" data-correct="bound"><span>Conclusion</span><h3>How does the criterion follow?</h3><div><button type="button" data-choice="bound">Rank-one factorization, the triangle inequality, and Cauchy–Schwarz give a bound controlled by the marginal variance deficits.</button><button type="button" data-choice="ppt">Partial transposition gives the bound in every dimension.</button><button type="button" data-choice="svd">An SVD proves that every mixed state passing the bound is separable.</button></div><p hidden></p></article>
+    </div>
+
+    <div class="assembled-explanation" id="assembled-explanation" hidden>
+      <p class="explain-kicker">The assembled account</p>
+      <p>A product state factorizes the correlation matrix as $T=rs^{\mathsf T}$. For a separable state, one common ensemble gives $r$, $s$, and $T$ simultaneously as first and cross-moments. Subtracting $rs^{\mathsf T}$ therefore turns the remainder into the covariance $C=\sum_kp_k(r_k-r)(s_k-s)^{\mathsf T}$. Rank-one norm factorization, the triangle inequality, and Cauchy–Schwarz then bound $\lVert C\rVert_*$ by the product of the two local standard deviations.</p>
+      <p>Bipartitely, the Euclidean projective norm is exactly the matrix nuclear norm, so the uncentered formulation recovers de Vicente. For three or more factors, unfolding nuclear norms can be strictly smaller than the full projective norm. The remaining structural problem is to enforce that all subset tensors and tensor orders come from one common separable ensemble.</p>
+    </div>
+  </section>
+
+  <section class="explain-readiness" aria-labelledby="readiness-heading">
+    <div><p class="explain-kicker">Reconstruction status</p><h2 id="readiness-heading">Understanding means recovering the links.</h2><p id="readiness-copy">Complete all four stages to mark this article as reconstructed.</p></div>
     <div class="readiness-actions">
-      <button type="button" class="explain-button" id="mark-ready" disabled>Mark as ready to explain</button>
+      <button type="button" class="explain-button" id="mark-ready" disabled>Mark as reconstructed</button>
       <button type="button" class="explain-button explain-button-secondary" id="export-progress">Export progress</button>
       <label class="explain-import-button">Import progress<input type="file" id="import-progress" accept="application/json,.json"></label>
       <button type="button" class="explain-text-button" id="reset-progress">Reset this browser’s progress</button>
@@ -224,5 +151,5 @@ description: "An active-recall and oral-rehearsal companion to the article on ce
     <p id="readiness-status" role="status" aria-live="polite"></p>
   </section>
 
-  <p class="explain-source-note">Need to check a detail? Every stage corresponds to a passage in <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Centered Correlation Tensors and Quantum Separability</a>. Use the article after attempting the prompt, not before.</p>
+  <p class="explain-source-note">Need to verify a detail? Return to <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Centered Correlation Tensors and Quantum Separability</a>, then come back to the due queue.</p>
 </div>
