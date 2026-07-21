@@ -5,7 +5,7 @@ permalink: /rating-lab/
 description: Live alternative ratings for tennis, club and national-team football, and chess, tested against real match outcomes.
 ---
 
-<div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}">
+<div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero">
     <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
     <h1>Across sports. Four ways to measure strength.</h1>
@@ -190,7 +190,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-kicker">How it works</p>
     <h2 id="research-heading">The details, when you want them.</h2>
     <p class="rating-lab-research-intro">Rating Lab is a side project, but its forecasts should still be inspectable. Open a panel to see the assumptions, parameters, data sources, licences, and exact reproduction steps.</p>
-    <p class="rating-lab-explainer"><strong>Identity images are data, too:</strong> club and federation crests are used only when football-data.org supplies them. Tennis and chess portraits are linked through exact ATP or FIDE identifiers to Wikimedia Commons—never guessed from a name—and appear only with a recorded file page, licence, and attribution. Small flags come only from the source country or federation code; unknown codes remain blank rather than being inferred from a name. The inspector exposes image details. Images and flags never enter a rating or forecast; initials remain the final fallback.</p>
+    <p class="rating-lab-explainer"><strong>Identity images are data, too:</strong> club and federation crests are used only when football-data.org supplies them. Tennis and chess portraits are linked through exact ATP or FIDE identifiers to Wikimedia Commons—never guessed from a name—and appear only with a recorded file page, licence, and attribution. Small flags are pinned MIT-licensed SVG assets selected only from the source country or federation code—never operating-system emoji. Unknown codes remain blank rather than being inferred from a name. The inspector exposes image details. Images and flags never enter a rating or forecast; initials remain the final fallback.</p>
     <div class="rating-lab-research-links" aria-label="Downloads and code">
       <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
       <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
@@ -321,7 +321,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <ul>
         <li>Current ratings use the result plus the declared competitive context: tennis surface, football venue, or chess color. Score margin, lineups, injuries, time controls, and player age are not model inputs. The withheld player-contribution protocol would add lineups and minutes, but no event statistics.</li>
         <li>Football Elo values are comparable only inside a connected result network. A new qualifying tie between two unseen clubs forms an isolated component around the arbitrary 1500 prior. Those clubs remain available to forecasts but stay in a provisional tier until they have 10 covered results and connect to the main network.</li>
-        <li>Crests, portraits, and source-coded flags are presentational metadata, never model inputs. External images are restricted to the declared football-data.org and Wikimedia hosts, carry source and rights metadata in the public JSON, and fall back to source-coded flags or initials if unavailable.</li>
+        <li>Crests, portraits, and source-coded flags are presentational metadata, never model inputs. External images are restricted to the declared football-data.org and Wikimedia hosts and carry source and rights metadata in the public JSON. Flags use a vendored, pinned SVG set rather than operating-system emoji; unavailable assets fall back to initials.</li>
         <li>Draws use an actual score of 0.5. Published log loss and Brier score evaluate expected score, not a separate three-class win/draw/loss forecast.</li>
         <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>
         <li>Glicko-2 is the exception to within-day ordering: all results on one calendar date form a simultaneous rating period. Seven days define one unit of inactivity inflation.</li>
@@ -418,6 +418,7 @@ python3 -m unittest discover -s tests -v</code></pre>
       <li><a href="https://github.com/hudl/open-data">Hudl StatsBomb Open Data</a> — lineups and events for selected historical competitions and seasons; a reproducible player-method research source, not the live five-league feed.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
+      <li><a href="https://github.com/lipis/flag-icons/tree/v7.5.0">flag-icons 7.5.0</a> — vendored SVG country and home-nation flags, MIT; selected only from source codes.</li>
       <li><a href="https://www.glicko.net/glicko/glicko2.pdf">Glicko-2 specification and worked example</a> — public-domain head-to-head rating protocol.</li>
       <li><a href="https://www.microsoft.com/en-us/research/publication/trueskill-2-improved-bayesian-skill-rating-system/">Microsoft Research TrueSkill 2 paper</a> — used to delimit features this result-only site does not claim.</li>
       <li><a href="https://docs.polymarket.com/market-data/overview">Polymarket Gamma API</a> — public outcome-price snapshots used only as an external forecast benchmark.</li>

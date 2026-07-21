@@ -464,6 +464,18 @@ class PipelineTests(unittest.TestCase):
         _merge_schedule_media(entities, schedules)
         self.assertEqual(entities["national-football:spain"]["media"]["url"], media["url"])
 
+    def test_flags_are_vendored_svg_assets_not_emoji_glyphs(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "assets/js/rating-lab.js").read_text()
+        self.assertNotIn("flagEmoji", script)
+        self.assertNotIn("subdivisionFlag", script)
+        self.assertIn("data-flag-image", script)
+        for code in ("ar", "ca", "de", "es", "fr", "gb-eng", "it", "rs", "us", "xk"):
+            asset = root / "assets/vendor/flag-icons/4x3" / f"{code}.svg"
+            self.assertTrue(asset.is_file(), f"Missing vendored flag asset: {code}")
+            self.assertIn("<svg", asset.read_text()[:500])
+        self.assertIn("MIT License", (root / "assets/vendor/flag-icons/LICENSE").read_text())
+
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{
             "round": "Final",
