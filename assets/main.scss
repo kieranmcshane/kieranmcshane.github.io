@@ -1390,6 +1390,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-control-group,
 .rating-lab-field {
   display: grid;
+  min-width: 0;
   gap: 0.4rem;
 }
 
@@ -1405,10 +1406,13 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-segmented {
   display: flex;
+  max-width: 100%;
   padding: 3px;
+  overflow-x: auto;
   background: #eef0ef;
   border: 1px solid var(--lab-line);
   border-radius: 3px;
+  scrollbar-width: thin;
 }
 
 .rating-lab-segmented button,
@@ -1433,6 +1437,9 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-field select,
 .rating-lab-field input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 40px;
   box-sizing: border-box;
   padding: 0.55rem 0.7rem;
@@ -2769,10 +2776,12 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-predictor-state {
+  min-width: 0;
   align-self: center;
   color: #536176;
   font-size: 0.84rem;
   font-weight: 650;
+  overflow-wrap: anywhere;
   text-align: right;
 }
 
