@@ -40,7 +40,7 @@ The article has a complete bipartite core followed by a research-direction appen
 <aside class="explain-article-cta">
   <div>
     <strong>Could you reconstruct the argument without the page?</strong>
-    <p>The click-based companion now begins with a bounded Lean-checked rewrite puzzle, followed by error diagnosis and scheduled FSRS reviews.</p>
+    <p>The click-based companion reconstructs the covariance identity and the full six-step separability bound, then schedules the ideas that caused difficulty with FSRS.</p>
   </div>
   <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the argument trainer →</a>
 </aside>

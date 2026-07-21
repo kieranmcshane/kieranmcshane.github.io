@@ -17,9 +17,9 @@ description: "A click-based FSRS learning companion to the article on centered c
     <div class="explain-progress" aria-labelledby="explain-progress-label">
       <div class="explain-progress-copy">
         <strong id="explain-progress-label">Your progress</strong>
-        <span id="explain-progress-text">0 of 4 stages complete</span>
+        <span id="explain-progress-text">0 of 5 stages complete</span>
       </div>
-      <div class="explain-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-labelledby="explain-progress-label">
+      <div class="explain-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-labelledby="explain-progress-label">
         <span id="explain-progress-bar"></span>
       </div>
     </div>
@@ -28,9 +28,10 @@ description: "A click-based FSRS learning companion to the article on centered c
 
   <nav class="explain-local-nav" aria-label="Learning stages">
     <a href="#learn-puzzle"><strong>1</strong><span>Prove</span></a>
-    <a href="#scheduled-review"><strong>2</strong><span>Review</span></a>
-    <a href="#diagnose"><strong>3</strong><span>Diagnose</span></a>
-    <a href="#build-explanation"><strong>4</strong><span>Assemble</span></a>
+    <a href="#derive-bound"><strong>2</strong><span>Derive</span></a>
+    <a href="#scheduled-review"><strong>3</strong><span>Review</span></a>
+    <a href="#diagnose"><strong>4</strong><span>Diagnose</span></a>
+    <a href="#build-explanation"><strong>5</strong><span>Assemble</span></a>
   </nav>
 
   <noscript><p class="explain-notice">This learning companion needs JavaScript. The mathematical article remains fully readable without it.</p></noscript>
@@ -90,20 +91,50 @@ description: "A click-based FSRS learning companion to the article on centered c
     </aside>
   </section>
 
+  <section class="explain-stage" id="derive-bound" aria-labelledby="bound-heading">
+    <div class="explain-stage-heading">
+      <div><span>Stage 2 · Cumulative derivation</span><h2 id="bound-heading">Recover the centered separability bound</h2></div>
+      <p>Six bottlenecks connect the covariance identity to the final criterion. A wrong choice sends that precise idea back to FSRS.</p>
+    </div>
+
+    <div class="bound-lab" id="bound-lab">
+      <header>
+        <div><span>Current bottleneck</span><strong id="bound-step-label">1 of 6</strong></div>
+        <button type="button" class="explain-text-button" id="bound-reset">Restart derivation</button>
+      </header>
+      <div class="bound-trace" id="bound-trace" aria-label="Recovered derivation"></div>
+      <article class="bound-challenge" id="bound-challenge">
+        <p class="bound-context" id="bound-context"></p>
+        <div class="bound-formula" id="bound-formula"></div>
+        <h3 id="bound-question"></h3>
+        <div class="bound-options" id="bound-options"></div>
+        <p class="bound-feedback" id="bound-feedback" role="status" aria-live="polite"></p>
+      </article>
+      <div class="bound-complete" id="bound-complete" hidden>
+        <strong>Derivation recovered.</strong>
+        <p>You reached the marginal-dependent bound and recovered the direction in which it strengthens de Vicente.</p>
+      </div>
+      <details class="proof-verification-note bound-verification-note">
+        <summary>What Lean checks in this stage</summary>
+        <p>The linked Lean module checks the weighted Cauchy–Schwarz inequality and the weighted variance identity, in addition to the covariance identity from Stage&nbsp;1. The nuclear-norm triangle inequality and rank-one norm formula are identified explicitly here but are not re-formalized in this small module.</p>
+      </details>
+    </div>
+  </section>
+
   <section class="explain-stage" id="scheduled-review" aria-labelledby="review-heading">
     <div class="explain-stage-heading">
-      <div><span>Stage 2 · FSRS-6</span><h2 id="review-heading">Review the ideas when they are due</h2></div>
+      <div><span>Stage 3 · FSRS-6</span><h2 id="review-heading">Review the decisions when they are due</h2></div>
       <p>Choose an answer. A first-attempt success is recorded as <em>Good</em>; a corrected answer as <em>Hard</em>; revealing the answer as <em>Again</em>. FSRS schedules the next appearance.</p>
     </div>
 
     <div class="fsrs-summary" aria-live="polite">
-      <div><span>Due now</span><strong id="fsrs-due-count">5</strong></div>
-      <div><span>Reviewed</span><strong id="fsrs-reviewed-count">0 / 5</strong></div>
+      <div><span>Due now</span><strong id="fsrs-due-count">8</strong></div>
+      <div><span>Reviewed</span><strong id="fsrs-reviewed-count">0 / 8</strong></div>
       <div><span>Next review</span><strong id="fsrs-next-date">today</strong></div>
     </div>
 
     <div class="fsrs-review-card" id="fsrs-review-card">
-      <div class="fsrs-card-meta"><span id="fsrs-concept-label">Concept 1 of 5</span><strong id="fsrs-card-status">New</strong></div>
+      <div class="fsrs-card-meta"><span id="fsrs-concept-label">Concept 1 of 8</span><strong id="fsrs-card-status">New</strong></div>
       <h3 id="fsrs-question">Which statement best describes the centered matrix?</h3>
       <div class="fsrs-options" id="fsrs-options"></div>
       <button type="button" class="explain-text-button" id="fsrs-reveal">Show the answer</button>
@@ -118,7 +149,7 @@ description: "A click-based FSRS learning companion to the article on centered c
     </div>
 
     <details class="fsrs-schedule">
-      <summary>See the five-concept schedule</summary>
+      <summary>See the eight-concept schedule</summary>
       <ol id="fsrs-schedule-list"></ol>
       <p>Scheduling uses the official <a href="https://github.com/open-spaced-repetition/ts-fsrs">ts-fsrs</a> implementation of FSRS-6 with 90% requested retention. No personal parameter optimization is attempted with so little data.</p>
     </details>
@@ -126,7 +157,7 @@ description: "A click-based FSRS learning companion to the article on centered c
 
   <section class="explain-stage" id="diagnose" aria-labelledby="diagnose-heading">
     <div class="explain-stage-heading">
-      <div><span>Stage 3</span><h2 id="diagnose-heading">Find what is wrong</h2></div>
+      <div><span>Stage 4</span><h2 id="diagnose-heading">Find what is wrong</h2></div>
       <p>The difficult misconceptions are plausible statements, not absurd ones. Decide whether each claim survives the article’s argument.</p>
     </div>
 
@@ -157,7 +188,7 @@ description: "A click-based FSRS learning companion to the article on centered c
 
   <section class="explain-stage" id="build-explanation" aria-labelledby="builder-heading">
     <div class="explain-stage-heading">
-      <div><span>Stage 4</span><h2 id="builder-heading">Assemble a concise explanation</h2></div>
+      <div><span>Stage 5</span><h2 id="builder-heading">Assemble a concise explanation</h2></div>
       <p>For each paragraph, choose the sentence that actually advances the argument. The completed version appears only after all four choices are correct.</p>
     </div>
 
@@ -176,7 +207,7 @@ description: "A click-based FSRS learning companion to the article on centered c
   </section>
 
   <section class="explain-readiness" aria-labelledby="readiness-heading">
-    <div><p class="explain-kicker">Reconstruction status</p><h2 id="readiness-heading">Understanding means recovering the links.</h2><p id="readiness-copy">Complete all four stages to mark this article as reconstructed.</p></div>
+    <div><p class="explain-kicker">Reconstruction status</p><h2 id="readiness-heading">Understanding means recovering the links.</h2><p id="readiness-copy">Complete all five stages to mark this article as reconstructed.</p></div>
     <div class="readiness-actions">
       <button type="button" class="explain-button" id="mark-ready" disabled>Mark as reconstructed</button>
       <button type="button" class="explain-button explain-button-secondary" id="export-progress">Export progress</button>

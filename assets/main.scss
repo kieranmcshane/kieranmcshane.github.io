@@ -4319,7 +4319,7 @@ body:has(.explain-lab) .post-header {
 
 .explain-local-nav {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   margin: 1.4rem 0 4.5rem;
   border: 1px solid var(--explain-line);
   background: #fff;
@@ -4650,6 +4650,164 @@ body:has(.explain-lab) .post-header {
   margin: 0;
   color: var(--explain-muted);
   font-size: 0.88rem;
+}
+
+.bound-lab {
+  overflow: hidden;
+  border: 1px solid var(--explain-line);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(23, 32, 51, 0.08);
+}
+
+.bound-lab > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--explain-line);
+  background: var(--explain-ink);
+  color: #fff;
+}
+
+.bound-lab > header > div {
+  display: grid;
+}
+
+.bound-lab > header span {
+  color: #b7c5d8;
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bound-lab > header .explain-text-button {
+  color: #d9e5ef;
+}
+
+.bound-trace {
+  display: grid;
+  gap: 0;
+  background: #f7f9fb;
+}
+
+.bound-trace:empty {
+  display: none;
+}
+
+.bound-trace > div {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--explain-line);
+}
+
+.bound-trace span {
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--explain-teal-dark);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.bound-trace p {
+  margin: 0;
+  overflow-x: auto;
+  color: #394457;
+  font-size: 0.9rem;
+}
+
+.bound-challenge,
+.bound-complete {
+  padding: 1.35rem;
+}
+
+.bound-context {
+  max-width: 70ch;
+  margin: 0 0 0.8rem;
+  color: var(--explain-muted);
+}
+
+.bound-formula {
+  min-height: 4.6rem;
+  display: grid;
+  place-items: center;
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid #c4ced9;
+  background: #fcfdfe;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.bound-challenge h3 {
+  margin: 1.15rem 0 0.75rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.bound-options {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.bound-options button {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #a9bbc6;
+  border-radius: 4px;
+  color: var(--explain-ink);
+  background: #fff;
+  text-align: left;
+}
+
+.bound-options button:hover:not(:disabled),
+.bound-options button:focus-visible {
+  border-color: var(--explain-teal);
+  background: #fbfefe;
+}
+
+.bound-options button.is-correct {
+  border-color: #2c7a61;
+  background: #edf8f3;
+}
+
+.bound-options button.is-wrong {
+  border-color: #a33b20;
+  background: #fff2ed;
+}
+
+.bound-feedback {
+  min-height: 1.7rem;
+  margin: 0.85rem 0 0;
+  color: #394457;
+}
+
+.bound-feedback .explain-button,
+.bound-feedback .explain-text-button {
+  margin-left: 0.55rem;
+}
+
+.bound-complete {
+  border-left: 4px solid var(--explain-teal);
+  background: var(--explain-wash);
+}
+
+.bound-complete p {
+  margin-bottom: 0;
+}
+
+.bound-verification-note {
+  margin: 0;
+  padding: 0.8rem 1.35rem 1rem;
 }
 
 .proof-action-panel button:hover {
@@ -5215,11 +5373,13 @@ body:has(.explain-lab) .post-header {
   }
 
   .explain-local-nav a:nth-child(3),
-  .explain-local-nav a:nth-child(4) {
+  .explain-local-nav a:nth-child(4),
+  .explain-local-nav a:nth-child(5) {
     border-top: 1px solid var(--explain-line);
   }
 
-  .explain-local-nav a:nth-child(3) {
+  .explain-local-nav a:nth-child(3),
+  .explain-local-nav a:nth-child(5) {
     border-left: 0;
   }
 
@@ -5243,6 +5403,7 @@ body:has(.explain-lab) .post-header {
   }
 
   .proof-puzzle-bar,
+  .bound-lab > header,
   .proof-goal-label,
   .proof-history li {
     align-items: flex-start;
@@ -5285,6 +5446,7 @@ body:has(.explain-lab) .post-header {
   }
 
   .proof-puzzle-bar,
+  .bound-lab > header,
   .proof-goal-label,
   .proof-history li {
     display: grid;

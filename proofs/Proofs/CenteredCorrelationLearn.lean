@@ -78,4 +78,47 @@ theorem centered_covariance_identity
   funext i
   rw [factor_centered_summand rbar sbar]
 
+/-- The scalar weighted Cauchy--Schwarz step used after rank-one norm factorization. -/
+theorem weighted_cauchy_schwarz
+    (a b : ι → ℝ)
+    (hp : ∀ i ∈ u, 0 ≤ p i) :
+    ∑ i ∈ u, p i * a i * b i ≤
+      √(∑ i ∈ u, p i * a i ^ 2) * √(∑ i ∈ u, p i * b i ^ 2) := by
+  calc
+    ∑ i ∈ u, p i * a i * b i =
+        ∑ i ∈ u, (√(p i) * a i) * (√(p i) * b i) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [mul_mul_mul_comm, Real.mul_self_sqrt (hp i hi)]
+      ring
+    _ ≤ √(∑ i ∈ u, (√(p i) * a i) ^ 2) *
+          √(∑ i ∈ u, (√(p i) * b i) ^ 2) :=
+      Real.sum_mul_le_sqrt_mul_sqrt u _ _
+    _ = √(∑ i ∈ u, p i * a i ^ 2) * √(∑ i ∈ u, p i * b i ^ 2) := by
+      congr 2 <;>
+        apply Finset.sum_congr rfl <;>
+        intro i hi <;>
+        rw [mul_pow, Real.sq_sqrt (hp i hi)]
+
+/-- Centering converts the weighted second moment into a variance deficit. -/
+theorem weighted_variance_identity
+    (hp : ∑ i ∈ u, p i = 1)
+    (hr : ∑ i ∈ u, p i * r i = rbar) :
+    ∑ i ∈ u, p i * (r i - rbar) ^ 2 =
+      (∑ i ∈ u, p i * r i ^ 2) - rbar ^ 2 := by
+  calc
+    ∑ i ∈ u, p i * (r i - rbar) ^ 2 =
+        ∑ i ∈ u, (p i * r i ^ 2 - 2 * rbar * (p i * r i) + p i * rbar ^ 2) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      ring
+    _ = (∑ i ∈ u, p i * r i ^ 2) -
+          2 * rbar * (∑ i ∈ u, p i * r i) +
+          (∑ i ∈ u, p i) * rbar ^ 2 := by
+      rw [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+      rw [Finset.mul_sum, Finset.sum_mul]
+    _ = (∑ i ∈ u, p i * r i ^ 2) - rbar ^ 2 := by
+      rw [hp, hr]
+      ring
+
 end CenteredCorrelationLearn
