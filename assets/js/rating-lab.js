@@ -206,6 +206,25 @@
     }).join('');
   }
 
+  // ATP citizenship and FIDE federation fields use three-letter sporting
+  // codes. Convert only declared source values; an unknown code stays blank
+  // instead of assigning a country from a player's name.
+  var sportingCountryCodes = {
+    ALG: 'DZ', ARG: 'AR', ARM: 'AM', AUS: 'AU', AUT: 'AT', AZE: 'AZ', BEL: 'BE',
+    BIH: 'BA', BLR: 'BY', BOL: 'BO', BRA: 'BR', BUL: 'BG', CAN: 'CA', CHI: 'CL',
+    CHN: 'CN', CIV: 'CI', COL: 'CO', CRO: 'HR', CZE: 'CZ', DEN: 'DK', DOM: 'DO',
+    ECU: 'EC', EGY: 'EG', ESP: 'ES', EST: 'EE', FIN: 'FI', FRA: 'FR', GBR: 'GB',
+    GEO: 'GE', GER: 'DE', GRE: 'GR', HKG: 'HK', HUN: 'HU', INA: 'ID', IND: 'IN',
+    IRI: 'IR', IRN: 'IR', IRQ: 'IQ', ISL: 'IS', ISR: 'IL', ITA: 'IT', JOR: 'JO',
+    JPN: 'JP', KAZ: 'KZ', KOR: 'KR', KSA: 'SA', LAT: 'LV', LBN: 'LB', LTU: 'LT',
+    LUX: 'LU', MAR: 'MA', MAS: 'MY', MDA: 'MD', MEX: 'MX', MKD: 'MK', MNE: 'ME',
+    MON: 'MC', NED: 'NL', NOR: 'NO', NZL: 'NZ', PAK: 'PK', PAR: 'PY', PER: 'PE',
+    PHI: 'PH', POL: 'PL', POR: 'PT', QAT: 'QA', ROU: 'RO', RSA: 'ZA', RUS: 'RU',
+    SGP: 'SG', SLO: 'SI', SRB: 'RS', SUI: 'CH', SVK: 'SK', SWE: 'SE', THA: 'TH',
+    TPE: 'TW', TUN: 'TN', TUR: 'TR', UAE: 'AE', UKR: 'UA', URU: 'UY', USA: 'US',
+    UZB: 'UZ', VEN: 'VE', VIE: 'VN'
+  };
+
   function subdivisionFlag(tag) {
     return String.fromCodePoint.apply(String, [0x1F3F4].concat(tag.split('').map(function (letter) {
       return 0xE0000 + letter.charCodeAt(0);
@@ -217,6 +236,29 @@
     var subdivisions = { england: 'gbeng', scotland: 'gbsct', wales: 'gbwls' };
     if (subdivisions[normalized]) return subdivisionFlag(subdivisions[normalized]);
     return flagEmoji(buildRegionCodes()[normalized]);
+  }
+
+  function countryFlag(value) {
+    var raw = String(value || '').trim();
+    if (!raw) return '';
+    var code = raw.toUpperCase();
+    var subdivisions = { ENG: 'gbeng', SCO: 'gbsct', WLS: 'gbwls' };
+    if (subdivisions[code]) return subdivisionFlag(subdivisions[code]);
+    if (/^[A-Z]{2}$/.test(code)) return flagEmoji(code);
+    return flagEmoji(sportingCountryCodes[code] || buildRegionCodes()[normalizedRegionName(raw)]);
+  }
+
+  function inlineCountryFlag(row, sport) {
+    if (!row || sport === 'national-football') return '';
+    var flag = countryFlag(row.country);
+    if (!flag) return '';
+    var sourceLabel = 'Source country or federation: ' + String(row.country).toUpperCase();
+    return '<span class="rating-lab-country-flag" role="img" aria-label="' + escapeHtml(sourceLabel) +
+      '" title="' + escapeHtml(sourceLabel) + '">' + escapeHtml(flag) + '</span>';
+  }
+
+  function entityName(row, sport) {
+    return '<span class="rating-lab-entity-name">' + escapeHtml(row.name) + inlineCountryFlag(row, sport) + '</span>';
   }
 
   function entityInitials(name) {
@@ -260,8 +302,7 @@
   }
 
   function entityTitle(row, sport) {
-    return '<span class="rating-lab-entity-title">' + entityBadge(row, sport) + '<span>' +
-      escapeHtml(row.name) + '</span></span>';
+    return '<span class="rating-lab-entity-title">' + entityBadge(row, sport) + entityName(row, sport) + '</span>';
   }
 
   function mediaCredit(row, sport) {
@@ -327,8 +368,8 @@
     function group(label, items, positive) {
       return '<div><p>' + label + '</p><div>' + items.map(function (row) {
         var value = (positive && row.change30 > 0 ? '+' : '') + number(row.change30, 1);
-        return '<button type="button" data-select="' + escapeHtml(row.id) + '"><span>' + escapeHtml(row.name) +
-          '</span><strong class="' + (positive ? 'is-positive' : 'is-negative') + '">' + value + '</strong></button>';
+        return '<button type="button" data-select="' + escapeHtml(row.id) + '">' + entityName(row, state.sport) +
+          '<strong class="' + (positive ? 'is-positive' : 'is-negative') + '">' + value + '</strong></button>';
       }).join('') + '</div></div>';
     }
     elements.movers.innerHTML = group('▲ Biggest risers · 30 days', risers, true) +
@@ -365,8 +406,8 @@
         (row.id === state.selected ? 'true' : 'false') + '"' + (row.id === state.selected ? ' class="is-selected"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td>' +
         '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '">' +
-        entityBadge(row, state.sport) + '<span class="rating-lab-identity-copy"><span>' + escapeHtml(row.name) +
-        '</span><small>' + escapeHtml(row.competition || row.country) + '</small></span></button></th>' +
+        entityBadge(row, state.sport) + '<span class="rating-lab-identity-copy">' + entityName(row, state.sport) +
+        '<small>' + escapeHtml(row.competition || row.country) + '</small></span></button></th>' +
         '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
         '<td><strong>' + number(row.score, 1) + '</strong></td>' +
         '<td class="rating-lab-optional">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1)) + '</td>' +
@@ -973,7 +1014,9 @@
       state.matchupB = state.matchupB ? state.matchupB.id : null;
     }
     var options = rows.map(function (row) {
-      return '<option value="' + escapeHtml(row.id) + '">#' + row.rank + ' · ' + escapeHtml(row.name) + '</option>';
+      var flag = state.sport === 'national-football' ? nationalTeamFlag(row.name) : countryFlag(row.country);
+      return '<option value="' + escapeHtml(row.id) + '">#' + row.rank + ' · ' +
+        (flag ? escapeHtml(flag) + ' ' : '') + escapeHtml(row.name) + '</option>';
     }).join('');
     elements.matchupA.innerHTML = options;
     elements.matchupB.innerHTML = options;
