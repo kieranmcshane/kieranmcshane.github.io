@@ -8,6 +8,7 @@ PAGE = (ROOT / "play-centered-correlations.md").read_text()
 SCRIPT = (ROOT / "assets/js/centered-correlation-game.js").read_text()
 HEAD = (ROOT / "_includes/head-custom.html").read_text()
 ARTICLE = (ROOT / "_posts/2026-07-17-centered-correlation-tensors-separability.md").read_text()
+STYLES = (ROOT / "assets/main.scss").read_text()
 
 
 class CenteredProofGameTests(unittest.TestCase):
@@ -51,6 +52,20 @@ class CenteredProofGameTests(unittest.TestCase):
     def test_html_ids_are_unique(self):
         ids = re.findall(r'\bid="([^"]+)"', PAGE)
         self.assertEqual(len(ids), len(set(ids)))
+
+    def test_phone_layout_has_thumb_navigation_and_collapsible_facts(self):
+        self.assertIn('id="mission-facts-drawer"', PAGE)
+        self.assertIn('class="game-tab-short"', PAGE)
+        self.assertIn("position: fixed;", STYLES)
+        self.assertIn("padding-bottom: calc(5.6rem + env(safe-area-inset-bottom))", STYLES)
+        self.assertIn("syncFactsDrawer", SCRIPT)
+        self.assertIn('root.dataset.activeView = name', SCRIPT)
+        self.assertIn('.proof-game[data-active-view="mission"] .game-hero', STYLES)
+
+    def test_phone_layout_prevents_page_level_horizontal_overflow(self):
+        self.assertIn("body:has(.proof-game) .wrapper", STYLES)
+        self.assertIn("overflow-x: hidden", STYLES)
+        self.assertIn("#proof-state-formula { width: 100%; font-size: 1rem; }", STYLES)
 
 
 if __name__ == "__main__":

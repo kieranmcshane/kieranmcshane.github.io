@@ -270,6 +270,7 @@
     missionObjective: document.getElementById('mission-objective'),
     missionTarget: document.getElementById('mission-target'),
     missionFacts: document.getElementById('mission-facts'),
+    factsDrawer: document.getElementById('mission-facts-drawer'),
     missionStepLabel: document.getElementById('mission-step-label'),
     missionRating: document.getElementById('mission-rating'),
     integrity: document.getElementById('integrity-meter'),
@@ -377,6 +378,7 @@
 
   function showView(name) {
     state.view = name;
+    root.dataset.activeView = name;
     elements.tabs.forEach(function (tab) {
       tab.setAttribute('aria-pressed', String(tab.dataset.gameView === name));
     });
@@ -385,6 +387,18 @@
     });
     if (name === 'returns') renderReturnMission();
     saveState();
+    if (isPhoneLayout() && window.scrollTo) {
+      window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    }
+  }
+
+  function isPhoneLayout() {
+    return Boolean(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
+  }
+
+  function syncFactsDrawer() {
+    if (!elements.factsDrawer) return;
+    elements.factsDrawer.open = !isPhoneLayout();
   }
 
   function firstIncomplete() {
@@ -424,6 +438,7 @@
     checkpointResets = 0;
     detour = null;
     log = [];
+    if (elements.factsDrawer && isPhoneLayout()) elements.factsDrawer.open = false;
     elements.complete.hidden = true;
     elements.nextMission.hidden = index === missions.length - 1;
     renderMission();
@@ -704,6 +719,12 @@
     showView('campaign');
   });
 
+  if (window.matchMedia) {
+    var phoneLayoutQuery = window.matchMedia('(max-width: 760px)');
+    if (phoneLayoutQuery.addEventListener) phoneLayoutQuery.addEventListener('change', syncFactsDrawer);
+  }
+
+  syncFactsDrawer();
   renderMap();
   updateReturnSummary();
   showView(state.view === 'mission' ? 'campaign' : state.view);

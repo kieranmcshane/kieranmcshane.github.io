@@ -22,9 +22,9 @@ description: "A no-typing mathematical strategy game for reconstructing the cent
   <noscript><p class="game-notice">The proof campaign needs JavaScript. The <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">mathematical article</a> remains fully readable without it.</p></noscript>
 
   <nav class="game-tabs" aria-label="Game views">
-    <button type="button" aria-pressed="true" data-game-view="campaign">Campaign map</button>
-    <button type="button" aria-pressed="false" data-game-view="mission">Current mission</button>
-    <button type="button" aria-pressed="false" data-game-view="returns">Return missions <span id="game-due-badge">0</span></button>
+    <button type="button" aria-pressed="true" data-game-view="campaign"><span class="game-tab-icon" aria-hidden="true">⌂</span><span class="game-tab-long">Campaign map</span><span class="game-tab-short">Map</span></button>
+    <button type="button" aria-pressed="false" data-game-view="mission"><span class="game-tab-icon" aria-hidden="true">◇</span><span class="game-tab-long">Current mission</span><span class="game-tab-short">Mission</span></button>
+    <button type="button" aria-pressed="false" data-game-view="returns"><span class="game-tab-icon" aria-hidden="true">↻</span><span class="game-tab-long">Return missions</span><span class="game-tab-short">Returns</span> <span class="game-due-badge" id="game-due-badge">0</span></button>
   </nav>
 
   <main>
@@ -57,14 +57,11 @@ description: "A no-typing mathematical strategy game for reconstructing the cent
       </div>
 
       <div class="mission-board">
-        <aside class="mission-facts" aria-labelledby="mission-facts-heading">
-          <h3 id="mission-facts-heading">Available facts</h3>
+        <details class="mission-facts" id="mission-facts-drawer" open>
+          <summary id="mission-facts-heading"><span>Available facts</span><small>Reference</small></summary>
           <ul id="mission-facts"></ul>
-          <details>
-            <summary>Rules of this mission</summary>
-            <p>A productive move advances the proof. A valid detour can be undone. A false implication damages proof integrity. At zero integrity, this mission returns to its checkpoint.</p>
-          </details>
-        </aside>
+          <p class="mission-rules">A productive move advances the proof. A valid detour can be undone. A false implication damages proof integrity. At zero integrity, this mission returns to its checkpoint.</p>
+        </details>
 
         <div class="mission-workspace">
           <div class="mission-turn">
