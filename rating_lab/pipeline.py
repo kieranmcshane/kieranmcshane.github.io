@@ -41,6 +41,8 @@ SCHEDULE_ENTITY_ALIASES = {
 USER_AGENT = "kieranmcshane-rating-lab/1.3 (+https://kieranmcshane.github.io/rating-lab/)"
 FOOTBALL_CREST_HOST = "crests.football-data.org"
 WIKIMEDIA_IMAGE_HOST = "upload.wikimedia.org"
+FOOTBALL_DATA_REQUEST_INTERVAL_SECONDS = 6.2
+_football_data_last_request = 0.0
 FOOTBALL_COMPETITIONS = {
     "PL": "Premier League",
     "PD": "La Liga",
@@ -185,6 +187,7 @@ def _get(
     attempts: int = 3,
     cache_ttl: int = 21_600,
 ) -> bytes:
+    global _football_data_last_request
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json, text/csv, */*"}
     if token:
         headers["X-Auth-Token"] = token
@@ -194,9 +197,15 @@ def _get(
         cache_file = Path(cache_root) / hashlib.sha256(url.encode()).hexdigest()
         if cache_file.exists() and time.time() - cache_file.stat().st_mtime < cache_ttl:
             return cache_file.read_bytes()
+    is_football_data = bool(token) and urlparse(url).hostname == "api.football-data.org"
     last_error: Exception | None = None
     for attempt in range(attempts):
         try:
+            if is_football_data:
+                elapsed = time.monotonic() - _football_data_last_request
+                if elapsed < FOOTBALL_DATA_REQUEST_INTERVAL_SECONDS:
+                    time.sleep(FOOTBALL_DATA_REQUEST_INTERVAL_SECONDS - elapsed)
+                _football_data_last_request = time.monotonic()
             with urlopen(Request(url, headers=headers), timeout=45) as response:
                 body = response.read()
             if cache_file:
@@ -206,7 +215,13 @@ def _get(
         except (HTTPError, URLError, TimeoutError) as error:
             last_error = error
             if attempt + 1 < attempts:
-                time.sleep(2**attempt)
+                retry_after = 0.0
+                if isinstance(error, HTTPError) and error.code == 429:
+                    try:
+                        retry_after = float(error.headers.get("Retry-After", "60"))
+                    except (TypeError, ValueError):
+                        retry_after = 60.0
+                time.sleep(max(2**attempt, retry_after))
     raise RuntimeError(f"Unable to fetch {url}: {last_error}")
 
 
@@ -441,6 +456,26 @@ def fetch_tennis(start_year: int = 2018) -> tuple[list[Match], dict, dict]:
     return matches, entities, meta
 
 
+def _required_football_seasons(start_year: int, current_year: int) -> list[int]:
+    return list(range(max(start_year, current_year - 3), current_year))
+
+
+def _validate_football_coverage(
+    coverage_counts: dict[tuple[str, int], int], required_seasons: list[int]
+) -> None:
+    missing = [
+        f"{code}:{year}"
+        for year in required_seasons
+        for code in FOOTBALL_COMPETITIONS
+        if coverage_counts.get((code, year), 0) == 0
+    ]
+    if missing:
+        raise RuntimeError(
+            "football-data.org coverage incomplete for required competition-seasons: "
+            + ", ".join(missing)
+        )
+
+
 def fetch_football(token: str | None, start_year: int = 2020) -> tuple[list[Match], dict, dict]:
     if not token:
         return fetch_open_football(start_year)
@@ -449,6 +484,7 @@ def fetch_football(token: str | None, start_year: int = 2020) -> tuple[list[Matc
     entities: dict[str, dict] = {}
     latest = None
     successful_sources = 0
+    coverage_counts: dict[tuple[str, int], int] = defaultdict(int)
     for code, label in FOOTBALL_COMPETITIONS.items():
         for year in range(start_year, current_year + 1):
             url = f"https://api.football-data.org/v4/competitions/{code}/matches?season={year}"
@@ -480,15 +516,29 @@ def fetch_football(token: str | None, start_year: int = 2020) -> tuple[list[Matc
                     }
                 result = 1.0 if home_goals > away_goals else 0.0 if home_goals < away_goals else 0.5
                 matches.append(Match(played, home, away, result, label, str(year), True))
+                coverage_counts[(code, year)] += 1
                 latest = max(latest or played, played)
     if not successful_sources or not matches:
         raise RuntimeError("football-data.org returned no usable competitions")
+    required_seasons = _required_football_seasons(start_year, current_year)
+    _validate_football_coverage(coverage_counts, required_seasons)
     meta = {
         "source": "football-data.org",
         "source_url": "https://www.football-data.org/",
         "license": "football-data.org terms",
         "latest_result": latest.isoformat() if latest else None,
         "stale_after_hours": 48,
+        "coverage": {
+            "required_seasons": required_seasons,
+            "competitions": list(FOOTBALL_COMPETITIONS),
+            "finished_matches": {
+                str(year): {
+                    code: coverage_counts[(code, year)] for code in FOOTBALL_COMPETITIONS
+                }
+                for year in required_seasons
+            },
+            "rule": "Every covered competition must return at least one finished match in each of the latest three season start-years; otherwise retain the previous valid dataset.",
+        },
     }
     matches = _deduplicate(matches)
     _mark_active_football(matches, entities)
