@@ -181,7 +181,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <summary>How this competition view is calculated</summary>
       <p id="predictor-method-copy"></p>
       <p>Every forecast uses the leaderboard’s chronological rating state. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Cups lock every published result and tie. When a later draw is not yet public, survivors are uniformly re-drawn; the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
-      <p>For a completed competition, the selected protocol records its expected result score <span class="rating-lab-formula">p<sub>m</sub></span> immediately before every update. Participant surprise is <span class="rating-lab-formula">Z = Σ(s<sub>m</sub> − p<sub>m</sub>) / √Σp<sub>m</sub>(1−p<sub>m</sub>)</span>, where a win scores 1, a draw 0.5, and a loss 0. Positive values are outperformance; negative values are underperformance. The denominator is a disclosed common Bernoulli-score variance reference, not a claim that draws are Bernoulli outcomes.</p>
+      <p>For a completed competition, the anchored Performance Rating varies one participant’s rating while every opponent stays fixed at the selected protocol’s pre-event belief, then solves <span class="rating-lab-formula">Σp<sub>m</sub>(R<sub>perf</sub>) = Σs<sub>m</sub></span>. A separate reset rank starts everybody from the neutral prior and replays only the event. Chronological surprise remains <span class="rating-lab-formula">Z = Σ(s<sub>m</sub> − p<sub>m</sub>) / √Σp<sub>m</sub>(1−p<sub>m</sub>)</span>, where a win scores 1, a draw 0.5, and a loss 0.</p>
     </details>
   </section>
 

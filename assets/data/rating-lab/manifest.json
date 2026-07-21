@@ -1,6 +1,6 @@
 {
   "schema_version": "1.9.0",
-  "methodology_version": "2026-07-21.1",
+  "methodology_version": "2026-07-21.2",
   "code_revision": "3deba666f812cb70b753b5b622a22e2c4efedd6c",
   "generated_at": "2026-07-20T07:51:09+00:00",
   "sports": {
@@ -196,7 +196,7 @@
     ],
     "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
     "availability": "Withhold title probabilities until the public source identifies a knockout field.",
-    "completed_competitions": "Replace retrospective title odds with competition-only protocol performance ratings initialized from the strictly pre-event state.",
+    "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
     "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
     "market_quality_fields": [
       "raw_yes_price_sum",

@@ -305,12 +305,15 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(len(result["participants"]), 2)
         alpha = next(row for row in result["participants"] if row["name"] == "Alpha")
         self.assertEqual((alpha["wins"], alpha["draws"], alpha["losses"]), (1, 1, 0))
-        self.assertGreater(alpha["change"], 0)
+        self.assertGreater(alpha["performance_delta"], 0)
+        self.assertGreater(alpha["performance_rating"], alpha["start_rating"])
+        self.assertGreaterEqual(alpha["reset_rank"], 1)
+        self.assertTrue(math.isfinite(alpha["reset_rating"]))
         self.assertGreater(alpha["score_residual"], 0)
         self.assertGreater(alpha["surprise_index"], 0)
         self.assertAlmostEqual(sum(row["expected_score"] for row in result["participants"]), 2.0, places=3)
         self.assertAlmostEqual(sum(row["score_residual"] for row in result["participants"]), 0.0, places=3)
-        self.assertAlmostEqual(sum(row["change"] for row in result["participants"]), 0, places=1)
+        self.assertAlmostEqual(sum(row["replay_change"] for row in result["participants"]), 0, places=1)
         self.assertIn("immediately before", result["surprise_method"])
 
         protocol_models = {
@@ -335,6 +338,13 @@ class PipelineTests(unittest.TestCase):
                 )
                 self.assertTrue(
                     all(math.isfinite(row["surprise_index"]) for row in protocol_result["participants"])
+                )
+                self.assertTrue(
+                    all(math.isfinite(row["performance_rating"]) for row in protocol_result["participants"])
+                )
+                self.assertEqual(
+                    sorted(row["reset_rank"] for row in protocol_result["participants"]),
+                    list(range(1, len(protocol_result["participants"]) + 1)),
                 )
 
     def test_completed_competition_normalizes_schedule_aliases(self):
