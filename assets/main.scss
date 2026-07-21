@@ -3924,6 +3924,64 @@ body:has(.explain-lab) .post-header {
   grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.7fr);
 }
 
+.proof-route {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--explain-line);
+  background: #fff;
+  list-style: none;
+}
+
+.proof-route li {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  color: var(--explain-muted);
+}
+
+.proof-route li + li {
+  border-left: 1px solid var(--explain-line);
+}
+
+.proof-route li > span {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid #b9c5d1;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.proof-route li div {
+  display: grid;
+}
+
+.proof-route strong {
+  color: var(--explain-ink);
+  font-size: 0.84rem;
+}
+
+.proof-route small {
+  font-size: 0.72rem;
+}
+
+.proof-route li.is-current {
+  background: var(--explain-wash);
+}
+
+.proof-route li.is-current > span,
+.proof-route li.is-complete > span {
+  border-color: var(--explain-teal-dark);
+  color: #fff;
+  background: var(--explain-teal-dark);
+}
+
 .proof-hypotheses {
   padding: 1.25rem;
   border-right: 1px solid var(--explain-line);
@@ -4025,6 +4083,16 @@ body:has(.explain-lab) .post-header {
   background: var(--explain-wash);
 }
 
+.proof-move-family {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--explain-teal-dark);
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .proof-action-panel > p {
   margin: 0 0 0.7rem;
   color: #394457;
@@ -4036,12 +4104,42 @@ body:has(.explain-lab) .post-header {
 }
 
 .proof-action-panel button {
+  display: grid;
+  gap: 0.2rem;
   padding: 0.7rem 0.8rem;
   border: 1px solid #a9bbc6;
   border-radius: 4px;
   color: var(--explain-ink);
   background: #fff;
   text-align: left;
+}
+
+.proof-action-panel button small,
+.proof-history small {
+  color: var(--explain-teal-dark);
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+}
+
+.proof-transfer {
+  max-width: 68rem;
+  margin: 1rem auto 0;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid #a9bbc6;
+  background: #f7f9fb;
+}
+
+.proof-transfer h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+}
+
+.proof-transfer p {
+  margin: 0;
+  color: var(--explain-muted);
+  font-size: 0.88rem;
 }
 
 .proof-action-panel button:hover {
@@ -4625,6 +4723,15 @@ body:has(.explain-lab) .post-header {
     border-bottom: 1px solid var(--explain-line);
   }
 
+  .proof-route {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-route li + li {
+    border-top: 1px solid var(--explain-line);
+    border-left: 0;
+  }
+
   .proof-puzzle-bar,
   .proof-goal-label,
   .proof-history li {
@@ -4671,6 +4778,10 @@ body:has(.explain-lab) .post-header {
   .proof-goal-label,
   .proof-history li {
     display: grid;
+  }
+
+  .proof-route small {
+    display: none;
   }
 
   .proof-controls > a {

@@ -43,9 +43,14 @@ description: "A click-based FSRS learning companion to the article on centered c
 
     <div class="proof-puzzle" id="proof-puzzle">
       <header class="proof-puzzle-bar">
-        <div><span>Bounded world</span><strong>Covariance identity</strong></div>
+        <div><span>Linear-algebra module</span><strong>Covariance identity</strong></div>
         <span class="proof-verified-badge">✓ transitions checked by Lean</span>
       </header>
+      <ol class="proof-route" aria-label="Proof strategy">
+        <li data-proof-phase="1"><span>1</span><div><strong>Rewrite</strong><small>Expose the cross-moment</small></div></li>
+        <li data-proof-phase="2"><span>2</span><div><strong>Center</strong><small>Insert the zero means</small></div></li>
+        <li data-proof-phase="3"><span>3</span><div><strong>Factor</strong><small>Recognize the covariance</small></div></li>
+      </ol>
       <div class="proof-puzzle-grid">
         <aside class="proof-hypotheses" aria-labelledby="proof-hypotheses-heading">
           <h3 id="proof-hypotheses-heading">Available facts</h3>
@@ -61,6 +66,7 @@ description: "A click-based FSRS learning companion to the article on centered c
           <div class="proof-goal-label"><span>Goal</span><strong id="proof-step-count">0 / 3 productive moves</strong></div>
           <div class="proof-expression" id="proof-expression" aria-live="polite"></div>
           <div class="proof-action-panel" id="proof-action-panel">
+            <span class="proof-move-family" id="proof-move-family">Choose an object first</span>
             <p id="proof-action-prompt">Select a highlighted part of the formula.</p>
             <div id="proof-actions"></div>
           </div>
@@ -78,6 +84,10 @@ description: "A click-based FSRS learning companion to the article on centered c
         </div>
       </div>
     </div>
+    <aside class="proof-transfer" aria-labelledby="proof-transfer-heading">
+      <h3 id="proof-transfer-heading">What this puzzle is training</h3>
+      <p>The reusable skill is not memorizing these three buttons. It is deciding which object to change, choosing a valid equality in a useful direction, and recognizing the form the proof is trying to reach. Other mathematical modules can keep that decision pattern while supplying different objects and operations.</p>
+    </aside>
   </section>
 
   <section class="explain-stage" id="scheduled-review" aria-labelledby="review-heading">
