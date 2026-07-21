@@ -13,7 +13,9 @@ from rating_lab.pipeline import (
     _deduplicate,
     _competition_performance,
     _competition_matches,
+    _football_data_crest_media,
     _metrics,
+    _merge_schedule_media,
     _merge_schedule_results,
     _parse_broadcast_pgn,
     _parse_cup_schedule,
@@ -437,8 +439,8 @@ class PipelineTests(unittest.TestCase):
             "status": "SCHEDULED",
             "stage": "GROUP_STAGE",
             "group": "A",
-            "homeTeam": {"id": 1, "name": "Alpha"},
-            "awayTeam": {"id": 2, "name": "Beta"},
+            "homeTeam": {"id": 1, "name": "Alpha", "crest": "https://crests.football-data.org/1.svg"},
+            "awayTeam": {"id": 2, "name": "Beta", "crest": "https://crests.football-data.org/2.png"},
             "score": {"winner": None, "fullTime": {"home": None, "away": None}},
             "season": {"startDate": "2026-08-01"},
         }]}
@@ -447,6 +449,17 @@ class PipelineTests(unittest.TestCase):
         self.assertIsNotNone(competition)
         self.assertFalse(competition["forecast_available"])
         self.assertIn("no title probability", competition["availability"])
+        self.assertEqual(competition["teams"][0]["media"]["kind"], "crest")
+
+    def test_media_hosts_and_schedule_identity_merge_are_explicit(self):
+        self.assertIsNotNone(_football_data_crest_media("https://crests.football-data.org/65.png"))
+        self.assertIsNone(_football_data_crest_media("http://crests.football-data.org/65.png"))
+        self.assertIsNone(_football_data_crest_media("https://example.test/65.png"))
+        media = _football_data_crest_media("https://crests.football-data.org/65.png")
+        entities = {"national-football:spain": {"name": "Spain"}}
+        schedules = [{"teams": [{"id": "different-id", "name": "Spain", "media": media}]}]
+        _merge_schedule_media(entities, schedules)
+        self.assertEqual(entities["national-football:spain"]["media"]["url"], media["url"])
 
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{
@@ -546,6 +559,7 @@ class PipelineTests(unittest.TestCase):
         validate_payload(payload, schema)
         self.assertEqual(set(payload["models"]), {"elo", "glicko2", "trueskill", "robust"})
         self.assertIn("candidate_parameters", payload)
+        self.assertFalse(payload["media"]["model_input"])
         self.assertEqual(payload["data_window"]["matches"], len(matches))
         self.assertEqual(payload["outcome_context"]["matches"], len(matches))
         self.assertEqual(payload["outcome_context"]["draw_rate"], 0.0)

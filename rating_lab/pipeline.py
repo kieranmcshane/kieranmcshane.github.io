@@ -7,6 +7,7 @@ import csv
 from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 import hashlib
+import html as html_module
 from html.parser import HTMLParser
 import io
 import json
@@ -20,14 +21,14 @@ import tempfile
 import time
 from typing import Iterable
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import unquote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.10.0"
-METHODOLOGY_VERSION = "2026-07-21.3"
+SCHEMA_VERSION = "1.11.0"
+METHODOLOGY_VERSION = "2026-07-21.4"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 SCHEDULE_ENTITY_ALIASES = {
@@ -36,7 +37,9 @@ SCHEDULE_ENTITY_ALIASES = {
         "bosnia-herzegovina": "bosnia-and-herzegovina",
     },
 }
-USER_AGENT = "kieranmcshane-rating-lab/1.2 (+https://kieranmcshane.github.io/rating-lab/)"
+USER_AGENT = "kieranmcshane-rating-lab/1.3 (+https://kieranmcshane.github.io/rating-lab/)"
+FOOTBALL_CREST_HOST = "crests.football-data.org"
+WIKIMEDIA_IMAGE_HOST = "upload.wikimedia.org"
 FOOTBALL_COMPETITIONS = {
     "PL": "Premier League",
     "PD": "La Liga",
@@ -210,6 +213,155 @@ def _slug(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-")
 
 
+def _safe_https_url(value: str | None, hosts: set[str]) -> str | None:
+    """Keep generated media URLs on the explicitly declared public hosts."""
+    if not value:
+        return None
+    parsed = urlparse(str(value))
+    if parsed.scheme != "https" or parsed.hostname not in hosts:
+        return None
+    return str(value)
+
+
+def _football_data_crest_media(value: str | None) -> dict | None:
+    url = _safe_https_url(value, {FOOTBALL_CREST_HOST})
+    if not url:
+        return None
+    return {
+        "kind": "crest",
+        "url": url,
+        "source": "football-data.org",
+        "source_url": "https://www.football-data.org/",
+        "license": "football-data.org terms; underlying club or federation mark rights remain with their owners",
+        "attribution": "Crest supplied by football-data.org",
+    }
+
+
+def _plain_metadata(value: str | None) -> str:
+    text = re.sub(r"<[^>]+>", " ", value or "")
+    return " ".join(html_module.unescape(text).split())[:240]
+
+
+def _commons_key(value: str) -> str:
+    return unquote(value).replace("_", " ").casefold().strip()
+
+
+def _wikimedia_portraits(sport: str, entity_ids: list[str]) -> dict[str, dict]:
+    """Resolve identifier-linked, explicitly licensed portraits without name guessing."""
+    if sport == "tennis":
+        property_id = "P536"
+        external_ids = {
+            entity.removeprefix("atp:").upper(): entity
+            for entity in entity_ids
+            if entity.startswith("atp:")
+        }
+    elif sport == "chess":
+        property_id = "P1440"
+        external_ids = {
+            entity.removeprefix("chess:fide:"): entity
+            for entity in entity_ids
+            if entity.startswith("chess:fide:")
+        }
+    else:
+        return {}
+    filenames: dict[str, dict[str, str]] = {}
+    values = sorted(external_ids)
+    for offset in range(0, len(values), 80):
+        batch = values[offset:offset + 80]
+        literals = " ".join(json.dumps(value) for value in batch)
+        query = (
+            "SELECT ?external ?image WHERE { VALUES ?external { " + literals + " } "
+            f"?item wdt:{property_id} ?external; wdt:P18 ?image. }}"
+        )
+        url = "https://query.wikidata.org/sparql?" + urlencode({"query": query, "format": "json"})
+        try:
+            payload = json.loads(_get(url, cache_ttl=2_592_000))
+        except (RuntimeError, json.JSONDecodeError):
+            continue
+        for binding in payload.get("results", {}).get("bindings", []):
+            external = binding.get("external", {}).get("value")
+            image = binding.get("image", {}).get("value", "")
+            marker = "/wiki/Special:FilePath/"
+            if external not in external_ids or marker not in image:
+                continue
+            filename = unquote(urlparse(image).path.split(marker, 1)[1])
+            if filename:
+                filenames[_commons_key(filename)] = {
+                    "entity": external_ids[external],
+                    "filename": filename,
+                }
+    portraits: dict[str, dict] = {}
+    keys = sorted(filenames)
+    for offset in range(0, len(keys), 40):
+        batch = keys[offset:offset + 40]
+        titles = "|".join("File:" + filenames[key]["filename"] for key in batch)
+        url = "https://commons.wikimedia.org/w/api.php?" + urlencode(
+            {
+                "action": "query",
+                "format": "json",
+                "prop": "imageinfo",
+                "titles": titles,
+                "iiprop": "url|extmetadata",
+                "iiurlwidth": "160",
+            }
+        )
+        try:
+            payload = json.loads(_get(url, cache_ttl=2_592_000))
+        except (RuntimeError, json.JSONDecodeError):
+            continue
+        for page in payload.get("query", {}).get("pages", {}).values():
+            filename = str(page.get("title", "")).removeprefix("File:")
+            matched = filenames.get(_commons_key(filename))
+            entity = matched["entity"] if matched else None
+            info = (page.get("imageinfo") or [{}])[0]
+            metadata = info.get("extmetadata") or {}
+            image_url = _safe_https_url(info.get("thumburl") or info.get("url"), {WIKIMEDIA_IMAGE_HOST})
+            source_url = _safe_https_url(info.get("descriptionurl"), {"commons.wikimedia.org"})
+            license_name = _plain_metadata((metadata.get("LicenseShortName") or {}).get("value"))
+            attribution = _plain_metadata((metadata.get("Artist") or {}).get("value"))
+            if not entity or not image_url or not source_url or not license_name:
+                continue
+            portraits[entity] = {
+                "kind": "portrait",
+                "url": image_url,
+                "source": "Wikimedia Commons via Wikidata identifier match",
+                "source_url": source_url,
+                "license": license_name,
+                "attribution": attribution or "See the Wikimedia Commons source page",
+            }
+    return portraits
+
+
+def _merge_schedule_media(entities: dict, schedules: list[dict] | None) -> None:
+    """Copy source-supplied team media into the ranking identity registry by ID or name."""
+    by_name = {_slug(info.get("name", "")): entity for entity, info in entities.items()}
+    for competition in schedules or []:
+        for team in competition.get("teams", []):
+            if not isinstance(team, dict) or not team.get("media"):
+                continue
+            entity = team.get("id") if team.get("id") in entities else by_name.get(_slug(team.get("name", "")))
+            if entity:
+                entities[entity]["media"] = team["media"]
+
+
+def _attach_verified_portraits(payload: dict) -> None:
+    """Add portraits to published rows only; a media outage never blocks ratings."""
+    sport = payload.get("sport")
+    if sport not in {"tennis", "chess"}:
+        return
+    candidates = []
+    for model_name in MODEL_NAMES:
+        for row in payload["models"][model_name]["rankings"][:120]:
+            if row["id"] not in candidates:
+                candidates.append(row["id"])
+    portraits = _wikimedia_portraits(sport, candidates)
+    for model_name in MODEL_NAMES:
+        for row in payload["models"][model_name]["rankings"]:
+            if row["id"] in portraits:
+                row["media"] = portraits[row["id"]]
+    payload["media"]["entities_with_media"] = len(portraits)
+
+
 def _season_label(year: int) -> str:
     return f"{year}-{str(year + 1)[-2:]}"
 
@@ -315,10 +467,16 @@ def fetch_football(token: str | None, start_year: int = 2020) -> tuple[list[Matc
                 played = date.fromisoformat(row["utcDate"][:10])
                 home = f"football:{row['homeTeam']['id']}"
                 away = f"football:{row['awayTeam']['id']}"
-                for entity, name in ((home, row["homeTeam"]["name"]), (away, row["awayTeam"]["name"])):
+                for entity, team_info in ((home, row["homeTeam"]), (away, row["awayTeam"])):
                     previous = entities.get(entity, {})
                     competition = previous.get("competition", "") if label == "Champions League" else label
-                    entities[entity] = {"name": name, "country": "", "competition": competition or label}
+                    media = _football_data_crest_media(team_info.get("crest")) or previous.get("media")
+                    entities[entity] = {
+                        "name": team_info["name"],
+                        "country": "",
+                        "competition": competition or label,
+                        **({"media": media} if media else {}),
+                    }
                 result = 1.0 if home_goals > away_goals else 0.0 if home_goals < away_goals else 0.5
                 matches.append(Match(played, home, away, result, label, str(year), True))
                 latest = max(latest or played, played)
@@ -467,7 +625,7 @@ def fetch_league_schedules() -> list[dict]:
 def _parse_cup_schedule(payload: dict, code: str, label: str, cohort: str, source_url: str, body: bytes) -> dict | None:
     """Keep the published knockout field; never manufacture unpublished teams or fixtures."""
     fixtures = []
-    teams: dict[str, str] = {}
+    teams: dict[str, dict] = {}
     season = None
     for row in payload.get("matches", []):
         stage = row.get("stage") or "UNKNOWN"
@@ -483,8 +641,16 @@ def _parse_cup_schedule(payload: dict, code: str, label: str, cohort: str, sourc
         else:
             home_id = f"football:{home_info.get('id')}" if home_info.get("id") else f"football:name:{_slug(home_name)}"
             away_id = f"football:{away_info.get('id')}" if away_info.get("id") else f"football:name:{_slug(away_name)}"
-        teams[home_id] = home_name
-        teams[away_id] = away_name
+        for entity, name, info in (
+            (home_id, home_name, home_info),
+            (away_id, away_name, away_info),
+        ):
+            media = _football_data_crest_media(info.get("crest"))
+            teams[entity] = {
+                "id": entity,
+                "name": name,
+                **({"media": media} if media else {}),
+            }
         score = row.get("score") or {}
         full_time = score.get("fullTime") or {}
         winner_code = score.get("winner")
@@ -529,7 +695,7 @@ def _parse_cup_schedule(payload: dict, code: str, label: str, cohort: str, sourc
         "source_url": source_url,
         "license": "football-data.org terms",
         "snapshot_sha256": hashlib.sha256(body).hexdigest(),
-        "teams": [{"id": entity, "name": name} for entity, name in sorted(teams.items(), key=lambda item: item[1])],
+        "teams": sorted(teams.values(), key=lambda item: item["name"]),
         "fixtures": fixtures,
         "knockout_fixtures": knockout_fixtures,
         "forecast_available": forecast_available,
@@ -2568,6 +2734,8 @@ def build_sport_payload(
                     "last_played": state.last_played.isoformat() if state.last_played else None,
                     "history": history,
                 }
+            if entities[entity].get("media"):
+                row["media"] = entities[entity]["media"]
             if isinstance(fitted_model, SurfaceBlendModel):
                 row["contexts"] = {}
                 for surface, surface_model in sorted(fitted_model.surface_models.items()):
@@ -2652,6 +2820,33 @@ def build_sport_payload(
         },
         "parameters": selected_parameters,
         "models": model_payloads,
+        "media": {
+            "model_input": False,
+            "policy": "Images are presentational only. Publish provider-supplied crests or identifier-linked portraits only when the public source and reuse terms are recorded; never match a player by name alone.",
+            "fallback": "Use a national flag or generated initials whenever no verified image is available or an image fails to load.",
+            "sources": (
+                [
+                    {
+                        "kind": "crest",
+                        "source": "football-data.org team resources",
+                        "terms": "football-data.org terms; underlying mark rights remain with clubs and federations",
+                    }
+                ]
+                if sport in {"football", "national-football"}
+                else [
+                    {
+                        "kind": "portrait",
+                        "source": "Wikimedia Commons via Wikidata ATP or FIDE identifier",
+                        "terms": "Per-file licence and attribution are published on every media-bearing row",
+                    }
+                ]
+                if sport in {"tennis", "chess"}
+                else []
+            ),
+            "entities_with_media": sum(
+                1 for row in model_payloads["elo"]["rankings"] if row.get("media")
+            ),
+        },
     }
     if sport in {"football", "national-football", "chess"} and predictor_schedules:
         payload["tournament_predictor"] = _build_tournament_predictor(
@@ -2768,6 +2963,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     predictor_schedules = fetch_cup_schedules(token, sport, matches)
                 elif sport == "chess":
                     predictor_schedules = fetch_chess_tournament_schedules()
+                _merge_schedule_media(entities, predictor_schedules)
                 payload = build_sport_payload(
                     sport,
                     matches,
@@ -2775,6 +2971,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     source_meta,
                     predictor_schedules=predictor_schedules,
                 )
+                _attach_verified_portraits(payload)
                 _attach_polymarket_comparison(payload, previous_payload)
                 validate_payload(payload, schema)
                 staged = temporary_path / f"{sport}.json"
@@ -2874,6 +3071,13 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         },
         "individual_contribution": individual_contribution_protocol(),
         "player_football": player_status,
+        "media": {
+            "model_input": False,
+            "crests": "Source-supplied football-data.org team crest URLs; underlying club and federation mark rights remain with their owners.",
+            "portraits": "Wikimedia Commons files reached through exact ATP or FIDE identifiers in Wikidata; every row carries its file page, licence, and attribution.",
+            "identity_matching": "Never infer a player portrait from a name-only search.",
+            "fallback": "National flag or generated initials when no verified image is available or loading fails.",
+        },
         "methodology_url": "/rating-lab/#methodology",
     }
     (output_dir / "schema.json").write_text(json.dumps(schema, indent=2) + "\n")

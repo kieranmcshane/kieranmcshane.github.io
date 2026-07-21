@@ -16,10 +16,11 @@
     "competitions",
     "candidate_parameters",
     "parameters",
-    "models"
+    "models",
+    "media"
   ],
   "properties": {
-    "schema_version": { "const": "1.10.0" },
+    "schema_version": { "const": "1.11.0" },
     "sport": { "enum": ["tennis", "football", "national-football", "chess"] },
     "generated_at": { "type": "string" },
     "latest_result": { "type": "string", "format": "date" },
@@ -78,6 +79,18 @@
     "models": {
       "type": "object",
       "required": ["elo", "glicko2", "trueskill", "robust"]
+    },
+    "media": {
+      "type": "object",
+      "required": ["model_input", "policy", "fallback", "sources", "entities_with_media"],
+      "properties": {
+        "model_input": { "const": false },
+        "policy": { "type": "string" },
+        "fallback": { "type": "string" },
+        "sources": { "type": "array", "items": { "type": "object" } },
+        "entities_with_media": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
     },
     "tournament_predictor": {
       "type": "object",

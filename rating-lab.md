@@ -190,6 +190,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-kicker">How it works</p>
     <h2 id="research-heading">The details, when you want them.</h2>
     <p class="rating-lab-research-intro">Rating Lab is a side project, but its forecasts should still be inspectable. Open a panel to see the assumptions, parameters, data sources, licences, and exact reproduction steps.</p>
+    <p class="rating-lab-explainer"><strong>Identity images are data, too:</strong> club and federation crests are used only when football-data.org supplies them. Tennis and chess portraits are linked through exact ATP or FIDE identifiers to Wikimedia Commons—never guessed from a name—and appear only with a recorded file page, licence, and attribution. The inspector exposes those details. Images never enter a rating or forecast; flags and initials remain the fallback.</p>
     <div class="rating-lab-research-links" aria-label="Downloads and code">
       <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
       <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
@@ -319,6 +320,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <summary>Known limitations and deliberate simplifications</summary>
       <ul>
         <li>Current ratings use the result plus the declared competitive context: tennis surface, football venue, or chess color. Score margin, lineups, injuries, time controls, and player age are not model inputs. The withheld player-contribution protocol would add lineups and minutes, but no event statistics.</li>
+        <li>Crests and portraits are presentational metadata, never model inputs. External images are restricted to the declared football-data.org and Wikimedia hosts, carry source and rights metadata in the public JSON, and fall back to flags or initials if unavailable.</li>
         <li>Draws use an actual score of 0.5. Published log loss and Brier score evaluate expected score, not a separate three-class win/draw/loss forecast.</li>
         <li>Multiple results on the same date are replayed in the published stable identifier order because exact start times are not consistently available.</li>
         <li>Glicko-2 is the exception to within-day ordering: all results on one calendar date form a simultaneous rating period. Seven days define one unit of inactivity inflation.</li>
