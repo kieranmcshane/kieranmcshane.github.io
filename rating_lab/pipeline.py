@@ -28,7 +28,7 @@ from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBl
 
 
 SCHEMA_VERSION = "1.12.0"
-METHODOLOGY_VERSION = "2026-07-21.5"
+METHODOLOGY_VERSION = "2026-07-21.6"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
@@ -2946,7 +2946,13 @@ def build_sport_payload(
                 ]
                 if sport in {"tennis", "chess"}
                 else []
-            ),
+            ) + [
+                {
+                    "kind": "flag",
+                    "source": "flag-icons v7.5.0",
+                    "terms": "MIT-licensed SVG assets vendored with the site; selected only from a declared source country or federation code",
+                }
+            ],
             "entities_with_media": sum(
                 1 for row in model_payloads["elo"]["rankings"] if row.get("media")
             ),
@@ -3179,6 +3185,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "model_input": False,
             "crests": "Source-supplied football-data.org team crest URLs; underlying club and federation mark rights remain with their owners.",
             "portraits": "Wikimedia Commons files reached through exact ATP or FIDE identifiers in Wikidata; every row carries its file page, licence, and attribution.",
+            "flags": "Vendored flag-icons v7.5.0 SVG assets under the MIT licence, selected only from source country or federation codes; operating-system emoji are not used.",
             "identity_matching": "Never infer a player portrait from a name-only search.",
             "fallback": "National flag or generated initials when no verified image is available or loading fails.",
         },

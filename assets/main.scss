@@ -1701,11 +1701,22 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-country-flag {
-  display: inline-block;
+  display: inline-flex;
+  width: 1.08rem;
+  height: 0.78rem;
   flex: 0 0 auto;
-  font-size: 0.88em;
-  font-weight: 400;
-  line-height: 1;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(29, 37, 46, 0.18);
+  border-radius: 2px;
+  box-shadow: 0 1px 1px rgba(29, 37, 46, 0.06);
+}
+
+.rating-lab-country-flag img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .rating-lab-identity-copy small {
@@ -1749,9 +1760,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-identity.is-flag {
   background: #fff;
-  border-radius: 4px;
-  font-size: 1.12rem;
-  line-height: 1;
+  border-radius: 6px;
 }
 
 .rating-lab-identity.is-media {
@@ -1798,6 +1807,11 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-identity.is-crest img {
   padding: 0.18rem;
+  object-fit: contain;
+}
+
+.rating-lab-identity.is-flag img {
+  padding: 0.22rem;
   object-fit: contain;
 }
 

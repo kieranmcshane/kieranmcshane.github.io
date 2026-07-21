@@ -199,13 +199,6 @@
     return regionCodesByName;
   }
 
-  function flagEmoji(code) {
-    if (!code || code.length !== 2) return '';
-    return code.toUpperCase().split('').map(function (letter) {
-      return String.fromCodePoint(127397 + letter.charCodeAt(0));
-    }).join('');
-  }
-
   // ATP citizenship and FIDE federation fields use three-letter sporting
   // codes. Convert only declared source values; an unknown code stays blank
   // instead of assigning a country from a player's name.
@@ -225,36 +218,43 @@
     UZB: 'UZ', VEN: 'VE', VIE: 'VN'
   };
 
-  function subdivisionFlag(tag) {
-    return String.fromCodePoint.apply(String, [0x1F3F4].concat(tag.split('').map(function (letter) {
-      return 0xE0000 + letter.charCodeAt(0);
-    }), [0xE007F]));
+  function normalizedFlagCode(value) {
+    var code = String(value || '').toLocaleLowerCase();
+    return /^(?:[a-z]{2}|gb-(?:eng|nir|sct|wls))$/.test(code) ? code : '';
   }
 
-  function nationalTeamFlag(name) {
+  function flagAssetUrl(code) {
+    var normalized = normalizedFlagCode(code);
+    return normalized ? root.dataset.flagRoot.replace(/\/$/, '') + '/' + normalized + '.svg' : '';
+  }
+
+  function nationalTeamFlagCode(name) {
     var normalized = normalizedRegionName(name);
-    var subdivisions = { england: 'gbeng', scotland: 'gbsct', wales: 'gbwls' };
-    if (subdivisions[normalized]) return subdivisionFlag(subdivisions[normalized]);
-    return flagEmoji(buildRegionCodes()[normalized]);
+    var subdivisions = {
+      england: 'gb-eng', 'northern ireland': 'gb-nir', scotland: 'gb-sct', wales: 'gb-wls'
+    };
+    return normalizedFlagCode(subdivisions[normalized] || buildRegionCodes()[normalized]);
   }
 
-  function countryFlag(value) {
+  function countryFlagCode(value) {
     var raw = String(value || '').trim();
     if (!raw) return '';
     var code = raw.toUpperCase();
-    var subdivisions = { ENG: 'gbeng', SCO: 'gbsct', WLS: 'gbwls' };
-    if (subdivisions[code]) return subdivisionFlag(subdivisions[code]);
-    if (/^[A-Z]{2}$/.test(code)) return flagEmoji(code);
-    return flagEmoji(sportingCountryCodes[code] || buildRegionCodes()[normalizedRegionName(raw)]);
+    var subdivisions = { ENG: 'gb-eng', NIR: 'gb-nir', SCO: 'gb-sct', WLS: 'gb-wls' };
+    if (subdivisions[code]) return subdivisions[code];
+    if (/^[A-Z]{2}$/.test(code)) return normalizedFlagCode(code);
+    return normalizedFlagCode(sportingCountryCodes[code] || buildRegionCodes()[normalizedRegionName(raw)]);
   }
 
   function inlineCountryFlag(row, sport) {
     if (!row || sport === 'national-football') return '';
-    var flag = countryFlag(row.country);
-    if (!flag) return '';
+    var code = countryFlagCode(row.country);
+    var imageUrl = flagAssetUrl(code);
+    if (!imageUrl) return '';
     var sourceLabel = 'Source country or federation: ' + String(row.country).toUpperCase();
     return '<span class="rating-lab-country-flag" role="img" aria-label="' + escapeHtml(sourceLabel) +
-      '" title="' + escapeHtml(sourceLabel) + '">' + escapeHtml(flag) + '</span>';
+      '" title="' + escapeHtml(sourceLabel) + '"><img src="' + escapeHtml(imageUrl) +
+      '" alt="" loading="lazy" decoding="async" data-flag-image></span>';
   }
 
   function entityName(row, sport) {
@@ -288,8 +288,9 @@
   }
 
   function entityBadge(row, sport) {
-    var flag = sport === 'national-football' ? nationalTeamFlag(row.name) : '';
-    var label = flag || entityInitials(row.name);
+    var flagCode = sport === 'national-football' ? nationalTeamFlagCode(row.name) : '';
+    var flagUrl = flagAssetUrl(flagCode);
+    var label = entityInitials(row.name);
     var media = entityMedia(row, sport);
     var imageUrl = media && trustedMediaUrl(media.url, 'image');
     if (imageUrl) {
@@ -297,8 +298,12 @@
         '<span class="rating-lab-identity-fallback">' + escapeHtml(label) + '</span><img src="' +
         escapeHtml(imageUrl) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-entity-image></span>';
     }
-    return '<span class="rating-lab-identity' + (flag ? ' is-flag' : '') + '" aria-hidden="true">' +
-      escapeHtml(label) + '</span>';
+    if (flagUrl) {
+      return '<span class="rating-lab-identity is-media is-flag" aria-hidden="true">' +
+        '<span class="rating-lab-identity-fallback">' + escapeHtml(label) + '</span><img src="' +
+        escapeHtml(flagUrl) + '" alt="" loading="lazy" decoding="async" data-flag-image></span>';
+    }
+    return '<span class="rating-lab-identity" aria-hidden="true">' + escapeHtml(label) + '</span>';
   }
 
   function entityTitle(row, sport) {
@@ -1035,9 +1040,9 @@
       state.matchupB = state.matchupB ? state.matchupB.id : null;
     }
     var options = rows.map(function (row) {
-      var flag = state.sport === 'national-football' ? nationalTeamFlag(row.name) : countryFlag(row.country);
+      var sourceCode = state.sport === 'national-football' ? '' : String(row.country || '').trim().toUpperCase();
       return '<option value="' + escapeHtml(row.id) + '">#' + row.rank + ' · ' +
-        (flag ? escapeHtml(flag) + ' ' : '') + escapeHtml(row.name) +
+        (sourceCode ? escapeHtml(sourceCode) + ' · ' : '') + escapeHtml(row.name) +
         (row.provisional ? ' · provisional Elo' : '') + '</option>';
     }).join('');
     elements.matchupA.innerHTML = options;
@@ -1750,7 +1755,7 @@
   revealLinkedMethod();
 
   root.addEventListener('error', function (event) {
-    if (event.target && event.target.matches && event.target.matches('[data-entity-image]')) {
+    if (event.target && event.target.matches && event.target.matches('[data-entity-image], [data-flag-image]')) {
       event.target.hidden = true;
     }
   }, true);
