@@ -24,10 +24,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Set cache date
+        id: cache-date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         with:
           path: .cache/rating-lab
-          key: rating-lab-public-data-v2-${{ runner.os }}
+          key: rating-lab-public-data-v3-${{ runner.os }}-${{ steps.cache-date.outputs.date }}
+          restore-keys: |
+            rating-lab-public-data-v3-${{ runner.os }}-
+      - name: Restore last validated public snapshot
+        uses: actions/cache@v4
+        with:
+          path: .cache/rating-lab-output
+          key: rating-lab-valid-output-v1-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            rating-lab-valid-output-v1-${{ runner.os }}-
+      - name: Seed fallback from last validated snapshot
+        run: |
+          for file in manifest.json tennis.json football.json national-football.json chess.json; do
+            if [ -f ".cache/rating-lab-output/$file" ]; then
+              cp ".cache/rating-lab-output/$file" "assets/data/rating-lab/$file"
+            fi
+          done
       - name: Install archive reader
         run: sudo apt-get update && sudo apt-get install --yes zstd
       - name: Refresh public ratings
@@ -40,6 +59,10 @@ jobs:
             sports="tennis $sports"
           fi
           python scripts/refresh_ratings.py --sports $sports
+      - name: Preserve validated public snapshot
+        run: |
+          mkdir -p .cache/rating-lab-output
+          cp assets/data/rating-lab/{manifest,tennis,football,national-football,chess}.json .cache/rating-lab-output/
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:

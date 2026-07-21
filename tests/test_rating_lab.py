@@ -10,6 +10,7 @@ from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match,
 from rating_lab.player_models import LineupTrueSkill
 from rating_lab.player_pipeline import _fit_ridge, _merge_minutes, player_schema, validate_player_payload
 from rating_lab.pipeline import (
+    FOOTBALL_COMPETITIONS,
     _deduplicate,
     _competition_performance,
     _competition_matches,
@@ -25,9 +26,11 @@ from rating_lab.pipeline import (
     _parse_uefa_ucl_qualifying,
     _polymarket_event_snapshot,
     _polymarket_search_query,
+    _required_football_seasons,
     _simulate_league,
     _simulate_knockout,
     _simulate_qualifying_round,
+    _validate_football_coverage,
     _model_candidates,
     build_sport_payload,
     individual_contribution_protocol,
@@ -534,6 +537,19 @@ class PipelineTests(unittest.TestCase):
     def test_deduplication_is_deterministic(self):
         match = Match(date(2026, 1, 1), "a", "b", 1.0, "Test")
         self.assertEqual(_deduplicate([match, match]), [match])
+
+    def test_football_source_rejects_partial_required_coverage(self):
+        seasons = _required_football_seasons(2020, 2026)
+        self.assertEqual(seasons, [2023, 2024, 2025])
+        counts = {
+            (code, year): 1
+            for year in seasons
+            for code in FOOTBALL_COMPETITIONS
+        }
+        _validate_football_coverage(counts, seasons)
+        counts.pop(("PL", 2025))
+        with self.assertRaisesRegex(RuntimeError, "PL:2025"):
+            _validate_football_coverage(counts, seasons)
 
     def test_metrics_are_finite(self):
         rows = [
