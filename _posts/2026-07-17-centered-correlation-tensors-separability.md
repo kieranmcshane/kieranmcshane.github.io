@@ -39,10 +39,13 @@ The article has a complete bipartite core followed by a research-direction appen
 
 <aside class="explain-article-cta">
   <div>
-    <strong>Could you reconstruct the argument without the page?</strong>
-    <p>The click-based companion reconstructs the covariance identity and the full six-step separability bound, then schedules the ideas that caused difficulty with FSRS.</p>
+    <strong>Could you recover the argument under pressure?</strong>
+    <p>The proof campaign turns the article into seven missions with persistent progress, mathematical failure states, and FSRS return encounters. It uses no typing or speaking.</p>
   </div>
-  <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the argument trainer →</a>
+  <div class="explain-article-cta-actions">
+    <a href="{{ '/play/centered-correlations/' | relative_url }}">Start the proof campaign →</a>
+    <a href="{{ '/explain/centered-correlations/' | relative_url }}">Prefer the study companion?</a>
+  </div>
 </aside>
 
 ## Notation glossary
