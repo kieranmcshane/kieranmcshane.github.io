@@ -9,8 +9,9 @@ description: "A no-typing mathematical strategy game for reconstructing the cent
   <header class="game-hero">
     <div>
       <p class="game-kicker">Proof campaign · no typing or speaking</p>
-      <h1>Recover the centered-correlation argument</h1>
-      <p>You are given mathematical facts, a target, and a small set of legal moves. Choose what to transform, keep the proof intact, and reconstruct the entire argument. Fragile ideas return later through FSRS.</p>
+      <h1>Rebuild the centered-correlation proof</h1>
+      <p class="game-hero-copy game-hero-copy-long">You are given mathematical facts, a target, and a small set of legal moves. Choose what to transform, keep the proof intact, and reconstruct the entire argument. Fragile ideas return later through FSRS.</p>
+      <p class="game-hero-copy game-hero-copy-short">Choose legal moves to rebuild the proof. Fragile ideas return later through FSRS.</p>
     </div>
     <div class="game-hero-status" aria-label="Campaign status">
       <span>Campaign</span>

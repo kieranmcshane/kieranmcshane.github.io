@@ -87,12 +87,16 @@ body:has(.proof-game) .site-footer {
   letter-spacing: -0.04em;
 }
 
-.game-hero > div:first-child > p:last-child {
+.game-hero-copy {
   max-width: 62ch;
   margin: 1.35rem 0 0;
   color: #394457;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.12rem;
+}
+
+.game-hero-copy-short {
+  display: none;
 }
 
 .game-hero-status {
@@ -767,11 +771,14 @@ body:has(.proof-game) .site-footer {
     line-height: 1.02;
   }
 
-  .game-hero > div:first-child > p:last-child {
+  .game-hero-copy {
     margin-top: 0.85rem;
     font-size: 1rem;
     line-height: 1.48;
   }
+
+  .game-hero-copy-long { display: none; }
+  .game-hero-copy-short { display: block; }
 
   .game-kicker {
     font-size: 0.68rem;
@@ -919,8 +926,8 @@ body:has(.proof-game) .site-footer {
 }
 
 @media (max-width: 390px) {
-  .game-hero h1 { font-size: 2rem; }
-  .game-hero > div:first-child > p:last-child { font-size: 0.95rem; }
+  .game-hero h1 { font-size: 1.9rem; }
+  .game-hero-copy { font-size: 0.95rem; }
   .mission-turn { font-size: 0.72rem; }
   .mission-brief { margin: 0.8rem 0; padding: 0.8rem 0.9rem; }
 }
