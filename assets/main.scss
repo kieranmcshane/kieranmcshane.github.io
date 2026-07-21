@@ -1778,8 +1778,11 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-identity.is-media img {
   z-index: 1;
+  box-sizing: border-box;
+  display: block;
   background: #fff;
   object-fit: cover;
+  object-position: center;
 }
 
 // Commons player images are usually full-body or action photographs. Bias the
