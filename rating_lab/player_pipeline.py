@@ -653,11 +653,18 @@ def _laplacian_solve(
 def _fit_team_lapm(
     stints: list[dict],
     eligible: set[str],
+    player_minimum_minutes: float,
+    player_minimum_matches: int,
     pair_minimum_minutes: float,
-    pair_minimum_matches: int,
+    pair_minimum_stints: int,
 ) -> dict:
-    aggregate: dict[tuple[str, ...], dict[str, float | int]] = defaultdict(
-        lambda: {"minutes": 0.0, "goal_difference": 0.0, "matches": 0}
+    aggregate: dict[tuple[str, ...], dict] = defaultdict(
+        lambda: {
+            "minutes": 0.0,
+            "goal_difference": 0.0,
+            "stints": 0,
+            "match_ids": set(),
+        }
     )
     for stint in stints:
         lineup = tuple(sorted(stint["lineup"]))
@@ -667,16 +674,21 @@ def _fit_team_lapm(
         for node in nodes:
             aggregate[node]["minutes"] += stint["minutes"]
             aggregate[node]["goal_difference"] += stint["goal_difference"]
-            aggregate[node]["matches"] += 1
+            aggregate[node]["stints"] += 1
+            aggregate[node]["match_ids"].add(stint["match_id"])
     nodes = [
         node
         for node, evidence in aggregate.items()
         if (
-            len(node) == 1
+            (
+                len(node) == 1
+                and evidence["minutes"] >= player_minimum_minutes
+                and len(evidence["match_ids"]) >= player_minimum_matches
+            )
             or (
                 len(node) == 2
                 and evidence["minutes"] >= pair_minimum_minutes
-                and evidence["matches"] >= pair_minimum_matches
+                and evidence["stints"] >= pair_minimum_stints
             )
             or (len(node) > 2 and evidence["minutes"] >= 15.0)
         )
@@ -723,7 +735,8 @@ def _fit_team_lapm(
             "uncertainty": uncertainty[index],
             "score": estimates[index] - 1.96 * uncertainty[index],
             "minutes": float(aggregate[node]["minutes"]),
-            "stints": int(aggregate[node]["matches"]),
+            "matches": len(aggregate[node]["match_ids"]),
+            "stints": int(aggregate[node]["stints"]),
         }
         if len(node) == 1 and node[0] in eligible:
             player_rows.append(row)
@@ -753,6 +766,7 @@ def _lapm(rows: list[dict], eligible: set[str], definition: dict) -> dict:
             team_stints[home_id].append(
                 {
                     "lineup": stint["home"],
+                    "match_id": row["match_id"],
                     "minutes": stint["minutes"],
                     "goal_difference": stint["goal_difference"],
                 }
@@ -760,6 +774,7 @@ def _lapm(rows: list[dict], eligible: set[str], definition: dict) -> dict:
             team_stints[away_id].append(
                 {
                     "lineup": stint["away"],
+                    "match_id": row["match_id"],
                     "minutes": stint["minutes"],
                     "goal_difference": -stint["goal_difference"],
                 }
@@ -770,16 +785,23 @@ def _lapm(rows: list[dict], eligible: set[str], definition: dict) -> dict:
             180.0 if definition.get("scope_type") == "season" else 45.0,
         )
     )
-    pair_matches = int(
+    pair_stints = int(
         definition.get(
             "lapm_pair_minimum_matches",
             3 if definition.get("scope_type") == "season" else 1,
         )
     )
+    player_minutes = float(definition.get("minimum_minutes", MIN_MINUTES))
+    player_matches = int(definition.get("minimum_matches", MIN_MATCHES))
     teams = []
     for team_id in sorted(team_stints, key=lambda value: team_names[value]):
         fitted = _fit_team_lapm(
-            team_stints[team_id], eligible, pair_minutes, pair_matches
+            team_stints[team_id],
+            eligible,
+            player_minutes,
+            player_matches,
+            pair_minutes,
+            pair_stints,
         )
         if fitted["players"]:
             teams.append(
@@ -797,7 +819,9 @@ def _lapm(rows: list[dict], eligible: set[str], definition: dict) -> dict:
             "jaccard_graph": "All retained generalized-lineup nodes with non-zero player overlap are connected.",
             "retained_orders": [1, 2, "full observed lineup"],
             "pair_minimum_minutes": pair_minutes,
-            "pair_minimum_stints": pair_matches,
+            "pair_minimum_stints": pair_stints,
+            "player_minimum_team_minutes": player_minutes,
+            "player_minimum_team_matches": player_matches,
         },
     }
 
@@ -1022,6 +1046,8 @@ def _rate_cohort(
                 common(player_id)
                 | {
                     "team": team["name"],
+                    "minutes": round(raw["minutes"], 1),
+                    "matches": raw["matches"],
                     "impact": round(raw["impact"], 4),
                     "uncertainty": round(raw["uncertainty"], 4),
                     "score": round(raw["score"], 4),
@@ -1048,6 +1074,7 @@ def _rate_cohort(
                 "uncertainty": round(raw["uncertainty"], 4),
                 "score": round(raw["score"], 4),
                 "minutes": round(raw["minutes"], 1),
+                "matches": raw["matches"],
                 "stints": raw["stints"],
             }
 
