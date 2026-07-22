@@ -164,7 +164,11 @@
     var byId = {};
     trueRows.forEach(function (row) { byId[row.id] = row; });
     var points = rapmRows.filter(function (row) { return trueZ[row.id] !== undefined; }).map(function (row) {
-      return { id: row.id, name: row.name, team: row.team, country: row.country, x: trueZ[row.id], y: rapmZ[row.id] };
+      return {
+        id: row.id, name: row.name, team: row.team, country: row.country,
+        x: trueZ[row.id], y: rapmZ[row.id], trueRank: byId[row.id].rank,
+        rapmRank: row.rank, trueScore: byId[row.id].score, rapmScore: row.score
+      };
     });
     var query = state.query.trim().toLocaleLowerCase();
     if (query) {
@@ -184,10 +188,22 @@
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
       var flag = playerFlag(point.country, 'is-chart-flag', true);
+      var pointX = x(point.x), pointY = y(point.y);
+      var cardWidth = Math.min(185, width - 16), cardHeight = 112;
+      var preferredCardLeft = pointX > width / 2 ? pointX - cardWidth - 15 : pointX + 15;
+      var preferredCardTop = pointY < cardHeight + 14 ? pointY + 14 : pointY - cardHeight - 14;
+      var cardLeft = Math.max(8, Math.min(width - cardWidth - 8, preferredCardLeft));
+      var cardTop = Math.max(8, Math.min(height - cardHeight - 8, preferredCardTop));
+      var selectionCard = selected ? '<strong class="player-lab-point-card" style="--card-left:' +
+        (cardLeft - pointX).toFixed(1) + 'px;--card-top:' + (cardTop - pointY).toFixed(1) + 'px;--card-width:' + cardWidth + 'px">' +
+        '<span class="player-lab-point-card-name">' + playerFlag(point.country, '', true) + '<span>' + escapeHtml(point.name) + '</span></span>' +
+        '<span class="player-lab-point-card-meta">' + escapeHtml(point.country || 'Nationality unavailable') + ' · ' + escapeHtml(point.team) + '</span>' +
+        '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>RAPM <b>#' + point.rapmRank + '</b></span></span>' +
+        '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.rapmScore, 2) + '</span></strong>' : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
-        '" style="--point-x:' + x(point.x).toFixed(1) + 'px;--point-y:' + y(point.y).toFixed(1) + 'px" aria-label="' +
+        '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, RAPM ' + point.y.toFixed(2) + ' standard deviations') +
-        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small>' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + '</button>';
+        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small>' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
     elements.chart.innerHTML = '<p class="player-lab-chart-key">Source-listed nationality · search a country to isolate it · select a marker for both ranks</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and RAPM scores">' +
@@ -327,11 +343,12 @@
   root.addEventListener('click', function (event) {
     var target = event.target.closest('[data-player-id]');
     if (!target) return;
-    state.selected = target.dataset.playerId;
+    var chartPoint = target.classList.contains('player-lab-point');
+    state.selected = chartPoint && state.selected === target.dataset.playerId ? null : target.dataset.playerId;
     renderChart();
     renderTable();
     renderDetail();
-    revealDetailOnMobile();
+    if (!chartPoint) revealDetailOnMobile();
   });
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);

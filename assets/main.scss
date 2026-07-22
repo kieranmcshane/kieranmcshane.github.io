@@ -7279,6 +7279,10 @@ body:has(.explain-lab) .post-header {
   cursor: pointer;
 }
 
+.player-lab-point.is-selected {
+  z-index: 5;
+}
+
 .player-lab-point > span {
   position: absolute;
   width: 8px;
@@ -7346,7 +7350,7 @@ body:has(.explain-lab) .post-header {
   background: #fff;
 }
 
-.player-lab-point small {
+.player-lab-point > small {
   position: absolute;
   left: 7px;
   bottom: 5px;
@@ -7361,10 +7365,73 @@ body:has(.explain-lab) .post-header {
   white-space: nowrap;
 }
 
-.player-lab-point small .is-label-flag {
+.player-lab-point > small .is-label-flag {
   width: 0.78rem;
   height: 0.55rem;
   margin-right: 0.22rem;
+}
+
+.player-lab-point-card {
+  position: absolute;
+  z-index: 6;
+  top: var(--card-top);
+  left: var(--card-left);
+  display: grid;
+  width: var(--card-width, 185px);
+  gap: 0.28rem;
+  box-sizing: border-box;
+  padding: 0.72rem;
+  color: var(--lab-navy);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #cfd3d8;
+  border-radius: 7px;
+  box-shadow: 0 12px 28px rgba(23, 32, 51, 0.18);
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  animation: rlIn 150ms ease both;
+}
+
+.player-lab-point-card-name {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  min-width: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.player-lab-point-card-name > span:last-child,
+.player-lab-point-card-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-lab-point-card-meta,
+.player-lab-point-card-scores {
+  color: #6a7688;
+  font-size: 0.61rem;
+}
+
+.player-lab-point-card-ranks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid #e1e3e6;
+  color: #5b687b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.player-lab-point-card-ranks b {
+  display: block;
+  color: var(--lab-navy);
+  font-size: 0.82rem;
 }
 
 .player-lab-player-name,

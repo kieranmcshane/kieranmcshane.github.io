@@ -655,6 +655,8 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("playerFlag(point.country", player_script)
         self.assertIn("String(row.country || '').toLocaleLowerCase()", player_script)
         self.assertIn("search a country to isolate it", player_script)
+        self.assertIn("player-lab-point-card", player_script)
+        self.assertIn("if (!chartPoint) revealDetailOnMobile();", player_script)
         self.assertIn('class="rating-lab-media-policy"', page)
         self.assertIn("Rating Lab mobile redesign", styles)
         self.assertIn("#ranking-table tbody tr", styles)
