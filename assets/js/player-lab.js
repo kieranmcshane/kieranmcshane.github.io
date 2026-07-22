@@ -11,6 +11,7 @@
     modelTabs: document.getElementById('player-model-tabs'),
     search: document.getElementById('player-search'),
     metrics: document.getElementById('player-metrics'),
+    scope: document.getElementById('player-season-scope'),
     chart: document.getElementById('player-comparison-chart'),
     body: document.getElementById('player-ranking-body'),
     caption: document.getElementById('player-ranking-caption'),
@@ -118,12 +119,14 @@
 
   function renderCohortOptions() {
     var groups = [
-      { id: 'men', label: "Men's competitions" },
-      { id: 'women', label: "Women's competitions" }
+      { id: 'men-season', label: "Men's full seasons", matches: function (cohort) { return cohort.gender === 'men' && cohort.scope_type === 'season'; } },
+      { id: 'men-event', label: "Men's tournaments", matches: function (cohort) { return cohort.gender === 'men' && cohort.scope_type !== 'season'; } },
+      { id: 'women-season', label: "Women's full seasons", matches: function (cohort) { return cohort.gender === 'women' && cohort.scope_type === 'season'; } },
+      { id: 'women-event', label: "Women's tournaments", matches: function (cohort) { return cohort.gender === 'women' && cohort.scope_type !== 'season'; } }
     ];
     var known = {};
     var html = groups.map(function (group) {
-      var cohorts = state.payload.cohorts.filter(function (cohort) { return cohort.gender === group.id; });
+      var cohorts = state.payload.cohorts.filter(group.matches);
       cohorts.forEach(function (cohort) { known[cohort.id] = true; });
       if (!cohorts.length) return '';
       return '<optgroup label="' + escapeHtml(group.label) + '">' + cohorts.map(function (cohort) {
@@ -147,7 +150,7 @@
       : ['Validation RMSE', number(model.metrics.validation_rmse, 3), model.metrics.chronological_validation_matches + ' chronological validation matches'];
     var metrics = [
       ['Matches', number(cohort.matches, 0), (cohort.format || 'historical cohort') + ' · ' + cohort.first_match + ' to ' + cohort.last_match],
-      ['Eligible players', number(cohort.eligible_players, 0), 'Minimum 450 minutes and five appearances'],
+      ['Eligible players', number(cohort.eligible_players, 0), 'Minimum ' + number(cohort.eligibility.minimum_minutes, 0) + ' minutes and ' + cohort.eligibility.minimum_matches + ' appearances'],
       [modelMetric[0], modelMetric[1], modelMetric[2]],
       ['Lineup coverage', percent(cohort.coverage.starting_lineups), 'Player-match graph: ' + cohort.coverage.player_match_graph_components + ' connected component']
     ];
@@ -155,6 +158,15 @@
       return '<div class="rating-lab-metric"><span>' + escapeHtml(metric[0]) + '</span><div class="rating-lab-metric-value"><strong>' +
         escapeHtml(metric[1]) + '</strong></div><small>' + escapeHtml(metric[2]) + '</small></div>';
     }).join('');
+  }
+
+  function renderScope() {
+    var cohort = currentCohort();
+    var included = cohort.included_competitions || [cohort.name];
+    var expected = cohort.coverage.expected_matches || cohort.matches;
+    elements.scope.innerHTML = '<strong>' + (cohort.scope_type === 'season' ? 'Season scope' : 'Competition scope') + '</strong>' +
+      '<span>Included: ' + escapeHtml(included.join(', ')) + ' · ' + number(cohort.matches, 0) + '/' + number(expected, 0) + ' matches.</span>' +
+      (cohort.scope_note ? '<small>' + escapeHtml(cohort.scope_note) + '</small>' : '');
   }
 
   function standardized(rows) {
@@ -270,7 +282,7 @@
       escapeHtml(identityMeta) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
       '<div class="player-lab-detail-model"><span>Lineup TrueSkill</span><strong>#' + trueRow.rank + '</strong><small>Mean ' + number(trueRow.mean, 2) + ' · uncertainty ±' + number(trueRow.uncertainty, 2) + '</small></div>' +
       '<div class="player-lab-detail-model"><span>RAPM</span><strong>#' + rapmRow.rank + '</strong><small>Goal impact ' + (rapmRow.impact > 0 ? '+' : '') + number(rapmRow.impact, 2) + ' · uncertainty ±' + number(rapmRow.uncertainty, 2) + '</small></div>' +
-      '<p class="rating-lab-audit-note">Ranks are season-specific and use conservative scores, so both estimated contribution and uncertainty matter.</p>';
+      '<p class="rating-lab-audit-note">Ranks are cohort-specific and use conservative scores, so both estimated contribution and uncertainty matter.</p>';
   }
 
   function renderGates() {
@@ -288,6 +300,7 @@
 
   function render() {
     renderMetrics();
+    renderScope();
     renderChart();
     renderTable();
     renderDetail();

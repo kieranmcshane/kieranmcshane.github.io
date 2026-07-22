@@ -2,7 +2,7 @@
 layout: page
 title: Historical Player Lab
 permalink: /rating-lab/players/
-description: Outcome-only historical men's and women's football player ratings from complete StatsBomb lineups using Lineup TrueSkill and RAPM.
+description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using Lineup TrueSkill and RAPM.
 ---
 
 <div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
@@ -19,7 +19,7 @@ description: Outcome-only historical men's and women's football player ratings f
   <section class="player-lab-explorer" aria-labelledby="player-ranking-heading">
     <div class="rating-lab-section-heading">
       <div>
-        <p class="rating-lab-kicker">Complete competitions only</p>
+        <p class="rating-lab-kicker">Complete tournaments and seasons only</p>
         <h2 id="player-ranking-heading">Historical player ratings</h2>
       </div>
       <p id="player-lab-generated">Loading the verified cohort…</p>
@@ -27,7 +27,7 @@ description: Outcome-only historical men's and women's football player ratings f
 
     <details class="player-lab-boundary" id="player-scope" open>
       <summary>Verified cohorts and rating scope</summary>
-      <p><strong>Men’s and women’s competitions pass the same evidence gates.</strong> These ratings apply only inside the selected competition. The men’s publication covers UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. The live five-league feed remains excluded until its lineup coverage passes the same gates.</p>
+      <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The men’s publication includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. Every view states exactly which fixtures enter the replay.</p>
     </details>
 
     <div class="player-lab-toolbar">
@@ -56,6 +56,7 @@ description: Outcome-only historical men's and women's football player ratings f
     </div>
 
     <div class="rating-lab-metrics player-lab-metrics" id="player-metrics" aria-label="Cohort and model evidence"></div>
+    <p class="player-lab-season-scope" id="player-season-scope"></p>
 
     <section class="player-lab-comparison" aria-labelledby="player-comparison-heading">
       <div class="player-lab-comparison-heading">
@@ -120,7 +121,7 @@ description: Outcome-only historical men's and women's football player ratings f
         <li>Lineup timestamps that overlap slightly around stoppage-time substitutions are normalized to eleven player-equivalents per side.</li>
         <li>Ratings cannot explain how a player contributed. No event or tracking surrogate is used.</li>
         <li>A match still level after extra time counts as a draw; a penalty shootout does not rewrite the preceding on-pitch result.</li>
-        <li>Players need at least 450 minutes and five appearances to be ranked.</li>
+        <li>Eligibility is cohort-specific and displayed above the ranking. Full league seasons use a stricter 900-minute and ten-appearance threshold.</li>
       </ul>
       <div class="rating-lab-downloads">
         <a href="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" download>Player data JSON</a>

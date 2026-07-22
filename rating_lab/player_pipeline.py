@@ -12,7 +12,7 @@ from typing import Callable
 from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_loss
 
 
-PLAYER_SCHEMA_VERSION = "1.1.0"
+PLAYER_SCHEMA_VERSION = "1.2.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 API_FOOTBALL_ROOT = "https://v3.football.api-sports.io"
 API_FOOTBALL_WORLD_CUP = {
@@ -28,6 +28,23 @@ API_FOOTBALL_WORLD_CUP = {
 }
 COHORTS = (
     {
+        "id": "premier-league-2015-16",
+        "competition_id": 2,
+        "season_id": 27,
+        "season_name": "2015/16",
+        "name": "Premier League 2015/16",
+        "country": "England",
+        "gender": "men",
+        "format": "club league season",
+        "scope_type": "season",
+        "venue_context": "home-and-away",
+        "expected_matches": 380,
+        "minimum_minutes": 900.0,
+        "minimum_matches": 10,
+        "included_competitions": ["Premier League"],
+        "scope_note": "Complete 380-match league season. FA Cup, EFL Cup and UEFA fixtures are withheld because the open source does not provide complete lineup-minute coverage for those competitions.",
+    },
+    {
         "id": "euro-2024",
         "competition_id": 55,
         "season_id": 282,
@@ -36,6 +53,8 @@ COHORTS = (
         "gender": "men",
         "format": "international tournament",
         "venue_context": "tournament",
+        "expected_matches": 51,
+        "included_competitions": ["UEFA Euro 2024"],
     },
     {
         "id": "world-cup-2022",
@@ -46,26 +65,38 @@ COHORTS = (
         "gender": "men",
         "format": "international tournament",
         "venue_context": "tournament",
+        "expected_matches": 64,
+        "included_competitions": ["FIFA World Cup 2022"],
     },
     {
         "id": "liga-f-2023-24",
         "competition_id": 182,
         "season_id": 281,
+        "season_name": "2023/24",
         "name": "Liga F 2023/24",
         "country": "Spain",
         "gender": "women",
         "format": "club league season",
+        "scope_type": "season",
         "venue_context": "home-and-away",
+        "expected_matches": 240,
+        "included_competitions": ["Liga F"],
+        "scope_note": "Complete 240-match league season. Copa de la Reina and UEFA fixtures are not included because equivalent complete lineup-minute coverage is unavailable in the open source.",
     },
     {
         "id": "wsl-2023-24",
         "competition_id": 37,
         "season_id": 281,
+        "season_name": "2023/24",
         "name": "FA Women's Super League 2023/24",
         "country": "England",
         "gender": "women",
         "format": "club league season",
+        "scope_type": "season",
         "venue_context": "home-and-away",
+        "expected_matches": 132,
+        "included_competitions": ["Women's Super League"],
+        "scope_note": "Complete 132-match league season. FA Cup, League Cup and UEFA fixtures are not included because equivalent complete lineup-minute coverage is unavailable in the open source.",
     },
 )
 RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
@@ -343,10 +374,12 @@ def _rate_cohort(
         lineup_model.update(row["home"], row["away"], row["score_a"])
     player_ids = sorted(player_meta)
     rapm = _rapm(rows, player_ids)
+    minimum_minutes = float(definition.get("minimum_minutes", MIN_MINUTES))
+    minimum_matches = int(definition.get("minimum_matches", MIN_MATCHES))
     eligible = [
         player_id
         for player_id, meta in player_meta.items()
-        if meta["minutes"] >= MIN_MINUTES and meta["matches"] >= MIN_MATCHES
+        if meta["minutes"] >= minimum_minutes and meta["matches"] >= minimum_matches
     ]
     for meta in player_meta.values():
         meta["team"] = max(meta["team_minutes"], key=meta["team_minutes"].get)
@@ -420,13 +453,17 @@ def _rate_cohort(
         "country": definition["country"],
         "gender": definition["gender"],
         "format": definition["format"],
+        "scope_type": definition.get("scope_type", "competition"),
+        "season_name": definition.get("season_name"),
+        "included_competitions": definition.get("included_competitions", [definition["name"]]),
+        "scope_note": definition.get("scope_note"),
         "source": source,
         "first_match": rows[0]["date"],
         "last_match": rows[-1]["date"],
         "matches": len(rows),
         "players_seen": len(player_meta),
         "eligible_players": len(eligible),
-        "eligibility": {"minimum_minutes": MIN_MINUTES, "minimum_matches": MIN_MATCHES},
+        "eligibility": {"minimum_minutes": minimum_minutes, "minimum_matches": minimum_matches},
         "coverage": {
             "status": "passed",
             "lineup_files": round(source_fixture_coverage, 4),
@@ -435,6 +472,10 @@ def _rate_cohort(
             "substitution_minutes": round(substitution_coverage, 4),
             "lineup_integrity": round(integrity_coverage, 4),
             "player_match_graph_components": _components(rows),
+            "expected_matches": definition.get("expected_matches", len(rows)),
+            "fixture_completeness": round(
+                len(rows) / max(definition.get("expected_matches", len(rows)), 1), 4
+            ),
         },
         "models": {
             "lineup-trueskill": {
@@ -465,6 +506,12 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
     match_url = f"{STATSBOMB_ROOT}/matches/{definition['competition_id']}/{definition['season_id']}.json"
     match_bytes = fetch(match_url, cache_ttl=35 * 86_400)
     matches = json.loads(match_bytes)
+    expected_matches = definition.get("expected_matches")
+    if expected_matches is not None and len(matches) != expected_matches:
+        raise ValueError(
+            f"{definition['name']} expected {expected_matches} matches; "
+            f"StatsBomb published {len(matches)}"
+        )
     matches.sort(key=lambda item: (item["match_date"], item["match_id"]))
     player_meta: dict[str, dict] = {}
     rows: list[dict] = []
@@ -751,14 +798,14 @@ def build_player_payload(
             "sources": list(sources.values()),
             "license": "Source-specific terms recorded on each cohort",
             "attribution": "Ratings and analysis are independent of the data providers.",
-            "scope": "Complete declared men's and women's historical cohorts only; each cohort records its own source and snapshot hash.",
+            "scope": "Complete declared men's and women's tournaments and league seasons only; each cohort records its included competitions, source, and snapshot hash.",
         },
         "methodology": {
             "inputs": ["match outcome", "goal difference", "stable player IDs", "lineups", "minutes played"],
             "excluded_inputs": ["passes", "shots", "dribbles", "expected goals", "tracking data"],
             "lineup_trueskill": "Sequential additive team-skill update using normalized minutes-played weights; every probability is recorded before its match update.",
             "rapm": "Match-level goal-difference ridge regression using normalized minutes weights, home-goal intercept, and a chronological final-quarter penalty selection.",
-            "interpretation": "These estimates describe association with team outcomes within one declared competition. They do not identify how a player contributed and should not be compared across cohorts.",
+            "interpretation": "These estimates describe association with team outcomes within one declared complete tournament or season. They do not identify how a player contributed and should not be compared across cohorts.",
         },
         "cohorts": cohorts,
     }

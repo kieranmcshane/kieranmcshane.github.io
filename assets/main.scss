@@ -7202,6 +7202,30 @@ body:has(.explain-lab) .post-header {
   border-radius: 8px;
 }
 
+.player-lab-season-scope {
+  display: grid;
+  gap: 0.18rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 0.85rem;
+  color: #526171;
+  background: #fff;
+  border: 1px solid var(--lab-line);
+  border-radius: 7px;
+  font-size: 0.8rem;
+}
+
+.player-lab-season-scope strong {
+  color: var(--lab-navy);
+  font-size: 0.72rem;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.player-lab-season-scope small {
+  color: #68758a;
+  line-height: 1.4;
+}
+
 .player-lab-comparison-heading {
   display: flex;
   gap: 1rem;
@@ -9194,6 +9218,12 @@ body:has(.explain-lab) .post-header {
 
   .player-lab-metrics {
     margin-bottom: 0.9rem;
+  }
+
+  .player-lab-season-scope {
+    margin: 0 0 0.9rem;
+    padding: 0.7rem 0.75rem;
+    font-size: 0.76rem;
   }
 
   .player-lab-comparison {
