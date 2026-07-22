@@ -581,6 +581,14 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("Rating Lab mobile redesign", styles)
         self.assertIn("#ranking-table tbody tr", styles)
         self.assertIn(".rating-lab-predictor-table caption", styles)
+        self.assertIn('id="rating-mobile-filter-sheet"', page)
+        self.assertIn('id="rating-mobile-model-tabs"', page)
+        self.assertIn("rating-lab-mobile-row-expansion", script)
+        self.assertIn("showModal", script)
+        self.assertIn("IntersectionObserver", script)
+        self.assertIn("Rating Lab mobile market-pattern pass", styles)
+        self.assertIn("position: fixed", styles)
+        self.assertIn("env(safe-area-inset-bottom)", styles)
 
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{

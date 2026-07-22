@@ -10,6 +10,339 @@
   --soft: #f3f6ff;
 }
 
+/* Rating Lab mobile market-pattern pass */
+.rating-lab-filter-trigger,
+.rating-lab-mobile-row-expansion,
+.rating-lab-mobile-row-chevron {
+  display: none;
+}
+
+.rating-lab-filter-sheet {
+  color: var(--lab-navy);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.rating-lab-probability::before,
+.rating-lab-outcome-strip span {
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes rating-lab-sheet-in {
+  from { opacity: 0; transform: translateY(1.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rating-lab-card-reveal {
+  from { opacity: 0; transform: translateY(-0.35rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 650px) {
+  body:has(.rating-lab) .page-content {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+
+  .rating-lab-local-nav {
+    position: fixed;
+    z-index: 40;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid var(--lab-line);
+    border-bottom: 0;
+    box-shadow: 0 -8px 24px rgba(29, 37, 46, 0.1);
+    backdrop-filter: blur(16px);
+  }
+
+  .rating-lab-local-nav a {
+    min-height: 52px;
+  }
+
+  .rating-lab-local-nav a[aria-current="location"] {
+    background: #fff;
+    box-shadow: inset 0 3px 0 var(--lab-blue);
+  }
+
+  .rating-lab-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rating-lab-toolbar > .rating-lab-control-group:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-desktop-filter {
+    display: none;
+  }
+
+  .rating-lab-toolbar .rating-lab-search {
+    grid-column: 1;
+  }
+
+  .rating-lab-filter-trigger {
+    display: flex;
+    min-width: 7.6rem;
+    min-height: 48px;
+    box-sizing: border-box;
+    grid-column: 2;
+    gap: 0.8rem;
+    align-items: center;
+    justify-content: space-between;
+    align-self: end;
+    padding: 0.5rem 0.7rem;
+    color: var(--lab-navy);
+    background: #fff;
+    border: 1px solid #aeb8bf;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .rating-lab-filter-trigger > span:first-child {
+    display: grid;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .rating-lab-filter-trigger strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rating-lab-filter-trigger small {
+    color: #6b7782;
+    font-size: 0.62rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .rating-lab-filter-sheet[open] {
+    position: fixed;
+    inset: auto 0 0;
+    display: grid;
+    width: min(100%, 32rem);
+    max-width: none;
+    max-height: min(78vh, 42rem);
+    box-sizing: border-box;
+    gap: 1rem;
+    margin: auto;
+    padding: 0.65rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--lab-line);
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -18px 48px rgba(18, 29, 39, 0.22);
+    animation: rating-lab-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .rating-lab-filter-sheet::backdrop {
+    background: rgba(24, 31, 38, 0.42);
+    backdrop-filter: blur(2px);
+  }
+
+  .rating-lab-filter-sheet-handle {
+    width: 2.75rem;
+    height: 4px;
+    justify-self: center;
+    background: #c8cdd0;
+    border-radius: 999px;
+  }
+
+  .rating-lab-filter-sheet-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+  }
+
+  .rating-lab-filter-sheet-heading h3 {
+    margin: 0;
+    font-size: 1.55rem;
+  }
+
+  .rating-lab-filter-sheet-heading button {
+    width: 44px;
+    height: 44px;
+    color: var(--lab-navy);
+    background: var(--lab-wash);
+    border: 1px solid var(--lab-line);
+    border-radius: 50%;
+    font: inherit;
+    font-size: 1.35rem;
+  }
+
+  .rating-lab-filter-sheet .rating-lab-segmented {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+  }
+
+  .rating-lab-filter-sheet .rating-lab-segmented button {
+    min-height: 48px;
+    border: 1px solid var(--lab-line);
+    border-radius: 8px;
+  }
+
+  .rating-lab-filter-provisional {
+    display: flex;
+    min-height: 48px;
+    gap: 0.65rem;
+    align-items: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .rating-lab-filter-provisional[hidden] {
+    display: none;
+  }
+
+  .rating-lab-filter-provisional input {
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: var(--lab-secondary);
+  }
+
+  .rating-lab-filter-apply {
+    min-height: 50px;
+    color: #fff;
+    background: var(--lab-navy);
+    border: 0;
+    border-radius: 9px;
+    font: inherit;
+    font-weight: 750;
+  }
+
+  .rating-lab-provisional-control {
+    display: none;
+  }
+
+  #ranking-table .rating-lab-mobile-row-chevron {
+    display: block;
+    flex: 0 0 auto;
+    color: #7b8791;
+    font-size: 1.35rem;
+    line-height: 1;
+    transition: transform 180ms ease;
+  }
+
+  #ranking-table .rating-lab-entity[aria-expanded="true"] .rating-lab-mobile-row-chevron {
+    transform: rotate(90deg);
+  }
+
+  #ranking-table tbody tr.is-selected {
+    border-bottom-color: transparent;
+    border-radius: 10px 10px 0 0;
+  }
+
+  #ranking-table tbody tr.rating-lab-mobile-row-expansion {
+    display: block;
+    min-height: 0;
+    margin-top: -0.56rem;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #7d9fbe;
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    box-shadow: inset 3px 0 0 var(--lab-blue), 0 7px 14px rgba(29, 37, 46, 0.07);
+    animation: rating-lab-card-reveal 180ms ease-out;
+  }
+
+  #ranking-table tbody tr.rating-lab-mobile-row-expansion td {
+    display: block;
+    padding: 0.15rem 0.75rem 0.8rem;
+  }
+
+  .rating-lab-mobile-row-insight {
+    display: grid;
+    gap: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--lab-line);
+  }
+
+  .rating-lab-mobile-row-insight > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .rating-lab-mobile-row-insight > div:first-child > span,
+  .rating-lab-mobile-row-insight dt {
+    color: #68758a;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+
+  .rating-lab-mobile-row-insight dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .rating-lab-mobile-row-insight dl div {
+    min-width: 0;
+  }
+
+  .rating-lab-mobile-row-insight dt,
+  .rating-lab-mobile-row-insight dd {
+    margin: 0;
+  }
+
+  .rating-lab-mobile-row-insight dd {
+    margin-top: 0.15rem;
+    overflow: hidden;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rating-lab-mobile-row-insight button {
+    min-height: 44px;
+    color: var(--lab-blue);
+    background: var(--lab-wash);
+    border: 1px solid var(--lab-line);
+    border-radius: 7px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 750;
+  }
+
+  .rating-lab-predictor-table .rating-lab-probability {
+    min-height: 1.65rem;
+    box-sizing: border-box;
+    padding-top: 0.27rem;
+    padding-bottom: 0.27rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rating-lab-filter-sheet[open],
+  #ranking-table tbody tr.rating-lab-mobile-row-expansion {
+    animation: none;
+  }
+
+  .rating-lab-probability::before,
+  .rating-lab-outcome-strip span,
+  #ranking-table .rating-lab-mobile-row-chevron {
+    transition: none;
+  }
+}
+
 /* Centered-correlation proof campaign */
 body:has(.proof-game) .wrapper {
   max-width: 1120px;
@@ -8241,5 +8574,54 @@ body:has(.explain-lab) .post-header {
     grid-column: 2;
     grid-row: 1 / span 2;
     align-self: center;
+  }
+}
+
+/* Keep the market-pattern mobile shell authoritative over earlier responsive passes. */
+@media (max-width: 650px) {
+  .rating-lab-local-nav {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid var(--lab-line);
+    border-bottom: 0;
+    box-shadow: 0 -8px 24px rgba(29, 37, 46, 0.1);
+  }
+
+  .rating-lab-local-nav a[aria-current="location"] {
+    box-shadow: inset 0 3px 0 var(--lab-blue);
+  }
+
+  .rating-lab-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rating-lab-toolbar > .rating-lab-control-group:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-desktop-filter,
+  .rating-lab-provisional-control {
+    display: none;
+  }
+
+  .rating-lab-toolbar .rating-lab-search {
+    grid-column: 1;
+  }
+
+  #ranking-table tbody tr.rating-lab-mobile-row-expansion {
+    display: block;
+    min-height: 0;
+    margin-top: -0.56rem;
+    padding: 0;
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
   }
 }

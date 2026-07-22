@@ -55,6 +55,16 @@
     protocol: document.getElementById('rating-protocol'),
     competition: document.getElementById('competition-filter'),
     search: document.getElementById('rating-search'),
+    mobileFilterTrigger: document.getElementById('rating-mobile-filters'),
+    mobileFilterSheet: document.getElementById('rating-mobile-filter-sheet'),
+    mobileFilterClose: document.getElementById('rating-mobile-filter-close'),
+    mobileFilterApply: document.getElementById('rating-mobile-filter-apply'),
+    mobileModelLabel: document.getElementById('rating-mobile-model-label'),
+    mobileModelTabs: document.getElementById('rating-mobile-model-tabs'),
+    mobileCompetition: document.getElementById('rating-mobile-competition'),
+    mobileProvisionalControl: document.getElementById('rating-mobile-provisional-control'),
+    mobileIncludeProvisional: document.getElementById('rating-mobile-include-provisional'),
+    mobileProvisionalCount: document.getElementById('rating-mobile-provisional-count'),
     metricsDisclosure: document.querySelector('.rating-lab-metrics-disclosure'),
     metrics: document.getElementById('rating-metrics'),
     movers: document.getElementById('rating-movers'),
@@ -190,7 +200,19 @@
       options.push('<option value="' + escapeHtml(competition) + '">' + escapeHtml(competition) + '</option>');
     });
     elements.competition.innerHTML = options.join('');
+    elements.mobileCompetition.innerHTML = options.join('');
     state.competition = '';
+  }
+
+  function syncMobileFilters() {
+    var model = state.datasets[state.sport] && state.datasets[state.sport].models[state.model];
+    elements.mobileModelLabel.textContent = model ? model.label : state.model;
+    setPressed(elements.mobileModelTabs, 'mobileModel', state.model);
+    elements.mobileCompetition.value = state.competition;
+    var count = provisionalCount();
+    elements.mobileProvisionalControl.hidden = count === 0;
+    elements.mobileIncludeProvisional.checked = state.includeProvisional;
+    elements.mobileProvisionalCount.textContent = number(count, 0);
   }
 
   function escapeHtml(value) {
@@ -395,6 +417,7 @@
     elements.provisionalNote.textContent = count + ' entr' + (count === 1 ? 'y is' : 'ies are') +
       ' below the established football Elo gate: fewer than ' + minimum +
       ' matches against established opponents, or not yet connected to that result network.';
+    syncMobileFilters();
   }
 
   function renderMetrics() {
@@ -484,21 +507,27 @@
       var movement = !Number.isFinite(row.change30) ? '• no 30d baseline' :
         Math.abs(row.change30) < 0.05 ? '• 0.0 · 30d' :
           (row.change30 > 0 ? '▲ ' : '▼ ') + delta + ' · 30d';
+      var selected = row.id === state.selected;
+      var quickDetail = selected ? '<tr class="rating-lab-mobile-row-expansion"><td colspan="7"><div class="rating-lab-mobile-row-insight">' +
+        '<div><span>Recent trend</span>' + miniSparkline(row.history, row.name) + '</div><dl><div><dt>Uncertainty</dt><dd>' +
+        (row.sigma === null ? 'Not published by Elo' : '±' + number(row.sigma, 1, 1)) + '</dd></div><div><dt>Recent matches</dt><dd>' +
+        number(row.recent_matches, 0) + '</dd></div><div><dt>Last activity</dt><dd>' + escapeHtml(formatDate(row.last_played)) +
+        '</dd></div></dl><button type="button" data-open-profile="' + escapeHtml(row.id) + '">Full rating history and model comparison ↓</button></div></td></tr>' : '';
       return '<tr data-id="' + escapeHtml(row.id) + '" data-row-select="' + escapeHtml(row.id) + '" aria-selected="' +
         (row.id === state.selected ? 'true' : 'false') + '"' +
         (rowClasses.length ? ' class="' + rowClasses.join(' ') + '"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td>' +
-        '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '">' +
+        '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '" aria-expanded="' + selected + '">' +
         entityBadge(row, state.sport) + '<span class="rating-lab-identity-copy">' + entityName(row, state.sport) +
         '<small' + (row.provisional ? ' class="rating-lab-provisional-label" title="' +
           escapeHtml(row.provisional_reason) + '"' : '') + '>' + escapeHtml(identityContext) + '</small>' +
-        '<small class="rating-lab-mobile-change ' + deltaClass + '">' + escapeHtml(movement) + '</small></span></button></th>' +
+        '<small class="rating-lab-mobile-change ' + deltaClass + '">' + escapeHtml(movement) + '</small></span><span class="rating-lab-mobile-row-chevron" aria-hidden="true">›</span></button></th>' +
         '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
         '<td class="rating-lab-rating-column"><strong>' + ratingNumber(row.score) + '</strong></td>' +
         '<td class="rating-lab-uncertainty-column' + (row.sigma === null ? ' is-empty' : '') + '">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1, 1)) + '</td>' +
         '<td class="rating-lab-change-column ' + deltaClass + '">' + delta + '</td>' +
         '<td class="rating-lab-recent-column">' + number(row.recent_matches, 0) + '</td>' +
-        '</tr>';
+        '</tr>' + quickDetail;
     }).join('');
     elements.rankingTable.querySelectorAll('thead th').forEach(function (header) {
       header.removeAttribute('aria-sort');
@@ -1662,6 +1691,7 @@
     renderProtocol();
     renderAudit();
     renderPredictor();
+    syncMobileFilters();
   }
 
   function revealDetailOnMobile() {
@@ -1672,6 +1702,38 @@
         block: 'start'
       });
     }, 0);
+  }
+
+  function selectLeaderboardModel(model) {
+    if (!model || model === state.model) return;
+    state.model = model;
+    state.expanded = false;
+    state.visibleRows = 0;
+    state.includeProvisional = false;
+    setPressed(elements.modelTabs, 'model', state.model);
+    render();
+  }
+
+  function setIncludeProvisional(value) {
+    state.includeProvisional = Boolean(value);
+    state.expanded = false;
+    state.visibleRows = 0;
+    if (!state.includeProvisional) {
+      var selected = state.datasets[state.sport].models[state.model].rankings.find(function (row) {
+        return row.id === state.selected;
+      });
+      if (selected && selected.provisional) state.selected = null;
+    }
+    renderProvisionalControl();
+    renderMetrics();
+    renderMovers();
+    renderTable();
+    renderDetail();
+  }
+
+  function closeMobileFilters() {
+    if (typeof elements.mobileFilterSheet.close === 'function') elements.mobileFilterSheet.close();
+    else elements.mobileFilterSheet.removeAttribute('open');
   }
 
   elements.sportTabs.addEventListener('click', function (event) {
@@ -1700,15 +1762,69 @@
     link.setAttribute('aria-current', 'location');
   });
 
+  if ('IntersectionObserver' in window) {
+    var navSections = [
+      ['leaderboard-heading', '#leaderboard-heading'],
+      ['matchup', '#matchup'],
+      ['predictor', '#predictor'],
+      ['research', '#research']
+    ];
+    var navObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var mapping = navSections.find(function (item) { return item[0] === entry.target.id; });
+        if (!mapping) return;
+        elements.localNav.querySelectorAll('a[aria-current]').forEach(function (item) {
+          item.removeAttribute('aria-current');
+        });
+        var active = elements.localNav.querySelector('a[href="' + mapping[1] + '"]');
+        if (active) active.setAttribute('aria-current', 'location');
+      });
+    }, { rootMargin: '-20% 0px -68% 0px', threshold: 0 });
+    navSections.forEach(function (mapping) {
+      var section = document.getElementById(mapping[0]);
+      if (section) navObserver.observe(section);
+    });
+  }
+
   elements.modelTabs.addEventListener('click', function (event) {
     var button = event.target.closest('[data-model]');
-    if (!button || button.dataset.model === state.model) return;
-    state.model = button.dataset.model;
+    if (!button) return;
+    selectLeaderboardModel(button.dataset.model);
+  });
+
+  elements.mobileFilterTrigger.addEventListener('click', function () {
+    syncMobileFilters();
+    if (typeof elements.mobileFilterSheet.showModal === 'function') elements.mobileFilterSheet.showModal();
+    else elements.mobileFilterSheet.setAttribute('open', '');
+  });
+
+  elements.mobileFilterClose.addEventListener('click', closeMobileFilters);
+  elements.mobileFilterApply.addEventListener('click', closeMobileFilters);
+  elements.mobileFilterSheet.addEventListener('click', function (event) {
+    if (event.target === elements.mobileFilterSheet) closeMobileFilters();
+  });
+
+  elements.mobileModelTabs.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-mobile-model]');
+    if (!button) return;
+    selectLeaderboardModel(button.dataset.mobileModel);
+  });
+
+  elements.mobileCompetition.addEventListener('change', function () {
+    state.competition = elements.mobileCompetition.value;
+    elements.competition.value = state.competition;
     state.expanded = false;
     state.visibleRows = 0;
-    state.includeProvisional = false;
-    setPressed(elements.modelTabs, 'model', state.model);
-    render();
+    renderMetrics();
+    renderMovers();
+    renderTable();
+    renderDetail();
+    syncMobileFilters();
+  });
+
+  elements.mobileIncludeProvisional.addEventListener('change', function () {
+    setIncludeProvisional(elements.mobileIncludeProvisional.checked);
   });
 
   elements.matchupModelTabs.addEventListener('click', function (event) {
@@ -1801,20 +1917,7 @@
   });
 
   elements.includeProvisional.addEventListener('change', function () {
-    state.includeProvisional = elements.includeProvisional.checked;
-    state.expanded = false;
-    state.visibleRows = 0;
-    if (!state.includeProvisional) {
-      var selected = state.datasets[state.sport].models[state.model].rankings.find(function (row) {
-        return row.id === state.selected;
-      });
-      if (selected && selected.provisional) state.selected = null;
-    }
-    renderProvisionalControl();
-    renderMetrics();
-    renderMovers();
-    renderTable();
-    renderDetail();
+    setIncludeProvisional(elements.includeProvisional.checked);
   });
 
   elements.more.addEventListener('click', function () {
@@ -1828,12 +1931,20 @@
   });
 
   elements.body.addEventListener('click', function (event) {
+    var profile = event.target.closest('[data-open-profile]');
+    if (profile) {
+      state.selected = profile.dataset.openProfile;
+      renderDetail();
+      revealDetailOnMobile();
+      return;
+    }
     var target = event.target.closest('[data-select], [data-row-select]');
     if (!target) return;
-    state.selected = target.dataset.select || target.dataset.rowSelect;
+    var selectedId = target.dataset.select || target.dataset.rowSelect;
+    state.selected = window.matchMedia('(max-width: 650px)').matches && state.selected === selectedId ? null : selectedId;
     renderTable();
     renderDetail();
-    revealDetailOnMobile();
+    if (!window.matchMedia('(max-width: 650px)').matches) revealDetailOnMobile();
   });
 
   elements.movers.addEventListener('click', function (event) {

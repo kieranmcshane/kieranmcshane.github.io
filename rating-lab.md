@@ -41,7 +41,11 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <button type="button" data-sport="chess" aria-pressed="false">Chess</button>
         </div>
       </div>
-      <div class="rating-lab-control-group" aria-label="Rating model">
+      <button type="button" class="rating-lab-filter-trigger" id="rating-mobile-filters" aria-haspopup="dialog" aria-controls="rating-mobile-filter-sheet">
+        <span><strong id="rating-mobile-model-label">Elo</strong><small>scored out-of-sample</small></span>
+        <span>Filters</span>
+      </button>
+      <div class="rating-lab-control-group rating-lab-desktop-filter" aria-label="Rating model">
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="model-tabs">
           <button type="button" data-model="elo" aria-pressed="true">Elo</button>
@@ -50,7 +54,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <button type="button" data-model="robust" aria-pressed="false">Robust</button>
         </div>
       </div>
-      <label class="rating-lab-field">
+      <label class="rating-lab-field rating-lab-desktop-filter">
         <span>Competition</span>
         <select id="competition-filter"><option value="">All competitions</option></select>
       </label>
@@ -59,6 +63,32 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <input id="rating-search" type="search" autocomplete="off" placeholder="Player or team">
       </label>
     </div>
+
+    <dialog class="rating-lab-filter-sheet" id="rating-mobile-filter-sheet" aria-labelledby="rating-mobile-filter-title">
+      <div class="rating-lab-filter-sheet-handle" aria-hidden="true"></div>
+      <div class="rating-lab-filter-sheet-heading">
+        <div><p class="rating-lab-kicker">Leaderboard view</p><h3 id="rating-mobile-filter-title">Filters</h3></div>
+        <button type="button" id="rating-mobile-filter-close" aria-label="Close filters">×</button>
+      </div>
+      <div class="rating-lab-control-group" aria-label="Mobile rating model">
+        <span class="rating-lab-control-label">Model</span>
+        <div class="rating-lab-segmented" id="rating-mobile-model-tabs">
+          <button type="button" data-mobile-model="elo" aria-pressed="true">Elo</button>
+          <button type="button" data-mobile-model="glicko2" aria-pressed="false">Glicko-2</button>
+          <button type="button" data-mobile-model="trueskill" aria-pressed="false">Gaussian</button>
+          <button type="button" data-mobile-model="robust" aria-pressed="false">Robust</button>
+        </div>
+      </div>
+      <label class="rating-lab-field">
+        <span>Competition</span>
+        <select id="rating-mobile-competition"><option value="">All competitions</option></select>
+      </label>
+      <label class="rating-lab-filter-provisional" id="rating-mobile-provisional-control" hidden>
+        <input id="rating-mobile-include-provisional" type="checkbox">
+        <span>Include provisional (<strong id="rating-mobile-provisional-count">0</strong>)</span>
+      </label>
+      <button type="button" class="rating-lab-filter-apply" id="rating-mobile-filter-apply">Apply view</button>
+    </dialog>
 
     <details class="rating-lab-metrics-disclosure" open>
       <summary>Model accuracy</summary>
