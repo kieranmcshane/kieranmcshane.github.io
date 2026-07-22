@@ -203,7 +203,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <p class="rating-lab-kicker">How it works</p>
     <h2 id="research-heading">The details, when you want them.</h2>
     <p class="rating-lab-research-intro">Rating Lab is a side project, but its forecasts should still be inspectable. Open a panel to see the assumptions, parameters, data sources, licences, and exact reproduction steps.</p>
-    <p class="rating-lab-explainer"><strong>Identity images are data, too:</strong> club and federation crests are used only when football-data.org supplies them. Tennis and chess portraits are linked through exact ATP or FIDE identifiers to Wikimedia Commons—never guessed from a name—and appear only with a recorded file page, licence, and attribution. Small flags are pinned MIT-licensed SVG assets selected only from the source country or federation code—never operating-system emoji. Unknown codes remain blank rather than being inferred from a name. The inspector exposes image details. Images and flags never enter a rating or forecast; initials remain the final fallback.</p>
+    <details class="rating-lab-media-policy">
+      <summary>Identity image and flag policy</summary>
+      <p class="rating-lab-explainer"><strong>Identity images are data, too:</strong> club and federation crests are used only when football-data.org supplies them. Tennis and chess portraits are linked through exact ATP or FIDE identifiers to Wikimedia Commons—never guessed from a name—and appear only with a recorded file page, licence, and attribution. Small flags are pinned MIT-licensed SVG assets selected only from the source country or federation code—never operating-system emoji. Unknown codes remain blank rather than being inferred from a name. The inspector exposes image details. Images and flags never enter a rating or forecast; initials remain the final fallback.</p>
+    </details>
     <div class="rating-lab-research-links" aria-label="Downloads and code">
       <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
       <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>

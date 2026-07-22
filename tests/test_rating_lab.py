@@ -495,7 +495,7 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("b.champion - a.champion", script)
         self.assertIn("spread reflects starting ratings and schedule priors", script)
         self.assertIn('id="rating-include-provisional"', page)
-        self.assertIn("var pageSize = mobile ? 12 : 20;", script)
+        self.assertIn("var pageSize = mobile ? 6 : 20;", script)
         self.assertIn("elements.metricsDisclosure.open = false;", script)
         self.assertIn('class="rating-lab-market-detail"', script)
         self.assertIn('class="rating-lab-title-mobile"', page)
@@ -524,6 +524,10 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('data-label="Candidates tested"', script)
         self.assertIn("elements.scoreHeading.textContent = 'Score';", player_script)
         self.assertIn("Math.floor(elements.chart.clientWidth || 330)", player_script)
+        self.assertIn('class="rating-lab-media-policy"', page)
+        self.assertIn("Rating Lab mobile redesign", styles)
+        self.assertIn("#ranking-table tbody tr", styles)
+        self.assertIn(".rating-lab-predictor-table caption", styles)
 
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{

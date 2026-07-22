@@ -458,7 +458,7 @@
   function renderTable() {
     var rows = currentRows();
     var mobile = window.matchMedia('(max-width: 650px)').matches;
-    var pageSize = mobile ? 12 : 20;
+    var pageSize = mobile ? 6 : 20;
     var visibleRows = Math.max(state.visibleRows, pageSize);
     var displayed = state.expanded ? rows : rows.slice(0, visibleRows);
     var model = state.datasets[state.sport].models[state.model];
