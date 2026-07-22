@@ -62,6 +62,13 @@ team-specific LAPM
 ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
 
+The Pages workflow always runs the historical player pipeline before Jekyll so
+a restored fallback can never silently replace the checked-in player schema.
+Push deployments refresh the player payload needed by the changed interface;
+scheduled and manual runs refresh the sport feeds first and then the player
+payload. The event-aware source cache restores the previous public-data cache
+on its first run and is saved under a new version only after validation.
+
 The historical player lab also publishes complete league-season cohorts when
 the source supplies every fixture. Premier League 2015/16 is the first men's
 full-season cohort: all 380 league matches pass the lineup, minutes, integrity,

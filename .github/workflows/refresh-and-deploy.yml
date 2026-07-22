@@ -30,8 +30,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .cache/rating-lab
-          key: rating-lab-public-data-v3-${{ runner.os }}-${{ steps.cache-date.outputs.date }}
+          key: rating-lab-public-data-v4-${{ runner.os }}-${{ steps.cache-date.outputs.date }}
           restore-keys: |
+            rating-lab-public-data-v4-${{ runner.os }}-
             rating-lab-public-data-v3-${{ runner.os }}-
       - name: Restore last validated public snapshot
         uses: actions/cache@v4
@@ -55,11 +56,14 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
-          sports="football national-football chess"
-          if [ "$(date -u +%u)" = "1" ] || [ "$GITHUB_EVENT_NAME" != "schedule" ]; then
-            sports="tennis $sports"
+          if [ "$GITHUB_EVENT_NAME" != "push" ]; then
+            sports="football national-football chess"
+            if [ "$(date -u +%u)" = "1" ] || [ "$GITHUB_EVENT_NAME" != "schedule" ]; then
+              sports="tennis $sports"
+            fi
+            python scripts/refresh_ratings.py --sports $sports
           fi
-          python scripts/refresh_ratings.py --sports $sports
+          python scripts/refresh_ratings.py --players-only
       - name: Preserve validated public snapshot
         run: |
           mkdir -p .cache/rating-lab-output
