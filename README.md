@@ -30,10 +30,13 @@ the complete Jekyll site as a Pages artifact. Repository setup requires:
 
 1. Optionally create a free football-data.org API token and add it as the
    repository secret `FOOTBALL_DATA_TOKEN` for the primary football feed.
-2. To publish the completed men's World Cup 2026 player cohort, add an
-   API-Football credential as `API_FOOTBALL_KEY`. The player pipeline uses one
-   league-season request plus fixture-detail batches of at most 20 IDs, validates
-   all 104 matches, and never exposes the credential or raw responses.
+2. To attempt publication of the completed men's World Cup 2026 player cohort,
+   add an API-Football credential as `API_FOOTBALL_KEY`. The credential currently
+   configured for this site is on a plan that does not expose season 2026, so the
+   cohort is explicitly withheld. An eligible plan triggers one league-season
+   request plus fixture-detail batches of at most 20 IDs, validation of all 104
+   matches, and publication only after every gate passes. The credential and raw
+   responses are never exposed.
 3. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
 4. Run **Refresh ratings and deploy Pages** once manually, or wait for the daily
    schedule. Tennis refreshes on Mondays; football and current chess refresh
@@ -61,6 +64,9 @@ publishes derived Lineup TrueSkill, RAPM, experimental pairwise-chemistry, and
 team-specific LAPM
 ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
+An unavailable optional commercial cohort cannot block or replace validated
+public-data cohorts. The payload records whether World Cup 2026 is published,
+not configured, or withheld, together with a sanitized reason and check time.
 
 The Pages workflow always runs the historical player pipeline before Jekyll so
 a restored fallback can never silently replace the checked-in player schema.

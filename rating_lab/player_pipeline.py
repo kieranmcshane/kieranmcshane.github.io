@@ -1610,14 +1610,50 @@ def _build_api_football_cohort(
 def build_player_payload(
     fetch: Callable[..., bytes], api_football_key: str | None = None
 ) -> dict:
+    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     cohorts = []
     for definition in COHORTS:
         cohort, _ = _build_cohort(definition, fetch)
         cohorts.append(cohort)
+    api_football_status = {
+        "status": "not_configured",
+        "cohort": API_FOOTBALL_WORLD_CUP["id"],
+        "checked_at": generated_at,
+        "message": "API_FOOTBALL_KEY is not configured; World Cup 2026 remains withheld.",
+    }
     if api_football_key:
-        cohorts.append(
-            _build_api_football_cohort(API_FOOTBALL_WORLD_CUP, fetch, api_football_key)
-        )
+        try:
+            cohorts.append(
+                _build_api_football_cohort(
+                    API_FOOTBALL_WORLD_CUP, fetch, api_football_key
+                )
+            )
+            api_football_status = {
+                "status": "published",
+                "cohort": API_FOOTBALL_WORLD_CUP["id"],
+                "checked_at": generated_at,
+                "message": "All declared API-Football completeness gates passed.",
+            }
+        except (RuntimeError, ValueError) as error:
+            # This optional commercial cohort must never weaken or block the
+            # independently reproducible public cohorts. Provider errors are
+            # deliberately summarized so credentials/raw responses cannot leak.
+            unavailable_season = "do not have access to this season" in str(error).casefold()
+            api_football_status = {
+                "status": "withheld",
+                "reason": (
+                    "provider_plan_does_not_include_2026"
+                    if unavailable_season
+                    else "source_or_completeness_gate_failed"
+                ),
+                "cohort": API_FOOTBALL_WORLD_CUP["id"],
+                "checked_at": generated_at,
+                "message": (
+                    "The configured API-Football plan does not include season 2026, so World Cup 2026 remains withheld."
+                    if unavailable_season
+                    else "API-Football did not make the complete 2026 season available to this build or the cohort failed a completeness gate."
+                ),
+            }
     sources = {
         cohort["source"]["name"]: {
             "name": cohort["source"]["name"],
@@ -1627,7 +1663,7 @@ def build_player_payload(
     }
     return {
         "schema_version": PLAYER_SCHEMA_VERSION,
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "generated_at": generated_at,
         "source": {
             "name": "Cohort-specific verified sources",
             "url": "https://kieranmcshane.github.io/rating-lab/players/",
@@ -1635,6 +1671,9 @@ def build_player_payload(
             "license": "Source-specific terms recorded on each cohort",
             "attribution": "Ratings and analysis are independent of the data providers.",
             "scope": "Complete declared men's and women's tournaments and league seasons only; each cohort records its included competitions, source, and snapshot hash.",
+            "statuses": {
+                "api_football_world_cup_2026": api_football_status,
+            },
         },
         "methodology": {
             "inputs": ["match outcome", "goal difference", "goal timing", "stable player IDs", "lineups", "minutes played"],
