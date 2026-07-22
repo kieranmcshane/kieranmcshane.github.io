@@ -5,7 +5,7 @@ permalink: /rating-lab/players/
 description: Outcome-only historical men's and women's football player ratings from complete StatsBomb lineups using Lineup TrueSkill and RAPM.
 ---
 
-<div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}">
+<div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero player-lab-hero">
     <p class="rating-lab-kicker">Historical men's and women's football player contribution</p>
     <h1>What changed when they played?</h1>
@@ -43,7 +43,7 @@ description: Outcome-only historical men's and women's football player ratings f
       </div>
       <label class="rating-lab-field">
         <span>Find a player</span>
-        <input id="player-search" type="search" autocomplete="off" placeholder="Player or club">
+        <input id="player-search" type="search" autocomplete="off" placeholder="Player, club or nationality">
       </label>
     </div>
 
@@ -62,7 +62,7 @@ description: Outcome-only historical men's and women's football player ratings f
           <p class="rating-lab-kicker">Agreement and disagreement</p>
           <h3 id="player-comparison-heading">Lineup TrueSkill versus RAPM</h3>
         </div>
-        <p>Each axis is standardized within this competition. Upper-right players rate highly under both protocols.</p>
+        <p>Each axis is standardized within this competition. Flags show the source-listed nationality; upper-right players rate highly under both protocols.</p>
       </div>
       <div id="player-comparison-chart"></div>
     </section>

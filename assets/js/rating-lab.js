@@ -248,10 +248,10 @@
     Object.assign(regionCodesByName, {
       'bolivia': 'BO', 'cape verde': 'CV', 'chinese taipei': 'TW', 'congo': 'CG',
       'czech republic': 'CZ', 'democratic republic of the congo': 'CD', 'dr congo': 'CD',
-      'england': 'GB', 'eswatini': 'SZ', 'hong kong': 'HK', 'iran': 'IR',
+      'england': 'GB', 'eswatini': 'SZ', 'france': 'FR', 'hong kong': 'HK', 'iran': 'IR',
       'ivory coast': 'CI', 'kosovo': 'XK', 'laos': 'LA', 'moldova': 'MD',
       'north korea': 'KP', 'northern ireland': 'GB', 'palestine': 'PS',
-      'republic of ireland': 'IE', 'russia': 'RU', 'scotland': 'GB',
+      'republic of ireland': 'IE', 'russia': 'RU', 'scotland': 'GB', 'serbia': 'RS',
       'south korea': 'KR', 'syria': 'SY', 'tanzania': 'TZ', 'turkey': 'TR',
       'united states': 'US', 'venezuela': 'VE', 'vietnam': 'VN', 'wales': 'GB'
     });
