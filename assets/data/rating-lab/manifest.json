@@ -244,7 +244,7 @@
       "publication_rights": "source licence must permit derived public ratings and audit metadata"
     },
     "source_assessment": {
-      "statsbomb_open_data": "Complete declared historical Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
+      "statsbomb_open_data": "Complete declared historical Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
       "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
       "openfootball_fallback": "Results and fixtures only; cannot support player attribution."
     },
@@ -252,9 +252,11 @@
   },
   "player_football": {
     "status": "current",
-    "checked_at": "2026-07-21T06:09:22+00:00",
+    "checked_at": "2026-07-22T11:30:03+00:00",
     "source": "StatsBomb Open Data",
     "cohorts": [
+      "euro-2024",
+      "world-cup-2022",
       "liga-f-2023-24",
       "wsl-2023-24"
     ],

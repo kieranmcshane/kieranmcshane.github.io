@@ -182,7 +182,7 @@ def individual_contribution_protocol() -> dict:
             "publication_rights": "source licence must permit derived public ratings and audit metadata",
         },
         "source_assessment": {
-            "statsbomb_open_data": "Complete declared historical Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
+            "statsbomb_open_data": "Complete declared historical Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
             "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
             "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
         },

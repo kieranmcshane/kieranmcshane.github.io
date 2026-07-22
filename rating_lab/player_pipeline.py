@@ -12,15 +12,38 @@ from typing import Callable
 from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_loss
 
 
-PLAYER_SCHEMA_VERSION = "1.0.0"
+PLAYER_SCHEMA_VERSION = "1.1.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 COHORTS = (
+    {
+        "id": "euro-2024",
+        "competition_id": 55,
+        "season_id": 282,
+        "name": "UEFA Euro 2024",
+        "country": "Europe",
+        "gender": "men",
+        "format": "international tournament",
+        "venue_context": "tournament",
+    },
+    {
+        "id": "world-cup-2022",
+        "competition_id": 43,
+        "season_id": 106,
+        "name": "FIFA World Cup 2022",
+        "country": "International",
+        "gender": "men",
+        "format": "international tournament",
+        "venue_context": "tournament",
+    },
     {
         "id": "liga-f-2023-24",
         "competition_id": 182,
         "season_id": 281,
         "name": "Liga F 2023/24",
         "country": "Spain",
+        "gender": "women",
+        "format": "club league season",
+        "venue_context": "home-and-away",
     },
     {
         "id": "wsl-2023-24",
@@ -28,6 +51,9 @@ COHORTS = (
         "season_id": 281,
         "name": "FA Women's Super League 2023/24",
         "country": "England",
+        "gender": "women",
+        "format": "club league season",
+        "venue_context": "home-and-away",
     },
 )
 RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
@@ -193,8 +219,13 @@ def _fit_ridge(rows: list[dict], player_ids: list[str], penalty: float) -> dict:
             vector[index[player_id]] -= weight
         design.append(vector)
         targets.append(row["goal_difference"])
-    home_advantage = sum(targets) / len(targets)
-    centered = [target - home_advantage for target in targets]
+    home_exposure = [1.0 if row.get("home_advantage", True) else 0.0 for row in rows]
+    exposed_targets = [target for target, exposure in zip(targets, home_exposure) if exposure]
+    home_advantage = sum(exposed_targets) / len(exposed_targets) if exposed_targets else 0.0
+    centered = [
+        target - home_advantage * exposure
+        for target, exposure in zip(targets, home_exposure)
+    ]
     gram = [
         [sum(left * right for left, right in zip(design[i], design[j])) for j in range(len(rows))]
         for i in range(len(rows))
@@ -208,8 +239,9 @@ def _fit_ridge(rows: list[dict], player_ids: list[str], penalty: float) -> dict:
         for column, player_id in enumerate(player_ids)
     }
     predictions = [
-        home_advantage + sum(vector[column] * coefficients[player_id] for column, player_id in enumerate(player_ids))
-        for vector in design
+        home_advantage * home_exposure[row]
+        + sum(vector[column] * coefficients[player_id] for column, player_id in enumerate(player_ids))
+        for row, vector in enumerate(design)
     ]
     residuals = [target - prediction for target, prediction in zip(targets, predictions)]
     residual_variance = sum(value * value for value in residuals) / max(len(rows) - 1, 1)
@@ -234,7 +266,7 @@ def _rapm(rows: list[dict], player_ids: list[str]) -> dict:
         fitted = _fit_ridge(training, player_ids, penalty)
         errors = []
         for row in validation:
-            prediction = fitted["home_advantage"]
+            prediction = fitted["home_advantage"] if row.get("home_advantage", True) else 0.0
             prediction += sum(fitted["coefficients"].get(player_id, 0.0) * weight for player_id, weight in row["home"].items())
             prediction -= sum(fitted["coefficients"].get(player_id, 0.0) * weight for player_id, weight in row["away"].items())
             errors.append((row["goal_difference"] - prediction) ** 2)
@@ -270,6 +302,15 @@ def _components(rows: list[dict]) -> int:
     return components
 
 
+def _home_advantage(match: dict, definition: dict) -> bool:
+    """Use venue evidence for tournaments; league home designations are authoritative."""
+    if definition.get("venue_context") != "tournament":
+        return True
+    home_country = (match.get("home_team", {}).get("country") or {}).get("name")
+    stadium_country = (match.get("stadium", {}).get("country") or {}).get("name")
+    return bool(home_country and stadium_country and home_country == stadium_country)
+
+
 def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, bytes]:
     match_url = f"{STATSBOMB_ROOT}/matches/{definition['competition_id']}/{definition['season_id']}.json"
     match_bytes = fetch(match_url, cache_ttl=35 * 86_400)
@@ -298,6 +339,7 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
                 "away": away,
                 "score_a": score_a,
                 "goal_difference": match["home_score"] - match["away_score"],
+                "home_advantage": _home_advantage(match, definition),
             }
         )
     lineup_model = LineupTrueSkill()
@@ -373,6 +415,8 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
         "id": definition["id"],
         "name": definition["name"],
         "country": definition["country"],
+        "gender": definition["gender"],
+        "format": definition["format"],
         "first_match": rows[0]["date"],
         "last_match": rows[-1]["date"],
         "matches": len(rows),
@@ -398,7 +442,12 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
             "rapm": {
                 "label": "RAPM",
                 "ranking_rule": "goal impact − 1.96 × uncertainty",
-                "parameters": {"selected_ridge_penalty": rapm["selected_penalty"], "candidates": rapm["candidates"], "home_goal_advantage": round(rapm["home_advantage"], 4)},
+                "parameters": {
+                    "selected_ridge_penalty": rapm["selected_penalty"],
+                    "candidates": rapm["candidates"],
+                    "home_goal_advantage": round(rapm["home_advantage"], 4),
+                    "home_advantage_evidence": "Declared home team for league seasons; stadium country equals home-team country for international tournaments.",
+                },
                 "metrics": {"chronological_validation_matches": rapm["validation_matches"], "validation_rmse": min(item["validation_rmse"] for item in rapm["candidates"]), "full_replay_rmse": round(rapm["rmse"], 4)},
                 "rankings": rapm_rows,
             },
@@ -421,14 +470,14 @@ def build_player_payload(fetch: Callable[..., bytes]) -> dict:
             "url": "https://github.com/statsbomb/open-data",
             "license": "StatsBomb Open Data terms",
             "attribution": "Data source: StatsBomb. Ratings and analysis are independent.",
-            "scope": "Complete declared historical cohorts only; not a live five-league player feed.",
+            "scope": "Complete declared men's and women's historical cohorts only; not a live five-league player feed.",
         },
         "methodology": {
             "inputs": ["match outcome", "goal difference", "stable player IDs", "lineups", "minutes played"],
             "excluded_inputs": ["passes", "shots", "dribbles", "expected goals", "tracking data"],
             "lineup_trueskill": "Sequential additive team-skill update using normalized minutes-played weights; every probability is recorded before its match update.",
             "rapm": "Match-level goal-difference ridge regression using normalized minutes weights, home-goal intercept, and a chronological final-quarter penalty selection.",
-            "interpretation": "These estimates describe association with team outcomes within one declared season. They do not identify how a player contributed and should not be compared across cohorts.",
+            "interpretation": "These estimates describe association with team outcomes within one declared competition. They do not identify how a player contributed and should not be compared across cohorts.",
         },
         "cohorts": cohorts,
     }

@@ -20,4 +20,5 @@ jobs:
       - name: Check browser JavaScript syntax
         run: |
           node --check assets/js/rating-lab.js
+          node --check assets/js/player-lab.js
           node --check assets/js/centered-correlation-explain.js

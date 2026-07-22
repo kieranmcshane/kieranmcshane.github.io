@@ -276,7 +276,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-contribution" id="player-contribution" aria-labelledby="contribution-heading">
     <p class="rating-lab-kicker">Team result → player contribution</p>
     <h2 id="contribution-heading">Published where the lineups are complete</h2>
-    <p class="rating-lab-contribution-intro">Live club and national-team rankings still treat each team as one competitor. A separate historical player lab now publishes individual estimates for complete declared StatsBomb seasons: Liga F 2023/24 and the FA Women’s Super League 2023/24.</p>
+    <p class="rating-lab-contribution-intro">Live club and national-team rankings still treat each team as one competitor. A separate historical player lab publishes individual estimates for four complete declared StatsBomb cohorts: UEFA Euro 2024 and the 2022 FIFA World Cup for men, plus Liga F and the FA Women’s Super League 2023/24 for women.</p>
     <p><a class="rating-lab-contribution-cta" href="{{ '/rating-lab/players/' | relative_url }}">Open historical player ratings →</a></p>
 
     <div class="rating-lab-contribution-methods">
@@ -302,7 +302,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         </div>
         <span class="rating-lab-status-ready">Historical cohorts live</span>
       </div>
-      <p>Every published historical cohort passes the checks below. Men’s club samples and the live five-league feed remain excluded because their open lineup coverage is incomplete.</p>
+      <p>Every published historical cohort passes the checks below. The men’s release uses complete international tournaments; partial men’s club samples and the live five-league feed remain excluded because their open lineup coverage is incomplete.</p>
       <div class="rating-lab-table-wrap">
         <table class="rating-lab-readiness-table">
           <caption>Minimum data and reproducibility requirements for publishing footballer ratings</caption>
@@ -326,7 +326,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <li>The estimates would measure net contribution associated with results after controlling for teammates and opponents, not how a player created that contribution.</li>
         <li>Lineup TrueSkill is the natural sequential rating. RAPM is the complementary retrospective impact estimate; they answer related but different questions.</li>
         <li>Minutes are needed to avoid assigning a substitute the same exposure as a full-match player. Score differential by on-field stint is preferable for RAPM when legally reproducible.</li>
-        <li>StatsBomb Open Data supports these declared historical seasons, but it is not a complete live feed for the five men’s leagues covered by the team rankings.</li>
+        <li>StatsBomb Open Data supports these declared historical competitions, but it is not a complete live feed for the five men’s leagues covered by the team rankings.</li>
       </ul>
     </details>
   </section>
