@@ -3,7 +3,7 @@
 
   var root = document.querySelector('.player-lab');
   if (!root) return;
-  var state = { payload: null, cohort: null, model: 'lineup-trueskill', query: '', expanded: false, selected: null };
+  var state = { payload: null, cohort: null, model: 'lineup-trueskill', query: '', visibleCount: 0, selected: null, detailOpen: false };
   var elements = {
     error: document.getElementById('player-lab-error'),
     generated: document.getElementById('player-lab-generated'),
@@ -16,6 +16,8 @@
     caption: document.getElementById('player-ranking-caption'),
     empty: document.getElementById('player-ranking-empty'),
     more: document.getElementById('player-ranking-more'),
+    listStatus: document.getElementById('player-list-status'),
+    filtersReturn: document.getElementById('player-filters-return'),
     detail: document.getElementById('player-detail'),
     scoreHeading: document.getElementById('player-score-heading'),
     gates: document.getElementById('player-gates'),
@@ -105,6 +107,15 @@
     });
   }
 
+  function isMobile() {
+    return window.matchMedia('(max-width: 650px)').matches;
+  }
+
+  function resetList() {
+    state.visibleCount = 0;
+    state.detailOpen = false;
+  }
+
   function renderCohortOptions() {
     var groups = [
       { id: 'men', label: "Men's competitions" },
@@ -183,7 +194,7 @@
     var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
     function x(value) { return pad + (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (width - 2 * pad); }
     function y(value) { return height - pad - (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (height - 2 * pad); }
-    var labels = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); }).slice(0, mobile ? 4 : 8);
+    var labels = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); }).slice(0, mobile ? 0 : 8);
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
@@ -194,10 +205,13 @@
       var preferredCardTop = pointY < cardHeight + 14 ? pointY + 14 : pointY - cardHeight - 14;
       var cardLeft = Math.max(8, Math.min(width - cardWidth - 8, preferredCardLeft));
       var cardTop = Math.max(8, Math.min(height - cardHeight - 8, preferredCardTop));
+      var pointMeta = point.country && point.country !== point.team
+        ? point.country + ' · ' + point.team
+        : point.team || point.country || 'Nationality unavailable';
       var selectionCard = selected ? '<strong class="player-lab-point-card" style="--card-left:' +
         (cardLeft - pointX).toFixed(1) + 'px;--card-top:' + (cardTop - pointY).toFixed(1) + 'px;--card-width:' + cardWidth + 'px">' +
         '<span class="player-lab-point-card-name">' + playerFlag(point.country, '', true) + '<span>' + escapeHtml(point.name) + '</span></span>' +
-        '<span class="player-lab-point-card-meta">' + escapeHtml(point.country || 'Nationality unavailable') + ' · ' + escapeHtml(point.team) + '</span>' +
+        '<span class="player-lab-point-card-meta">' + escapeHtml(pointMeta) + '</span>' +
         '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>RAPM <b>#' + point.rapmRank + '</b></span></span>' +
         '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.rapmScore, 2) + '</span></strong>' : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
@@ -216,25 +230,30 @@
   function renderTable() {
     var cohort = currentCohort();
     var rows = currentRows();
-    var displayed = state.expanded ? rows : rows.slice(0, 30);
+    var pageSize = isMobile() ? 10 : 30;
+    var visibleCount = state.visibleCount || pageSize;
+    var displayed = rows.slice(0, visibleCount);
+    var remaining = Math.max(0, rows.length - displayed.length);
     elements.caption.textContent = cohort.models[state.model].label + ' · ' + rows.length + ' eligible players' +
       (cohort.source && cohort.source.name ? ' · ' + cohort.source.name : '');
+    elements.listStatus.textContent = cohort.models[state.model].label + ' · showing ' + displayed.length + ' of ' + rows.length;
     elements.scoreHeading.textContent = 'Score';
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
-    elements.more.textContent = 'Show all ' + rows.length + ' players';
+    elements.more.textContent = remaining ? 'Show next ' + Math.min(pageSize, remaining) + ' · ' + remaining + ' remaining' : '';
     elements.body.innerHTML = displayed.map(function (row) {
       return '<tr data-player-row="' + escapeHtml(row.id) + '"' + (row.id === state.selected ? ' class="is-selected"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td><th scope="row"><button type="button" class="rating-lab-entity" data-player-id="' +
-        escapeHtml(row.id) + '"><span class="player-lab-player-name"><span>' + escapeHtml(row.name) + '</span>' + playerFlag(row.country) + '</span><small>' + escapeHtml(row.team) + ' · ±' +
-        number(row.uncertainty, 2) + ' · ' + number(row.minutes, 0) + ' min · ' + row.matches + ' matches</small></button></th>' +
-        '<td><strong>' + number(row.score, 2) + '</strong></td><td>±' + number(row.uncertainty, 2) + '</td>' +
+        escapeHtml(row.id) + '"><span class="player-lab-player-name"><span>' + escapeHtml(row.name) + '</span>' + playerFlag(row.country) + '</span><small>' + escapeHtml(row.team) + '</small>' +
+        '<span class="player-lab-row-evidence">±' + number(row.uncertainty, 2) + ' · ' + number(row.minutes, 0) + ' min · ' + row.matches + ' matches</span></button></th>' +
+        '<td class="player-lab-score"><span>' + (state.model === 'rapm' ? 'RAPM' : 'Lineup') + '</span><strong>' + number(row.score, 2) + '</strong></td><td>±' + number(row.uncertainty, 2) + '</td>' +
         '<td class="rating-lab-optional">' + number(row.minutes, 0) + '</td><td class="rating-lab-optional">' + row.matches + '</td></tr>';
     }).join('');
   }
 
   function renderDetail() {
     if (!state.selected) {
+      elements.detail.classList.remove('is-active');
       elements.detail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a player to compare both protocols.</p>';
       return;
     }
@@ -242,8 +261,13 @@
     var trueRow = cohort.models['lineup-trueskill'].rankings.find(function (row) { return row.id === state.selected; });
     var rapmRow = cohort.models.rapm.rankings.find(function (row) { return row.id === state.selected; });
     if (!trueRow || !rapmRow) return;
-    elements.detail.innerHTML = '<p class="rating-lab-kicker">Player comparison</p><h3 class="player-lab-detail-name"><span>' + escapeHtml(trueRow.name) + '</span>' + playerFlag(trueRow.country) + '</h3><p>' +
-      escapeHtml(trueRow.country || 'Nationality unavailable') + ' · ' + escapeHtml(trueRow.team) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
+    var identityMeta = trueRow.country && trueRow.country !== trueRow.team
+      ? trueRow.country + ' · ' + trueRow.team
+      : trueRow.team || trueRow.country || 'Nationality unavailable';
+    elements.detail.classList.toggle('is-active', state.detailOpen);
+    elements.detail.innerHTML = '<button type="button" class="player-lab-detail-close" data-player-close aria-label="Close player comparison">×</button>' +
+      '<p class="rating-lab-kicker">Player comparison</p><h3 class="player-lab-detail-name"><span>' + escapeHtml(trueRow.name) + '</span>' + playerFlag(trueRow.country) + '</h3><p>' +
+      escapeHtml(identityMeta) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
       '<div class="player-lab-detail-model"><span>Lineup TrueSkill</span><strong>#' + trueRow.rank + '</strong><small>Mean ' + number(trueRow.mean, 2) + ' · uncertainty ±' + number(trueRow.uncertainty, 2) + '</small></div>' +
       '<div class="player-lab-detail-model"><span>RAPM</span><strong>#' + rapmRow.rank + '</strong><small>Goal impact ' + (rapmRow.impact > 0 ? '+' : '') + number(rapmRow.impact, 2) + ' · uncertainty ±' + number(rapmRow.uncertainty, 2) + '</small></div>' +
       '<p class="rating-lab-audit-note">Ranks are season-specific and use conservative scores, so both estimated contribution and uncertainty matter.</p>';
@@ -296,20 +320,10 @@
     });
   }
 
-  function revealDetailOnMobile() {
-    if (!window.matchMedia('(max-width: 650px)').matches) return;
-    window.setTimeout(function () {
-      elements.detail.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'start'
-      });
-    }, 0);
-  }
-
   elements.cohort.addEventListener('change', function () {
     state.cohort = elements.cohort.value;
     state.selected = null;
-    state.expanded = false;
+    resetList();
     render();
   });
   elements.modelTabs.addEventListener('click', function (event) {
@@ -319,7 +333,7 @@
     elements.modelTabs.querySelectorAll('button').forEach(function (item) {
       item.setAttribute('aria-pressed', String(item === button));
     });
-    state.expanded = false;
+    resetList();
     render();
   });
   elements.quickModelMenu.addEventListener('click', function (event) {
@@ -330,25 +344,39 @@
     elements.modelTabs.querySelectorAll('button').forEach(function (item) {
       item.setAttribute('aria-pressed', String(item.dataset.playerModel === state.model));
     });
-    state.expanded = false;
+    resetList();
     render();
   });
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
-    state.expanded = false;
+    resetList();
     renderChart();
     renderTable();
   });
-  elements.more.addEventListener('click', function () { state.expanded = true; renderTable(); });
+  elements.more.addEventListener('click', function () {
+    state.visibleCount = (state.visibleCount || (isMobile() ? 10 : 30)) + (isMobile() ? 10 : 30);
+    renderTable();
+  });
+  elements.filtersReturn.addEventListener('click', function () {
+    document.querySelector('.player-lab-toolbar').scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start'
+    });
+  });
   root.addEventListener('click', function (event) {
+    if (event.target.closest('[data-player-close]')) {
+      state.detailOpen = false;
+      renderDetail();
+      return;
+    }
     var target = event.target.closest('[data-player-id]');
     if (!target) return;
     var chartPoint = target.classList.contains('player-lab-point');
     state.selected = chartPoint && state.selected === target.dataset.playerId ? null : target.dataset.playerId;
+    state.detailOpen = !chartPoint && Boolean(state.selected);
     renderChart();
     renderTable();
     renderDetail();
-    if (!chartPoint) revealDetailOnMobile();
   });
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);
@@ -361,6 +389,10 @@
     .then(function (payload) {
       state.payload = payload;
       state.cohort = payload.cohorts[0].id;
+      if (isMobile()) {
+        document.getElementById('player-scope').open = false;
+        document.getElementById('player-methods').open = false;
+      }
       renderCohortOptions();
       elements.generated.textContent = 'Verified ' + date(payload.generated_at) + ' · Data source: StatsBomb';
       render();

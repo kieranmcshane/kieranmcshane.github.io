@@ -25,9 +25,10 @@ description: Outcome-only historical men's and women's football player ratings f
       <p id="player-lab-generated">Loading the verified cohort…</p>
     </div>
 
-    <div class="player-lab-boundary" role="note">
-      <strong>Verified men’s and women’s cohorts.</strong> These ratings apply only inside the selected competition. The men’s publication covers UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. The live five-league feed remains excluded until its lineup coverage passes the same gates.
-    </div>
+    <details class="player-lab-boundary" id="player-scope" open>
+      <summary>Verified cohorts and rating scope</summary>
+      <p><strong>Men’s and women’s competitions pass the same evidence gates.</strong> These ratings apply only inside the selected competition. The men’s publication covers UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. The live five-league feed remains excluded until its lineup coverage passes the same gates.</p>
+    </details>
 
     <div class="player-lab-toolbar">
       <label class="rating-lab-field">
@@ -69,6 +70,10 @@ description: Outcome-only historical men's and women's football player ratings f
 
     <div class="player-lab-grid">
       <div class="rating-lab-table-wrap">
+        <div class="player-lab-list-head">
+          <div><span>Leaderboard</span><strong id="player-list-status">Loading players…</strong></div>
+          <button type="button" id="player-filters-return">Filters ↑</button>
+        </div>
         <table class="rating-lab-table player-lab-table">
           <caption id="player-ranking-caption">Eligible historical players</caption>
           <thead>
@@ -86,7 +91,7 @@ description: Outcome-only historical men's and women's football player ratings f
         <p id="player-ranking-empty" class="rating-lab-empty" hidden>No eligible player matches this search.</p>
         <button type="button" id="player-ranking-more" class="rating-lab-more" hidden>Show all players</button>
       </div>
-      <aside class="rating-lab-detail player-lab-detail" id="player-detail" aria-live="polite">
+      <aside class="rating-lab-detail player-lab-detail" id="player-detail" aria-live="polite" aria-label="Selected player comparison">
         <p class="rating-lab-detail-placeholder">Choose a player to compare both protocols.</p>
       </aside>
     </div>
@@ -97,7 +102,7 @@ description: Outcome-only historical men's and women's football player ratings f
     <h2 id="player-audit-heading">Why these seasons are included</h2>
     <div class="player-lab-gates" id="player-gates"></div>
 
-    <details class="rating-lab-limitations" open>
+    <details class="rating-lab-limitations" id="player-methods" open>
       <summary>Exact interpretation and limitations</summary>
       <div class="player-lab-method-copy">
         <article>

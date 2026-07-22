@@ -7442,6 +7442,13 @@ body:has(.explain-lab) .post-header {
   min-width: 0;
 }
 
+.player-lab-list-head,
+.player-lab-row-evidence,
+.player-lab-score > span,
+.player-lab-detail-close {
+  display: none;
+}
+
 .player-lab-player-name > span:first-child {
   min-width: 0;
   overflow: hidden;
@@ -9094,5 +9101,370 @@ body:has(.explain-lab) .post-header {
   .rating-lab-quick-model-trigger > span:last-child,
   .rating-lab-quick-model-menu {
     transition: none;
+  }
+}
+
+/* Historical Player Lab: compact mobile cards and nearby controls. */
+@media (max-width: 650px) {
+  .player-lab {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .player-lab .rating-lab-kicker {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .player-lab-hero {
+    padding-bottom: 1rem;
+  }
+
+  .player-lab-hero h1 {
+    max-width: 12ch;
+    font-size: clamp(2rem, 10vw, 2.55rem);
+  }
+
+  .player-lab-hero .rating-lab-deck {
+    font-size: 0.93rem;
+    line-height: 1.42;
+  }
+
+  .player-lab-explorer,
+  .player-lab-audit {
+    padding: 1.35rem 0 2rem;
+  }
+
+  .player-lab-explorer h2,
+  .player-lab-audit > h2 {
+    font-size: 1.65rem;
+    line-height: 1.08;
+  }
+
+  .player-lab-boundary {
+    margin: 0.85rem 0;
+    padding: 0;
+    background: #f7f2e9;
+    border: 1px solid #ded5c8;
+    border-left: 3px solid var(--lab-secondary);
+    border-radius: 6px;
+  }
+
+  .player-lab-boundary summary {
+    min-height: 46px;
+    box-sizing: border-box;
+    padding: 0.72rem 0.8rem;
+    color: var(--lab-navy);
+    font-size: 0.82rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .player-lab-boundary p {
+    margin: 0;
+    padding: 0 0.8rem 0.8rem;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .player-lab-toolbar,
+  .rating-lab-toolbar.player-lab-toolbar {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin: 0.85rem 0 1rem;
+    padding: 0.85rem;
+    background: #fff;
+    border: 1px solid var(--lab-line);
+    border-radius: 10px;
+    box-shadow: 0 3px 14px rgba(29, 37, 46, 0.06);
+    scroll-margin-top: 0.5rem;
+  }
+
+  .player-lab-toolbar .rating-lab-control-group,
+  .player-lab-toolbar .rating-lab-field {
+    grid-column: 1;
+  }
+
+  .player-lab-toolbar .rating-lab-segmented button {
+    min-height: 46px;
+    font-size: 0.8rem;
+  }
+
+  .player-lab-metrics {
+    margin-bottom: 0.9rem;
+  }
+
+  .player-lab-comparison {
+    margin: 0.85rem 0 1rem;
+    padding: 0.85rem;
+    border-radius: 10px;
+  }
+
+  .player-lab-comparison-heading h3 {
+    font-size: 1.28rem;
+    line-height: 1.15;
+  }
+
+  .player-lab-comparison-heading > p {
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+
+  .player-lab-chart-key {
+    font-size: 0.65rem;
+    line-height: 1.35;
+  }
+
+  .player-lab-chart-frame {
+    height: 280px !important;
+  }
+
+  .player-lab-list-head {
+    position: sticky;
+    z-index: 12;
+    top: 0;
+    display: flex;
+    min-height: 54px;
+    box-sizing: border-box;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 -4px 0.65rem;
+    padding: 0.55rem 0.6rem;
+    background: rgba(248, 248, 246, 0.96);
+    border: 1px solid var(--lab-line);
+    border-radius: 9px;
+    box-shadow: 0 4px 14px rgba(29, 37, 46, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  .player-lab-list-head > div {
+    display: grid;
+    min-width: 0;
+  }
+
+  .player-lab-list-head span {
+    color: #697588;
+    font-size: 0.62rem;
+    font-weight: 750;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+  }
+
+  .player-lab-list-head strong {
+    overflow: hidden;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-lab-list-head button {
+    min-height: 40px;
+    flex: 0 0 auto;
+    padding: 0.45rem 0.7rem;
+    color: var(--lab-blue);
+    background: #fff;
+    border: 1px solid #aeb8c2;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 750;
+  }
+
+  .player-lab-table,
+  .player-lab-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .player-lab-table caption,
+  .player-lab-table thead {
+    display: none;
+  }
+
+  .player-lab-table tbody {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .player-lab-table tbody tr {
+    display: grid;
+    grid-template-columns: 1.8rem minmax(0, 1fr) auto;
+    min-height: 74px;
+    box-sizing: border-box;
+    gap: 0.55rem;
+    align-items: center;
+    padding: 0.65rem 0.7rem;
+    background: #fff;
+    border: 1px solid var(--lab-line);
+    border-radius: 10px;
+    box-shadow: 0 2px 9px rgba(29, 37, 46, 0.05);
+  }
+
+  .player-lab-table tbody tr.is-selected {
+    border-color: #7d9fbe;
+    box-shadow: inset 3px 0 0 var(--lab-blue), 0 2px 9px rgba(29, 37, 46, 0.05);
+  }
+
+  .player-lab-table tbody th,
+  .player-lab-table tbody td {
+    display: block;
+    width: auto !important;
+    min-width: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    text-align: left;
+  }
+
+  .player-lab-table .rating-lab-rank {
+    grid-column: 1;
+    color: #718095;
+    font-size: 0.9rem;
+    font-weight: 750;
+  }
+
+  .player-lab-table tbody th {
+    grid-column: 2;
+    background: transparent;
+  }
+
+  .player-lab-table .rating-lab-entity {
+    display: grid;
+    width: 100%;
+    min-height: 48px;
+    gap: 0.08rem;
+    align-content: center;
+    padding: 0;
+    text-align: left;
+  }
+
+  .player-lab-table .player-lab-player-name {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    font-size: 0.94rem;
+    line-height: 1.2;
+  }
+
+  .player-lab-table .rating-lab-entity small {
+    margin: 0;
+    overflow: hidden;
+    font-size: 0.7rem;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-lab-row-evidence {
+    display: block;
+    overflow: hidden;
+    color: #778294;
+    font-size: 0.63rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-lab-table .player-lab-score {
+    grid-column: 3;
+    min-width: 3.6rem;
+    text-align: right;
+  }
+
+  .player-lab-score > span {
+    display: block;
+    margin-bottom: 0.08rem;
+    color: #788394;
+    font-size: 0.58rem;
+    font-weight: 750;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .player-lab-score strong {
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .player-lab-table th:nth-child(n + 4),
+  .player-lab-table td:nth-child(n + 4) {
+    display: none;
+  }
+
+  .player-lab-grid .rating-lab-more {
+    min-height: 48px;
+    margin-top: 0.7rem;
+    background: #fff;
+    border-radius: 9px;
+    font-size: 0.82rem;
+  }
+
+  .player-lab-detail:not(.is-active) {
+    display: none;
+  }
+
+  .player-lab-detail.is-active {
+    position: fixed;
+    z-index: 50;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+    display: block;
+    width: auto;
+    height: fit-content;
+    min-height: 0;
+    max-height: min(72vh, 440px);
+    align-self: auto;
+    box-sizing: border-box;
+    padding: 1rem;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.985);
+    border: 1px solid #aeb8c2;
+    border-radius: 14px;
+    box-shadow: 0 18px 55px rgba(21, 31, 40, 0.28);
+    backdrop-filter: blur(16px);
+    animation: rlIn 160ms ease both;
+  }
+
+  .player-lab-detail-close {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    padding: 0;
+    color: #526171;
+    background: #f3f5f5;
+    border: 1px solid var(--lab-line);
+    border-radius: 50%;
+    font: inherit;
+    font-size: 1.4rem;
+    cursor: pointer;
+  }
+
+  .player-lab-detail h3 {
+    max-width: calc(100% - 3.2rem);
+    font-size: 1.35rem;
+  }
+
+  .player-lab-audit .rating-lab-limitations > summary {
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 0.75rem 0;
+    font-size: 0.86rem;
+  }
+
+  .player-lab-attribution {
+    gap: 0.75rem;
+  }
+
+  .player-lab-attribution img {
+    width: 116px;
   }
 }
