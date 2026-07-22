@@ -120,7 +120,7 @@ description: Outcome-only historical men's and women's football player ratings f
 
     <div class="player-lab-attribution">
       <img src="https://raw.githubusercontent.com/statsbomb/public-images/master/statsbomb_logo_email_new.jpg" alt="StatsBomb">
-      <p><strong>Data source: StatsBomb Open Data.</strong> Ratings and analysis are independent. The source supplies match results, stable player identifiers, lineups, and position intervals for the declared historical cohorts.</p>
+      <p><strong>Sources are declared per competition.</strong> StatsBomb Open Data supplies the existing historical cohorts. World Cup 2026 is published only after <a href="https://www.api-football.com/">API-Football</a> passes the same completeness gates for all 104 matches. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata, and a response snapshot hash.</p>
     </div>
   </section>
 </div>

@@ -14,6 +14,18 @@ from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_los
 
 PLAYER_SCHEMA_VERSION = "1.1.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
+API_FOOTBALL_ROOT = "https://v3.football.api-sports.io"
+API_FOOTBALL_WORLD_CUP = {
+    "id": "world-cup-2026",
+    "competition_id": 1,
+    "season_id": 2026,
+    "name": "FIFA World Cup 2026",
+    "country": "International",
+    "gender": "men",
+    "format": "international tournament",
+    "venue_context": "tournament",
+    "expected_matches": 104,
+}
 COHORTS = (
     {
         "id": "euro-2024",
@@ -311,37 +323,16 @@ def _home_advantage(match: dict, definition: dict) -> bool:
     return bool(home_country and stadium_country and home_country == stadium_country)
 
 
-def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, bytes]:
-    match_url = f"{STATSBOMB_ROOT}/matches/{definition['competition_id']}/{definition['season_id']}.json"
-    match_bytes = fetch(match_url, cache_ttl=35 * 86_400)
-    matches = json.loads(match_bytes)
-    matches.sort(key=lambda item: (item["match_date"], item["match_id"]))
-    player_meta: dict[str, dict] = {}
-    rows: list[dict] = []
-    audit = {"starter_teams_ok": 0, "used_players": 0, "complete_players": 0, "integrity_matches": 0}
-    snapshot = hashlib.sha256(match_bytes)
-    for match in matches:
-        lineup_url = f"{STATSBOMB_ROOT}/lineups/{match['match_id']}.json"
-        lineup_bytes = fetch(lineup_url, cache_ttl=35 * 86_400)
-        snapshot.update(lineup_bytes)
-        lineups = json.loads(lineup_bytes)
-        home, away, match_audit = _lineup_weights(match, lineups, player_meta)
-        audit["starter_teams_ok"] += match_audit["starter_teams_ok"]
-        audit["used_players"] += match_audit["used_players"]
-        audit["complete_players"] += match_audit["complete_players"]
-        audit["integrity_matches"] += int(match_audit["integrity_ok"])
-        score_a = 1.0 if match["home_score"] > match["away_score"] else 0.0 if match["home_score"] < match["away_score"] else 0.5
-        rows.append(
-            {
-                "date": match["match_date"],
-                "match_id": match["match_id"],
-                "home": home,
-                "away": away,
-                "score_a": score_a,
-                "goal_difference": match["home_score"] - match["away_score"],
-                "home_advantage": _home_advantage(match, definition),
-            }
-        )
+def _rate_cohort(
+    definition: dict,
+    rows: list[dict],
+    player_meta: dict[str, dict],
+    audit: dict,
+    snapshot_sha256: str,
+    source: dict,
+) -> dict:
+    if not rows:
+        raise ValueError(f"{definition['name']} has no completed matches")
     lineup_model = LineupTrueSkill()
     log_losses: list[float] = []
     briers: list[float] = []
@@ -405,18 +396,31 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
     starter_coverage = audit["starter_teams_ok"] / max(2 * len(rows), 1)
     minute_coverage = audit["complete_players"] / max(audit["used_players"], 1)
     integrity_coverage = audit["integrity_matches"] / max(len(rows), 1)
-    gate_passed = starter_coverage >= 0.95 and minute_coverage >= 0.95 and integrity_coverage >= 0.95
+    substitution_coverage = audit.get("verified_substitution_players", 0) / max(
+        audit.get("substitution_players", 0), 1
+    ) if "substitution_players" in audit else 1.0
+    source_fixture_coverage = audit.get("source_fixtures", len(rows)) / max(len(rows), 1)
+    gate_passed = (
+        starter_coverage >= 0.95
+        and minute_coverage >= 0.95
+        and integrity_coverage >= 0.95
+        and substitution_coverage >= 0.95
+        and source_fixture_coverage >= 0.95
+    )
     if not gate_passed:
         raise ValueError(
             f"{definition['name']} failed lineup publication gates: "
-            f"starters={starter_coverage:.3f}, minutes={minute_coverage:.3f}, integrity={integrity_coverage:.3f}"
+            f"starters={starter_coverage:.3f}, minutes={minute_coverage:.3f}, "
+            f"integrity={integrity_coverage:.3f}, substitutions={substitution_coverage:.3f}, "
+            f"fixtures={source_fixture_coverage:.3f}"
         )
-    cohort = {
+    return {
         "id": definition["id"],
         "name": definition["name"],
         "country": definition["country"],
         "gender": definition["gender"],
         "format": definition["format"],
+        "source": source,
         "first_match": rows[0]["date"],
         "last_match": rows[-1]["date"],
         "matches": len(rows),
@@ -425,9 +429,10 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
         "eligibility": {"minimum_minutes": MIN_MINUTES, "minimum_matches": MIN_MATCHES},
         "coverage": {
             "status": "passed",
-            "lineup_files": 1.0,
+            "lineup_files": round(source_fixture_coverage, 4),
             "starting_lineups": round(starter_coverage, 4),
             "player_minutes": round(minute_coverage, 4),
+            "substitution_minutes": round(substitution_coverage, 4),
             "lineup_integrity": round(integrity_coverage, 4),
             "player_match_graph_components": _components(rows),
         },
@@ -452,25 +457,301 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
                 "rankings": rapm_rows,
             },
         },
-        "snapshot_sha256": snapshot.hexdigest(),
+        "snapshot_sha256": snapshot_sha256,
     }
+
+
+def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, bytes]:
+    match_url = f"{STATSBOMB_ROOT}/matches/{definition['competition_id']}/{definition['season_id']}.json"
+    match_bytes = fetch(match_url, cache_ttl=35 * 86_400)
+    matches = json.loads(match_bytes)
+    matches.sort(key=lambda item: (item["match_date"], item["match_id"]))
+    player_meta: dict[str, dict] = {}
+    rows: list[dict] = []
+    audit = {"starter_teams_ok": 0, "used_players": 0, "complete_players": 0, "integrity_matches": 0}
+    snapshot = hashlib.sha256(match_bytes)
+    for match in matches:
+        lineup_url = f"{STATSBOMB_ROOT}/lineups/{match['match_id']}.json"
+        lineup_bytes = fetch(lineup_url, cache_ttl=35 * 86_400)
+        snapshot.update(lineup_bytes)
+        lineups = json.loads(lineup_bytes)
+        home, away, match_audit = _lineup_weights(match, lineups, player_meta)
+        audit["starter_teams_ok"] += match_audit["starter_teams_ok"]
+        audit["used_players"] += match_audit["used_players"]
+        audit["complete_players"] += match_audit["complete_players"]
+        audit["integrity_matches"] += int(match_audit["integrity_ok"])
+        score_a = 1.0 if match["home_score"] > match["away_score"] else 0.0 if match["home_score"] < match["away_score"] else 0.5
+        rows.append(
+            {
+                "date": match["match_date"],
+                "match_id": match["match_id"],
+                "home": home,
+                "away": away,
+                "score_a": score_a,
+                "goal_difference": match["home_score"] - match["away_score"],
+                "home_advantage": _home_advantage(match, definition),
+            }
+        )
+    cohort = _rate_cohort(
+        definition,
+        rows,
+        player_meta,
+        audit,
+        snapshot.hexdigest(),
+        {
+            "name": "StatsBomb Open Data",
+            "url": "https://github.com/statsbomb/open-data",
+            "license": "StatsBomb Open Data terms",
+            "raw_responses_published": True,
+        },
+    )
     return cohort, match_bytes
 
 
-def build_player_payload(fetch: Callable[..., bytes]) -> dict:
+def _api_football_json(
+    fetch: Callable[..., bytes], url: str, api_key: str, snapshot
+) -> dict:
+    body = fetch(url, api_football_key=api_key, cache_ttl=35 * 86_400)
+    snapshot.update(body)
+    payload = json.loads(body)
+    errors = payload.get("errors")
+    if errors:
+        raise ValueError(f"API-Football rejected {url.split('?')[0]}: {errors}")
+    if "response" not in payload:
+        raise ValueError(f"API-Football response missing data for {url.split('?')[0]}")
+    return payload
+
+
+def _api_football_fixture(
+    fixture_row: dict,
+) -> tuple[dict, list[dict], dict]:
+    fixture = fixture_row.get("fixture") or {}
+    fixture_id = fixture.get("id")
+    teams = fixture_row.get("teams") or {}
+    home_team = teams.get("home") or {}
+    away_team = teams.get("away") or {}
+    if not fixture_id or not home_team.get("id") or not away_team.get("id"):
+        raise ValueError("API-Football fixture is missing stable fixture or team identifiers")
+    lineups_by_team = {
+        (item.get("team") or {}).get("id"): item for item in fixture_row.get("lineups") or []
+    }
+    players_by_team = {
+        (item.get("team") or {}).get("id"): item for item in fixture_row.get("players") or []
+    }
+    incoming: dict[int, set[int]] = defaultdict(set)
+    outgoing: dict[int, set[int]] = defaultdict(set)
+    dismissed: dict[int, set[int]] = defaultdict(set)
+    for event in fixture_row.get("events") or []:
+        team_id = (event.get("team") or {}).get("id")
+        event_type = str(event.get("type") or "").casefold()
+        if not team_id:
+            continue
+        if event_type == "subst":
+            player_out = (event.get("player") or {}).get("id")
+            player_in = (event.get("assist") or {}).get("id")
+            if player_out:
+                outgoing[team_id].add(player_out)
+            if player_in:
+                incoming[team_id].add(player_in)
+        elif event_type == "card" and "red" in str(event.get("detail") or "").casefold():
+            player_id = (event.get("player") or {}).get("id")
+            if player_id:
+                dismissed[team_id].add(player_id)
+    lineups: list[dict] = []
+    substitution_players = 0
+    verified_substitution_players = 0
+    maximum_minutes = 90.0
+    for team in (home_team, away_team):
+        team_id = team["id"]
+        lineup = lineups_by_team.get(team_id)
+        player_block = players_by_team.get(team_id)
+        if not lineup or not player_block:
+            raise ValueError(f"API-Football fixture {fixture_id} is missing lineup/player data for team {team_id}")
+        starter_ids = {
+            (item.get("player") or {}).get("id") for item in lineup.get("startXI") or []
+        }
+        starter_ids.discard(None)
+        if len(starter_ids) != 11:
+            raise ValueError(f"API-Football fixture {fixture_id} team {team_id} has {len(starter_ids)} starters")
+        players: list[dict] = []
+        for entry in player_block.get("players") or []:
+            player = entry.get("player") or {}
+            player_id = player.get("id")
+            statistics = (entry.get("statistics") or [{}])[0]
+            games = statistics.get("games") or {}
+            minutes = games.get("minutes")
+            if not player_id or minutes in (None, ""):
+                continue
+            minutes = float(minutes)
+            if minutes <= 0:
+                continue
+            maximum_minutes = max(maximum_minutes, minutes)
+            started = player_id in starter_ids
+            if not started:
+                substitution_players += 1
+                verified_substitution_players += int(player_id in incoming[team_id])
+            elif minutes < 89.5:
+                substitution_players += 1
+                verified_substitution_players += int(
+                    player_id in outgoing[team_id] or player_id in dismissed[team_id]
+                )
+            players.append(
+                {
+                    "player_id": f"api-football:{player_id}",
+                    "player_name": player.get("name") or str(player_id),
+                    "country": {"name": ""},
+                    "positions": [
+                        {
+                            "from": "00:00" if started else f"{max(0.0, 90.0 - minutes):.2f}:00",
+                            "to": f"{minutes:.2f}:00" if started else "90:00",
+                            "end_reason": "Final Whistle" if minutes >= 89.5 else "Substitution",
+                        }
+                    ],
+                }
+            )
+        missing_starters = starter_ids - {
+            int(player["player_id"].split(":", 1)[1]) for player in players
+        }
+        if missing_starters:
+            raise ValueError(
+                f"API-Football fixture {fixture_id} team {team_id} lacks minutes for starters {sorted(missing_starters)}"
+            )
+        lineups.append({"team_id": team_id, "team_name": team.get("name") or str(team_id), "lineup": players})
+    duration = 120.0 if maximum_minutes > 100.0 else 90.0
+    for team in lineups:
+        for player in team["lineup"]:
+            position = player["positions"][0]
+            minutes = float(position["to"].split(":", 1)[0]) if position["from"] == "00:00" else 90.0 - float(position["from"].split(":", 1)[0])
+            if position["from"] != "00:00":
+                position["from"] = f"{duration - minutes:.2f}:00"
+                position["to"] = f"{duration:.2f}:00"
+    goals = fixture_row.get("goals") or {}
+    if goals.get("home") is None or goals.get("away") is None:
+        raise ValueError(f"API-Football fixture {fixture_id} is missing the result")
+    match = {
+        "match_id": fixture_id,
+        "match_date": str(fixture.get("date") or "")[:10],
+        "home_team": {"home_team_id": home_team["id"], "home_team_name": home_team.get("name")},
+        "away_team": {"away_team_id": away_team["id"], "away_team_name": away_team.get("name")},
+        "home_score": int(goals["home"]),
+        "away_score": int(goals["away"]),
+        "competition_stage": {"name": (fixture_row.get("league") or {}).get("round", "")},
+    }
+    return match, lineups, {
+        "substitution_players": substitution_players,
+        "verified_substitution_players": verified_substitution_players,
+    }
+
+
+def _build_api_football_cohort(
+    definition: dict, fetch: Callable[..., bytes], api_key: str
+) -> dict:
+    snapshot = hashlib.sha256()
+    fixture_list_url = (
+        f"{API_FOOTBALL_ROOT}/fixtures?league={definition['competition_id']}"
+        f"&season={definition['season_id']}"
+    )
+    fixture_list = _api_football_json(fetch, fixture_list_url, api_key, snapshot)
+    fixture_ids = sorted(
+        {
+            int(item["fixture"]["id"])
+            for item in fixture_list["response"]
+            if (item.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}
+        }
+    )
+    if len(fixture_ids) != definition["expected_matches"]:
+        raise ValueError(
+            f"{definition['name']} expected {definition['expected_matches']} completed fixtures; "
+            f"API-Football returned {len(fixture_ids)}"
+        )
+    detailed: list[dict] = []
+    for offset in range(0, len(fixture_ids), 20):
+        ids = "-".join(str(value) for value in fixture_ids[offset : offset + 20])
+        payload = _api_football_json(
+            fetch, f"{API_FOOTBALL_ROOT}/fixtures?ids={ids}", api_key, snapshot
+        )
+        detailed.extend(payload["response"])
+    by_id = {(item.get("fixture") or {}).get("id"): item for item in detailed}
+    if set(by_id) != set(fixture_ids):
+        raise ValueError(f"{definition['name']} detailed fixture batches are incomplete")
+    player_meta: dict[str, dict] = {}
+    rows: list[dict] = []
+    audit = {
+        "starter_teams_ok": 0,
+        "used_players": 0,
+        "complete_players": 0,
+        "integrity_matches": 0,
+        "source_fixtures": 0,
+        "substitution_players": 0,
+        "verified_substitution_players": 0,
+    }
+    for fixture_id in fixture_ids:
+        match, lineups, source_audit = _api_football_fixture(by_id[fixture_id])
+        home, away, match_audit = _lineup_weights(match, lineups, player_meta)
+        audit["starter_teams_ok"] += match_audit["starter_teams_ok"]
+        audit["used_players"] += match_audit["used_players"]
+        audit["complete_players"] += match_audit["complete_players"]
+        audit["integrity_matches"] += int(match_audit["integrity_ok"])
+        audit["source_fixtures"] += 1
+        audit["substitution_players"] += source_audit["substitution_players"]
+        audit["verified_substitution_players"] += source_audit["verified_substitution_players"]
+        score_a = 1.0 if match["home_score"] > match["away_score"] else 0.0 if match["home_score"] < match["away_score"] else 0.5
+        rows.append(
+            {
+                "date": match["match_date"],
+                "match_id": match["match_id"],
+                "home": home,
+                "away": away,
+                "score_a": score_a,
+                "goal_difference": match["home_score"] - match["away_score"],
+                "home_advantage": False,
+            }
+        )
+    rows.sort(key=lambda item: (item["date"], item["match_id"]))
+    return _rate_cohort(
+        definition,
+        rows,
+        player_meta,
+        audit,
+        snapshot.hexdigest(),
+        {
+            "name": "API-Football by API-SPORTS",
+            "url": "https://www.api-football.com/",
+            "terms": "https://api-sports.io/terms",
+            "retrieval": "One league-season fixture list plus batches of at most 20 fixture IDs; raw responses remain in the private build cache.",
+            "raw_responses_published": False,
+        },
+    )
+
+
+def build_player_payload(
+    fetch: Callable[..., bytes], api_football_key: str | None = None
+) -> dict:
     cohorts = []
     for definition in COHORTS:
         cohort, _ = _build_cohort(definition, fetch)
         cohorts.append(cohort)
+    if api_football_key:
+        cohorts.append(
+            _build_api_football_cohort(API_FOOTBALL_WORLD_CUP, fetch, api_football_key)
+        )
+    sources = {
+        cohort["source"]["name"]: {
+            "name": cohort["source"]["name"],
+            "url": cohort["source"]["url"],
+        }
+        for cohort in cohorts
+    }
     return {
         "schema_version": PLAYER_SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "source": {
-            "name": "StatsBomb Open Data",
-            "url": "https://github.com/statsbomb/open-data",
-            "license": "StatsBomb Open Data terms",
-            "attribution": "Data source: StatsBomb. Ratings and analysis are independent.",
-            "scope": "Complete declared men's and women's historical cohorts only; not a live five-league player feed.",
+            "name": "Cohort-specific verified sources",
+            "url": "https://kieranmcshane.github.io/rating-lab/players/",
+            "sources": list(sources.values()),
+            "license": "Source-specific terms recorded on each cohort",
+            "attribution": "Ratings and analysis are independent of the data providers.",
+            "scope": "Complete declared men's and women's historical cohorts only; each cohort records its own source and snapshot hash.",
         },
         "methodology": {
             "inputs": ["match outcome", "goal difference", "stable player IDs", "lineups", "minutes played"],

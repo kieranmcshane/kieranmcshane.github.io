@@ -137,7 +137,8 @@
     var cohort = currentCohort();
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 30);
-    elements.caption.textContent = cohort.models[state.model].label + ' · ' + rows.length + ' eligible players';
+    elements.caption.textContent = cohort.models[state.model].label + ' · ' + rows.length + ' eligible players' +
+      (cohort.source && cohort.source.name ? ' · ' + cohort.source.name : '');
     elements.scoreHeading.textContent = 'Score';
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;

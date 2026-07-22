@@ -42,7 +42,7 @@ jobs:
             rating-lab-valid-output-v1-${{ runner.os }}-
       - name: Seed fallback from last validated snapshot
         run: |
-          for file in manifest.json tennis.json football.json national-football.json chess.json; do
+          for file in manifest.json tennis.json football.json national-football.json chess.json player-football.json player-schema.json; do
             if [ -f ".cache/rating-lab-output/$file" ]; then
               cp ".cache/rating-lab-output/$file" "assets/data/rating-lab/$file"
             fi
@@ -52,6 +52,7 @@ jobs:
       - name: Refresh public ratings
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
           sports="football national-football chess"
@@ -62,7 +63,7 @@ jobs:
       - name: Preserve validated public snapshot
         run: |
           mkdir -p .cache/rating-lab-output
-          cp assets/data/rating-lab/{manifest,tennis,football,national-football,chess}.json .cache/rating-lab-output/
+          cp assets/data/rating-lab/{manifest,tennis,football,national-football,chess,player-football,player-schema}.json .cache/rating-lab-output/
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:

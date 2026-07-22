@@ -30,8 +30,12 @@ the complete Jekyll site as a Pages artifact. Repository setup requires:
 
 1. Optionally create a free football-data.org API token and add it as the
    repository secret `FOOTBALL_DATA_TOKEN` for the primary football feed.
-2. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
-3. Run **Refresh ratings and deploy Pages** once manually, or wait for the daily
+2. To publish the completed men's World Cup 2026 player cohort, add an
+   API-Football credential as `API_FOOTBALL_KEY`. The player pipeline uses one
+   league-season request plus fixture-detail batches of at most 20 IDs, validates
+   all 104 matches, and never exposes the credential or raw responses.
+3. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
+4. Run **Refresh ratings and deploy Pages** once manually, or wait for the daily
    schedule. Tennis refreshes on Mondays; football and current chess refresh
    daily, while finalized Lichess archives are cached. National teams use
    Mart Jürisoo's CC0 full-international results.
@@ -49,6 +53,12 @@ credentials. Generated JSON follows `rating_lab/schema.json`; source
 adapters and rating models live in `rating_lab/`. The public manifest records
 the schema and methodology versions, code revision, source freshness, and data
 snapshot hash where a source is distributed as a single file.
+
+Historical player ratings publish source and retrieval metadata per cohort.
+StatsBomb raw files remain publicly reproducible. API-Football responses are
+cached only during the server-side build under the provider's terms; the site
+publishes derived Lineup TrueSkill/RAPM ratings, coverage gates, and a SHA-256
+snapshot identifier rather than redistributing the provider feed.
 
 Competition forecasts use 5,000 deterministic simulations per competition and
 model. League forecasts publish the current table, remaining-match count, and
