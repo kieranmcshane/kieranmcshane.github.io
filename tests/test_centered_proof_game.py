@@ -67,6 +67,14 @@ class CenteredProofGameTests(unittest.TestCase):
         self.assertIn("overflow-x: hidden", STYLES)
         self.assertIn("#proof-state-formula { width: 100%; font-size: 1rem; }", STYLES)
 
+    def test_article_heading_spacing_does_not_leak_into_game_views(self):
+        self.assertIn(".post-content .proof-game h2", STYLES)
+        self.assertIn(".post-content .proof-game h3", STYLES)
+        self.assertRegex(
+            STYLES,
+            r"\.post-content \.proof-game h2,[\s\S]*?margin-top: 0;",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
