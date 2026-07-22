@@ -7792,3 +7792,439 @@ body:has(.explain-lab) .post-header {
     padding: 0.75rem;
   }
 }
+
+/* Rating Lab mobile redesign (22 July 2026)
+   Mobile is an intentional card interface, not a compressed desktop table. */
+.rating-lab-media-policy {
+  max-width: 840px;
+  margin: 1rem 0 1.4rem;
+  background: #fff;
+  border: 1px solid var(--lab-line);
+  border-radius: 8px;
+}
+
+.rating-lab-media-policy > summary {
+  padding: 0.75rem 0.9rem;
+  color: var(--lab-navy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rating-lab-media-policy .rating-lab-explainer {
+  max-width: none;
+  margin: 0;
+  padding: 0.15rem 0.9rem 0.9rem;
+  background: transparent;
+  border: 0;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 650px) {
+  body:has(.rating-lab) .page-content > .wrapper {
+    max-width: none;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .rating-lab {
+    font-size: 16px;
+  }
+
+  .rating-lab-hero {
+    padding: 0.85rem 0 0.7rem;
+  }
+
+  .rating-lab-hero h1 {
+    font-size: clamp(2.2rem, 11vw, 2.75rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  .rating-lab-deck {
+    max-width: 34rem;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .rating-lab-local-nav {
+    margin-right: -14px;
+    margin-left: -14px;
+    background: #fff;
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .rating-lab-local-nav a {
+    min-height: 50px;
+  }
+
+  .rating-lab-local-nav span::after {
+    font-size: 0.72rem;
+  }
+
+  .rating-lab-explorer {
+    padding: 1rem 0 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .rating-lab-matchup,
+  .rating-lab-predictor,
+  .rating-lab-research {
+    padding-top: 2.25rem;
+    padding-bottom: 2.25rem;
+  }
+
+  .rating-lab-table-wrap {
+    overflow: visible;
+  }
+
+  #ranking-table {
+    display: block;
+    width: 100%;
+    table-layout: auto;
+    border-collapse: separate;
+  }
+
+  #ranking-table caption,
+  #ranking-table thead {
+    display: none;
+  }
+
+  #ranking-table tbody {
+    display: grid;
+    width: 100%;
+    gap: 0.55rem;
+  }
+
+  #ranking-table tbody tr {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) 4.8rem;
+    gap: 0.55rem;
+    min-height: 72px;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0.7rem 0.75rem;
+    background: #fff;
+    border: 1px solid var(--lab-line);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(29, 37, 46, 0.055);
+  }
+
+  #ranking-table tbody tr:hover,
+  #ranking-table tbody tr.is-selected {
+    background: #fff;
+  }
+
+  #ranking-table tbody tr.is-selected {
+    border-color: #7d9fbe;
+    box-shadow: inset 3px 0 0 var(--lab-blue), 0 2px 10px rgba(29, 37, 46, 0.055);
+  }
+
+  #ranking-table tbody th,
+  #ranking-table tbody td {
+    display: block;
+    width: auto !important;
+    min-width: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+  }
+
+  #ranking-table .rating-lab-rank {
+    grid-column: 1;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  #ranking-table tbody th {
+    grid-column: 2;
+  }
+
+  #ranking-table .rating-lab-rating-column {
+    grid-column: 3;
+    text-align: right;
+  }
+
+  #ranking-table .rating-lab-rating-column::before {
+    display: block;
+    margin-bottom: 0.08rem;
+    color: #788394;
+    content: "Rating";
+    font-size: 0.61rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  #ranking-table .rating-lab-rating-column strong {
+    font-size: 1.04rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #ranking-table .rating-lab-trend-column,
+  #ranking-table .rating-lab-uncertainty-column,
+  #ranking-table .rating-lab-change-column,
+  #ranking-table .rating-lab-recent-column {
+    display: none;
+  }
+
+  #ranking-table .rating-lab-entity {
+    width: 100%;
+    min-width: 0;
+    gap: 0.65rem;
+  }
+
+  #ranking-table .rating-lab-identity {
+    width: 2.65rem;
+    height: 2.65rem;
+    flex-basis: 2.65rem;
+  }
+
+  #ranking-table .rating-lab-identity-copy {
+    width: 100%;
+    gap: 0.1rem;
+  }
+
+  #ranking-table .rating-lab-entity-name-text {
+    font-size: 1rem;
+  }
+
+  #ranking-table .rating-lab-identity-copy > small {
+    max-width: 100%;
+    font-size: 0.73rem;
+  }
+
+  #ranking-table .rating-lab-mobile-change {
+    margin-top: 0.04rem;
+    font-size: 0.7rem;
+  }
+
+  .rating-lab-more {
+    min-height: 48px;
+    margin-top: 0.75rem;
+    background: #fff;
+    border-radius: 9px;
+    font-size: 0.85rem;
+  }
+
+  .rating-lab-matchup-toolbar {
+    grid-template-columns: minmax(0, 1fr) 48px;
+    gap: 0.75rem;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-field:nth-of-type(1) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-field:nth-of-type(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .rating-lab-matchup-swap {
+    grid-column: 2;
+    grid-row: 2;
+    width: 48px;
+    height: 48px;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-field:nth-of-type(3) {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .rating-lab-matchup-toolbar .rating-lab-control-group {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  .rating-lab-matchup-toolbar select {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .rating-lab-matchup-result {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .rating-lab-outcome-strip {
+    height: 1.15rem;
+  }
+
+  .rating-lab-outcome-cards {
+    gap: 0.4rem;
+  }
+
+  .rating-lab-outcome-cards strong {
+    font-size: 1.22rem;
+  }
+
+  .rating-lab-predictor-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .rating-lab-predictor-toolbar .rating-lab-field,
+  .rating-lab-predictor-toolbar .rating-lab-control-group,
+  .rating-lab-predictor-state {
+    grid-column: 1;
+    text-align: left;
+  }
+
+  .rating-lab-predictor-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .rating-lab-predictor-metrics div,
+  .rating-lab-predictor-metrics div + div {
+    min-height: 82px;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    background: var(--lab-wash);
+    border: 1px solid var(--lab-line);
+    border-radius: 9px;
+  }
+
+  .rating-lab-predictor-metrics div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-predictor-table caption {
+    display: none;
+  }
+
+  .rating-lab-predictor-grid .rating-lab-table-wrap {
+    overflow: visible;
+  }
+
+  .rating-lab-predictor-table.is-league tbody tr {
+    margin-bottom: 0.65rem;
+    padding: 0.8rem;
+    background: #fff;
+    border: 1px solid var(--lab-line);
+    border-radius: 10px;
+    box-shadow: 0 2px 9px rgba(29, 37, 46, 0.045);
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) {
+    display: block;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) thead {
+    display: none;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) tbody {
+    display: grid;
+    width: 100%;
+    gap: 0.55rem;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--lab-line);
+    border-radius: 10px;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) tbody th,
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) tbody td {
+    display: block;
+    width: auto;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) .rating-lab-rank,
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) .rating-lab-predictor-now,
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) .rating-lab-optional {
+    display: none;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) .rating-lab-predictor-entity {
+    grid-column: 1;
+  }
+
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) .rating-lab-predictor-title,
+  .rating-lab-predictor-table.is-knockout:not(.is-completed) .rating-lab-predictor-value {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .rating-lab-predictor-detail {
+    margin-top: 0.65rem;
+  }
+
+  .rating-lab-media-policy {
+    margin: 0.8rem 0 1rem;
+  }
+
+  .rating-lab-media-policy > summary {
+    display: flex;
+    min-height: 48px;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0.75rem;
+    font-size: 0.88rem;
+  }
+
+  .rating-lab-media-policy .rating-lab-explainer {
+    padding: 0 0.75rem 0.85rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .rating-lab-research-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rating-lab-research-links a {
+    display: flex;
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .rating-lab-research-links a:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-disclosure > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 0.7rem;
+    padding: 0.9rem 0;
+  }
+
+  .rating-lab-disclosure > summary span {
+    grid-column: 1;
+    font-size: 0.68rem;
+  }
+
+  .rating-lab-disclosure > summary strong {
+    grid-column: 1;
+    font-size: 1.05rem;
+  }
+
+  .rating-lab-disclosure > summary::after {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+}
