@@ -57,7 +57,8 @@ snapshot hash where a source is distributed as a single file.
 Historical player ratings publish source and retrieval metadata per cohort.
 StatsBomb raw files remain publicly reproducible. API-Football responses are
 cached only during the server-side build under the provider's terms; the site
-publishes derived Lineup TrueSkill, RAPM, and experimental pairwise-chemistry
+publishes derived Lineup TrueSkill, RAPM, experimental pairwise-chemistry, and
+team-specific LAPM
 ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
 
@@ -75,6 +76,17 @@ features; a ridge model is fitted only to the goal difference RAPM did not
 explain, with shrinkage selected on the chronological final quarter. Each
 cohort publishes the interaction layer's held-out RMSE beside the RAPM baseline
 and marks it descriptive-only when validation does not support predictive use.
+
+LAPM is a separate descriptive interaction lens based on Josephs et al.'s
+line-graph APM construction. Exact substitution intervals split matches into
+constant-lineup stints; event goals must reproduce the final score. Within each
+team, singleton players, supported pairs, and full observed lineups become
+nodes. Non-zero player overlap creates Jaccard-weighted edges, and a Laplacian
+penalty smooths the fitted goal-difference values across similar combinations.
+The public payload records the retained orders, thresholds, node and edge
+counts, solver diagnostics, paper DOI, and reference implementation. LAPM
+values are never ranked across teams because those graphs do not share a
+common fitted scale.
 
 Competition forecasts use 5,000 deterministic simulations per competition and
 model. League forecasts publish the current table, remaining-match count, and

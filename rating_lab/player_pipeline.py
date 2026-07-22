@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
+from itertools import combinations
 import json
 import math
 from typing import Callable
@@ -12,7 +14,7 @@ from typing import Callable
 from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_loss
 
 
-PLAYER_SCHEMA_VERSION = "1.3.0"
+PLAYER_SCHEMA_VERSION = "1.4.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 API_FOOTBALL_ROOT = "https://v3.football.api-sports.io"
 API_FOOTBALL_WORLD_CUP = {
@@ -101,6 +103,8 @@ COHORTS = (
 )
 RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
 CHEMISTRY_RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
+LAPM_LAMBDA = 1.0
+LAPM_RIDGE = 0.05
 MIN_MINUTES = 450.0
 MIN_MATCHES = 5
 
@@ -124,7 +128,8 @@ def _match_duration(match: dict, lineups: list[dict]) -> float:
         for clock in (_clock(position.get("from")), _clock(position.get("to")))
         if clock is not None
     ]
-    maximum = max(observed, default=90.0)
+    declared = float(match.get("duration") or 0.0)
+    maximum = max([declared, *observed], default=90.0)
     stage = match.get("competition_stage", {}).get("name", "")
     knockout = stage not in {"Regular Season", "Group Stage"}
     if maximum > 100.0 or (knockout and match.get("home_score") == match.get("away_score")):
@@ -192,6 +197,7 @@ def _lineup_weights(
     duration = _match_duration(match, lineups)
     by_team: dict[int, dict[str, float]] = {}
     pair_by_team: dict[int, dict[tuple[str, str], float]] = {}
+    intervals_by_team: dict[int, dict[str, list[tuple[float, float]]]] = {}
     starters_ok = 0
     complete_players = 0
     used_players = 0
@@ -243,6 +249,7 @@ def _lineup_weights(
             )
             if overlap > 0.0
         }
+        intervals_by_team[team["team_id"]] = intervals_by_player
         team_minutes[team["team_id"]] = total * duration
     home_id = match["home_team"]["home_team_id"]
     away_id = match["away_team"]["away_team_id"]
@@ -255,12 +262,100 @@ def _lineup_weights(
         "complete_players": complete_players,
         "home_pairs": pair_by_team[home_id],
         "away_pairs": pair_by_team[away_id],
+        "home_intervals": intervals_by_team[home_id],
+        "away_intervals": intervals_by_team[away_id],
         # Source position intervals can overlap by a few stoppage-time minutes around
         # substitutions. The model normalizes each side back to 11 player-equivalents;
         # the gate rejects material gaps but permits that documented timestamp jitter.
         "integrity_ok": starters_ok == 2
         and all(8.5 * duration <= minutes <= 11.6 * duration for minutes in team_minutes.values()),
     }
+
+
+def _statsbomb_goal_events(events: list[dict], home_id: int, away_id: int) -> list[dict]:
+    goals = []
+    for event in events:
+        # Period 5 is the shootout. The published match score and every player
+        # model describe play through extra time, so shootout kicks stay out.
+        if event.get("period") == 5:
+            continue
+        event_type = (event.get("type") or {}).get("name", "")
+        shot_goal = (
+            event_type == "Shot"
+            and ((event.get("shot") or {}).get("outcome") or {}).get("name") == "Goal"
+        )
+        if not shot_goal and event_type != "Own Goal For":
+            continue
+        team_id = (event.get("team") or {}).get("id")
+        if team_id not in {home_id, away_id}:
+            continue
+        goals.append(
+            {
+                "minute": float(event.get("minute", 0.0))
+                + float(event.get("second", 0.0)) / 60.0,
+                "team_id": team_id,
+            }
+        )
+    return goals
+
+
+def _active_lineup(
+    intervals: dict[str, list[tuple[float, float]]], midpoint: float
+) -> tuple[str, ...]:
+    return tuple(
+        sorted(
+            player_id
+            for player_id, spans in intervals.items()
+            if any(start <= midpoint < end for start, end in spans)
+        )
+    )
+
+
+def _constant_lineup_stints(
+    match_audit: dict, goal_events: list[dict], home_id: int, away_id: int
+) -> list[dict]:
+    duration = float(match_audit["duration"])
+    boundaries = {0.0, duration}
+    for intervals in (
+        match_audit["home_intervals"], match_audit["away_intervals"]
+    ):
+        for spans in intervals.values():
+            for start, end in spans:
+                boundaries.add(min(max(start, 0.0), duration))
+                boundaries.add(min(max(end, 0.0), duration))
+    ordered = sorted(boundaries)
+    stints = []
+    for start, end in zip(ordered, ordered[1:]):
+        if end - start <= 0.02:
+            continue
+        midpoint = (start + end) / 2.0
+        home = _active_lineup(match_audit["home_intervals"], midpoint)
+        away = _active_lineup(match_audit["away_intervals"], midpoint)
+        if len(home) < 7 or len(away) < 7:
+            continue
+        home_goals = sum(
+            1
+            for goal in goal_events
+            if goal["team_id"] == home_id
+            and start <= min(goal["minute"], duration - 1e-6) < end
+        )
+        away_goals = sum(
+            1
+            for goal in goal_events
+            if goal["team_id"] == away_id
+            and start <= min(goal["minute"], duration - 1e-6) < end
+        )
+        stints.append(
+            {
+                "start": start,
+                "end": end,
+                "minutes": end - start,
+                "home": home,
+                "away": away,
+                "goal_difference": home_goals - away_goals,
+            }
+        )
+    return stints
 
 
 def _cholesky(matrix: list[list[float]]) -> list[list[float]]:
@@ -487,6 +582,226 @@ def _pair_chemistry(rows: list[dict], player_ids: list[str], additive: dict) -> 
     return fitted
 
 
+def _jaccard(left: tuple[str, ...], right: tuple[str, ...]) -> float:
+    left_set, right_set = set(left), set(right)
+    return len(left_set & right_set) / max(len(left_set | right_set), 1)
+
+
+def _laplacian_solve(
+    observations: list[float],
+    weights: list[float],
+    edges: list[tuple[int, int, float]],
+    smoothing: float,
+    ridge: float,
+) -> tuple[list[float], int, float]:
+    size = len(observations)
+    diagonal = [weights[index] + ridge for index in range(size)]
+    scaled_edges = []
+    for left, right, similarity in edges:
+        edge_weight = smoothing * similarity
+        diagonal[left] += edge_weight
+        diagonal[right] += edge_weight
+        scaled_edges.append((left, right, edge_weight))
+
+    def multiply(vector: list[float]) -> list[float]:
+        result = [diagonal[index] * vector[index] for index in range(size)]
+        for left, right, edge_weight in scaled_edges:
+            result[left] -= edge_weight * vector[right]
+            result[right] -= edge_weight * vector[left]
+        return result
+
+    target = [weight * value for weight, value in zip(weights, observations)]
+    estimate = [0.0] * size
+    residual = target[:]
+    preconditioned = [value / diagonal[index] for index, value in enumerate(residual)]
+    direction = preconditioned[:]
+    residual_product = sum(
+        value * scaled for value, scaled in zip(residual, preconditioned)
+    )
+    squared = sum(value * value for value in residual)
+    initial = math.sqrt(squared)
+    if initial <= 1e-12:
+        return estimate, 0, 0.0
+    iterations = 0
+    for iterations in range(1, min(2 * size, 1000) + 1):
+        product = multiply(direction)
+        denominator = sum(left * right for left, right in zip(direction, product))
+        if abs(denominator) <= 1e-18:
+            break
+        step = residual_product / denominator
+        estimate = [value + step * delta for value, delta in zip(estimate, direction)]
+        residual = [value - step * delta for value, delta in zip(residual, product)]
+        updated = sum(value * value for value in residual)
+        if math.sqrt(updated) <= max(1e-9, initial * 1e-8):
+            squared = updated
+            break
+        preconditioned = [
+            value / diagonal[index] for index, value in enumerate(residual)
+        ]
+        updated_product = sum(
+            value * scaled for value, scaled in zip(residual, preconditioned)
+        )
+        ratio = updated_product / max(residual_product, 1e-30)
+        direction = [
+            value + ratio * old for value, old in zip(preconditioned, direction)
+        ]
+        residual_product = updated_product
+        squared = updated
+    return estimate, iterations, math.sqrt(squared)
+
+
+def _fit_team_lapm(
+    stints: list[dict],
+    eligible: set[str],
+    pair_minimum_minutes: float,
+    pair_minimum_matches: int,
+) -> dict:
+    aggregate: dict[tuple[str, ...], dict[str, float | int]] = defaultdict(
+        lambda: {"minutes": 0.0, "goal_difference": 0.0, "matches": 0}
+    )
+    for stint in stints:
+        lineup = tuple(sorted(stint["lineup"]))
+        nodes = [(player_id,) for player_id in lineup]
+        nodes.extend(combinations(lineup, 2))
+        nodes.append(lineup)
+        for node in nodes:
+            aggregate[node]["minutes"] += stint["minutes"]
+            aggregate[node]["goal_difference"] += stint["goal_difference"]
+            aggregate[node]["matches"] += 1
+    nodes = [
+        node
+        for node, evidence in aggregate.items()
+        if (
+            len(node) == 1
+            or (
+                len(node) == 2
+                and evidence["minutes"] >= pair_minimum_minutes
+                and evidence["matches"] >= pair_minimum_matches
+            )
+            or (len(node) > 2 and evidence["minutes"] >= 15.0)
+        )
+    ]
+    nodes.sort(key=lambda node: (len(node), node))
+    observations = [
+        90.0 * float(aggregate[node]["goal_difference"]) / max(float(aggregate[node]["minutes"]), 1e-9)
+        for node in nodes
+    ]
+    weights = [max(float(aggregate[node]["minutes"]) / 90.0, 1e-6) for node in nodes]
+    edges = [
+        (left, right, similarity)
+        for left in range(len(nodes))
+        for right in range(left + 1, len(nodes))
+        for similarity in (_jaccard(nodes[left], nodes[right]),)
+        if similarity > 0.0
+    ]
+    estimates, iterations, solver_residual = _laplacian_solve(
+        observations, weights, edges, LAPM_LAMBDA, LAPM_RIDGE
+    )
+    weighted_residuals = [
+        weight * (observed - estimated) ** 2
+        for observed, estimated, weight in zip(observations, estimates, weights)
+    ]
+    residual_variance = sum(weighted_residuals) / max(sum(weights), 1.0)
+    degrees = [0.0] * len(nodes)
+    for left, right, similarity in edges:
+        degrees[left] += similarity
+        degrees[right] += similarity
+    uncertainty = [
+        math.sqrt(
+            residual_variance
+            / max(weight + LAPM_LAMBDA * degree + LAPM_RIDGE, 1e-9)
+        )
+        for weight, degree in zip(weights, degrees)
+    ]
+    player_rows = []
+    combination_rows = []
+    for index, node in enumerate(nodes):
+        row = {
+            "players": list(node),
+            "order": len(node),
+            "impact": estimates[index],
+            "uncertainty": uncertainty[index],
+            "score": estimates[index] - 1.96 * uncertainty[index],
+            "minutes": float(aggregate[node]["minutes"]),
+            "stints": int(aggregate[node]["matches"]),
+        }
+        if len(node) == 1 and node[0] in eligible:
+            player_rows.append(row)
+        elif len(node) > 1:
+            combination_rows.append(row)
+    player_rows.sort(key=lambda item: (-item["score"], item["players"]))
+    combination_rows.sort(key=lambda item: (-item["score"], item["players"]))
+    return {
+        "players": player_rows,
+        "combinations": combination_rows,
+        "nodes": len(nodes),
+        "edges": len(edges),
+        "iterations": iterations,
+        "solver_residual": solver_residual,
+        "weighted_rmse": math.sqrt(sum(weighted_residuals) / max(sum(weights), 1.0)),
+    }
+
+
+def _lapm(rows: list[dict], eligible: set[str], definition: dict) -> dict:
+    team_stints: dict[str, list[dict]] = defaultdict(list)
+    team_names: dict[str, str] = {}
+    for row in rows:
+        home_id, away_id = str(row["home_team_id"]), str(row["away_team_id"])
+        team_names[home_id] = row["home_team_name"]
+        team_names[away_id] = row["away_team_name"]
+        for stint in row.get("stints", []):
+            team_stints[home_id].append(
+                {
+                    "lineup": stint["home"],
+                    "minutes": stint["minutes"],
+                    "goal_difference": stint["goal_difference"],
+                }
+            )
+            team_stints[away_id].append(
+                {
+                    "lineup": stint["away"],
+                    "minutes": stint["minutes"],
+                    "goal_difference": -stint["goal_difference"],
+                }
+            )
+    pair_minutes = float(
+        definition.get(
+            "lapm_pair_minimum_minutes",
+            180.0 if definition.get("scope_type") == "season" else 45.0,
+        )
+    )
+    pair_matches = int(
+        definition.get(
+            "lapm_pair_minimum_matches",
+            3 if definition.get("scope_type") == "season" else 1,
+        )
+    )
+    teams = []
+    for team_id in sorted(team_stints, key=lambda value: team_names[value]):
+        fitted = _fit_team_lapm(
+            team_stints[team_id], eligible, pair_minutes, pair_matches
+        )
+        if fitted["players"]:
+            teams.append(
+                {
+                    "id": team_id,
+                    "name": team_names[team_id],
+                    "fit": fitted,
+                }
+            )
+    return {
+        "teams": teams,
+        "parameters": {
+            "lambda": LAPM_LAMBDA,
+            "ridge": LAPM_RIDGE,
+            "jaccard_graph": "All retained generalized-lineup nodes with non-zero player overlap are connected.",
+            "retained_orders": [1, 2, "full observed lineup"],
+            "pair_minimum_minutes": pair_minutes,
+            "pair_minimum_stints": pair_matches,
+        },
+    }
+
+
 def _components(rows: list[dict]) -> int:
     graph: dict[str, set[str]] = defaultdict(set)
     for row in rows:
@@ -547,6 +862,7 @@ def _rate_cohort(
         for player_id, meta in player_meta.items()
         if meta["minutes"] >= minimum_minutes and meta["matches"] >= minimum_matches
     ]
+    lapm = _lapm(rows, set(eligible), definition)
     for meta in player_meta.values():
         meta["team"] = max(meta["team_minutes"], key=meta["team_minutes"].get)
         del meta["team_minutes"]
@@ -694,6 +1010,66 @@ def _rate_cohort(
             }
         )
     partnership_rows.sort(key=lambda item: (-item["score"], item["id"]))
+    lapm_teams = []
+    for team in lapm["teams"]:
+        fit = team["fit"]
+        team_rankings = []
+        for raw in fit["players"]:
+            player_id = raw["players"][0]
+            if player_id not in player_meta:
+                continue
+            team_rankings.append(
+                common(player_id)
+                | {
+                    "team": team["name"],
+                    "impact": round(raw["impact"], 4),
+                    "uncertainty": round(raw["uncertainty"], 4),
+                    "score": round(raw["score"], 4),
+                    "team_minutes": round(raw["minutes"], 1),
+                    "stints": raw["stints"],
+                }
+            )
+        team_rankings.sort(key=lambda item: (-item["score"], item["name"]))
+        for rank, item in enumerate(team_rankings, 1):
+            item["rank"] = rank
+
+        def combination_summary(raw: dict) -> dict:
+            people = [
+                {"id": player_id, "name": player_meta[player_id]["name"]}
+                for player_id in raw["players"]
+                if player_id in player_meta
+            ]
+            return {
+                "id": ":".join(raw["players"]),
+                "players": people,
+                "label": " + ".join(person["name"] for person in people),
+                "order": raw["order"],
+                "impact": round(raw["impact"], 4),
+                "uncertainty": round(raw["uncertainty"], 4),
+                "score": round(raw["score"], 4),
+                "minutes": round(raw["minutes"], 1),
+                "stints": raw["stints"],
+            }
+
+        combinations_ranked = [combination_summary(raw) for raw in fit["combinations"]]
+        lapm_teams.append(
+            {
+                "id": team["id"],
+                "name": team["name"],
+                "rankings": team_rankings,
+                "combinations": {
+                    "outperformers": combinations_ranked[:15],
+                    "underperformers": list(reversed(combinations_ranked[-15:])),
+                },
+                "diagnostics": {
+                    "retained_nodes": fit["nodes"],
+                    "jaccard_edges": fit["edges"],
+                    "solver_iterations": fit["iterations"],
+                    "solver_residual": round(fit["solver_residual"], 8),
+                    "weighted_fit_rmse": round(fit["weighted_rmse"], 4),
+                },
+            }
+        )
     starter_coverage = audit["starter_teams_ok"] / max(2 * len(rows), 1)
     minute_coverage = audit["complete_players"] / max(audit["used_players"], 1)
     integrity_coverage = audit["integrity_matches"] / max(len(rows), 1)
@@ -701,19 +1077,21 @@ def _rate_cohort(
         audit.get("substitution_players", 0), 1
     ) if "substitution_players" in audit else 1.0
     source_fixture_coverage = audit.get("source_fixtures", len(rows)) / max(len(rows), 1)
+    goal_event_coverage = audit.get("goal_event_matches", 0) / max(len(rows), 1)
     gate_passed = (
         starter_coverage >= 0.95
         and minute_coverage >= 0.95
         and integrity_coverage >= 0.95
         and substitution_coverage >= 0.95
         and source_fixture_coverage >= 0.95
+        and goal_event_coverage >= 0.95
     )
     if not gate_passed:
         raise ValueError(
             f"{definition['name']} failed lineup publication gates: "
             f"starters={starter_coverage:.3f}, minutes={minute_coverage:.3f}, "
             f"integrity={integrity_coverage:.3f}, substitutions={substitution_coverage:.3f}, "
-            f"fixtures={source_fixture_coverage:.3f}"
+            f"fixtures={source_fixture_coverage:.3f}, event_goals={goal_event_coverage:.3f}"
         )
     return {
         "id": definition["id"],
@@ -739,6 +1117,7 @@ def _rate_cohort(
             "player_minutes": round(minute_coverage, 4),
             "substitution_minutes": round(substitution_coverage, 4),
             "lineup_integrity": round(integrity_coverage, 4),
+            "event_goal_scores": round(goal_event_coverage, 4),
             "player_match_graph_components": _components(rows),
             "expected_matches": definition.get("expected_matches", len(rows)),
             "fixture_completeness": round(
@@ -793,6 +1172,27 @@ def _rate_cohort(
                     "underperformers": list(reversed(partnership_rows[-15:])),
                 },
             },
+            "lapm": {
+                "label": "LAPM",
+                "status": "descriptive_only",
+                "scope": "within_team",
+                "ranking_rule": "within-team line-graph impact − 1.96 × approximate uncertainty",
+                "parameters": lapm["parameters"]
+                | {
+                    "outcome": "goal difference per 90 during constant-lineup stints",
+                    "edge_weight": "Jaccard similarity |A ∩ B| / |A ∪ B|",
+                    "objective": "weighted data fit + lambda × sum(Jaccard × squared node-value difference) + ridge anchor",
+                    "reference_paper": "https://doi.org/10.1515/jqas-2024-0057",
+                    "reference_code": "https://github.com/njosephs/HAPM",
+                },
+                "metrics": {
+                    "verified_event_matches": audit.get("goal_event_matches", 0),
+                    "teams": len(lapm_teams),
+                    "retained_nodes": sum(team["diagnostics"]["retained_nodes"] for team in lapm_teams),
+                    "jaccard_edges": sum(team["diagnostics"]["jaccard_edges"] for team in lapm_teams),
+                },
+                "teams": lapm_teams,
+            },
         },
         "snapshot_sha256": snapshot_sha256,
     }
@@ -809,16 +1209,57 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
             f"StatsBomb published {len(matches)}"
         )
     matches.sort(key=lambda item: (item["match_date"], item["match_id"]))
+    def fetch_match_files(match: dict) -> tuple[int, bytes, bytes]:
+        match_id = match["match_id"]
+        lineup_bytes = fetch(
+            f"{STATSBOMB_ROOT}/lineups/{match_id}.json", cache_ttl=35 * 86_400
+        )
+        event_bytes = fetch(
+            f"{STATSBOMB_ROOT}/events/{match_id}.json", cache_ttl=35 * 86_400
+        )
+        return match_id, lineup_bytes, event_bytes
+
+    # The public archive is match-sharded. Bounded concurrent reads keep the
+    # deterministic replay practical without changing processing order.
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        source_files = {
+            match_id: (lineup_bytes, event_bytes)
+            for match_id, lineup_bytes, event_bytes in executor.map(
+                fetch_match_files, matches
+            )
+        }
     player_meta: dict[str, dict] = {}
     rows: list[dict] = []
-    audit = {"starter_teams_ok": 0, "used_players": 0, "complete_players": 0, "integrity_matches": 0}
+    audit = {
+        "starter_teams_ok": 0,
+        "used_players": 0,
+        "complete_players": 0,
+        "integrity_matches": 0,
+        "goal_event_matches": 0,
+    }
     snapshot = hashlib.sha256(match_bytes)
     for match in matches:
-        lineup_url = f"{STATSBOMB_ROOT}/lineups/{match['match_id']}.json"
-        lineup_bytes = fetch(lineup_url, cache_ttl=35 * 86_400)
+        lineup_bytes, event_bytes = source_files[match["match_id"]]
         snapshot.update(lineup_bytes)
         lineups = json.loads(lineup_bytes)
         home, away, match_audit = _lineup_weights(match, lineups, player_meta)
+        snapshot.update(event_bytes)
+        home_id = match["home_team"]["home_team_id"]
+        away_id = match["away_team"]["away_team_id"]
+        goal_events = _statsbomb_goal_events(
+            json.loads(event_bytes), home_id, away_id
+        )
+        event_score = {
+            home_id: sum(goal["team_id"] == home_id for goal in goal_events),
+            away_id: sum(goal["team_id"] == away_id for goal in goal_events),
+        }
+        if event_score != {home_id: match["home_score"], away_id: match["away_score"]}:
+            raise ValueError(
+                f"{definition['name']} match {match['match_id']} event goals "
+                f"{event_score} do not reproduce {match['home_score']}-{match['away_score']}"
+            )
+        audit["goal_event_matches"] += 1
+        stints = _constant_lineup_stints(match_audit, goal_events, home_id, away_id)
         audit["starter_teams_ok"] += match_audit["starter_teams_ok"]
         audit["used_players"] += match_audit["used_players"]
         audit["complete_players"] += match_audit["complete_players"]
@@ -830,9 +1271,14 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
                 "match_id": match["match_id"],
                 "home": home,
                 "away": away,
+                "home_team_id": home_id,
+                "away_team_id": away_id,
+                "home_team_name": match["home_team"].get("home_team_name", str(home_id)),
+                "away_team_name": match["away_team"].get("away_team_name", str(away_id)),
                 "home_pairs": match_audit["home_pairs"],
                 "away_pairs": match_audit["away_pairs"],
                 "duration": match_audit["duration"],
+                "stints": stints,
                 "score_a": score_a,
                 "goal_difference": match["home_score"] - match["away_score"],
                 "home_advantage": _home_advantage(match, definition),
@@ -887,6 +1333,10 @@ def _api_football_fixture(
     incoming: dict[int, set[int]] = defaultdict(set)
     outgoing: dict[int, set[int]] = defaultdict(set)
     dismissed: dict[int, set[int]] = defaultdict(set)
+    incoming_minute: dict[int, float] = {}
+    outgoing_minute: dict[int, float] = {}
+    dismissed_minute: dict[int, float] = {}
+    goal_events = []
     for event in fixture_row.get("events") or []:
         team_id = (event.get("team") or {}).get("id")
         event_type = str(event.get("type") or "").casefold()
@@ -895,14 +1345,32 @@ def _api_football_fixture(
         if event_type == "subst":
             player_out = (event.get("player") or {}).get("id")
             player_in = (event.get("assist") or {}).get("id")
+            event_time = event.get("time") or {}
+            minute = float(event_time.get("elapsed") or 0.0) + float(
+                event_time.get("extra") or 0.0
+            ) / 60.0
             if player_out:
                 outgoing[team_id].add(player_out)
+                outgoing_minute[player_out] = minute
             if player_in:
                 incoming[team_id].add(player_in)
+                incoming_minute[player_in] = minute
         elif event_type == "card" and "red" in str(event.get("detail") or "").casefold():
             player_id = (event.get("player") or {}).get("id")
             if player_id:
                 dismissed[team_id].add(player_id)
+                event_time = event.get("time") or {}
+                dismissed_minute[player_id] = float(
+                    event_time.get("elapsed") or 0.0
+                ) + float(event_time.get("extra") or 0.0) / 60.0
+        elif (
+            event_type == "goal"
+            and "missed" not in str(event.get("detail") or "").casefold()
+            and (event.get("time") or {}).get("elapsed") is not None
+        ):
+            elapsed = float((event.get("time") or {})["elapsed"])
+            extra = float((event.get("time") or {}).get("extra") or 0.0)
+            goal_events.append({"minute": elapsed + extra / 60.0, "team_id": team_id})
     lineups: list[dict] = []
     substitution_players = 0
     verified_substitution_players = 0
@@ -948,9 +1416,21 @@ def _api_football_fixture(
                     "country": {"name": ""},
                     "positions": [
                         {
-                            "from": "00:00" if started else f"{max(0.0, 90.0 - minutes):.2f}:00",
-                            "to": f"{minutes:.2f}:00" if started else "90:00",
-                            "end_reason": "Final Whistle" if minutes >= 89.5 else "Substitution",
+                            "from": "00:00" if started else f"{incoming_minute.get(player_id, max(0.0, 90.0 - minutes)):.2f}:00",
+                            "to": (
+                                f"{outgoing_minute[player_id]:.2f}:00"
+                                if player_id in outgoing_minute
+                                else f"{dismissed_minute[player_id]:.2f}:00"
+                                if player_id in dismissed_minute
+                                else None
+                            ),
+                            "end_reason": (
+                                "Substitution"
+                                if player_id in outgoing_minute
+                                else "Dismissed"
+                                if player_id in dismissed_minute
+                                else "Final Whistle"
+                            ),
                         }
                     ],
                 }
@@ -964,13 +1444,6 @@ def _api_football_fixture(
             )
         lineups.append({"team_id": team_id, "team_name": team.get("name") or str(team_id), "lineup": players})
     duration = 120.0 if maximum_minutes > 100.0 else 90.0
-    for team in lineups:
-        for player in team["lineup"]:
-            position = player["positions"][0]
-            minutes = float(position["to"].split(":", 1)[0]) if position["from"] == "00:00" else 90.0 - float(position["from"].split(":", 1)[0])
-            if position["from"] != "00:00":
-                position["from"] = f"{duration - minutes:.2f}:00"
-                position["to"] = f"{duration:.2f}:00"
     goals = fixture_row.get("goals") or {}
     if goals.get("home") is None or goals.get("away") is None:
         raise ValueError(f"API-Football fixture {fixture_id} is missing the result")
@@ -982,6 +1455,8 @@ def _api_football_fixture(
         "home_score": int(goals["home"]),
         "away_score": int(goals["away"]),
         "competition_stage": {"name": (fixture_row.get("league") or {}).get("round", "")},
+        "duration": duration,
+        "goal_events": goal_events,
     }
     return match, lineups, {
         "substitution_players": substitution_players,
@@ -1027,6 +1502,7 @@ def _build_api_football_cohort(
         "used_players": 0,
         "complete_players": 0,
         "integrity_matches": 0,
+        "goal_event_matches": 0,
         "source_fixtures": 0,
         "substitution_players": 0,
         "verified_substitution_players": 0,
@@ -1034,6 +1510,32 @@ def _build_api_football_cohort(
     for fixture_id in fixture_ids:
         match, lineups, source_audit = _api_football_fixture(by_id[fixture_id])
         home, away, match_audit = _lineup_weights(match, lineups, player_meta)
+        event_score = {
+            match["home_team"]["home_team_id"]: sum(
+                goal["team_id"] == match["home_team"]["home_team_id"]
+                for goal in match["goal_events"]
+            ),
+            match["away_team"]["away_team_id"]: sum(
+                goal["team_id"] == match["away_team"]["away_team_id"]
+                for goal in match["goal_events"]
+            ),
+        }
+        expected_score = {
+            match["home_team"]["home_team_id"]: match["home_score"],
+            match["away_team"]["away_team_id"]: match["away_score"],
+        }
+        if event_score != expected_score:
+            raise ValueError(
+                f"{definition['name']} fixture {fixture_id} event goals {event_score} "
+                f"do not reproduce {match['home_score']}-{match['away_score']}"
+            )
+        audit["goal_event_matches"] += 1
+        stints = _constant_lineup_stints(
+            match_audit,
+            match["goal_events"],
+            match["home_team"]["home_team_id"],
+            match["away_team"]["away_team_id"],
+        )
         audit["starter_teams_ok"] += match_audit["starter_teams_ok"]
         audit["used_players"] += match_audit["used_players"]
         audit["complete_players"] += match_audit["complete_players"]
@@ -1048,9 +1550,14 @@ def _build_api_football_cohort(
                 "match_id": match["match_id"],
                 "home": home,
                 "away": away,
+                "home_team_id": match["home_team"]["home_team_id"],
+                "away_team_id": match["away_team"]["away_team_id"],
+                "home_team_name": match["home_team"].get("home_team_name") or str(match["home_team"]["home_team_id"]),
+                "away_team_name": match["away_team"].get("away_team_name") or str(match["away_team"]["away_team_id"]),
                 "home_pairs": match_audit["home_pairs"],
                 "away_pairs": match_audit["away_pairs"],
                 "duration": match_audit["duration"],
+                "stints": stints,
                 "score_a": score_a,
                 "goal_difference": match["home_score"] - match["away_score"],
                 "home_advantage": False,
@@ -1103,11 +1610,12 @@ def build_player_payload(
             "scope": "Complete declared men's and women's tournaments and league seasons only; each cohort records its included competitions, source, and snapshot hash.",
         },
         "methodology": {
-            "inputs": ["match outcome", "goal difference", "stable player IDs", "lineups", "minutes played"],
+            "inputs": ["match outcome", "goal difference", "goal timing", "stable player IDs", "lineups", "minutes played"],
             "excluded_inputs": ["passes", "shots", "dribbles", "expected goals", "tracking data"],
             "lineup_trueskill": "Sequential additive team-skill update using normalized minutes-played weights; every probability is recorded before its match update.",
             "rapm": "Match-level goal-difference ridge regression using normalized minutes weights, home-goal intercept, and a chronological final-quarter penalty selection.",
             "pairwise_chemistry": "Experimental non-additive residual model: exact teammate overlap minutes define pair features, ridge shrinkage is selected on the chronological final quarter, and effects are fitted only to goal difference left unexplained by RAPM.",
+            "lapm": "Experimental team-specific line-graph APM adaptation: singleton players, qualifying pairs, and full observed constant lineups are graph nodes; non-zero Jaccard overlap creates edges and a Laplacian penalty smooths similar combinations toward one another.",
             "interpretation": "These estimates describe association with team outcomes within one declared complete tournament or season. They do not identify how a player contributed and should not be compared across cohorts.",
         },
         "cohorts": cohorts,
@@ -1149,3 +1657,9 @@ def validate_player_payload(payload: dict) -> None:
             for model in ("lineup-trueskill", "rapm", "pairwise-chemistry")
         ):
             raise ValueError(f"Empty player ranking: {cohort['id']}")
+        lapm = cohort["models"].get("lapm")
+        if not lapm or not lapm.get("teams"):
+            raise ValueError(f"Empty LAPM team models: {cohort['id']}")
+        for team in lapm["teams"]:
+            if not team.get("rankings"):
+                raise ValueError(f"Empty LAPM team ranking: {cohort['id']} / {team['id']}")
