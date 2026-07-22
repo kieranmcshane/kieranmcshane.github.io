@@ -20,6 +20,7 @@ import subprocess
 import tempfile
 import time
 from typing import Iterable
+import unicodedata
 from urllib.error import HTTPError, URLError
 from urllib.parse import unquote, urlencode, urlparse
 from urllib.request import Request, urlopen
@@ -79,6 +80,15 @@ OPEN_FOOTBALL_FIXTURES = {
         "Ligue 1",
         "https://raw.githubusercontent.com/openfootball/france/master/france/{season}_fr1.txt",
     ),
+}
+KALSHI_COMPETITION_SERIES = {
+    "premier-league": ("KXPREMIERLEAGUE", "premier-league"),
+    "la-liga": ("KXLALIGA", "la-liga"),
+    "bundesliga": ("KXBUNDESLIGA", "bundesliga"),
+    "serie-a": ("KXSERIEA", "serie-a"),
+    "ligue-1": ("KXLIGUE1", "ligue-1"),
+    "football-cl": ("KXUCL", "champions-league"),
+    "national-football-wc": ("KXWC", "world-cup"),
 }
 PUBLIC_CUP_COMPETITIONS = {
     "football": {
@@ -2462,8 +2472,29 @@ def _json_array(value) -> list:
 
 
 def _market_identity_tokens(name: str) -> frozenset[str]:
-    ignored = {"fc", "cf", "afc", "sc", "ac", "club"}
-    return frozenset(token for token in _slug(name).split("-") if token and token not in ignored)
+    normalized = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode().casefold()
+    normalized = re.sub(r"[^a-z0-9]+", " ", normalized).strip()
+    aliases = {
+        "fc bayern munchen": "bayern munich",
+        "paris saint germain": "psg",
+        "fc internazionale milano": "inter",
+        "inter milan": "inter",
+        "athletic club": "athletic bilbao",
+        "sporting clube de portugal": "sporting cp",
+        "fc cologne": "koln",
+        "m gladbach": "monchengladbach",
+        "hamburger sv": "hamburg",
+        "olympique lyonnais": "lyon",
+        "stade rennais": "rennes",
+        "stade rennes": "rennes",
+        "stade brestois 29": "brest",
+        "stade brest 29": "brest",
+    }
+    for source, replacement in aliases.items():
+        if source in normalized:
+            normalized = normalized.replace(source, replacement)
+    ignored = {"fc", "cf", "afc", "sc", "ac", "club", "de", "the"}
+    return frozenset(token for token in normalized.split() if token and token not in ignored)
 
 
 def _competition_participants(competition: dict) -> list[dict]:
@@ -2556,14 +2587,16 @@ def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
 
 
 def _polymarket_search_query(competition: dict) -> str:
-    season = str(competition.get("season", ""))
-    if "-" in season and len(season.rsplit("-", 1)[-1]) == 2:
-        century = season.split("-", 1)[0][:2]
-        year = century + season.rsplit("-", 1)[-1]
-    else:
-        year = season
+    year = _competition_end_year(competition)
     suffix = "winner" if "chess" in competition["id"] else "champion"
     return " ".join(part for part in (competition["label"], year, suffix) if part)
+
+
+def _competition_end_year(competition: dict) -> str:
+    season = str(competition.get("season", ""))
+    if "-" in season and len(season.rsplit("-", 1)[-1]) == 2:
+        return season.split("-", 1)[0][:2] + season.rsplit("-", 1)[-1]
+    return season
 
 
 def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
@@ -2618,6 +2651,167 @@ def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
     }
 
 
+def _kalshi_event_snapshot(competition: dict, event: dict, series_slug: str) -> dict | None:
+    """Convert one mutually exclusive Kalshi winner event into our benchmark contract."""
+    participants = _competition_participants(competition)
+    markets = event.get("markets") or []
+    if len(participants) < 2 or len(markets) < 2 or event.get("mutually_exclusive") is not True:
+        return None
+    participant_tokens = [(_market_identity_tokens(row["name"]), row) for row in participants]
+    valid_markets = []
+    for market in markets:
+        if market.get("status") not in {"active", "open"}:
+            continue
+        bid = _as_float(market.get("yes_bid_dollars"), -1)
+        ask = _as_float(market.get("yes_ask_dollars"), -1)
+        last = _as_float(market.get("last_price_dollars"), -1)
+        quote_method = None
+        if 0 <= bid <= ask <= 1 and ask > 0:
+            price = (bid + ask) / 2
+            quote_method = "yes bid-ask midpoint"
+        elif 0 < last <= 1:
+            price = last
+            quote_method = "last traded Yes price"
+        else:
+            continue
+        label = str(
+            market.get("yes_sub_title")
+            or market.get("subtitle")
+            or market.get("title")
+            or ""
+        ).strip()
+        tokens = _market_identity_tokens(label)
+        if not tokens:
+            continue
+        valid_markets.append((market, label, tokens, price, bid, ask, quote_method))
+    raw_sum = sum(item[3] for item in valid_markets)
+    if raw_sum <= 0:
+        return None
+    matched = []
+    used_entities = set()
+    for market, market_label, tokens, price, bid, ask, quote_method in valid_markets:
+        exact = [row for candidate, row in participant_tokens if candidate == tokens]
+        candidates = exact or [
+            row for candidate, row in participant_tokens
+            if tokens.issubset(candidate) or candidate.issubset(tokens)
+        ]
+        candidates = [row for row in candidates if row["id"] not in used_entities]
+        if len(candidates) != 1:
+            continue
+        participant = candidates[0]
+        used_entities.add(participant["id"])
+        matched.append(
+            {
+                "entity_id": participant["id"],
+                "name": participant["name"],
+                "market_id": str(market.get("ticker", "")),
+                "market_label": market_label,
+                "raw_yes_price": round(price, 6),
+                "normalized_probability": round(price / raw_sum, 6),
+                "best_bid": round(bid, 6) if 0 <= bid <= 1 else 0.0,
+                "best_ask": round(ask, 6) if 0 <= ask <= 1 else 0.0,
+                "quote_method": quote_method,
+                "liquidity_usd": round(_as_float(market.get("liquidity_dollars")), 2),
+                "volume_contracts": round(_as_float(market.get("volume_fp")), 2),
+                "updated_at": market.get("updated_time"),
+            }
+        )
+    coverage = len(matched) / len(participants)
+    if len(matched) < 2 or coverage < 0.5:
+        return None
+    matched.sort(key=lambda row: (-row["normalized_probability"], row["name"]))
+    snapshot_material = json.dumps(
+        [(row["market_id"], row["raw_yes_price"], row["updated_at"]) for row in matched],
+        separators=(",", ":"),
+    )
+    event_ticker = str(event.get("event_ticker", ""))
+    series_ticker = str(event.get("series_ticker", ""))
+    updated_values = [row["updated_at"] for row in matched if row.get("updated_at")]
+    return {
+        "competition_id": competition["id"],
+        "event_id": event_ticker,
+        "event_title": event.get("title"),
+        "event_url": f"https://kalshi.com/markets/{series_ticker.casefold()}/{series_slug}/{event_ticker.casefold()}",
+        "event_updated_at": max(updated_values) if updated_values else None,
+        "event_volume_contracts": round(sum(row["volume_contracts"] for row in matched), 2),
+        "raw_yes_price_sum": round(raw_sum, 6),
+        "normalization": "Each usable Kalshi Yes bid-ask midpoint (or last trade when no two-sided quote exists) divided by the sum across the active mutually exclusive winner field.",
+        "matched_participants": len(matched),
+        "model_participants": len(participants),
+        "market_outcomes": len(valid_markets),
+        "coverage": round(coverage, 4),
+        "snapshot_sha256": hashlib.sha256(snapshot_material.encode()).hexdigest(),
+        "outcomes": matched,
+    }
+
+
+def fetch_kalshi_comparison(competitions: list[dict]) -> dict:
+    """Fetch public Kalshi winner events through stable series filters, without credentials."""
+    eligible = [
+        competition for competition in competitions
+        if competition.get("status") in {"live", "scheduled"}
+        and competition.get("id") in KALSHI_COMPETITION_SERIES
+    ]
+    fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    snapshots = []
+    searches = []
+    failures = 0
+    api_base = "https://external-api.kalshi.com/trade-api/v2"
+    for competition in eligible:
+        series_ticker, series_slug = KALSHI_COMPETITION_SERIES[competition["id"]]
+        api_url = api_base + "/events?" + urlencode(
+            {
+                "series_ticker": series_ticker,
+                "status": "open",
+                "with_nested_markets": "true",
+                "limit": 20,
+            }
+        )
+        try:
+            payload = json.loads(_get(api_url, attempts=3, cache_ttl=1800).decode("utf-8"))
+        except (RuntimeError, json.JSONDecodeError):
+            failures += 1
+            searches.append({"competition_id": competition["id"], "series_ticker": series_ticker, "status": "source_error"})
+            continue
+        end_year = _competition_end_year(competition)
+        expected_suffix = "-" + end_year[-2:] if len(end_year) >= 2 else ""
+        candidates = []
+        for event in payload.get("events") or []:
+            ticker = str(event.get("event_ticker", ""))
+            if expected_suffix and not ticker.endswith(expected_suffix):
+                continue
+            snapshot = _kalshi_event_snapshot(competition, event, series_slug)
+            if snapshot:
+                candidates.append(snapshot)
+        if candidates:
+            candidates.sort(key=lambda row: (-row["matched_participants"], -row["coverage"], row["event_id"]))
+            snapshots.append(candidates[0])
+            searches.append(
+                {
+                    "competition_id": competition["id"],
+                    "series_ticker": series_ticker,
+                    "status": "matched",
+                    "event_id": candidates[0]["event_id"],
+                }
+            )
+        else:
+            searches.append({"competition_id": competition["id"], "series_ticker": series_ticker, "status": "no_confident_match"})
+    if eligible and failures == len(eligible):
+        raise RuntimeError("Kalshi public market API was unavailable for every eligible competition")
+    return {
+        "status": "current",
+        "source": "Kalshi Trade API",
+        "source_url": "https://docs.kalshi.com/getting_started/quick_start_market_data",
+        "api_base": api_base,
+        "fetched_at": fetched_at,
+        "checked_at": fetched_at,
+        "stale_after_hours": 48,
+        "probability_definition": "Public Yes bid-ask midpoints, falling back to the last traded Yes price only when a two-sided quote is unavailable, normalized across a mutually exclusive winner field; never a rating-model input.",
+        "competitions": snapshots,
+        "searches": searches,
+    }
+
+
 def _attach_polymarket_comparison(payload: dict, previous: dict | None) -> None:
     predictor = payload.get("tournament_predictor")
     if not predictor:
@@ -2643,6 +2837,37 @@ def _attach_polymarket_comparison(payload: dict, previous: dict | None) -> None:
                 "checked_at": checked_at,
                 "stale_after_hours": 48,
                 "probability_definition": "No market snapshot was available; rating forecasts remain independent.",
+                "competitions": [],
+                "searches": [],
+                "message": str(error)[:240],
+            }
+
+
+def _attach_kalshi_comparison(payload: dict, previous: dict | None) -> None:
+    predictor = payload.get("tournament_predictor")
+    if not predictor:
+        return
+    try:
+        predictor["kalshi_comparison"] = fetch_kalshi_comparison(predictor["competitions"])
+    except RuntimeError as error:
+        retained = (previous or {}).get("tournament_predictor", {}).get("kalshi_comparison")
+        if retained:
+            retained = json.loads(json.dumps(retained))
+            retained["status"] = "retained"
+            retained["checked_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            retained["message"] = str(error)[:240]
+            predictor["kalshi_comparison"] = retained
+        else:
+            checked_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            predictor["kalshi_comparison"] = {
+                "status": "unavailable",
+                "source": "Kalshi Trade API",
+                "source_url": "https://docs.kalshi.com/getting_started/quick_start_market_data",
+                "api_base": "https://external-api.kalshi.com/trade-api/v2",
+                "fetched_at": None,
+                "checked_at": checked_at,
+                "stale_after_hours": 48,
+                "probability_definition": "No Kalshi snapshot was available; rating forecasts remain independent.",
                 "competitions": [],
                 "searches": [],
                 "message": str(error)[:240],
@@ -3010,18 +3235,20 @@ def validate_payload(payload: dict, schema: dict) -> None:
                 performance = competition.get("performance", {}).get("models", {})
                 if set(performance) != set(MODEL_NAMES):
                     raise ValueError("Completed competition is missing protocol performance ratings")
-        market = predictor.get("market_comparison")
-        if market:
+        for market_key, provider in (("market_comparison", "Polymarket"), ("kalshi_comparison", "Kalshi")):
+            market = predictor.get(market_key)
+            if not market:
+                continue
             if market.get("status") not in {"current", "retained", "unavailable"}:
-                raise ValueError("Invalid market comparison status")
+                raise ValueError(f"Invalid {provider} comparison status")
             for competition in market.get("competitions", []):
                 if competition.get("raw_yes_price_sum", 0) <= 0:
-                    raise ValueError("Invalid Polymarket outcome-price sum")
+                    raise ValueError(f"Invalid {provider} outcome-price sum")
                 entity_ids = [row.get("entity_id") for row in competition.get("outcomes", [])]
                 if len(entity_ids) != len(set(entity_ids)):
-                    raise ValueError("Duplicate Polymarket participant match")
+                    raise ValueError(f"Duplicate {provider} participant match")
                 if any(not 0 <= row.get("normalized_probability", -1) <= 1 for row in competition.get("outcomes", [])):
-                    raise ValueError("Invalid normalized Polymarket probability")
+                    raise ValueError(f"Invalid normalized {provider} probability")
     for name in MODEL_NAMES:
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
@@ -3087,6 +3314,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                 )
                 _attach_verified_portraits(payload)
                 _attach_polymarket_comparison(payload, previous_payload)
+                _attach_kalshi_comparison(payload, previous_payload)
                 validate_payload(payload, schema)
                 staged = temporary_path / f"{sport}.json"
                 staged.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n")

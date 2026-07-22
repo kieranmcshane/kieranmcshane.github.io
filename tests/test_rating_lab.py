@@ -15,6 +15,8 @@ from rating_lab.pipeline import (
     _competition_performance,
     _competition_matches,
     _football_data_crest_media,
+    _kalshi_event_snapshot,
+    _market_identity_tokens,
     _metrics,
     _merge_schedule_media,
     _merge_schedule_results,
@@ -250,6 +252,54 @@ class PipelineTests(unittest.TestCase):
     def test_polymarket_query_uses_season_end_year(self):
         competition = {"id": "football-epl", "label": "Premier League", "season": "2026-27"}
         self.assertEqual(_polymarket_search_query(competition), "Premier League 2027 champion")
+
+    def test_kalshi_snapshot_uses_midpoints_and_preserves_raw_field_sum(self):
+        competition = {
+            "id": "premier-league",
+            "label": "Premier League",
+            "season": "2026-27",
+            "models": {"elo": {"teams": [
+                {"id": "football:name:arsenal-fc", "name": "Arsenal FC", "champion": 0.5},
+                {"id": "football:name:chelsea-fc", "name": "Chelsea FC", "champion": 0.3},
+                {"id": "football:name:brighton-hove-albion-fc", "name": "Brighton & Hove Albion FC", "champion": 0.2},
+            ]}},
+        }
+        markets = []
+        for name, ticker, bid, ask in (
+            ("Arsenal", "ARS", 0.51, 0.53),
+            ("Chelsea", "CHE", 0.29, 0.31),
+            ("Brighton", "BHA", 0.17, 0.19),
+        ):
+            markets.append({
+                "ticker": f"KXPREMIERLEAGUE-27-{ticker}",
+                "yes_sub_title": name,
+                "status": "active",
+                "yes_bid_dollars": str(bid),
+                "yes_ask_dollars": str(ask),
+                "last_price_dollars": str(bid),
+                "liquidity_dollars": "1000",
+                "volume_fp": "5000",
+                "updated_time": "2026-07-22T12:00:00Z",
+            })
+        event = {
+            "event_ticker": "KXPREMIERLEAGUE-27",
+            "series_ticker": "KXPREMIERLEAGUE",
+            "title": "English Premier League Champion",
+            "mutually_exclusive": True,
+            "markets": markets,
+        }
+        snapshot = _kalshi_event_snapshot(competition, event, "premier-league")
+        self.assertIsNotNone(snapshot)
+        self.assertAlmostEqual(snapshot["raw_yes_price_sum"], 1.0)
+        self.assertEqual(snapshot["matched_participants"], 3)
+        self.assertAlmostEqual(sum(row["normalized_probability"] for row in snapshot["outcomes"]), 1.0)
+        self.assertTrue(all(row["quote_method"] == "yes bid-ask midpoint" for row in snapshot["outcomes"]))
+        self.assertIn("kalshi.com/markets/kxpremierleague", snapshot["event_url"])
+
+    def test_market_identity_aliases_cover_provider_names(self):
+        self.assertEqual(_market_identity_tokens("FC Bayern München"), _market_identity_tokens("Bayern Munich"))
+        self.assertEqual(_market_identity_tokens("Paris Saint-Germain FC"), _market_identity_tokens("PSG"))
+        self.assertEqual(_market_identity_tokens("FC Internazionale Milano"), _market_identity_tokens("Inter Milan"))
 
     def test_football_txt_parser_preserves_schedule_and_zero_zero_result(self):
         fixture = """= Test League 2026/27
@@ -498,6 +548,9 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("var pageSize = mobile ? 6 : 20;", script)
         self.assertIn("elements.metricsDisclosure.open = false;", script)
         self.assertIn('class="rating-lab-market-detail"', script)
+        self.assertIn("view.predictor.kalshi_comparison", script)
+        self.assertIn("Kalshi Trade API", page)
+        self.assertIn(".rating-lab-market-provider", styles)
         self.assertIn('class="rating-lab-title-mobile"', page)
         self.assertIn('aria-label="Competition forecasts"', page)
         self.assertIn("Rating Lab mobile-first interaction pass", styles)

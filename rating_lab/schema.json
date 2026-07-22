@@ -105,6 +105,7 @@
         "availability_rule": { "type": "string" },
         "performance_method": { "type": "string" },
         "market_comparison": { "type": "object" },
+        "kalshi_comparison": { "type": "object" },
         "competitions": { "type": "array", "minItems": 1 }
       },
       "additionalProperties": false
