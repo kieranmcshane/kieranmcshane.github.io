@@ -663,6 +663,12 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("Rating Lab mobile market-pattern pass", styles)
         self.assertIn("position: fixed", styles)
         self.assertIn("env(safe-area-inset-bottom)", styles)
+        self.assertIn('id="rating-quick-model"', page)
+        self.assertIn('id="player-quick-model"', player_page)
+        self.assertIn("function updateQuickModel()", script)
+        self.assertIn("function updateQuickModel()", player_script)
+        self.assertIn("Compact, context-aware model access", styles)
+        self.assertIn("prefers-reduced-motion: reduce", styles)
 
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{

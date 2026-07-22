@@ -47,6 +47,13 @@ description: Outcome-only historical men's and women's football player ratings f
       </label>
     </div>
 
+    <div class="rating-lab-quick-model player-lab-quick-model" id="player-quick-model" hidden>
+      <div class="rating-lab-quick-model-menu" id="player-quick-model-menu" role="group" aria-label="Choose the player model">
+        <button type="button" data-player-quick-model="lineup-trueskill">Lineup TrueSkill</button>
+        <button type="button" data-player-quick-model="rapm">RAPM</button>
+      </div>
+    </div>
+
     <div class="rating-lab-metrics player-lab-metrics" id="player-metrics" aria-label="Cohort and model evidence"></div>
 
     <section class="player-lab-comparison" aria-labelledby="player-comparison-heading">

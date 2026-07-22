@@ -18,7 +18,9 @@
     more: document.getElementById('player-ranking-more'),
     detail: document.getElementById('player-detail'),
     scoreHeading: document.getElementById('player-score-heading'),
-    gates: document.getElementById('player-gates')
+    gates: document.getElementById('player-gates'),
+    quickModel: document.getElementById('player-quick-model'),
+    quickModelMenu: document.getElementById('player-quick-model-menu')
   };
 
   function escapeHtml(value) {
@@ -188,6 +190,32 @@
     renderTable();
     renderDetail();
     renderGates();
+    updateQuickModel();
+  }
+
+  var quickModelFrame = null;
+
+  function updateQuickModel() {
+    if (!window.matchMedia('(max-width: 650px)').matches) {
+      elements.quickModel.hidden = true;
+      return;
+    }
+    var sectionRect = document.querySelector('.player-lab-explorer').getBoundingClientRect();
+    var tabsRect = elements.modelTabs.getBoundingClientRect();
+    var withinExplorer = sectionRect.top <= window.innerHeight * 0.36 && sectionRect.bottom > window.innerHeight * 0.36;
+    var originalControlsVisible = tabsRect.bottom > 0 && tabsRect.top < window.innerHeight;
+    elements.quickModel.hidden = !withinExplorer || originalControlsVisible;
+    elements.quickModelMenu.querySelectorAll('[data-player-quick-model]').forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.playerQuickModel === state.model));
+    });
+  }
+
+  function queueQuickModelUpdate() {
+    if (quickModelFrame !== null) return;
+    quickModelFrame = window.requestAnimationFrame(function () {
+      quickModelFrame = null;
+      updateQuickModel();
+    });
   }
 
   function revealDetailOnMobile() {
@@ -216,6 +244,17 @@
     state.expanded = false;
     render();
   });
+  elements.quickModelMenu.addEventListener('click', function (event) {
+    event.stopPropagation();
+    var button = event.target.closest('[data-player-quick-model]');
+    if (!button) return;
+    state.model = button.dataset.playerQuickModel;
+    elements.modelTabs.querySelectorAll('button').forEach(function (item) {
+      item.setAttribute('aria-pressed', String(item.dataset.playerModel === state.model));
+    });
+    state.expanded = false;
+    render();
+  });
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
     state.expanded = false;
@@ -231,6 +270,8 @@
     renderDetail();
     revealDetailOnMobile();
   });
+  window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
+  window.addEventListener('resize', queueQuickModelUpdate);
 
   fetch(root.dataset.playerData)
     .then(function (response) {

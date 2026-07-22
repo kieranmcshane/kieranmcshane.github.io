@@ -65,6 +65,10 @@
     mobileProvisionalControl: document.getElementById('rating-mobile-provisional-control'),
     mobileIncludeProvisional: document.getElementById('rating-mobile-include-provisional'),
     mobileProvisionalCount: document.getElementById('rating-mobile-provisional-count'),
+    quickModel: document.getElementById('rating-quick-model'),
+    quickModelMenu: document.getElementById('rating-quick-model-menu'),
+    quickModelTrigger: document.getElementById('rating-quick-model-trigger'),
+    quickModelLabel: document.getElementById('rating-quick-model-label'),
     metricsDisclosure: document.querySelector('.rating-lab-metrics-disclosure'),
     metrics: document.getElementById('rating-metrics'),
     movers: document.getElementById('rating-movers'),
@@ -1692,6 +1696,64 @@
     renderAudit();
     renderPredictor();
     syncMobileFilters();
+    updateQuickModel();
+  }
+
+  var quickModelContext = null;
+  var quickModelFrame = null;
+
+  function modelLabel(model) {
+    return { elo: 'Elo', glicko2: 'Glicko-2', trueskill: 'Gaussian', robust: 'Robust' }[model] || model;
+  }
+
+  function closeQuickModel() {
+    elements.quickModel.classList.remove('is-open');
+    elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
+  }
+
+  function quickContext() {
+    var probe = window.innerHeight * 0.36;
+    var contexts = [
+      { id: 'leaderboard', section: document.querySelector('.rating-lab-explorer'), tabs: elements.mobileFilterTrigger },
+      { id: 'matchup', section: document.getElementById('matchup'), tabs: elements.matchupModelTabs },
+      { id: 'predictor', section: document.getElementById('predictor'), tabs: elements.predictorModelTabs }
+    ];
+    return contexts.find(function (context) {
+      if (!context.section) return false;
+      var rect = context.section.getBoundingClientRect();
+      return rect.top <= probe && rect.bottom > probe;
+    }) || null;
+  }
+
+  function updateQuickModel() {
+    if (!elements.quickModel || !window.matchMedia('(max-width: 650px)').matches) {
+      if (elements.quickModel) elements.quickModel.hidden = true;
+      return;
+    }
+    var context = quickContext();
+    if (!context) {
+      elements.quickModel.hidden = true;
+      closeQuickModel();
+      return;
+    }
+    quickModelContext = context.id;
+    var tabsRect = context.tabs.getBoundingClientRect();
+    var originalControlsVisible = tabsRect.bottom > 0 && tabsRect.top < window.innerHeight;
+    elements.quickModel.hidden = originalControlsVisible;
+    if (originalControlsVisible) closeQuickModel();
+    var activeModel = context.id === 'predictor' ? state.predictorModel : state.model;
+    elements.quickModelLabel.textContent = modelLabel(activeModel);
+    elements.quickModelMenu.querySelectorAll('[data-quick-model]').forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.quickModel === activeModel));
+    });
+  }
+
+  function queueQuickModelUpdate() {
+    if (quickModelFrame !== null) return;
+    quickModelFrame = window.requestAnimationFrame(function () {
+      quickModelFrame = null;
+      updateQuickModel();
+    });
   }
 
   function revealDetailOnMobile() {
@@ -1826,6 +1888,39 @@
   elements.mobileIncludeProvisional.addEventListener('change', function () {
     setIncludeProvisional(elements.mobileIncludeProvisional.checked);
   });
+
+  elements.quickModelTrigger.addEventListener('click', function (event) {
+    event.stopPropagation();
+    var opening = !elements.quickModel.classList.contains('is-open');
+    elements.quickModel.classList.toggle('is-open', opening);
+    elements.quickModelTrigger.setAttribute('aria-expanded', String(opening));
+  });
+
+  elements.quickModelMenu.addEventListener('click', function (event) {
+    event.stopPropagation();
+    var button = event.target.closest('[data-quick-model]');
+    if (!button) return;
+    if (quickModelContext === 'predictor') {
+      state.predictorModel = button.dataset.quickModel;
+      state.predictorTeam = null;
+      setPressed(elements.predictorModelTabs, 'predictorModel', state.predictorModel);
+      renderPredictor();
+    } else {
+      selectLeaderboardModel(button.dataset.quickModel);
+      renderMatchup();
+    }
+    closeQuickModel();
+    updateQuickModel();
+  });
+
+  document.addEventListener('click', function (event) {
+    if (!elements.quickModel.contains(event.target)) closeQuickModel();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeQuickModel();
+  });
+  window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
+  window.addEventListener('resize', queueQuickModelUpdate);
 
   elements.matchupModelTabs.addEventListener('click', function (event) {
     var button = event.target.closest('[data-matchup-model]');
