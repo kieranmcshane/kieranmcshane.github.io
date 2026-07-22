@@ -360,6 +360,16 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(schema["properties"]["schema_version"]["const"], "1.4.0")
         self.assertFalse(schema["additionalProperties"])
 
+    def test_pages_workflow_regenerates_player_data_before_jekyll(self):
+        workflow = (
+            Path(__file__).resolve().parents[1]
+            / ".github/workflows/refresh-and-deploy.yml"
+        ).read_text()
+        player_refresh = "python scripts/refresh_ratings.py --players-only"
+        self.assertIn(player_refresh, workflow)
+        self.assertLess(workflow.index(player_refresh), workflow.index("actions/jekyll-build-pages"))
+        self.assertIn("rating-lab-public-data-v4-", workflow)
+
     def test_complete_season_rejects_partial_fixture_catalogue(self):
         definition = {
             "id": "partial-season", "competition_id": 2, "season_id": 27,
