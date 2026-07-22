@@ -123,21 +123,34 @@ description: Outcome-only historical men's and women's football player ratings a
 
     <details class="rating-lab-limitations" id="player-methods" open>
       <summary>Exact interpretation and limitations</summary>
+      <article class="player-lab-model-hierarchy">
+        <div>
+          <p class="rating-lab-kicker">Model hierarchy</p>
+          <h3>Why the additive baselines stay primary</h3>
+          <p>Lineup TrueSkill and RAPM deliberately simplify team performance into player contributions. In sparse football lineups, that constraint is often a strength: it produces steadier, easier-to-audit estimates and a common baseline against which interaction models can be tested.</p>
+        </div>
+        <dl>
+          <div><dt>Broad ranking</dt><dd>Start with both additive baselines and inspect their agreement, minutes, and uncertainty.</dd></div>
+          <div><dt>Over- or under-performance</dt><dd>Use the baselines to control for teammates and opponents across the declared cohort.</dd></div>
+          <div><dt>Partnership questions</dt><dd>Use Chemistry or LAPM as contextual interaction lenses, not portable talent scores.</dd></div>
+          <div><dt>Promotion rule</dt><dd>An interaction layer does not replace the baseline unless chronological validation supports it.</dd></div>
+        </dl>
+      </article>
       <div class="player-lab-method-copy">
         <article>
-          <h3>Lineup TrueSkill</h3>
+          <h3>Lineup TrueSkill <small>Additive baseline · sequential</small></h3>
           <p>Each player has a Gaussian skill belief. Team performance is the normalized minutes-weighted sum of the players’ performances. The match result updates every player after its probability is recorded. Publication uses <span class="rating-lab-formula">mean − 3 × uncertainty</span>.</p>
         </article>
         <article>
-          <h3>RAPM</h3>
+          <h3>RAPM <small>Additive baseline · goal difference</small></h3>
           <p>Match goal difference is regressed on normalized minutes for every player, with positive weights for the home side and negative weights for the away side. Ridge shrinkage is selected on the chronological final quarter. Publication uses <span class="rating-lab-formula">impact − 1.96 × uncertainty</span>.</p>
         </article>
         <article>
-          <h3>Pairwise chemistry <small>experimental</small></h3>
+          <h3>Pairwise chemistry <small>Non-additive extension · experimental</small></h3>
           <p>Exact shared-pitch minutes create teammate-pair features. A second ridge model explains only the goal difference left over after RAPM; its penalty is selected on the chronological final quarter. A player’s score is the minutes-weighted residual chemistry of qualifying partnerships minus <span class="rating-lab-formula">1.96 × approximate uncertainty</span>. The cohort publishes whether this interaction layer improves held-out RMSE.</p>
         </article>
         <article>
-          <h3>LAPM <small>experimental · within team</small></h3>
+          <h3>LAPM <small>Non-additive extension · experimental · within team</small></h3>
           <p>Constant-lineup stints are converted into a graph whose nodes are players, qualifying pairs, and full observed lineups. Nodes sharing players are linked by Jaccard similarity. The fitted goal-difference values minimize weighted error plus <span class="rating-lab-formula">λ Σ wᵢⱼ(βᵢ − βⱼ)²</span>, so overlapping combinations borrow strength. LAPM applies the displayed eligibility minimum inside the selected team and is shown within that team only; cross-team LAPM ranks would not share a valid scale.</p>
         </article>
       </div>

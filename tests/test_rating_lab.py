@@ -199,6 +199,15 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("rapm", protocol["methods"])
         self.assertIn("pairwise_chemistry", protocol["methods"])
         self.assertIn("lapm", protocol["methods"])
+        self.assertEqual(
+            protocol["model_hierarchy"]["primary_baselines"],
+            ["lineup_trueskill", "rapm"],
+        )
+        self.assertEqual(
+            protocol["model_hierarchy"]["interaction_extensions"],
+            ["pairwise_chemistry", "lapm"],
+        )
+        self.assertIn("chronological", protocol["model_hierarchy"]["promotion_rule"])
         self.assertEqual(protocol["methods"]["pairwise_chemistry"]["status"], "experimental; validation result is published per cohort")
         self.assertEqual(protocol["methods"]["lapm"]["scope"], "within one team; values are not compared across teams")
         self.assertEqual(protocol["release_gates"]["starting_lineup_coverage"], ">= 95% of eligible matches")
@@ -429,6 +438,14 @@ class PipelineTests(unittest.TestCase):
     def test_published_player_payload_passes_gates_and_has_contiguous_ranks(self):
         payload = json.loads((Path(__file__).resolve().parents[1] / "assets/data/rating-lab/player-football.json").read_text())
         validate_player_payload(payload)
+        self.assertEqual(
+            payload["methodology"]["model_hierarchy"]["primary_baselines"],
+            ["lineup_trueskill", "rapm"],
+        )
+        self.assertEqual(
+            payload["methodology"]["model_hierarchy"]["interaction_extensions"],
+            ["pairwise_chemistry", "lapm"],
+        )
         cohort_ids = {cohort["id"] for cohort in payload["cohorts"]}
         self.assertTrue({"premier-league-2015-16", "euro-2024", "world-cup-2022"}.issubset(cohort_ids))
         self.assertEqual({definition["gender"] for definition in COHORTS}, {"men", "women"})
