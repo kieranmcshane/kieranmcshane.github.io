@@ -2,12 +2,12 @@
 layout: page
 title: Historical Player Lab
 permalink: /rating-lab/players/
-description: Outcome-only historical football player ratings from complete StatsBomb lineups using Lineup TrueSkill and RAPM.
+description: Outcome-only historical men's and women's football player ratings from complete StatsBomb lineups using Lineup TrueSkill and RAPM.
 ---
 
 <div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}">
   <header class="rating-lab-hero player-lab-hero">
-    <p class="rating-lab-kicker">Historical football player contribution</p>
+    <p class="rating-lab-kicker">Historical men's and women's football player contribution</p>
     <h1>What changed when they played?</h1>
     <p class="rating-lab-deck">Two outcome-only models distribute team results across the players who were actually on the pitch. No passes, shots, expected goals, or tracking data enter either rating.</p>
     <p class="player-lab-back"><a href="{{ '/rating-lab/' | relative_url }}">← Back to Rating Lab</a></p>
@@ -19,19 +19,19 @@ description: Outcome-only historical football player ratings from complete Stats
   <section class="player-lab-explorer" aria-labelledby="player-ranking-heading">
     <div class="rating-lab-section-heading">
       <div>
-        <p class="rating-lab-kicker">Complete seasons only</p>
+        <p class="rating-lab-kicker">Complete competitions only</p>
         <h2 id="player-ranking-heading">Historical player ratings</h2>
       </div>
       <p id="player-lab-generated">Loading the verified cohort…</p>
     </div>
 
     <div class="player-lab-boundary" role="note">
-      <strong>Historical, not live.</strong> These ratings apply only inside the selected season. Men’s club samples and the live five-league feed remain excluded until their lineup coverage passes the same gates.
+      <strong>Verified men’s and women’s cohorts.</strong> These ratings apply only inside the selected competition. The men’s publication covers UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. The live five-league feed remains excluded until its lineup coverage passes the same gates.
     </div>
 
     <div class="player-lab-toolbar">
       <label class="rating-lab-field">
-        <span>Season</span>
+        <span>Competition</span>
         <select id="player-cohort"></select>
       </label>
       <div class="rating-lab-control-group" aria-label="Player contribution model">
@@ -55,7 +55,7 @@ description: Outcome-only historical football player ratings from complete Stats
           <p class="rating-lab-kicker">Agreement and disagreement</p>
           <h3 id="player-comparison-heading">Lineup TrueSkill versus RAPM</h3>
         </div>
-        <p>Each axis is standardized within this season. Upper-right players rate highly under both protocols.</p>
+        <p>Each axis is standardized within this competition. Upper-right players rate highly under both protocols.</p>
       </div>
       <div id="player-comparison-chart"></div>
     </section>
@@ -103,10 +103,11 @@ description: Outcome-only historical football player ratings from complete Stats
         </article>
       </div>
       <ul>
-        <li>These are within-season associations with team outcomes, not portable estimates of intrinsic talent.</li>
+        <li>These are within-competition associations with team outcomes, not portable estimates of intrinsic talent.</li>
         <li>Players who repeatedly share the pitch remain hard to separate; ridge shrinkage and uncertainty expose rather than eliminate that problem.</li>
         <li>Lineup timestamps that overlap slightly around stoppage-time substitutions are normalized to eleven player-equivalents per side.</li>
         <li>Ratings cannot explain how a player contributed. No event or tracking surrogate is used.</li>
+        <li>A match still level after extra time counts as a draw; a penalty shootout does not rewrite the preceding on-pitch result.</li>
         <li>Players need at least 450 minutes and five appearances to be ranked.</li>
       </ul>
       <div class="rating-lab-downloads">

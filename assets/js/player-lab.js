@@ -50,6 +50,29 @@
     });
   }
 
+  function renderCohortOptions() {
+    var groups = [
+      { id: 'men', label: "Men's competitions" },
+      { id: 'women', label: "Women's competitions" }
+    ];
+    var known = {};
+    var html = groups.map(function (group) {
+      var cohorts = state.payload.cohorts.filter(function (cohort) { return cohort.gender === group.id; });
+      cohorts.forEach(function (cohort) { known[cohort.id] = true; });
+      if (!cohorts.length) return '';
+      return '<optgroup label="' + escapeHtml(group.label) + '">' + cohorts.map(function (cohort) {
+        return '<option value="' + escapeHtml(cohort.id) + '">' + escapeHtml(cohort.name) + '</option>';
+      }).join('') + '</optgroup>';
+    }).join('');
+    var historical = state.payload.cohorts.filter(function (cohort) { return !known[cohort.id]; });
+    if (historical.length) {
+      html += '<optgroup label="Historical competitions">' + historical.map(function (cohort) {
+        return '<option value="' + escapeHtml(cohort.id) + '">' + escapeHtml(cohort.name) + '</option>';
+      }).join('') + '</optgroup>';
+    }
+    elements.cohort.innerHTML = html;
+  }
+
   function renderMetrics() {
     var cohort = currentCohort();
     var model = cohort.models[state.model];
@@ -57,7 +80,7 @@
       ? ['Held-out log loss', number(model.metrics.log_loss, 3), model.metrics.chronological_predictions + ' predictions recorded before updating']
       : ['Validation RMSE', number(model.metrics.validation_rmse, 3), model.metrics.chronological_validation_matches + ' chronological validation matches'];
     var metrics = [
-      ['Matches', number(cohort.matches, 0), cohort.first_match + ' to ' + cohort.last_match],
+      ['Matches', number(cohort.matches, 0), (cohort.format || 'historical cohort') + ' · ' + cohort.first_match + ' to ' + cohort.last_match],
       ['Eligible players', number(cohort.eligible_players, 0), 'Minimum 450 minutes and five appearances'],
       [modelMetric[0], modelMetric[1], modelMetric[2]],
       ['Lineup coverage', percent(cohort.coverage.starting_lineups), 'Player-match graph: ' + cohort.coverage.player_match_graph_components + ' connected component']
@@ -216,9 +239,7 @@
     .then(function (payload) {
       state.payload = payload;
       state.cohort = payload.cohorts[0].id;
-      elements.cohort.innerHTML = payload.cohorts.map(function (cohort) {
-        return '<option value="' + escapeHtml(cohort.id) + '">' + escapeHtml(cohort.name) + '</option>';
-      }).join('');
+      renderCohortOptions();
       elements.generated.textContent = 'Verified ' + date(payload.generated_at) + ' · Data source: StatsBomb';
       render();
     })

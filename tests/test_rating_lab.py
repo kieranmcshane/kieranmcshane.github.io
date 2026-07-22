@@ -8,7 +8,7 @@ import unittest
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
-from rating_lab.player_pipeline import _fit_ridge, _merge_minutes, player_schema, validate_player_payload
+from rating_lab.player_pipeline import COHORTS, _fit_ridge, _home_advantage, _merge_minutes, player_schema, validate_player_payload
 from rating_lab.pipeline import (
     FOOTBALL_COMPETITIONS,
     _deduplicate,
@@ -195,15 +195,40 @@ class PipelineTests(unittest.TestCase):
         self.assertGreater(fitted["coefficients"]["winner"], fitted["coefficients"]["loser"])
         self.assertGreaterEqual(fitted["uncertainty"]["winner"], 0.0)
 
+    def test_tournament_home_advantage_requires_matching_stadium_country(self):
+        definition = {"venue_context": "tournament"}
+        hosted = {
+            "home_team": {"country": {"name": "Germany"}},
+            "stadium": {"country": {"name": "Germany"}},
+        }
+        neutral = {
+            "home_team": {"country": {"name": "Spain"}},
+            "stadium": {"country": {"name": "Germany"}},
+        }
+        self.assertTrue(_home_advantage(hosted, definition))
+        self.assertFalse(_home_advantage(neutral, definition))
+
+    def test_rapm_neutral_matches_do_not_create_home_intercept(self):
+        rows = [
+            {"home": {"a": 1.0}, "away": {"b": 1.0}, "goal_difference": 2.0, "home_advantage": False},
+            {"home": {"b": 1.0}, "away": {"a": 1.0}, "goal_difference": -2.0, "home_advantage": False},
+        ]
+        fitted = _fit_ridge(rows, ["a", "b"], 1.0)
+        self.assertEqual(fitted["home_advantage"], 0.0)
+
     def test_player_schema_is_versioned_and_closed(self):
         schema = player_schema()
-        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.0.0")
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.1.0")
         self.assertFalse(schema["additionalProperties"])
 
     def test_published_player_payload_passes_gates_and_has_contiguous_ranks(self):
         payload = json.loads((Path(__file__).resolve().parents[1] / "assets/data/rating-lab/player-football.json").read_text())
         validate_player_payload(payload)
+        cohort_ids = {cohort["id"] for cohort in payload["cohorts"]}
+        self.assertTrue({"euro-2024", "world-cup-2022"}.issubset(cohort_ids))
+        self.assertEqual({definition["gender"] for definition in COHORTS}, {"men", "women"})
         for cohort in payload["cohorts"]:
+            self.assertIn(cohort["gender"], {"men", "women"})
             self.assertGreaterEqual(cohort["coverage"]["starting_lineups"], 0.95)
             self.assertGreaterEqual(cohort["coverage"]["player_minutes"], 0.95)
             self.assertEqual(cohort["coverage"]["player_match_graph_components"], 1)
