@@ -183,7 +183,8 @@ def individual_contribution_protocol() -> dict:
         },
         "source_assessment": {
             "statsbomb_open_data": "Complete declared historical Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
-            "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
+            "api_football": "World Cup 2026 is eligible only when API-Football returns all 104 completed fixtures with stable player IDs, two complete starting lineups, player minutes, and substitution events. Raw responses remain private; derived ratings record the response snapshot hash.",
+            "football_data_org": "Fixtures and results remain the primary club feed, but its configured coverage is not used for historical player attribution.",
             "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
         },
         "publication_rule": "Publish only declared cohorts that pass every gate; never imply that a historical cohort is a live player ranking.",
@@ -194,6 +195,7 @@ def _get(
     url: str,
     *,
     token: str | None = None,
+    api_football_key: str | None = None,
     attempts: int = 3,
     cache_ttl: int = 21_600,
 ) -> bytes:
@@ -201,6 +203,8 @@ def _get(
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json, text/csv, */*"}
     if token:
         headers["X-Auth-Token"] = token
+    if api_football_key:
+        headers["x-apisports-key"] = api_football_key
     cache_root = os.environ.get("RATING_LAB_CACHE_DIR")
     cache_file = None
     if cache_root:
@@ -218,6 +222,16 @@ def _get(
                 _football_data_last_request = time.monotonic()
             with urlopen(Request(url, headers=headers), timeout=45) as response:
                 body = response.read()
+            if api_football_key:
+                try:
+                    provider_payload = json.loads(body)
+                except json.JSONDecodeError as error:
+                    raise RuntimeError("API-Football returned invalid JSON") from error
+                if provider_payload.get("errors"):
+                    raise RuntimeError(
+                        f"API-Football rejected {url.split('?')[0]}: "
+                        f"{provider_payload['errors']}"
+                    )
             if cache_file:
                 cache_file.parent.mkdir(parents=True, exist_ok=True)
                 cache_file.write_bytes(body)
@@ -3351,7 +3365,9 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
 
     player_path = output_dir / "player-football.json"
     try:
-        player_payload = build_player_payload(_get)
+        player_payload = build_player_payload(
+            _get, api_football_key=os.environ.get("API_FOOTBALL_KEY")
+        )
         validate_player_payload(player_payload)
         staged_player = output_dir / ".player-football.json.tmp"
         staged_player.write_text(json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False) + "\n")

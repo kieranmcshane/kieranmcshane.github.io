@@ -8,7 +8,7 @@ import unittest
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
-from rating_lab.player_pipeline import COHORTS, _fit_ridge, _home_advantage, _merge_minutes, player_schema, validate_player_payload
+from rating_lab.player_pipeline import COHORTS, _api_football_fixture, _fit_ridge, _home_advantage, _lineup_weights, _merge_minutes, player_schema, validate_player_payload
 from rating_lab.pipeline import (
     FOOTBALL_COMPETITIONS,
     _deduplicate,
@@ -207,6 +207,55 @@ class PipelineTests(unittest.TestCase):
         }
         self.assertTrue(_home_advantage(hosted, definition))
         self.assertFalse(_home_advantage(neutral, definition))
+
+    def test_api_football_fixture_requires_verified_starters_substitutions_and_minutes(self):
+        def team_payload(team_id, offset):
+            starters = [offset + index for index in range(1, 12)]
+            substitute = offset + 12
+            return (
+                {
+                    "team": {"id": team_id, "name": f"Team {team_id}"},
+                    "startXI": [{"player": {"id": player_id, "name": f"P{player_id}"}} for player_id in starters],
+                    "substitutes": [{"player": {"id": substitute, "name": f"P{substitute}"}}],
+                },
+                {
+                    "team": {"id": team_id, "name": f"Team {team_id}"},
+                    "players": [
+                        {
+                            "player": {"id": player_id, "name": f"P{player_id}"},
+                            "statistics": [{"games": {"minutes": 60 if index == 0 else 90}}],
+                        }
+                        for index, player_id in enumerate(starters)
+                    ]
+                    + [{"player": {"id": substitute, "name": f"P{substitute}"}, "statistics": [{"games": {"minutes": 30}}]}],
+                },
+                starters[0],
+                substitute,
+            )
+
+        home_lineup, home_players, home_out, home_in = team_payload(10, 100)
+        away_lineup, away_players, away_out, away_in = team_payload(20, 200)
+        fixture = {
+            "fixture": {"id": 999, "date": "2026-07-19T20:00:00+00:00"},
+            "league": {"round": "Final"},
+            "teams": {"home": {"id": 10, "name": "Home"}, "away": {"id": 20, "name": "Away"}},
+            "goals": {"home": 1, "away": 0},
+            "lineups": [home_lineup, away_lineup],
+            "players": [home_players, away_players],
+            "events": [
+                {"team": {"id": 10}, "type": "subst", "player": {"id": home_out}, "assist": {"id": home_in}, "time": {"elapsed": 60}},
+                {"team": {"id": 20}, "type": "subst", "player": {"id": away_out}, "assist": {"id": away_in}, "time": {"elapsed": 60}},
+            ],
+        }
+        match, lineups, audit = _api_football_fixture(fixture)
+        self.assertEqual(match["match_id"], 999)
+        self.assertEqual(audit["substitution_players"], 4)
+        self.assertEqual(audit["verified_substitution_players"], 4)
+        player_meta = {}
+        home, away, weights_audit = _lineup_weights(match, lineups, player_meta)
+        self.assertAlmostEqual(sum(home.values()), 11.0)
+        self.assertAlmostEqual(sum(away.values()), 11.0)
+        self.assertTrue(weights_audit["integrity_ok"])
 
     def test_rapm_neutral_matches_do_not_create_home_intercept(self):
         rows = [
@@ -602,6 +651,12 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('data-label="Candidates tested"', script)
         self.assertIn("elements.scoreHeading.textContent = 'Score';", player_script)
         self.assertIn("Math.floor(elements.chart.clientWidth || 330)", player_script)
+        self.assertIn('data-flag-root=', player_page)
+        self.assertIn("playerFlag(point.country", player_script)
+        self.assertIn("String(row.country || '').toLocaleLowerCase()", player_script)
+        self.assertIn("search a country to isolate it", player_script)
+        self.assertIn("player-lab-point-card", player_script)
+        self.assertIn("if (!chartPoint) revealDetailOnMobile();", player_script)
         self.assertIn('class="rating-lab-media-policy"', page)
         self.assertIn("Rating Lab mobile redesign", styles)
         self.assertIn("#ranking-table tbody tr", styles)
@@ -614,6 +669,12 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("Rating Lab mobile market-pattern pass", styles)
         self.assertIn("position: fixed", styles)
         self.assertIn("env(safe-area-inset-bottom)", styles)
+        self.assertIn('id="rating-quick-model"', page)
+        self.assertIn('id="player-quick-model"', player_page)
+        self.assertIn("function updateQuickModel()", script)
+        self.assertIn("function updateQuickModel()", player_script)
+        self.assertIn("Compact, context-aware model access", styles)
+        self.assertIn("prefers-reduced-motion: reduce", styles)
 
     def test_open_cup_json_uses_penalties_to_resolve_final(self):
         payload = {"matches": [{

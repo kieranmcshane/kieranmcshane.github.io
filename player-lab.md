@@ -5,7 +5,7 @@ permalink: /rating-lab/players/
 description: Outcome-only historical men's and women's football player ratings from complete StatsBomb lineups using Lineup TrueSkill and RAPM.
 ---
 
-<div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}">
+<div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero player-lab-hero">
     <p class="rating-lab-kicker">Historical men's and women's football player contribution</p>
     <h1>What changed when they played?</h1>
@@ -43,8 +43,15 @@ description: Outcome-only historical men's and women's football player ratings f
       </div>
       <label class="rating-lab-field">
         <span>Find a player</span>
-        <input id="player-search" type="search" autocomplete="off" placeholder="Player or club">
+        <input id="player-search" type="search" autocomplete="off" placeholder="Player, club or nationality">
       </label>
+    </div>
+
+    <div class="rating-lab-quick-model player-lab-quick-model" id="player-quick-model" hidden>
+      <div class="rating-lab-quick-model-menu" id="player-quick-model-menu" role="group" aria-label="Choose the player model">
+        <button type="button" data-player-quick-model="lineup-trueskill">Lineup TrueSkill</button>
+        <button type="button" data-player-quick-model="rapm">RAPM</button>
+      </div>
     </div>
 
     <div class="rating-lab-metrics player-lab-metrics" id="player-metrics" aria-label="Cohort and model evidence"></div>
@@ -55,7 +62,7 @@ description: Outcome-only historical men's and women's football player ratings f
           <p class="rating-lab-kicker">Agreement and disagreement</p>
           <h3 id="player-comparison-heading">Lineup TrueSkill versus RAPM</h3>
         </div>
-        <p>Each axis is standardized within this competition. Upper-right players rate highly under both protocols.</p>
+        <p>Each axis is standardized within this competition. Flags show the source-listed nationality; upper-right players rate highly under both protocols.</p>
       </div>
       <div id="player-comparison-chart"></div>
     </section>
@@ -120,7 +127,7 @@ description: Outcome-only historical men's and women's football player ratings f
 
     <div class="player-lab-attribution">
       <img src="https://raw.githubusercontent.com/statsbomb/public-images/master/statsbomb_logo_email_new.jpg" alt="StatsBomb">
-      <p><strong>Data source: StatsBomb Open Data.</strong> Ratings and analysis are independent. The source supplies match results, stable player identifiers, lineups, and position intervals for the declared historical cohorts.</p>
+      <p><strong>Sources are declared per competition.</strong> StatsBomb Open Data supplies the existing historical cohorts. World Cup 2026 is published only after <a href="https://www.api-football.com/">API-Football</a> passes the same completeness gates for all 104 matches. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata, and a response snapshot hash.</p>
     </div>
   </section>
 </div>

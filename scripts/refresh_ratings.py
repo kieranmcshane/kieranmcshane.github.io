@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -33,7 +34,9 @@ def main() -> int:
     args = parser.parse_args()
     if args.players_only:
         args.output.mkdir(parents=True, exist_ok=True)
-        payload = build_player_payload(_get)
+        payload = build_player_payload(
+            _get, api_football_key=os.environ.get("API_FOOTBALL_KEY")
+        )
         validate_player_payload(payload)
         (args.output / "player-football.json").write_text(
             json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n"

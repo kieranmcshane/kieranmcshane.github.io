@@ -90,6 +90,18 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <button type="button" class="rating-lab-filter-apply" id="rating-mobile-filter-apply">Apply view</button>
     </dialog>
 
+    <div class="rating-lab-quick-model" id="rating-quick-model" hidden>
+      <div class="rating-lab-quick-model-menu" id="rating-quick-model-menu" role="group" aria-label="Choose the model">
+        <button type="button" data-quick-model="elo">Elo</button>
+        <button type="button" data-quick-model="glicko2">Glicko-2</button>
+        <button type="button" data-quick-model="trueskill">Gaussian</button>
+        <button type="button" data-quick-model="robust">Robust</button>
+      </div>
+      <button type="button" class="rating-lab-quick-model-trigger" id="rating-quick-model-trigger" aria-expanded="false" aria-controls="rating-quick-model-menu">
+        <span>Model</span><strong id="rating-quick-model-label">Elo</strong><span aria-hidden="true">⌃</span>
+      </button>
+    </div>
+
     <details class="rating-lab-metrics-disclosure" open>
       <summary>Model accuracy</summary>
       <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>

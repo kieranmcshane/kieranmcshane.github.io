@@ -18,7 +18,9 @@
     more: document.getElementById('player-ranking-more'),
     detail: document.getElementById('player-detail'),
     scoreHeading: document.getElementById('player-score-heading'),
-    gates: document.getElementById('player-gates')
+    gates: document.getElementById('player-gates'),
+    quickModel: document.getElementById('player-quick-model'),
+    quickModelMenu: document.getElementById('player-quick-model-menu')
   };
 
   function escapeHtml(value) {
@@ -39,6 +41,57 @@
     return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value));
   }
 
+  var regionCodesByName = null;
+
+  function normalizedRegionName(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  function buildRegionCodes() {
+    if (regionCodesByName) return regionCodesByName;
+    regionCodesByName = {};
+    if (typeof Intl.DisplayNames === 'function') {
+      var names = new Intl.DisplayNames(['en'], { type: 'region' });
+      for (var first = 65; first <= 90; first += 1) {
+        for (var second = 65; second <= 90; second += 1) {
+          var code = String.fromCharCode(first, second);
+          var name = names.of(code);
+          if (name && name !== code) regionCodesByName[normalizedRegionName(name)] = code;
+        }
+      }
+    }
+    Object.assign(regionCodesByName, {
+      'cote d ivoire': 'CI', 'czech republic': 'CZ', england: 'gb-eng', france: 'FR',
+      ireland: 'IE', 'korea south': 'KR', 'macedonia republic of': 'MK',
+      'northern ireland': 'gb-nir', scotland: 'gb-sct', serbia: 'RS',
+      'united states of america': 'US', 'venezuela bolivarian republic': 'VE',
+      wales: 'gb-wls'
+    });
+    return regionCodesByName;
+  }
+
+  function countryFlagCode(country) {
+    var code = buildRegionCodes()[normalizedRegionName(country)] || '';
+    return /^(?:[A-Z]{2}|gb-(?:eng|nir|sct|wls))$/.test(code) ? code.toLocaleLowerCase() : '';
+  }
+
+  function flagAssetUrl(country) {
+    var code = countryFlagCode(country);
+    var base = String(root.dataset.flagRoot || '').replace(/\/$/, '');
+    return code && base ? base + '/' + code + '.svg' : '';
+  }
+
+  function playerFlag(country, className, decorative) {
+    var url = flagAssetUrl(country);
+    if (!url) return '';
+    var label = 'Nationality: ' + country;
+    return '<span class="player-lab-country-flag' + (className ? ' ' + escapeHtml(className) : '') +
+      '"' + (decorative ? ' aria-hidden="true"' : ' role="img" aria-label="' + escapeHtml(label) + '"') +
+      ' title="' + escapeHtml(label) + '"><img src="' +
+      escapeHtml(url) + '" alt="" loading="lazy" decoding="async"></span>';
+  }
+
   function currentCohort() {
     return state.payload.cohorts.find(function (cohort) { return cohort.id === state.cohort; });
   }
@@ -46,7 +99,9 @@
   function currentRows() {
     var query = state.query.trim().toLocaleLowerCase();
     return currentCohort().models[state.model].rankings.filter(function (row) {
-      return !query || row.name.toLocaleLowerCase().indexOf(query) !== -1 || row.team.toLocaleLowerCase().indexOf(query) !== -1;
+      return !query || row.name.toLocaleLowerCase().indexOf(query) !== -1 ||
+        row.team.toLocaleLowerCase().indexOf(query) !== -1 ||
+        String(row.country || '').toLocaleLowerCase().indexOf(query) !== -1;
     });
   }
 
@@ -109,8 +164,20 @@
     var byId = {};
     trueRows.forEach(function (row) { byId[row.id] = row; });
     var points = rapmRows.filter(function (row) { return trueZ[row.id] !== undefined; }).map(function (row) {
-      return { id: row.id, name: row.name, team: row.team, x: trueZ[row.id], y: rapmZ[row.id] };
+      return {
+        id: row.id, name: row.name, team: row.team, country: row.country,
+        x: trueZ[row.id], y: rapmZ[row.id], trueRank: byId[row.id].rank,
+        rapmRank: row.rank, trueScore: byId[row.id].score, rapmScore: row.score
+      };
     });
+    var query = state.query.trim().toLocaleLowerCase();
+    if (query) {
+      points = points.filter(function (point) {
+        return point.name.toLocaleLowerCase().indexOf(query) !== -1 ||
+          point.team.toLocaleLowerCase().indexOf(query) !== -1 ||
+          String(point.country || '').toLocaleLowerCase().indexOf(query) !== -1;
+      });
+    }
     var mobile = window.matchMedia('(max-width: 650px)').matches;
     var width = mobile ? Math.max(280, Math.floor(elements.chart.clientWidth || 330)) : 760;
     var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
@@ -120,12 +187,25 @@
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
-      return '<button type="button" class="player-lab-point' + selected + '" data-player-id="' + escapeHtml(point.id) +
-        '" style="--point-x:' + x(point.x).toFixed(1) + 'px;--point-y:' + y(point.y).toFixed(1) + 'px" aria-label="' +
-        escapeHtml(point.name + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, RAPM ' + point.y.toFixed(2) + ' standard deviations') +
-        '"><span></span>' + (labelIds[point.id] ? '<small>' + escapeHtml(point.name) + '</small>' : '') + '</button>';
+      var flag = playerFlag(point.country, 'is-chart-flag', true);
+      var pointX = x(point.x), pointY = y(point.y);
+      var cardWidth = Math.min(185, width - 16), cardHeight = 112;
+      var preferredCardLeft = pointX > width / 2 ? pointX - cardWidth - 15 : pointX + 15;
+      var preferredCardTop = pointY < cardHeight + 14 ? pointY + 14 : pointY - cardHeight - 14;
+      var cardLeft = Math.max(8, Math.min(width - cardWidth - 8, preferredCardLeft));
+      var cardTop = Math.max(8, Math.min(height - cardHeight - 8, preferredCardTop));
+      var selectionCard = selected ? '<strong class="player-lab-point-card" style="--card-left:' +
+        (cardLeft - pointX).toFixed(1) + 'px;--card-top:' + (cardTop - pointY).toFixed(1) + 'px;--card-width:' + cardWidth + 'px">' +
+        '<span class="player-lab-point-card-name">' + playerFlag(point.country, '', true) + '<span>' + escapeHtml(point.name) + '</span></span>' +
+        '<span class="player-lab-point-card-meta">' + escapeHtml(point.country || 'Nationality unavailable') + ' · ' + escapeHtml(point.team) + '</span>' +
+        '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>RAPM <b>#' + point.rapmRank + '</b></span></span>' +
+        '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.rapmScore, 2) + '</span></strong>' : '';
+      return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
+        '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
+        escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, RAPM ' + point.y.toFixed(2) + ' standard deviations') +
+        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small>' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
-    elements.chart.innerHTML = '<div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
+    elements.chart.innerHTML = '<p class="player-lab-chart-key">Source-listed nationality · search a country to isolate it · select a marker for both ranks</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and RAPM scores">' +
       '<line x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +
       '<line x1="' + pad + '" y1="' + y(0) + '" x2="' + (width - pad) + '" y2="' + y(0) + '"></line>' +
@@ -137,7 +217,8 @@
     var cohort = currentCohort();
     var rows = currentRows();
     var displayed = state.expanded ? rows : rows.slice(0, 30);
-    elements.caption.textContent = cohort.models[state.model].label + ' · ' + rows.length + ' eligible players';
+    elements.caption.textContent = cohort.models[state.model].label + ' · ' + rows.length + ' eligible players' +
+      (cohort.source && cohort.source.name ? ' · ' + cohort.source.name : '');
     elements.scoreHeading.textContent = 'Score';
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
@@ -145,7 +226,7 @@
     elements.body.innerHTML = displayed.map(function (row) {
       return '<tr data-player-row="' + escapeHtml(row.id) + '"' + (row.id === state.selected ? ' class="is-selected"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td><th scope="row"><button type="button" class="rating-lab-entity" data-player-id="' +
-        escapeHtml(row.id) + '"><span>' + escapeHtml(row.name) + '</span><small>' + escapeHtml(row.team) + ' · ±' +
+        escapeHtml(row.id) + '"><span class="player-lab-player-name"><span>' + escapeHtml(row.name) + '</span>' + playerFlag(row.country) + '</span><small>' + escapeHtml(row.team) + ' · ±' +
         number(row.uncertainty, 2) + ' · ' + number(row.minutes, 0) + ' min · ' + row.matches + ' matches</small></button></th>' +
         '<td><strong>' + number(row.score, 2) + '</strong></td><td>±' + number(row.uncertainty, 2) + '</td>' +
         '<td class="rating-lab-optional">' + number(row.minutes, 0) + '</td><td class="rating-lab-optional">' + row.matches + '</td></tr>';
@@ -161,8 +242,8 @@
     var trueRow = cohort.models['lineup-trueskill'].rankings.find(function (row) { return row.id === state.selected; });
     var rapmRow = cohort.models.rapm.rankings.find(function (row) { return row.id === state.selected; });
     if (!trueRow || !rapmRow) return;
-    elements.detail.innerHTML = '<p class="rating-lab-kicker">Player comparison</p><h3>' + escapeHtml(trueRow.name) + '</h3><p>' +
-      escapeHtml(trueRow.team) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
+    elements.detail.innerHTML = '<p class="rating-lab-kicker">Player comparison</p><h3 class="player-lab-detail-name"><span>' + escapeHtml(trueRow.name) + '</span>' + playerFlag(trueRow.country) + '</h3><p>' +
+      escapeHtml(trueRow.country || 'Nationality unavailable') + ' · ' + escapeHtml(trueRow.team) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
       '<div class="player-lab-detail-model"><span>Lineup TrueSkill</span><strong>#' + trueRow.rank + '</strong><small>Mean ' + number(trueRow.mean, 2) + ' · uncertainty ±' + number(trueRow.uncertainty, 2) + '</small></div>' +
       '<div class="player-lab-detail-model"><span>RAPM</span><strong>#' + rapmRow.rank + '</strong><small>Goal impact ' + (rapmRow.impact > 0 ? '+' : '') + number(rapmRow.impact, 2) + ' · uncertainty ±' + number(rapmRow.uncertainty, 2) + '</small></div>' +
       '<p class="rating-lab-audit-note">Ranks are season-specific and use conservative scores, so both estimated contribution and uncertainty matter.</p>';
@@ -187,6 +268,32 @@
     renderTable();
     renderDetail();
     renderGates();
+    updateQuickModel();
+  }
+
+  var quickModelFrame = null;
+
+  function updateQuickModel() {
+    if (!window.matchMedia('(max-width: 650px)').matches) {
+      elements.quickModel.hidden = true;
+      return;
+    }
+    var sectionRect = document.querySelector('.player-lab-explorer').getBoundingClientRect();
+    var tabsRect = elements.modelTabs.getBoundingClientRect();
+    var withinExplorer = sectionRect.top <= window.innerHeight * 0.36 && sectionRect.bottom > window.innerHeight * 0.36;
+    var originalControlsVisible = tabsRect.bottom > 0 && tabsRect.top < window.innerHeight;
+    elements.quickModel.hidden = !withinExplorer || originalControlsVisible;
+    elements.quickModelMenu.querySelectorAll('[data-player-quick-model]').forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.playerQuickModel === state.model));
+    });
+  }
+
+  function queueQuickModelUpdate() {
+    if (quickModelFrame !== null) return;
+    quickModelFrame = window.requestAnimationFrame(function () {
+      quickModelFrame = null;
+      updateQuickModel();
+    });
   }
 
   function revealDetailOnMobile() {
@@ -215,21 +322,36 @@
     state.expanded = false;
     render();
   });
+  elements.quickModelMenu.addEventListener('click', function (event) {
+    event.stopPropagation();
+    var button = event.target.closest('[data-player-quick-model]');
+    if (!button) return;
+    state.model = button.dataset.playerQuickModel;
+    elements.modelTabs.querySelectorAll('button').forEach(function (item) {
+      item.setAttribute('aria-pressed', String(item.dataset.playerModel === state.model));
+    });
+    state.expanded = false;
+    render();
+  });
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
     state.expanded = false;
+    renderChart();
     renderTable();
   });
   elements.more.addEventListener('click', function () { state.expanded = true; renderTable(); });
   root.addEventListener('click', function (event) {
     var target = event.target.closest('[data-player-id]');
     if (!target) return;
-    state.selected = target.dataset.playerId;
+    var chartPoint = target.classList.contains('player-lab-point');
+    state.selected = chartPoint && state.selected === target.dataset.playerId ? null : target.dataset.playerId;
     renderChart();
     renderTable();
     renderDetail();
-    revealDetailOnMobile();
+    if (!chartPoint) revealDetailOnMobile();
   });
+  window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
+  window.addEventListener('resize', queueQuickModelUpdate);
 
   fetch(root.dataset.playerData)
     .then(function (response) {
