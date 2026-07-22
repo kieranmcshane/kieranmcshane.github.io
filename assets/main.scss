@@ -1053,6 +1053,12 @@ html.math-pending .post-content {
   height: auto;
 }
 
+.post-figure-media {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .post-video {
   display: block;
   width: 100%;
@@ -1065,6 +1071,13 @@ html.math-pending .post-content {
   color: var(--muted);
   font-size: 0.9em;
   line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+  .post-figure-media-wide img {
+    width: 680px;
+    max-width: none;
+  }
 }
 
 .post-content table {
