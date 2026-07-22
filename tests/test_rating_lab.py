@@ -5,6 +5,7 @@ import json
 import math
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
@@ -30,6 +31,7 @@ from rating_lab.pipeline import (
     _competition_performance,
     _competition_matches,
     _football_data_crest_media,
+    _get,
     _kalshi_event_snapshot,
     _market_identity_tokens,
     _metrics,
@@ -159,6 +161,29 @@ class RatingModelTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_http_credentials_strip_accidental_surrounding_whitespace(self):
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self):
+                return b'{"errors":{},"response":[]}'
+
+        with patch("rating_lab.pipeline.urlopen", return_value=Response()) as opened:
+            _get(
+                "https://v3.football.api-sports.io/status?credential-test=1",
+                token=" football-data-token\n",
+                api_football_key=" api-football-key\n",
+                attempts=1,
+            )
+        request = opened.call_args.args[0]
+        headers = {name.casefold(): value for name, value in request.header_items()}
+        self.assertEqual(headers["x-auth-token"], "football-data-token")
+        self.assertEqual(headers["x-apisports-key"], "api-football-key")
+
     def test_context_parameters_cover_chess_color_and_tennis_surface(self):
         self.assertTrue(all(candidate["home"] == 35.0 for candidate in _model_candidates("chess", "elo")))
         surface_weights = {candidate["surface_weight"] for candidate in _model_candidates("tennis", "elo")}

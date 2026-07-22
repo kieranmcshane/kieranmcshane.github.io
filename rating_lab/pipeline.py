@@ -218,6 +218,12 @@ def _get(
     cache_ttl: int = 21_600,
 ) -> bytes:
     global _football_data_last_request
+    token = token.strip() if token and token.strip() else None
+    api_football_key = (
+        api_football_key.strip()
+        if api_football_key and api_football_key.strip()
+        else None
+    )
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json, text/csv, */*"}
     if token:
         headers["X-Auth-Token"] = token
