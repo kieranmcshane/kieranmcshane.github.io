@@ -7531,6 +7531,37 @@ body:has(.explain-lab) .post-header {
   color: #647185;
 }
 
+.player-lab-partnership-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.player-lab-partnership-detail > div {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.65rem;
+  background: #fbfaf6;
+  border: 1px solid var(--lab-line);
+  border-radius: 6px;
+}
+
+.player-lab-partnership-detail > div > span {
+  color: #627084;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.player-lab-partnership-detail small {
+  color: #536176;
+  line-height: 1.35;
+}
+
 .player-lab-gates {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -7561,7 +7592,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-method-copy {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin: 1rem 0;
 }
@@ -7578,6 +7609,17 @@ body:has(.explain-lab) .post-header {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.2rem;
   font-weight: 500;
+}
+
+.player-lab-method-copy h3 small {
+  display: block;
+  margin-top: 0.18rem;
+  color: #697588;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .player-lab-attribution {
@@ -7610,6 +7652,10 @@ body:has(.explain-lab) .post-header {
 
   .player-lab-gates {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .player-lab-method-copy {
+    grid-template-columns: 1fr;
   }
 
   .player-lab-gates article:nth-child(3) {
@@ -9015,7 +9061,7 @@ body:has(.explain-lab) .post-header {
   .player-lab-quick-model .rating-lab-quick-model-menu {
     position: static;
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: repeat(3, auto);
     min-width: 0;
     visibility: visible;
     opacity: 1;
@@ -9024,7 +9070,9 @@ body:has(.explain-lab) .post-header {
   }
 
   .player-lab-quick-model .rating-lab-quick-model-menu button {
-    min-width: 5.4rem;
+    min-width: 4.7rem;
+    padding-inline: 0.45rem;
+    font-size: 0.74rem;
     text-align: center;
   }
 

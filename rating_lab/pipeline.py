@@ -164,6 +164,12 @@ def individual_contribution_protocol() -> dict:
                 "estimator": "minutes-weighted ridge regression with chronological validation",
                 "uncertainty": "ridge sampling approximation from match-level residual variance",
             },
+            "pairwise_chemistry": {
+                "input": "score differential plus exact shared-pitch minutes for teammate pairs",
+                "estimator": "ridge-shrunk pair effects on RAPM residuals with chronological validation",
+                "uncertainty": "approximate posterior spread from the regularized pair model",
+                "status": "experimental; validation result is published per cohort",
+            },
         },
         "excluded_inputs": [
             "passes",

@@ -57,7 +57,8 @@ snapshot hash where a source is distributed as a single file.
 Historical player ratings publish source and retrieval metadata per cohort.
 StatsBomb raw files remain publicly reproducible. API-Football responses are
 cached only during the server-side build under the provider's terms; the site
-publishes derived Lineup TrueSkill/RAPM ratings, coverage gates, and a SHA-256
+publishes derived Lineup TrueSkill, RAPM, and experimental pairwise-chemistry
+ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
 
 The historical player lab also publishes complete league-season cohorts when
@@ -67,6 +68,13 @@ and connected-graph gates, and eligibility rises to 900 minutes and ten
 appearances. The payload lists included competitions explicitly; domestic cups
 and UEFA matches are not described as season-wide evidence until their complete
 lineup-minute feeds are available.
+
+Pairwise chemistry is a non-additive residual lens rather than a replacement
+for the two additive baselines. Exact teammate overlap minutes define the pair
+features; a ridge model is fitted only to the goal difference RAPM did not
+explain, with shrinkage selected on the chronological final quarter. Each
+cohort publishes the interaction layer's held-out RMSE beside the RAPM baseline
+and marks it descriptive-only when validation does not support predictive use.
 
 Competition forecasts use 5,000 deterministic simulations per competition and
 model. League forecasts publish the current table, remaining-match count, and

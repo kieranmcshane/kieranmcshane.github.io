@@ -13,6 +13,8 @@
     metrics: document.getElementById('player-metrics'),
     scope: document.getElementById('player-season-scope'),
     chart: document.getElementById('player-comparison-chart'),
+    comparisonHeading: document.getElementById('player-comparison-heading'),
+    comparisonCopy: document.getElementById('player-comparison-copy'),
     body: document.getElementById('player-ranking-body'),
     caption: document.getElementById('player-ranking-caption'),
     empty: document.getElementById('player-ranking-empty'),
@@ -145,9 +147,16 @@
   function renderMetrics() {
     var cohort = currentCohort();
     var model = cohort.models[state.model];
-    var modelMetric = state.model === 'lineup-trueskill'
-      ? ['Held-out log loss', number(model.metrics.log_loss, 3), model.metrics.chronological_predictions + ' predictions recorded before updating']
-      : ['Validation RMSE', number(model.metrics.validation_rmse, 3), model.metrics.chronological_validation_matches + ' chronological validation matches'];
+    var modelMetric;
+    if (state.model === 'lineup-trueskill') {
+      modelMetric = ['Held-out log loss', number(model.metrics.log_loss, 3), model.metrics.chronological_predictions + ' predictions recorded before updating'];
+    } else if (state.model === 'rapm') {
+      modelMetric = ['Validation RMSE', number(model.metrics.validation_rmse, 3), model.metrics.chronological_validation_matches + ' chronological validation matches'];
+    } else {
+      var delta = model.metrics.validation_delta;
+      var deltaLabel = (delta > 0 ? '+' : '') + number(delta, 3) + ' vs RAPM';
+      modelMetric = ['Chemistry validation', deltaLabel, model.status === 'supported' ? 'Held-out RMSE is competitive with the additive baseline' : 'Descriptive only: held-out RMSE did not support the interaction layer'];
+    }
     var metrics = [
       ['Matches', number(cohort.matches, 0), (cohort.format || 'historical cohort') + ' · ' + cohort.first_match + ' to ' + cohort.last_match],
       ['Eligible players', number(cohort.eligible_players, 0), 'Minimum ' + number(cohort.eligibility.minimum_minutes, 0) + ' minutes and ' + cohort.eligibility.minimum_matches + ' appearances'],
@@ -182,17 +191,25 @@
   function renderChart() {
     var cohort = currentCohort();
     var trueRows = cohort.models['lineup-trueskill'].rankings;
-    var rapmRows = cohort.models.rapm.rankings;
-    var trueZ = standardized(trueRows), rapmZ = standardized(rapmRows);
+    var comparisonId = state.model === 'pairwise-chemistry' ? 'pairwise-chemistry' : 'rapm';
+    var comparisonModel = cohort.models[comparisonId];
+    var comparisonRows = comparisonModel.rankings;
+    var comparisonLabel = comparisonId === 'pairwise-chemistry' ? 'Pairwise chemistry' : 'RAPM';
+    var comparisonShort = comparisonId === 'pairwise-chemistry' ? 'Chemistry' : 'RAPM';
+    var trueZ = standardized(trueRows), comparisonZ = standardized(comparisonRows);
     var byId = {};
     trueRows.forEach(function (row) { byId[row.id] = row; });
-    var points = rapmRows.filter(function (row) { return trueZ[row.id] !== undefined; }).map(function (row) {
+    var points = comparisonRows.filter(function (row) { return trueZ[row.id] !== undefined; }).map(function (row) {
       return {
         id: row.id, name: row.name, team: row.team, country: row.country,
-        x: trueZ[row.id], y: rapmZ[row.id], trueRank: byId[row.id].rank,
-        rapmRank: row.rank, trueScore: byId[row.id].score, rapmScore: row.score
+        x: trueZ[row.id], y: comparisonZ[row.id], trueRank: byId[row.id].rank,
+        comparisonRank: row.rank, trueScore: byId[row.id].score, comparisonScore: row.score
       };
     });
+    elements.comparisonHeading.textContent = 'Lineup TrueSkill versus ' + comparisonLabel;
+    elements.comparisonCopy.textContent = comparisonId === 'pairwise-chemistry'
+      ? 'The interaction axis rates residual teammate chemistry after RAPM. Upper-right players rate highly under both lenses; select a marker for exact ranks.'
+      : 'Each axis is standardized within this competition. Flags show source-listed nationality; upper-right players rate highly under both protocols.';
     var query = state.query.trim().toLocaleLowerCase();
     if (query) {
       points = points.filter(function (point) {
@@ -224,19 +241,19 @@
         (cardLeft - pointX).toFixed(1) + 'px;--card-top:' + (cardTop - pointY).toFixed(1) + 'px;--card-width:' + cardWidth + 'px">' +
         '<span class="player-lab-point-card-name">' + playerFlag(point.country, '', true) + '<span>' + escapeHtml(point.name) + '</span></span>' +
         '<span class="player-lab-point-card-meta">' + escapeHtml(pointMeta) + '</span>' +
-        '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>RAPM <b>#' + point.rapmRank + '</b></span></span>' +
-        '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.rapmScore, 2) + '</span></strong>' : '';
+        '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>' + comparisonShort + ' <b>#' + point.comparisonRank + '</b></span></span>' +
+        '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.comparisonScore, 2) + '</span></strong>' : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
         '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
-        escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, RAPM ' + point.y.toFixed(2) + ' standard deviations') +
+        escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
         '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small>' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
     elements.chart.innerHTML = '<p class="player-lab-chart-key">Source-listed nationality · search a country to isolate it · select a marker for both ranks</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
-      '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and RAPM scores">' +
+      '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and ' + escapeHtml(comparisonLabel) + ' scores">' +
       '<line x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +
       '<line x1="' + pad + '" y1="' + y(0) + '" x2="' + (width - pad) + '" y2="' + y(0) + '"></line>' +
       '<text x="' + (width / 2) + '" y="' + (height - 8) + '">Lineup TrueSkill score →</text>' +
-      '<text class="is-y-label" transform="translate(14 ' + (height / 2) + ') rotate(-90)">RAPM impact →</text></svg>' + circles + '</div>';
+      '<text class="is-y-label" transform="translate(14 ' + (height / 2) + ') rotate(-90)">' + escapeHtml(comparisonShort) + ' impact →</text></svg>' + circles + '</div>';
   }
 
   function renderTable() {
@@ -258,7 +275,7 @@
         '<td class="rating-lab-rank">' + row.rank + '</td><th scope="row"><button type="button" class="rating-lab-entity" data-player-id="' +
         escapeHtml(row.id) + '"><span class="player-lab-player-name"><span>' + escapeHtml(row.name) + '</span>' + playerFlag(row.country) + '</span><small>' + escapeHtml(row.team) + '</small>' +
         '<span class="player-lab-row-evidence">±' + number(row.uncertainty, 2) + ' · ' + number(row.minutes, 0) + ' min · ' + row.matches + ' matches</span></button></th>' +
-        '<td class="player-lab-score"><span>' + (state.model === 'rapm' ? 'RAPM' : 'Lineup') + '</span><strong>' + number(row.score, 2) + '</strong></td><td>±' + number(row.uncertainty, 2) + '</td>' +
+        '<td class="player-lab-score"><span>' + (state.model === 'rapm' ? 'RAPM' : state.model === 'pairwise-chemistry' ? 'Chemistry' : 'Lineup') + '</span><strong>' + number(row.score, 2) + '</strong></td><td>±' + number(row.uncertainty, 2) + '</td>' +
         '<td class="rating-lab-optional">' + number(row.minutes, 0) + '</td><td class="rating-lab-optional">' + row.matches + '</td></tr>';
     }).join('');
   }
@@ -272,16 +289,32 @@
     var cohort = currentCohort();
     var trueRow = cohort.models['lineup-trueskill'].rankings.find(function (row) { return row.id === state.selected; });
     var rapmRow = cohort.models.rapm.rankings.find(function (row) { return row.id === state.selected; });
+    var chemistryModel = cohort.models['pairwise-chemistry'];
+    var chemistryRow = chemistryModel.rankings.find(function (row) { return row.id === state.selected; });
     if (!trueRow || !rapmRow) return;
     var identityMeta = trueRow.country && trueRow.country !== trueRow.team
       ? trueRow.country + ' · ' + trueRow.team
       : trueRow.team || trueRow.country || 'Nationality unavailable';
+    var partnershipDetails = '';
+    if (chemistryRow) {
+      function partnershipList(label, rows) {
+        return '<div><span>' + escapeHtml(label) + '</span>' + rows.map(function (pair) {
+          return '<small><b>' + escapeHtml(pair.partner_name) + '</b><br>' +
+            (pair.impact > 0 ? '+' : '') + number(pair.impact, 2) + ' residual goals · ' + number(pair.shared_minutes, 0) + ' min</small>';
+        }).join('') + '</div>';
+      }
+      partnershipDetails = '<div class="player-lab-partnership-detail">' +
+        partnershipList('Strongest observed pairs', chemistryRow.strongest_partnerships || []) +
+        partnershipList('Weakest observed pairs', chemistryRow.weakest_partnerships || []) + '</div>';
+    }
     elements.detail.classList.toggle('is-active', state.detailOpen);
     elements.detail.innerHTML = '<button type="button" class="player-lab-detail-close" data-player-close aria-label="Close player comparison">×</button>' +
       '<p class="rating-lab-kicker">Player comparison</p><h3 class="player-lab-detail-name"><span>' + escapeHtml(trueRow.name) + '</span>' + playerFlag(trueRow.country) + '</h3><p>' +
       escapeHtml(identityMeta) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
       '<div class="player-lab-detail-model"><span>Lineup TrueSkill</span><strong>#' + trueRow.rank + '</strong><small>Mean ' + number(trueRow.mean, 2) + ' · uncertainty ±' + number(trueRow.uncertainty, 2) + '</small></div>' +
       '<div class="player-lab-detail-model"><span>RAPM</span><strong>#' + rapmRow.rank + '</strong><small>Goal impact ' + (rapmRow.impact > 0 ? '+' : '') + number(rapmRow.impact, 2) + ' · uncertainty ±' + number(rapmRow.uncertainty, 2) + '</small></div>' +
+      (chemistryRow ? '<div class="player-lab-detail-model"><span>Pairwise chemistry · ' + escapeHtml(chemistryModel.status.replace(/_/g, ' ')) + '</span><strong>#' + chemistryRow.rank + '</strong><small>Residual pair impact ' + (chemistryRow.impact > 0 ? '+' : '') + number(chemistryRow.impact, 2) + ' · ' + chemistryRow.qualifying_partnerships + ' qualifying partnerships · uncertainty ±' + number(chemistryRow.uncertainty, 2) + '</small></div>' : '') +
+      partnershipDetails +
       '<p class="rating-lab-audit-note">Ranks are cohort-specific and use conservative scores, so both estimated contribution and uncertainty matter.</p>';
   }
 
