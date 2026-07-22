@@ -83,6 +83,14 @@ appearances. The payload lists included competitions explicitly; domestic cups
 and UEFA matches are not described as season-wide evidence until their complete
 lineup-minute feeds are available.
 
+Lineup TrueSkill and RAPM remain the primary player-comparison baselines. Their
+additivity assumption is explicit, but strong regularization makes them more
+stable and interpretable when football lineup combinations are sparse. Broad
+rankings and over- or under-performance claims should begin with both baselines,
+their agreement, minutes, and uncertainty. Interaction models answer narrower
+partnership or lineup questions and do not become replacements merely because
+they are more flexible.
+
 Pairwise chemistry is a non-additive residual lens rather than a replacement
 for the two additive baselines. Exact teammate overlap minutes define the pair
 features; a ridge model is fitted only to the goal difference RAPM did not

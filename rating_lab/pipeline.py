@@ -182,6 +182,13 @@ def individual_contribution_protocol() -> dict:
                 },
             },
         },
+        "model_hierarchy": {
+            "primary_baselines": ["lineup_trueskill", "rapm"],
+            "interaction_extensions": ["pairwise_chemistry", "lapm"],
+            "reason": "Football lineup combinations are sparse; regularized additive models provide the stable, interpretable first-order comparison.",
+            "use_rule": "Use the baselines for broad ranking and over- or under-performance; use interaction extensions for contextual partnership and lineup questions.",
+            "promotion_rule": "Added interaction complexity must improve strictly chronological held-out evaluation before it can replace a baseline.",
+        },
         "excluded_inputs": [
             "passes",
             "shots",

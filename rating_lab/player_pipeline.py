@@ -1678,6 +1678,13 @@ def build_player_payload(
         "methodology": {
             "inputs": ["match outcome", "goal difference", "goal timing", "stable player IDs", "lineups", "minutes played"],
             "excluded_inputs": ["passes", "shots", "dribbles", "expected goals", "tracking data"],
+            "model_hierarchy": {
+                "primary_baselines": ["lineup_trueskill", "rapm"],
+                "interaction_extensions": ["pairwise_chemistry", "lapm"],
+                "reason": "Strongly regularized additive models remain primary because sparse football lineup combinations make them more stable, interpretable, and auditable for broad player comparison.",
+                "interaction_scope": "Pairwise chemistry and LAPM answer contextual partnership or lineup questions; they are not portable individual-talent scores.",
+                "promotion_rule": "An interaction layer does not replace an additive baseline unless strictly chronological held-out evaluation supports the added complexity.",
+            },
             "lineup_trueskill": "Sequential additive team-skill update using normalized minutes-played weights; every probability is recorded before its match update.",
             "rapm": "Match-level goal-difference ridge regression using normalized minutes weights, home-goal intercept, and a chronological final-quarter penalty selection.",
             "pairwise_chemistry": "Experimental non-additive residual model: exact teammate overlap minutes define pair features, ridge shrinkage is selected on the chronological final quarter, and effects are fitted only to goal difference left unexplained by RAPM.",

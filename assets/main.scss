@@ -7692,6 +7692,57 @@ body:has(.explain-lab) .post-header {
   margin: 1rem 0;
 }
 
+.player-lab-model-hierarchy {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f5f7fa;
+  border: 1px solid var(--lab-line);
+  border-left: 3px solid var(--lab-primary);
+  border-radius: 6px;
+}
+
+.player-lab-model-hierarchy h3 {
+  margin: 0.12rem 0 0.4rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.player-lab-model-hierarchy p {
+  margin: 0;
+}
+
+.player-lab-model-hierarchy dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.player-lab-model-hierarchy dl div {
+  min-width: 0;
+  padding: 0.65rem;
+  background: #fff;
+  border: 1px solid var(--lab-line);
+  border-radius: 5px;
+}
+
+.player-lab-model-hierarchy dt {
+  color: var(--lab-navy);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.player-lab-model-hierarchy dd {
+  margin: 0.2rem 0 0;
+  color: #647185;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 .player-lab-method-copy article {
   padding: 1rem;
   background: var(--lab-wash);
@@ -7760,6 +7811,11 @@ body:has(.explain-lab) .post-header {
   .player-lab-method-copy,
   .player-lab-attribution,
   .player-lab-lapm-lists {
+    grid-template-columns: 1fr;
+  }
+
+  .player-lab-model-hierarchy,
+  .player-lab-model-hierarchy dl {
     grid-template-columns: 1fr;
   }
 
