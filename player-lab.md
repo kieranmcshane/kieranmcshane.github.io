@@ -2,14 +2,14 @@
 layout: page
 title: Historical Player Lab
 permalink: /rating-lab/players/
-description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using Lineup TrueSkill and RAPM.
+description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using Lineup TrueSkill, RAPM, and pairwise chemistry.
 ---
 
 <div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero player-lab-hero">
     <p class="rating-lab-kicker">Historical men's and women's football player contribution</p>
     <h1>What changed when they played?</h1>
-    <p class="rating-lab-deck">Two outcome-only models distribute team results across the players who were actually on the pitch. No passes, shots, expected goals, or tracking data enter either rating.</p>
+    <p class="rating-lab-deck">Three outcome-only lenses distribute team results across the players who were actually on the pitch. Pairwise chemistry tests whether shared-pitch combinations explain what the additive baselines miss. No passes, shots, expected goals, or tracking data enter the ratings.</p>
     <p class="player-lab-back"><a href="{{ '/rating-lab/' | relative_url }}">← Back to Rating Lab</a></p>
   </header>
 
@@ -38,8 +38,9 @@ description: Outcome-only historical men's and women's football player ratings a
       <div class="rating-lab-control-group" aria-label="Player contribution model">
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="player-model-tabs">
-          <button type="button" data-player-model="lineup-trueskill" aria-pressed="true">Lineup TrueSkill</button>
+          <button type="button" data-player-model="lineup-trueskill" aria-pressed="true">Lineup</button>
           <button type="button" data-player-model="rapm" aria-pressed="false">RAPM</button>
+          <button type="button" data-player-model="pairwise-chemistry" aria-pressed="false">Chemistry</button>
         </div>
       </div>
       <label class="rating-lab-field">
@@ -50,8 +51,9 @@ description: Outcome-only historical men's and women's football player ratings a
 
     <div class="rating-lab-quick-model player-lab-quick-model" id="player-quick-model" hidden>
       <div class="rating-lab-quick-model-menu" id="player-quick-model-menu" role="group" aria-label="Choose the player model">
-        <button type="button" data-player-quick-model="lineup-trueskill">Lineup TrueSkill</button>
+        <button type="button" data-player-quick-model="lineup-trueskill">Lineup</button>
         <button type="button" data-player-quick-model="rapm">RAPM</button>
+        <button type="button" data-player-quick-model="pairwise-chemistry">Chemistry</button>
       </div>
     </div>
 
@@ -64,7 +66,7 @@ description: Outcome-only historical men's and women's football player ratings a
           <p class="rating-lab-kicker">Agreement and disagreement</p>
           <h3 id="player-comparison-heading">Lineup TrueSkill versus RAPM</h3>
         </div>
-        <p>Each axis is standardized within this competition. Flags show the source-listed nationality; upper-right players rate highly under both protocols.</p>
+        <p id="player-comparison-copy">Each axis is standardized within this competition. Flags show the source-listed nationality; upper-right players rate highly under both protocols.</p>
       </div>
       <div id="player-comparison-chart"></div>
     </section>
@@ -114,12 +116,18 @@ description: Outcome-only historical men's and women's football player ratings a
           <h3>RAPM</h3>
           <p>Match goal difference is regressed on normalized minutes for every player, with positive weights for the home side and negative weights for the away side. Ridge shrinkage is selected on the chronological final quarter. Publication uses <span class="rating-lab-formula">impact − 1.96 × uncertainty</span>.</p>
         </article>
+        <article>
+          <h3>Pairwise chemistry <small>experimental</small></h3>
+          <p>Exact shared-pitch minutes create teammate-pair features. A second ridge model explains only the goal difference left over after RAPM; its penalty is selected on the chronological final quarter. A player’s score is the minutes-weighted residual chemistry of qualifying partnerships minus <span class="rating-lab-formula">1.96 × approximate uncertainty</span>. The cohort publishes whether this interaction layer improves held-out RMSE.</p>
+        </article>
       </div>
       <ul>
         <li>These are within-competition associations with team outcomes, not portable estimates of intrinsic talent.</li>
         <li>Players who repeatedly share the pitch remain hard to separate; ridge shrinkage and uncertainty expose rather than eliminate that problem.</li>
         <li>Lineup timestamps that overlap slightly around stoppage-time substitutions are normalized to eleven player-equivalents per side.</li>
         <li>Ratings cannot explain how a player contributed. No event or tracking surrogate is used.</li>
+        <li>Pairwise chemistry is contextual, not a portable individual-talent score. It can reflect tactics, coaching, opposition and roles shared by a pair.</li>
+        <li>The implementation is an explicit football pair-interaction extension, not a claim to reproduce Josephs and Upton’s basketball HAPM unchanged. See the <a href="https://doi.org/10.1515/jqas-2024-0057">published HAPM paper</a> and <a href="https://arxiv.org/abs/2003.01712">Bransen–Van Haaren player-chemistry paper</a>.</li>
         <li>A match still level after extra time counts as a draw; a penalty shootout does not rewrite the preceding on-pitch result.</li>
         <li>Eligibility is cohort-specific and displayed above the ranking. Full league seasons use a stricter 900-minute and ten-appearance threshold.</li>
       </ul>

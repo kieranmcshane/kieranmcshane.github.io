@@ -12,7 +12,7 @@ from typing import Callable
 from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_loss
 
 
-PLAYER_SCHEMA_VERSION = "1.2.0"
+PLAYER_SCHEMA_VERSION = "1.3.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 API_FOOTBALL_ROOT = "https://v3.football.api-sports.io"
 API_FOOTBALL_WORLD_CUP = {
@@ -100,6 +100,7 @@ COHORTS = (
     },
 )
 RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
+CHEMISTRY_RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
 MIN_MINUTES = 450.0
 MIN_MATCHES = 5
 
@@ -131,7 +132,9 @@ def _match_duration(match: dict, lineups: list[dict]) -> float:
     return max(90.0, maximum)
 
 
-def _merge_minutes(positions: list[dict], duration: float) -> tuple[float, bool, bool]:
+def _merge_intervals(
+    positions: list[dict], duration: float
+) -> tuple[list[tuple[float, float]], bool, bool]:
     intervals: list[tuple[float, float]] = []
     starts = False
     complete = True
@@ -159,7 +162,28 @@ def _merge_minutes(positions: list[dict], duration: float) -> tuple[float, bool,
             merged[-1][1] = max(merged[-1][1], end)
         else:
             merged.append([start, end])
-    return sum(end - start for start, end in merged), starts, complete and bool(intervals)
+    return [(start, end) for start, end in merged], starts, complete and bool(intervals)
+
+
+def _merge_minutes(positions: list[dict], duration: float) -> tuple[float, bool, bool]:
+    intervals, starts, complete = _merge_intervals(positions, duration)
+    return sum(end - start for start, end in intervals), starts, complete
+
+
+def _overlap_minutes(
+    left: list[tuple[float, float]], right: list[tuple[float, float]]
+) -> float:
+    total = 0.0
+    left_index = right_index = 0
+    while left_index < len(left) and right_index < len(right):
+        left_start, left_end = left[left_index]
+        right_start, right_end = right[right_index]
+        total += max(0.0, min(left_end, right_end) - max(left_start, right_start))
+        if left_end <= right_end:
+            left_index += 1
+        else:
+            right_index += 1
+    return total
 
 
 def _lineup_weights(
@@ -167,22 +191,28 @@ def _lineup_weights(
 ) -> tuple[dict[str, float], dict[str, float], dict]:
     duration = _match_duration(match, lineups)
     by_team: dict[int, dict[str, float]] = {}
+    pair_by_team: dict[int, dict[tuple[str, str], float]] = {}
     starters_ok = 0
     complete_players = 0
     used_players = 0
     team_minutes: dict[int, float] = {}
     for team in lineups:
         raw: dict[str, float] = {}
+        intervals_by_player: dict[str, list[tuple[float, float]]] = {}
         starters = 0
         for player in team.get("lineup", []):
             player_id = str(player["player_id"])
-            minutes, started, complete = _merge_minutes(player.get("positions", []), duration)
+            intervals, started, complete = _merge_intervals(
+                player.get("positions", []), duration
+            )
+            minutes = sum(end - start for start, end in intervals)
             if minutes <= 0:
                 continue
             used_players += 1
             complete_players += int(complete)
             starters += int(started)
             raw[player_id] = minutes / duration
+            intervals_by_player[player_id] = intervals
             meta = player_meta.setdefault(
                 player_id,
                 {
@@ -204,6 +234,15 @@ def _lineup_weights(
         if total <= 0:
             raise ValueError(f"No usable lineup for match {match['match_id']} team {team.get('team_name')}")
         by_team[team["team_id"]] = {player_id: weight * 11.0 / total for player_id, weight in raw.items()}
+        pair_by_team[team["team_id"]] = {
+            (left, right): overlap / duration
+            for position, left in enumerate(sorted(intervals_by_player))
+            for right in sorted(intervals_by_player)[position + 1 :]
+            for overlap in (
+                _overlap_minutes(intervals_by_player[left], intervals_by_player[right]),
+            )
+            if overlap > 0.0
+        }
         team_minutes[team["team_id"]] = total * duration
     home_id = match["home_team"]["home_team_id"]
     away_id = match["away_team"]["away_team_id"]
@@ -214,6 +253,8 @@ def _lineup_weights(
         "starter_teams_ok": starters_ok,
         "used_players": used_players,
         "complete_players": complete_players,
+        "home_pairs": pair_by_team[home_id],
+        "away_pairs": pair_by_team[away_id],
         # Source position intervals can overlap by a few stoppage-time minutes around
         # substitutions. The model normalizes each side back to 11 player-equivalents;
         # the gate rejects material gaps but permits that documented timestamp jitter.
@@ -322,6 +363,130 @@ def _rapm(rows: list[dict], player_ids: list[str]) -> dict:
     return fitted
 
 
+def _predict_ridge(row: dict, fitted: dict) -> float:
+    prediction = fitted["home_advantage"] if row.get("home_advantage", True) else 0.0
+    prediction += sum(
+        fitted["coefficients"].get(player_id, 0.0) * weight
+        for player_id, weight in row["home"].items()
+    )
+    prediction -= sum(
+        fitted["coefficients"].get(player_id, 0.0) * weight
+        for player_id, weight in row["away"].items()
+    )
+    return prediction
+
+
+def _pair_design(row: dict) -> dict[tuple[str, str], float]:
+    """Give each side one unit of chemistry exposure, split by shared-pitch time."""
+    result: dict[tuple[str, str], float] = {}
+    home_total = sum(row.get("home_pairs", {}).values())
+    away_total = sum(row.get("away_pairs", {}).values())
+    if home_total:
+        for pair, exposure in row["home_pairs"].items():
+            result[pair] = result.get(pair, 0.0) + exposure / home_total
+    if away_total:
+        for pair, exposure in row["away_pairs"].items():
+            result[pair] = result.get(pair, 0.0) - exposure / away_total
+    return result
+
+
+def _sparse_dot(left: dict, right: dict) -> float:
+    if len(left) > len(right):
+        left, right = right, left
+    return sum(value * right.get(key, 0.0) for key, value in left.items())
+
+
+def _fit_pair_ridge(rows: list[dict], additive: dict, penalty: float) -> dict:
+    """Fit teammate-pair effects to goal difference left unexplained by RAPM."""
+    if not rows:
+        return {"coefficients": {}, "uncertainty": {}, "rmse": 0.0}
+    design = [_pair_design(row) for row in rows]
+    targets = [row["goal_difference"] - _predict_ridge(row, additive) for row in rows]
+    gram = [
+        [
+            _sparse_dot(design[left], design[right])
+            + (penalty if left == right else 0.0)
+            for right in range(len(rows))
+        ]
+        for left in range(len(rows))
+    ]
+    lower = _cholesky(gram)
+    alpha = _solve(lower, targets)
+    features = sorted({pair for vector in design for pair in vector})
+    coefficients = {
+        pair: sum(vector.get(pair, 0.0) * alpha[row] for row, vector in enumerate(design))
+        for pair in features
+    }
+    predictions = [
+        sum(coefficients[pair] * value for pair, value in vector.items())
+        for vector in design
+    ]
+    residuals = [target - prediction for target, prediction in zip(targets, predictions)]
+    residual_variance = sum(value * value for value in residuals) / max(len(rows) - 1, 1)
+    uncertainty: dict[tuple[str, str], float] = {}
+    for pair in features:
+        source = [vector.get(pair, 0.0) for vector in design]
+        projected = _solve(lower, source)
+        leverage = sum(value * fitted for value, fitted in zip(source, projected))
+        posterior_variance = residual_variance / penalty * max(1.0 - leverage, 0.0)
+        uncertainty[pair] = math.sqrt(posterior_variance)
+    return {
+        "coefficients": coefficients,
+        "uncertainty": uncertainty,
+        "rmse": math.sqrt(sum(value * value for value in residuals) / len(residuals)),
+    }
+
+
+def _predict_pair_component(row: dict, fitted: dict) -> float:
+    return sum(
+        fitted["coefficients"].get(pair, 0.0) * value
+        for pair, value in _pair_design(row).items()
+    )
+
+
+def _pair_chemistry(rows: list[dict], player_ids: list[str], additive: dict) -> dict:
+    """Select residual pair shrinkage chronologically, then replay the full cohort."""
+    split = max(1, int(len(rows) * 0.75))
+    training, validation = rows[:split], rows[split:]
+    training_additive = _rapm(training, player_ids)
+    baseline_errors = [
+        (row["goal_difference"] - _predict_ridge(row, training_additive)) ** 2
+        for row in validation
+    ]
+    baseline_rmse = math.sqrt(sum(baseline_errors) / max(len(baseline_errors), 1))
+    candidates = []
+    for penalty in CHEMISTRY_RIDGE_CANDIDATES:
+        fitted = _fit_pair_ridge(training, training_additive, penalty)
+        errors = [
+            (
+                row["goal_difference"]
+                - _predict_ridge(row, training_additive)
+                - _predict_pair_component(row, fitted)
+            )
+            ** 2
+            for row in validation
+        ]
+        candidates.append(
+            {
+                "penalty": penalty,
+                "validation_rmse": math.sqrt(sum(errors) / max(len(errors), 1)),
+            }
+        )
+    selected = min(candidates, key=lambda item: (item["validation_rmse"], item["penalty"]))
+    fitted = _fit_pair_ridge(rows, additive, selected["penalty"])
+    fitted["selected_penalty"] = selected["penalty"]
+    fitted["candidates"] = candidates
+    fitted["validation_matches"] = len(validation)
+    fitted["baseline_validation_rmse"] = baseline_rmse
+    fitted["validation_rmse"] = selected["validation_rmse"]
+    fitted["validation_status"] = (
+        "supported"
+        if selected["validation_rmse"] < baseline_rmse - 0.0001
+        else "descriptive_only"
+    )
+    return fitted
+
+
 def _components(rows: list[dict]) -> int:
     graph: dict[str, set[str]] = defaultdict(set)
     for row in rows:
@@ -374,6 +539,7 @@ def _rate_cohort(
         lineup_model.update(row["home"], row["away"], row["score_a"])
     player_ids = sorted(player_meta)
     rapm = _rapm(rows, player_ids)
+    chemistry = _pair_chemistry(rows, player_ids, rapm)
     minimum_minutes = float(definition.get("minimum_minutes", MIN_MINUTES))
     minimum_matches = int(definition.get("minimum_matches", MIN_MATCHES))
     eligible = [
@@ -426,6 +592,108 @@ def _rate_cohort(
     rapm_rows.sort(key=lambda item: (-item["score"], item["name"]))
     for rank, item in enumerate(rapm_rows, 1):
         item["rank"] = rank
+
+    pair_minimum_minutes = float(
+        definition.get(
+            "pair_minimum_minutes", 450.0 if definition.get("scope_type") == "season" else 120.0
+        )
+    )
+    pair_minimum_matches = int(
+        definition.get(
+            "pair_minimum_matches", 5 if definition.get("scope_type") == "season" else 2
+        )
+    )
+    pair_support: dict[tuple[str, str], dict[str, float | int]] = defaultdict(
+        lambda: {"minutes": 0.0, "matches": 0}
+    )
+    for row in rows:
+        for pairs in (row.get("home_pairs", {}), row.get("away_pairs", {})):
+            for pair, exposure in pairs.items():
+                pair_support[pair]["minutes"] += exposure * row["duration"]
+                pair_support[pair]["matches"] += 1
+    published_pairs = {
+        pair
+        for pair, support in pair_support.items()
+        if support["minutes"] >= pair_minimum_minutes
+        and support["matches"] >= pair_minimum_matches
+        and pair in chemistry["coefficients"]
+    }
+    chemistry_rows = []
+    for player_id in eligible:
+        partnerships = [pair for pair in published_pairs if player_id in pair]
+        total_minutes = sum(float(pair_support[pair]["minutes"]) for pair in partnerships)
+        if total_minutes <= 0.0:
+            continue
+        weights = {
+            pair: float(pair_support[pair]["minutes"]) / total_minutes
+            for pair in partnerships
+        }
+        impact = sum(weights[pair] * chemistry["coefficients"][pair] for pair in partnerships)
+        uncertainty = math.sqrt(
+            sum(
+                (weights[pair] * chemistry["uncertainty"][pair]) ** 2
+                for pair in partnerships
+            )
+        )
+        ordered_partnerships = sorted(
+            partnerships,
+            key=lambda pair: (chemistry["coefficients"][pair], pair),
+            reverse=True,
+        )
+
+        def partnership_summary(pair: tuple[str, str]) -> dict:
+            partner_id = pair[1] if pair[0] == player_id else pair[0]
+            return {
+                "partner_id": partner_id,
+                "partner_name": player_meta[partner_id]["name"],
+                "impact": round(chemistry["coefficients"][pair], 4),
+                "shared_minutes": round(float(pair_support[pair]["minutes"]), 1),
+            }
+
+        chemistry_rows.append(
+            common(player_id)
+            | {
+                "impact": round(impact, 4),
+                "uncertainty": round(uncertainty, 4),
+                "score": round(impact - 1.96 * uncertainty, 4),
+                "qualifying_partnerships": len(partnerships),
+                "strongest_partnerships": [
+                    partnership_summary(pair) for pair in ordered_partnerships[:2]
+                ],
+                "weakest_partnerships": [
+                    partnership_summary(pair) for pair in reversed(ordered_partnerships[-2:])
+                ],
+            }
+        )
+    chemistry_rows.sort(key=lambda item: (-item["score"], item["name"]))
+    for rank, item in enumerate(chemistry_rows, 1):
+        item["rank"] = rank
+
+    partnership_rows = []
+    for pair in published_pairs:
+        left, right = pair
+        if left not in player_meta or right not in player_meta:
+            continue
+        impact = chemistry["coefficients"][pair]
+        uncertainty = chemistry["uncertainty"][pair]
+        left_team = player_meta[left]["team"]
+        right_team = player_meta[right]["team"]
+        partnership_rows.append(
+            {
+                "id": f"{left}:{right}",
+                "players": [
+                    {"id": left, "name": player_meta[left]["name"]},
+                    {"id": right, "name": player_meta[right]["name"]},
+                ],
+                "team": left_team if left_team == right_team else "Multiple teams",
+                "shared_minutes": round(float(pair_support[pair]["minutes"]), 1),
+                "matches": int(pair_support[pair]["matches"]),
+                "impact": round(impact, 4),
+                "uncertainty": round(uncertainty, 4),
+                "score": round(impact - 1.96 * uncertainty, 4),
+            }
+        )
+    partnership_rows.sort(key=lambda item: (-item["score"], item["id"]))
     starter_coverage = audit["starter_teams_ok"] / max(2 * len(rows), 1)
     minute_coverage = audit["complete_players"] / max(audit["used_players"], 1)
     integrity_coverage = audit["integrity_matches"] / max(len(rows), 1)
@@ -497,6 +765,34 @@ def _rate_cohort(
                 "metrics": {"chronological_validation_matches": rapm["validation_matches"], "validation_rmse": min(item["validation_rmse"] for item in rapm["candidates"]), "full_replay_rmse": round(rapm["rmse"], 4)},
                 "rankings": rapm_rows,
             },
+            "pairwise-chemistry": {
+                "label": "Pairwise chemistry",
+                "status": chemistry["validation_status"],
+                "ranking_rule": "residual pair impact − 1.96 × approximate uncertainty",
+                "parameters": {
+                    "selected_ridge_penalty": chemistry["selected_penalty"],
+                    "candidates": chemistry["candidates"],
+                    "pair_minimum_minutes": pair_minimum_minutes,
+                    "pair_minimum_matches": pair_minimum_matches,
+                    "team_pair_normalization": "Each side contributes one unit of total pair exposure per match, divided according to exact shared-pitch time.",
+                    "additive_baseline": "Chronologically tuned RAPM",
+                },
+                "metrics": {
+                    "chronological_validation_matches": chemistry["validation_matches"],
+                    "baseline_validation_rmse": round(chemistry["baseline_validation_rmse"], 4),
+                    "validation_rmse": round(chemistry["validation_rmse"], 4),
+                    "validation_delta": round(
+                        chemistry["validation_rmse"] - chemistry["baseline_validation_rmse"], 4
+                    ),
+                    "full_replay_residual_rmse": round(chemistry["rmse"], 4),
+                    "qualifying_partnerships": len(partnership_rows),
+                },
+                "rankings": chemistry_rows,
+                "partnerships": {
+                    "outperformers": partnership_rows[:15],
+                    "underperformers": list(reversed(partnership_rows[-15:])),
+                },
+            },
         },
         "snapshot_sha256": snapshot_sha256,
     }
@@ -534,6 +830,9 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
                 "match_id": match["match_id"],
                 "home": home,
                 "away": away,
+                "home_pairs": match_audit["home_pairs"],
+                "away_pairs": match_audit["away_pairs"],
+                "duration": match_audit["duration"],
                 "score_a": score_a,
                 "goal_difference": match["home_score"] - match["away_score"],
                 "home_advantage": _home_advantage(match, definition),
@@ -749,6 +1048,9 @@ def _build_api_football_cohort(
                 "match_id": match["match_id"],
                 "home": home,
                 "away": away,
+                "home_pairs": match_audit["home_pairs"],
+                "away_pairs": match_audit["away_pairs"],
+                "duration": match_audit["duration"],
                 "score_a": score_a,
                 "goal_difference": match["home_score"] - match["away_score"],
                 "home_advantage": False,
@@ -805,6 +1107,7 @@ def build_player_payload(
             "excluded_inputs": ["passes", "shots", "dribbles", "expected goals", "tracking data"],
             "lineup_trueskill": "Sequential additive team-skill update using normalized minutes-played weights; every probability is recorded before its match update.",
             "rapm": "Match-level goal-difference ridge regression using normalized minutes weights, home-goal intercept, and a chronological final-quarter penalty selection.",
+            "pairwise_chemistry": "Experimental non-additive residual model: exact teammate overlap minutes define pair features, ridge shrinkage is selected on the chronological final quarter, and effects are fitted only to goal difference left unexplained by RAPM.",
             "interpretation": "These estimates describe association with team outcomes within one declared complete tournament or season. They do not identify how a player contributed and should not be compared across cohorts.",
         },
         "cohorts": cohorts,
@@ -841,5 +1144,8 @@ def validate_player_payload(payload: dict) -> None:
     for cohort in payload["cohorts"]:
         if cohort["coverage"]["status"] != "passed":
             raise ValueError(f"Unpublishable player cohort: {cohort['id']}")
-        if not cohort["models"]["lineup-trueskill"]["rankings"] or not cohort["models"]["rapm"]["rankings"]:
+        if any(
+            not cohort["models"][model]["rankings"]
+            for model in ("lineup-trueskill", "rapm", "pairwise-chemistry")
+        ):
             raise ValueError(f"Empty player ranking: {cohort['id']}")

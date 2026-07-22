@@ -8,7 +8,19 @@ import unittest
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
-from rating_lab.player_pipeline import COHORTS, _api_football_fixture, _build_cohort, _fit_ridge, _home_advantage, _lineup_weights, _merge_minutes, player_schema, validate_player_payload
+from rating_lab.player_pipeline import (
+    COHORTS,
+    _api_football_fixture,
+    _build_cohort,
+    _fit_pair_ridge,
+    _fit_ridge,
+    _home_advantage,
+    _lineup_weights,
+    _merge_minutes,
+    _overlap_minutes,
+    player_schema,
+    validate_player_payload,
+)
 from rating_lab.pipeline import (
     FOOTBALL_COMPETITIONS,
     _deduplicate,
@@ -156,6 +168,8 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("individual player", protocol["historical_publication_unit"])
         self.assertIn("lineup_trueskill", protocol["methods"])
         self.assertIn("rapm", protocol["methods"])
+        self.assertIn("pairwise_chemistry", protocol["methods"])
+        self.assertEqual(protocol["methods"]["pairwise_chemistry"]["status"], "experimental; validation result is published per cohort")
         self.assertEqual(protocol["release_gates"]["starting_lineup_coverage"], ">= 95% of eligible matches")
         self.assertIn("source licence", protocol["release_gates"]["publication_rights"])
         self.assertNotIn("shots", protocol["methods"]["lineup_trueskill"]["input"])
@@ -184,6 +198,36 @@ class PipelineTests(unittest.TestCase):
         self.assertAlmostEqual(minutes, 90.0)
         self.assertTrue(started)
         self.assertTrue(complete)
+
+    def test_shared_pitch_overlap_uses_exact_intervals(self):
+        left = [(0.0, 60.0), (75.0, 90.0)]
+        right = [(30.0, 80.0)]
+        self.assertAlmostEqual(_overlap_minutes(left, right), 35.0)
+
+    def test_pair_ridge_identifies_residual_teammate_chemistry(self):
+        additive = {
+            "home_advantage": 0.0,
+            "coefficients": {player: 0.0 for player in ("a", "b", "c", "d")},
+        }
+        rows = []
+        for home_pair, away_pair, goal_difference in (
+            (("a", "b"), ("c", "d"), 2.0),
+            (("c", "d"), ("a", "b"), -2.0),
+            (("a", "b"), ("c", "d"), 1.0),
+        ):
+            rows.append(
+                {
+                    "home": {home_pair[0]: 1.0, home_pair[1]: 1.0},
+                    "away": {away_pair[0]: 1.0, away_pair[1]: 1.0},
+                    "home_pairs": {home_pair: 1.0},
+                    "away_pairs": {away_pair: 1.0},
+                    "goal_difference": goal_difference,
+                    "home_advantage": False,
+                }
+            )
+        fitted = _fit_pair_ridge(rows, additive, 1.0)
+        self.assertGreater(fitted["coefficients"][("a", "b")], fitted["coefficients"][("c", "d")])
+        self.assertGreaterEqual(fitted["uncertainty"][("a", "b")], 0.0)
 
     def test_rapm_ridge_assigns_positive_impact_to_repeated_winner(self):
         rows = [
@@ -267,7 +311,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_player_schema_is_versioned_and_closed(self):
         schema = player_schema()
-        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.2.0")
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.3.0")
         self.assertFalse(schema["additionalProperties"])
 
     def test_complete_season_rejects_partial_fixture_catalogue(self):
@@ -296,6 +340,8 @@ class PipelineTests(unittest.TestCase):
             self.assertGreaterEqual(cohort["coverage"]["starting_lineups"], 0.95)
             self.assertGreaterEqual(cohort["coverage"]["player_minutes"], 0.95)
             self.assertEqual(cohort["coverage"]["player_match_graph_components"], 1)
+            self.assertIn(cohort["models"]["pairwise-chemistry"]["status"], {"supported", "descriptive_only"})
+            self.assertIn("baseline_validation_rmse", cohort["models"]["pairwise-chemistry"]["metrics"])
             for model in cohort["models"].values():
                 self.assertEqual(
                     [row["rank"] for row in model["rankings"]],
