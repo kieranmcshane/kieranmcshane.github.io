@@ -201,7 +201,7 @@ def individual_contribution_protocol() -> dict:
         },
         "source_assessment": {
             "statsbomb_open_data": "Complete declared historical Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
-            "api_football": "World Cup 2026 is eligible only when API-Football returns all 104 completed fixtures with stable player IDs, two complete starting lineups, player minutes, and substitution events. Raw responses remain private; derived ratings record the response snapshot hash.",
+            "api_football": "The configured provider plan currently does not include season 2026, so World Cup 2026 is withheld. It becomes eligible only when API-Football returns all 104 completed fixtures with stable player IDs, two complete starting lineups, player minutes, and substitution events. Raw responses remain private; derived ratings record the response snapshot hash.",
             "football_data_org": "Fixtures and results remain the primary club feed, but its configured coverage is not used for historical player attribution.",
             "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
         },

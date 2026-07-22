@@ -7,6 +7,7 @@
   var elements = {
     error: document.getElementById('player-lab-error'),
     generated: document.getElementById('player-lab-generated'),
+    sourceStatus: document.getElementById('player-source-status'),
     cohort: document.getElementById('player-cohort'),
     team: document.getElementById('player-team'),
     teamField: document.getElementById('player-team-field'),
@@ -165,6 +166,20 @@
       }).join('') + '</optgroup>';
     }
     elements.cohort.innerHTML = html;
+  }
+
+  function renderSourceStatus() {
+    var statuses = state.payload.source && state.payload.source.statuses;
+    var worldCup = statuses && statuses.api_football_world_cup_2026;
+    if (!worldCup || worldCup.status === 'published') {
+      elements.sourceStatus.hidden = true;
+      elements.sourceStatus.textContent = '';
+      return;
+    }
+    elements.sourceStatus.hidden = false;
+    elements.sourceStatus.innerHTML = '<strong>World Cup 2026 withheld.</strong> ' +
+      escapeHtml(worldCup.message || 'The required complete lineup and event feed has not passed every publication gate.') +
+      ' The verified historical cohorts below remain independently reproducible.';
   }
 
   function renderMetrics() {
@@ -507,7 +522,8 @@
         document.getElementById('player-methods').open = false;
       }
       renderCohortOptions();
-      elements.generated.textContent = 'Verified ' + date(payload.generated_at) + ' · Data source: StatsBomb';
+      renderSourceStatus();
+      elements.generated.textContent = 'Verified ' + date(payload.generated_at) + ' · Cohort-specific sources';
       render();
     })
     .catch(function (error) {

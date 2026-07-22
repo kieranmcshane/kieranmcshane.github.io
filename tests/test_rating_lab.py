@@ -13,6 +13,7 @@ from rating_lab.player_pipeline import (
     COHORTS,
     _api_football_fixture,
     _build_cohort,
+    build_player_payload,
     _fit_pair_ridge,
     _fit_ridge,
     _fit_team_lapm,
@@ -371,6 +372,25 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(weights_audit["integrity_ok"])
         self.assertEqual(weights_audit["home_intervals"][f"api-football:{home_out}"], [(0.0, 60.0)])
         self.assertEqual(weights_audit["home_intervals"][f"api-football:{home_in}"], [(60.0, 90.0)])
+
+    def test_unavailable_optional_world_cup_does_not_block_public_cohorts(self):
+        public_cohort = {
+            "id": "verified-public-cohort",
+            "source": {"name": "Public source", "url": "https://example.org/data"},
+        }
+        provider_error = RuntimeError(
+            "Free plans do not have access to this season, try from 2022 to 2024."
+        )
+        with patch("rating_lab.player_pipeline._build_cohort", return_value=(public_cohort, b"snapshot")), patch(
+            "rating_lab.player_pipeline._build_api_football_cohort",
+            side_effect=provider_error,
+        ):
+            payload = build_player_payload(lambda *_args, **_kwargs: b"", "secret-key")
+        self.assertEqual(payload["cohorts"], [public_cohort] * len(COHORTS))
+        status = payload["source"]["statuses"]["api_football_world_cup_2026"]
+        self.assertEqual(status["status"], "withheld")
+        self.assertEqual(status["reason"], "provider_plan_does_not_include_2026")
+        self.assertNotIn("2022 to 2024", status["message"])
 
     def test_rapm_neutral_matches_do_not_create_home_intercept(self):
         rows = [

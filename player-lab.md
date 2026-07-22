@@ -29,6 +29,7 @@ description: Outcome-only historical men's and women's football player ratings a
       <summary>Verified cohorts and rating scope</summary>
       <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The men’s publication includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. Every view states exactly which fixtures enter the replay.</p>
     </details>
+    <p id="player-source-status" class="rating-lab-notice" role="status" hidden></p>
 
     <div class="player-lab-toolbar">
       <label class="rating-lab-field">
