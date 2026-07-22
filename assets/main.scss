@@ -964,9 +964,50 @@ body {
   letter-spacing: -0.035em;
 }
 
+.post-subtitle {
+  max-width: 42rem;
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1.12rem;
+  line-height: 1.45;
+}
+
 .post-content {
   font-size: 18px;
   line-height: 1.72;
+}
+
+.post.h-entry > .post-content {
+  max-width: 68ch;
+  margin-right: auto;
+  margin-left: auto;
+  color: #1c2432;
+  font-family: Charter, "Bitstream Charter", "Iowan Old Style", Cambria, Georgia, serif;
+}
+
+.post.h-entry > .post-content h2,
+.post.h-entry > .post-content h3,
+.post.h-entry > .post-content h4,
+.post.h-entry > .post-content table,
+.post.h-entry > .post-content .notation-glossary,
+.post.h-entry > .post-content .explain-article-cta {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html.math-pending .post-content {
+  visibility: hidden;
+}
+
+.post-content mjx-container[display="true"] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .post-content h2 {
@@ -1024,6 +1065,39 @@ body {
   color: var(--muted);
   font-size: 0.9em;
   line-height: 1.45;
+}
+
+.post-content table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 1.5rem 0 2rem;
+  overflow-x: auto;
+  border: 0;
+  border-collapse: collapse;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  -webkit-overflow-scrolling: touch;
+}
+
+.post-content th,
+.post-content td {
+  min-width: 7.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d9dee8;
+  text-align: left;
+  vertical-align: top;
+}
+
+.post-content th {
+  background: var(--soft);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.post-content tr:nth-child(even) td {
+  background: #fafbfe;
 }
 
 .animation-transcript {

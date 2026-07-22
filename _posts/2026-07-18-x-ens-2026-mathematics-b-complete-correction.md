@@ -1,5 +1,6 @@
 ---
 layout: post
+math: true
 title: "École Polytechnique–ESPCI 2026 Mathematics B (MP–MPI): Complete Correction"
 subtitle: "Question-by-question solutions and reference notes"
 date: 2026-07-18 12:00:00 +0200

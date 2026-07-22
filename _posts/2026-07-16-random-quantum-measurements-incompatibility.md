@@ -1,5 +1,6 @@
 ---
 layout: post
+math: true
 title: "Random Binary Projective Measurements and Incompatibility"
 subtitle: "From joint measurability to a principal-angle phase diagram"
 date: 2026-07-16 09:00:00 +0200

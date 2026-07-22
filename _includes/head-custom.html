@@ -1,4 +1,11 @@
 <script>
+  {% if page.math %}
+  document.documentElement.classList.add('math-pending');
+  window.setTimeout(function () {
+    document.documentElement.classList.remove('math-pending');
+  }, 5000);
+  {% endif %}
+
   window.MathJax = {
     tex: {
       inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -7,7 +14,15 @@
     },
     options: {
       skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }{% if page.math %},
+    startup: {
+      pageReady: function () {
+        return MathJax.startup.defaultPageReady().then(function () {
+          document.documentElement.classList.remove('math-pending');
+        });
+      }
     }
+    {% endif %}
   };
 </script>
 <script defer src="{{ '/assets/js/notation-tooltips.js' | relative_url }}"></script>

@@ -1,5 +1,6 @@
 ---
 layout: post
+math: true
 title: "Centered Correlation Tensors and Quantum Separability"
 subtitle: "The enhanced realignment criterion in Bloch coordinates"
 date: 2026-07-17 08:00:00 +0200
@@ -200,9 +201,10 @@ The nuclear norm $\lVert X\rVert_*$ is the sum of the singular values of a matri
 
 This factorization is the basic step behind the separability test.
 
-![Flow from product-state factorization to the centered covariance bound](/assets/images/centered-correlation-flow.svg)
-
-**Figure 1.** The colors have the same meaning in every panel: teal denotes Alice's Bloch vectors and orange denotes Bob's. A product state produces the outer-product matrix $rs^{\mathsf T}$. A separable state produces a convex weighted sum of such rank-one matrices. Subtracting the outer product of the mean vectors moves both local clouds to zero, leaving outer products of the deviations $r_k-r$ and $s_k-s$—the centered covariance.
+<figure class="post-figure">
+  <img src="/assets/images/centered-correlation-flow.svg" alt="Three panels show a product-state outer product, a convex mixture of rank-one correlation matrices, and the centered covariance obtained after subtracting the product of the local means.">
+  <figcaption><strong>Figure 1.</strong> Teal denotes Alice's Bloch vectors and orange denotes Bob's. A product state produces the outer-product matrix $rs^{\mathsf T}$; a separable state produces a convex weighted sum of such matrices. Subtracting the product of the mean vectors replaces $r_k,s_k$ by the deviations $r_k-r,s_k-s$, leaving the centered covariance.</figcaption>
+</figure>
 
 ## From product states to the de Vicente bound
 
@@ -609,9 +611,10 @@ $$
 
 whose determinant is negative. More generally, this family is NPT for every $p>0$ and $0<\gamma\leq\pi/4$.
 
-![Detection regions for the polarized-noise family](/assets/images/centered-detection-regions.svg)
-
-**Figure 2.** Every interior point of the $(p,\gamma)$ rectangle is NPT entangled. The grey region is missed by both norm criteria. The light teal region is detected only by the centered criterion, and the dark region is detected by both. The marked state is the numerical example above. The axis $\gamma=0$ is different from its right-hand limit: every state on the axis is separable, whereas for arbitrarily small $\gamma>0$ the centered detection threshold tends to $\sqrt5-2$. Open endpoints and the uncoloured vertical axis mark this discontinuity. Angular ticks are exact radian values.
+<figure class="post-figure">
+  <img src="/assets/images/centered-detection-regions.svg" alt="Detection regions over mixture weight p and Schmidt angle gamma. Grey is detected by neither norm test, light teal only by the centered test, and dark teal by both. The gamma equals zero axis is marked separately because it is separable.">
+  <figcaption><strong>Figure 2.</strong> Every interior point of the $(p,\gamma)$ rectangle is NPT entangled. Grey is missed by both norm criteria, light teal is detected only by the centered criterion, and dark teal is detected by both. The marked state is the numerical example above. The axis $\gamma=0$ is separable and differs from its right-hand limit, where the centered threshold tends to $\sqrt5-2$. Angular ticks are exact radian values.</figcaption>
+</figure>
 
 The [NumPy script](https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/assets/code/centered_correlation_examples.py) constructs each $4\times4$ density matrix, takes its partial trace and partial transpose, and computes $r$, $s$, $T$, $C$ and both criteria from Pauli expectations. It also generates Figure 2 and its [boundary data](/assets/data/centered-detection-regions.csv). This is an independent numerical consistency check, not a proof.
 
