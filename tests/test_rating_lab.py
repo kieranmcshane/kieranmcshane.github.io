@@ -8,7 +8,7 @@ import unittest
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
-from rating_lab.player_pipeline import COHORTS, _api_football_fixture, _fit_ridge, _home_advantage, _lineup_weights, _merge_minutes, player_schema, validate_player_payload
+from rating_lab.player_pipeline import COHORTS, _api_football_fixture, _build_cohort, _fit_ridge, _home_advantage, _lineup_weights, _merge_minutes, player_schema, validate_player_payload
 from rating_lab.pipeline import (
     FOOTBALL_COMPETITIONS,
     _deduplicate,
@@ -267,15 +267,30 @@ class PipelineTests(unittest.TestCase):
 
     def test_player_schema_is_versioned_and_closed(self):
         schema = player_schema()
-        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.1.0")
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.2.0")
         self.assertFalse(schema["additionalProperties"])
+
+    def test_complete_season_rejects_partial_fixture_catalogue(self):
+        definition = {
+            "id": "partial-season", "competition_id": 2, "season_id": 27,
+            "name": "Partial season", "country": "England", "gender": "men",
+            "format": "club league season", "venue_context": "home-and-away",
+            "expected_matches": 2,
+        }
+        fetch = lambda *_args, **_kwargs: json.dumps([{"match_id": 1}]).encode()
+        with self.assertRaisesRegex(ValueError, "expected 2 matches"):
+            _build_cohort(definition, fetch)
 
     def test_published_player_payload_passes_gates_and_has_contiguous_ranks(self):
         payload = json.loads((Path(__file__).resolve().parents[1] / "assets/data/rating-lab/player-football.json").read_text())
         validate_player_payload(payload)
         cohort_ids = {cohort["id"] for cohort in payload["cohorts"]}
-        self.assertTrue({"euro-2024", "world-cup-2022"}.issubset(cohort_ids))
+        self.assertTrue({"premier-league-2015-16", "euro-2024", "world-cup-2022"}.issubset(cohort_ids))
         self.assertEqual({definition["gender"] for definition in COHORTS}, {"men", "women"})
+        premier = next(cohort for cohort in payload["cohorts"] if cohort["id"] == "premier-league-2015-16")
+        self.assertEqual(premier["matches"], 380)
+        self.assertEqual(premier["coverage"]["fixture_completeness"], 1.0)
+        self.assertEqual(premier["eligibility"], {"minimum_minutes": 900.0, "minimum_matches": 10})
         for cohort in payload["cohorts"]:
             self.assertIn(cohort["gender"], {"men", "women"})
             self.assertGreaterEqual(cohort["coverage"]["starting_lineups"], 0.95)

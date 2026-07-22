@@ -60,6 +60,14 @@ cached only during the server-side build under the provider's terms; the site
 publishes derived Lineup TrueSkill/RAPM ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
 
+The historical player lab also publishes complete league-season cohorts when
+the source supplies every fixture. Premier League 2015/16 is the first men's
+full-season cohort: all 380 league matches pass the lineup, minutes, integrity,
+and connected-graph gates, and eligibility rises to 900 minutes and ten
+appearances. The payload lists included competitions explicitly; domestic cups
+and UEFA matches are not described as season-wide evidence until their complete
+lineup-minute feeds are available.
+
 Competition forecasts use 5,000 deterministic simulations per competition and
 model. League forecasts publish the current table, remaining-match count, and
 every team's finishing-position distribution. Knockout forecasts lock known
