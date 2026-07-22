@@ -55,6 +55,15 @@ class PostPresentationTests(unittest.TestCase):
         self.assertIn("page.last_modified_at", LAYOUT)
         self.assertIn('itemprop="dateModified"', LAYOUT)
 
+    def test_research_update_keeps_comparisons_and_open_problem_explicit(self):
+        self.assertIn("quant-ph/0607195#S4.SS2.p4", ARTICLE)
+        self.assertIn("quant-ph/0607195#S4.SS2.p6", ARTICLE)
+        self.assertIn(
+            "The information lost by testing one tensor at a time",
+            ARTICLE,
+        )
+        self.assertIn("a common decomposition across tensor orders", ARTICLE)
+
 
 if __name__ == "__main__":
     unittest.main()

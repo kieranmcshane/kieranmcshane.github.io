@@ -4,7 +4,7 @@ math: true
 title: "Centered Correlation Tensors and Quantum Separability"
 subtitle: "The enhanced realignment criterion in Bloch coordinates"
 date: 2026-07-17 08:00:00 +0200
-last_modified_at: 2026-07-19 16:14:00 +0200
+last_modified_at: 2026-07-22 08:49:00 +0200
 categories: [quantum-information]
 tags: [entanglement, separability, tensor-norms, Bloch-representation]
 excerpt: "How the usual correlation-tensor separability test becomes a marginal-dependent covariance bound after centering."
@@ -439,6 +439,8 @@ $$
 
 Thus a state satisfying the centered condition necessarily satisfies the CCNR bound as well.
 
+The word *stronger* is easy to reverse here, so it helps to separate the uncentered and centered statements. For the original uncentered correlation-matrix test, [de Vicente's Proposition 4](https://ar5iv.labs.arxiv.org/html/quant-ph/0607195#S4.SS2.p4) shows that, when both marginals are maximally mixed, it agrees with CCNR for $M=N$ and is stronger for $M\neq N$. With general marginals and $M=N$, [Proposition 5](https://ar5iv.labs.arxiv.org/html/quant-ph/0607195#S4.SS2.p6) shows that CCNR is stronger. These statements do not conflict with the argument above: the *centered* condition considered here implies both the uncentered correlation-matrix bound and the CCNR bound.
+
 Both tests are invariant under local unitaries. In Bloch coordinates these act by orthogonal transformations
 
 $$
@@ -728,6 +730,35 @@ $$
 $$
 
 together with the requirement that every member arise from one common separable ensemble.
+
+### The information lost by testing one tensor at a time
+
+This common ensemble is not a minor technical condition. If
+
+$$
+\rho=\sum_kp_k\,
+\rho_{1,k}\otimes\cdots\otimes\rho_{g,k}
+$$
+
+is fully separable and $r_{a,k}$ is the Bloch vector of $\rho_{a,k}$, then every nonempty subset $S\subseteq\{1,\ldots,g\}$ satisfies
+
+$$
+T_S
+=\sum_kp_k\bigotimes_{a\in S}r_{a,k}.
+$$
+
+The weights $p_k$ and local vectors $r_{a,k}$ are the same for every $S$. Conversely, if the complete family of Bloch tensors admits one such decomposition with physical local Bloch vectors, reconstructing the density matrix gives a fully separable state. Before taking any norm, this joint decomposition statement is therefore equivalent to full separability.
+
+Centering preserves the shared latent ensemble. For $|S|\geq2$,
+
+$$
+K_S
+=\sum_kp_k\bigotimes_{a\in S}(r_{a,k}-r_a).
+$$
+
+An order-by-order norm test forgets this coupling. Each $K_S$ may satisfy its projective-norm bound using a different near-optimal decomposition, even though no single ensemble realizes all of them simultaneously. This explains exactly what is missing from a list of otherwise valid tensor inequalities.
+
+> **Remaining problem.** Find a computable condition on the whole family $(K_S)_S$ that enforces, or at least approximates, a common decomposition across tensor orders. Individual projective norms and their matrix unfoldings are necessary relaxations; they do not by themselves impose this compatibility.
 
 There is nevertheless an elementary centered bound at every order. For party $a$, set
 
