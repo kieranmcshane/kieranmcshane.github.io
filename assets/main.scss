@@ -4035,6 +4035,21 @@ body:has(.rating-lab) .post-content {
   border-left: 4px solid var(--lab-secondary);
 }
 
+.rating-lab-market-provider + .rating-lab-market-provider {
+  margin-top: 1.35rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--lab-line);
+}
+
+.rating-lab-market-withheld {
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.8rem;
+  color: #4f5e72;
+  background: var(--lab-wash);
+  border-radius: 7px;
+  font-size: 0.82rem;
+}
+
 .rating-lab-market-heading {
   display: flex;
   gap: 1rem;

@@ -909,19 +909,12 @@
       (value * 100).toFixed(1) + '%"><span>' + percent(value) + '</span></span>';
   }
 
-  function renderMarketComparison(view, modelRows, options) {
-    var benchmark = view.predictor.market_comparison;
-    elements.predictorMarket.hidden = false;
-    if (options && options.withheld) {
-      elements.predictorMarket.classList.remove('is-stale');
-      elements.predictorMarket.innerHTML = '<div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p>' +
-        '<h3>Market gap withheld before play</h3></div></div><p>' + escapeHtml(options.withheld) +
-        ' The independent market snapshot remains part of the reproducible data file, but a model–market gap is not presented as in-season evidence yet.</p>';
-      return;
-    }
+  function marketProviderCard(view, modelRows, provider, options) {
+    var benchmark = provider.data;
     if (!benchmark) {
-      elements.predictorMarket.innerHTML = '<p><strong>Market comparison not in this snapshot.</strong> Refresh the published dataset to check for a confidently matched public market.</p>';
-      return;
+      return '<section class="rating-lab-market-provider"><div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>' +
+        escapeHtml(provider.name) + ' snapshot pending</h3></div></div><p>This dataset predates the ' + escapeHtml(provider.name) +
+        ' integration. The next refresh will check its public markets.</p></section>';
     }
     var snapshot = (benchmark.competitions || []).find(function (item) {
       return item.competition_id === view.competition.id;
@@ -932,10 +925,11 @@
       });
       var reason = search && search.status === 'source_error' ?
         'The market source could not be checked.' :
-        'No active event passed the participant-coverage and identity checks.';
-      elements.predictorMarket.innerHTML = '<div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>No confident Polymarket match</h3></div></div><p>' +
-        escapeHtml(reason) + ' Our forecast remains available and independent; no market is guessed or attached by title alone.</p>';
-      return;
+        search ? 'No active event passed the season, participant-coverage, and identity checks.' :
+          'This provider has no configured winner series for the selected competition.';
+      return '<section class="rating-lab-market-provider"><div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>No confident ' +
+        escapeHtml(provider.name) + ' match</h3></div></div><p>' + escapeHtml(reason) +
+        ' Our forecast remains independent; no market is guessed or attached by title alone.</p></section>';
     }
     var rowsById = {};
     (modelRows || []).forEach(function (row) { rowsById[row.id] = row; });
@@ -960,23 +954,53 @@
     }, 0) / comparisons.length : null;
     var retained = benchmark.status !== 'current' || isStale(benchmark);
     var freshness = retained ? ' · retained or delayed snapshot' : '';
-    var table = comparisons.length ? '<div class="rating-lab-market-table-wrap"><table><caption>Largest model–market differences first</caption><thead><tr><th scope="col">Participant</th><th scope="col">Our model</th><th scope="col">Market</th><th scope="col">Gap</th><th scope="col" class="rating-lab-market-raw">Raw quote</th><th scope="col" class="rating-lab-market-spread">Bid–ask</th></tr></thead><tbody>' +
+    var suppressComparison = Boolean(options && options.withheld);
+    var tableHead = suppressComparison ?
+      '<tr><th scope="col">Participant</th><th scope="col">Market</th><th scope="col" class="rating-lab-market-raw">Raw quote</th><th scope="col" class="rating-lab-market-spread">Bid–ask</th></tr>' :
+      '<tr><th scope="col">Participant</th><th scope="col">Our model</th><th scope="col">Market</th><th scope="col">Gap</th><th scope="col" class="rating-lab-market-raw">Raw quote</th><th scope="col" class="rating-lab-market-spread">Bid–ask</th></tr>';
+    var table = comparisons.length ? '<div class="rating-lab-market-table-wrap"><table><caption>' +
+      (suppressComparison ? provider.name + ' normalized winner field' : 'Largest model–market differences first') +
+      '</caption><thead>' + tableHead + '</thead><tbody>' +
       comparisons.map(function (row) {
         var gapClass = row.gap > 0 ? 'is-positive' : row.gap < 0 ? 'is-negative' : '';
         var gap = signedNumber(row.gap * 100, 1) + ' pp';
-        var spread = row.bid > 0 && row.ask > 0 ? number(row.bid * 100, 1) + '–' + number(row.ask * 100, 1) + '%' : '—';
-        return '<tr><th scope="row">' + escapeHtml(row.name) + '</th><td>' + percent(row.model) + '</td><td>' +
-          percent(row.market) + '</td><td class="' + gapClass + '">' + escapeHtml(gap) + '</td><td class="rating-lab-market-raw">' +
+        var spread = row.bid >= 0 && row.ask > 0 ? number(row.bid * 100, 1) + '–' + number(row.ask * 100, 1) + '%' : '—';
+        var modelCells = suppressComparison ? '' : '<td>' + percent(row.model) + '</td>';
+        var gapCell = suppressComparison ? '' : '<td class="' + gapClass + '">' + escapeHtml(gap) + '</td>';
+        return '<tr><th scope="row">' + escapeHtml(row.name) + '</th>' + modelCells + '<td>' +
+          percent(row.market) + '</td>' + gapCell + '<td class="rating-lab-market-raw">' +
           percent(row.raw) + '</td><td class="rating-lab-market-spread">' + escapeHtml(spread) + '</td></tr>';
       }).join('') + '</tbody></table></div>' :
       '<p><strong>A market was matched, but no participant IDs overlap this model output.</strong> The comparison is withheld.</p>';
-    elements.predictorMarket.classList.toggle('is-stale', retained);
-    elements.predictorMarket.innerHTML = '<div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>Our protocol vs Polymarket</h3></div><a href="' +
+    var comparisonMetric = suppressComparison ? '<span>Model comparison</span><strong>After kickoff</strong>' :
+      '<span>Mean absolute gap</span><strong>' + (meanGap === null ? '—' : number(meanGap * 100, 1) + ' pp') + '</strong>';
+    return '<section class="rating-lab-market-provider' + (retained ? ' is-stale' : '') + '">' +
+      '<div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>' +
+      (suppressComparison ? escapeHtml(provider.name) + ' winner market' : 'Our protocol vs ' + escapeHtml(provider.name)) + '</h3></div><a href="' +
       escapeHtml(snapshot.event_url) + '" target="_blank" rel="noopener">Open market ↗</a></div><div class="rating-lab-market-metrics"><div><span>Field coverage</span><strong>' +
       snapshot.matched_participants + ' / ' + snapshot.model_participants + '</strong></div><div><span>Raw Yes total</span><strong>' +
-      number(snapshot.raw_yes_price_sum * 100, 1) + '%</strong></div><div><span>Mean absolute gap</span><strong>' +
-      (meanGap === null ? '—' : number(meanGap * 100, 1) + ' pp') + '</strong></div></div><details class="rating-lab-market-detail"><summary>Participant comparison and normalization</summary><p class="rating-lab-market-note">Snapshot ' +
-      escapeHtml(formatDate(benchmark.fetched_at)) + freshness + '. “Market” divides each public Yes quote by the raw Yes total across all active liquid winner outcomes. The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details>';
+      number(snapshot.raw_yes_price_sum * 100, 1) + '%</strong></div><div>' + comparisonMetric +
+      '</div></div><details class="rating-lab-market-detail"><summary>Participant quotes and normalization</summary><p class="rating-lab-market-note">Snapshot ' +
+      escapeHtml(benchmark.fetched_at ? formatDate(benchmark.fetched_at) : 'unavailable') + freshness + '. ' +
+      escapeHtml(snapshot.normalization || benchmark.probability_definition) +
+      ' The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details></section>';
+  }
+
+  function renderMarketComparison(view, modelRows, options) {
+    elements.predictorMarket.hidden = false;
+    var providers = [
+      { name: 'Polymarket', data: view.predictor.market_comparison },
+      { name: 'Kalshi', data: view.predictor.kalshi_comparison }
+    ];
+    elements.predictorMarket.classList.toggle('is-stale', providers.some(function (provider) {
+      return provider.data && (provider.data.status !== 'current' || isStale(provider.data));
+    }));
+    var withheldBanner = options && options.withheld ?
+      '<p class="rating-lab-market-withheld"><strong>Market gap withheld before play.</strong> ' +
+      escapeHtml(options.withheld) + ' Venue quotes remain visible, but model–market gaps are not presented as in-season evidence yet.</p>' : '';
+    elements.predictorMarket.innerHTML = withheldBanner + providers.map(function (provider) {
+      return marketProviderCard(view, modelRows, provider, options);
+    }).join('');
   }
 
   function errorFunction(value) {
