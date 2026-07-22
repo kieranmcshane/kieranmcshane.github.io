@@ -1,5 +1,6 @@
 ---
 layout: post
+math: true
 title: "Formalizing an X/ENS Correction in Lean"
 subtitle: "What changed when the proof had to compile"
 date: 2026-07-18 10:00:00 +0200
