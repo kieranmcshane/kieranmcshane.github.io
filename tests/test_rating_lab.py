@@ -243,14 +243,34 @@ class PipelineTests(unittest.TestCase):
 
     def test_team_lapm_publishes_players_and_supported_combinations(self):
         stints = [
-            {"lineup": ("a", "b", "c"), "minutes": 60.0, "goal_difference": 2.0},
-            {"lineup": ("a", "b", "d"), "minutes": 30.0, "goal_difference": -1.0},
+            {"match_id": 1, "lineup": ("a", "b", "c"), "minutes": 60.0, "goal_difference": 2.0},
+            {"match_id": 2, "lineup": ("a", "b", "d"), "minutes": 30.0, "goal_difference": -1.0},
         ]
-        fitted = _fit_team_lapm(stints, {"a", "b", "c", "d"}, 20.0, 1)
+        fitted = _fit_team_lapm(
+            stints, {"a", "b", "c", "d"}, 20.0, 1, 20.0, 1
+        )
         self.assertEqual({row["players"][0] for row in fitted["players"]}, {"a", "b", "c", "d"})
         self.assertTrue(any(row["order"] == 2 for row in fitted["combinations"]))
         self.assertTrue(any(row["order"] == 3 for row in fitted["combinations"]))
         self.assertGreater(fitted["edges"], 0)
+
+    def test_team_lapm_reapplies_eligibility_inside_each_team(self):
+        fitted = _fit_team_lapm(
+            [
+                {
+                    "match_id": 1,
+                    "lineup": ("established", "transfer"),
+                    "minutes": 9.0,
+                    "goal_difference": 1.0,
+                }
+            ],
+            {"established", "transfer"},
+            20.0,
+            1,
+            5.0,
+            1,
+        )
+        self.assertEqual(fitted["players"], [])
 
     def test_rapm_ridge_assigns_positive_impact_to_repeated_winner(self):
         rows = [

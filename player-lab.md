@@ -137,7 +137,7 @@ description: Outcome-only historical men's and women's football player ratings a
         </article>
         <article>
           <h3>LAPM <small>experimental · within team</small></h3>
-          <p>Constant-lineup stints are converted into a graph whose nodes are players, qualifying pairs, and full observed lineups. Nodes sharing players are linked by Jaccard similarity. The fitted goal-difference values minimize weighted error plus <span class="rating-lab-formula">λ Σ wᵢⱼ(βᵢ − βⱼ)²</span>, so overlapping combinations borrow strength. LAPM is shown inside one team only; cross-team LAPM ranks would not share a valid scale.</p>
+          <p>Constant-lineup stints are converted into a graph whose nodes are players, qualifying pairs, and full observed lineups. Nodes sharing players are linked by Jaccard similarity. The fitted goal-difference values minimize weighted error plus <span class="rating-lab-formula">λ Σ wᵢⱼ(βᵢ − βⱼ)²</span>, so overlapping combinations borrow strength. LAPM applies the displayed eligibility minimum inside the selected team and is shown within that team only; cross-team LAPM ranks would not share a valid scale.</p>
         </article>
       </div>
       <ul>
