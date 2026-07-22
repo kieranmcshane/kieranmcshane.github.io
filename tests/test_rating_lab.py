@@ -14,7 +14,10 @@ from rating_lab.player_pipeline import (
     _build_cohort,
     _fit_pair_ridge,
     _fit_ridge,
+    _fit_team_lapm,
     _home_advantage,
+    _jaccard,
+    _laplacian_solve,
     _lineup_weights,
     _merge_minutes,
     _overlap_minutes,
@@ -169,7 +172,9 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("lineup_trueskill", protocol["methods"])
         self.assertIn("rapm", protocol["methods"])
         self.assertIn("pairwise_chemistry", protocol["methods"])
+        self.assertIn("lapm", protocol["methods"])
         self.assertEqual(protocol["methods"]["pairwise_chemistry"]["status"], "experimental; validation result is published per cohort")
+        self.assertEqual(protocol["methods"]["lapm"]["scope"], "within one team; values are not compared across teams")
         self.assertEqual(protocol["release_gates"]["starting_lineup_coverage"], ">= 95% of eligible matches")
         self.assertIn("source licence", protocol["release_gates"]["publication_rights"])
         self.assertNotIn("shots", protocol["methods"]["lineup_trueskill"]["input"])
@@ -229,6 +234,24 @@ class PipelineTests(unittest.TestCase):
         self.assertGreater(fitted["coefficients"][("a", "b")], fitted["coefficients"][("c", "d")])
         self.assertGreaterEqual(fitted["uncertainty"][("a", "b")], 0.0)
 
+    def test_lapm_uses_jaccard_overlap_and_laplacian_smoothing(self):
+        self.assertAlmostEqual(_jaccard(("a", "b"), ("b", "c")), 1.0 / 3.0)
+        unsmoothed, _, _ = _laplacian_solve([2.0, -2.0], [1.0, 1.0], [(0, 1, 0.5)], 0.0, 0.01)
+        smoothed, _, residual = _laplacian_solve([2.0, -2.0], [1.0, 1.0], [(0, 1, 0.5)], 2.0, 0.01)
+        self.assertLess(abs(smoothed[0] - smoothed[1]), abs(unsmoothed[0] - unsmoothed[1]))
+        self.assertLess(residual, 1e-6)
+
+    def test_team_lapm_publishes_players_and_supported_combinations(self):
+        stints = [
+            {"lineup": ("a", "b", "c"), "minutes": 60.0, "goal_difference": 2.0},
+            {"lineup": ("a", "b", "d"), "minutes": 30.0, "goal_difference": -1.0},
+        ]
+        fitted = _fit_team_lapm(stints, {"a", "b", "c", "d"}, 20.0, 1)
+        self.assertEqual({row["players"][0] for row in fitted["players"]}, {"a", "b", "c", "d"})
+        self.assertTrue(any(row["order"] == 2 for row in fitted["combinations"]))
+        self.assertTrue(any(row["order"] == 3 for row in fitted["combinations"]))
+        self.assertGreater(fitted["edges"], 0)
+
     def test_rapm_ridge_assigns_positive_impact_to_repeated_winner(self):
         rows = [
             {"home": {"winner": 1.0}, "away": {"loser": 1.0}, "goal_difference": 2.0},
@@ -287,6 +310,7 @@ class PipelineTests(unittest.TestCase):
             "lineups": [home_lineup, away_lineup],
             "players": [home_players, away_players],
             "events": [
+                {"team": {"id": 10}, "type": "Goal", "player": {"id": home_out}, "time": {"elapsed": 25}},
                 {"team": {"id": 10}, "type": "subst", "player": {"id": home_out}, "assist": {"id": home_in}, "time": {"elapsed": 60}},
                 {"team": {"id": 20}, "type": "subst", "player": {"id": away_out}, "assist": {"id": away_in}, "time": {"elapsed": 60}},
             ],
@@ -300,6 +324,8 @@ class PipelineTests(unittest.TestCase):
         self.assertAlmostEqual(sum(home.values()), 11.0)
         self.assertAlmostEqual(sum(away.values()), 11.0)
         self.assertTrue(weights_audit["integrity_ok"])
+        self.assertEqual(weights_audit["home_intervals"][f"api-football:{home_out}"], [(0.0, 60.0)])
+        self.assertEqual(weights_audit["home_intervals"][f"api-football:{home_in}"], [(60.0, 90.0)])
 
     def test_rapm_neutral_matches_do_not_create_home_intercept(self):
         rows = [
@@ -311,7 +337,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_player_schema_is_versioned_and_closed(self):
         schema = player_schema()
-        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.3.0")
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.4.0")
         self.assertFalse(schema["additionalProperties"])
 
     def test_complete_season_rejects_partial_fixture_catalogue(self):
@@ -339,13 +365,22 @@ class PipelineTests(unittest.TestCase):
             self.assertIn(cohort["gender"], {"men", "women"})
             self.assertGreaterEqual(cohort["coverage"]["starting_lineups"], 0.95)
             self.assertGreaterEqual(cohort["coverage"]["player_minutes"], 0.95)
+            self.assertGreaterEqual(cohort["coverage"]["event_goal_scores"], 0.95)
             self.assertEqual(cohort["coverage"]["player_match_graph_components"], 1)
             self.assertIn(cohort["models"]["pairwise-chemistry"]["status"], {"supported", "descriptive_only"})
             self.assertIn("baseline_validation_rmse", cohort["models"]["pairwise-chemistry"]["metrics"])
-            for model in cohort["models"].values():
+            self.assertEqual(cohort["models"]["lapm"]["scope"], "within_team")
+            self.assertTrue(cohort["models"]["lapm"]["teams"])
+            for model_id in ("lineup-trueskill", "rapm", "pairwise-chemistry"):
+                model = cohort["models"][model_id]
                 self.assertEqual(
                     [row["rank"] for row in model["rankings"]],
                     list(range(1, len(model["rankings"]) + 1)),
+                )
+            for team in cohort["models"]["lapm"]["teams"]:
+                self.assertEqual(
+                    [row["rank"] for row in team["rankings"]],
+                    list(range(1, len(team["rankings"]) + 1)),
                 )
 
     def test_polymarket_snapshot_matches_entities_and_preserves_raw_overround(self):

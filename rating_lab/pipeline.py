@@ -170,6 +170,17 @@ def individual_contribution_protocol() -> dict:
                 "uncertainty": "approximate posterior spread from the regularized pair model",
                 "status": "experimental; validation result is published per cohort",
             },
+            "lapm": {
+                "input": "constant-lineup goal difference, exact lineup intervals, and stable player identifiers",
+                "estimator": "team-specific Jaccard line graph with Laplacian smoothness over players, qualifying pairs, and full observed lineups",
+                "uncertainty": "local regularized-fit approximation from stint residual variance and graph support",
+                "scope": "within one team; values are not compared across teams",
+                "status": "experimental and descriptive; graph construction and diagnostics are published per cohort",
+                "references": {
+                    "paper": "https://doi.org/10.1515/jqas-2024-0057",
+                    "code": "https://github.com/njosephs/HAPM",
+                },
+            },
         },
         "excluded_inputs": [
             "passes",
@@ -182,6 +193,7 @@ def individual_contribution_protocol() -> dict:
             "stable_player_identifiers": "required",
             "starting_lineup_coverage": ">= 95% of eligible matches",
             "substitution_minute_coverage": ">= 95% of eligible matches",
+            "goal_event_score_coverage": ">= 95% of eligible matches and event goals must reproduce the final score",
             "lineup_integrity": "11 starters per side and minutes bounded to the match",
             "identifiability": "connected player-opponent graph and published collinearity diagnostics",
             "chronology": "no future lineups or outcomes may enter a past update or evaluation prediction",
