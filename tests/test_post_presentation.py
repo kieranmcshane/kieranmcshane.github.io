@@ -43,6 +43,11 @@ class PostPresentationTests(unittest.TestCase):
     def test_figure_captions_use_semantic_markup(self):
         self.assertEqual(ARTICLE.count('<figure class="post-figure">'), 2)
         self.assertEqual(ARTICLE.count("<figcaption>"), 2)
+        self.assertEqual(ARTICLE.count("post-figure-media-wide"), 2)
+        self.assertRegex(
+            STYLES,
+            r"\.post-figure-media[\s\S]*?overflow-x: auto;",
+        )
 
     def test_post_layout_renders_subtitle_and_modified_date(self):
         self.assertIn("page.subtitle", LAYOUT)

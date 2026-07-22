@@ -202,7 +202,9 @@ The nuclear norm $\lVert X\rVert_*$ is the sum of the singular values of a matri
 This factorization is the basic step behind the separability test.
 
 <figure class="post-figure">
-  <img src="/assets/images/centered-correlation-flow.svg" alt="Three panels show a product-state outer product, a convex mixture of rank-one correlation matrices, and the centered covariance obtained after subtracting the product of the local means.">
+  <div class="post-figure-media post-figure-media-wide">
+    <img src="/assets/images/centered-correlation-flow.svg" alt="Three panels show a product-state outer product, a convex mixture of rank-one correlation matrices, and the centered covariance obtained after subtracting the product of the local means.">
+  </div>
   <figcaption><strong>Figure 1.</strong> Teal denotes Alice's Bloch vectors and orange denotes Bob's. A product state produces the outer-product matrix $rs^{\mathsf T}$; a separable state produces a convex weighted sum of such matrices. Subtracting the product of the mean vectors replaces $r_k,s_k$ by the deviations $r_k-r,s_k-s$, leaving the centered covariance.</figcaption>
 </figure>
 
@@ -612,7 +614,9 @@ $$
 whose determinant is negative. More generally, this family is NPT for every $p>0$ and $0<\gamma\leq\pi/4$.
 
 <figure class="post-figure">
-  <img src="/assets/images/centered-detection-regions.svg" alt="Detection regions over mixture weight p and Schmidt angle gamma. Grey is detected by neither norm test, light teal only by the centered test, and dark teal by both. The gamma equals zero axis is marked separately because it is separable.">
+  <div class="post-figure-media post-figure-media-wide">
+    <img src="/assets/images/centered-detection-regions.svg" alt="Detection regions over mixture weight p and Schmidt angle gamma. Grey is detected by neither norm test, light teal only by the centered test, and dark teal by both. The gamma equals zero axis is marked separately because it is separable.">
+  </div>
   <figcaption><strong>Figure 2.</strong> Every interior point of the $(p,\gamma)$ rectangle is NPT entangled. Grey is missed by both norm criteria, light teal is detected only by the centered criterion, and dark teal is detected by both. The marked state is the numerical example above. The axis $\gamma=0$ is separable and differs from its right-hand limit, where the centered threshold tends to $\sqrt5-2$. Angular ticks are exact radian values.</figcaption>
 </figure>
 
