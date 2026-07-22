@@ -444,7 +444,7 @@
     var provisionalNote = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
       (provisionalCount() ? ' · provisional included' : '');
     elements.context.textContent = models[state.model].label + ' · ' +
-      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' shown competitors' + provisionalNote;
+      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' eligible competitors' + provisionalNote;
   }
 
   function renderMovers() {
@@ -493,7 +493,7 @@
     var provisionalCaption = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
       (provisionalCount() ? ' · provisional included' : '');
     elements.rankingTable.classList.toggle('has-uncertainty', state.model !== 'elo');
-    elements.caption.textContent = model.label + ' · ' + rows.length + ' shown competitors · ' +
+    elements.caption.textContent = model.label + ' · ' + rows.length + ' eligible · ' +
       (model.ranking_rule || 'Current model ranking rule') + provisionalCaption;
     elements.empty.hidden = rows.length > 0;
     elements.more.hidden = rows.length <= displayed.length;
