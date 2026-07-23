@@ -10,10 +10,12 @@ The site uses GitHub Pages, Jekyll, and the Minima theme. Long-form posts live i
 Gaussian TrueSkill, and robust heavy-tail ratings for ATP tennis, European club
 football, men's national-team football, and elite over-the-board chess.
 The same page includes a daily, format-aware competition predictor. It covers
-the five European league tables plus public football-data.org knockout fields
+official live ATP main draws, the five European league tables, and public football-data.org knockout fields
 for the Champions League, FIFA World Cup, and European Championship. It starts
 from actual results and published fixtures under each of the four rating
-protocols. During live elite Lichess round-robin broadcasts it also reconstructs
+protocols. ATP draws preserve every published path and bye, use the declared
+surface-aware probability for each unplayed match, and publish direct-match,
+round-progression, and title probabilities. During live elite Lichess round-robin broadcasts it also reconstructs
 the remaining all-play-all pairing set and forecasts the final chess table.
 
 The page's protocol explorer exposes the running rules for every sport/model
@@ -39,7 +41,7 @@ the complete Jekyll site as a Pages artifact. Repository setup requires:
    responses are never exposed.
 3. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
 4. Run **Refresh ratings and deploy Pages** once manually, or wait for the daily
-   schedule. Tennis refreshes on Mondays; football and current chess refresh
+   schedule. Tennis, football, national-team football, and current chess refresh
    daily, while finalized Lichess archives are cached. National teams use
    Mart Jürisoo's CC0 full-international results.
 
@@ -49,6 +51,10 @@ For an exact local refresh and verification, run:
 RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
 python3 -m unittest discover -s tests -v
 ```
+
+Install `requirements-rating-lab.txt` first so the refresh can extract the
+public ATP ProTennisLive draw PDFs. The draw PDF is the bracket authority;
+ManTennisData supplies stable ATP identifiers and the result cross-check.
 
 Without the football token, the script uses CC0 OpenFootball league, Champions
 League, World Cup, and Euro snapshots; the predictor remains functional without
@@ -120,7 +126,9 @@ values are never ranked across teams because those graphs do not share a
 common fitted scale.
 
 Competition forecasts use 5,000 deterministic simulations per competition and
-model. League forecasts publish the current table, remaining-match count, and
+model. Tennis forecasts lock official ProTennisLive draw slots, results, and
+byes, then use the selected global-plus-surface belief for every unplayed
+singles match. League forecasts publish the current table, remaining-match count, and
 every team's finishing-position distribution. Knockout forecasts lock known
 ties and results; when a later draw is unpublished, surviving teams are
 uniformly re-drawn in each simulation. Title probabilities are withheld until

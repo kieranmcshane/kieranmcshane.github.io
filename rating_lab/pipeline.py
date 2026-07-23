@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import copy
 import csv
 from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
@@ -28,8 +29,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.12.0"
-METHODOLOGY_VERSION = "2026-07-21.8"
+SCHEMA_VERSION = "1.13.0"
+METHODOLOGY_VERSION = "2026-07-23.1"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
@@ -112,6 +113,10 @@ KNOCKOUT_STAGES = {
     "FINAL": 6,
 }
 PREDICTOR_SIMULATIONS = 5_000
+ATP_DRAW_LOOKBACK_DAYS = 42
+ATP_DRAW_LOOKAHEAD_DAYS = 10
+ATP_TOUR_SERIES = {"atp", "1000", "gs"}
+ATP_NON_STANDARD_CATEGORIES = {"nextGen", "laverCup", "atpFinal"}
 UEFA_UCL_QUALIFYING_URL = (
     "https://www.uefa.com/uefachampionsleague/news/"
     "02a6-20e5a8be4e63-ae971c582f8c-1000--champions-league-qualifying-fixtures-results-dates-how-it-/"
@@ -518,9 +523,560 @@ def fetch_tennis(start_year: int = 2018) -> tuple[list[Match], dict, dict]:
         "source_url": "https://github.com/msolonskyi/ManTennisData",
         "license": "MIT",
         "latest_result": latest.isoformat() if latest else None,
-        "stale_after_hours": 240,
+        "stale_after_hours": 48,
     }
     return matches, entities, meta
+
+
+def _tennis_name_key(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.replace("…", ""))
+    return re.sub(r"[^a-z0-9]+", "", normalized.encode("ascii", "ignore").decode().casefold())
+
+
+def _parse_atp_player_catalog(text: str) -> dict[str, dict]:
+    """Build a stable ATP-code identity catalog for official draw names."""
+    catalog = {}
+    for row in csv.DictReader(io.StringIO(text)):
+        code = (row.get("code") or "").strip()
+        first = (row.get("first_name") or "").strip()
+        last = (row.get("last_name") or "").strip()
+        if not code or code == "0" or not first or not last:
+            continue
+        entity = f"atp:{code}"
+        catalog[entity] = {
+            "id": entity,
+            "name": f"{first} {last}",
+            "first": first,
+            "last": last,
+            "country": (row.get("citizenship") or "").strip(),
+            "first_key": _tennis_name_key(first),
+            "last_key": _tennis_name_key(last),
+            "full_key": _tennis_name_key(f"{first} {last}"),
+        }
+    return catalog
+
+
+def _resolve_atp_draw_player(raw_name: str, country: str, catalog: dict[str, dict]) -> dict | None:
+    """Resolve a PDF entry, including visually truncated names, without name-only guessing."""
+    cleaned = re.sub(r"\s+", " ", raw_name.replace("…", "")).strip(" .")
+    if not cleaned or cleaned.casefold() == "bye":
+        return None
+    if "," in cleaned:
+        last, first = (part.strip() for part in cleaned.split(",", 1))
+    else:
+        parts = cleaned.split()
+        first, last = (" ".join(parts[:-1]), parts[-1]) if len(parts) > 1 else ("", parts[0])
+    first_key = _tennis_name_key(first)
+    last_key = _tennis_name_key(last)
+    full_key = _tennis_name_key(f"{first} {last}")
+    country = country.strip().upper()
+    candidates = [
+        info for info in catalog.values()
+        if not country or not info["country"] or info["country"].upper() == country
+    ]
+    exact = [info for info in candidates if info["full_key"] == full_key]
+    if len(exact) == 1:
+        return exact[0]
+    last_matches = [
+        info for info in candidates
+        if info["last_key"] == last_key
+        or (len(last_key) >= 5 and info["last_key"].startswith(last_key))
+    ]
+    if len(last_matches) == 1:
+        return last_matches[0]
+    first_matches = [
+        info for info in last_matches
+        if not first_key
+        or info["first_key"].startswith(first_key)
+        or first_key.startswith(info["first_key"])
+        or info["first_key"][:1] == first_key[:1]
+    ]
+    return first_matches[0] if len(first_matches) == 1 else None
+
+
+def _atp_draw_entry_rows(page_text: str) -> list[str]:
+    """Return the first consecutive 1..N entry block from one official PDF page."""
+    lines = page_text.splitlines()
+    start = next(
+        (index for index, line in enumerate(lines) if "Main Draw Singles" in line),
+        -1,
+    )
+    if start < 0:
+        return []
+    rows = []
+    expected = 1
+    for line in lines[start + 1:]:
+        if re.search(r"Last\s+[Dd]irect\s+[Aa]cceptance", line):
+            break
+        match = re.match(r"^\s*(\d{1,3})\s", line)
+        if not match:
+            continue
+        number = int(match.group(1))
+        if number == expected:
+            rows.append(line)
+            expected += 1
+        elif rows and number == 1:
+            break
+    return rows
+
+
+def _atp_draw_stage_start(rows: list[str]) -> int:
+    positions = []
+    for line in rows:
+        country_matches = list(re.finditer(r"\b[A-Z]{3}\b", line[:80]))
+        if not country_matches:
+            continue
+        country = country_matches[-1]
+        trailing = line[country.end():]
+        if not trailing.strip():
+            continue
+        positions.append(country.end() + len(trailing) - len(trailing.lstrip()))
+    if not positions:
+        return 61 if len(rows) > 32 else 52
+    counts = defaultdict(int)
+    for position in positions:
+        counts[position] += 1
+    return min(counts, key=lambda position: (-counts[position], position))
+
+
+def _atp_draw_entry(
+    line: str,
+    stage_start: int,
+    catalog: dict[str, dict],
+) -> dict | None:
+    entry = line[:stage_start]
+    entry = re.sub(r"^\s*\d{1,3}\s+", "", entry).strip()
+    if entry.casefold() == "bye":
+        return None
+    country_matches = list(re.finditer(r"\b[A-Z]{3}\b", entry))
+    country = country_matches[-1].group(0) if country_matches else ""
+    if country_matches:
+        entry = entry[:country_matches[-1].start()].strip()
+    entry = re.sub(r"^(?:(?:WC|LL|ALT|PR|Q|\d+)\s+)+", "", entry, flags=re.IGNORECASE)
+    resolved = _resolve_atp_draw_player(entry, country, catalog)
+    if resolved:
+        return resolved
+    display = entry
+    if "," in entry:
+        last, first = (part.strip() for part in entry.split(",", 1))
+        display = f"{first} {last}".strip()
+    if not display:
+        return None
+    return {
+        "id": f"atp:draw:{_slug(display)}",
+        "name": display,
+        "first": display.split()[0],
+        "last": display.split()[-1],
+        "country": country,
+        "first_key": _tennis_name_key(display.split()[0]),
+        "last_key": _tennis_name_key(display.split()[-1]),
+        "full_key": _tennis_name_key(display),
+    }
+
+
+def _resolve_atp_draw_winner(
+    raw_label: str,
+    candidates: list[str | None],
+    identities: dict[str, dict],
+) -> str | None:
+    candidates = [entity for entity in candidates if entity]
+    if len(candidates) == 1:
+        return candidates[0]
+    label = re.sub(r"\b(?:RET|W/?O)\b", " ", raw_label, flags=re.IGNORECASE)
+    label = re.sub(r"\d+", " ", label)
+    label = re.sub(r"\s+", " ", label).strip(" .")
+    if not label or not candidates:
+        return None
+    label_key = _tennis_name_key(label)
+    first_initial = _tennis_name_key(label.split()[0])[:1]
+    scored = []
+    for entity in candidates:
+        info = identities[entity]
+        last_key = info["last_key"]
+        score = 0
+        if last_key and last_key in label_key:
+            score += 4
+        elif last_key and label_key and (last_key.startswith(label_key) or label_key.startswith(last_key)):
+            score += 3
+        if first_initial and info["first_key"].startswith(first_initial):
+            score += 1
+        scored.append((score, entity))
+    scored.sort(reverse=True)
+    if scored and scored[0][0] >= 3 and (len(scored) == 1 or scored[0][0] > scored[1][0]):
+        return scored[0][1]
+    return None
+
+
+def _parse_atp_draw_pages(
+    page_texts: list[str],
+    catalog: dict[str, dict],
+) -> dict | None:
+    """Parse official ProTennisLive bracket pages into deterministic draw slots."""
+    parsed_pages = []
+    identities = dict(catalog)
+    for page_text in page_texts:
+        rows = _atp_draw_entry_rows(page_text)
+        if len(rows) not in {8, 16, 32, 64}:
+            continue
+        stage_start = _atp_draw_stage_start(rows)
+        stage_width = 29 if len(rows) > 32 else 31
+        entries = [_atp_draw_entry(line, stage_start, catalog) for line in rows]
+        for info in entries:
+            if info:
+                identities[info["id"]] = info
+        current = [info["id"] if info else None for info in entries]
+        winners_by_round = []
+        round_count = int(math.log2(len(rows)))
+        for round_index in range(round_count):
+            group_size = 2 ** (round_index + 1)
+            column_start = stage_start + round_index * stage_width
+            column_end = column_start + stage_width
+            winners = []
+            for group_start in range(0, len(rows), group_size):
+                candidates = current[(group_start // group_size) * 2:(group_start // group_size) * 2 + 2]
+                winner = None
+                for line in rows[group_start:group_start + group_size]:
+                    segment = line[column_start:column_end].strip()
+                    if not re.search(r"[A-Za-z]", segment):
+                        continue
+                    winner = _resolve_atp_draw_winner(segment, candidates, identities)
+                    if winner:
+                        break
+                if not winner and len([entity for entity in candidates if entity]) == 1:
+                    winner = next(entity for entity in candidates if entity)
+                winners.append(winner)
+            winners_by_round.append(winners)
+            current = winners
+        parsed_pages.append(
+            {
+                "slots": [info["id"] if info else None for info in entries],
+                "winners": winners_by_round,
+            }
+        )
+    if not parsed_pages:
+        return None
+    page_size = len(parsed_pages[0]["slots"])
+    if any(len(page["slots"]) != page_size for page in parsed_pages):
+        return None
+    slots = [entity for page in parsed_pages for entity in page["slots"]]
+    winners = []
+    for round_index in range(int(math.log2(page_size))):
+        winners.append(
+            [
+                entity
+                for page in parsed_pages
+                for entity in page["winners"][round_index]
+            ]
+        )
+    while len(winners[-1]) > 1:
+        winners.append([None] * (len(winners[-1]) // 2))
+    return {"slots": slots, "recorded_winners": winners, "identities": identities}
+
+
+def _extract_atp_draw_pdf(pdf_body: bytes) -> list[str]:
+    """Extract layout-preserving text lazily so normal model tests stay lightweight."""
+    try:
+        from pypdf import PdfReader
+    except ImportError as error:
+        raise RuntimeError("pypdf is required to read official ATP draw PDFs") from error
+    try:
+        reader = PdfReader(io.BytesIO(pdf_body))
+        return [
+            page.extract_text(extraction_mode="layout") or ""
+            for page in reader.pages
+        ]
+    except Exception as error:
+        raise RuntimeError("Official ATP draw PDF could not be extracted") from error
+
+
+def _tennis_round_ids(bracket_size: int) -> list[str]:
+    ordered = {
+        128: ["R128", "R64", "R32", "R16", "QF", "SF", "F"],
+        64: ["R64", "R32", "R16", "QF", "SF", "F"],
+        32: ["R32", "R16", "QF", "SF", "F"],
+        16: ["R16", "QF", "SF", "F"],
+        8: ["QF", "SF", "F"],
+    }
+    return ordered[bracket_size]
+
+
+def _tennis_round_label(round_id: str) -> str:
+    return {
+        "R128": "Round of 128",
+        "R64": "Round of 64",
+        "R32": "Round of 32",
+        "R16": "Round of 16",
+        "QF": "Quarterfinals",
+        "SF": "Semifinals",
+        "F": "Final",
+    }[round_id]
+
+
+def _fill_atp_recorded_winners(
+    draw: dict,
+    result_rows: list[dict],
+) -> None:
+    result_by_round_pair = {}
+    for row in result_rows:
+        round_id = row.get("stadie_id")
+        if round_id not in {"R128", "R64", "R32", "R16", "QF", "SF", "F"}:
+            continue
+        entity_a = f"atp:{row['winner_code']}"
+        entity_b = f"atp:{row['loser_code']}"
+        result_by_round_pair[(round_id, frozenset((entity_a, entity_b)))] = entity_a
+    current = draw["slots"]
+    round_ids = _tennis_round_ids(len(draw["slots"]))
+    for round_index, round_id in enumerate(round_ids):
+        winners = draw["recorded_winners"][round_index]
+        for match_index in range(len(winners)):
+            pair = current[match_index * 2:match_index * 2 + 2]
+            present = [entity for entity in pair if entity]
+            if not winners[match_index] and len(present) == 1:
+                winners[match_index] = present[0]
+            elif not winners[match_index] and len(present) == 2:
+                winners[match_index] = result_by_round_pair.get((round_id, frozenset(present)))
+        current = winners
+
+
+def _tennis_round_date(start: date, finish: date, round_index: int, round_count: int) -> str:
+    if round_count <= 1:
+        return finish.isoformat()
+    span = max((finish - start).days, round_count - 1)
+    offset = round(round_index * span / (round_count - 1))
+    return min(start + timedelta(days=offset), finish).isoformat()
+
+
+def _tennis_bracket_fixtures(
+    tournament: dict,
+    draw: dict,
+    identities: dict[str, dict],
+) -> list[dict]:
+    start, finish = tournament["date"], tournament["finish"]
+    round_ids = _tennis_round_ids(len(draw["slots"]))
+    fixtures = []
+    current = draw["slots"]
+    for round_index, round_id in enumerate(round_ids):
+        winners = draw["recorded_winners"][round_index]
+        played = _tennis_round_date(start, finish, round_index, len(round_ids))
+        for match_index, winner in enumerate(winners):
+            pair = current[match_index * 2:match_index * 2 + 2]
+            entity_a, entity_b = (pair + [None, None])[:2]
+            # A missing source slot is a real bye only in the opening round.
+            # In later rounds it usually means that an upstream match is pending.
+            bye = round_index == 0 and (bool(entity_a) ^ bool(entity_b))
+            finished = bool(winner and entity_a and entity_b)
+            fixtures.append(
+                {
+                    "id": f"{tournament['id']}-{round_id}-{match_index + 1}",
+                    "date": played,
+                    "round": _tennis_round_label(round_id),
+                    "round_id": round_id,
+                    "round_index": round_index,
+                    "bracket_index": match_index,
+                    "home_id": entity_a,
+                    "away_id": entity_b,
+                    "home_name": identities.get(entity_a, {}).get("name", "TBD") if entity_a else ("Bye" if bye else "TBD"),
+                    "away_name": identities.get(entity_b, {}).get("name", "TBD") if entity_b else ("Bye" if bye else "TBD"),
+                    "home_goals": 1.0 if finished and winner == entity_a else 0.0 if finished else None,
+                    "away_goals": 1.0 if finished and winner == entity_b else 0.0 if finished else None,
+                    "winner_id": winner if finished else None,
+                    "status": "BYE" if bye else "FINISHED" if finished else "SCHEDULED",
+                    "is_bye": bye,
+                    "surface": tournament["surface"],
+                }
+            )
+        current = winners
+    return fixtures
+
+
+def _tennis_result_fixtures(
+    tournament: dict,
+    result_rows: list[dict],
+    catalog: dict[str, dict],
+) -> list[dict]:
+    """Fallback completed-event schedule when an official draw PDF is unavailable."""
+    round_ids = [
+        round_id for round_id in ("R128", "R64", "R32", "R16", "QF", "SF", "F")
+        if any(row.get("stadie_id") == round_id for row in result_rows)
+    ]
+    fixtures = []
+    for round_index, round_id in enumerate(round_ids):
+        played = _tennis_round_date(
+            tournament["date"], tournament["finish"], round_index, len(round_ids)
+        )
+        for match_index, row in enumerate(
+            item for item in result_rows if item.get("stadie_id") == round_id
+        ):
+            winner = f"atp:{row['winner_code']}"
+            loser = f"atp:{row['loser_code']}"
+            fixtures.append(
+                {
+                    "id": row.get("id") or f"{tournament['id']}-{round_id}-{match_index + 1}",
+                    "date": played,
+                    "round": _tennis_round_label(round_id),
+                    "round_id": round_id,
+                    "round_index": round_index,
+                    "bracket_index": match_index,
+                    "home_id": winner,
+                    "away_id": loser,
+                    "home_name": catalog.get(winner, {}).get("name", row.get("winner_name") or winner),
+                    "away_name": catalog.get(loser, {}).get("name", row.get("loser_name") or loser),
+                    "home_goals": 1.0,
+                    "away_goals": 0.0,
+                    "winner_id": winner,
+                    "status": "FINISHED",
+                    "is_bye": False,
+                    "surface": tournament["surface"],
+                }
+            )
+    return fixtures
+
+
+def fetch_tennis_tournament_schedules(
+    entities: dict,
+    *,
+    today: date | None = None,
+    limit: int = 6,
+) -> list[dict]:
+    """Publish active ATP draws and recent completed ATP performance cohorts."""
+    today = today or datetime.now(timezone.utc).date()
+    root = "https://raw.githubusercontent.com/msolonskyi/ManTennisData/master/atp"
+    tournaments_body = _get(f"{root}/tournaments.csv", cache_ttl=21_600)
+    players_body = _get(f"{root}/players.csv", cache_ttl=86_400)
+    matches_body = _get(f"{root}/matches_{today.year}.csv", cache_ttl=10_800)
+    catalog = _parse_atp_player_catalog(players_body.decode("utf-8-sig"))
+    results_by_tournament = defaultdict(list)
+    for row in csv.DictReader(io.StringIO(matches_body.decode("utf-8-sig"))):
+        if row.get("winner_code") and row.get("loser_code"):
+            results_by_tournament[row.get("tournament_id", "")].append(row)
+    candidates = []
+    for row in csv.DictReader(io.StringIO(tournaments_body.decode("utf-8-sig"))):
+        raw_start, raw_finish = row.get("start_dtm", ""), row.get("finish_dtm", "")
+        if not raw_start[:8].isdigit() or not raw_finish[:8].isdigit():
+            continue
+        start = datetime.strptime(raw_start[:8], "%Y%m%d").date()
+        finish = datetime.strptime(raw_finish[:8], "%Y%m%d").date()
+        if row.get("series_id") not in ATP_TOUR_SERIES:
+            continue
+        if row.get("series_category_id") in ATP_NON_STANDARD_CATEGORIES:
+            continue
+        if finish < today - timedelta(days=ATP_DRAW_LOOKBACK_DAYS):
+            continue
+        if start > today + timedelta(days=ATP_DRAW_LOOKAHEAD_DAYS):
+            continue
+        candidates.append(
+            {
+                **row,
+                "date": start,
+                "finish": finish,
+                "surface": (row.get("surface") or "Unknown").title(),
+            }
+        )
+    candidates.sort(
+        key=lambda tournament: (
+            0 if tournament["date"] <= today <= tournament["finish"] else
+            1 if tournament["date"] > today else 2,
+            -int(tournament["series_category_id"] == "gs"),
+            abs((tournament["date"] - today).days),
+            tournament["name"],
+        )
+    )
+    schedules = []
+    for tournament in candidates:
+        result_rows = results_by_tournament[tournament["id"]]
+        final_row = next((row for row in result_rows if row.get("stadie_id") == "F"), None)
+        draw = None
+        pdf_body = b""
+        pdf_url = (tournament.get("sgl_pdf_url") or "").replace("http://", "https://")
+        if pdf_url:
+            try:
+                pdf_body = _get(
+                    pdf_url,
+                    cache_ttl=3_600 if tournament["finish"] >= today else 86_400,
+                )
+                if pdf_body.startswith(b"%PDF"):
+                    draw = _parse_atp_draw_pages(_extract_atp_draw_pdf(pdf_body), catalog)
+            except (RuntimeError, ValueError):
+                draw = None
+        if draw:
+            _fill_atp_recorded_winners(draw, result_rows)
+            identities = draw["identities"]
+            fixtures = _tennis_bracket_fixtures(tournament, draw, identities)
+        elif final_row:
+            identities = dict(catalog)
+            fixtures = _tennis_result_fixtures(tournament, result_rows, catalog)
+        else:
+            continue
+        participants = sorted(
+            {
+                entity
+                for fixture in fixtures
+                for entity in (fixture.get("home_id"), fixture.get("away_id"))
+                if entity
+            }
+        )
+        for entity in participants:
+            info = identities.get(entity) or catalog.get(entity) or {
+                "name": entity,
+                "country": "",
+            }
+            entities[entity] = {
+                **entities.get(entity, {}),
+                "name": info["name"],
+                "country": info.get("country", ""),
+                "competition": "ATP singles",
+            }
+        complete_winner = f"atp:{final_row['winner_code']}" if final_row else None
+        if draw and draw["recorded_winners"][-1][0]:
+            complete_winner = draw["recorded_winners"][-1][0]
+        complete = bool(
+            complete_winner
+            and tournament["finish"] <= today
+            and any(fixture["round_id"] == "F" and fixture["status"] == "FINISHED" for fixture in fixtures)
+        )
+        snapshot = hashlib.sha256(pdf_body or matches_body).hexdigest()
+        schedules.append(
+            {
+                "id": f"tennis-{tournament['id']}",
+                "label": tournament.get("name") or "ATP tournament",
+                "season": str(today.year),
+                "format": "tennis knockout draw",
+                "forecast_type": "tennis_draw",
+                "cohort": "tennis",
+                "surface": tournament["surface"],
+                "location": tournament.get("location", ""),
+                "teams": [
+                    {
+                        "id": entity,
+                        "name": entities[entity]["name"],
+                        "country": entities[entity].get("country", ""),
+                    }
+                    for entity in participants
+                ],
+                "fixtures": fixtures,
+                "draw_slots": draw["slots"] if draw else [],
+                "recorded_winners": draw["recorded_winners"] if draw else [],
+                "round_labels": (
+                    [_tennis_round_label(round_id) for round_id in _tennis_round_ids(len(draw["slots"]))]
+                    if draw else []
+                ),
+                "complete": complete,
+                "complete_winner_id": complete_winner,
+                "first_fixture": tournament["date"].isoformat(),
+                "last_fixture": tournament["finish"].isoformat(),
+                "source_url": pdf_url or tournament.get("url") or "https://www.atptour.com/en/scores",
+                "license": "ATP Tour website terms (official draw); ManTennisData MIT (stable ATP identities and result cross-check)",
+                "snapshot_sha256": snapshot,
+                "forecast_available": bool(draw) or complete,
+                "availability": "The official main-draw bracket is locked. Every unplayed match follows that published path; no opponent or re-draw is invented.",
+                "tie_break": None,
+                "home_advantage": False,
+                "date_method": "The public draw supplies bracket order but not match timestamps. Replay dates are deterministic round-order positions between the official event start and finish dates.",
+            }
+        )
+        if len(schedules) >= limit:
+            break
+    return schedules
 
 
 def _required_football_seasons(start_year: int, current_year: int) -> list[int]:
@@ -1293,6 +1849,46 @@ def _merge_schedule_results(matches: list[Match], entities: dict, schedules: lis
     return _deduplicate(matches)
 
 
+def _merge_tennis_schedule_results(
+    matches: list[Match],
+    schedules: list[dict],
+) -> list[Match]:
+    """Bring official draw progress into the same surface-aware chronological replay."""
+    existing = {
+        (_slug(match.competition), frozenset((match.entity_a, match.entity_b)))
+        for match in matches
+    }
+    today = datetime.now(timezone.utc).date()
+    for competition in schedules:
+        for fixture in competition.get("fixtures", []):
+            entity_a, entity_b = fixture.get("home_id"), fixture.get("away_id")
+            if (
+                fixture.get("is_bye")
+                or fixture.get("status") != "FINISHED"
+                or not entity_a
+                or not entity_b
+            ):
+                continue
+            signature = (_slug(competition["label"]), frozenset((entity_a, entity_b)))
+            if signature in existing:
+                continue
+            played = min(date.fromisoformat(fixture["date"]), today)
+            matches.append(
+                Match(
+                    played,
+                    entity_a,
+                    entity_b,
+                    1.0 if fixture.get("winner_id") == entity_a else 0.0,
+                    competition["label"],
+                    competition["season"],
+                    False,
+                    {"surface": competition.get("surface", "")},
+                )
+            )
+            existing.add(signature)
+    return _deduplicate(matches)
+
+
 def _parse_international_results(text: str, start_year: int = 2016) -> tuple[list[Match], dict]:
     """Parse Mart Jürisoo's CC0 men's full-international results."""
     matches: list[Match] = []
@@ -1746,14 +2342,21 @@ def _run_model(
     sport: str,
     *,
     history_entities: set[str] | None = None,
+    snapshot_dates: set[date] | None = None,
+    snapshots: dict[date, object] | None = None,
 ) -> tuple[dict, list[dict], dict[str, list]]:
     predictions: list[dict] = []
     histories: dict[str, list] = defaultdict(list)
     previous_season = None
     ordered = sorted(matches, key=_match_sort_key)
+    pending_snapshots = sorted(snapshot_dates or set())
     index = 0
     while index < len(ordered):
         match = ordered[index]
+        while pending_snapshots and pending_snapshots[0] <= match.date:
+            snapshot_date = pending_snapshots.pop(0)
+            if snapshots is not None:
+                snapshots[snapshot_date] = copy.deepcopy(model)
         period_end = index + 1
         if isinstance(model, Glicko2Model) or getattr(model, "uses_rating_period", False):
             while period_end < len(ordered) and ordered[period_end].date == match.date:
@@ -1802,6 +2405,10 @@ def _run_model(
                 series.append(point)
         previous_season = period[-1].season or previous_season
         index = period_end
+    while pending_snapshots:
+        snapshot_date = pending_snapshots.pop(0)
+        if snapshots is not None:
+            snapshots[snapshot_date] = copy.deepcopy(model)
     return model.states, predictions, histories
 
 
@@ -2107,6 +2714,214 @@ def _simulate_knockout(competition: dict, model, model_name: str, simulations: i
     }
 
 
+def _tennis_match_probability(model, entity_a: str, entity_b: str, surface: str) -> float:
+    """Return a decisive singles probability from the fitted surface-aware protocol."""
+    match = Match(
+        date.today(),
+        entity_a,
+        entity_b,
+        0.5,
+        home_advantage=False,
+        metadata={"surface": surface},
+    )
+    return min(max(model.predict(match), 0.0), 1.0)
+
+
+def _simulate_tennis_draw(
+    competition: dict,
+    model,
+    model_name: str,
+    simulations: int = PREDICTOR_SIMULATIONS,
+) -> dict:
+    """Replay a fixed ATP bracket while sampling only genuinely unplayed matches."""
+    names = {team["id"]: team["name"] for team in competition["teams"]}
+    countries = {team["id"]: team.get("country", "") for team in competition["teams"]}
+    surface = competition.get("surface", "Unknown")
+    slots = list(competition.get("draw_slots") or [])
+    recorded = [list(round_winners) for round_winners in competition.get("recorded_winners") or []]
+    participants = sorted(set(entity for entity in slots if entity) or names)
+    complete_winner = competition.get("complete_winner_id")
+    seed_material = (
+        f"{METHODOLOGY_VERSION}|{competition['id']}|{competition['season']}|"
+        f"{model_name}|tennis|{surface.casefold()}"
+    )
+    seed = int.from_bytes(hashlib.sha256(seed_material.encode()).digest()[:8], "big")
+    if not slots or not recorded:
+        rows = []
+        for entity in participants:
+            state = model.state(entity)
+            rows.append(
+                {
+                    "id": entity,
+                    "name": names.get(entity, entity),
+                    "country": countries.get(entity, ""),
+                    "rating": round(state.mean, 2),
+                    "surface_rating": None,
+                    "surface_matches": 0,
+                    "champion": 1.0 if entity == complete_winner else 0.0,
+                    "reach_next_stage": 1.0 if entity == complete_winner else 0.0,
+                    "round_probabilities": [],
+                    "next_match": None,
+                }
+            )
+        rows.sort(key=lambda row: (-row["champion"], -row["rating"], row["name"]))
+        return {
+            "forecast_type": "tennis_draw",
+            "seed": f"{seed:016x}",
+            "simulations": simulations,
+            "surface": surface,
+            "current_stage": "Complete" if complete_winner else "Draw unavailable",
+            "published_ties_remaining": 0,
+            "participants": rows,
+            "upcoming_matches": [],
+        }
+
+    round_labels = competition["round_labels"]
+    active_round = None
+    known_field = list(slots)
+    active_pairs: list[tuple[str, str]] = []
+    for round_index, winners in enumerate(recorded):
+        unresolved = []
+        for match_index, winner in enumerate(winners):
+            pair = known_field[match_index * 2:match_index * 2 + 2]
+            present = [entity for entity in pair if entity]
+            if len(present) == 2 and not winner:
+                unresolved.append((present[0], present[1]))
+        if active_round is None and unresolved:
+            active_round = round_index
+            active_pairs = unresolved
+            break
+        known_field = list(winners)
+    if competition.get("complete") and complete_winner:
+        active_round = None
+        active_pairs = []
+
+    round_counts = {
+        entity: [0 for _round in recorded]
+        for entity in participants
+    }
+    champion_counts = {entity: 0 for entity in participants}
+    probability_cache: dict[tuple[str, str], float] = {}
+
+    def match_probability(entity_a: str, entity_b: str) -> float:
+        """Cache repeated bracket pairings without changing the deterministic draw."""
+        canonical = tuple(sorted((entity_a, entity_b)))
+        if canonical not in probability_cache:
+            probability_cache[canonical] = _tennis_match_probability(
+                model,
+                canonical[0],
+                canonical[1],
+                surface,
+            )
+        probability = probability_cache[canonical]
+        return probability if entity_a == canonical[0] else 1.0 - probability
+
+    generator = random.Random(seed)
+    for _ in range(simulations):
+        current = list(slots)
+        for round_index, known_winners in enumerate(recorded):
+            next_round = []
+            for match_index, published_winner in enumerate(known_winners):
+                pair = current[match_index * 2:match_index * 2 + 2]
+                entity_a, entity_b = (pair + [None, None])[:2]
+                winner = published_winner if published_winner in pair else None
+                if not winner:
+                    if entity_a and not entity_b:
+                        winner = entity_a
+                    elif entity_b and not entity_a:
+                        winner = entity_b
+                    elif entity_a and entity_b:
+                        probability = match_probability(entity_a, entity_b)
+                        winner = entity_a if generator.random() < probability else entity_b
+                next_round.append(winner)
+                if winner:
+                    round_counts[winner][round_index] += 1
+            current = next_round
+        if current and current[0]:
+            champion_counts[current[0]] += 1
+
+    matchup_by_entity = {}
+    upcoming_matches = []
+    if active_round is not None:
+        for entity_a, entity_b in active_pairs:
+            probability_a = match_probability(entity_a, entity_b)
+            matchup_a = {
+                "round": round_labels[active_round],
+                "opponent_id": entity_b,
+                "opponent_name": names.get(entity_b, entity_b),
+                "win_probability": round(probability_a, 4),
+                "surface": surface,
+            }
+            matchup_b = {
+                "round": round_labels[active_round],
+                "opponent_id": entity_a,
+                "opponent_name": names.get(entity_a, entity_a),
+                "win_probability": round(1.0 - probability_a, 4),
+                "surface": surface,
+            }
+            matchup_by_entity[entity_a] = matchup_a
+            matchup_by_entity[entity_b] = matchup_b
+            upcoming_matches.append(
+                {
+                    "round": round_labels[active_round],
+                    "player_a_id": entity_a,
+                    "player_a_name": names.get(entity_a, entity_a),
+                    "player_b_id": entity_b,
+                    "player_b_name": names.get(entity_b, entity_b),
+                    "probability_a": round(probability_a, 4),
+                    "probability_b": round(1.0 - probability_a, 4),
+                    "surface": surface,
+                }
+            )
+
+    surface_key = SurfaceBlendModel.surface(
+        Match(date.today(), "a", "b", 0.5, metadata={"surface": surface})
+    )
+    surface_model = model.surface_model(surface_key) if isinstance(model, SurfaceBlendModel) else None
+    rows = []
+    next_round_index = active_round if active_round is not None else len(recorded) - 1
+    for entity in participants:
+        state = model.state(entity)
+        context_state = surface_model.state(entity) if surface_model else None
+        probabilities = []
+        for round_index in range(len(recorded)):
+            target = round_labels[round_index + 1] if round_index + 1 < len(round_labels) else "Champion"
+            probabilities.append(
+                {
+                    "stage": target,
+                    "probability": round(round_counts[entity][round_index] / simulations, 4),
+                }
+            )
+        rows.append(
+            {
+                "id": entity,
+                "name": names.get(entity, entity),
+                "country": countries.get(entity, ""),
+                "rating": round(state.mean, 2),
+                "surface_rating": round(context_state.mean, 2) if context_state else None,
+                "surface_matches": context_state.matches if context_state else 0,
+                "champion": round(champion_counts[entity] / simulations, 4),
+                "reach_next_stage": round(
+                    round_counts[entity][next_round_index] / simulations,
+                    4,
+                ),
+                "round_probabilities": probabilities,
+                "next_match": matchup_by_entity.get(entity),
+            }
+        )
+    rows.sort(key=lambda row: (-row["champion"], -row["rating"], row["name"]))
+    return {
+        "forecast_type": "tennis_draw",
+        "seed": f"{seed:016x}",
+        "simulations": simulations,
+        "surface": surface,
+        "current_stage": "Complete" if active_round is None else round_labels[active_round],
+        "published_ties_remaining": len(active_pairs),
+        "participants": rows,
+        "upcoming_matches": upcoming_matches,
+    }
+
+
 def _poisson_score_distribution(model, home_id: str, away_id: str, draw_rate: float) -> list[tuple[int, int, float]]:
     """Fit a transparent independent-Poisson bridge to a protocol's W/D/L probabilities."""
     match = Match(date.today(), home_id, away_id, 0.5, home_advantage=True)
@@ -2272,6 +3087,8 @@ def _competition_matches(schedule: dict, entities: dict) -> list[Match]:
     use_advantage = bool(schedule.get("home_advantage", cohort == "football"))
     results = []
     for fixture in schedule["fixtures"]:
+        if fixture.get("is_bye"):
+            continue
         if fixture.get("home_goals") is None or fixture.get("away_goals") is None or not fixture.get("date"):
             continue
         home_slug = _slug(fixture["home_name"])
@@ -2292,6 +3109,7 @@ def _competition_matches(schedule: dict, entities: dict) -> list[Match]:
                 schedule["label"],
                 schedule["season"],
                 use_advantage,
+                {"surface": fixture.get("surface") or schedule.get("surface", "")},
             )
         )
     return sorted(_deduplicate(results), key=_match_sort_key)
@@ -2299,14 +3117,24 @@ def _competition_matches(schedule: dict, entities: dict) -> list[Match]:
 
 def _copy_competitor_states(source_model, target_model, entities: Iterable[str]) -> None:
     """Copy fixed pre-event beliefs between fresh instances of one protocol."""
-    for entity in entities:
-        source = source_model.state(entity)
-        target = target_model.state(entity)
-        target.mean = source.mean
-        target.variance = source.variance
-        target.matches = source.matches
-        target.last_played = source.last_played
-        target.volatility = source.volatility
+    entity_list = list(entities)
+
+    def copy_states(source, target) -> None:
+        for entity in entity_list:
+            source_state = source.state(entity)
+            target_state = target.state(entity)
+            target_state.mean = source_state.mean
+            target_state.variance = source_state.variance
+            target_state.matches = source_state.matches
+            target_state.last_played = source_state.last_played
+            target_state.volatility = source_state.volatility
+
+    if isinstance(source_model, SurfaceBlendModel) and isinstance(target_model, SurfaceBlendModel):
+        copy_states(source_model.global_model, target_model.global_model)
+        for surface, source_surface in source_model.surface_models.items():
+            copy_states(source_surface, target_model.surface_model(surface))
+        return
+    copy_states(source_model, target_model)
 
 
 def _anchored_performance_rating(
@@ -2320,10 +3148,20 @@ def _anchored_performance_rating(
     relevant = [match for match in event_matches if entity in (match.entity_a, match.entity_b)]
     state = anchor_model.state(entity)
     original_mean = state.mean
+    surface_means = {}
+    if isinstance(anchor_model, SurfaceBlendModel):
+        surface_means = {
+            surface: surface_model.state(entity).mean
+            for surface, surface_model in anchor_model.surface_models.items()
+        }
     span = 1_600.0 if model_name in {"elo", "glicko2"} else 60.0
 
     def expected(candidate: float) -> float:
+        delta = candidate - original_mean
         state.mean = candidate
+        if isinstance(anchor_model, SurfaceBlendModel):
+            for surface, surface_mean in surface_means.items():
+                anchor_model.surface_model(surface).state(entity).mean = surface_mean + delta
         total = 0.0
         for match in relevant:
             expectation_a = anchor_model.predict(match)
@@ -2346,6 +3184,9 @@ def _anchored_performance_rating(
                 high = middle
         rating = (low + high) / 2.0
     state.mean = original_mean
+    if isinstance(anchor_model, SurfaceBlendModel):
+        for surface, surface_mean in surface_means.items():
+            anchor_model.surface_model(surface).state(entity).mean = surface_mean
     return rating, cap
 
 
@@ -2355,6 +3196,8 @@ def _competition_performance(
     model_name: str,
     entities: dict,
     matches: list[Match],
+    prior_model_cache: dict | None = None,
+    prior_model_override=None,
 ) -> dict | None:
     """Replay a completed event from its strictly pre-event rating state."""
     event_matches = _competition_matches(schedule, entities)
@@ -2364,8 +3207,18 @@ def _competition_performance(
     first_result = event_matches[0].date
     prior_matches = [match for match in matches if match.date < first_result]
     parameters = _model_parameters(reference_model)
-    prior_model = _new_model(model_name, parameters, sport)
-    _run_model(prior_matches, prior_model, sport, history_entities=set())
+    cache_key = (
+        sport,
+        model_name,
+        first_result.isoformat(),
+        json.dumps(parameters, sort_keys=True),
+    )
+    prior_model = prior_model_override or (prior_model_cache or {}).get(cache_key)
+    if prior_model is None:
+        prior_model = _new_model(model_name, parameters, sport)
+        _run_model(prior_matches, prior_model, sport, history_entities=set())
+        if prior_model_cache is not None:
+            prior_model_cache[cache_key] = prior_model
     event_model = _new_model(model_name, parameters, sport)
     participants = sorted({entity for match in event_matches for entity in (match.entity_a, match.entity_b)})
     event_names = {}
@@ -2936,11 +3789,16 @@ def _build_tournament_predictor(
     models: dict,
     entities: dict,
     matches: list[Match],
+    pre_event_models: dict[str, dict[date, object]] | None = None,
 ) -> dict:
     draw_rate = sum(match.score_a == 0.5 for match in matches) / len(matches)
     competitions = []
+    prior_model_cache = {}
     for schedule in schedules:
         competition = {key: schedule[key] for key in ("id", "label", "season", "source_url", "license", "snapshot_sha256")}
+        for key in ("surface", "location", "date_method"):
+            if schedule.get(key):
+                competition[key] = schedule[key]
         competition["format"] = schedule.get("format", "round-robin league")
         competition["forecast_available"] = schedule.get("forecast_available", True)
         competition["availability"] = schedule.get(
@@ -2948,12 +3806,33 @@ def _build_tournament_predictor(
             "The complete round-robin fixture list is published and forecastable.",
         )
         competition["tie_break"] = schedule.get("tie_break")
-        competition["total_matches"] = len(schedule["fixtures"])
+        competition["total_matches"] = sum(
+            not row.get("is_bye") for row in schedule["fixtures"]
+        )
         competition["first_fixture"] = schedule.get("first_fixture") or min(row["date"] for row in schedule["fixtures"])
         competition["last_fixture"] = schedule.get("last_fixture") or max(row["date"] for row in schedule["fixtures"])
-        unplayed_dates = [row["date"] for row in schedule["fixtures"] if row["home_goals"] is None and row["date"]]
+        unplayed_dates = [
+            row["date"]
+            for row in schedule["fixtures"]
+            if row["home_goals"] is None and row["date"] and not row.get("is_bye")
+        ]
         competition["next_fixture"] = schedule.get("next_fixture") or min(unplayed_dates) if unplayed_dates else schedule.get("next_fixture")
-        if competition["format"] in {"round-robin league", "round-robin tournament"}:
+        if competition["format"] == "tennis knockout draw":
+            competition["models"] = {
+                model_name: _simulate_tennis_draw(schedule, model, model_name)
+                for model_name, model in models.items()
+            }
+            competition["status"] = (
+                "complete"
+                if schedule.get("complete")
+                else "scheduled"
+                if all(
+                    fixture.get("status") in {"SCHEDULED", "BYE"}
+                    for fixture in schedule["fixtures"]
+                )
+                else "live"
+            )
+        elif competition["format"] in {"round-robin league", "round-robin tournament"}:
             competition["models"] = {
                 model_name: _simulate_league(schedule, model, model_name, entities, draw_rate)
                 for model_name, model in models.items()
@@ -2978,7 +3857,17 @@ def _build_tournament_predictor(
             competition["status"] = "waiting for draw"
         if competition["status"] == "complete":
             performance_models = {
-                model_name: _competition_performance(schedule, model, model_name, entities, matches)
+                model_name: _competition_performance(
+                    schedule,
+                    model,
+                    model_name,
+                    entities,
+                    matches,
+                    prior_model_cache=prior_model_cache,
+                    prior_model_override=(pre_event_models or {}).get(model_name, {}).get(
+                        date.fromisoformat(schedule["first_fixture"])
+                    ),
+                )
                 for model_name, model in models.items()
             }
             if all(performance_models.values()):
@@ -2994,6 +3883,7 @@ def _build_tournament_predictor(
         "tie_break": "Points, simulated goal difference, then current model strength.",
         "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
         "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented. Qualifying-round forecasts stop at the next stage and never invent later entrants or pairings.",
+        "tennis_draw": "Official ATP bracket paths and byes are locked. Completed matches are fixed; each unplayed match is sampled from the selected model's global-plus-surface probability. Round advancement is counted from the same deterministic simulations.",
         "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
         "performance_method": "Completed competitions publish an anchored exact performance rating, a tournament-only reset rank, and chronological actual-versus-expected surprise instead of retrospective title probabilities.",
         "competitions": competitions,
@@ -3045,16 +3935,26 @@ def build_sport_payload(
     model_payloads = {}
     selected_parameters = {}
     fitted_models = {}
+    pre_event_models = {}
+    performance_snapshot_dates = {
+        date.fromisoformat(schedule["first_fixture"])
+        for schedule in predictor_schedules or []
+        if schedule.get("complete") and schedule.get("first_fixture")
+    }
     for model_name in MODEL_NAMES:
         params = _choose_parameters(matches, sport, model_name, validation_start, evaluation_start)
         selected_parameters[model_name] = params
         fitted_model = _new_model(model_name, params, sport)
+        model_snapshots = {}
         states, predictions, histories = _run_model(
             matches,
             fitted_model,
             sport,
             history_entities=history_entities,
+            snapshot_dates=performance_snapshot_dates,
+            snapshots=model_snapshots,
         )
+        pre_event_models[model_name] = model_snapshots
         if isinstance(fitted_model, Glicko2Model) or getattr(fitted_model, "uses_rating_period", False):
             fitted_model.age_to(latest)
             for entity in history_entities:
@@ -3244,9 +4144,13 @@ def build_sport_payload(
             ),
         },
     }
-    if sport in {"football", "national-football", "chess"} and predictor_schedules:
+    if sport in {"tennis", "football", "national-football", "chess"} and predictor_schedules:
         payload["tournament_predictor"] = _build_tournament_predictor(
-            predictor_schedules, fitted_models, entities, matches
+            predictor_schedules,
+            fitted_models,
+            entities,
+            matches,
+            pre_event_models=pre_event_models,
         )
     return payload
 
@@ -3357,6 +4261,9 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
                     league_schedules = fetch_league_schedules()
                     predictor_schedules = league_schedules + fetch_cup_schedules(token, sport, matches)
                     matches = _merge_schedule_results(matches, entities, predictor_schedules)
+                elif sport == "tennis":
+                    predictor_schedules = fetch_tennis_tournament_schedules(entities)
+                    matches = _merge_tennis_schedule_results(matches, predictor_schedules)
                 elif sport == "national-football":
                     predictor_schedules = fetch_cup_schedules(token, sport, matches)
                 elif sport == "chess":
@@ -3467,8 +4374,11 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         "tournament_predictor": {
             "simulations_per_competition_model": PREDICTOR_SIMULATIONS,
             "seed": "SHA-256(methodology version, competition, season, model), first 64 bits as hexadecimal",
-            "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup", "two-legged qualifying round"],
+            "formats": ["round-robin league", "round-robin tournament", "group + knockout", "knockout cup", "two-legged qualifying round", "tennis knockout draw"],
             "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
+            "tennis_draws": "Official ProTennisLive main-draw PDFs lock every ATP bracket path and bye. Unplayed singles matches use the fitted global-plus-surface probability; the same simulations publish direct-match, round-progression, and title probabilities.",
+            "tennis_draw_identity": "Official draw names are matched to the ManTennisData ATP player catalog by ATP code, country, surname, and given-name evidence. Unresolved names receive an explicit draw-scoped provisional ID rather than a guessed identity.",
+            "tennis_draw_dates": "Official draw PDFs do not contain match timestamps. Completed-event replay uses deterministic bracket-round ordering spread between the published event start and finish dates, and discloses that approximation.",
             "availability": "Withhold title probabilities until the public source identifies a knockout field. Qualifying rounds publish only current-tie advancement probabilities.",
             "qualifying_rounds": "UEFA's official named ties and results are replayed only for the active two-leg round. Future entrants and draws are withheld until published.",
             "qualifying_scoreline_bridge": "Fit an independent-Poisson scoreline distribution to each protocol's home/draw/away probabilities for unplayed legs; use actual aggregate scores and a neutral decisive probability only when still level.",

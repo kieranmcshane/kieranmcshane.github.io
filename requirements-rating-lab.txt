@@ -1,2 +1,2 @@
-# The refresh pipeline intentionally uses only the Python standard library.
-# Test tooling is installed separately in CI.
+# PDF extraction is required for the official ATP ProTennisLive draw feed.
+pypdf==6.1.1

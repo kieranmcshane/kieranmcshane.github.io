@@ -182,10 +182,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
     <p class="rating-lab-kicker">Live forecast · completed performance</p>
     <h2 id="predictor-heading">Competition forecast and performance</h2>
-    <p class="rating-lab-predictor-intro">Forecast live and scheduled competitions from current ratings, with confidently matched Polymarket and Kalshi snapshots shown as separate external benchmarks. Completed events switch to protocol performance ratings.</p>
+    <p class="rating-lab-predictor-intro">Forecast live and scheduled competitions from current ratings, including official ATP draws with surface-aware match and progression probabilities. Confidently matched Polymarket and Kalshi snapshots remain separate external benchmarks. Completed events switch to protocol performance ratings.</p>
     <details class="rating-lab-coverage-note">
       <summary>Coverage and forecast limits</summary>
-      <p class="rating-lab-audit-note">Current forward forecasts cover five club leagues, the live UEFA Champions League qualifying round, public club and national knockout fields, and active elite Lichess round-robin events. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. Completed sourced competitions switch to protocol performance ratings. The ATP results source does not publish a usable unauthenticated live draw, so tennis title odds are not reconstructed from completed matches alone.</p>
+      <p class="rating-lab-audit-note">Current forward forecasts cover official ATP main draws, five club leagues, the live UEFA Champions League qualifying round, public club and national knockout fields, and active elite Lichess round-robin events. Tennis locks the public ProTennisLive bracket and uses the declared surface model for every unplayed match. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. Completed sourced competitions switch to protocol performance ratings.</p>
     </details>
 
     <div class="rating-lab-predictor-toolbar">
@@ -226,7 +226,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
           </thead>
           <tbody id="predictor-body"></tbody>
         </table>
-        <p class="rating-lab-predictor-mobile-hint">Tap a team for title, top-four, relegation, and its full finishing-position distribution.</p>
+        <p class="rating-lab-predictor-mobile-hint">Tap a participant for its direct matchup, progression curve, title probability, or full finishing-position distribution.</p>
       </div>
       <aside class="rating-lab-detail rating-lab-predictor-detail" id="predictor-detail" aria-live="polite">
         <p class="rating-lab-detail-placeholder">Choose a team to inspect its full finishing-position distribution.</p>
@@ -236,7 +236,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <details class="rating-lab-predictor-method">
       <summary>How this competition view is calculated</summary>
       <p id="predictor-method-copy"></p>
-      <p>Every forecast uses the leaderboard’s chronological rating state. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Cups lock every published result and tie. When a later draw is not yet public, survivors are uniformly re-drawn; the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
+      <p>Every forecast uses the leaderboard’s chronological rating state. Tennis locks the official ATP bracket, results, and byes, then samples each unplayed match from the selected global-plus-surface belief. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Football cups lock every published result and tie; when a later draw is not yet public, survivors are uniformly re-drawn and the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
       <p>For a completed competition, the anchored Performance Rating varies one participant’s rating while every opponent stays fixed at the selected protocol’s pre-event belief, then solves <span class="rating-lab-formula">Σp<sub>m</sub>(R<sub>perf</sub>) = Σs<sub>m</sub></span>. A separate reset rank starts everybody from the neutral prior and replays only the event. Chronological surprise remains <span class="rating-lab-formula">Z = Σ(s<sub>m</sub> − p<sub>m</sub>) / √Σp<sub>m</sub>(1−p<sub>m</sub>)</span>, where a win scores 1, a draw 0.5, and a loss 0.</p>
     </details>
   </section>
@@ -386,6 +386,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <li>The public JSON publishes at most the top 500 eligible entities per model; it is not a complete registry of every entity seen in the source archive.</li>
         <li>Model selection tests a small declared parameter grid. It does not prove that the selected candidate is globally optimal.</li>
         <li>Cup forecasts do not guess unpublished entrants or qualification paths. The live Champions League qualifying view forecasts survival of the current official two-leg tie only. For a fully published knockout field, known ties are fixed; later unpublished draws use a uniform redraw without seeding, association, or country restrictions.</li>
+        <li>ATP forecasts use the official ProTennisLive main-draw PDF, preserve every bracket path and bye, and map entrants to stable ATP codes from the published player catalog. The PDF does not expose match timestamps, so completed-event replay uses disclosed deterministic round ordering between the official start and finish dates.</li>
         <li>For two-leg qualifying ties, the selected protocol supplies home/draw/away probabilities. A disclosed independent-Poisson bridge fits those probabilities for each unplayed leg, aggregate goals determine advancement, and a neutral decisive probability is used only if the aggregate remains level.</li>
       </ul>
     </details>

@@ -911,7 +911,7 @@
   }
 
   function predictorCompetitions() {
-    var rows = ['football', 'national-football', 'chess'].reduce(function (items, sport) {
+    var rows = ['tennis', 'football', 'national-football', 'chess'].reduce(function (items, sport) {
       var predictor = state.datasets[sport].tournament_predictor;
       if (!predictor) return items;
       predictor.competitions.forEach(function (competition) {
@@ -1360,6 +1360,52 @@
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>' + mediaCredit(team, sport);
   }
 
+  function renderTennisPredictorDetail(team, model, sport) {
+    if (!team) {
+      elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a player to inspect the surface-aware matchup and full progression curve.</p>';
+      return;
+    }
+    var nextMatch = team.next_match;
+    var matchup = nextMatch ?
+      '<section class="rating-lab-tennis-matchup"><p class="rating-lab-kicker">Next published matchup · ' +
+      escapeHtml(nextMatch.round) + '</p><div><span>' + escapeHtml(team.name) + '</span><strong>' +
+      percent(nextMatch.win_probability) + '</strong></div><div><span>' + escapeHtml(nextMatch.opponent_name) +
+      '</span><strong>' + percent(1 - nextMatch.win_probability) + '</strong></div><p>' +
+      escapeHtml(nextMatch.surface) + ' · selected protocol · no market input</p></section>' :
+      '<p class="rating-lab-performance-note">No direct opponent is currently pending for this player: the player has either already advanced, been eliminated, or is waiting for the preceding bracket match.</p>';
+    var progression = (team.round_probabilities || []).map(function (stage) {
+      return '<div class="rating-lab-tennis-progression-row"><span>' + escapeHtml(stage.stage) +
+        '</span><span class="rating-lab-tennis-progression-track" aria-hidden="true"><i style="--progress:' +
+        (stage.probability * 100).toFixed(2) + '%"></i></span><strong>' + percent(stage.probability) +
+        '</strong></div>';
+    }).join('');
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
+      escapeHtml(model.surface + ' · ' + model.current_stage) + '</p><h3>' + entityTitle(team, sport) +
+      '</h3></div><strong>' + percent(team.champion) + '</strong></div>' + matchup +
+      '<section class="rating-lab-tennis-progression"><h4>Progression probability</h4>' + progression +
+      '</section><dl><div><dt>Win tournament</dt><dd>' + percent(team.champion) +
+      '</dd></div><div><dt>Global rating</dt><dd>' + number(team.rating, 1) +
+      '</dd></div><div><dt>' + escapeHtml(model.surface) + ' rating</dt><dd>' +
+      (Number.isFinite(team.surface_rating) ? number(team.surface_rating, 1) : 'Prior') +
+      '</dd></div><div><dt>Surface evidence</dt><dd>' + number(team.surface_matches, 0) +
+      ' matches</dd></div></dl><p class="rating-lab-performance-note">The direct probability blends the global belief with the selected-surface belief. The surface weight grows with evidence and is exactly the parameter published in Methods & data.</p>' +
+      mediaCredit(team, sport);
+  }
+
+  function tennisInlineDetail(team, model) {
+    var matchup = team.next_match ?
+      '<p><strong>' + percent(team.next_match.win_probability) + '</strong> vs ' +
+      escapeHtml(team.next_match.opponent_name) + ' · ' + escapeHtml(team.next_match.round) +
+      '</p>' : '<p>Direct opponent pending or event run complete.</p>';
+    var stages = (team.round_probabilities || []).map(function (stage) {
+      return '<span><small>' + escapeHtml(stage.stage) + '</small><strong>' +
+        percent(stage.probability) + '</strong></span>';
+    }).join('');
+    return '<tr class="rating-lab-tennis-inline-detail"><td colspan="5"><div><p class="rating-lab-kicker">' +
+      escapeHtml(model.surface + ' probability') + '</p>' + matchup +
+      '<div class="rating-lab-tennis-inline-stages">' + stages + '</div></div></td></tr>';
+  }
+
   function renderQualifyingPredictorDetail(team, model, sport) {
     if (!team) {
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a club to inspect its current-round advancement probability.</p>';
@@ -1374,14 +1420,15 @@
   }
 
   function setPredictorColumns(type, targetLabel) {
-    var knockout = type === 'knockout';
+    var tennis = type === 'tennis';
+    var knockout = type === 'knockout' || tennis;
     var qualifying = type === 'qualifying';
     var standings = type === 'standings';
     elements.predictorColumns.rank.textContent = knockout || qualifying ? 'Forecast' : 'Projected';
-    elements.predictorColumns.team.textContent = knockout || qualifying ? 'Participant' : standings ? 'Player' : 'Team';
+    elements.predictorColumns.team.textContent = tennis ? 'Player' : knockout || qualifying ? 'Participant' : standings ? 'Player' : 'Team';
     elements.predictorColumns.now.textContent = knockout || qualifying ? 'Rating' : 'Now';
-    elements.predictorColumns.value.textContent = qualifying ? targetLabel : knockout ? 'Next stage' : 'Expected pts';
-    elements.predictorColumns.title.textContent = standings ? 'Win event' : 'Title';
+    elements.predictorColumns.value.textContent = qualifying ? targetLabel : tennis ? 'Advance' : knockout ? 'Next stage' : 'Expected pts';
+    elements.predictorColumns.title.textContent = tennis ? 'Champion' : standings ? 'Win event' : 'Title';
     elements.predictorColumns.secondary.textContent = standings ? 'Podium' : 'Top four';
     elements.predictorColumns.tertiary.textContent = standings ? 'Last place' : 'Bottom three';
     elements.predictorColumns.now.hidden = false;
@@ -1571,6 +1618,7 @@
     var isLeague = model.forecast_type === 'league' || Boolean(model.teams);
     var isStandings = model.forecast_type === 'standings';
     var isQualifying = model.forecast_type === 'qualifying_round';
+    var isTennisDraw = model.forecast_type === 'tennis_draw';
     var rows = isLeague ? model.teams.slice().sort(function (a, b) {
       return b.expected_points - a.expected_points || a.name.localeCompare(b.name);
     }) : model.participants.slice().sort(function (a, b) {
@@ -1586,7 +1634,7 @@
     var isPreseason = isLeague && model.completed_matches === 0;
     predictorTable.classList.add(isLeague ? 'is-league' : 'is-knockout');
     if (isPreseason) predictorTable.classList.add('is-preseason');
-    setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : isQualifying ? 'qualifying' : 'knockout', model.target_label);
+    setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : isQualifying ? 'qualifying' : isTennisDraw ? 'tennis' : 'knockout', model.target_label);
     if (isPreseason) {
       elements.predictorColumns.now.hidden = true;
       elements.predictorColumns.title.hidden = true;
@@ -1622,6 +1670,40 @@
           escapeHtml(timeline) + ' Fixed seed: <code>' + escapeHtml(String(model.seed)) + '</code>. Snapshot: <code>' +
           escapeHtml(competition.snapshot_sha256.substring(0, 12)) + '</code>. <a href="' +
           escapeHtml(competition.source_url) + '">Open UEFA fixture source</a>.';
+        return;
+      }
+      if (isTennisDraw) {
+        elements.predictorMetrics.innerHTML = [
+          ['Current round', model.current_stage],
+          ['Surface', model.surface],
+          ['Forecast sample', number(model.simulations, 0) + ' locked-draw simulations']
+        ].map(function (item) {
+          return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+        }).join('');
+        elements.predictorCaption.textContent = competitionTitle(competition) + ' · surface-aware progression by ' +
+          state.datasets[view.sport].models[state.predictorModel].label;
+        elements.predictorBody.innerHTML = rows.map(function (team, index) {
+          var opponent = team.next_match ?
+            '<small>vs ' + escapeHtml(team.next_match.opponent_name) + ' · ' +
+            percent(team.next_match.win_probability) + '</small>' : '';
+          var row = '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
+            (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
+            escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span><span>' + escapeHtml(team.name) +
+            '</span>' + opponent + '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
+            '</td><td class="rating-lab-predictor-value">' + probabilityCell(team.reach_next_stage) +
+            '</td><td class="rating-lab-predictor-title">' + probabilityCell(team.champion) + '</td></tr>';
+          return row + (team.id === state.predictorTeam ? tennisInlineDetail(team, model) : '');
+        }).join('');
+        renderTennisPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
+        elements.predictorMarket.hidden = true;
+        elements.predictorMarket.innerHTML = '';
+        elements.predictorMethod.innerHTML = number(model.simulations, 0) +
+          ' deterministic simulations of the official bracket. Completed matches and byes are locked; every unplayed match uses the selected protocol’s ' +
+          escapeHtml(model.surface) + ' probability. ' + escapeHtml(view.predictor.tennis_draw) +
+          ' Fixed seed: <code>' + escapeHtml(String(model.seed)) + '</code>. Snapshot: <code>' +
+          escapeHtml(competition.snapshot_sha256.substring(0, 12)) + '</code>. ' +
+          escapeHtml(competition.date_method || '') + ' <a href="' + escapeHtml(competition.source_url) +
+          '">Open official ATP draw</a>.';
         return;
       }
       elements.predictorMetrics.innerHTML = [
