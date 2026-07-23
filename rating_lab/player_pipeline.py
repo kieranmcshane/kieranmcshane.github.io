@@ -14,7 +14,7 @@ from typing import Callable
 from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_loss
 
 
-PLAYER_SCHEMA_VERSION = "1.4.0"
+PLAYER_SCHEMA_VERSION = "1.5.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 API_FOOTBALL_ROOT = "https://v3.football.api-sports.io"
 API_FOOTBALL_WORLD_CUP = {
@@ -103,6 +103,9 @@ COHORTS = (
 )
 RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
 CHEMISTRY_RIDGE_CANDIDATES = (1.0, 5.0, 20.0, 50.0)
+HAPM_RIDGE_CANDIDATES = (0.1, 1.0, 5.0, 20.0, 50.0)
+HAPM_MAX_INTERMEDIATE_ORDER = 4
+HAPM_PUBLISHED_COMBINATIONS_PER_ORDER = 8
 LAPM_LAMBDA = 1.0
 LAPM_RIDGE = 0.05
 MIN_MINUTES = 450.0
@@ -587,6 +590,352 @@ def _jaccard(left: tuple[str, ...], right: tuple[str, ...]) -> float:
     return len(left_set & right_set) / max(len(left_set | right_set), 1)
 
 
+def _team_stint_catalog(
+    rows: list[dict],
+) -> tuple[dict[str, list[dict]], dict[str, str], dict[str, int]]:
+    """Return chronological, team-perspective constant-lineup stints."""
+    team_stints: dict[str, list[dict]] = defaultdict(list)
+    team_names: dict[str, str] = {}
+    omitted_overcomplete: dict[str, int] = defaultdict(int)
+    for row in rows:
+        home_id, away_id = str(row["home_team_id"]), str(row["away_team_id"])
+        team_names[home_id] = row["home_team_name"]
+        team_names[away_id] = row["away_team_name"]
+        for stint in row.get("stints", []):
+            if len(stint["home"]) > 11 or len(stint["away"]) > 11:
+                omitted_overcomplete[home_id] += 1
+                omitted_overcomplete[away_id] += 1
+                continue
+            team_stints[home_id].append(
+                {
+                    "lineup": tuple(stint["home"]),
+                    "match_id": row["match_id"],
+                    "minutes": float(stint["minutes"]),
+                    "goal_difference": float(stint["goal_difference"]),
+                }
+            )
+            team_stints[away_id].append(
+                {
+                    "lineup": tuple(stint["away"]),
+                    "match_id": row["match_id"],
+                    "minutes": float(stint["minutes"]),
+                    "goal_difference": -float(stint["goal_difference"]),
+                }
+            )
+    return team_stints, team_names, omitted_overcomplete
+
+
+def _generalized_lineup_aggregate(
+    stints: list[dict], max_intermediate_order: int
+) -> tuple[dict[tuple[str, ...], dict], set[tuple[str, ...]]]:
+    """Aggregate HAPM rows for players, bounded subsets, and full lineups."""
+    aggregate: dict[tuple[str, ...], dict] = defaultdict(
+        lambda: {
+            "minutes": 0.0,
+            "goal_difference": 0.0,
+            "stints": 0,
+            "match_ids": set(),
+        }
+    )
+    full_lineups: set[tuple[str, ...]] = set()
+    for stint in stints:
+        lineup = tuple(sorted(set(stint["lineup"])))
+        if not lineup:
+            continue
+        full_lineups.add(lineup)
+        upper = min(max_intermediate_order, max(len(lineup) - 1, 0))
+        nodes = [
+            node
+            for order in range(1, upper + 1)
+            for node in combinations(lineup, order)
+        ]
+        nodes.append(lineup)
+        for node in nodes:
+            evidence = aggregate[node]
+            evidence["minutes"] += float(stint["minutes"])
+            evidence["goal_difference"] += float(stint["goal_difference"])
+            evidence["stints"] += 1
+            evidence["match_ids"].add(stint["match_id"])
+    return aggregate, full_lineups
+
+
+def _retained_hapm_nodes(
+    aggregate: dict[tuple[str, ...], dict],
+    full_lineups: set[tuple[str, ...]],
+    combination_minimum_minutes: float,
+    combination_minimum_stints: int,
+) -> list[tuple[str, ...]]:
+    nodes = []
+    for node, evidence in aggregate.items():
+        is_player = len(node) == 1
+        is_full_lineup = node in full_lineups
+        has_combination_support = (
+            evidence["minutes"] >= combination_minimum_minutes
+            and evidence["stints"] >= combination_minimum_stints
+        )
+        if is_player or (is_full_lineup and evidence["minutes"] >= 15.0) or has_combination_support:
+            nodes.append(node)
+    nodes.sort(key=lambda node: (len(node), node))
+    return nodes
+
+
+def _fit_hapm_incidence(
+    aggregate: dict[tuple[str, ...], dict],
+    nodes: list[tuple[str, ...]],
+    player_ids: list[str],
+    penalty: float,
+) -> dict:
+    """Weighted ridge on the extended hypergraph incidence matrix."""
+    if not player_ids:
+        return {
+            "coefficients": {},
+            "uncertainty": {},
+            "inverse": [],
+            "residual_variance": 0.0,
+            "weighted_rmse": 0.0,
+        }
+    index = {player_id: position for position, player_id in enumerate(player_ids)}
+    size = len(player_ids)
+    gram = [[0.0] * size for _ in range(size)]
+    target = [0.0] * size
+    observations: list[tuple[list[int], float, float]] = []
+    for node in nodes:
+        positions = [index[player_id] for player_id in node if player_id in index]
+        if not positions:
+            continue
+        evidence = aggregate[node]
+        minutes = max(float(evidence["minutes"]), 1e-9)
+        observed = 90.0 * float(evidence["goal_difference"]) / minutes
+        weight = max(minutes / 90.0, 1e-6)
+        observations.append((positions, observed, weight))
+        for left in positions:
+            target[left] += weight * observed
+            for right in positions:
+                gram[left][right] += weight
+    for position in range(size):
+        gram[position][position] += penalty
+    lower = _cholesky(gram)
+    estimates = _solve(lower, target)
+    weighted_errors = []
+    for positions, observed, weight in observations:
+        predicted = sum(estimates[position] for position in positions)
+        weighted_errors.append(weight * (observed - predicted) ** 2)
+    weight_total = sum(weight for _, _, weight in observations)
+    residual_variance = sum(weighted_errors) / max(weight_total - size, 1.0)
+    inverse = [[0.0] * size for _ in range(size)]
+    for column in range(size):
+        unit = [0.0] * size
+        unit[column] = 1.0
+        solved = _solve(lower, unit)
+        for row, value in enumerate(solved):
+            inverse[row][column] = value
+    uncertainty = {
+        player_id: math.sqrt(max(residual_variance * inverse[position][position], 0.0))
+        for player_id, position in index.items()
+    }
+    return {
+        "coefficients": dict(zip(player_ids, estimates)),
+        "uncertainty": uncertainty,
+        "inverse": inverse,
+        "residual_variance": residual_variance,
+        "weighted_rmse": math.sqrt(sum(weighted_errors) / max(weight_total, 1.0)),
+    }
+
+
+def _hapm_stint_rmse(stints: list[dict], fitted: dict) -> float:
+    weighted_errors = []
+    weight_total = 0.0
+    for stint in stints:
+        minutes = max(float(stint["minutes"]), 1e-9)
+        observed = 90.0 * float(stint["goal_difference"]) / minutes
+        predicted = sum(
+            fitted["coefficients"].get(player_id, 0.0)
+            for player_id in stint["lineup"]
+        )
+        weight = minutes / 90.0
+        weighted_errors.append(weight * (observed - predicted) ** 2)
+        weight_total += weight
+    return math.sqrt(sum(weighted_errors) / max(weight_total, 1.0))
+
+
+def _fit_team_hapm(
+    stints: list[dict],
+    eligible: set[str],
+    player_minimum_minutes: float,
+    player_minimum_matches: int,
+    combination_minimum_minutes: float,
+    combination_minimum_stints: int,
+    max_intermediate_order: int = HAPM_MAX_INTERMEDIATE_ORDER,
+) -> dict:
+    """Fit chronologically tuned, truncated-order football HAPM for one team."""
+    player_ids = sorted({player_id for stint in stints for player_id in stint["lineup"]})
+    match_ids = list(dict.fromkeys(stint["match_id"] for stint in stints))
+    split = min(max(1, int(len(match_ids) * 0.75)), max(len(match_ids) - 1, 1))
+    training_matches = set(match_ids[:split])
+    training = [stint for stint in stints if stint["match_id"] in training_matches]
+    validation = [stint for stint in stints if stint["match_id"] not in training_matches]
+    train_aggregate, train_full = _generalized_lineup_aggregate(
+        training, max_intermediate_order
+    )
+    train_nodes = _retained_hapm_nodes(
+        train_aggregate,
+        train_full,
+        combination_minimum_minutes,
+        combination_minimum_stints,
+    )
+    candidates = []
+    for penalty in HAPM_RIDGE_CANDIDATES:
+        fitted = _fit_hapm_incidence(
+            train_aggregate, train_nodes, player_ids, penalty
+        )
+        candidates.append(
+            {
+                "penalty": penalty,
+                "validation_rmse": _hapm_stint_rmse(validation, fitted),
+            }
+        )
+    selected = min(candidates, key=lambda item: (item["validation_rmse"], item["penalty"]))
+
+    baseline_candidates = []
+    for penalty in HAPM_RIDGE_CANDIDATES:
+        fitted = _fit_hapm_incidence(
+            train_aggregate, sorted(train_full), player_ids, penalty
+        )
+        baseline_candidates.append(
+            {
+                "penalty": penalty,
+                "validation_rmse": _hapm_stint_rmse(validation, fitted),
+            }
+        )
+    baseline_selected = min(
+        baseline_candidates,
+        key=lambda item: (item["validation_rmse"], item["penalty"]),
+    )
+
+    aggregate, full_lineups = _generalized_lineup_aggregate(
+        stints, max_intermediate_order
+    )
+    nodes = _retained_hapm_nodes(
+        aggregate,
+        full_lineups,
+        combination_minimum_minutes,
+        combination_minimum_stints,
+    )
+    fitted = _fit_hapm_incidence(
+        aggregate, nodes, player_ids, selected["penalty"]
+    )
+    index = {player_id: position for position, player_id in enumerate(player_ids)}
+
+    def node_uncertainty(node: tuple[str, ...]) -> float:
+        positions = [index[player_id] for player_id in node if player_id in index]
+        variance_factor = sum(
+            fitted["inverse"][left][right]
+            for left in positions
+            for right in positions
+        )
+        return math.sqrt(max(fitted["residual_variance"] * variance_factor, 0.0))
+
+    player_rows = []
+    combination_rows = []
+    for node in nodes:
+        evidence = aggregate[node]
+        impact = sum(fitted["coefficients"].get(player_id, 0.0) for player_id in node)
+        uncertainty = node_uncertainty(node)
+        row = {
+            "players": list(node),
+            "order": len(node),
+            "impact": impact,
+            "uncertainty": uncertainty,
+            "score": impact - 1.96 * uncertainty,
+            "minutes": float(evidence["minutes"]),
+            "matches": len(evidence["match_ids"]),
+            "stints": int(evidence["stints"]),
+        }
+        if (
+            len(node) == 1
+            and node[0] in eligible
+            and evidence["minutes"] >= player_minimum_minutes
+            and len(evidence["match_ids"]) >= player_minimum_matches
+        ):
+            player_rows.append(row)
+        elif len(node) > 1:
+            combination_rows.append(row)
+    player_rows.sort(key=lambda item: (-item["score"], item["players"]))
+    combination_rows.sort(key=lambda item: (item["order"], -item["score"], item["players"]))
+    nodes_by_order: dict[int, int] = defaultdict(int)
+    for node in nodes:
+        nodes_by_order[len(node)] += 1
+    return {
+        "players": player_rows,
+        "combinations": combination_rows,
+        "nodes": len(nodes),
+        "nodes_by_order": dict(sorted(nodes_by_order.items())),
+        "selected_penalty": selected["penalty"],
+        "candidates": candidates,
+        "validation_matches": len(validation),
+        "validation_rmse": selected["validation_rmse"],
+        "baseline_selected_penalty": baseline_selected["penalty"],
+        "baseline_validation_rmse": baseline_selected["validation_rmse"],
+        "validation_status": (
+            "supported"
+            if selected["validation_rmse"]
+            < baseline_selected["validation_rmse"] - 0.0001
+            else "descriptive_only"
+        ),
+        "weighted_rmse": fitted["weighted_rmse"],
+    }
+
+
+def _hapm(rows: list[dict], eligible: set[str], definition: dict) -> dict:
+    team_stints, team_names, omitted_overcomplete = _team_stint_catalog(rows)
+    combination_minutes = float(
+        definition.get(
+            "hapm_combination_minimum_minutes",
+            90.0 if definition.get("scope_type") == "season" else 30.0,
+        )
+    )
+    combination_stints = int(
+        definition.get(
+            "hapm_combination_minimum_stints",
+            2 if definition.get("scope_type") == "season" else 1,
+        )
+    )
+    player_minutes = float(definition.get("minimum_minutes", MIN_MINUTES))
+    player_matches = int(definition.get("minimum_matches", MIN_MATCHES))
+    teams = []
+    for team_id in sorted(team_stints, key=lambda value: team_names[value]):
+        fitted = _fit_team_hapm(
+            team_stints[team_id],
+            eligible,
+            player_minutes,
+            player_matches,
+            combination_minutes,
+            combination_stints,
+        )
+        if fitted["players"]:
+            teams.append(
+                {
+                    "id": team_id,
+                    "name": team_names[team_id],
+                    "fit": fitted,
+                    "omitted_overcomplete_stints": omitted_overcomplete[team_id],
+                }
+            )
+    return {
+        "teams": teams,
+        "parameters": {
+            "candidate_ridge_penalties": list(HAPM_RIDGE_CANDIDATES),
+            "retained_orders": [1, 2, 3, 4, "full observed lineup"],
+            "maximum_intermediate_order": HAPM_MAX_INTERMEDIATE_ORDER,
+            "combination_minimum_minutes": combination_minutes,
+            "combination_minimum_stints": combination_stints,
+            "player_minimum_team_minutes": player_minutes,
+            "player_minimum_team_matches": player_matches,
+            "stint_integrity_gate": "Intervals implying more than 11 active players on either side are excluded and counted per team; valid red-card lineups remain eligible.",
+        },
+    }
+
+
 def _laplacian_solve(
     observations: list[float],
     weights: list[float],
@@ -886,6 +1235,7 @@ def _rate_cohort(
         for player_id, meta in player_meta.items()
         if meta["minutes"] >= minimum_minutes and meta["matches"] >= minimum_matches
     ]
+    hapm = _hapm(rows, set(eligible), definition)
     lapm = _lapm(rows, set(eligible), definition)
     for meta in player_meta.values():
         meta["team"] = max(meta["team_minutes"], key=meta["team_minutes"].get)
@@ -1034,69 +1384,122 @@ def _rate_cohort(
             }
         )
     partnership_rows.sort(key=lambda item: (-item["score"], item["id"]))
-    lapm_teams = []
-    for team in lapm["teams"]:
-        fit = team["fit"]
-        team_rankings = []
-        for raw in fit["players"]:
-            player_id = raw["players"][0]
-            if player_id not in player_meta:
-                continue
-            team_rankings.append(
-                common(player_id)
-                | {
-                    "team": team["name"],
-                    "minutes": round(raw["minutes"], 1),
-                    "matches": raw["matches"],
+    def publish_team_models(raw_model: dict, model_id: str) -> list[dict]:
+        published = []
+        for team in raw_model["teams"]:
+            fit = team["fit"]
+            team_rankings = []
+            for raw in fit["players"]:
+                player_id = raw["players"][0]
+                if player_id not in player_meta:
+                    continue
+                team_rankings.append(
+                    common(player_id)
+                    | {
+                        "team": team["name"],
+                        "minutes": round(raw["minutes"], 1),
+                        "matches": raw["matches"],
+                        "impact": round(raw["impact"], 4),
+                        "uncertainty": round(raw["uncertainty"], 4),
+                        "score": round(raw["score"], 4),
+                        "team_minutes": round(raw["minutes"], 1),
+                        "stints": raw["stints"],
+                    }
+                )
+            team_rankings.sort(key=lambda item: (-item["score"], item["name"]))
+            for rank, item in enumerate(team_rankings, 1):
+                item["rank"] = rank
+
+            def combination_summary(raw: dict) -> dict:
+                people = [
+                    {"id": player_id, "name": player_meta[player_id]["name"]}
+                    for player_id in raw["players"]
+                    if player_id in player_meta
+                ]
+                return {
+                    "id": ":".join(raw["players"]),
+                    "players": people,
+                    "label": " + ".join(person["name"] for person in people),
+                    "order": raw["order"],
                     "impact": round(raw["impact"], 4),
                     "uncertainty": round(raw["uncertainty"], 4),
                     "score": round(raw["score"], 4),
-                    "team_minutes": round(raw["minutes"], 1),
+                    "minutes": round(raw["minutes"], 1),
+                    "matches": raw["matches"],
                     "stints": raw["stints"],
                 }
-            )
-        team_rankings.sort(key=lambda item: (-item["score"], item["name"]))
-        for rank, item in enumerate(team_rankings, 1):
-            item["rank"] = rank
 
-        def combination_summary(raw: dict) -> dict:
-            people = [
-                {"id": player_id, "name": player_meta[player_id]["name"]}
-                for player_id in raw["players"]
-                if player_id in player_meta
+            combinations_ranked = [
+                combination_summary(raw) for raw in fit["combinations"]
             ]
-            return {
-                "id": ":".join(raw["players"]),
-                "players": people,
-                "label": " + ".join(person["name"] for person in people),
-                "order": raw["order"],
-                "impact": round(raw["impact"], 4),
-                "uncertainty": round(raw["uncertainty"], 4),
-                "score": round(raw["score"], 4),
-                "minutes": round(raw["minutes"], 1),
-                "matches": raw["matches"],
-                "stints": raw["stints"],
-            }
-
-        combinations_ranked = [combination_summary(raw) for raw in fit["combinations"]]
-        lapm_teams.append(
-            {
-                "id": team["id"],
-                "name": team["name"],
-                "rankings": team_rankings,
-                "combinations": {
+            if model_id == "hapm":
+                by_order = []
+                for order in (2, 3, 4):
+                    ranked = sorted(
+                        (item for item in combinations_ranked if item["order"] == order),
+                        key=lambda item: (-item["score"], item["id"]),
+                    )
+                    if not ranked:
+                        continue
+                    by_order.append(
+                        {
+                            "order": order,
+                            "outperformers": ranked[:HAPM_PUBLISHED_COMBINATIONS_PER_ORDER],
+                            "underperformers": list(
+                                reversed(ranked[-HAPM_PUBLISHED_COMBINATIONS_PER_ORDER:])
+                            ),
+                        }
+                    )
+                combinations_payload = {"by_order": by_order}
+                diagnostics = {
+                    "retained_nodes": fit["nodes"],
+                    "nodes_by_order": {
+                        str(order): count
+                        for order, count in fit["nodes_by_order"].items()
+                    },
+                    "selected_ridge_penalty": fit["selected_penalty"],
+                    "validation_matches": fit["validation_matches"],
+                    "validation_rmse": round(fit["validation_rmse"], 4),
+                    "full_lineup_apm_validation_rmse": round(
+                        fit["baseline_validation_rmse"], 4
+                    ),
+                    "validation_delta": round(
+                        fit["validation_rmse"] - fit["baseline_validation_rmse"],
+                        4,
+                    ),
+                    "validation_status": fit["validation_status"],
+                    "weighted_fit_rmse": round(fit["weighted_rmse"], 4),
+                    "published_combination_orders": [2, 3, 4],
+                    "published_examples_per_tail": HAPM_PUBLISHED_COMBINATIONS_PER_ORDER,
+                    "omitted_overcomplete_stints": team.get(
+                        "omitted_overcomplete_stints", 0
+                    ),
+                }
+            else:
+                combinations_payload = {
                     "outperformers": combinations_ranked[:15],
                     "underperformers": list(reversed(combinations_ranked[-15:])),
-                },
-                "diagnostics": {
+                }
+                diagnostics = {
                     "retained_nodes": fit["nodes"],
                     "jaccard_edges": fit["edges"],
                     "solver_iterations": fit["iterations"],
                     "solver_residual": round(fit["solver_residual"], 8),
                     "weighted_fit_rmse": round(fit["weighted_rmse"], 4),
-                },
-            }
-        )
+                }
+            published.append(
+                {
+                    "id": team["id"],
+                    "name": team["name"],
+                    "rankings": team_rankings,
+                    "combinations": combinations_payload,
+                    "diagnostics": diagnostics,
+                }
+            )
+        return published
+
+    hapm_teams = publish_team_models(hapm, "hapm")
+    lapm_teams = publish_team_models(lapm, "lapm")
     starter_coverage = audit["starter_teams_ok"] / max(2 * len(rows), 1)
     minute_coverage = audit["complete_players"] / max(audit["used_players"], 1)
     integrity_coverage = audit["integrity_matches"] / max(len(rows), 1)
@@ -1198,6 +1601,38 @@ def _rate_cohort(
                     "outperformers": partnership_rows[:15],
                     "underperformers": list(reversed(partnership_rows[-15:])),
                 },
+            },
+            "hapm": {
+                "label": "HAPM",
+                "status": "team_specific_validation",
+                "scope": "within_team",
+                "ranking_rule": "within-team player coefficient − 1.96 × approximate uncertainty",
+                "parameters": hapm["parameters"]
+                | {
+                    "outcome": "goal difference per 90 during constant-lineup stints",
+                    "design": "weighted ridge regression on an extended hypergraph incidence matrix whose rows are retained generalized lineups and whose columns are players",
+                    "objective": "minutes-weighted squared error over generalized lineups + ridge penalty on player coefficients",
+                    "football_adaptation": "Retain players, pairs, trios, quartets, and full observed lineups; exhaustive intermediate orders are omitted because an 11-player lineup has 2,047 non-empty subsets.",
+                    "validation_baseline": "Team-specific additive APM fitted only to full observed lineup rows with the same chronological split and ridge candidates.",
+                    "reference_paper": "https://doi.org/10.1515/jqas-2024-0057",
+                    "reference_code": "https://github.com/njosephs/HAPM",
+                },
+                "metrics": {
+                    "verified_event_matches": audit.get("goal_event_matches", 0),
+                    "teams": len(hapm_teams),
+                    "supported_teams": sum(
+                        team["diagnostics"]["validation_status"] == "supported"
+                        for team in hapm_teams
+                    ),
+                    "descriptive_teams": sum(
+                        team["diagnostics"]["validation_status"] != "supported"
+                        for team in hapm_teams
+                    ),
+                    "retained_nodes": sum(
+                        team["diagnostics"]["retained_nodes"] for team in hapm_teams
+                    ),
+                },
+                "teams": hapm_teams,
             },
             "lapm": {
                 "label": "LAPM",
@@ -1680,14 +2115,16 @@ def build_player_payload(
             "excluded_inputs": ["passes", "shots", "dribbles", "expected goals", "tracking data"],
             "model_hierarchy": {
                 "primary_baselines": ["lineup_trueskill", "rapm"],
-                "interaction_extensions": ["pairwise_chemistry", "lapm"],
+                "interaction_extensions": ["pairwise_chemistry"],
+                "dependency_aware_extensions": ["hapm", "lapm"],
                 "reason": "Strongly regularized additive models remain primary because sparse football lineup combinations make them more stable, interpretable, and auditable for broad player comparison.",
-                "interaction_scope": "Pairwise chemistry and LAPM answer contextual partnership or lineup questions; they are not portable individual-talent scores.",
-                "promotion_rule": "An interaction layer does not replace an additive baseline unless strictly chronological held-out evaluation supports the added complexity.",
+                "interaction_scope": "Pairwise chemistry estimates explicit residual pair effects. HAPM and LAPM use generalized-lineup dependency structure. All three answer contextual questions and are not portable individual-talent scores.",
+                "promotion_rule": "A contextual extension does not replace an additive baseline unless strictly chronological held-out evaluation supports the added complexity.",
             },
             "lineup_trueskill": "Sequential additive team-skill update using normalized minutes-played weights; every probability is recorded before its match update.",
             "rapm": "Match-level goal-difference ridge regression using normalized minutes weights, home-goal intercept, and a chronological final-quarter penalty selection.",
             "pairwise_chemistry": "Experimental non-additive residual model: exact teammate overlap minutes define pair features, ridge shrinkage is selected on the chronological final quarter, and effects are fitted only to goal difference left unexplained by RAPM.",
+            "hapm": "Experimental team-specific Hypergraph Adjusted Plus-Minus adaptation: weighted ridge regression fits player coefficients to an extended incidence matrix containing supported players, pairs, trios, quartets, and full observed lineups. The ridge penalty is chosen chronologically and validation is published against full-lineup APM for every team.",
             "lapm": "Experimental team-specific line-graph APM adaptation: singleton players, qualifying pairs, and full observed constant lineups are graph nodes; non-zero Jaccard overlap creates edges and a Laplacian penalty smooths similar combinations toward one another.",
             "interpretation": "These estimates describe association with team outcomes within one declared complete tournament or season. They do not identify how a player contributed and should not be compared across cohorts.",
         },
@@ -1730,9 +2167,15 @@ def validate_player_payload(payload: dict) -> None:
             for model in ("lineup-trueskill", "rapm", "pairwise-chemistry")
         ):
             raise ValueError(f"Empty player ranking: {cohort['id']}")
-        lapm = cohort["models"].get("lapm")
-        if not lapm or not lapm.get("teams"):
-            raise ValueError(f"Empty LAPM team models: {cohort['id']}")
-        for team in lapm["teams"]:
-            if not team.get("rankings"):
-                raise ValueError(f"Empty LAPM team ranking: {cohort['id']} / {team['id']}")
+        for model_id in ("hapm", "lapm"):
+            team_model = cohort["models"].get(model_id)
+            if not team_model or not team_model.get("teams"):
+                raise ValueError(
+                    f"Empty {model_id.upper()} team models: {cohort['id']}"
+                )
+            for team in team_model["teams"]:
+                if not team.get("rankings"):
+                    raise ValueError(
+                        f"Empty {model_id.upper()} team ranking: "
+                        f"{cohort['id']} / {team['id']}"
+                    )

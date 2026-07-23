@@ -9205,7 +9205,7 @@ body:has(.explain-lab) .post-header {
   .player-lab-quick-model .rating-lab-quick-model-menu {
     position: static;
     display: grid;
-    grid-template-columns: repeat(2, minmax(4.7rem, auto));
+    grid-template-columns: repeat(3, minmax(4.25rem, auto));
     min-width: 0;
     visibility: visible;
     opacity: 1;
@@ -9214,7 +9214,7 @@ body:has(.explain-lab) .post-header {
   }
 
   .player-lab-quick-model .rating-lab-quick-model-menu button {
-    min-width: 4.7rem;
+    min-width: 4.25rem;
     padding-inline: 0.45rem;
     font-size: 0.74rem;
     text-align: center;

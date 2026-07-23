@@ -170,6 +170,17 @@ def individual_contribution_protocol() -> dict:
                 "uncertainty": "approximate posterior spread from the regularized pair model",
                 "status": "experimental; validation result is published per cohort",
             },
+            "hapm": {
+                "input": "constant-lineup goal difference, exact lineup intervals, and stable player identifiers",
+                "estimator": "team-specific minutes-weighted ridge regression on an extended hypergraph incidence matrix; supported players, pairs, trios, quartets, and full observed lineups are rows and players are columns",
+                "uncertainty": "regularized-fit approximation from stint residual variance and the inverse ridge information matrix",
+                "scope": "within one team; player coefficients and combination fits are not compared across teams",
+                "status": "experimental; ridge strength and improvement over full-lineup APM are validated chronologically and published per team",
+                "references": {
+                    "paper": "https://doi.org/10.1515/jqas-2024-0057",
+                    "code": "https://github.com/njosephs/HAPM",
+                },
+            },
             "lapm": {
                 "input": "constant-lineup goal difference, exact lineup intervals, and stable player identifiers",
                 "estimator": "team-specific Jaccard line graph with Laplacian smoothness over players, qualifying pairs, and full observed lineups",
@@ -184,10 +195,11 @@ def individual_contribution_protocol() -> dict:
         },
         "model_hierarchy": {
             "primary_baselines": ["lineup_trueskill", "rapm"],
-            "interaction_extensions": ["pairwise_chemistry", "lapm"],
+            "interaction_extensions": ["pairwise_chemistry"],
+            "dependency_aware_extensions": ["hapm", "lapm"],
             "reason": "Football lineup combinations are sparse; regularized additive models provide the stable, interpretable first-order comparison.",
-            "use_rule": "Use the baselines for broad ranking and over- or under-performance; use interaction extensions for contextual partnership and lineup questions.",
-            "promotion_rule": "Added interaction complexity must improve strictly chronological held-out evaluation before it can replace a baseline.",
+            "use_rule": "Use the baselines for broad ranking and over- or under-performance; use pairwise chemistry for explicit partnership effects and HAPM/LAPM for generalized-lineup dependency questions.",
+            "promotion_rule": "Added contextual complexity must improve strictly chronological held-out evaluation before it can replace a baseline.",
         },
         "excluded_inputs": [
             "passes",
