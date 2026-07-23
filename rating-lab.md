@@ -293,7 +293,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-contribution" id="player-contribution" aria-labelledby="contribution-heading">
     <p class="rating-lab-kicker">Team result → player contribution</p>
     <h2 id="contribution-heading">Published where the lineups are complete</h2>
-    <p class="rating-lab-contribution-intro">Live club and national-team rankings still treat each team as one competitor. A separate historical player lab publishes individual estimates for four complete declared StatsBomb cohorts: UEFA Euro 2024 and the 2022 FIFA World Cup for men, plus Liga F and the FA Women’s Super League 2023/24 for women.</p>
+    <p class="rating-lab-contribution-intro">Live club and national-team rankings still treat each team as one competitor. A separate historical player lab publishes individual estimates only for complete declared cohorts: Premier League 2015/16, UEFA Euro 2024 and the 2022 FIFA World Cup for men, plus Liga F and the FA Women’s Super League 2023/24 for women. Recent Premier League seasons appear independently when every one of their 380 fixtures passes the API-Football evidence gates.</p>
     <p><a class="rating-lab-contribution-cta" href="{{ '/rating-lab/players/' | relative_url }}">Open historical player ratings →</a></p>
 
     <div class="rating-lab-contribution-methods">
@@ -319,7 +319,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         </div>
         <span class="rating-lab-status-ready">Historical cohorts live</span>
       </div>
-      <p>Every published historical cohort passes the checks below. The men’s release uses complete international tournaments; partial men’s club samples and the live five-league feed remain excluded because their open lineup coverage is incomplete.</p>
+      <p>Every published historical cohort passes the checks below. Partial men’s club samples and the live five-league feed remain excluded; recent complete Premier League seasons are accepted only through the verified server-side source path and never inferred from partial open-data slices.</p>
       <div class="rating-lab-table-wrap">
         <table class="rating-lab-readiness-table">
           <caption>Minimum data and reproducibility requirements for publishing footballer ratings</caption>

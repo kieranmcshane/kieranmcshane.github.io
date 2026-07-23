@@ -36,7 +36,7 @@ description: Outcome-only historical men's and women's football player ratings a
     <p id="player-source-status" class="rating-lab-notice" role="status" hidden></p>
     <details class="player-lab-boundary" id="player-scope">
       <summary>Verified cohorts and rating scope</summary>
-      <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The men’s publication includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. Every view states exactly which fixtures enter the replay.</p>
+      <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The open-data baseline includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup for men, plus Liga F and the WSL 2023/24 for women. Recent complete Premier League seasons are added independently through API-Football only when all 380 fixtures clear the same source audit. Every view states exactly which fixtures enter the replay.</p>
     </details>
 
     <div class="player-lab-toolbar" id="player-controls">
@@ -79,6 +79,7 @@ description: Outcome-only historical men's and women's football player ratings a
 
     <div class="rating-lab-metrics player-lab-metrics" id="player-metrics" aria-label="Cohort and model evidence"></div>
     <p class="player-lab-season-scope" id="player-season-scope"></p>
+    <p class="player-lab-hapm-status" id="player-hapm-status"></p>
 
     <section class="player-lab-lapm-combinations" id="player-lapm-combinations" aria-labelledby="player-lapm-combinations-heading" hidden>
       <div>
@@ -164,7 +165,7 @@ description: Outcome-only historical men's and women's football player ratings a
         </article>
         <article>
           <h3>HAPM <small>Hypergraph dependency model · experimental · within team</small></h3>
-          <p>Each retained player, pair, trio, quartet, and full observed lineup becomes a row of an extended incidence matrix; players remain its columns. A minutes-weighted ridge regression fits the player coefficients jointly. The ridge penalty is selected on the chronological final quarter, and every team reports whether HAPM beats a full-lineup-only APM baseline on held-out stints. Publication uses <span class="rating-lab-formula">coefficient − 1.96 × approximate uncertainty</span>.</p>
+          <p>Each retained player, pair, trio, quartet, and full observed lineup becomes a row of an extended incidence matrix; players remain its columns. A minutes-weighted ridge regression fits the player coefficients jointly. The ridge penalty is selected on the chronological final quarter, and every team reports whether HAPM beats a full-lineup-only APM baseline on held-out stints. HAPM remains an experimental diagnostic even for teams where it wins; it does not replace either additive ranking. Publication uses <span class="rating-lab-formula">coefficient − 1.96 × approximate uncertainty</span>.</p>
         </article>
         <article>
           <h3>LAPM <small>Line-graph dependency model · experimental · within team</small></h3>
@@ -179,7 +180,7 @@ description: Outcome-only historical men's and women's football player ratings a
         <li>Pairwise chemistry is contextual, not a portable individual-talent score. It can reflect tactics, coaching, opposition and roles shared by a pair.</li>
         <li>HAPM’s published player coefficients are still additive. Its dependency adjustment comes from fitting supported generalized lineups jointly; it does not publish a pair coefficient as “chemistry”.</li>
         <li>The football HAPM adaptation retains orders one through four plus each full observed lineup. Exhaustively retaining every order would create 2,047 non-empty subsets for a single 11-player lineup before duplicates are removed.</li>
-        <li>HAPM is marked supported for a team only when its strictly later validation stints beat full-lineup APM. Otherwise it remains visible as descriptive evidence. Intervals implying more than eleven active players are excluded and counted per team; valid red-card lineups remain eligible.</li>
+        <li>HAPM is marked as beating the baseline for a team only when its strictly later validation stints have lower RMSE than full-lineup APM. The cohort-level pass count is published above; HAPM remains experimental regardless of that team-specific result. Intervals implying more than eleven active players are excluded and counted per team; valid red-card lineups remain eligible.</li>
         <li>LAPM is descriptive in this release. It uses goal timing only to score constant-lineup stints, and retains singletons, qualifying pairs, and full observed lineups—not the exponentially large set of every possible order.</li>
         <li>HAPM and LAPM uncertainties are local regularized-fit approximations, not fully sampled Bayesian posteriors.</li>
         <li>The HAPM and LAPM implementations are explicit football adaptations of Josephs and Upton’s basketball framework, not claims to reproduce its NBA setup unchanged. See the <a href="https://doi.org/10.1515/jqas-2024-0057">published HAPM paper</a> and <a href="https://arxiv.org/abs/2003.01712">Bransen–Van Haaren player-chemistry paper</a>.</li>
@@ -197,7 +198,7 @@ description: Outcome-only historical men's and women's football player ratings a
 
     <div class="player-lab-attribution">
       <img src="https://raw.githubusercontent.com/statsbomb/public-images/master/statsbomb_logo_email_new.jpg" alt="StatsBomb">
-      <p><strong>Sources are declared per competition.</strong> StatsBomb Open Data supplies the existing historical cohorts. World Cup 2026 is published only after <a href="https://www.api-football.com/">API-Football</a> passes the same completeness gates for all 104 matches. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata, and a response snapshot hash.</p>
+      <p><strong>Sources are declared per cohort.</strong> StatsBomb Open Data supplies the reproducible historical baseline. API-Football supplies candidate recent Premier League seasons and World Cup 2026; each season is published independently only after every expected match passes the lineup, substitution, minutes, event-score and identifier gates. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata and a response snapshot hash.</p>
     </div>
   </section>
 </div>

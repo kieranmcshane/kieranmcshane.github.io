@@ -30,7 +30,7 @@ from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBl
 
 
 SCHEMA_VERSION = "1.15.0"
-METHODOLOGY_VERSION = "2026-07-23.3"
+METHODOLOGY_VERSION = "2026-07-23.4"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
@@ -225,8 +225,8 @@ def individual_contribution_protocol() -> dict:
             "publication_rights": "source licence must permit derived public ratings and audit metadata",
         },
         "source_assessment": {
-            "statsbomb_open_data": "Complete declared historical Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
-            "api_football": "The configured provider plan currently does not include season 2026, so World Cup 2026 is withheld. It becomes eligible only when API-Football returns all 104 completed fixtures with stable player IDs, two complete starting lineups, player minutes, and substitution events. Raw responses remain private; derived ratings record the response snapshot hash.",
+            "statsbomb_open_data": "Complete declared historical Premier League 2015/16, Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published. Newer men's domestic-league entries in the open archive are partial club slices and are not mislabeled as full seasons.",
+            "api_football": "Premier League 2022/23 through 2025/26 and World Cup 2026 are evaluated independently. A league season becomes eligible only when all 380 completed fixtures pass stable-ID, two-starting-lineup, player-minute, substitution-event and reproduced-score gates; World Cup 2026 requires all 104. Provider responses remain private, while derived ratings record coverage, retrieval metadata and the response snapshot hash.",
             "football_data_org": "Fixtures and results remain the primary club feed, but its configured coverage is not used for historical player attribution.",
             "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
         },

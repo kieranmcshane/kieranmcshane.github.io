@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.9.0",
-  "methodology_version": "2026-07-21.2",
-  "code_revision": "3deba666f812cb70b753b5b622a22e2c4efedd6c",
-  "generated_at": "2026-07-20T07:51:09+00:00",
+  "schema_version": "1.15.0",
+  "methodology_version": "2026-07-23.4",
+  "code_revision": "295f0cae68df6e099796c44115c1c911b799ae4a",
+  "generated_at": "2026-07-23T22:01:36+00:00",
   "sports": {
     "tennis": {
       "status": "current",
@@ -192,20 +192,33 @@
       "round-robin league",
       "round-robin tournament",
       "group + knockout",
-      "knockout cup"
+      "knockout cup",
+      "two-legged qualifying round",
+      "tennis knockout draw"
     ],
     "unpublished_draws": "Uniform random redraw among surviving teams; published ties and byes are locked.",
-    "availability": "Withhold title probabilities until the public source identifies a knockout field.",
+    "tennis_draws": "Official ProTennisLive main-draw PDFs lock every ATP bracket path and bye. Unplayed singles matches use the fitted global-plus-surface probability; the same simulations publish direct-match, round-progression, and title probabilities.",
+    "tennis_draw_identity": "Official draw names are matched to the ManTennisData ATP player catalog by ATP code, country, surname, and given-name evidence. Unresolved names receive an explicit draw-scoped provisional ID rather than a guessed identity.",
+    "tennis_draw_dates": "Official draw PDFs do not contain match timestamps. Completed-event replay uses deterministic bracket-round ordering spread between the published event start and finish dates, and discloses that approximation.",
+    "availability": "Withhold title probabilities until the public source identifies a knockout field. Qualifying rounds publish only current-tie advancement probabilities.",
+    "qualifying_rounds": "UEFA's official named ties and results are replayed only for the active two-leg round. Future entrants and draws are withheld until published.",
+    "qualifying_scoreline_bridge": "Fit an independent-Poisson scoreline distribution to each protocol's home/draw/away probabilities for unplayed legs; use actual aggregate scores and a neutral decisive probability only when still level.",
     "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
-    "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
+    "market_benchmark": "Polymarket and Kalshi winner quotes are frozen beside all four protocol forecasts at the same dated snapshot. Once the official winner resolves, every forecaster is scored on the unchanged common field using categorical log loss and multiclass Brier score; market data remain comparison-only and never enter a model.",
+    "market_snapshot_retention": "The latest successful quote per provider, competition, and UTC date is retained in the published sport JSON with its source hash and simultaneous model probabilities.",
     "market_quality_fields": [
+      "captured_at",
+      "snapshot_sha256",
       "raw_yes_price_sum",
       "coverage",
       "best_bid",
       "best_ask",
       "liquidity_usd",
       "volume_usd",
-      "updated_at"
+      "updated_at",
+      "other_probability",
+      "resolution.scores.*.log_loss",
+      "resolution.scores.*.brier"
     ],
     "refresh": "daily"
   },
@@ -225,7 +238,51 @@
         "input": "score differential plus the players and minutes on each side",
         "estimator": "minutes-weighted ridge regression with chronological validation",
         "uncertainty": "ridge sampling approximation from match-level residual variance"
+      },
+      "pairwise_chemistry": {
+        "input": "score differential plus exact shared-pitch minutes for teammate pairs",
+        "estimator": "ridge-shrunk pair effects on RAPM residuals with chronological validation",
+        "uncertainty": "approximate posterior spread from the regularized pair model",
+        "status": "experimental; validation result is published per cohort"
+      },
+      "hapm": {
+        "input": "constant-lineup goal difference, exact lineup intervals, and stable player identifiers",
+        "estimator": "team-specific minutes-weighted ridge regression on an extended hypergraph incidence matrix; supported players, pairs, trios, quartets, and full observed lineups are rows and players are columns",
+        "uncertainty": "regularized-fit approximation from stint residual variance and the inverse ridge information matrix",
+        "scope": "within one team; player coefficients and combination fits are not compared across teams",
+        "status": "experimental; ridge strength and improvement over full-lineup APM are validated chronologically and published per team",
+        "references": {
+          "paper": "https://doi.org/10.1515/jqas-2024-0057",
+          "code": "https://github.com/njosephs/HAPM"
+        }
+      },
+      "lapm": {
+        "input": "constant-lineup goal difference, exact lineup intervals, and stable player identifiers",
+        "estimator": "team-specific Jaccard line graph with Laplacian smoothness over players, qualifying pairs, and full observed lineups",
+        "uncertainty": "local regularized-fit approximation from stint residual variance and graph support",
+        "scope": "within one team; values are not compared across teams",
+        "status": "experimental and descriptive; graph construction and diagnostics are published per cohort",
+        "references": {
+          "paper": "https://doi.org/10.1515/jqas-2024-0057",
+          "code": "https://github.com/njosephs/HAPM"
+        }
       }
+    },
+    "model_hierarchy": {
+      "primary_baselines": [
+        "lineup_trueskill",
+        "rapm"
+      ],
+      "interaction_extensions": [
+        "pairwise_chemistry"
+      ],
+      "dependency_aware_extensions": [
+        "hapm",
+        "lapm"
+      ],
+      "reason": "Football lineup combinations are sparse; regularized additive models provide the stable, interpretable first-order comparison.",
+      "use_rule": "Use the baselines for broad ranking and over- or under-performance; use pairwise chemistry for explicit partnership effects and HAPM/LAPM for generalized-lineup dependency questions.",
+      "promotion_rule": "Added contextual complexity must improve strictly chronological held-out evaluation before it can replace a baseline."
     },
     "excluded_inputs": [
       "passes",
@@ -238,29 +295,118 @@
       "stable_player_identifiers": "required",
       "starting_lineup_coverage": ">= 95% of eligible matches",
       "substitution_minute_coverage": ">= 95% of eligible matches",
+      "goal_event_score_coverage": ">= 95% of eligible matches and event goals must reproduce the final score",
       "lineup_integrity": "11 starters per side and minutes bounded to the match",
       "identifiability": "connected player-opponent graph and published collinearity diagnostics",
       "chronology": "no future lineups or outcomes may enter a past update or evaluation prediction",
       "publication_rights": "source licence must permit derived public ratings and audit metadata"
     },
     "source_assessment": {
-      "statsbomb_open_data": "Complete declared historical Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published; the archive is not a complete live five-league feed.",
-      "football_data_org": "Potential live source because the API schema includes lineups and substitutions; completeness must be measured with the configured token.",
+      "statsbomb_open_data": "Complete declared historical Premier League 2015/16, Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published. Newer men's domestic-league entries in the open archive are partial club slices and are not mislabeled as full seasons.",
+      "api_football": "Premier League 2022/23 through 2025/26 and World Cup 2026 are evaluated independently. A league season becomes eligible only when all 380 completed fixtures pass stable-ID, two-starting-lineup, player-minute, substitution-event and reproduced-score gates; World Cup 2026 requires all 104. Provider responses remain private, while derived ratings record coverage, retrieval metadata and the response snapshot hash.",
+      "football_data_org": "Fixtures and results remain the primary club feed, but its configured coverage is not used for historical player attribution.",
       "openfootball_fallback": "Results and fixtures only; cannot support player attribution."
     },
     "publication_rule": "Publish only declared cohorts that pass every gate; never imply that a historical cohort is a live player ranking."
   },
   "player_football": {
     "status": "current",
-    "checked_at": "2026-07-22T11:30:03+00:00",
-    "source": "StatsBomb Open Data",
+    "checked_at": "2026-07-23T21:59:00+00:00",
+    "source": "Cohort-specific verified sources",
     "cohorts": [
+      "premier-league-2015-16",
       "euro-2024",
       "world-cup-2022",
       "liga-f-2023-24",
       "wsl-2023-24"
     ],
-    "data_url": "/assets/data/rating-lab/player-football.json"
+    "data_url": "/assets/data/rating-lab/player-football.json",
+    "snapshot_sha256": "949d47d5c6f540335bf5ab68d8c23839ea892e86e49d39e500e535490d852a59",
+    "source_statuses": {
+      "api_football_premier_league_2022_23": {
+        "status": "not_configured",
+        "provider": "API-Football by API-SPORTS",
+        "cohort": "premier-league-2022-23",
+        "checked_at": "2026-07-23T21:59:00+00:00",
+        "required_matches": 380,
+        "required_fields": [
+          "stable player ID",
+          "starting XI",
+          "substitution minute",
+          "minutes played",
+          "match result"
+        ],
+        "message": "API_FOOTBALL_KEY is not configured; Premier League 2022/23 remains withheld."
+      },
+      "api_football_premier_league_2023_24": {
+        "status": "not_configured",
+        "provider": "API-Football by API-SPORTS",
+        "cohort": "premier-league-2023-24",
+        "checked_at": "2026-07-23T21:59:00+00:00",
+        "required_matches": 380,
+        "required_fields": [
+          "stable player ID",
+          "starting XI",
+          "substitution minute",
+          "minutes played",
+          "match result"
+        ],
+        "message": "API_FOOTBALL_KEY is not configured; Premier League 2023/24 remains withheld."
+      },
+      "api_football_premier_league_2024_25": {
+        "status": "not_configured",
+        "provider": "API-Football by API-SPORTS",
+        "cohort": "premier-league-2024-25",
+        "checked_at": "2026-07-23T21:59:00+00:00",
+        "required_matches": 380,
+        "required_fields": [
+          "stable player ID",
+          "starting XI",
+          "substitution minute",
+          "minutes played",
+          "match result"
+        ],
+        "message": "API_FOOTBALL_KEY is not configured; Premier League 2024/25 remains withheld."
+      },
+      "api_football_premier_league_2025_26": {
+        "status": "not_configured",
+        "provider": "API-Football by API-SPORTS",
+        "cohort": "premier-league-2025-26",
+        "checked_at": "2026-07-23T21:59:00+00:00",
+        "required_matches": 380,
+        "required_fields": [
+          "stable player ID",
+          "starting XI",
+          "substitution minute",
+          "minutes played",
+          "match result"
+        ],
+        "message": "API_FOOTBALL_KEY is not configured; Premier League 2025/26 remains withheld."
+      },
+      "api_football_world_cup_2026": {
+        "status": "not_configured",
+        "provider": "API-Football by API-SPORTS",
+        "cohort": "world-cup-2026",
+        "checked_at": "2026-07-23T21:59:00+00:00",
+        "required_matches": 104,
+        "required_fields": [
+          "stable player ID",
+          "starting XI",
+          "substitution minute",
+          "minutes played",
+          "match result"
+        ],
+        "message": "API_FOOTBALL_KEY is not configured; FIFA World Cup 2026 remains withheld."
+      }
+    }
+  },
+  "media": {
+    "model_input": false,
+    "crests": "Source-supplied football-data.org team crest URLs; underlying club and federation mark rights remain with their owners.",
+    "portraits": "Wikimedia Commons files reached through exact ATP or FIDE identifiers in Wikidata; every row carries its file page, licence, and attribution.",
+    "flags": "Vendored flag-icons v7.5.0 SVG assets under the MIT licence, selected only from source country or federation codes; operating-system emoji are not used.",
+    "identity_matching": "Never infer a player portrait from a name-only search.",
+    "fallback": "National flag or generated initials when no verified image is available or loading fails."
   },
   "methodology_url": "/rating-lab/#methodology"
 }

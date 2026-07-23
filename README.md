@@ -36,13 +36,14 @@ the complete Jekyll site as a Pages artifact. Repository setup requires:
 
 1. Optionally create a free football-data.org API token and add it as the
    repository secret `FOOTBALL_DATA_TOKEN` for the primary football feed.
-2. To attempt publication of the completed men's World Cup 2026 player cohort,
-   add an API-Football credential as `API_FOOTBALL_KEY`. The credential currently
-   configured for this site is on a plan that does not expose season 2026, so the
-   cohort is explicitly withheld. An eligible plan triggers one league-season
-   request plus fixture-detail batches of at most 20 IDs, validation of all 104
-   matches, and publication only after every gate passes. The credential and raw
-   responses are never exposed.
+2. To publish candidate recent men's league seasons or the completed men's
+   World Cup 2026 player cohort, add an API-Football credential as
+   `API_FOOTBALL_KEY`. Premier League 2022/23 through 2025/26 are checked
+   independently for all 380 fixtures; World Cup 2026 requires all 104 matches.
+   Fixture details are requested in batches of at most 20 IDs, keeping the first
+   complete expansion below 100 requests. Cohorts that the configured plan
+   cannot access remain explicitly withheld. The credential and raw responses
+   are never exposed.
 3. In **Settings → Pages**, select **GitHub Actions** as the deployment source.
 4. Run **Refresh ratings and deploy Pages** once manually, or wait for the daily
    schedule. Tennis, football, national-team football, and current chess refresh
@@ -75,8 +76,9 @@ team-specific HAPM, and team-specific LAPM
 ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
 An unavailable optional commercial cohort cannot block or replace validated
-public-data cohorts. The payload records whether World Cup 2026 is published,
-not configured, or withheld, together with a sanitized reason and check time.
+public-data cohorts. The payload records whether each candidate recent Premier
+League season and World Cup 2026 is published, not configured, or withheld,
+together with a sanitized reason and check time.
 
 The Pages workflow always runs the historical player pipeline before Jekyll so
 a restored fallback can never silently replace the checked-in player schema.
@@ -89,8 +91,11 @@ The historical player lab also publishes complete league-season cohorts when
 the source supplies every fixture. Premier League 2015/16 is the first men's
 full-season cohort: all 380 league matches pass the lineup, minutes, integrity,
 and connected-graph gates, and eligibility rises to 900 minutes and ten
-appearances. The payload lists included competitions explicitly; domestic cups
-and UEFA matches are not described as season-wide evidence until their complete
+appearances. Premier League 2022/23 through 2025/26 are candidate API-Football
+cohorts and are published independently only after all 380 matches pass the
+same stable-ID, lineup, substitution, minute, goal-event and score-reproduction
+gates. The payload lists included competitions explicitly; domestic cups and
+UEFA matches are not described as season-wide evidence until their complete
 lineup-minute feeds are available.
 
 Lineup TrueSkill and RAPM remain the primary player-comparison baselines. Their
@@ -114,9 +119,10 @@ trios, quartets, and full observed constant lineups become weighted regression
 rows while players remain the columns. This bounded-order adaptation avoids
 materializing all 2,047 non-empty subsets of every 11-player lineup. Ridge
 strength is selected on the chronological final quarter; the public payload
-reports HAPM's held-out stint RMSE beside a full-lineup APM baseline and marks
-each team supported or descriptive. HAPM player coefficients remain additive;
-pairwise chemistry remains the explicit residual interaction model.
+reports HAPM's held-out stint RMSE beside a full-lineup APM baseline and counts
+how many teams beat that simpler baseline. HAPM remains experimental regardless
+of an individual team's result; its player coefficients also remain additive.
+Pairwise chemistry remains the explicit residual interaction model.
 
 LAPM is a separate descriptive dependency lens based on Josephs et al.'s
 line-graph APM construction. Exact substitution intervals split matches into

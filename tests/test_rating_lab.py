@@ -12,6 +12,8 @@ from unittest.mock import patch
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
 from rating_lab.player_pipeline import (
+    API_FOOTBALL_LEAGUE_COHORTS,
+    API_FOOTBALL_WORLD_CUP,
     COHORTS,
     _api_football_fixture,
     _build_cohort,
@@ -565,6 +567,29 @@ h001,Hana,Theta,CZE
         self.assertIn("substitution minute", status["required_fields"])
         self.assertNotIn("2022 to 2024", status["message"])
 
+    def test_recent_mens_league_cohorts_are_complete_and_request_bounded(self):
+        self.assertEqual(
+            [definition["id"] for definition in API_FOOTBALL_LEAGUE_COHORTS],
+            [
+                "premier-league-2022-23",
+                "premier-league-2023-24",
+                "premier-league-2024-25",
+                "premier-league-2025-26",
+            ],
+        )
+        for definition in API_FOOTBALL_LEAGUE_COHORTS:
+            self.assertEqual(definition["competition_id"], 39)
+            self.assertEqual(definition["expected_matches"], 380)
+            self.assertEqual(definition["scope_type"], "season")
+            self.assertEqual(definition["venue_context"], "home-and-away")
+            self.assertEqual(definition["minimum_minutes"], 900.0)
+            self.assertEqual(definition["minimum_matches"], 10)
+        requests = sum(
+            1 + math.ceil(definition["expected_matches"] / 20)
+            for definition in (*API_FOOTBALL_LEAGUE_COHORTS, API_FOOTBALL_WORLD_CUP)
+        )
+        self.assertLessEqual(requests, 100)
+
     def test_rapm_neutral_matches_do_not_create_home_intercept(self):
         rows = [
             {"home": {"a": 1.0}, "away": {"b": 1.0}, "goal_difference": 2.0, "home_advantage": False},
@@ -575,7 +600,7 @@ h001,Hana,Theta,CZE
 
     def test_player_schema_is_versioned_and_closed(self):
         schema = player_schema()
-        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.5.0")
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.6.0")
         self.assertFalse(schema["additionalProperties"])
 
     def test_pages_workflow_regenerates_player_data_before_jekyll(self):
@@ -690,6 +715,17 @@ h001,Hana,Theta,CZE
             self.assertIn(cohort["models"]["pairwise-chemistry"]["status"], {"supported", "descriptive_only"})
             self.assertIn("baseline_validation_rmse", cohort["models"]["pairwise-chemistry"]["metrics"])
             self.assertEqual(cohort["models"]["hapm"]["scope"], "within_team")
+            self.assertEqual(cohort["models"]["hapm"]["status"], "experimental")
+            self.assertEqual(
+                cohort["models"]["hapm"]["metrics"]["release_status"],
+                "experimental",
+            )
+            self.assertEqual(
+                cohort["models"]["hapm"]["metrics"][
+                    "teams_beating_full_lineup_baseline"
+                ],
+                cohort["models"]["hapm"]["metrics"]["supported_teams"],
+            )
             self.assertTrue(cohort["models"]["hapm"]["teams"])
             self.assertEqual(cohort["models"]["lapm"]["scope"], "within_team")
             self.assertTrue(cohort["models"]["lapm"]["teams"])
@@ -1299,7 +1335,9 @@ h001,Hana,Theta,CZE
         self.assertIn("var pageSize = isMobile() ? 10 : 30;", player_script)
         self.assertIn("state.detailOpen = !chartPoint", player_script)
         self.assertIn('data-player-model="hapm"', player_page)
-        self.assertIn("HAPM validation", player_script)
+        self.assertIn("HAPM · experimental", player_script)
+        self.assertIn("HAPM remains experimental.", player_script)
+        self.assertIn("teams_beating_full_lineup_baseline", player_script)
         self.assertIn('id="player-filters-return"', player_page)
         self.assertIn('class="rating-lab-local-nav player-lab-local-nav"', player_page)
         self.assertIn('id="player-quick-model-trigger"', player_page)

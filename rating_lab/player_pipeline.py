@@ -14,9 +14,16 @@ from typing import Callable
 from .player_models import LineupTrueSkill, multiclass_brier, multiclass_log_loss
 
 
-PLAYER_SCHEMA_VERSION = "1.5.0"
+PLAYER_SCHEMA_VERSION = "1.6.0"
 STATSBOMB_ROOT = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
 API_FOOTBALL_ROOT = "https://v3.football.api-sports.io"
+API_FOOTBALL_REQUIRED_FIELDS = [
+    "stable player ID",
+    "starting XI",
+    "substitution minute",
+    "minutes played",
+    "match result",
+]
 API_FOOTBALL_WORLD_CUP = {
     "id": "world-cup-2026",
     "competition_id": 1,
@@ -28,6 +35,76 @@ API_FOOTBALL_WORLD_CUP = {
     "venue_context": "tournament",
     "expected_matches": 104,
 }
+API_FOOTBALL_LEAGUE_COHORTS = (
+    {
+        "id": "premier-league-2022-23",
+        "competition_id": 39,
+        "season_id": 2022,
+        "season_name": "2022/23",
+        "name": "Premier League 2022/23",
+        "country": "England",
+        "gender": "men",
+        "format": "club league season",
+        "scope_type": "season",
+        "venue_context": "home-and-away",
+        "expected_matches": 380,
+        "minimum_minutes": 900.0,
+        "minimum_matches": 10,
+        "included_competitions": ["Premier League"],
+        "scope_note": "Complete 380-match league season. Domestic cups and UEFA fixtures are excluded so every included match has equivalent lineup-minute evidence.",
+    },
+    {
+        "id": "premier-league-2023-24",
+        "competition_id": 39,
+        "season_id": 2023,
+        "season_name": "2023/24",
+        "name": "Premier League 2023/24",
+        "country": "England",
+        "gender": "men",
+        "format": "club league season",
+        "scope_type": "season",
+        "venue_context": "home-and-away",
+        "expected_matches": 380,
+        "minimum_minutes": 900.0,
+        "minimum_matches": 10,
+        "included_competitions": ["Premier League"],
+        "scope_note": "Complete 380-match league season. Domestic cups and UEFA fixtures are excluded so every included match has equivalent lineup-minute evidence.",
+    },
+    {
+        "id": "premier-league-2024-25",
+        "competition_id": 39,
+        "season_id": 2024,
+        "season_name": "2024/25",
+        "name": "Premier League 2024/25",
+        "country": "England",
+        "gender": "men",
+        "format": "club league season",
+        "scope_type": "season",
+        "venue_context": "home-and-away",
+        "expected_matches": 380,
+        "minimum_minutes": 900.0,
+        "minimum_matches": 10,
+        "included_competitions": ["Premier League"],
+        "scope_note": "Complete 380-match league season. Domestic cups and UEFA fixtures are excluded so every included match has equivalent lineup-minute evidence.",
+    },
+    {
+        "id": "premier-league-2025-26",
+        "competition_id": 39,
+        "season_id": 2025,
+        "season_name": "2025/26",
+        "name": "Premier League 2025/26",
+        "country": "England",
+        "gender": "men",
+        "format": "club league season",
+        "scope_type": "season",
+        "venue_context": "home-and-away",
+        "expected_matches": 380,
+        "minimum_minutes": 900.0,
+        "minimum_matches": 10,
+        "included_competitions": ["Premier League"],
+        "scope_note": "Complete 380-match league season. Domestic cups and UEFA fixtures are excluded so every included match has equivalent lineup-minute evidence.",
+    },
+)
 COHORTS = (
     {
         "id": "premier-league-2015-16",
@@ -1500,6 +1577,13 @@ def _rate_cohort(
 
     hapm_teams = publish_team_models(hapm, "hapm")
     lapm_teams = publish_team_models(lapm, "lapm")
+    hapm_supported_teams = sum(
+        team["diagnostics"]["validation_status"] == "supported"
+        for team in hapm_teams
+    )
+    hapm_validation_deltas = [
+        team["diagnostics"]["validation_delta"] for team in hapm_teams
+    ]
     starter_coverage = audit["starter_teams_ok"] / max(2 * len(rows), 1)
     minute_coverage = audit["complete_players"] / max(audit["used_players"], 1)
     integrity_coverage = audit["integrity_matches"] / max(len(rows), 1)
@@ -1604,8 +1688,9 @@ def _rate_cohort(
             },
             "hapm": {
                 "label": "HAPM",
-                "status": "team_specific_validation",
+                "status": "experimental",
                 "scope": "within_team",
+                "validation_scope": "team_specific",
                 "ranking_rule": "within-team player coefficient − 1.96 × approximate uncertainty",
                 "parameters": hapm["parameters"]
                 | {
@@ -1620,14 +1705,20 @@ def _rate_cohort(
                 "metrics": {
                     "verified_event_matches": audit.get("goal_event_matches", 0),
                     "teams": len(hapm_teams),
-                    "supported_teams": sum(
-                        team["diagnostics"]["validation_status"] == "supported"
-                        for team in hapm_teams
+                    "teams_evaluated": len(hapm_teams),
+                    "supported_teams": hapm_supported_teams,
+                    "teams_beating_full_lineup_baseline": hapm_supported_teams,
+                    "descriptive_teams": len(hapm_teams) - hapm_supported_teams,
+                    "support_rate": round(
+                        hapm_supported_teams / max(len(hapm_teams), 1), 4
                     ),
-                    "descriptive_teams": sum(
-                        team["diagnostics"]["validation_status"] != "supported"
-                        for team in hapm_teams
+                    "mean_validation_delta": round(
+                        sum(hapm_validation_deltas)
+                        / max(len(hapm_validation_deltas), 1),
+                        4,
                     ),
+                    "validation_baseline": "team-specific full-lineup APM",
+                    "release_status": "experimental",
                     "retained_nodes": sum(
                         team["diagnostics"]["retained_nodes"] for team in hapm_teams
                     ),
@@ -2022,7 +2113,7 @@ def _build_api_football_cohort(
                 "stints": stints,
                 "score_a": score_a,
                 "goal_difference": match["home_score"] - match["away_score"],
-                "home_advantage": False,
+                "home_advantage": definition.get("venue_context") != "tournament",
             }
         )
     rows.sort(key=lambda item: (item["date"], item["match_id"]))
@@ -2042,6 +2133,53 @@ def _build_api_football_cohort(
     )
 
 
+def _api_football_status_key(definition: dict) -> str:
+    return "api_football_" + definition["id"].replace("-", "_")
+
+
+def _api_football_status(
+    definition: dict,
+    generated_at: str,
+    *,
+    status: str,
+    reason: str | None = None,
+) -> dict:
+    is_world_cup = definition["id"] == API_FOOTBALL_WORLD_CUP["id"]
+    season_label = definition.get("season_name") or str(definition["season_id"])
+    result = {
+        "status": status,
+        "provider": "API-Football by API-SPORTS",
+        "cohort": definition["id"],
+        "checked_at": generated_at,
+        "required_matches": definition["expected_matches"],
+        "required_fields": list(API_FOOTBALL_REQUIRED_FIELDS),
+    }
+    if reason:
+        result["reason"] = reason
+    if status == "published":
+        result["message"] = "All declared API-Football completeness gates passed."
+    elif status == "not_configured":
+        result["message"] = (
+            f"API_FOOTBALL_KEY is not configured; {definition['name']} remains withheld."
+        )
+    elif reason in {
+        "provider_plan_does_not_include_2026",
+        "provider_plan_does_not_include_season",
+    }:
+        result["message"] = (
+            "The configured API-Football plan does not include "
+            f"season {season_label}, so {definition['name']} remains withheld."
+        )
+    else:
+        result["message"] = (
+            f"API-Football did not make the complete {definition['name']} source "
+            "available to this build or the cohort failed a completeness gate."
+        )
+    if is_world_cup and reason == "provider_plan_does_not_include_season":
+        result["reason"] = "provider_plan_does_not_include_2026"
+    return result
+
+
 def build_player_payload(
     fetch: Callable[..., bytes], api_football_key: str | None = None
 ) -> dict:
@@ -2050,54 +2188,40 @@ def build_player_payload(
     for definition in COHORTS:
         cohort, _ = _build_cohort(definition, fetch)
         cohorts.append(cohort)
-    api_football_status = {
-        "status": "not_configured",
-        "provider": "API-Football by API-SPORTS",
-        "cohort": API_FOOTBALL_WORLD_CUP["id"],
-        "checked_at": generated_at,
-        "required_matches": API_FOOTBALL_WORLD_CUP["expected_matches"],
-        "required_fields": ["stable player ID", "starting XI", "substitution minute", "minutes played", "match result"],
-        "message": "API_FOOTBALL_KEY is not configured; World Cup 2026 remains withheld.",
+    api_definitions = (*API_FOOTBALL_LEAGUE_COHORTS, API_FOOTBALL_WORLD_CUP)
+    api_football_statuses = {
+        _api_football_status_key(definition): _api_football_status(
+            definition, generated_at, status="not_configured"
+        )
+        for definition in api_definitions
     }
     if api_football_key:
-        try:
-            cohorts.append(
-                _build_api_football_cohort(
-                    API_FOOTBALL_WORLD_CUP, fetch, api_football_key
+        for definition in api_definitions:
+            status_key = _api_football_status_key(definition)
+            try:
+                cohorts.append(
+                    _build_api_football_cohort(definition, fetch, api_football_key)
                 )
-            )
-            api_football_status = {
-                "status": "published",
-                "provider": "API-Football by API-SPORTS",
-                "cohort": API_FOOTBALL_WORLD_CUP["id"],
-                "checked_at": generated_at,
-                "required_matches": API_FOOTBALL_WORLD_CUP["expected_matches"],
-                "required_fields": ["stable player ID", "starting XI", "substitution minute", "minutes played", "match result"],
-                "message": "All declared API-Football completeness gates passed.",
-            }
-        except (RuntimeError, ValueError) as error:
-            # This optional commercial cohort must never weaken or block the
-            # independently reproducible public cohorts. Provider errors are
-            # deliberately summarized so credentials/raw responses cannot leak.
-            unavailable_season = "do not have access to this season" in str(error).casefold()
-            api_football_status = {
-                "status": "withheld",
-                "provider": "API-Football by API-SPORTS",
-                "reason": (
-                    "provider_plan_does_not_include_2026"
-                    if unavailable_season
-                    else "source_or_completeness_gate_failed"
-                ),
-                "cohort": API_FOOTBALL_WORLD_CUP["id"],
-                "checked_at": generated_at,
-                "required_matches": API_FOOTBALL_WORLD_CUP["expected_matches"],
-                "required_fields": ["stable player ID", "starting XI", "substitution minute", "minutes played", "match result"],
-                "message": (
-                    "The configured API-Football plan does not include season 2026, so World Cup 2026 remains withheld."
-                    if unavailable_season
-                    else "API-Football did not make the complete 2026 season available to this build or the cohort failed a completeness gate."
-                ),
-            }
+                api_football_statuses[status_key] = _api_football_status(
+                    definition, generated_at, status="published"
+                )
+            except (RuntimeError, ValueError) as error:
+                # Optional commercial cohorts must never weaken or block the
+                # independently reproducible public cohorts. Provider errors are
+                # deliberately summarized so credentials/raw responses cannot leak.
+                unavailable_season = (
+                    "do not have access to this season" in str(error).casefold()
+                )
+                api_football_statuses[status_key] = _api_football_status(
+                    definition,
+                    generated_at,
+                    status="withheld",
+                    reason=(
+                        "provider_plan_does_not_include_season"
+                        if unavailable_season
+                        else "source_or_completeness_gate_failed"
+                    ),
+                )
     sources = {
         cohort["source"]["name"]: {
             "name": cohort["source"]["name"],
@@ -2115,9 +2239,7 @@ def build_player_payload(
             "license": "Source-specific terms recorded on each cohort",
             "attribution": "Ratings and analysis are independent of the data providers.",
             "scope": "Complete declared men's and women's tournaments and league seasons only; each cohort records its included competitions, source, and snapshot hash.",
-            "statuses": {
-                "api_football_world_cup_2026": api_football_status,
-            },
+            "statuses": api_football_statuses,
         },
         "methodology": {
             "inputs": ["match outcome", "goal difference", "goal timing", "stable player IDs", "lineups", "minutes played"],
