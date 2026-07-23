@@ -9199,25 +9199,7 @@ body:has(.explain-lab) .post-header {
   }
 
   .player-lab-quick-model {
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
-  }
-
-  .player-lab-quick-model .rating-lab-quick-model-menu {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(4.25rem, auto));
-    min-width: 0;
-    visibility: visible;
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
-
-  .player-lab-quick-model .rating-lab-quick-model-menu button {
-    min-width: 4.25rem;
-    padding-inline: 0.45rem;
-    font-size: 0.74rem;
-    text-align: center;
+    bottom: calc(60px + env(safe-area-inset-bottom));
   }
 
   .rating-lab-quick-model-trigger {
@@ -9633,7 +9615,7 @@ body:has(.explain-lab) .post-header {
     position: fixed;
     z-index: 50;
     right: 10px;
-    bottom: calc(10px + env(safe-area-inset-bottom));
+    bottom: calc(64px + env(safe-area-inset-bottom));
     left: 10px;
     display: block;
     width: auto;
@@ -9688,5 +9670,84 @@ body:has(.explain-lab) .post-header {
 
   .player-lab-attribution img {
     width: 116px;
+  }
+}
+
+/* Historical Player Lab mobile shell: controls stay one tap away. */
+.player-lab-local-nav {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  body:has(.rating-lab) .site-header {
+    min-height: 44px;
+  }
+
+  body:has(.rating-lab) .site-header .wrapper {
+    min-height: 44px;
+  }
+
+  body:has(.rating-lab) .site-title {
+    overflow: hidden;
+    max-width: calc(100% - 3rem);
+    font-size: 0.82rem;
+    line-height: 44px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rating-lab .rating-lab-kicker {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .player-lab-hero {
+    padding-bottom: 0.55rem;
+  }
+
+  .player-lab-hero h1 {
+    max-width: none;
+    font-size: clamp(1.9rem, 9vw, 2.25rem);
+  }
+
+  .player-lab-hero .rating-lab-deck {
+    margin-top: 0.45rem;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .player-lab-back {
+    margin: 0.45rem 0 0;
+  }
+
+  .player-lab-local-nav {
+    display: grid;
+  }
+
+  .player-lab-local-nav a {
+    min-height: 52px;
+  }
+
+  #player-controls,
+  #player-comparison-heading,
+  #player-ranking-list,
+  #player-audit-heading {
+    scroll-margin-top: 0.75rem;
+  }
+
+  #player-source-status {
+    margin: 0.65rem 0;
+    padding: 0.75rem;
+    font-size: 0.78rem;
+    line-height: 1.42;
+  }
+
+  .player-lab-boundary {
+    margin-top: 0.65rem;
+  }
+
+  .player-lab-quick-model .rating-lab-quick-model-menu {
+    max-height: min(60vh, 260px);
+    overflow-y: auto;
   }
 }

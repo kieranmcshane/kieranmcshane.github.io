@@ -9,9 +9,17 @@ description: Outcome-only historical men's and women's football player ratings a
   <header class="rating-lab-hero player-lab-hero">
     <p class="rating-lab-kicker">Historical men's and women's football player contribution</p>
     <h1>What changed when they played?</h1>
-    <p class="rating-lab-deck">Five outcome-only lenses distribute team results across the players who were actually on the pitch. Pairwise chemistry tests explicit pairs; HAPM fits players through supported generalized lineups; LAPM smooths a Jaccard-weighted lineup graph. No passes, shots, expected goals, or tracking data enter the ratings.</p>
+    <p class="rating-lab-deck"><span class="rating-lab-deck-desktop">Five outcome-only lenses distribute team results across the players who were actually on the pitch. Pairwise chemistry tests explicit pairs; HAPM fits players through supported generalized lineups; LAPM smooths a Jaccard-weighted lineup graph. No passes, shots, expected goals, or tracking data enter the ratings.</span><span class="rating-lab-deck-mobile">Five outcome-only models compare players within complete tournaments and seasons.</span></p>
     <p class="player-lab-back"><a href="{{ '/rating-lab/' | relative_url }}">← Back to Rating Lab</a></p>
   </header>
+
+  <nav class="rating-lab-local-nav player-lab-local-nav" aria-label="Historical Player Lab sections">
+    <a href="#player-controls" aria-label="Player controls"><span data-mobile-label="Controls">Controls</span></a>
+    <a href="#player-comparison-heading" aria-label="Model comparison chart"><span data-mobile-label="Chart">Chart</span></a>
+    <a href="#player-ranking-list" aria-label="Player rankings"><span data-mobile-label="Ranking">Ranking</span></a>
+    <a href="#player-audit-heading" aria-label="Methods and publication gates"><span data-mobile-label="Methods">Methods</span></a>
+    <a href="{{ '/rating-lab/' | relative_url }}" aria-label="Return to Rating Lab"><span data-mobile-label="Lab">Lab ↗</span></a>
+  </nav>
 
   <div id="player-lab-error" class="rating-lab-notice rating-lab-notice-error" role="alert" hidden></div>
   <noscript>This player leaderboard requires JavaScript.</noscript>
@@ -25,13 +33,13 @@ description: Outcome-only historical men's and women's football player ratings a
       <p id="player-lab-generated">Loading the verified cohort…</p>
     </div>
 
-    <details class="player-lab-boundary" id="player-scope" open>
+    <p id="player-source-status" class="rating-lab-notice" role="status" hidden></p>
+    <details class="player-lab-boundary" id="player-scope">
       <summary>Verified cohorts and rating scope</summary>
       <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The men’s publication includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup; the women’s publication retains Liga F and the WSL 2023/24. Every view states exactly which fixtures enter the replay.</p>
     </details>
-    <p id="player-source-status" class="rating-lab-notice" role="status" hidden></p>
 
-    <div class="player-lab-toolbar">
+    <div class="player-lab-toolbar" id="player-controls">
       <label class="rating-lab-field">
         <span>Competition</span>
         <select id="player-cohort"></select>
@@ -64,6 +72,9 @@ description: Outcome-only historical men's and women's football player ratings a
         <button type="button" data-player-quick-model="hapm">HAPM</button>
         <button type="button" data-player-quick-model="lapm">LAPM</button>
       </div>
+      <button class="rating-lab-quick-model-trigger" id="player-quick-model-trigger" type="button" aria-expanded="false" aria-controls="player-quick-model-menu">
+        <span>Model</span><strong id="player-quick-model-label">Lineup</strong><span aria-hidden="true">⌃</span>
+      </button>
     </div>
 
     <div class="rating-lab-metrics player-lab-metrics" id="player-metrics" aria-label="Cohort and model evidence"></div>
@@ -89,7 +100,7 @@ description: Outcome-only historical men's and women's football player ratings a
       <div id="player-comparison-chart"></div>
     </section>
 
-    <div class="player-lab-grid">
+    <div class="player-lab-grid" id="player-ranking-list">
       <div class="rating-lab-table-wrap">
         <div class="player-lab-list-head">
           <div><span>Leaderboard</span><strong id="player-list-status">Loading players…</strong></div>
@@ -123,7 +134,7 @@ description: Outcome-only historical men's and women's football player ratings a
     <h2 id="player-audit-heading">Why these seasons are included</h2>
     <div class="player-lab-gates" id="player-gates"></div>
 
-    <details class="rating-lab-limitations" id="player-methods" open>
+    <details class="rating-lab-limitations" id="player-methods">
       <summary>Exact interpretation and limitations</summary>
       <article class="player-lab-model-hierarchy">
         <div>

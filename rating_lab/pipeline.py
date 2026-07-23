@@ -3413,7 +3413,10 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
         )
         validate_player_payload(player_payload)
         staged_player = output_dir / ".player-football.json.tmp"
-        staged_player.write_text(json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False) + "\n")
+        player_serialized = (
+            json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False) + "\n"
+        )
+        staged_player.write_text(player_serialized)
         staged_player.replace(player_path)
         player_status = {
             "status": "current",
@@ -3421,6 +3424,8 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "source": player_payload["source"]["name"],
             "cohorts": [cohort["id"] for cohort in player_payload["cohorts"]],
             "data_url": "/assets/data/rating-lab/player-football.json",
+            "snapshot_sha256": hashlib.sha256(player_serialized.encode()).hexdigest(),
+            "source_statuses": player_payload["source"].get("statuses", {}),
         }
     except Exception as error:
         if not player_path.exists():
@@ -3432,6 +3437,8 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "source": previous_player.get("source", {}).get("name", "StatsBomb Open Data"),
             "cohorts": [cohort.get("id") for cohort in previous_player.get("cohorts", [])],
             "data_url": "/assets/data/rating-lab/player-football.json",
+            "snapshot_sha256": hashlib.sha256(player_path.read_bytes()).hexdigest(),
+            "source_statuses": previous_player.get("source", {}).get("statuses", {}),
             "message": str(error)[:240],
         }
     manifest = {
@@ -3484,7 +3491,9 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
     }
     (output_dir / "schema.json").write_text(json.dumps(schema, indent=2) + "\n")
     (output_dir / "player-schema.json").write_text(json.dumps(player_schema(), indent=2) + "\n")
-    (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    staged_manifest = output_dir / ".manifest.json.tmp"
+    staged_manifest.write_text(json.dumps(manifest, indent=2) + "\n")
+    staged_manifest.replace(output_dir / "manifest.json")
     return manifest
 
 

@@ -4,20 +4,13 @@
 from __future__ import annotations
 
 import argparse
-import json
-import os
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from rating_lab.pipeline import _get, write_outputs  # noqa: E402
-from rating_lab.player_pipeline import (  # noqa: E402
-    build_player_payload,
-    player_schema,
-    validate_player_payload,
-)
+from rating_lab.pipeline import write_outputs  # noqa: E402
 
 
 def main() -> int:
@@ -33,18 +26,11 @@ def main() -> int:
     parser.add_argument("--players-only", action="store_true", help="Refresh only historical football-player cohorts")
     args = parser.parse_args()
     if args.players_only:
-        args.output.mkdir(parents=True, exist_ok=True)
-        payload = build_player_payload(
-            _get, api_football_key=os.environ.get("API_FOOTBALL_KEY")
-        )
-        validate_player_payload(payload)
-        (args.output / "player-football.json").write_text(
-            json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n"
-        )
-        (args.output / "player-schema.json").write_text(json.dumps(player_schema(), indent=2) + "\n")
+        manifest = write_outputs(args.output, [], chess_months=args.chess_months)
+        player = manifest["player_football"]
         print(
             "player-football: current ("
-            + ", ".join(f"{cohort['name']}: {cohort['matches']} matches" for cohort in payload["cohorts"])
+            + ", ".join(player["cohorts"])
             + ")"
         )
         return 0
