@@ -92,6 +92,7 @@ import io.github.kieranmcshane.ratinglab.data.RatingLoadState
 import io.github.kieranmcshane.ratinglab.data.RatingModel
 import io.github.kieranmcshane.ratinglab.data.RatingSnapshot
 import io.github.kieranmcshane.ratinglab.data.Sport
+import io.github.kieranmcshane.ratinglab.data.PlayerModel
 import java.text.NumberFormat
 import kotlin.math.abs
 import kotlin.math.exp
@@ -102,6 +103,7 @@ import kotlin.math.pow
 fun RatingLabApp(viewModel: RatingLabViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showModelSheet by rememberSaveable { mutableStateOf(false) }
+    var showPlayerModelSheet by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -141,12 +143,21 @@ fun RatingLabApp(viewModel: RatingLabViewModel = viewModel()) {
             RatingBottomBar(selected = state.section, onSelect = viewModel::selectSection)
         },
         floatingActionButton = {
-            if (state.section == AppSection.RANKINGS) {
+            if (state.section != AppSection.METHODS) {
                 FloatingActionButton(
-                    onClick = { showModelSheet = true },
+                    onClick = {
+                        if (state.section == AppSection.PLAYERS) showPlayerModelSheet = true
+                        else showModelSheet = true
+                    },
                     containerColor = Ink,
                     contentColor = Color.White,
-                    modifier = Modifier.semantics { contentDescription = "Choose rating model" }
+                    modifier = Modifier.semantics {
+                        contentDescription = if (state.section == AppSection.PLAYERS) {
+                            "Choose player impact protocol"
+                        } else {
+                            "Choose rating model"
+                        }
+                    }
                 ) {
                     Icon(Icons.Default.Tune, contentDescription = null)
                 }
@@ -159,7 +170,11 @@ fun RatingLabApp(viewModel: RatingLabViewModel = viewModel()) {
             modifier = Modifier.fillMaxSize().padding(padding)
         ) { section ->
             when (section) {
-                AppSection.RANKINGS -> RankingsScreen(state.data, state.model)
+                AppSection.RANKINGS -> ParityRankingsScreen(
+                    state = state,
+                    onSearch = viewModel::setSearch,
+                    onToggleProvisional = viewModel::toggleProvisional
+                )
                 AppSection.COMPARE -> CompareScreen(
                     sport = state.sport,
                     model = state.model,
@@ -171,9 +186,19 @@ fun RatingLabApp(viewModel: RatingLabViewModel = viewModel()) {
                     onSwap = viewModel::swapCompetitors,
                     onModelClick = { showModelSheet = true }
                 )
-                AppSection.FORECASTS -> ForecastScreen(state.sport, state.model, state.data)
-                AppSection.PLAYERS -> PlayersScreen()
-                AppSection.METHODS -> MethodsScreen()
+                AppSection.FORECASTS -> ParityCompetitionScreen(
+                    state = state,
+                    onSelectCompetition = viewModel::selectCompetition,
+                    onModelClick = { showModelSheet = true }
+                )
+                AppSection.PLAYERS -> ParityPlayersScreen(
+                    state = state,
+                    onSelectCohort = viewModel::selectPlayerCohort,
+                    onSelectModel = viewModel::selectPlayerModel,
+                    onSelectTeam = viewModel::selectPlayerTeam,
+                    onSearch = viewModel::setPlayerSearch
+                )
+                AppSection.METHODS -> ParityMethodsScreen(state)
             }
         }
     }
@@ -186,6 +211,16 @@ fun RatingLabApp(viewModel: RatingLabViewModel = viewModel()) {
                 showModelSheet = false
             },
             onDismiss = { showModelSheet = false }
+        )
+    }
+    if (showPlayerModelSheet) {
+        PlayerModelSheet(
+            selected = state.playerModel,
+            onSelect = {
+                viewModel.selectPlayerModel(it)
+                showPlayerModelSheet = false
+            },
+            onDismiss = { showPlayerModelSheet = false }
         )
     }
 }
@@ -454,11 +489,10 @@ private fun CompareScreen(
     var pickerForA by remember { mutableStateOf<Boolean?>(null) }
     var contextShift by rememberSaveable(sport) { mutableStateOf(if (sport == Sport.TENNIS) -1 else 0) }
     val surface = when (contextShift) { -1 -> "hard"; 0 -> "clay"; else -> "grass" }
-    val effectiveA = if (sport == Sport.TENNIS) a.contextRatings[surface] ?: a.rating else a.rating
-    val effectiveB = if (sport == Sport.TENNIS) b.contextRatings[surface] ?: b.rating else b.rating
-    val adjustment = if (sport == Sport.TENNIS) 0.0 else contextShift * if (model == RatingModel.ELO) 35.0 else 0.8
-    val scale = if (model == RatingModel.ELO) 400.0 else 8.0
-    val probabilityA = (1.0 / (1.0 + 10.0.pow(-((effectiveA - effectiveB + adjustment) / scale)))).coerceIn(0.02, 0.98)
+    val effectiveA = if (sport == Sport.TENNIS) a.contexts[surface]?.rating ?: a.rating else a.rating
+    val effectiveB = if (sport == Sport.TENNIS) b.contexts[surface]?.rating ?: b.rating else b.rating
+    val outcomes = matchupProbabilities(data.snapshot, sport, model, a, b, contextShift, surface)
+    val probabilityA = outcomes.win.coerceIn(0.001, 0.999)
     val animatedA by animateFloatAsState(probabilityA.toFloat(), label = "probability")
 
     LazyColumn(
@@ -492,10 +526,11 @@ private fun CompareScreen(
                         Text(a.name, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text("${(probabilityA * 100).toInt()}%", fontSize = 26.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
-                    ProbabilityBar(animatedA)
+                    ProbabilityBar(animatedA, outcomes.draw.toFloat())
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("A ${(probabilityA * 100).toInt()}%", color = Cobalt, fontWeight = FontWeight.Bold)
-                        Text("B ${((1 - probabilityA) * 100).toInt()}%", color = Violet, fontWeight = FontWeight.Bold)
+                        Text("A ${formatPercent(outcomes.win)}", color = Cobalt, fontWeight = FontWeight.Bold)
+                        if (outcomes.draw > 0.0005) Text("Draw ${formatPercent(outcomes.draw)}", color = Muted, fontWeight = FontWeight.Bold)
+                        Text("B ${formatPercent(outcomes.loss)}", color = Violet, fontWeight = FontWeight.Bold)
                     }
                     HorizontalDivider(color = Rule)
                     val contextNote = if (sport == Sport.TENNIS) "$surface surface ratings" else "${sport.context.lowercase()} ${if (contextShift == 0) "neutral" else if (contextShift > 0) "favours A" else "favours B"}"
@@ -580,10 +615,11 @@ private fun ContextSelector(sport: Sport, selected: Int, onSelect: (Int) -> Unit
 }
 
 @Composable
-private fun ProbabilityBar(probabilityA: Float) {
+private fun ProbabilityBar(probabilityA: Float, draw: Float = 0f) {
     Row(Modifier.fillMaxWidth().height(14.dp).clip(RoundedCornerShape(7.dp))) {
         Box(Modifier.weight(probabilityA.coerceAtLeast(0.01f)).fillMaxHeight().background(Cobalt))
-        Box(Modifier.weight((1f - probabilityA).coerceAtLeast(0.01f)).fillMaxHeight().background(Violet))
+        if (draw > 0.001f) Box(Modifier.weight(draw).fillMaxHeight().background(Color(0xFF9AA3B2)))
+        Box(Modifier.weight((1f - probabilityA - draw).coerceAtLeast(0.01f)).fillMaxHeight().background(Violet))
     }
 }
 
@@ -775,6 +811,48 @@ private fun ModelSheet(selected: RatingModel, onSelect: (RatingModel) -> Unit, o
                             Text(model.label, fontWeight = FontWeight.Bold)
                             Text(
                                 if (model.hasUncertainty) "Dynamic uncertainty · conservative ranking" else "Transparent baseline · no σ",
+                                color = Muted,
+                                fontSize = 11.sp
+                            )
+                        }
+                        if (model == selected) Icon(Icons.Default.Check, "Selected", tint = Cobalt)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlayerModelSheet(selected: PlayerModel, onSelect: (PlayerModel) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Paper) {
+        Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
+            Text("Player impact protocol", fontFamily = FontFamily.Serif, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "Switch from anywhere in a long player ranking.",
+                color = Muted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 3.dp, bottom = 14.dp)
+            )
+            PlayerModel.entries.forEach { model ->
+                Surface(
+                    onClick = { onSelect(model) },
+                    color = if (model == selected) Color(0xFFE9EEF9) else Color.Transparent,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(model.label, fontWeight = FontWeight.Bold)
+                            Text(
+                                when (model) {
+                                    PlayerModel.LINEUP -> "Bayesian lineup credit assignment"
+                                    PlayerModel.RAPM -> "Regularised additive impact per 90"
+                                    PlayerModel.CHEMISTRY -> "Pairwise interaction residuals"
+                                    PlayerModel.HAPM -> "Higher-order lineup combinations"
+                                    PlayerModel.LAPM -> "Line-graph Laplacian smoothing"
+                                },
                                 color = Muted,
                                 fontSize = 11.sp
                             )
