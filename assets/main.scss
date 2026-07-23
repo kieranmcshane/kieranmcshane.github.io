@@ -7523,6 +7523,22 @@ body:has(.explain-lab) .post-header {
   line-height: 1.4;
 }
 
+.player-lab-hapm-status {
+  margin: -0.35rem 0 1.25rem;
+  padding: 0.72rem 0.85rem;
+  color: #4f5c70;
+  background: #f5f3f8;
+  border: 1px solid #d8d2e2;
+  border-left: 3px solid #6f638b;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.player-lab-hapm-status strong {
+  color: #403653;
+}
+
 .player-lab-comparison-heading {
   display: flex;
   gap: 1rem;
@@ -9622,6 +9638,12 @@ body:has(.explain-lab) .post-header {
   }
 
   .player-lab-season-scope {
+    margin: 0 0 0.9rem;
+    padding: 0.7rem 0.75rem;
+    font-size: 0.76rem;
+  }
+
+  .player-lab-hapm-status {
     margin: 0 0 0.9rem;
     padding: 0.7rem 0.75rem;
     font-size: 0.76rem;

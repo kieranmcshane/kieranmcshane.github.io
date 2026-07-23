@@ -3,6 +3,372 @@
   "$id": "https://kieranmcshane.github.io/rating-lab/schema.json",
   "title": "Rating Lab sport payload",
   "type": "object",
+  "$defs": {
+    "probabilityField": {
+      "type": "object",
+      "required": [
+        "probabilities",
+        "other_probability"
+      ],
+      "properties": {
+        "probabilities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "other_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "resolvedScore": {
+      "type": "object",
+      "required": [
+        "winner_probability",
+        "log_loss",
+        "brier"
+      ],
+      "properties": {
+        "winner_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "log_loss": {
+          "type": "number",
+          "minimum": 0
+        },
+        "brier": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "marketHistory": {
+      "type": "object",
+      "required": [
+        "captured_at",
+        "snapshot_date",
+        "competition_id",
+        "competition_label",
+        "competition_season",
+        "competition_state",
+        "event_id",
+        "event_title",
+        "event_url",
+        "snapshot_sha256",
+        "matched_participants",
+        "model_participants",
+        "coverage",
+        "raw_yes_price_sum",
+        "market_forecast",
+        "model_forecasts"
+      ],
+      "properties": {
+        "captured_at": {
+          "type": "string"
+        },
+        "snapshot_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "competition_id": {
+          "type": "string"
+        },
+        "competition_label": {
+          "type": "string"
+        },
+        "competition_season": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "competition_state": {
+          "enum": [
+            "upcoming",
+            "live"
+          ]
+        },
+        "event_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "event_title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "event_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "snapshot_sha256": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "matched_participants": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "model_participants": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "raw_yes_price_sum": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "market_forecast": {
+          "$ref": "#/$defs/probabilityField"
+        },
+        "model_forecasts": {
+          "type": "object",
+          "properties": {
+            "elo": {
+              "$ref": "#/$defs/probabilityField"
+            },
+            "glicko2": {
+              "$ref": "#/$defs/probabilityField"
+            },
+            "trueskill": {
+              "$ref": "#/$defs/probabilityField"
+            },
+            "robust": {
+              "$ref": "#/$defs/probabilityField"
+            }
+          },
+          "additionalProperties": false
+        },
+        "resolution": {
+          "type": "object",
+          "required": [
+            "winner_id",
+            "winner_name",
+            "resolved_at",
+            "scores"
+          ],
+          "properties": {
+            "winner_id": {
+              "type": "string"
+            },
+            "winner_name": {
+              "type": "string"
+            },
+            "resolved_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "scores": {
+              "type": "object",
+              "properties": {
+                "market": {
+                  "$ref": "#/$defs/resolvedScore"
+                },
+                "elo": {
+                  "$ref": "#/$defs/resolvedScore"
+                },
+                "glicko2": {
+                  "$ref": "#/$defs/resolvedScore"
+                },
+                "trueskill": {
+                  "$ref": "#/$defs/resolvedScore"
+                },
+                "robust": {
+                  "$ref": "#/$defs/resolvedScore"
+                }
+              },
+              "required": [
+                "market"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "marketBenchmark": {
+      "type": "object",
+      "required": [
+        "status",
+        "unit",
+        "snapshots_retained",
+        "scored_snapshots",
+        "resolved_competitions",
+        "forecasters",
+        "method"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "awaiting_resolutions",
+            "scored"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "snapshots_retained": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scored_snapshots": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolved_competitions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forecasters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "predictions",
+              "log_loss",
+              "brier"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "market",
+                  "elo",
+                  "glicko2",
+                  "trueskill",
+                  "robust"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "predictions": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "log_loss": {
+                "type": "number",
+                "minimum": 0
+              },
+              "brier": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "method": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "marketComparison": {
+      "type": "object",
+      "required": [
+        "status",
+        "source",
+        "source_url",
+        "api_base",
+        "fetched_at",
+        "checked_at",
+        "stale_after_hours",
+        "probability_definition",
+        "competitions",
+        "searches",
+        "history",
+        "benchmark",
+        "retention_policy"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "current",
+            "retained",
+            "unavailable"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "source_url": {
+          "type": "string"
+        },
+        "api_base": {
+          "type": "string"
+        },
+        "fetched_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "checked_at": {
+          "type": "string"
+        },
+        "stale_after_hours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "probability_definition": {
+          "type": "string"
+        },
+        "competitions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "searches": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketHistory"
+          }
+        },
+        "benchmark": {
+          "$ref": "#/$defs/marketBenchmark"
+        },
+        "retention_policy": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
   "required": [
     "schema_version",
     "sport",
@@ -21,7 +387,7 @@
   ],
   "properties": {
     "schema_version": {
-        "const": "1.12.0"
+      "const": "1.15.0"
     },
     "sport": {
       "enum": [
@@ -239,7 +605,10 @@
           "type": "string"
         },
         "market_comparison": {
-          "type": "object"
+          "$ref": "#/$defs/marketComparison"
+        },
+        "kalshi_comparison": {
+          "$ref": "#/$defs/marketComparison"
         },
         "competitions": {
           "type": "array",

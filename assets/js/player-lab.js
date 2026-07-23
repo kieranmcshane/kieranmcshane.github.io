@@ -16,6 +16,7 @@
     search: document.getElementById('player-search'),
     metrics: document.getElementById('player-metrics'),
     scope: document.getElementById('player-season-scope'),
+    hapmStatus: document.getElementById('player-hapm-status'),
     lapmCombinations: document.getElementById('player-lapm-combinations'),
     lapmNote: document.getElementById('player-lapm-note'),
     lapmLists: document.getElementById('player-lapm-lists'),
@@ -179,21 +180,40 @@
 
   function renderSourceStatus() {
     var statuses = state.payload.source && state.payload.source.statuses;
-    var worldCup = statuses && statuses.api_football_world_cup_2026;
-    if (!worldCup || worldCup.status === 'published') {
+    var unavailable = Object.keys(statuses || {}).map(function (key) {
+      return statuses[key];
+    }).filter(function (status) {
+      return status.status !== 'published';
+    });
+    if (!unavailable.length) {
       elements.sourceStatus.hidden = true;
       elements.sourceStatus.textContent = '';
       return;
     }
     elements.sourceStatus.hidden = false;
-    var accessBlocked = worldCup.reason === 'provider_plan_does_not_include_2026';
-    elements.sourceStatus.innerHTML = '<strong>' +
-      (accessBlocked ? 'World Cup 2026 data access required.' : 'World Cup 2026 withheld.') +
-      '</strong> ' +
-      escapeHtml(worldCup.message || 'The required complete lineup and event feed has not passed every publication gate.') +
-      ' Publication requires ' + number(worldCup.required_matches || 104, 0) +
-      ' complete matches with stable player IDs, starting lineups, substitution minutes and minutes played. ' +
-      'The verified cohorts below remain independently reproducible.';
+    var worldCup = unavailable.find(function (status) {
+      return status.cohort === 'world-cup-2026';
+    });
+    var leagueSeasons = unavailable.filter(function (status) {
+      return String(status.cohort || '').indexOf('premier-league-') === 0;
+    });
+    var parts = [];
+    if (leagueSeasons.length) {
+      parts.push('<strong>Some recent men’s league seasons remain withheld.</strong> ' +
+        leagueSeasons.map(function (status) {
+          return escapeHtml(status.cohort.replace('premier-league-', 'Premier League ').replace(/-/g, '/'));
+        }).join(', ') +
+        ' did not pass source access and completeness gates in this build.');
+    }
+    if (worldCup) {
+      var accessBlocked = worldCup.reason === 'provider_plan_does_not_include_2026';
+      parts.push('<strong>' +
+        (accessBlocked ? 'World Cup 2026 data access required.' : 'World Cup 2026 withheld.') +
+        '</strong> ' +
+        escapeHtml(worldCup.message || 'The required complete lineup and event feed has not passed every publication gate.'));
+    }
+    parts.push('Nothing is published without every declared fixture, stable player IDs, starting lineups, substitution minutes, player minutes and reproduced results.');
+    elements.sourceStatus.innerHTML = parts.join(' ');
   }
 
   function renderMetrics() {
@@ -211,11 +231,13 @@
     } else if (state.model === 'hapm') {
       var hapmTeam = currentTeam('hapm');
       var hapmDelta = hapmTeam.diagnostics.validation_delta;
-      var hapmDeltaLabel = (hapmDelta > 0 ? '+' : '') + number(hapmDelta, 3) + ' vs APM';
-      modelMetric = ['HAPM validation', hapmDeltaLabel,
-        hapmTeam.diagnostics.validation_status === 'supported'
-          ? 'Supported: lower held-out stint RMSE within ' + hapmTeam.name
-          : 'Descriptive only: held-out stint RMSE did not beat full-lineup APM'];
+      var hapmMetrics = model.metrics;
+      modelMetric = ['HAPM · experimental',
+        number(hapmMetrics.teams_beating_full_lineup_baseline, 0) + '/' +
+          number(hapmMetrics.teams_evaluated, 0) + ' teams',
+        hapmTeam.name + ': ' + (hapmDelta > 0 ? '+' : '') + number(hapmDelta, 3) +
+          ' RMSE vs full-lineup APM · ' +
+          (hapmTeam.diagnostics.validation_status === 'supported' ? 'beat baseline' : 'descriptive only')];
     } else {
       var team = currentTeam('lapm');
       modelMetric = ['LAPM graph', number(team.diagnostics.retained_nodes, 0) + ' nodes',
@@ -237,9 +259,15 @@
     var cohort = currentCohort();
     var included = cohort.included_competitions || [cohort.name];
     var expected = cohort.coverage.expected_matches || cohort.matches;
+    var hapmMetrics = cohort.models.hapm.metrics;
     elements.scope.innerHTML = '<strong>' + (cohort.scope_type === 'season' ? 'Season scope' : 'Competition scope') + '</strong>' +
       '<span>Included: ' + escapeHtml(included.join(', ')) + ' · ' + number(cohort.matches, 0) + '/' + number(expected, 0) + ' matches.</span>' +
       (cohort.scope_note ? '<small>' + escapeHtml(cohort.scope_note) + '</small>' : '');
+    elements.hapmStatus.innerHTML = '<strong>HAPM remains experimental.</strong> ' +
+      number(hapmMetrics.teams_beating_full_lineup_baseline, 0) + ' of ' +
+      number(hapmMetrics.teams_evaluated, 0) +
+      ' teams beat the simpler full-lineup APM on strictly later held-out stints in this cohort. ' +
+      'Team-level results are visible for diagnosis, but additive Lineup TrueSkill and RAPM remain the primary rankings.';
   }
 
   function renderTeamCombinations() {
@@ -261,7 +289,7 @@
       document.getElementById('player-lapm-combinations-heading').textContent = 'What the extended hypergraph sees';
       elements.lapmNote.textContent = team.name + ' · ' + number(team.diagnostics.retained_nodes, 0) +
         ' retained nodes · orders 1–4 plus full lineups · ridge ' + number(team.diagnostics.selected_ridge_penalty, 1) +
-        ' · ' + (team.diagnostics.validation_status === 'supported' ? 'supported against full-lineup APM' : 'descriptive after held-out comparison') +
+        ' · experimental · ' + (team.diagnostics.validation_status === 'supported' ? 'beat full-lineup APM for this team' : 'descriptive after held-out comparison') +
         ' · ' + number(team.diagnostics.omitted_overcomplete_stints || 0, 0) + ' source-overlap intervals omitted';
       elements.lapmLists.innerHTML = list('Highest-rated pairs', pairs.outperformers || []) +
         list('Highest-rated trios', trios.outperformers || []);
