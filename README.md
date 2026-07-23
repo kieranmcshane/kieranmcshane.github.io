@@ -60,8 +60,8 @@ snapshot hash where a source is distributed as a single file.
 Historical player ratings publish source and retrieval metadata per cohort.
 StatsBomb raw files remain publicly reproducible. API-Football responses are
 cached only during the server-side build under the provider's terms; the site
-publishes derived Lineup TrueSkill, RAPM, experimental pairwise-chemistry, and
-team-specific LAPM
+publishes derived Lineup TrueSkill, RAPM, experimental pairwise-chemistry,
+team-specific HAPM, and team-specific LAPM
 ratings, coverage gates, and a SHA-256
 snapshot identifier rather than redistributing the provider feed.
 An unavailable optional commercial cohort cannot block or replace validated
@@ -98,7 +98,17 @@ explain, with shrinkage selected on the chronological final quarter. Each
 cohort publishes the interaction layer's held-out RMSE beside the RAPM baseline
 and marks it descriptive-only when validation does not support predictive use.
 
-LAPM is a separate descriptive interaction lens based on Josephs et al.'s
+HAPM is a separate dependency-aware lens based on Josephs et al.'s extended
+hypergraph incidence construction. Within each team, supported players, pairs,
+trios, quartets, and full observed constant lineups become weighted regression
+rows while players remain the columns. This bounded-order adaptation avoids
+materializing all 2,047 non-empty subsets of every 11-player lineup. Ridge
+strength is selected on the chronological final quarter; the public payload
+reports HAPM's held-out stint RMSE beside a full-lineup APM baseline and marks
+each team supported or descriptive. HAPM player coefficients remain additive;
+pairwise chemistry remains the explicit residual interaction model.
+
+LAPM is a separate descriptive dependency lens based on Josephs et al.'s
 line-graph APM construction. Exact substitution intervals split matches into
 constant-lineup stints; event goals must reproduce the final score. Within each
 team, singleton players, supported pairs, and full observed lineups become

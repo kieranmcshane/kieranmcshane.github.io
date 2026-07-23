@@ -2,14 +2,14 @@
 layout: page
 title: Historical Player Lab
 permalink: /rating-lab/players/
-description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using Lineup TrueSkill, RAPM, pairwise chemistry, and LAPM.
+description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using Lineup TrueSkill, RAPM, pairwise chemistry, HAPM, and LAPM.
 ---
 
 <div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero player-lab-hero">
     <p class="rating-lab-kicker">Historical men's and women's football player contribution</p>
     <h1>What changed when they played?</h1>
-    <p class="rating-lab-deck">Four outcome-only lenses distribute team results across the players who were actually on the pitch. Pairwise chemistry tests explicit pairs; LAPM uses a Jaccard-weighted lineup graph to borrow strength across overlapping combinations. No passes, shots, expected goals, or tracking data enter the ratings.</p>
+    <p class="rating-lab-deck">Five outcome-only lenses distribute team results across the players who were actually on the pitch. Pairwise chemistry tests explicit pairs; HAPM fits players through supported generalized lineups; LAPM smooths a Jaccard-weighted lineup graph. No passes, shots, expected goals, or tracking data enter the ratings.</p>
     <p class="player-lab-back"><a href="{{ '/rating-lab/' | relative_url }}">← Back to Rating Lab</a></p>
   </header>
 
@@ -42,11 +42,12 @@ description: Outcome-only historical men's and women's football player ratings a
           <button type="button" data-player-model="lineup-trueskill" aria-pressed="true">Lineup</button>
           <button type="button" data-player-model="rapm" aria-pressed="false">RAPM</button>
           <button type="button" data-player-model="pairwise-chemistry" aria-pressed="false">Chemistry</button>
+          <button type="button" data-player-model="hapm" aria-pressed="false">HAPM</button>
           <button type="button" data-player-model="lapm" aria-pressed="false">LAPM</button>
         </div>
       </div>
       <label class="rating-lab-field player-lab-team-field" id="player-team-field" hidden>
-        <span>Team · LAPM is within-team</span>
+        <span id="player-team-label">Team · model is within-team</span>
         <select id="player-team"></select>
       </label>
       <label class="rating-lab-field">
@@ -60,6 +61,7 @@ description: Outcome-only historical men's and women's football player ratings a
         <button type="button" data-player-quick-model="lineup-trueskill">Lineup</button>
         <button type="button" data-player-quick-model="rapm">RAPM</button>
         <button type="button" data-player-quick-model="pairwise-chemistry">Chemistry</button>
+        <button type="button" data-player-quick-model="hapm">HAPM</button>
         <button type="button" data-player-quick-model="lapm">LAPM</button>
       </div>
     </div>
@@ -132,8 +134,8 @@ description: Outcome-only historical men's and women's football player ratings a
         <dl>
           <div><dt>Broad ranking</dt><dd>Start with both additive baselines and inspect their agreement, minutes, and uncertainty.</dd></div>
           <div><dt>Over- or under-performance</dt><dd>Use the baselines to control for teammates and opponents across the declared cohort.</dd></div>
-          <div><dt>Partnership questions</dt><dd>Use Chemistry or LAPM as contextual interaction lenses, not portable talent scores.</dd></div>
-          <div><dt>Promotion rule</dt><dd>An interaction layer does not replace the baseline unless chronological validation supports it.</dd></div>
+          <div><dt>Context and combinations</dt><dd>Use Chemistry for explicit pair effects; use HAPM or LAPM to inspect generalized lineups within one team.</dd></div>
+          <div><dt>Promotion rule</dt><dd>A contextual layer does not replace the baseline unless chronological validation supports it.</dd></div>
         </dl>
       </article>
       <div class="player-lab-method-copy">
@@ -150,7 +152,11 @@ description: Outcome-only historical men's and women's football player ratings a
           <p>Exact shared-pitch minutes create teammate-pair features. A second ridge model explains only the goal difference left over after RAPM; its penalty is selected on the chronological final quarter. A player’s score is the minutes-weighted residual chemistry of qualifying partnerships minus <span class="rating-lab-formula">1.96 × approximate uncertainty</span>. The cohort publishes whether this interaction layer improves held-out RMSE.</p>
         </article>
         <article>
-          <h3>LAPM <small>Non-additive extension · experimental · within team</small></h3>
+          <h3>HAPM <small>Hypergraph dependency model · experimental · within team</small></h3>
+          <p>Each retained player, pair, trio, quartet, and full observed lineup becomes a row of an extended incidence matrix; players remain its columns. A minutes-weighted ridge regression fits the player coefficients jointly. The ridge penalty is selected on the chronological final quarter, and every team reports whether HAPM beats a full-lineup-only APM baseline on held-out stints. Publication uses <span class="rating-lab-formula">coefficient − 1.96 × approximate uncertainty</span>.</p>
+        </article>
+        <article>
+          <h3>LAPM <small>Line-graph dependency model · experimental · within team</small></h3>
           <p>Constant-lineup stints are converted into a graph whose nodes are players, qualifying pairs, and full observed lineups. Nodes sharing players are linked by Jaccard similarity. The fitted goal-difference values minimize weighted error plus <span class="rating-lab-formula">λ Σ wᵢⱼ(βᵢ − βⱼ)²</span>, so overlapping combinations borrow strength. LAPM applies the displayed eligibility minimum inside the selected team and is shown within that team only; cross-team LAPM ranks would not share a valid scale.</p>
         </article>
       </div>
@@ -160,9 +166,12 @@ description: Outcome-only historical men's and women's football player ratings a
         <li>Lineup timestamps that overlap slightly around stoppage-time substitutions are normalized to eleven player-equivalents per side.</li>
         <li>Ratings cannot explain how a player contributed. No event or tracking surrogate is used.</li>
         <li>Pairwise chemistry is contextual, not a portable individual-talent score. It can reflect tactics, coaching, opposition and roles shared by a pair.</li>
+        <li>HAPM’s published player coefficients are still additive. Its dependency adjustment comes from fitting supported generalized lineups jointly; it does not publish a pair coefficient as “chemistry”.</li>
+        <li>The football HAPM adaptation retains orders one through four plus each full observed lineup. Exhaustively retaining every order would create 2,047 non-empty subsets for a single 11-player lineup before duplicates are removed.</li>
+        <li>HAPM is marked supported for a team only when its strictly later validation stints beat full-lineup APM. Otherwise it remains visible as descriptive evidence. Intervals implying more than eleven active players are excluded and counted per team; valid red-card lineups remain eligible.</li>
         <li>LAPM is descriptive in this release. It uses goal timing only to score constant-lineup stints, and retains singletons, qualifying pairs, and full observed lineups—not the exponentially large set of every possible order.</li>
-        <li>LAPM’s uncertainty is a local regularized-fit approximation, not a fully sampled Bayesian posterior.</li>
-        <li>The implementation is an explicit football pair-interaction extension, not a claim to reproduce Josephs and Upton’s basketball HAPM unchanged. See the <a href="https://doi.org/10.1515/jqas-2024-0057">published HAPM paper</a> and <a href="https://arxiv.org/abs/2003.01712">Bransen–Van Haaren player-chemistry paper</a>.</li>
+        <li>HAPM and LAPM uncertainties are local regularized-fit approximations, not fully sampled Bayesian posteriors.</li>
+        <li>The HAPM and LAPM implementations are explicit football adaptations of Josephs and Upton’s basketball framework, not claims to reproduce its NBA setup unchanged. See the <a href="https://doi.org/10.1515/jqas-2024-0057">published HAPM paper</a> and <a href="https://arxiv.org/abs/2003.01712">Bransen–Van Haaren player-chemistry paper</a>.</li>
         <li>The LAPM implementation follows the paper’s Jaccard line-graph and Laplacian-smoothing construction, adapted to football stints. The <a href="https://github.com/njosephs/HAPM">authors’ reference code</a> is linked for reproduction.</li>
         <li>A match still level after extra time counts as a draw; a penalty shootout does not rewrite the preceding on-pitch result.</li>
         <li>Eligibility is cohort-specific and displayed above the ranking. Full league seasons use a stricter 900-minute and ten-appearance threshold.</li>
