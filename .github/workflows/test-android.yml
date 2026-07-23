@@ -5,6 +5,11 @@ on:
     paths:
       - "android/**"
       - ".github/workflows/test-android.yml"
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - ".github/workflows/test-android.yml"
   workflow_dispatch:
 
 permissions:
@@ -21,9 +26,16 @@ jobs:
           java-version: "21"
           cache: gradle
       - uses: android-actions/setup-android@v3
-      - name: Build debug APK
+      - name: Test, lint and build parity app
         working-directory: android
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --stacktrace
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rating-lab-android-lint
+          path: android/app/build/reports/lint-results-debug.html
+          if-no-files-found: warn
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
