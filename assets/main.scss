@@ -4495,6 +4495,38 @@ body:has(.rating-lab) .post-content {
   font-size: 1.08rem;
 }
 
+.rating-lab-state-key {
+  display: grid;
+  max-width: 780px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0;
+  margin: 1rem 0 0;
+  list-style: none;
+  border: 1px solid var(--lab-line);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.rating-lab-state-key li {
+  display: grid;
+  gap: 0.08rem;
+  padding: 0.65rem 0.8rem;
+}
+
+.rating-lab-state-key li + li {
+  border-left: 1px solid var(--lab-line);
+}
+
+.rating-lab-state-key strong {
+  color: var(--lab-ink);
+  font-size: 0.82rem;
+}
+
+.rating-lab-state-key span {
+  color: #657287;
+  font-size: 0.72rem;
+}
+
 .rating-lab-predictor-toolbar {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) auto minmax(220px, 0.9fr);
@@ -4504,13 +4536,63 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-predictor-state {
+  display: grid;
+  gap: 0.1rem;
   min-width: 0;
   align-self: center;
   color: #536176;
-  font-size: 0.84rem;
-  font-weight: 650;
+  font-size: 0.78rem;
   overflow-wrap: anywhere;
   text-align: right;
+}
+
+.rating-lab-predictor-state strong {
+  justify-self: end;
+  padding: 0.16rem 0.45rem;
+  color: #fff;
+  background: #516073;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.rating-lab-predictor-state.is-live strong {
+  background: #175b69;
+}
+
+.rating-lab-predictor-state.is-finished strong {
+  background: #38435a;
+}
+
+.rating-lab-predictor-state span {
+  font-weight: 650;
+}
+
+.rating-lab-predictor-state small {
+  color: #68758a;
+  font-size: 0.7rem;
+}
+
+.rating-lab-tie-snapshot {
+  margin: 0.9rem 0;
+  padding: 0.75rem;
+  background: var(--lab-wash);
+  border: 1px solid var(--lab-line);
+  border-radius: 7px;
+}
+
+.rating-lab-tie-snapshot div {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+}
+
+.rating-lab-tie-snapshot p:last-child {
+  margin: 0.35rem 0 0;
+  color: #657287;
+  font-size: 0.72rem;
 }
 
 .rating-lab-predictor-metrics {
@@ -5277,6 +5359,10 @@ body:has(.rating-lab) .post-content {
   .rating-lab-predictor-state {
     grid-column: 1 / -1;
     text-align: left;
+  }
+
+  .rating-lab-predictor-state strong {
+    justify-self: start;
   }
 
   .rating-lab-predictor-grid {
@@ -8205,6 +8291,31 @@ body:has(.explain-lab) .post-header {
   .rating-lab-research-intro {
     font-size: 0.95rem;
     line-height: 1.45;
+  }
+
+  .rating-lab-state-key {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rating-lab-state-key li {
+    display: grid;
+    gap: 0.08rem;
+    padding: 0.5rem 0.35rem;
+    text-align: center;
+  }
+
+  .rating-lab-state-key li + li {
+    border-top: 0;
+    border-left: 1px solid var(--lab-line);
+  }
+
+  .rating-lab-state-key strong {
+    font-size: 0.74rem;
+  }
+
+  .rating-lab-state-key span {
+    font-size: 0.65rem;
+    line-height: 1.25;
   }
 
   .rating-lab-matchup-toolbar {

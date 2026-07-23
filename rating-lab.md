@@ -180,12 +180,17 @@ description: Live alternative ratings for tennis, club and national-team footbal
   </section>
 
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
-    <p class="rating-lab-kicker">Live forecast · completed performance</p>
+    <p class="rating-lab-kicker">Upcoming · live · finished</p>
     <h2 id="predictor-heading">Competition forecast and performance</h2>
-    <p class="rating-lab-predictor-intro">Forecast live and scheduled competitions from current ratings, including official ATP draws with surface-aware match and progression probabilities. Confidently matched Polymarket and Kalshi snapshots remain separate external benchmarks. Completed events switch to protocol performance ratings.</p>
+    <p class="rating-lab-predictor-intro">One lifecycle covers leagues, qualifying rounds, cups, knockout tournaments, chess tournaments, and official ATP draws. Upcoming events show prior-heavy expected outcomes; live events lock the current score, table, or draw before recomputing conditional probabilities; finished events switch to protocol performance ratings and actual-versus-expected analysis.</p>
+    <ol class="rating-lab-state-key" aria-label="Competition lifecycle">
+      <li><strong>Upcoming</strong><span>Prior-heavy forecast</span></li>
+      <li><strong>Live</strong><span>Conditional on now</span></li>
+      <li><strong>Finished</strong><span>Performance review</span></li>
+    </ol>
     <details class="rating-lab-coverage-note">
       <summary>Coverage and forecast limits</summary>
-      <p class="rating-lab-audit-note">Current forward forecasts cover official ATP main draws, five club leagues, the live UEFA Champions League qualifying round, public club and national knockout fields, and active elite Lichess round-robin events. Tennis locks the public ProTennisLive bracket and uses the declared surface model for every unplayed match. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. Completed sourced competitions switch to protocol performance ratings.</p>
+      <p class="rating-lab-audit-note">Coverage is format-based, not limited to championships: official ATP main draws, five club leagues, published UEFA qualifying rounds, public club and national cup fields, and elite Lichess round-robin events use the same three-state contract. Tennis locks the public ProTennisLive bracket and declared surface. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. A forecast remains withheld when the public draw or field is not yet sufficient to reproduce it.</p>
     </details>
 
     <div class="rating-lab-predictor-toolbar">

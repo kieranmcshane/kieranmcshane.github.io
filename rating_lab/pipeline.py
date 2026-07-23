@@ -29,8 +29,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.13.0"
-METHODOLOGY_VERSION = "2026-07-23.1"
+SCHEMA_VERSION = "1.14.0"
+METHODOLOGY_VERSION = "2026-07-23.2"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
@@ -2124,7 +2124,10 @@ def fetch_chess_tournament_schedules(limit: int = 3) -> list[dict]:
         dates = tour.get("dates") or []
         if tour.get("tier", 0) < 4 or "round-robin" not in raw_format.casefold() or len(dates) != 2:
             continue
-        if not dates[0] - 2 * 86_400_000 <= now_ms <= dates[1] + 2 * 86_400_000:
+        # Keep recently completed elite events available long enough for the
+        # Finished-state performance view instead of dropping them two days
+        # after the last round.
+        if not dates[0] - 7 * 86_400_000 <= now_ms <= dates[1] + 35 * 86_400_000:
             continue
         event_matches: list[Match] = []
         event_entities: dict[str, dict] = {}
@@ -2644,6 +2647,7 @@ def _simulate_knockout(competition: dict, model, model_name: str, simulations: i
     )
     seed_material = f"{METHODOLOGY_VERSION}|{competition['id']}|{competition['season']}|{model_name}|knockout"
     seed = int.from_bytes(hashlib.sha256(seed_material.encode()).digest()[:8], "big")
+    active_rank = None
     if final:
         champion_counts = {entity: simulations if entity == final["winner_id"] else 0 for entity in participants}
         next_counts = {entity: simulations if entity == final["winner_id"] else 0 for entity in participants}
@@ -2704,12 +2708,39 @@ def _simulate_knockout(competition: dict, model, model_name: str, simulations: i
             }
         )
     rows.sort(key=lambda row: (-row["champion"], -row["rating"], row["name"]))
+    row_by_id = {row["id"]: row for row in rows}
+    current_ties = []
+    for entity_a, entity_b in unresolved_pairs:
+        fixtures = grouped.get((active_rank, (entity_a, entity_b)), [])
+        goals = {entity_a: 0, entity_b: 0}
+        completed_legs = 0
+        for fixture in fixtures:
+            if fixture["status"] != "FINISHED":
+                continue
+            completed_legs += 1
+            goals[fixture["home_id"]] += fixture.get("home_goals") or 0
+            goals[fixture["away_id"]] += fixture.get("away_goals") or 0
+        current_ties.append(
+            {
+                "team_a_id": entity_a,
+                "team_a_name": names.get(entity_a, entity_a),
+                "team_b_id": entity_b,
+                "team_b_name": names.get(entity_b, entity_b),
+                "aggregate_a": goals[entity_a],
+                "aggregate_b": goals[entity_b],
+                "completed_legs": completed_legs,
+                "remaining_legs": max(len(fixtures) - completed_legs, 0),
+                "team_a_advance": row_by_id[entity_a]["reach_next_stage"],
+                "team_b_advance": row_by_id[entity_b]["reach_next_stage"],
+            }
+        )
     return {
         "forecast_type": "knockout",
         "seed": f"{seed:016x}",
         "simulations": simulations,
         "current_stage": current_stage.replace("_", " ").title(),
         "published_ties_remaining": len(unresolved_pairs),
+        "ties": current_ties,
         "participants": rows,
     }
 
@@ -3037,6 +3068,31 @@ def _simulate_qualifying_round(
             }
         )
     participants.sort(key=lambda row: (-row["reach_next_stage"], -row["rating"], row["name"]))
+    participant_by_id = {row["id"]: row for row in participants}
+    ties = []
+    for pair, tie in sorted(grouped.items()):
+        goals = {pair[0]: 0, pair[1]: 0}
+        completed_legs = 0
+        for fixture in tie:
+            if fixture["status"] != "FINISHED":
+                continue
+            completed_legs += 1
+            goals[fixture["home_id"]] += fixture.get("home_goals") or 0
+            goals[fixture["away_id"]] += fixture.get("away_goals") or 0
+        ties.append(
+            {
+                "team_a_id": pair[0],
+                "team_a_name": names.get(pair[0], pair[0]),
+                "team_b_id": pair[1],
+                "team_b_name": names.get(pair[1], pair[1]),
+                "aggregate_a": goals[pair[0]],
+                "aggregate_b": goals[pair[1]],
+                "completed_legs": completed_legs,
+                "remaining_legs": max(len(tie) - completed_legs, 0),
+                "team_a_advance": participant_by_id[pair[0]]["reach_next_stage"],
+                "team_b_advance": participant_by_id[pair[1]]["reach_next_stage"],
+            }
+        )
     return {
         "forecast_type": "qualifying_round",
         "seed": f"{seed:016x}",
@@ -3046,6 +3102,7 @@ def _simulate_qualifying_round(
         "published_ties_remaining": len(grouped),
         "completed_legs": sum(row["status"] == "FINISHED" for row in fixtures),
         "remaining_legs": sum(row["status"] != "FINISHED" for row in fixtures),
+        "ties": ties,
         "participants": participants,
         "scoreline_method": (
             "Each selected rating protocol supplies home/draw/away probabilities. An independent-Poisson scoreline "
@@ -3511,7 +3568,10 @@ def _competition_end_year(competition: dict) -> str:
 
 def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
     """Fetch public winner markets and match them conservatively to our fields."""
-    eligible = [competition for competition in competitions if competition.get("status") in {"live", "scheduled"}]
+    eligible = [
+        competition for competition in competitions
+        if (competition.get("state") or competition.get("status")) in {"upcoming", "live"}
+    ]
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     snapshots = []
     searches = []
@@ -3659,7 +3719,7 @@ def fetch_kalshi_comparison(competitions: list[dict]) -> dict:
     """Fetch public Kalshi winner events through stable series filters, without credentials."""
     eligible = [
         competition for competition in competitions
-        if competition.get("status") in {"live", "scheduled"}
+        if (competition.get("state") or competition.get("status")) in {"upcoming", "live"}
         and competition.get("id") in KALSHI_COMPETITION_SERIES
     ]
     fetched_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -3784,6 +3844,47 @@ def _attach_kalshi_comparison(payload: dict, previous: dict | None) -> None:
             }
 
 
+def _competition_state(
+    schedule: dict,
+    competition: dict,
+    models: dict,
+) -> tuple[str, int, int]:
+    """Return the single public Upcoming → Live → Finished state."""
+    fixtures = [row for row in schedule["fixtures"] if not row.get("is_bye")]
+    completed = sum(
+        row.get("home_goals") is not None and row.get("away_goals") is not None
+        for row in fixtures
+    )
+    remaining = max(len(fixtures) - completed, 0)
+    competition_format = competition["format"]
+    finished = False
+    if competition_format == "tennis knockout draw":
+        finished = bool(schedule.get("complete"))
+    elif competition_format in {"round-robin league", "round-robin tournament"}:
+        finished = bool(fixtures) and completed == len(fixtures)
+    elif competition_format == "two-legged qualifying round":
+        # The source can expose only the current published qualifying round.
+        # Do not call the whole competition finished before the declared final
+        # fixture date, even when that current round has ended.
+        finished = (
+            bool(fixtures)
+            and completed == len(fixtures)
+            and date.today() >= date.fromisoformat(competition["last_fixture"])
+        )
+    elif models:
+        finished = models.get("elo", {}).get("current_stage") == "Complete"
+    elif fixtures:
+        finished = (
+            completed == len(fixtures)
+            and date.today() >= date.fromisoformat(competition["last_fixture"])
+        )
+    if finished:
+        return "finished", completed, remaining
+    if completed:
+        return "live", completed, remaining
+    return "upcoming", completed, remaining
+
+
 def _build_tournament_predictor(
     schedules: list[dict],
     models: dict,
@@ -3822,40 +3923,60 @@ def _build_tournament_predictor(
                 model_name: _simulate_tennis_draw(schedule, model, model_name)
                 for model_name, model in models.items()
             }
-            competition["status"] = (
-                "complete"
-                if schedule.get("complete")
-                else "scheduled"
-                if all(
-                    fixture.get("status") in {"SCHEDULED", "BYE"}
-                    for fixture in schedule["fixtures"]
-                )
-                else "live"
-            )
         elif competition["format"] in {"round-robin league", "round-robin tournament"}:
             competition["models"] = {
                 model_name: _simulate_league(schedule, model, model_name, entities, draw_rate)
                 for model_name, model in models.items()
             }
-            completed = competition["models"]["elo"]["completed_matches"]
-            competition["status"] = "scheduled" if completed == 0 else "complete" if completed == competition["total_matches"] else "live"
         elif competition["format"] == "two-legged qualifying round" and competition["forecast_available"]:
             competition["round_timeline"] = schedule["round_timeline"]
             competition["models"] = {
                 model_name: _simulate_qualifying_round(schedule, model, model_name, draw_rate)
                 for model_name, model in models.items()
             }
-            competition["status"] = "live"
         elif competition["forecast_available"]:
             competition["models"] = {
                 model_name: _simulate_knockout(schedule, model, model_name)
                 for model_name, model in models.items()
             }
-            competition["status"] = "complete" if competition["models"]["elo"]["current_stage"] == "Complete" else "live"
         else:
             competition["models"] = {}
-            competition["status"] = "waiting for draw"
-        if competition["status"] == "complete":
+        competition_state, completed_matches, remaining_matches = _competition_state(
+            schedule,
+            competition,
+            competition["models"],
+        )
+        competition["state"] = competition_state
+        # Kept as a canonical alias for older clients. It no longer carries a
+        # second vocabulary such as scheduled/complete/waiting for draw.
+        competition["status"] = competition_state
+        competition["completed_matches"] = completed_matches
+        competition["remaining_matches"] = remaining_matches
+        competition["state_view"] = {
+            "upcoming": "prior_forecast",
+            "live": "conditional_forecast",
+            "finished": "performance",
+        }[competition_state]
+        competition["snapshot_kind"] = (
+            "table"
+            if competition["format"] in {"round-robin league", "round-robin tournament"}
+            else "draw"
+        )
+        competition["state_message"] = {
+            "upcoming": (
+                "No result from this competition has entered the forecast. "
+                "Expected outcomes are driven by pre-competition ratings and the published schedule or draw."
+            ),
+            "live": (
+                f"{completed_matches} sourced result{'s' if completed_matches != 1 else ''} "
+                "are locked; probabilities are conditional on the current table, score, or draw."
+            ),
+            "finished": (
+                "All sourced competition results are locked. Forecast probabilities are replaced by "
+                "protocol performance ratings and actual-minus-expected analysis."
+            ),
+        }[competition_state]
+        if competition_state == "finished":
             performance_models = {
                 model_name: _competition_performance(
                     schedule,
@@ -3885,6 +4006,12 @@ def _build_tournament_predictor(
         "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented. Qualifying-round forecasts stop at the next stage and never invent later entrants or pairings.",
         "tennis_draw": "Official ATP bracket paths and byes are locked. Completed matches are fixed; each unplayed match is sampled from the selected model's global-plus-surface probability. Round advancement is counted from the same deterministic simulations.",
         "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
+        "state_machine": {
+            "order": ["upcoming", "live", "finished"],
+            "upcoming": "Prior-heavy forecast and expected outcomes from the published schedule or draw.",
+            "live": "Current score, table, or draw with conditional advancement and finishing probabilities.",
+            "finished": "Performance ratings plus actual-versus-expected outperformer and underperformer analysis.",
+        },
         "performance_method": "Completed competitions publish an anchored exact performance rating, a tournament-only reset rank, and chronological actual-versus-expected surprise instead of retrospective title probabilities.",
         "competitions": competitions,
     }

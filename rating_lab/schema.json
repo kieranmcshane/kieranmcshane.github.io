@@ -20,7 +20,7 @@
     "media"
   ],
   "properties": {
-    "schema_version": { "const": "1.13.0" },
+    "schema_version": { "const": "1.14.0" },
     "sport": { "enum": ["tennis", "football", "national-football", "chess"] },
     "generated_at": { "type": "string" },
     "latest_result": { "type": "string", "format": "date" },

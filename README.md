@@ -9,14 +9,18 @@ The site uses GitHub Pages, Jekyll, and the Minima theme. Long-form posts live i
 `/rating-lab/` is a generated, interactive comparison of Elo, Glicko-2,
 Gaussian TrueSkill, and robust heavy-tail ratings for ATP tennis, European club
 football, men's national-team football, and elite over-the-board chess.
-The same page includes a daily, format-aware competition predictor. It covers
-official live ATP main draws, the five European league tables, and public football-data.org knockout fields
-for the Champions League, FIFA World Cup, and European Championship. It starts
-from actual results and published fixtures under each of the four rating
-protocols. ATP draws preserve every published path and bye, use the declared
-surface-aware probability for each unplayed match, and publish direct-match,
-round-progression, and title probabilities. During live elite Lichess round-robin broadcasts it also reconstructs
-the remaining all-play-all pairing set and forecasts the final chess table.
+The same page includes a daily, format-aware competition predictor. A single
+public state machine applies to leagues, qualifying rounds, cups, knockout
+tournaments, chess tournaments, and official ATP draws: **Upcoming** publishes
+prior-heavy expected outcomes; **Live** locks the current score, table, or draw
+and publishes conditional progression probabilities; **Finished** replaces
+forecast odds with protocol performance ratings and an actual-versus-expected
+outperformer/underperformer graph. ATP draws preserve every published path and
+bye, use the declared surface-aware probability for each unplayed match, and
+publish direct-match, round-progression, and title probabilities. During elite
+Lichess round-robin broadcasts it reconstructs the remaining all-play-all
+pairing set and forecasts the final chess table; recently finished events stay
+visible for retrospective performance analysis.
 
 The page's protocol explorer exposes the running rules for every sport/model
 pair: source identity boundary, deterministic sort order, priors, venue or
@@ -128,12 +132,17 @@ common fitted scale.
 Competition forecasts use 5,000 deterministic simulations per competition and
 model. Tennis forecasts lock official ProTennisLive draw slots, results, and
 byes, then use the selected global-plus-surface belief for every unplayed
-singles match. League forecasts publish the current table, remaining-match count, and
-every team's finishing-position distribution. Knockout forecasts lock known
-ties and results; when a later draw is unpublished, surviving teams are
-uniformly re-drawn in each simulation. Title probabilities are withheld until
-the public feed identifies a knockout field. Every forecast publishes its
-fixture snapshot checksum and deterministic seed for exact reproduction.
+singles match. League forecasts publish the current table, remaining-match
+count, and every team's finishing-position distribution; before the first
+result those distributions are explicitly labeled as priors. Knockout and
+qualifying forecasts lock known aggregate scores and results, publish the
+current tie beside conditional advancement chances, and never infer an
+unpublished field. When a later cup draw is unpublished, surviving teams are
+uniformly re-drawn in each simulation only where the competition protocol
+permits it. Title probabilities are withheld until the public feed identifies
+a knockout field. Every forecast publishes its lifecycle state, state
+definition, fixture snapshot checksum, and deterministic seed for exact
+reproduction.
 
 Completed competitions replace title odds with a deterministic event replay
 from the strictly pre-event rating state. Before each update, the selected

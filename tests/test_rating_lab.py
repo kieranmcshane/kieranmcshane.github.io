@@ -34,6 +34,7 @@ from rating_lab.pipeline import (
     _deduplicate,
     _competition_performance,
     _competition_matches,
+    _competition_state,
     _build_tournament_predictor,
     _football_data_crest_media,
     _get,
@@ -840,6 +841,46 @@ h001,Hana,Theta,CZE
             sorted((team["expected_points"] for team in first["teams"]), reverse=True),
         )
 
+    def test_competition_state_machine_is_format_independent(self):
+        competition = {
+            "format": "round-robin league",
+            "last_fixture": "2026-08-09",
+        }
+        upcoming = {
+            "fixtures": [
+                {"home_goals": None, "away_goals": None},
+                {"home_goals": None, "away_goals": None},
+            ]
+        }
+        live = {
+            "fixtures": [
+                {"home_goals": 2, "away_goals": 1},
+                {"home_goals": None, "away_goals": None},
+            ]
+        }
+        finished = {
+            "fixtures": [
+                {"home_goals": 2, "away_goals": 1},
+                {"home_goals": 0, "away_goals": 0},
+            ]
+        }
+        self.assertEqual(_competition_state(upcoming, competition, {})[0], "upcoming")
+        self.assertEqual(_competition_state(live, competition, {})[0], "live")
+        self.assertEqual(_competition_state(finished, competition, {})[0], "finished")
+
+        knockout = {
+            "format": "knockout cup",
+            "last_fixture": "2026-07-19",
+        }
+        self.assertEqual(
+            _competition_state(live, knockout, {"elo": {"current_stage": "Complete"}})[0],
+            "finished",
+        )
+        self.assertEqual(
+            _competition_state(upcoming, knockout, {"elo": {"current_stage": "Quarter Finals"}})[0],
+            "upcoming",
+        )
+
     def test_completed_competition_performance_replays_from_pre_event_state(self):
         entities = {
             "football:name:alpha": {"name": "Alpha"},
@@ -952,6 +993,8 @@ h001,Hana,Theta,CZE
         second = _simulate_knockout(competition, model, "elo", simulations=500)
         self.assertEqual(first, second)
         self.assertEqual(first["published_ties_remaining"], 2)
+        self.assertEqual(len(first["ties"]), 2)
+        self.assertTrue(all(tie["completed_legs"] == 0 for tie in first["ties"]))
         self.assertAlmostEqual(sum(team["champion"] for team in first["participants"]), 1.0, places=3)
 
     def test_uefa_qualifying_parser_and_current_round_forecast(self):
@@ -981,6 +1024,8 @@ h001,Hana,Theta,CZE
         self.assertEqual(first["current_stage"], "Second qualifying round")
         self.assertEqual(first["target_label"], "Reach third qualifying round")
         self.assertEqual(first["published_ties_remaining"], 1)
+        self.assertEqual(first["ties"][0]["remaining_legs"], 2)
+        self.assertEqual(first["ties"][0]["completed_legs"], 0)
         self.assertAlmostEqual(sum(row["reach_next_stage"] for row in first["participants"]), 1.0, places=3)
         between_rounds = _parse_uefa_ucl_qualifying(
             article.replace(b"Alpha vs Gamma", b"Alpha 1-0 Gamma").replace(b"Gamma vs Alpha", b"Gamma 0-0 Alpha")
