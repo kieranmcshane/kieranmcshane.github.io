@@ -50,21 +50,15 @@ jobs:
           done
       - name: Install archive reader
         run: sudo apt-get update && sudo apt-get install --yes zstd
+      - name: Install rating pipeline dependencies
+        run: python -m pip install --requirement requirements-rating-lab.txt
       - name: Refresh public ratings
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
-            python scripts/refresh_ratings.py --players-only
-          else
-            sports="football national-football chess"
-            if [ "$(date -u +%u)" = "1" ] || [ "$GITHUB_EVENT_NAME" != "schedule" ]; then
-              sports="tennis $sports"
-            fi
-            python scripts/refresh_ratings.py --sports $sports
-          fi
+          python scripts/refresh_ratings.py --sports tennis football national-football chess
       - name: Preserve validated public snapshot
         run: |
           mkdir -p .cache/rating-lab-output

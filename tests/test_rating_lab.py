@@ -34,6 +34,7 @@ from rating_lab.pipeline import (
     _deduplicate,
     _competition_performance,
     _competition_matches,
+    _build_tournament_predictor,
     _football_data_crest_media,
     _get,
     _kalshi_event_snapshot,
@@ -41,6 +42,9 @@ from rating_lab.pipeline import (
     _metrics,
     _merge_schedule_media,
     _merge_schedule_results,
+    _merge_tennis_schedule_results,
+    _parse_atp_draw_pages,
+    _parse_atp_player_catalog,
     _parse_broadcast_pgn,
     _parse_cup_schedule,
     _parse_football_txt,
@@ -53,6 +57,7 @@ from rating_lab.pipeline import (
     _simulate_league,
     _simulate_knockout,
     _simulate_qualifying_round,
+    _simulate_tennis_draw,
     _validate_football_coverage,
     _model_candidates,
     build_sport_payload,
@@ -193,6 +198,126 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(all(candidate["home"] == 35.0 for candidate in _model_candidates("chess", "elo")))
         surface_weights = {candidate["surface_weight"] for candidate in _model_candidates("tennis", "elo")}
         self.assertEqual(surface_weights, {0.4, 0.7, 0.9})
+
+    def test_official_atp_draw_parser_preserves_slots_byes_and_stable_ids(self):
+        catalog_text = """code,first_name,last_name,citizenship
+a001,Alice,Alpha,FRA
+b001,Beth,Beta,GBR
+c001,Carla,Gamma,ESP
+d001,Dana,Delta,USA
+e001,Elena,Epsilon,ITA
+f001,Farah,Zeta,TUN
+g001,Greta,Eta,GER
+h001,Hana,Theta,CZE
+"""
+        catalog = _parse_atp_player_catalog(catalog_text)
+        entries = [
+            ("ALPHA, Alice", "FRA"),
+            ("Bye", ""),
+            ("GAMMA, Carla", "ESP"),
+            ("DELTA, Dana", "USA"),
+            ("EPSILON, Elena", "ITA"),
+            ("ZETA, Farah", "TUN"),
+            ("ETA, Greta", "GER"),
+            ("THETA, Hana", "CZE"),
+        ]
+        lines = []
+        for index, (name, country) in enumerate(entries, 1):
+            base = f" {index}   {name}" + (f"   {country}" if country else "")
+            line = base.ljust(52)
+            stage_one = {1: "A. Alpha", 3: "C. Gamma", 7: "G. Eta"}.get(index, "")
+            stage_two = {2: "A. Alpha"}.get(index, "")
+            if stage_one:
+                line += stage_one
+            line = line.ljust(83)
+            if stage_two:
+                line += stage_two
+            lines.append(line)
+        page = "Example Open\nMain Draw Singles\n" + "\n".join(lines) + "\nRound of 8\n"
+        draw = _parse_atp_draw_pages([page], catalog)
+        self.assertIsNotNone(draw)
+        self.assertEqual(draw["slots"][0], "atp:a001")
+        self.assertIsNone(draw["slots"][1])
+        self.assertEqual(draw["recorded_winners"][0][:2], ["atp:a001", "atp:c001"])
+        self.assertIsNone(draw["recorded_winners"][0][2])
+        self.assertEqual(draw["recorded_winners"][1][0], "atp:a001")
+
+    def test_tennis_draw_simulation_uses_surface_probability_and_locked_path(self):
+        model = SurfaceBlendModel(lambda: EloModel(k=28), surface_weight=0.9)
+        start = date(2026, 1, 1)
+        for offset in range(12):
+            model.update(
+                Match(
+                    start + timedelta(days=offset),
+                    "atp:a",
+                    "atp:b",
+                    1.0,
+                    metadata={"surface": "Clay"},
+                )
+            )
+            model.update(
+                Match(
+                    start + timedelta(days=20 + offset),
+                    "atp:a",
+                    "atp:b",
+                    0.0,
+                    metadata={"surface": "Hard"},
+                )
+            )
+        base = {
+            "id": "tennis-test",
+            "season": "2026",
+            "teams": [
+                {"id": "atp:a", "name": "Alice Alpha", "country": "FRA"},
+                {"id": "atp:b", "name": "Beth Beta", "country": "GBR"},
+            ],
+            "draw_slots": ["atp:a", "atp:b"],
+            "recorded_winners": [[None]],
+            "round_labels": ["Final"],
+            "complete": False,
+        }
+        clay = _simulate_tennis_draw({**base, "surface": "Clay"}, model, "elo", simulations=2000)
+        hard = _simulate_tennis_draw({**base, "surface": "Hard"}, model, "elo", simulations=2000)
+        clay_a = next(row for row in clay["participants"] if row["id"] == "atp:a")
+        hard_a = next(row for row in hard["participants"] if row["id"] == "atp:a")
+        self.assertGreater(clay_a["champion"], 0.5)
+        self.assertLess(hard_a["champion"], 0.5)
+        self.assertAlmostEqual(
+            clay["upcoming_matches"][0]["probability_a"]
+            + clay["upcoming_matches"][0]["probability_b"],
+            1.0,
+        )
+        self.assertEqual(clay_a["next_match"]["surface"], "Clay")
+        self.assertEqual([row["stage"] for row in clay_a["round_probabilities"]], ["Champion"])
+
+    def test_completed_tennis_competition_replay_keeps_surface_metadata(self):
+        schedule = {
+            "label": "Example Open",
+            "season": "2026",
+            "cohort": "tennis",
+            "surface": "Grass",
+            "home_advantage": False,
+            "fixtures": [
+                {
+                    "date": "2026-07-12",
+                    "home_id": "atp:a",
+                    "away_id": "atp:b",
+                    "home_name": "Alice Alpha",
+                    "away_name": "Beth Beta",
+                    "home_goals": 1.0,
+                    "away_goals": 0.0,
+                    "is_bye": False,
+                }
+            ],
+        }
+        entities = {
+            "atp:a": {"name": "Alice Alpha"},
+            "atp:b": {"name": "Beth Beta"},
+        }
+        event_matches = _competition_matches(schedule, entities)
+        self.assertEqual(len(event_matches), 1)
+        self.assertFalse(event_matches[0].home_advantage)
+        self.assertEqual(event_matches[0].metadata["surface"], "Grass")
 
     def test_individual_contribution_protocol_publishes_only_valid_historical_cohorts(self):
         protocol = individual_contribution_protocol()
@@ -455,11 +580,10 @@ class PipelineTests(unittest.TestCase):
             Path(__file__).resolve().parents[1]
             / ".github/workflows/refresh-and-deploy.yml"
         ).read_text()
-        player_refresh = "python scripts/refresh_ratings.py --players-only"
-        self.assertIn(player_refresh, workflow)
-        self.assertEqual(workflow.count(player_refresh), 1)
-        self.assertIn('if [ "$GITHUB_EVENT_NAME" = "push" ]; then', workflow)
-        self.assertLess(workflow.index(player_refresh), workflow.index("actions/jekyll-build-pages"))
+        full_refresh = "python scripts/refresh_ratings.py --sports tennis football national-football chess"
+        self.assertIn(full_refresh, workflow)
+        self.assertEqual(workflow.count(full_refresh), 1)
+        self.assertLess(workflow.index(full_refresh), workflow.index("actions/jekyll-build-pages"))
         self.assertIn("rating-lab-public-data-v4-", workflow)
         refresh_script = (
             Path(__file__).resolve().parents[1] / "scripts/refresh_ratings.py"
