@@ -29,8 +29,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.14.0"
-METHODOLOGY_VERSION = "2026-07-23.2"
+SCHEMA_VERSION = "1.15.0"
+METHODOLOGY_VERSION = "2026-07-23.3"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
@@ -113,6 +113,7 @@ KNOCKOUT_STAGES = {
     "FINAL": 6,
 }
 PREDICTOR_SIMULATIONS = 5_000
+MARKET_SCORE_EPSILON = 1e-12
 ATP_DRAW_LOOKBACK_DAYS = 42
 ATP_DRAW_LOOKAHEAD_DAYS = 10
 ATP_TOUR_SERIES = {"atp", "1000", "gs"}
@@ -3566,6 +3567,250 @@ def _competition_end_year(competition: dict) -> str:
     return season
 
 
+def _market_forecast_bins(probabilities: dict[str, float]) -> dict:
+    """Publish a mutually exclusive field plus an explicit unmatched remainder."""
+    cleaned = {
+        entity_id: min(max(float(probability), 0.0), 1.0)
+        for entity_id, probability in probabilities.items()
+        if isinstance(entity_id, str)
+    }
+    total = sum(cleaned.values())
+    if total > 1.0:
+        cleaned = {
+            entity_id: probability / total
+            for entity_id, probability in cleaned.items()
+        }
+        total = 1.0
+    return {
+        "probabilities": {
+            entity_id: round(cleaned[entity_id], 6)
+            for entity_id in sorted(cleaned)
+        },
+        "other_probability": round(max(0.0, 1.0 - total), 6),
+    }
+
+
+def _market_model_forecasts(competition: dict, entity_ids: set[str]) -> dict:
+    """Capture every protocol on the same participant field as one market quote."""
+    forecasts = {}
+    for model_name in MODEL_NAMES:
+        model = competition.get("models", {}).get(model_name, {})
+        rows = model.get("teams") or model.get("participants") or []
+        probabilities = {
+            row["id"]: row["champion"]
+            for row in rows
+            if row.get("id") in entity_ids and isinstance(row.get("champion"), (int, float))
+        }
+        if probabilities:
+            forecasts[model_name] = _market_forecast_bins(probabilities)
+    return forecasts
+
+
+def _market_history_entry(
+    snapshot: dict,
+    competition: dict,
+    captured_at: str,
+) -> dict:
+    """Freeze a dated market quote beside simultaneous model forecasts."""
+    market_probabilities = {
+        row["entity_id"]: row["normalized_probability"]
+        for row in snapshot.get("outcomes", [])
+    }
+    entity_ids = set(market_probabilities)
+    return {
+        "captured_at": captured_at,
+        "snapshot_date": captured_at[:10],
+        "competition_id": competition["id"],
+        "competition_label": competition["label"],
+        "competition_season": competition.get("season"),
+        "competition_state": competition.get("state") or competition.get("status"),
+        "event_id": snapshot.get("event_id"),
+        "event_title": snapshot.get("event_title"),
+        "event_url": snapshot.get("event_url"),
+        "snapshot_sha256": snapshot.get("snapshot_sha256"),
+        "matched_participants": snapshot.get("matched_participants", 0),
+        "model_participants": snapshot.get("model_participants", 0),
+        "coverage": snapshot.get("coverage", 0),
+        "raw_yes_price_sum": snapshot.get("raw_yes_price_sum", 0),
+        "market_forecast": _market_forecast_bins(market_probabilities),
+        "model_forecasts": _market_model_forecasts(competition, entity_ids),
+    }
+
+
+def _resolved_competition_winner(competition: dict) -> dict | None:
+    """Read the deterministic winner only after the competition is finished."""
+    if (competition.get("state") or competition.get("status")) != "finished":
+        return None
+    model = competition.get("models", {}).get("elo", {})
+    rows = model.get("teams") or model.get("participants") or []
+    candidates = [
+        row for row in rows
+        if isinstance(row.get("champion"), (int, float))
+    ]
+    if not candidates:
+        return None
+    winner = max(candidates, key=lambda row: (row["champion"], row.get("name", "")))
+    if winner["champion"] < 1.0 - 1e-6:
+        return None
+    return {"id": winner["id"], "name": winner["name"]}
+
+
+def _categorical_forecast_score(forecast: dict, winner_id: str) -> dict:
+    """Score one mutually exclusive winner forecast, including its Other bin."""
+    probabilities = {
+        entity_id: min(max(float(probability), 0.0), 1.0)
+        for entity_id, probability in forecast.get("probabilities", {}).items()
+    }
+    probabilities["__other__"] = min(
+        max(float(forecast.get("other_probability", 0.0)), 0.0),
+        1.0,
+    )
+    actual_id = winner_id if winner_id in probabilities else "__other__"
+    winner_probability = probabilities.get(actual_id, 0.0)
+    brier = sum(
+        (probability - (1.0 if entity_id == actual_id else 0.0)) ** 2
+        for entity_id, probability in probabilities.items()
+    )
+    return {
+        "winner_probability": round(winner_probability, 6),
+        "log_loss": round(-math.log(max(winner_probability, MARKET_SCORE_EPSILON)), 6),
+        "brier": round(brier, 6),
+    }
+
+
+def _market_benchmark_summary(
+    history: list[dict],
+    competitions: list[dict],
+    provider_name: str,
+) -> tuple[list[dict], dict]:
+    """Resolve dated forecasts and aggregate providers and models on identical frames."""
+    competition_by_id = {competition["id"]: competition for competition in competitions}
+    scored_history = []
+    aggregates: dict[str, dict[str, float]] = defaultdict(
+        lambda: {"log_loss": 0.0, "brier": 0.0, "predictions": 0}
+    )
+    resolved_competitions = set()
+    for original in history:
+        entry = json.loads(json.dumps(original))
+        competition = competition_by_id.get(entry.get("competition_id"))
+        same_season = (
+            competition
+            and str(competition.get("season")) == str(entry.get("competition_season"))
+        )
+        winner = _resolved_competition_winner(competition) if same_season else None
+        if winner:
+            forecasts = {"market": entry.get("market_forecast", {})}
+            forecasts.update(entry.get("model_forecasts", {}))
+            scores = {}
+            for forecaster, forecast in forecasts.items():
+                if not forecast:
+                    continue
+                scores[forecaster] = _categorical_forecast_score(forecast, winner["id"])
+            if "market" in scores:
+                entry["resolution"] = {
+                    "winner_id": winner["id"],
+                    "winner_name": winner["name"],
+                    "resolved_at": competition.get("last_fixture"),
+                    "scores": scores,
+                }
+        resolution = entry.get("resolution")
+        if resolution and "market" in resolution.get("scores", {}):
+            resolved_competitions.add(
+                (entry.get("competition_id"), entry.get("competition_season"))
+            )
+            for forecaster, score in resolution["scores"].items():
+                aggregates[forecaster]["log_loss"] += score["log_loss"]
+                aggregates[forecaster]["brier"] += score["brier"]
+                aggregates[forecaster]["predictions"] += 1
+        scored_history.append(entry)
+    labels = {
+        "market": provider_name,
+        "elo": "Elo",
+        "glicko2": "Glicko-2",
+        "trueskill": "Gaussian TrueSkill",
+        "robust": "Robust TrueSkill",
+    }
+    forecasters = []
+    for forecaster in ("market",) + MODEL_NAMES:
+        aggregate = aggregates.get(forecaster)
+        if not aggregate or not aggregate["predictions"]:
+            continue
+        predictions = int(aggregate["predictions"])
+        forecasters.append(
+            {
+                "id": forecaster,
+                "label": labels[forecaster],
+                "predictions": predictions,
+                "log_loss": round(aggregate["log_loss"] / predictions, 6),
+                "brier": round(aggregate["brier"] / predictions, 6),
+            }
+        )
+    return scored_history, {
+        "status": "scored" if forecasters else "awaiting_resolutions",
+        "unit": "one dated, mutually exclusive competition-winner snapshot",
+        "snapshots_retained": len(scored_history),
+        "scored_snapshots": aggregates.get("market", {}).get("predictions", 0),
+        "resolved_competitions": len(resolved_competitions),
+        "forecasters": forecasters,
+        "method": (
+            "At each dated capture, the market and all four protocols are frozen on the same "
+            "matched participant field with an explicit Other remainder. After the official "
+            "winner is known, categorical log loss and multiclass Brier score are computed on "
+            "that unchanged forecast. Lower is better; every forecaster is evaluated on the "
+            "same dated snapshots."
+        ),
+    }
+
+
+def _finalize_market_comparison(
+    current: dict,
+    previous: dict | None,
+    competitions: list[dict],
+    provider_name: str,
+) -> dict:
+    """Merge one snapshot per UTC date and resolve any newly finished events."""
+    history = json.loads(json.dumps((previous or {}).get("history", [])))
+    competition_by_id = {competition["id"]: competition for competition in competitions}
+    captured_at = current.get("fetched_at") or current.get("checked_at")
+    if captured_at:
+        by_day = {
+            (
+                entry.get("competition_id"),
+                entry.get("competition_season"),
+                entry.get("snapshot_date"),
+            ): entry
+            for entry in history
+        }
+        for snapshot in current.get("competitions", []):
+            competition = competition_by_id.get(snapshot.get("competition_id"))
+            if not competition:
+                continue
+            entry = _market_history_entry(snapshot, competition, captured_at)
+            by_day[
+                (
+                    entry["competition_id"],
+                    entry.get("competition_season"),
+                    entry["snapshot_date"],
+                )
+            ] = entry
+        history = sorted(
+            by_day.values(),
+            key=lambda entry: (
+                entry.get("captured_at", ""),
+                entry.get("competition_id", ""),
+            ),
+        )
+    history, benchmark = _market_benchmark_summary(history, competitions, provider_name)
+    current["history"] = history
+    current["benchmark"] = benchmark
+    current["retention_policy"] = (
+        "Keep the final successful provider quote per UTC date, competition, and season "
+        "in the published sport JSON. Once that UTC date has passed, its probabilities "
+        "are not revised; resolution appends scores without changing the forecast."
+    )
+    return current
+
+
 def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
     """Fetch public winner markets and match them conservatively to our fields."""
     eligible = [
@@ -3786,19 +4031,20 @@ def _attach_polymarket_comparison(payload: dict, previous: dict | None) -> None:
     predictor = payload.get("tournament_predictor")
     if not predictor:
         return
+    previous_market = (previous or {}).get("tournament_predictor", {}).get("market_comparison")
     try:
-        predictor["market_comparison"] = fetch_polymarket_comparison(predictor["competitions"])
+        current = fetch_polymarket_comparison(predictor["competitions"])
     except RuntimeError as error:
-        retained = (previous or {}).get("tournament_predictor", {}).get("market_comparison")
+        retained = previous_market
         if retained:
             retained = json.loads(json.dumps(retained))
             retained["status"] = "retained"
             retained["checked_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
             retained["message"] = str(error)[:240]
-            predictor["market_comparison"] = retained
+            current = retained
         else:
             checked_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-            predictor["market_comparison"] = {
+            current = {
                 "status": "unavailable",
                 "source": "Polymarket Gamma API",
                 "source_url": "https://docs.polymarket.com/market-data/overview",
@@ -3811,25 +4057,32 @@ def _attach_polymarket_comparison(payload: dict, previous: dict | None) -> None:
                 "searches": [],
                 "message": str(error)[:240],
             }
+    predictor["market_comparison"] = _finalize_market_comparison(
+        current,
+        previous_market,
+        predictor["competitions"],
+        "Polymarket",
+    )
 
 
 def _attach_kalshi_comparison(payload: dict, previous: dict | None) -> None:
     predictor = payload.get("tournament_predictor")
     if not predictor:
         return
+    previous_market = (previous or {}).get("tournament_predictor", {}).get("kalshi_comparison")
     try:
-        predictor["kalshi_comparison"] = fetch_kalshi_comparison(predictor["competitions"])
+        current = fetch_kalshi_comparison(predictor["competitions"])
     except RuntimeError as error:
-        retained = (previous or {}).get("tournament_predictor", {}).get("kalshi_comparison")
+        retained = previous_market
         if retained:
             retained = json.loads(json.dumps(retained))
             retained["status"] = "retained"
             retained["checked_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
             retained["message"] = str(error)[:240]
-            predictor["kalshi_comparison"] = retained
+            current = retained
         else:
             checked_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-            predictor["kalshi_comparison"] = {
+            current = {
                 "status": "unavailable",
                 "source": "Kalshi Trade API",
                 "source_url": "https://docs.kalshi.com/getting_started/quick_start_market_data",
@@ -3842,6 +4095,12 @@ def _attach_kalshi_comparison(payload: dict, previous: dict | None) -> None:
                 "searches": [],
                 "message": str(error)[:240],
             }
+    predictor["kalshi_comparison"] = _finalize_market_comparison(
+        current,
+        previous_market,
+        predictor["competitions"],
+        "Kalshi",
+    )
 
 
 def _competition_state(
@@ -4358,6 +4617,45 @@ def validate_payload(payload: dict, schema: dict) -> None:
                     raise ValueError(f"Duplicate {provider} participant match")
                 if any(not 0 <= row.get("normalized_probability", -1) <= 1 for row in competition.get("outcomes", [])):
                     raise ValueError(f"Invalid normalized {provider} probability")
+            history = market.get("history")
+            benchmark = market.get("benchmark")
+            if not isinstance(history, list) or not isinstance(benchmark, dict):
+                raise ValueError(f"Missing dated {provider} benchmark history")
+            seen_days = set()
+            for snapshot in history:
+                key = (
+                    snapshot.get("competition_id"),
+                    snapshot.get("competition_season"),
+                    snapshot.get("snapshot_date"),
+                )
+                if key in seen_days:
+                    raise ValueError(f"Duplicate dated {provider} snapshot")
+                seen_days.add(key)
+                if not snapshot.get("captured_at") or not snapshot.get("snapshot_sha256"):
+                    raise ValueError(f"Incomplete dated {provider} snapshot")
+                forecasts = {
+                    "market": snapshot.get("market_forecast"),
+                    **snapshot.get("model_forecasts", {}),
+                }
+                for forecast in forecasts.values():
+                    if not forecast:
+                        continue
+                    probabilities = list(forecast.get("probabilities", {}).values())
+                    other = forecast.get("other_probability")
+                    if (
+                        not isinstance(other, (int, float))
+                        or any(not 0 <= probability <= 1 for probability in probabilities)
+                        or not 0 <= other <= 1
+                        or sum(probabilities) + other > 1.00001
+                    ):
+                        raise ValueError(f"Invalid dated {provider} forecast field")
+                resolution = snapshot.get("resolution")
+                if resolution:
+                    for score in resolution.get("scores", {}).values():
+                        if score.get("log_loss", -1) < 0 or score.get("brier", -1) < 0:
+                            raise ValueError(f"Invalid resolved {provider} forecast score")
+            if benchmark.get("status") not in {"awaiting_resolutions", "scored"}:
+                raise ValueError(f"Invalid {provider} benchmark status")
     for name in MODEL_NAMES:
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
@@ -4531,8 +4829,9 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "qualifying_rounds": "UEFA's official named ties and results are replayed only for the active two-leg round. Future entrants and draws are withheld until published.",
             "qualifying_scoreline_bridge": "Fit an independent-Poisson scoreline distribution to each protocol's home/draw/away probabilities for unplayed legs; use actual aggregate scores and a neutral decisive probability only when still level.",
             "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
-            "market_benchmark": "Polymarket Gamma Yes outcomePrices, normalized across active liquid mutually exclusive winner markets; comparison only and never a model input.",
-            "market_quality_fields": ["raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at"],
+            "market_benchmark": "Polymarket and Kalshi winner quotes are frozen beside all four protocol forecasts at the same dated snapshot. Once the official winner resolves, every forecaster is scored on the unchanged common field using categorical log loss and multiclass Brier score; market data remain comparison-only and never enter a model.",
+            "market_snapshot_retention": "The latest successful quote per provider, competition, and UTC date is retained in the published sport JSON with its source hash and simultaneous model probabilities.",
+            "market_quality_fields": ["captured_at", "snapshot_sha256", "raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at", "other_probability", "resolution.scores.*.log_loss", "resolution.scores.*.brier"],
             "refresh": "daily",
         },
         "individual_contribution": individual_contribution_protocol(),

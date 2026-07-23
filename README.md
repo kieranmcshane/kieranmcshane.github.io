@@ -151,3 +151,14 @@ protocol records expected result score `p`; the participant residual is
 `sqrt(sum(p * (1 - p)))`. Wins, draws, and losses score 1, 0.5, and 0. The
 published JSON retains actual score, expected score, residual, per-match
 residual, variance reference, and standardized surprise for every participant.
+
+Eligible Polymarket and Kalshi winner fields are retained as dated benchmark
+snapshots rather than overwritten on the next refresh. Each capture freezes
+the normalized market field and all four Rating Lab title forecasts on the
+same participant identities, including an explicit `Other` remainder when the
+market field is incomplete. After the official winner is known, the unchanged
+snapshots receive categorical log-loss and multiclass Brier scores. The public
+JSON retains the quote date, source hash, forecasts, resolution, and
+per-forecaster scores; lower is better and market data never enter a model.
+Competitions without a conservative season-and-identity match publish an
+explicit `no eligible market found` state.

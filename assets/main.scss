@@ -4702,6 +4702,13 @@ body:has(.rating-lab) .post-content {
   font-size: 0.78rem;
 }
 
+.rating-lab-market-benchmark-state {
+  max-width: 900px;
+  margin: 0.2rem 0 0;
+  color: #4f5e72;
+  font-size: 0.8rem;
+}
+
 .rating-lab-market-detail {
   margin-top: 0.8rem;
 }
@@ -4748,6 +4755,28 @@ body:has(.rating-lab) .post-content {
 .rating-lab-market tbody .is-positive,
 .rating-lab-market tbody .is-negative {
   font-weight: 750;
+}
+
+.rating-lab-market-provider.is-empty {
+  padding: 0.85rem;
+  background: #faf9f6;
+  border: 1px dashed #c9cdd2;
+  border-radius: 7px;
+}
+
+.rating-lab-market-provider.is-empty > p {
+  max-width: 800px;
+  margin-bottom: 0;
+  color: #596579;
+  font-size: 0.82rem;
+}
+
+.rating-lab-market-score-table .is-market {
+  background: var(--lab-wash);
+}
+
+.rating-lab-market-score-table .is-market th {
+  color: var(--lab-blue);
 }
 
 .rating-lab-performance-chart {
