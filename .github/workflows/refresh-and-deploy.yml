@@ -56,14 +56,15 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
-          if [ "$GITHUB_EVENT_NAME" != "push" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            python scripts/refresh_ratings.py --players-only
+          else
             sports="football national-football chess"
             if [ "$(date -u +%u)" = "1" ] || [ "$GITHUB_EVENT_NAME" != "schedule" ]; then
               sports="tennis $sports"
             fi
             python scripts/refresh_ratings.py --sports $sports
           fi
-          python scripts/refresh_ratings.py --players-only
       - name: Preserve validated public snapshot
         run: |
           mkdir -p .cache/rating-lab-output

@@ -32,7 +32,9 @@
     scoreHeading: document.getElementById('player-score-heading'),
     gates: document.getElementById('player-gates'),
     quickModel: document.getElementById('player-quick-model'),
-    quickModelMenu: document.getElementById('player-quick-model-menu')
+    quickModelMenu: document.getElementById('player-quick-model-menu'),
+    quickModelTrigger: document.getElementById('player-quick-model-trigger'),
+    quickModelLabel: document.getElementById('player-quick-model-label')
   };
 
   function escapeHtml(value) {
@@ -184,9 +186,14 @@
       return;
     }
     elements.sourceStatus.hidden = false;
-    elements.sourceStatus.innerHTML = '<strong>World Cup 2026 withheld.</strong> ' +
+    var accessBlocked = worldCup.reason === 'provider_plan_does_not_include_2026';
+    elements.sourceStatus.innerHTML = '<strong>' +
+      (accessBlocked ? 'World Cup 2026 data access required.' : 'World Cup 2026 withheld.') +
+      '</strong> ' +
       escapeHtml(worldCup.message || 'The required complete lineup and event feed has not passed every publication gate.') +
-      ' The verified historical cohorts below remain independently reproducible.';
+      ' Publication requires ' + number(worldCup.required_matches || 104, 0) +
+      ' complete matches with stable player IDs, starting lineups, substitution minutes and minutes played. ' +
+      'The verified cohorts below remain independently reproducible.';
   }
 
   function renderMetrics() {
@@ -453,6 +460,8 @@
   function updateQuickModel() {
     if (!window.matchMedia('(max-width: 650px)').matches) {
       elements.quickModel.hidden = true;
+      elements.quickModel.classList.remove('is-open');
+      elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
       return;
     }
     var sectionRect = document.querySelector('.player-lab-explorer').getBoundingClientRect();
@@ -460,6 +469,17 @@
     var withinExplorer = sectionRect.top <= window.innerHeight * 0.36 && sectionRect.bottom > window.innerHeight * 0.36;
     var originalControlsVisible = tabsRect.bottom > 0 && tabsRect.top < window.innerHeight;
     elements.quickModel.hidden = !withinExplorer || originalControlsVisible;
+    if (elements.quickModel.hidden) {
+      elements.quickModel.classList.remove('is-open');
+      elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
+    }
+    elements.quickModelLabel.textContent = {
+      'lineup-trueskill': 'Lineup',
+      rapm: 'RAPM',
+      'pairwise-chemistry': 'Chemistry',
+      hapm: 'HAPM',
+      lapm: 'LAPM'
+    }[state.model];
     elements.quickModelMenu.querySelectorAll('[data-player-quick-model]').forEach(function (button) {
       button.setAttribute('aria-pressed', String(button.dataset.playerQuickModel === state.model));
     });
@@ -506,8 +526,25 @@
     elements.modelTabs.querySelectorAll('button').forEach(function (item) {
       item.setAttribute('aria-pressed', String(item.dataset.playerModel === state.model));
     });
+    elements.quickModel.classList.remove('is-open');
+    elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
     resetList();
     render();
+  });
+  elements.quickModelTrigger.addEventListener('click', function (event) {
+    event.stopPropagation();
+    var open = elements.quickModel.classList.toggle('is-open');
+    elements.quickModelTrigger.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', function (event) {
+    if (elements.quickModel.hidden || elements.quickModel.contains(event.target)) return;
+    elements.quickModel.classList.remove('is-open');
+    elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape') return;
+    elements.quickModel.classList.remove('is-open');
+    elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
   });
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
@@ -551,10 +588,6 @@
     .then(function (payload) {
       state.payload = payload;
       state.cohort = payload.cohorts[0].id;
-      if (isMobile()) {
-        document.getElementById('player-scope').open = false;
-        document.getElementById('player-methods').open = false;
-      }
       renderCohortOptions();
       renderSourceStatus();
       elements.generated.textContent = 'Verified ' + date(payload.generated_at) + ' · Cohort-specific sources';

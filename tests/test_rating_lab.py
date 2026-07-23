@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+import hashlib
 import json
 import math
 from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -56,6 +58,7 @@ from rating_lab.pipeline import (
     build_sport_payload,
     individual_contribution_protocol,
     validate_payload,
+    write_outputs,
 )
 
 
@@ -430,6 +433,8 @@ class PipelineTests(unittest.TestCase):
         status = payload["source"]["statuses"]["api_football_world_cup_2026"]
         self.assertEqual(status["status"], "withheld")
         self.assertEqual(status["reason"], "provider_plan_does_not_include_2026")
+        self.assertEqual(status["required_matches"], 104)
+        self.assertIn("substitution minute", status["required_fields"])
         self.assertNotIn("2022 to 2024", status["message"])
 
     def test_rapm_neutral_matches_do_not_create_home_intercept(self):
@@ -452,8 +457,69 @@ class PipelineTests(unittest.TestCase):
         ).read_text()
         player_refresh = "python scripts/refresh_ratings.py --players-only"
         self.assertIn(player_refresh, workflow)
+        self.assertEqual(workflow.count(player_refresh), 1)
+        self.assertIn('if [ "$GITHUB_EVENT_NAME" = "push" ]; then', workflow)
         self.assertLess(workflow.index(player_refresh), workflow.index("actions/jekyll-build-pages"))
         self.assertIn("rating-lab-public-data-v4-", workflow)
+        refresh_script = (
+            Path(__file__).resolve().parents[1] / "scripts/refresh_ratings.py"
+        ).read_text()
+        self.assertIn("write_outputs(args.output, [], chess_months=args.chess_months)", refresh_script)
+        self.assertNotIn('(args.output / "player-football.json").write_text', refresh_script)
+
+    def test_player_snapshot_and_manifest_are_published_as_one_contract(self):
+        sport_payload = {
+            "latest_result": "2026-07-22",
+            "generated_at": "2026-07-23T00:00:00+00:00",
+            "source": {
+                "source": "fixture",
+                "stale_after_hours": 24,
+                "license": "test",
+                "source_url": "https://example.test",
+                "snapshot_sha256": "source-hash",
+            },
+            "parameters": {},
+        }
+        player_payload = {
+            "generated_at": "2026-07-23T01:00:00+00:00",
+            "source": {
+                "name": "Verified fixture",
+                "statuses": {
+                    "api_football_world_cup_2026": {
+                        "status": "withheld",
+                        "reason": "provider_plan_does_not_include_2026",
+                    }
+                },
+            },
+            "cohorts": [{"id": "verified-cohort"}],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            for sport in ("tennis", "football", "national-football", "chess"):
+                (output / f"{sport}.json").write_text(json.dumps(sport_payload))
+            with patch(
+                "rating_lab.player_pipeline.build_player_payload",
+                return_value=player_payload,
+            ), patch(
+                "rating_lab.player_pipeline.validate_player_payload"
+            ), patch(
+                "rating_lab.player_pipeline.player_schema",
+                return_value={"type": "object"},
+            ):
+                manifest = write_outputs(output, [])
+            player_bytes = (output / "player-football.json").read_bytes()
+            published = json.loads((output / "manifest.json").read_text())
+            self.assertEqual(
+                manifest["player_football"]["snapshot_sha256"],
+                hashlib.sha256(player_bytes).hexdigest(),
+            )
+            self.assertEqual(published["player_football"], manifest["player_football"])
+            self.assertEqual(
+                published["player_football"]["source_statuses"][
+                    "api_football_world_cup_2026"
+                ]["reason"],
+                "provider_plan_does_not_include_2026",
+            )
 
     def test_complete_season_rejects_partial_fixture_catalogue(self):
         definition = {
@@ -896,7 +962,14 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('data-player-model="hapm"', player_page)
         self.assertIn("HAPM validation", player_script)
         self.assertIn('id="player-filters-return"', player_page)
+        self.assertIn('class="rating-lab-local-nav player-lab-local-nav"', player_page)
+        self.assertIn('id="player-quick-model-trigger"', player_page)
+        self.assertIn('id="player-controls"', player_page)
+        self.assertNotIn('id="player-scope" open', player_page)
+        self.assertNotIn('id="player-methods" open', player_page)
+        self.assertIn("World Cup 2026 data access required.", player_script)
         self.assertIn("Historical Player Lab: compact mobile cards", styles)
+        self.assertIn("Historical Player Lab mobile shell", styles)
         self.assertIn(".player-lab-detail.is-active", styles)
         self.assertIn('class="rating-lab-media-policy"', page)
         self.assertIn("Rating Lab mobile redesign", styles)

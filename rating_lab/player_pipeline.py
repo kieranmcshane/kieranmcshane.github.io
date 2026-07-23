@@ -2052,8 +2052,11 @@ def build_player_payload(
         cohorts.append(cohort)
     api_football_status = {
         "status": "not_configured",
+        "provider": "API-Football by API-SPORTS",
         "cohort": API_FOOTBALL_WORLD_CUP["id"],
         "checked_at": generated_at,
+        "required_matches": API_FOOTBALL_WORLD_CUP["expected_matches"],
+        "required_fields": ["stable player ID", "starting XI", "substitution minute", "minutes played", "match result"],
         "message": "API_FOOTBALL_KEY is not configured; World Cup 2026 remains withheld.",
     }
     if api_football_key:
@@ -2065,8 +2068,11 @@ def build_player_payload(
             )
             api_football_status = {
                 "status": "published",
+                "provider": "API-Football by API-SPORTS",
                 "cohort": API_FOOTBALL_WORLD_CUP["id"],
                 "checked_at": generated_at,
+                "required_matches": API_FOOTBALL_WORLD_CUP["expected_matches"],
+                "required_fields": ["stable player ID", "starting XI", "substitution minute", "minutes played", "match result"],
                 "message": "All declared API-Football completeness gates passed.",
             }
         except (RuntimeError, ValueError) as error:
@@ -2076,6 +2082,7 @@ def build_player_payload(
             unavailable_season = "do not have access to this season" in str(error).casefold()
             api_football_status = {
                 "status": "withheld",
+                "provider": "API-Football by API-SPORTS",
                 "reason": (
                     "provider_plan_does_not_include_2026"
                     if unavailable_season
@@ -2083,6 +2090,8 @@ def build_player_payload(
                 ),
                 "cohort": API_FOOTBALL_WORLD_CUP["id"],
                 "checked_at": generated_at,
+                "required_matches": API_FOOTBALL_WORLD_CUP["expected_matches"],
+                "required_fields": ["stable player ID", "starting XI", "substitution minute", "minutes played", "match result"],
                 "message": (
                     "The configured API-Football plan does not include season 2026, so World Cup 2026 remains withheld."
                     if unavailable_season
