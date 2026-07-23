@@ -1086,6 +1086,7 @@ h001,Hana,Theta,CZE
         self.assertIn("Market gap withheld before play", script)
         self.assertIn("if (!state.includeProvisional)", script)
         self.assertIn("Math.abs(row.change30) >= 0.05", script)
+        self.assertIn('competition_state == "finished"', (root / "rating_lab/pipeline.py").read_text())
         self.assertIn("b.champion - a.champion", script)
         self.assertIn("spread reflects starting ratings and schedule priors", script)
         self.assertIn('id="rating-include-provisional"', page)
