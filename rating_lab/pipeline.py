@@ -4316,13 +4316,34 @@ def validate_payload(payload: dict, schema: dict) -> None:
             raise ValueError("Missing football tournament predictor")
     predictor = payload.get("tournament_predictor")
     if predictor:
+        state_machine = predictor.get("state_machine", {})
+        if state_machine.get("order") != ["upcoming", "live", "finished"]:
+            raise ValueError("Invalid competition state-machine order")
         for competition in predictor["competitions"]:
+            competition_state = competition.get("state")
+            if competition_state not in {"upcoming", "live", "finished"}:
+                raise ValueError("Invalid competition state")
+            if competition.get("status") != competition_state:
+                raise ValueError("Competition state aliases disagree")
+            expected_view = {
+                "upcoming": "prior_forecast",
+                "live": "conditional_forecast",
+                "finished": "performance",
+            }[competition_state]
+            if competition.get("state_view") != expected_view:
+                raise ValueError("Competition state view disagrees with its state")
+            completed = competition.get("completed_matches")
+            remaining = competition.get("remaining_matches")
+            if not isinstance(completed, int) or not isinstance(remaining, int):
+                raise ValueError("Competition result counts must be integers")
+            if completed < 0 or remaining < 0 or completed + remaining != competition.get("total_matches"):
+                raise ValueError("Competition result counts do not reconcile")
             if competition.get("forecast_available") and set(competition.get("models", {})) != set(MODEL_NAMES):
                 raise ValueError("Incomplete tournament prediction models")
-            if competition.get("status") == "complete":
+            if competition_state == "finished":
                 performance = competition.get("performance", {}).get("models", {})
                 if set(performance) != set(MODEL_NAMES):
-                    raise ValueError("Completed competition is missing protocol performance ratings")
+                    raise ValueError("Finished competition is missing protocol performance ratings")
         for market_key, provider in (("market_comparison", "Polymarket"), ("kalshi_comparison", "Kalshi")):
             market = predictor.get(market_key)
             if not market:
