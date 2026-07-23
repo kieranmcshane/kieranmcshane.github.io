@@ -182,7 +182,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
     <p class="rating-lab-kicker">Upcoming · live · finished</p>
     <h2 id="predictor-heading">Competition forecast and performance</h2>
-    <p class="rating-lab-predictor-intro">One lifecycle covers leagues, qualifying rounds, cups, knockout tournaments, chess tournaments, and official ATP draws. Upcoming events show prior-heavy expected outcomes; live events lock the current score, table, or draw before recomputing conditional probabilities; finished events switch to protocol performance ratings and actual-versus-expected analysis.</p>
+    <p class="rating-lab-predictor-intro">One lifecycle covers leagues, qualifying rounds, cups, knockout tournaments, chess tournaments, and official ATP draws. Upcoming events show prior-heavy expected outcomes; live events lock the current score, table, or draw before recomputing conditional probabilities; finished events switch to protocol performance ratings and actual-versus-expected analysis. Eligible Polymarket and Kalshi winner quotes are frozen beside all four model forecasts, then receive resolved log-loss and Brier scores once the official winner is known.</p>
     <ol class="rating-lab-state-key" aria-label="Competition lifecycle">
       <li><strong>Upcoming</strong><span>Prior-heavy forecast</span></li>
       <li><strong>Live</strong><span>Conditional on now</span></li>
@@ -485,8 +485,8 @@ python3 -m unittest discover -s tests -v</code></pre>
       <li><a href="https://github.com/lipis/flag-icons/tree/v7.5.0">flag-icons 7.5.0</a> — vendored SVG country and home-nation flags, MIT; selected only from source codes.</li>
       <li><a href="https://www.glicko.net/glicko/glicko2.pdf">Glicko-2 specification and worked example</a> — public-domain head-to-head rating protocol.</li>
       <li><a href="https://www.microsoft.com/en-us/research/publication/trueskill-2-improved-bayesian-skill-rating-system/">Microsoft Research TrueSkill 2 paper</a> — used to delimit features this result-only site does not claim.</li>
-      <li><a href="https://docs.polymarket.com/market-data/overview">Polymarket Gamma API</a> — public outcome-price snapshots used only as an external forecast benchmark.</li>
-      <li><a href="https://docs.kalshi.com/getting_started/quick_start_market_data">Kalshi Trade API</a> — unauthenticated public bid, ask, and last-trade snapshots used only as a separate external forecast benchmark.</li>
+      <li><a href="https://docs.polymarket.com/market-data/overview">Polymarket Gamma API</a> — dated public outcome-price snapshots, frozen beside simultaneous model forecasts and scored after resolution; external benchmark only.</li>
+      <li><a href="https://docs.kalshi.com/getting_started/quick_start_market_data">Kalshi Trade API</a> — dated unauthenticated bid, ask, and last-trade snapshots, frozen and scored by the same benchmark protocol.</li>
     </ul>
     <p>Rankings are independent statistical estimates, not official tour, league, federation, or Lichess ratings. They are informational and are not betting advice.</p>
   </section>

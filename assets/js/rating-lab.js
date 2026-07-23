@@ -972,12 +972,105 @@
       (value * 100).toFixed(1) + '%"><span>' + percent(value) + '</span></span>';
   }
 
-  function marketProviderCard(view, modelRows, provider, options) {
+  function noEligibleMarketCard(provider, reason, unavailable) {
+    var heading = unavailable ? 'Market check unavailable' : 'No eligible market found';
+    return '<section class="rating-lab-market-provider is-empty"><div class="rating-lab-market-heading"><div>' +
+      '<p class="rating-lab-kicker">External benchmark · ' + escapeHtml(provider.name) + '</p><h3>' +
+      escapeHtml(heading) + '</h3></div></div><p>' + escapeHtml(reason) +
+      ' Our forecast remains independent; no market is guessed or attached by title alone.</p></section>';
+  }
+
+  function resolvedMarketProviderCard(view, provider) {
     var benchmark = provider.data;
     if (!benchmark) {
-      return '<section class="rating-lab-market-provider"><div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>' +
-        escapeHtml(provider.name) + ' snapshot pending</h3></div></div><p>This dataset predates the ' + escapeHtml(provider.name) +
-        ' integration. The next refresh will check its public markets.</p></section>';
+      return noEligibleMarketCard(
+        provider,
+        'No dated snapshot is present in this older dataset.',
+        false
+      );
+    }
+    var competitionHistory = (benchmark.history || []).filter(function (entry) {
+      return entry.competition_id === view.competition.id;
+    });
+    if (!competitionHistory.length) {
+      var search = (benchmark.searches || []).find(function (item) {
+        return item.competition_id === view.competition.id;
+      });
+      return noEligibleMarketCard(
+        provider,
+        search && search.status === 'source_error' ?
+          'The provider could not be checked while this competition was forecastable.' :
+          'No eligible winner market passed the season, identity, and participant-coverage checks while this competition was forecastable.',
+        Boolean(search && search.status === 'source_error')
+      );
+    }
+    var resolved = competitionHistory.filter(function (entry) {
+      return entry.resolution && entry.resolution.scores && entry.resolution.scores.market;
+    });
+    if (!resolved.length) {
+      return '<section class="rating-lab-market-provider"><div class="rating-lab-market-heading"><div>' +
+        '<p class="rating-lab-kicker">Resolved benchmark · ' + escapeHtml(provider.name) + '</p>' +
+        '<h3>Snapshot retained, score unavailable</h3></div></div><p>' +
+        'A dated market quote exists, but this historical frame does not contain a simultaneous model forecast on the same participant field. It is retained for provenance and is not backfilled.</p></section>';
+    }
+    var order = ['market', 'elo', 'glicko2', 'trueskill', 'robust'];
+    var labels = {
+      market: provider.name,
+      elo: 'Elo',
+      glicko2: 'Glicko-2',
+      trueskill: 'Gaussian',
+      robust: 'Robust'
+    };
+    var scoreRows = order.map(function (forecaster) {
+      var observations = resolved.map(function (entry) {
+        return entry.resolution.scores[forecaster];
+      }).filter(Boolean);
+      if (!observations.length) return null;
+      return {
+        id: forecaster,
+        label: labels[forecaster],
+        predictions: observations.length,
+        logLoss: observations.reduce(function (sum, score) { return sum + score.log_loss; }, 0) / observations.length,
+        brier: observations.reduce(function (sum, score) { return sum + score.brier; }, 0) / observations.length
+      };
+    }).filter(Boolean);
+    var winner = resolved[0].resolution.winner_name;
+    var first = resolved[0].captured_at;
+    var last = resolved[resolved.length - 1].captured_at;
+    var latest = resolved[resolved.length - 1];
+    return '<section class="rating-lab-market-provider is-resolved"><div class="rating-lab-market-heading"><div>' +
+      '<p class="rating-lab-kicker">Resolved benchmark</p><h3>' + escapeHtml(provider.name) +
+      ' vs all four protocols</h3></div>' + (latest.event_url ? '<a href="' +
+      escapeHtml(latest.event_url) + '" target="_blank" rel="noopener">Open market ↗</a>' : '') +
+      '</div><div class="rating-lab-market-metrics"><div><span>Official winner</span><strong>' +
+      escapeHtml(winner) + '</strong></div><div><span>Dated snapshots</span><strong>' +
+      number(resolved.length, 0) + '</strong></div><div><span>Scoring window</span><strong>' +
+      escapeHtml(formatDate(first)) + '–' + escapeHtml(formatDate(last)) +
+      '</strong></div></div><div class="rating-lab-market-table-wrap"><table class="rating-lab-market-score-table">' +
+      '<caption>Resolved winner forecast scores · lower is better</caption><thead><tr><th scope="col">Forecaster</th>' +
+      '<th scope="col">Snapshots</th><th scope="col">Log loss</th><th scope="col">Brier</th></tr></thead><tbody>' +
+      scoreRows.map(function (row) {
+        return '<tr' + (row.id === 'market' ? ' class="is-market"' : '') + '><th scope="row">' +
+          escapeHtml(row.label) + '</th><td>' + number(row.predictions, 0) + '</td><td>' +
+          number(row.logLoss, 4) + '</td><td>' + number(row.brier, 4) + '</td></tr>';
+      }).join('') + '</tbody></table></div><details class="rating-lab-market-detail"><summary>Scoring protocol and audit trail</summary>' +
+      '<p class="rating-lab-market-note">' + escapeHtml(benchmark.benchmark && benchmark.benchmark.method ?
+        benchmark.benchmark.method :
+        'Every dated market and model forecast is frozen before the winner is known, then scored without revision.') +
+      ' The public JSON retains every captured probability, source hash, winner, and per-snapshot score. Market quotes never enter a rating or simulation.</p></details></section>';
+  }
+
+  function marketProviderCard(view, modelRows, provider, options) {
+    var benchmark = provider.data;
+    if (options && options.resolved) {
+      return resolvedMarketProviderCard(view, provider);
+    }
+    if (!benchmark) {
+      return noEligibleMarketCard(
+        provider,
+        'This dataset predates the provider integration. The next refresh will check its public markets.',
+        false
+      );
     }
     var snapshot = (benchmark.competitions || []).find(function (item) {
       return item.competition_id === view.competition.id;
@@ -990,9 +1083,11 @@
         'The market source could not be checked.' :
         search ? 'No active event passed the season, participant-coverage, and identity checks.' :
           'This provider has no configured winner series for the selected competition.';
-      return '<section class="rating-lab-market-provider"><div class="rating-lab-market-heading"><div><p class="rating-lab-kicker">External benchmark</p><h3>No confident ' +
-        escapeHtml(provider.name) + ' match</h3></div></div><p>' + escapeHtml(reason) +
-        ' Our forecast remains independent; no market is guessed or attached by title alone.</p></section>';
+      return noEligibleMarketCard(
+        provider,
+        reason,
+        Boolean(search && search.status === 'source_error')
+      );
     }
     var rowsById = {};
     (modelRows || []).forEach(function (row) { rowsById[row.id] = row; });
@@ -1018,6 +1113,9 @@
     var retained = benchmark.status !== 'current' || isStale(benchmark);
     var freshness = retained ? ' · retained or delayed snapshot' : '';
     var suppressComparison = Boolean(options && options.withheld);
+    var datedSnapshots = (benchmark.history || []).filter(function (entry) {
+      return entry.competition_id === view.competition.id;
+    }).length;
     var tableHead = suppressComparison ?
       '<tr><th scope="col">Participant</th><th scope="col">Market</th><th scope="col" class="rating-lab-market-raw">Raw quote</th><th scope="col" class="rating-lab-market-spread">Bid–ask</th></tr>' :
       '<tr><th scope="col">Participant</th><th scope="col">Our model</th><th scope="col">Market</th><th scope="col">Gap</th><th scope="col" class="rating-lab-market-raw">Raw quote</th><th scope="col" class="rating-lab-market-spread">Bid–ask</th></tr>';
@@ -1043,10 +1141,14 @@
       escapeHtml(snapshot.event_url) + '" target="_blank" rel="noopener">Open market ↗</a></div><div class="rating-lab-market-metrics"><div><span>Field coverage</span><strong>' +
       snapshot.matched_participants + ' / ' + snapshot.model_participants + '</strong></div><div><span>Raw Yes total</span><strong>' +
       number(snapshot.raw_yes_price_sum * 100, 1) + '%</strong></div><div>' + comparisonMetric +
-      '</div></div><details class="rating-lab-market-detail"><summary>Participant quotes and normalization</summary><p class="rating-lab-market-note">Snapshot ' +
+      '</div></div><p class="rating-lab-market-benchmark-state"><strong>Benchmark clock:</strong> ' +
+      number(datedSnapshots, 0) + ' dated snapshot' + (datedSnapshots === 1 ? '' : 's') +
+      ' frozen; log loss and Brier score unlock after the official winner is known.</p>' +
+      '<details class="rating-lab-market-detail"><summary>Participant quotes and normalization</summary><p class="rating-lab-market-note">Snapshot ' +
       escapeHtml(benchmark.fetched_at ? formatDate(benchmark.fetched_at) : 'unavailable') + freshness + '. ' +
+      number(datedSnapshots, 0) + ' dated snapshot' + (datedSnapshots === 1 ? '' : 's') + ' retained. ' +
       escapeHtml(snapshot.normalization || benchmark.probability_definition) +
-      ' The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details></section>';
+      ' The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Once the competition resolves, this frozen quote and the simultaneous forecasts from all four protocols receive log-loss and Brier scores. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details></section>';
   }
 
   function renderMarketComparison(view, modelRows, options) {
@@ -1618,8 +1720,6 @@
   }
 
   function renderCompletedPerformance(view) {
-    elements.predictorMarket.hidden = true;
-    elements.predictorMarket.innerHTML = '';
     var competition = view.competition;
     var model = competition.performance.models[state.predictorModel];
     var rows = model.participants;
@@ -1637,6 +1737,7 @@
     }).join('');
     elements.predictorCaption.textContent = competitionTitle(competition) + ' · finished performance by ' +
       state.datasets[view.sport].models[state.predictorModel].label;
+    renderMarketComparison(view, [], { resolved: true });
     renderPerformanceChart(rows, model, competition, view.sport);
     elements.predictorBody.innerHTML = rows.map(function (team) {
       var changeClass = team.performance_delta > 0 ? 'is-positive' : team.performance_delta < 0 ? 'is-negative' : '';

@@ -35,7 +35,9 @@ from rating_lab.pipeline import (
     _competition_performance,
     _competition_matches,
     _competition_state,
+    _categorical_forecast_score,
     _build_tournament_predictor,
+    _finalize_market_comparison,
     _football_data_crest_media,
     _get,
     _kalshi_event_snapshot,
@@ -801,6 +803,170 @@ h001,Hana,Theta,CZE
         self.assertEqual(_market_identity_tokens("Paris Saint-Germain FC"), _market_identity_tokens("PSG"))
         self.assertEqual(_market_identity_tokens("FC Internazionale Milano"), _market_identity_tokens("Inter Milan"))
 
+    def test_market_history_freezes_simultaneous_models_and_scores_resolution(self):
+        model_probabilities = {
+            "elo": (0.7, 0.3),
+            "glicko2": (0.65, 0.35),
+            "trueskill": (0.6, 0.4),
+            "robust": (0.55, 0.45),
+        }
+        competition = {
+            "id": "premier-league",
+            "label": "Premier League",
+            "season": "2026-27",
+            "state": "finished",
+            "last_fixture": "2027-05-23",
+            "models": {
+                model_name: {
+                    "teams": [
+                        {"id": "arsenal", "name": "Arsenal", "champion": 1.0 if model_name == "elo" else probabilities[0]},
+                        {"id": "chelsea", "name": "Chelsea", "champion": 0.0 if model_name == "elo" else probabilities[1]},
+                    ]
+                }
+                for model_name, probabilities in model_probabilities.items()
+            },
+        }
+        current = {
+            "status": "current",
+            "source": "Polymarket Gamma API",
+            "fetched_at": "2026-08-01T12:00:00+00:00",
+            "checked_at": "2026-08-01T12:00:00+00:00",
+            "competitions": [{
+                "competition_id": "premier-league",
+                "event_id": "99",
+                "event_title": "Premier League Champion",
+                "event_url": "https://polymarket.com/event/premier-league",
+                "snapshot_sha256": "a" * 64,
+                "matched_participants": 2,
+                "model_participants": 2,
+                "coverage": 1.0,
+                "raw_yes_price_sum": 1.0,
+                "outcomes": [
+                    {"entity_id": "arsenal", "normalized_probability": 0.6},
+                    {"entity_id": "chelsea", "normalized_probability": 0.4},
+                ],
+            }],
+            "searches": [{"competition_id": "premier-league", "status": "matched"}],
+        }
+        benchmark = _finalize_market_comparison(
+            current,
+            None,
+            [competition],
+            "Polymarket",
+        )
+        self.assertEqual(len(benchmark["history"]), 1)
+        history = benchmark["history"][0]
+        self.assertEqual(history["snapshot_date"], "2026-08-01")
+        self.assertEqual(set(history["model_forecasts"]), set(model_probabilities))
+        self.assertEqual(history["resolution"]["winner_name"], "Arsenal")
+        self.assertAlmostEqual(
+            history["resolution"]["scores"]["market"]["log_loss"],
+            -math.log(0.6),
+            places=6,
+        )
+        self.assertAlmostEqual(
+            history["resolution"]["scores"]["market"]["brier"],
+            0.32,
+            places=6,
+        )
+        self.assertEqual(benchmark["benchmark"]["status"], "scored")
+        self.assertEqual(
+            {row["id"] for row in benchmark["benchmark"]["forecasters"]},
+            {"market", "elo", "glicko2", "trueskill", "robust"},
+        )
+        next_season = json.loads(json.dumps(competition))
+        next_season["season"] = "2027-28"
+        next_season["state"] = "upcoming"
+        retained = _finalize_market_comparison(
+            {
+                "status": "current",
+                "source": "Polymarket Gamma API",
+                "fetched_at": "2027-07-20T12:00:00+00:00",
+                "checked_at": "2027-07-20T12:00:00+00:00",
+                "competitions": [],
+                "searches": [],
+            },
+            benchmark,
+            [next_season],
+            "Polymarket",
+        )
+        self.assertEqual(retained["benchmark"]["status"], "scored")
+        self.assertEqual(retained["benchmark"]["resolved_competitions"], 1)
+
+    def test_market_history_keeps_one_latest_snapshot_per_utc_day(self):
+        competition = {
+            "id": "premier-league",
+            "label": "Premier League",
+            "season": "2026-27",
+            "state": "upcoming",
+            "models": {
+                model_name: {"teams": [
+                    {"id": "arsenal", "name": "Arsenal", "champion": 0.6},
+                    {"id": "chelsea", "name": "Chelsea", "champion": 0.4},
+                ]}
+                for model_name in ("elo", "glicko2", "trueskill", "robust")
+            },
+        }
+
+        def provider(fetched_at, snapshot_hash, arsenal_probability):
+            return {
+                "status": "current",
+                "source": "Kalshi Trade API",
+                "fetched_at": fetched_at,
+                "checked_at": fetched_at,
+                "competitions": [{
+                    "competition_id": "premier-league",
+                    "event_id": "EPL-27",
+                    "event_title": "Premier League Champion",
+                    "event_url": "https://kalshi.com/markets/epl",
+                    "snapshot_sha256": snapshot_hash,
+                    "matched_participants": 2,
+                    "model_participants": 2,
+                    "coverage": 1.0,
+                    "raw_yes_price_sum": 1.0,
+                    "outcomes": [
+                        {"entity_id": "arsenal", "normalized_probability": arsenal_probability},
+                        {"entity_id": "chelsea", "normalized_probability": 1 - arsenal_probability},
+                    ],
+                }],
+                "searches": [{"competition_id": "premier-league", "status": "matched"}],
+            }
+
+        first = _finalize_market_comparison(
+            provider("2026-08-01T08:00:00+00:00", "a" * 64, 0.55),
+            None,
+            [competition],
+            "Kalshi",
+        )
+        replacement = _finalize_market_comparison(
+            provider("2026-08-01T18:00:00+00:00", "b" * 64, 0.57),
+            first,
+            [competition],
+            "Kalshi",
+        )
+        second_day = _finalize_market_comparison(
+            provider("2026-08-02T18:00:00+00:00", "c" * 64, 0.58),
+            replacement,
+            [competition],
+            "Kalshi",
+        )
+        self.assertEqual(len(replacement["history"]), 1)
+        self.assertEqual(replacement["history"][0]["snapshot_sha256"], "b" * 64)
+        self.assertEqual(len(second_day["history"]), 2)
+        self.assertEqual(second_day["benchmark"]["status"], "awaiting_resolutions")
+
+    def test_categorical_market_score_uses_explicit_other_bin(self):
+        score = _categorical_forecast_score(
+            {
+                "probabilities": {"arsenal": 0.4, "chelsea": 0.3},
+                "other_probability": 0.3,
+            },
+            "unmatched-winner",
+        )
+        self.assertAlmostEqual(score["winner_probability"], 0.3)
+        self.assertAlmostEqual(score["log_loss"], -math.log(0.3), places=6)
+        self.assertAlmostEqual(score["brier"], 0.16 + 0.09 + 0.49, places=6)
+
     def test_football_txt_parser_preserves_schedule_and_zero_zero_result(self):
         fixture = """= Test League 2026/27
 ▪ Matchday 1
@@ -1094,6 +1260,9 @@ h001,Hana,Theta,CZE
         self.assertIn("elements.metricsDisclosure.open = false;", script)
         self.assertIn('class="rating-lab-market-detail"', script)
         self.assertIn("view.predictor.kalshi_comparison", script)
+        self.assertIn("No eligible market found", script)
+        self.assertIn("Benchmark clock:", script)
+        self.assertIn("resolvedMarketProviderCard", script)
         self.assertIn("Kalshi Trade API", page)
         self.assertIn(".rating-lab-market-provider", styles)
         self.assertIn('class="rating-lab-title-mobile"', page)
