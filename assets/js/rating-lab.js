@@ -167,6 +167,34 @@
     return season && label.indexOf(season) === -1 ? label + ' ' + season : label;
   }
 
+  function competitionState(competition) {
+    var value = competition.state || competition.status || '';
+    if (value === 'complete') return 'finished';
+    if (value === 'scheduled') return 'upcoming';
+    if (value === 'waiting for draw') {
+      return competition.completed_matches > 0 ? 'live' : 'upcoming';
+    }
+    return ['upcoming', 'live', 'finished'].indexOf(value) >= 0 ? value : 'upcoming';
+  }
+
+  function stateLabel(value) {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function renderCompetitionState(competition, competitionFormat) {
+    var value = competitionState(competition);
+    var fallback = {
+      upcoming: 'Prior-heavy forecast from the published schedule or draw.',
+      live: 'Current results are locked; every probability is conditional on the current state.',
+      finished: 'Forecasts are replaced by protocol performance and actual-versus-expected analysis.'
+    };
+    elements.predictorState.className = 'rating-lab-predictor-state is-' + value;
+    elements.predictorState.innerHTML = '<strong>' + escapeHtml(stateLabel(value)) +
+      '</strong><span>' + escapeHtml(competition.state_message || fallback[value]) +
+      '</span><small>' + escapeHtml(competitionFormat) + ' · through ' +
+      escapeHtml(formatDate(competition.last_fixture)) + '</small>';
+  }
+
   function isStale(status) {
     if (!status || !status.checked_at || !status.stale_after_hours) return false;
     return Date.now() - new Date(status.checked_at).getTime() > status.stale_after_hours * 3600000;
@@ -919,10 +947,12 @@
       });
       return items;
     }, []);
-    var priority = { live: 0, scheduled: 1, 'waiting for draw': 2, complete: 3 };
+    var priority = { live: 0, upcoming: 1, finished: 2 };
     return rows.sort(function (a, b) {
-      var priorityA = Object.prototype.hasOwnProperty.call(priority, a.competition.status) ? priority[a.competition.status] : 9;
-      var priorityB = Object.prototype.hasOwnProperty.call(priority, b.competition.status) ? priority[b.competition.status] : 9;
+      var stateA = competitionState(a.competition);
+      var stateB = competitionState(b.competition);
+      var priorityA = Object.prototype.hasOwnProperty.call(priority, stateA) ? priority[stateA] : 9;
+      var priorityB = Object.prototype.hasOwnProperty.call(priority, stateB) ? priority[stateB] : 9;
       return priorityA - priorityB ||
         a.competition.label.localeCompare(b.competition.label);
     });
@@ -1324,11 +1354,20 @@
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a team to inspect its pre-season expected-points prior.</p>';
       return;
     }
-    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Pre-season prior</p><h3>' +
+    var bars = team.positions.map(function (probability, index) {
+      return '<span class="rating-lab-position-bar" style="--height:' + Math.max(probability * 100, 1).toFixed(1) +
+        '%" aria-label="Prior probability of position ' + (index + 1) + ': ' + escapeHtml(percent(probability)) + '"></span>';
+    }).join('');
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Upcoming · prior-heavy</p><h3>' +
       entityTitle(team, sport) + '</h3></div><strong>' + number(team.expected_points, 1, 1) + ' pts</strong></div>' +
-      '<dl><div><dt>Expected points</dt><dd>' + number(team.expected_points, 1, 1) + '</dd></div>' +
-      '<div><dt>Matches played</dt><dd>0</dd></div></dl>' +
-      '<p class="rating-lab-performance-note">No result from this season has entered the simulation. Title and finishing-position probabilities are withheld here until the competition starts; expected points remain a model prior, not an in-season forecast.</p>' +
+      '<div class="rating-lab-position-chart" role="img" aria-label="Prior finishing-position probabilities for ' +
+      escapeHtml(team.name) + '">' + bars + '</div><div class="rating-lab-position-axis"><span>Champion</span><span>Position ' +
+      team.positions.length + '</span></div><dl><div><dt>Expected points</dt><dd>' +
+      number(team.expected_points, 1, 1) + '</dd></div><div><dt>Prior title probability</dt><dd>' +
+      percent(team.champion) + '</dd></div><div><dt>Prior top four</dt><dd>' +
+      percent(team.top_four) + '</dd></div><div><dt>Prior bottom three</dt><dd>' +
+      percent(team.bottom_three) + '</dd></div><div><dt>Matches played</dt><dd>0</dd></div></dl>' +
+      '<p class="rating-lab-performance-note">No result from this competition has entered the simulation. These are explicit prior-heavy expected outcomes, driven by starting ratings and the published schedule—not an in-season form claim.</p>' +
       mediaCredit(team, sport);
   }
 
@@ -1347,6 +1386,43 @@
       percent(team.last_place) + '</dd></div><div><dt>Current points</dt><dd>' + number(team.current_points, 1) + '</dd></div></dl>' + mediaCredit(team, sport);
   }
 
+  function tieForTeam(model, teamId) {
+    return (model.ties || []).find(function (tie) {
+      return tie.team_a_id === teamId || tie.team_b_id === teamId;
+    });
+  }
+
+  function tieSnapshot(team, model) {
+    var tie = tieForTeam(model, team.id);
+    if (!tie) return '';
+    var isA = tie.team_a_id === team.id;
+    var opponent = isA ? tie.team_b_name : tie.team_a_name;
+    var ownGoals = isA ? tie.aggregate_a : tie.aggregate_b;
+    var opponentGoals = isA ? tie.aggregate_b : tie.aggregate_a;
+    var opponentAdvance = isA ? tie.team_b_advance : tie.team_a_advance;
+    var score = tie.completed_legs ?
+      number(ownGoals, 0) + '–' + number(opponentGoals, 0) + ' aggregate' :
+      'Tie not started';
+    return '<section class="rating-lab-tie-snapshot"><p class="rating-lab-kicker">Current published tie</p>' +
+      '<div><span>' + escapeHtml(team.name) + '</span><strong>' + escapeHtml(score) +
+      '</strong></div><div><span>' + escapeHtml(opponent) + '</span><strong>' +
+      percent(opponentAdvance) + ' advance</strong></div><p>' +
+      number(tie.completed_legs, 0) + ' played · ' + number(tie.remaining_legs, 0) +
+      ' remaining</p></section>';
+  }
+
+  function tieSummary(team, model) {
+    var tie = tieForTeam(model, team.id);
+    if (!tie) return '';
+    var isA = tie.team_a_id === team.id;
+    var opponent = isA ? tie.team_b_name : tie.team_a_name;
+    var ownGoals = isA ? tie.aggregate_a : tie.aggregate_b;
+    var opponentGoals = isA ? tie.aggregate_b : tie.aggregate_a;
+    return '<small>vs ' + escapeHtml(opponent) + ' · ' +
+      (tie.completed_legs ? number(ownGoals, 0) + '–' + number(opponentGoals, 0) + ' aggregate' : 'not started') +
+      '</small>';
+  }
+
   function renderKnockoutPredictorDetail(team, model, sport) {
     if (!team) {
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a participant to inspect its advancement probabilities.</p>';
@@ -1355,7 +1431,8 @@
     var nextLabel = model.current_stage === 'Complete' ? 'Recorded champion' : 'Survive published stage';
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
       escapeHtml(model.current_stage) + '</p><h3>' + entityTitle(team, sport) + '</h3></div><strong>' +
-      percent(team.champion) + '</strong></div><dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
+      percent(team.champion) + '</strong></div>' + tieSnapshot(team, model) +
+      '<dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>' + escapeHtml(nextLabel) + '</dt><dd>' + percent(team.reach_next_stage) +
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>' + mediaCredit(team, sport);
   }
@@ -1413,7 +1490,8 @@
     }
     elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
       escapeHtml(model.current_stage + ' · ' + team.path + ' path') + '</p><h3>' + entityTitle(team, sport) +
-      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div><dl><div><dt>' +
+      '</h3></div><strong>' + percent(team.reach_next_stage) + '</strong></div>' +
+      tieSnapshot(team, model) + '<dl><div><dt>' +
       escapeHtml(model.target_label) + '</dt><dd>' + percent(team.reach_next_stage) +
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) +
       '</dd></div></dl><p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>' + mediaCredit(team, sport);
@@ -1485,7 +1563,8 @@
       signedNumber(team.surprise_index, 2) + ' σ' +
       '</dd></div><div><dt>Anchored performance rating</dt><dd>' + escapeHtml(performanceRating) +
       '</dd></div><div><dt>TPR versus start</dt><dd class="' + changeClass + '">' + change +
-      '</dd></div><div><dt>Tournament-only reset</dt><dd>#' + team.reset_rank + ' · ' + number(team.reset_rating, 2) +
+      '</dd></div><div><dt>Tournament-only reset</dt><dd>' +
+      (Number.isFinite(team.reset_rank) ? '#' + team.reset_rank + ' · ' + number(team.reset_rating, 2) : 'Unavailable in this snapshot') +
       '</dd></div><div><dt>Starting belief</dt><dd>' + escapeHtml(startBelief) + '</dd></div><div><dt>Final belief</dt><dd>' +
       escapeHtml(endBelief) + '</dd></div><div><dt>Published start</dt><dd>' + number(team.start_score, 2) +
       '</dd></div><div><dt>Post-event replay score</dt><dd>' + number(team.replay_rating, 2) +
@@ -1513,7 +1592,7 @@
     elements.predictorPerformanceChart.hidden = false;
     elements.predictorPerformanceChart.innerHTML =
       '<div class="rating-lab-performance-heading"><div><p class="rating-lab-kicker">Actual versus expected</p>' +
-      '<h3 id="predictor-performance-title">Largest completed-event surprises</h3></div>' +
+      '<h3 id="predictor-performance-title">Largest finished-event surprises</h3></div>' +
       '<p>Selected protocol: <strong>' + escapeHtml(modelLabel) + '</strong></p></div>' +
       '<p class="rating-lab-performance-subtitle">The six largest outperformers and underperformers by signed standardized result-score residual. Solid dark bars point right; outlined light bars point left, so color is not the only cue. The complete participant table remains below.</p>' +
       '<div class="rating-lab-performance-scroll"><div class="rating-lab-performance-plot" role="group" aria-label="' +
@@ -1548,8 +1627,7 @@
       state.predictorTeam = rows[0].id;
     }
     setPerformanceColumns();
-    elements.predictorState.textContent = 'Completed · performance replay ' + formatDate(model.first_result) + '–' +
-      formatDate(model.last_result);
+    renderCompetitionState(competition, competition.format || 'competition');
     elements.predictorMetrics.innerHTML = [
       ['Recorded results', number(model.results, 0)],
       ['Participants', number(rows.length, 0)],
@@ -1557,7 +1635,7 @@
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
-    elements.predictorCaption.textContent = competitionTitle(competition) + ' · completed performance by ' +
+    elements.predictorCaption.textContent = competitionTitle(competition) + ' · finished performance by ' +
       state.datasets[view.sport].models[state.predictorModel].label;
     renderPerformanceChart(rows, model, competition, view.sport);
     elements.predictorBody.innerHTML = rows.map(function (team) {
@@ -1571,7 +1649,8 @@
         '</span></button></th><td class="rating-lab-predictor-now">' + team.wins + '–' + team.draws + '–' +
         team.losses + '</td><td class="rating-lab-predictor-value">' + number(team.start_rating, 2) + '</td><td class="rating-lab-predictor-title"><strong>' + escapeHtml(performanceRating) +
         '</strong></td><td class="rating-lab-optional ' + changeClass + '">' + change +
-        '</td><td class="rating-lab-optional">#' + team.reset_rank + '</td></tr>';
+        '</td><td class="rating-lab-optional">' +
+        (Number.isFinite(team.reset_rank) ? '#' + team.reset_rank : '—') + '</td></tr>';
     }).join('');
     renderPerformanceDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
     elements.predictorMethod.innerHTML = escapeHtml(competition.performance.method) + ' Selected model parameters are the same ones shown in the protocol section. Snapshot: <code>' +
@@ -1589,10 +1668,9 @@
     var predictorTable = elements.predictorBody.closest('.rating-lab-predictor-table');
     predictorTable.classList.remove('is-league', 'is-preseason', 'is-knockout', 'is-completed');
     var competitionFormat = competition.format || (model && model.teams ? 'round-robin league' : 'knockout cup');
-    elements.predictorState.textContent = competition.status.charAt(0).toUpperCase() + competition.status.slice(1) +
-      ' · ' + competitionFormat + ' · ' + (competitionFormat === 'two-legged qualifying round' ? 'official calendar through ' : 'fixtures through ') +
-      formatDate(competition.last_fixture);
-    if (competition.status === 'complete' && competition.performance && competition.performance.models[state.predictorModel]) {
+    var currentState = competitionState(competition);
+    renderCompetitionState(competition, competitionFormat);
+    if (currentState === 'finished' && competition.performance && competition.performance.models[state.predictorModel]) {
       predictorTable.classList.add('is-completed');
       renderCompletedPerformance(view);
       return;
@@ -1600,14 +1678,14 @@
     if (competition.forecast_available === false || !model) {
       setPredictorColumns('knockout');
       elements.predictorMetrics.innerHTML = [
-        ['Competition state', competition.status],
-        ['Published fixtures', number(competition.total_matches, 0)],
+        ['Competition state', stateLabel(currentState)],
+        ['Results locked', number(competition.completed_matches || 0, 0) + ' of ' + number(competition.total_matches, 0)],
         ['Title forecast', 'Withheld']
       ].map(function (item) {
         return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
       }).join('');
-      elements.predictorCaption.textContent = competitionTitle(competition) + ' · waiting for forecastable structure';
-      elements.predictorBody.innerHTML = '<tr><td colspan="5"><strong>Waiting for the knockout field.</strong><br>' +
+      elements.predictorCaption.textContent = competitionTitle(competition) + ' · published structure pending';
+      elements.predictorBody.innerHTML = '<tr><td colspan="5"><strong>The next forecastable draw or field is not published yet.</strong><br>' +
         escapeHtml(competition.availability) + '</td></tr>';
       elements.predictorDetail.innerHTML = '<p>' + escapeHtml(competition.availability) + '</p>';
       elements.predictorMethod.innerHTML = escapeHtml(view.predictor.availability_rule) + ' <a href="' +
@@ -1637,9 +1715,9 @@
     setPredictorColumns(isStandings ? 'standings' : isLeague ? 'league' : isQualifying ? 'qualifying' : isTennisDraw ? 'tennis' : 'knockout', model.target_label);
     if (isPreseason) {
       elements.predictorColumns.now.hidden = true;
-      elements.predictorColumns.title.hidden = true;
-      elements.predictorColumns.secondary.hidden = true;
-      elements.predictorColumns.tertiary.hidden = true;
+      elements.predictorColumns.title.textContent = 'Prior title';
+      elements.predictorColumns.secondary.textContent = isStandings ? 'Prior podium' : 'Prior top four';
+      elements.predictorColumns.tertiary.textContent = isStandings ? 'Prior last' : 'Prior bottom three';
     }
     if (!isLeague) {
       if (isQualifying) {
@@ -1655,8 +1733,8 @@
         elements.predictorBody.innerHTML = rows.map(function (team, index) {
           return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
             (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
-            escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-            '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
+            escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span><span>' + escapeHtml(team.name) +
+            '</span>' + tieSummary(team, model) + '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
             '</td><td class="rating-lab-predictor-value">' + probabilityCell(team.reach_next_stage) + '</td></tr>';
         }).join('');
         renderQualifyingPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
@@ -1718,8 +1796,8 @@
       elements.predictorBody.innerHTML = rows.map(function (team, index) {
         return '<tr' + (team.id === state.predictorTeam ? ' class="is-selected"' : '') + '><td class="rating-lab-rank">' +
           (index + 1) + '</td><th scope="row" class="rating-lab-predictor-entity"><button type="button" class="rating-lab-predictor-team" data-predictor-team="' +
-          escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
-          '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
+        escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span><span>' + escapeHtml(team.name) +
+        '</span>' + tieSummary(team, model) + '</span></button></th><td class="rating-lab-predictor-now">' + number(team.rating, 1) +
           '</td><td class="rating-lab-predictor-value">' + probabilityCell(team.reach_next_stage) + '</td><td class="rating-lab-predictor-title">' + probabilityCell(team.champion) + '</td></tr>';
       }).join('');
       renderKnockoutPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
@@ -1730,12 +1808,10 @@
         '</code>. <a href="' + escapeHtml(competition.source_url) + '">Open competition source</a>.';
       return;
     }
-    elements.predictorState.textContent = isPreseason ? 'Pre-season prior · spread reflects starting ratings and schedule priors · fixtures through ' +
-      formatDate(competition.last_fixture) : elements.predictorState.textContent;
     elements.predictorMetrics.innerHTML = [
-      ['Competition state', isPreseason ? 'Pre-season · 0 of ' + competition.total_matches + ' played' : model.completed_matches + ' of ' + competition.total_matches + ' played'],
-      ['Next fixture', competition.next_fixture ? formatDate(competition.next_fixture) : 'Competition complete'],
-      [isPreseason ? 'Published view' : 'Forecast sample', isPreseason ? 'Expected points prior' : number(model.simulations, 0) + (isStandings ? ' deterministic tournaments' : ' deterministic seasons')]
+      ['Competition state', stateLabel(currentState) + ' · ' + model.completed_matches + ' of ' + competition.total_matches + ' played'],
+      ['Next fixture', competition.next_fixture ? formatDate(competition.next_fixture) : currentState === 'finished' ? 'Competition finished' : 'Awaiting fixture'],
+      [isPreseason ? 'Forecast basis' : 'Forecast sample', isPreseason ? 'Prior-heavy · no current results' : number(model.simulations, 0) + (isStandings ? ' deterministic tournaments' : ' deterministic seasons')]
     ].map(function (item) {
       return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
     }).join('');
@@ -1747,10 +1823,12 @@
         escapeHtml(team.id) + '">' + entityBadge(team, view.sport) + '<span>' + escapeHtml(team.name) +
         '</span></button></th>' + (isPreseason ? '' : '<td class="rating-lab-predictor-now" data-label="Now">' +
         (team.played ? team.current_rank : '—') + '</td>') + '<td class="rating-lab-predictor-value"><strong>' + number(team.expected_points, 1, 1) +
-        '</strong></td>' + (isPreseason ? '' : '<td class="rating-lab-predictor-title" data-label="Title">' + probabilityCell(team.champion) +
-        '</td><td class="rating-lab-optional" data-label="' + (isStandings ? 'Podium' : 'Top four') + '">' +
+        '</strong></td><td class="rating-lab-predictor-title" data-label="' + (isPreseason ? 'Prior title' : 'Title') + '">' +
+        probabilityCell(team.champion) + '</td><td class="rating-lab-optional" data-label="' +
+        (isPreseason ? 'Prior ' : '') + (isStandings ? 'Podium' : 'Top four') + '">' +
         probabilityCell(isStandings ? team.podium : team.top_four) + '</td><td class="rating-lab-optional" data-label="' +
-        (isStandings ? 'Last' : 'Bottom three') + '">' + probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td>') + '</tr>';
+        (isPreseason ? 'Prior ' : '') + (isStandings ? 'Last' : 'Bottom three') + '">' +
+        probabilityCell(isStandings ? team.last_place : team.bottom_three) + '</td></tr>';
     }).join('');
     var selectedTeam = rows.find(function (team) { return team.id === state.predictorTeam; });
     if (isPreseason) renderLeaguePriorDetail(selectedTeam, view.sport);
@@ -2281,7 +2359,7 @@
       elements.predictorCompetition.innerHTML = competitions.map(function (view) {
         var competition = view.competition;
         return '<option value="' + escapeHtml(competition.id) + '"' + (competition.id === competitions[0].competition.id ? ' selected' : '') + '>' +
-          escapeHtml(competitionTitle(competition)) + '</option>';
+          escapeHtml(stateLabel(competitionState(competition)) + ' · ' + competitionTitle(competition)) + '</option>';
       }).join('');
       state.predictorCompetition = competitions[0].competition.id;
       populateCompetitions();
