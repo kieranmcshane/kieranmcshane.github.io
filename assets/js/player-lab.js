@@ -502,8 +502,24 @@
     var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
     function x(value) { return pad + (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (width - 2 * pad); }
     function y(value) { return height - pad - (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (height - 2 * pad); }
+    points.forEach(function (point) {
+      point.px = x(point.x);
+      point.py = y(point.y);
+    });
     var byExtremity = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); });
-    var labels = byExtremity.slice(0, mobile ? 0 : 8);
+    // Greedy label placement: take the most extreme players whose name text
+    // cannot overlap an already placed label, instead of printing names on
+    // top of each other when two extremes sit close together.
+    var labels = [];
+    if (!mobile) {
+      byExtremity.some(function (point) {
+        var collides = labels.some(function (kept) {
+          return Math.abs(kept.px - point.px) < 150 && Math.abs(kept.py - point.py) < 18;
+        });
+        if (!collides) labels.push(point);
+        return labels.length >= 8;
+      });
+    }
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
     // Overplotting control: with a large cohort, only the most extreme points
     // carry a flag; the dense middle stays as plain dots. Small filtered sets
@@ -518,13 +534,11 @@
       ? state.selected
       : points.length ? points[0].id : null;
     chartView = { width: width, height: height, comparisonShort: comparisonShort, flagged: flaggedIds, byId: {} };
+    points.forEach(function (point) { chartView.byId[point.id] = point; });
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
       var showFlag = !flaggedIds || flaggedIds[point.id] || point.id === state.selected;
       var flag = showFlag ? playerFlag(point.country, 'is-chart-flag', true) : '';
-      point.px = x(point.x);
-      point.py = y(point.y);
-      chartView.byId[point.id] = point;
       var pointX = point.px, pointY = point.py;
       var selectionCard = selected ? chartSelectionCard(point) : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
