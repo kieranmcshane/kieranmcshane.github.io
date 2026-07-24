@@ -1,0 +1,13 @@
+{
+  "name": "rating-lab-e2e",
+  "private": true,
+  "description": "Visual and interaction regression tests for the Rating Lab pages",
+  "scripts": {
+    "test": "playwright test",
+    "test:visual": "playwright test --grep @visual",
+    "update-snapshots": "playwright test --grep @visual --update-snapshots"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.0"
+  }
+}
