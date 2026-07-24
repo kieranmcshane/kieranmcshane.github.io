@@ -2,7 +2,7 @@
 layout: page
 title: Historical Player Lab
 permalink: /rating-lab/players/
-description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using Lineup TrueSkill, RAPM, pairwise chemistry, HAPM, and LAPM.
+description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using RAPM, Lineup TrueSkill, pairwise chemistry, HAPM, and LAPM.
 ---
 
 <div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
@@ -33,7 +33,7 @@ description: Outcome-only historical men's and women's football player ratings a
       <p id="player-lab-generated">Loading the verified cohort…</p>
     </div>
 
-    <p id="player-source-status" class="rating-lab-notice" role="status" hidden></p>
+    <div id="player-source-status" class="rating-lab-notice player-lab-source-status" role="status" hidden></div>
     <details class="player-lab-boundary" id="player-scope">
       <summary>Verified cohorts and rating scope</summary>
       <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The open-data baseline includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup for men, plus Liga F and the WSL 2023/24 for women. Recent complete Premier League seasons are added independently through API-Football only when all 380 fixtures clear the same source audit. Every view states exactly which fixtures enter the replay.</p>
@@ -47,8 +47,8 @@ description: Outcome-only historical men's and women's football player ratings a
       <div class="rating-lab-control-group" aria-label="Player contribution model">
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="player-model-tabs">
-          <button type="button" data-player-model="lineup-trueskill" aria-pressed="true">Lineup</button>
-          <button type="button" data-player-model="rapm" aria-pressed="false">RAPM</button>
+          <button type="button" data-player-model="rapm" aria-pressed="true">RAPM</button>
+          <button type="button" data-player-model="lineup-trueskill" aria-pressed="false">Lineup</button>
           <button type="button" data-player-model="pairwise-chemistry" aria-pressed="false">Chemistry</button>
           <button type="button" data-player-model="hapm" aria-pressed="false">HAPM</button>
           <button type="button" data-player-model="lapm" aria-pressed="false">LAPM</button>
@@ -66,20 +66,21 @@ description: Outcome-only historical men's and women's football player ratings a
 
     <div class="rating-lab-quick-model player-lab-quick-model" id="player-quick-model" hidden>
       <div class="rating-lab-quick-model-menu" id="player-quick-model-menu" role="group" aria-label="Choose the player model">
-        <button type="button" data-player-quick-model="lineup-trueskill">Lineup</button>
         <button type="button" data-player-quick-model="rapm">RAPM</button>
+        <button type="button" data-player-quick-model="lineup-trueskill">Lineup</button>
         <button type="button" data-player-quick-model="pairwise-chemistry">Chemistry</button>
         <button type="button" data-player-quick-model="hapm">HAPM</button>
         <button type="button" data-player-quick-model="lapm">LAPM</button>
       </div>
       <button class="rating-lab-quick-model-trigger" id="player-quick-model-trigger" type="button" aria-expanded="false" aria-controls="player-quick-model-menu">
-        <span>Model</span><strong id="player-quick-model-label">Lineup</strong><span aria-hidden="true">⌃</span>
+        <span>Model</span><strong id="player-quick-model-label">RAPM</strong><span aria-hidden="true">⌃</span>
       </button>
     </div>
 
     <div class="rating-lab-metrics player-lab-metrics" id="player-metrics" aria-label="Cohort and model evidence"></div>
     <p class="player-lab-season-scope" id="player-season-scope"></p>
     <p class="player-lab-hapm-status" id="player-hapm-status"></p>
+    <p class="player-lab-ordering-note" id="player-ordering-note" hidden></p>
 
     <section class="player-lab-lapm-combinations" id="player-lapm-combinations" aria-labelledby="player-lapm-combinations-heading" hidden>
       <div>
@@ -197,7 +198,7 @@ description: Outcome-only historical men's and women's football player ratings a
     </details>
 
     <div class="player-lab-attribution">
-      <img src="https://raw.githubusercontent.com/statsbomb/public-images/master/statsbomb_logo_email_new.jpg" alt="StatsBomb">
+      <img src="{{ '/assets/images/statsbomb-logo.jpg' | relative_url }}" alt="StatsBomb">
       <p><strong>Sources are declared per cohort.</strong> StatsBomb Open Data supplies the reproducible historical baseline. API-Football supplies candidate recent Premier League seasons and World Cup 2026; each season is published independently only after every expected match passes the lineup, substitution, minutes, event-score and identifier gates. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata and a response snapshot hash.</p>
     </div>
   </section>

@@ -303,7 +303,10 @@ def _lineup_weights(
                 player_id,
                 {
                     "id": player_id,
-                    "name": player.get("player_name", player_id),
+                    # Prefer the source-listed common name for scanning and
+                    # search; the formal name stays available for the detail.
+                    "name": player.get("player_nickname") or player.get("player_name", player_id),
+                    "full_name": player.get("player_name", player_id),
                     "country": (player.get("country") or {}).get("name", ""),
                     "minutes": 0.0,
                     "matches": 0,
@@ -1297,10 +1300,23 @@ def _rate_cohort(
     lineup_model = LineupTrueSkill()
     log_losses: list[float] = []
     briers: list[float] = []
+    # Chronological reference forecasters scored on the identical replay: a
+    # uniform three-way guess, and a running home/draw/away frequency prior
+    # (add-one smoothed, using only strictly earlier matches in this cohort).
+    uniform_probabilities = {"win": 1 / 3, "draw": 1 / 3, "loss": 1 / 3}
+    prior_counts = {"win": 1.0, "draw": 1.0, "loss": 1.0}
+    uniform_log_losses: list[float] = []
+    prior_log_losses: list[float] = []
     for row in rows:
         probabilities = lineup_model.probabilities(row["home"], row["away"])
         log_losses.append(multiclass_log_loss(probabilities, row["score_a"]))
         briers.append(multiclass_brier(probabilities, row["score_a"]))
+        uniform_log_losses.append(multiclass_log_loss(uniform_probabilities, row["score_a"]))
+        prior_total = sum(prior_counts.values())
+        prior_probabilities = {key: count / prior_total for key, count in prior_counts.items()}
+        prior_log_losses.append(multiclass_log_loss(prior_probabilities, row["score_a"]))
+        outcome_key = "win" if row["score_a"] > 0.5 else "loss" if row["score_a"] < 0.5 else "draw"
+        prior_counts[outcome_key] += 1.0
         lineup_model.update(row["home"], row["away"], row["score_a"])
     player_ids = sorted(player_meta)
     rapm = _rapm(rows, player_ids)
@@ -1320,7 +1336,7 @@ def _rate_cohort(
 
     def common(player_id: str) -> dict:
         meta = player_meta[player_id]
-        return {
+        entry = {
             "id": player_id,
             "name": meta["name"],
             "team": meta["team"],
@@ -1329,6 +1345,10 @@ def _rate_cohort(
             "matches": meta["matches"],
             "starts": meta["starts"],
         }
+        full_name = meta.get("full_name")
+        if full_name and full_name != meta["name"]:
+            entry["full_name"] = full_name
+        return entry
 
     trueskill_rows = []
     for player_id in eligible:
@@ -1642,8 +1662,24 @@ def _rate_cohort(
             "lineup-trueskill": {
                 "label": "Lineup TrueSkill",
                 "ranking_rule": "mean − 3 × uncertainty",
+                "ordering_confidence": "noise-dominated",
+                "ordering_note": (
+                    "One shared result per match separates teammates who are usually "
+                    "on the pitch together only weakly, so after this cohort's replay "
+                    "the per-player uncertainties remain comparable to the spread of "
+                    "the means and the conservative ordering is noise-dominated. It "
+                    "is published as the auditable sequential baseline; "
+                    "ridge-regularized RAPM is the default ranking."
+                ),
                 "parameters": {"initial_mean": 25.0, "initial_sigma": round(25.0 / 3.0, 4), "beta": round(25.0 / 6.0, 4), "tau": round(25.0 / 300.0, 4), "draw_probability": 0.25},
-                "metrics": {"chronological_predictions": len(rows), "log_loss": round(sum(log_losses) / len(log_losses), 4), "brier": round(sum(briers) / len(briers), 4)},
+                "metrics": {
+                    "chronological_predictions": len(rows),
+                    "log_loss": round(sum(log_losses) / len(log_losses), 4),
+                    "brier": round(sum(briers) / len(briers), 4),
+                    "log_loss_uniform_baseline": round(sum(uniform_log_losses) / len(uniform_log_losses), 4),
+                    "log_loss_home_prior_baseline": round(sum(prior_log_losses) / len(prior_log_losses), 4),
+                    "baseline_note": "Reference forecasters scored on the identical chronological replay: a uniform three-way guess and a running home/draw/away frequency prior built only from earlier matches in this cohort.",
+                },
                 "rankings": trueskill_rows,
             },
             "rapm": {

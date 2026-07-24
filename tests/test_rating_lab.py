@@ -1658,6 +1658,76 @@ class SplitAssetTests(unittest.TestCase):
             self.assertTrue((output / "split/player-cohort-euro-2024.json").exists())
             self.assertTrue((output / "split/tennis-rankings-elo.json").exists())
 
+    def test_player_default_ranking_is_rapm_with_honest_lineup_framing(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "player-lab.md").read_text()
+        script = (root / "assets/js/player-lab.js").read_text()
+        pipeline = (root / "rating_lab/player_pipeline.py").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        # RAPM is the landing lens: its tab is first and pressed.
+        self.assertIn('data-player-model="rapm" aria-pressed="true"', page)
+        self.assertIn('data-player-model="lineup-trueskill" aria-pressed="false"', page)
+        self.assertIn('id="player-quick-model-label">RAPM<', page)
+        self.assertIn("model: 'rapm'", script)
+        # The Lineup baseline carries an explicit noise-domination caveat,
+        # published in the data and rendered only for that model.
+        self.assertIn('"ordering_confidence": "noise-dominated"', pipeline)
+        self.assertIn('"ordering_note"', pipeline)
+        self.assertIn("function renderOrderingNote()", script)
+        self.assertIn("state.model !== 'lineup-trueskill'", script)
+        self.assertIn('id="player-ordering-note"', page)
+        # The note element cannot fall into the hidden-attribute CSS trap.
+        self.assertIn(".player-lab-ordering-note[hidden]", styles)
+        self.assertIn("RAPM remains the primary ranking", script)
+
+    def test_player_lab_audit_fixes_are_present(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "player-lab.md").read_text()
+        script = (root / "assets/js/player-lab.js").read_text()
+        pipeline = (root / "rating_lab/player_pipeline.py").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        head = (root / "_includes/head-custom.html").read_text()
+        # Lineup log loss ships with chronological reference forecasters.
+        self.assertIn('"log_loss_uniform_baseline"', pipeline)
+        self.assertIn('"log_loss_home_prior_baseline"', pipeline)
+        self.assertIn("uniform guess", script)
+        # The hidden attribute wins over the field grid (team selector bug).
+        self.assertIn(".rating-lab-field[hidden]", styles)
+        # Signed zeros are clamped everywhere impacts are displayed.
+        self.assertIn("function signedNumber(value, digits)", script)
+        self.assertNotIn(".impact > 0 ? '+' : ''", script)
+        # Team-scoped models explain an empty search instead of lying.
+        self.assertIn("is fitted within one team", script)
+        # Common names from the source, formal name kept for the detail.
+        self.assertIn('player.get("player_nickname")', pipeline)
+        self.assertIn("full_name", script)
+        # Withheld banner renders as a collapsed summary.
+        self.assertIn("withheld</strong> — why", script)
+        # Scatter overplotting and keyboard controls.
+        self.assertIn("FLAG_BUDGET", script)
+        self.assertIn("tabindex=\"' + (point.id === tabbableId", script)
+        # No render-blocking or hotlinked external dependencies.
+        self.assertIn("script async src=\"https://cdn.jsdelivr.net/npm/mathjax@3", head)
+        self.assertNotIn("raw.githubusercontent.com", page)
+        self.assertIn("assets/images/statsbomb-logo.jpg", page)
+
+    def test_competition_labels_and_rating_context_are_explicit(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "assets/js/rating-lab.js").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        # Cross-year competitions display a spanned season ("2025/26"), never
+        # a bare starting year, and source variants are normalized.
+        self.assertIn("function competitionSeasonLabel(competition)", script)
+        self.assertIn("last > first", script)
+        self.assertIn("spanned[1] + '/' + spanned[2].slice(-2)", script)
+        # Every predictor detail names the protocol behind its ratings and the
+        # entity's position on that protocol's global leaderboard.
+        self.assertIn("function predictorRatingContext(sport, entityId)", script)
+        self.assertEqual(script.count("predictorRatingContext(sport, team.id)"), 4)
+        self.assertIn("on the global ", script)
+        # The competition table cannot silently clip its trailing columns.
+        self.assertIn(".rating-lab-predictor-table th,\n  .rating-lab-predictor-table td {\n    min-width: 0;\n  }", styles)
+
     def test_on_demand_loading_contract_is_present(self):
         root = Path(__file__).resolve().parents[1]
         script = (root / "assets/js/rating-lab.js").read_text()

@@ -228,8 +228,24 @@
     }).format(value);
   }
 
-  function competitionTitle(competition) {
+  function competitionSeasonLabel(competition) {
     var season = String(competition.season || '');
+    // A bare starting year is ambiguous for cross-year competitions: the
+    // "2025" Champions League runs September 2025 – May 2026. Display the
+    // spanned form whenever the fixtures cross a calendar year, and
+    // normalize source variants like "2025-26" to one "2025/26" style.
+    var spanned = season.match(/^(\d{4})[-/](\d{2}|\d{4})$/);
+    if (spanned) return spanned[1] + '/' + spanned[2].slice(-2);
+    if (/^\d{4}$/.test(season)) {
+      var first = String(competition.first_fixture || '').slice(0, 4);
+      var last = String(competition.last_fixture || '').slice(0, 4);
+      if (first && last && last > first) return first + '/' + last.slice(2);
+    }
+    return season;
+  }
+
+  function competitionTitle(competition) {
+    var season = competitionSeasonLabel(competition);
     var label = String(competition.label || '').replace(/\s*\|\s*/g, ' · ');
     return season && label.indexOf(season) === -1 ? label + ' ' + season : label;
   }
@@ -1506,6 +1522,25 @@
       escapeHtml(dataset.source.source_url) + '">open the source data</a>.</p></details>';
   }
 
+  // Name the protocol behind every displayed rating, with the entity's
+  // position on that protocol's global leaderboard (streamed in on demand).
+  function predictorRatingContext(sport, entityId) {
+    var dataset = state.datasets[sport];
+    if (!dataset || !dataset.models[state.predictorModel]) return '';
+    var entry = dataset.models[state.predictorModel];
+    var opening = '<p class="rating-lab-performance-note">Ratings shown use the <strong>' +
+      escapeHtml(entry.label) + '</strong> protocol';
+    if (!entry.rankings) {
+      ensureRankings(sport, state.predictorModel).then(scheduleRender, function () {});
+      return opening + '.</p>';
+    }
+    var row = entry.rankings.find(function (item) { return item.id === entityId; });
+    return opening + (row ?
+      ' · currently <strong>#' + row.rank + '</strong> of ' + number(entry.rankings.length, 0) +
+      ' on the global ' + escapeHtml(entry.label) + ' leaderboard' :
+      ' · outside the published global leaderboard') + '.</p>';
+  }
+
   function renderLeaguePredictorDetail(team, sport) {
     if (!team) {
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a team to inspect its full finishing-position distribution.</p>';
@@ -1613,7 +1648,8 @@
       percent(team.champion) + '</strong></div>' + tieSnapshot(team, model) +
       '<dl><div><dt>Win competition</dt><dd>' + percent(team.champion) +
       '</dd></div><div><dt>' + escapeHtml(nextLabel) + '</dt><dd>' + percent(team.reach_next_stage) +
-      '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>' + mediaCredit(team, sport);
+      '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) + '</dd></div></dl>' +
+      predictorRatingContext(sport, team.id) + mediaCredit(team, sport);
   }
 
   function renderTennisPredictorDetail(team, model, sport) {
@@ -1644,7 +1680,8 @@
       '</dd></div><div><dt>' + escapeHtml(model.surface) + ' rating</dt><dd>' +
       (Number.isFinite(team.surface_rating) ? number(team.surface_rating, 1) : 'Prior') +
       '</dd></div><div><dt>Surface evidence</dt><dd>' + number(team.surface_matches, 0) +
-      ' matches</dd></div></dl><p class="rating-lab-performance-note">The direct probability blends the global belief with the selected-surface belief. The surface weight grows with evidence and is exactly the parameter published in Methods & data.</p>' +
+      ' matches</dd></div></dl>' + predictorRatingContext(sport, team.id) +
+      '<p class="rating-lab-performance-note">The direct probability blends the global belief with the selected-surface belief. The surface weight grows with evidence and is exactly the parameter published in Methods & data.</p>' +
       mediaCredit(team, sport);
   }
 
@@ -1673,7 +1710,8 @@
       tieSnapshot(team, model) + '<dl><div><dt>' +
       escapeHtml(model.target_label) + '</dt><dd>' + percent(team.reach_next_stage) +
       '</dd></div><div><dt>Model rating</dt><dd>' + number(team.rating, 1) +
-      '</dd></div></dl><p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>' + mediaCredit(team, sport);
+      '</dd></div></dl>' + predictorRatingContext(sport, team.id) +
+      '<p class="rating-lab-performance-note">This is a probability of surviving the current published two-leg tie. It is not a Champions League title probability.</p>' + mediaCredit(team, sport);
   }
 
   function setPredictorColumns(type, targetLabel) {
@@ -1747,7 +1785,8 @@
       '</dd></div><div><dt>Starting belief</dt><dd>' + escapeHtml(startBelief) + '</dd></div><div><dt>Final belief</dt><dd>' +
       escapeHtml(endBelief) + '</dd></div><div><dt>Published start</dt><dd>' + number(team.start_score, 2) +
       '</dd></div><div><dt>Post-event replay score</dt><dd>' + number(team.replay_rating, 2) +
-      '</dd></div></dl><p class="rating-lab-performance-note">The performance rating solves the exact expected-score equation against opponents held at their pre-event beliefs. The reset rank starts everyone from the selected protocol’s neutral prior and uses only this event. The chronological surprise remains actual score minus the expectation recorded before each update.</p>' + mediaCredit(team, sport);
+      '</dd></div></dl>' + predictorRatingContext(sport, team.id) +
+      '<p class="rating-lab-performance-note">The performance rating solves the exact expected-score equation against opponents held at their pre-event beliefs. The reset rank starts everyone from the selected protocol’s neutral prior and uses only this event. The chronological surprise remains actual score minus the expectation recorded before each update.</p>' + mediaCredit(team, sport);
   }
 
   function renderPerformanceChart(rows, model, competition, sport) {

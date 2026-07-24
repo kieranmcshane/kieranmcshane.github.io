@@ -3,12 +3,13 @@
 
   var root = document.querySelector('.player-lab');
   if (!root) return;
-  var state = { payload: null, cohort: null, cohortData: {}, model: 'lineup-trueskill', team: null, query: '', visibleCount: 0, selected: null, detailOpen: false };
+  var state = { payload: null, cohort: null, cohortData: {}, model: 'rapm', team: null, query: '', visibleCount: 0, selected: null, detailOpen: false };
   var cohortRequests = {};
   var elements = {
     error: document.getElementById('player-lab-error'),
     generated: document.getElementById('player-lab-generated'),
     sourceStatus: document.getElementById('player-source-status'),
+    orderingNote: document.getElementById('player-ordering-note'),
     cohort: document.getElementById('player-cohort'),
     team: document.getElementById('player-team'),
     teamField: document.getElementById('player-team-field'),
@@ -47,6 +48,14 @@
 
   function number(value, digits) {
     return new Intl.NumberFormat('en', { maximumFractionDigits: digits }).format(value);
+  }
+
+  // Signed display that clamps rounded ±0 to a plain 0, matching the main lab.
+  function signedNumber(value, digits) {
+    if (value === null || value === undefined) return '—';
+    var rounded = Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
+    if (Object.is(rounded, -0) || rounded === 0) return '0';
+    return (rounded > 0 ? '+' : '') + number(rounded, digits);
   }
 
   function percent(value) {
@@ -254,11 +263,13 @@
     var worldCup = unavailable.find(function (status) {
       return status.cohort === 'world-cup-2026';
     });
+    var summaryParts = [];
     var leagueSeasons = unavailable.filter(function (status) {
       return String(status.cohort || '').indexOf('premier-league-') === 0;
     });
     var parts = [];
     if (leagueSeasons.length) {
+      summaryParts.push(leagueSeasons.length + ' recent Premier League season' + (leagueSeasons.length === 1 ? '' : 's'));
       parts.push('<strong>Some recent men’s league seasons remain withheld.</strong> ' +
         leagueSeasons.map(function (status) {
           return escapeHtml(status.cohort.replace('premier-league-', 'Premier League ').replace(/-/g, '/'));
@@ -266,14 +277,19 @@
         ' did not pass source access and completeness gates in this build.');
     }
     if (worldCup) {
+      summaryParts.push('World Cup 2026');
       var accessBlocked = worldCup.reason === 'provider_plan_does_not_include_2026';
       parts.push('<strong>' +
         (accessBlocked ? 'World Cup 2026 data access required.' : 'World Cup 2026 withheld.') +
         '</strong> ' +
         escapeHtml(worldCup.message || 'The required complete lineup and event feed has not passed every publication gate.'));
     }
+    if (!summaryParts.length) summaryParts.push(unavailable.length + ' cohort' + (unavailable.length === 1 ? '' : 's'));
     parts.push('Nothing is published without every declared fixture, stable player IDs, starting lineups, substitution minutes, player minutes and reproduced results.');
-    elements.sourceStatus.innerHTML = parts.join(' ');
+    // One quiet line by default; the full publication-gate explanation on demand.
+    elements.sourceStatus.innerHTML = '<details><summary><strong>' +
+      escapeHtml(summaryParts.join(' and ')) + ' withheld</strong> — why</summary><div>' +
+      parts.join(' ') + '</div></details>';
   }
 
   function renderMetrics() {
@@ -281,12 +297,17 @@
     var model = cohort.models[state.model];
     var modelMetric;
     if (state.model === 'lineup-trueskill') {
-      modelMetric = ['Held-out log loss', number(model.metrics.log_loss, 3), model.metrics.chronological_predictions + ' predictions recorded before updating'];
+      var uniformBaseline = model.metrics.log_loss_uniform_baseline || 1.099;
+      var priorBaseline = model.metrics.log_loss_home_prior_baseline;
+      modelMetric = ['Held-out log loss', number(model.metrics.log_loss, 3),
+        model.metrics.chronological_predictions + ' predictions recorded before updating · uniform guess ' +
+        number(uniformBaseline, 3) + (priorBaseline ? ' · home-frequency prior ' + number(priorBaseline, 3) : '') +
+        ' on the same replay'];
     } else if (state.model === 'rapm') {
       modelMetric = ['Validation RMSE', number(model.metrics.validation_rmse, 3), model.metrics.chronological_validation_matches + ' chronological validation matches'];
     } else if (state.model === 'pairwise-chemistry') {
       var delta = model.metrics.validation_delta;
-      var deltaLabel = (delta > 0 ? '+' : '') + number(delta, 3) + ' vs RAPM';
+      var deltaLabel = signedNumber(delta, 3) + ' vs RAPM';
       modelMetric = ['Chemistry validation', deltaLabel, model.status === 'supported' ? 'Held-out RMSE is competitive with the additive baseline' : 'Descriptive only: held-out RMSE did not support the interaction layer'];
     } else if (state.model === 'hapm') {
       var hapmTeam = currentTeam('hapm');
@@ -295,7 +316,7 @@
       modelMetric = ['HAPM · experimental',
         number(hapmMetrics.teams_beating_full_lineup_baseline, 0) + '/' +
           number(hapmMetrics.teams_evaluated, 0) + ' teams',
-        hapmTeam.name + ': ' + (hapmDelta > 0 ? '+' : '') + number(hapmDelta, 3) +
+        hapmTeam.name + ': ' + signedNumber(hapmDelta, 3) +
           ' RMSE vs full-lineup APM · ' +
           (hapmTeam.diagnostics.validation_status === 'supported' ? 'beat baseline' : 'descriptive only')];
     } else {
@@ -327,7 +348,19 @@
       number(hapmMetrics.teams_beating_full_lineup_baseline, 0) + ' of ' +
       number(hapmMetrics.teams_evaluated, 0) +
       ' teams beat the simpler full-lineup APM on strictly later held-out stints in this cohort. ' +
-      'Team-level results are visible for diagnosis, but additive Lineup TrueSkill and RAPM remain the primary rankings.';
+      'Team-level results are visible for diagnosis, but ridge-regularized RAPM remains the primary ranking, ' +
+      'with Lineup TrueSkill published as the sequential baseline.';
+  }
+
+  function renderOrderingNote() {
+    var lineupModel = currentCohort().models['lineup-trueskill'];
+    var note = lineupModel.ordering_note ||
+      'One shared result per match separates teammates who are usually on the pitch together only weakly, ' +
+      'so the per-player uncertainties remain comparable to the spread of the means and this conservative ' +
+      'ordering is noise-dominated. It is published as the auditable sequential baseline; ridge-regularized ' +
+      'RAPM is the default ranking.';
+    elements.orderingNote.innerHTML = '<strong>Read this ordering with care.</strong> ' + escapeHtml(note);
+    elements.orderingNote.hidden = state.model !== 'lineup-trueskill';
   }
 
   function renderTeamCombinations() {
@@ -338,8 +371,7 @@
       return '<article><h4>' + escapeHtml(label) + '</h4><ol>' + rows.slice(0, 5).map(function (row) {
         var readable = row.order > 3 ? row.order + '-player observed lineup' : row.label;
         return '<li><span><b>' + escapeHtml(readable) + '</b><small>' + number(row.minutes, 0) +
-          ' minutes · ' + row.stints + ' stints</small></span><strong>' + (row.impact > 0 ? '+' : '') +
-          number(row.impact, 2) + '</strong></li>';
+          ' minutes · ' + row.stints + ' stints</small></span><strong>' + signedNumber(row.impact, 2) + '</strong></li>';
       }).join('') + '</ol></article>';
     }
     if (state.model === 'hapm') {
@@ -416,11 +448,25 @@
     var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
     function x(value) { return pad + (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (width - 2 * pad); }
     function y(value) { return height - pad - (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (height - 2 * pad); }
-    var labels = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); }).slice(0, mobile ? 0 : 8);
+    var byExtremity = points.slice().sort(function (a, b) { return Math.max(Math.abs(b.x), Math.abs(b.y)) - Math.max(Math.abs(a.x), Math.abs(a.y)); });
+    var labels = byExtremity.slice(0, mobile ? 0 : 8);
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
+    // Overplotting control: with a large cohort, only the most extreme points
+    // carry a flag; the dense middle stays as plain dots. Small filtered sets
+    // (for example one searched country) keep every flag.
+    var FLAG_BUDGET = 100;
+    var flaggedIds = null;
+    if (points.length > 120) {
+      flaggedIds = byExtremity.slice(0, FLAG_BUDGET).reduce(function (items, point) { items[point.id] = true; return items; }, {});
+    }
+    // Roving tabindex: the chart is one tab stop; arrow keys walk the markers.
+    var tabbableId = points.some(function (point) { return point.id === state.selected; })
+      ? state.selected
+      : points.length ? points[0].id : null;
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
-      var flag = playerFlag(point.country, 'is-chart-flag', true);
+      var showFlag = !flaggedIds || flaggedIds[point.id] || point.id === state.selected;
+      var flag = showFlag ? playerFlag(point.country, 'is-chart-flag', true) : '';
       var pointX = x(point.x), pointY = y(point.y);
       var cardWidth = Math.min(185, width - 16), cardHeight = 112;
       var preferredCardLeft = pointX > width / 2 ? pointX - cardWidth - 15 : pointX + 15;
@@ -437,11 +483,13 @@
         '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>' + comparisonShort + ' <b>#' + point.comparisonRank + '</b></span></span>' +
         '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.comparisonScore, 2) + '</span></strong>' : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
-        '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
+        '" tabindex="' + (point.id === tabbableId ? '0' : '-1') + '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
         '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small>' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
-    elements.chart.innerHTML = '<p class="player-lab-chart-key">Source-listed nationality · search a country to isolate it · select a marker for both ranks</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
+    elements.chart.innerHTML = '<p class="player-lab-chart-key">' +
+      (flaggedIds ? 'Flags mark the most extreme players; the dense middle stays as dots · ' : 'Source-listed nationality · ') +
+      'search a country to isolate it · select a marker for both ranks · arrow keys walk the markers</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and ' + escapeHtml(comparisonLabel) + ' scores">' +
       '<line x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +
       '<line x1="' + pad + '" y1="' + y(0) + '" x2="' + (width - pad) + '" y2="' + y(0) + '"></line>' +
@@ -461,6 +509,16 @@
     elements.listStatus.textContent = cohort.models[state.model].label + ' · showing ' + displayed.length + ' of ' + rows.length;
     elements.scoreHeading.textContent = 'Score';
     elements.empty.hidden = rows.length > 0;
+    if (isTeamModel(state.model)) {
+      // A team-scoped model must say so, or an empty search result reads as
+      // "this player was not in the cohort" when they simply play elsewhere.
+      elements.empty.innerHTML = 'No eligible player matches this search within <strong>' +
+        escapeHtml(currentTeam(state.model).name) + '</strong>. ' +
+        escapeHtml(cohort.models[state.model].label) +
+        ' is fitted within one team — switch team above, or choose RAPM or Lineup to search the whole cohort.';
+    } else {
+      elements.empty.textContent = 'No eligible player matches this search.';
+    }
     elements.more.hidden = rows.length <= displayed.length;
     elements.more.textContent = remaining ? 'Show next ' + Math.min(pageSize, remaining) + ' · ' + remaining + ' remaining' : '';
     elements.body.innerHTML = displayed.map(function (row) {
@@ -497,7 +555,7 @@
       function partnershipList(label, rows) {
         return '<div><span>' + escapeHtml(label) + '</span>' + rows.map(function (pair) {
           return '<small><b>' + escapeHtml(pair.partner_name) + '</b><br>' +
-            (pair.impact > 0 ? '+' : '') + number(pair.impact, 2) + ' residual goals · ' + number(pair.shared_minutes, 0) + ' min</small>';
+            signedNumber(pair.impact, 2) + ' residual goals · ' + number(pair.shared_minutes, 0) + ' min</small>';
         }).join('') + '</div>';
       }
       partnershipDetails = '<div class="player-lab-partnership-detail">' +
@@ -507,12 +565,13 @@
     elements.detail.classList.toggle('is-active', state.detailOpen);
     elements.detail.innerHTML = '<button type="button" class="player-lab-detail-close" data-player-close aria-label="Close player comparison">×</button>' +
       '<p class="rating-lab-kicker">Player comparison</p><h3 class="player-lab-detail-name"><span>' + escapeHtml(trueRow.name) + '</span>' + playerFlag(trueRow.country) + '</h3><p>' +
+      escapeHtml(trueRow.full_name && trueRow.full_name !== trueRow.name ? trueRow.full_name + ' · ' : '') +
       escapeHtml(identityMeta) + ' · ' + number(trueRow.minutes, 0) + ' minutes · ' + trueRow.matches + ' matches</p>' +
       '<div class="player-lab-detail-model"><span>Lineup TrueSkill</span><strong>#' + trueRow.rank + '</strong><small>Mean ' + number(trueRow.mean, 2) + ' · uncertainty ±' + number(trueRow.uncertainty, 2) + '</small></div>' +
-      '<div class="player-lab-detail-model"><span>RAPM</span><strong>#' + rapmRow.rank + '</strong><small>Goal impact ' + (rapmRow.impact > 0 ? '+' : '') + number(rapmRow.impact, 2) + ' · uncertainty ±' + number(rapmRow.uncertainty, 2) + '</small></div>' +
-      (chemistryRow ? '<div class="player-lab-detail-model"><span>Pairwise chemistry · ' + escapeHtml(chemistryModel.status.replace(/_/g, ' ')) + '</span><strong>#' + chemistryRow.rank + '</strong><small>Residual pair impact ' + (chemistryRow.impact > 0 ? '+' : '') + number(chemistryRow.impact, 2) + ' · ' + chemistryRow.qualifying_partnerships + ' qualifying partnerships · uncertainty ±' + number(chemistryRow.uncertainty, 2) + '</small></div>' : '') +
-      (hapmRow ? '<div class="player-lab-detail-model"><span>HAPM · ' + escapeHtml(hapmTeam.name) + ' · ' + escapeHtml(hapmTeam.diagnostics.validation_status.replace(/_/g, ' ')) + '</span><strong>#' + hapmRow.rank + '</strong><small>Hypergraph-adjusted player coefficient ' + (hapmRow.impact > 0 ? '+' : '') + number(hapmRow.impact, 2) + ' per 90 · uncertainty ±' + number(hapmRow.uncertainty, 2) + '</small></div>' : '') +
-      (lapmRow ? '<div class="player-lab-detail-model"><span>LAPM · ' + escapeHtml(lapmTeam.name) + ' · descriptive</span><strong>#' + lapmRow.rank + '</strong><small>Graph-smoothed impact ' + (lapmRow.impact > 0 ? '+' : '') + number(lapmRow.impact, 2) + ' per 90 · uncertainty ±' + number(lapmRow.uncertainty, 2) + '</small></div>' : '') +
+      '<div class="player-lab-detail-model"><span>RAPM</span><strong>#' + rapmRow.rank + '</strong><small>Goal impact ' + signedNumber(rapmRow.impact, 2) + ' · uncertainty ±' + number(rapmRow.uncertainty, 2) + '</small></div>' +
+      (chemistryRow ? '<div class="player-lab-detail-model"><span>Pairwise chemistry · ' + escapeHtml(chemistryModel.status.replace(/_/g, ' ')) + '</span><strong>#' + chemistryRow.rank + '</strong><small>Residual pair impact ' + signedNumber(chemistryRow.impact, 2) + ' · ' + chemistryRow.qualifying_partnerships + ' qualifying partnerships · uncertainty ±' + number(chemistryRow.uncertainty, 2) + '</small></div>' : '') +
+      (hapmRow ? '<div class="player-lab-detail-model"><span>HAPM · ' + escapeHtml(hapmTeam.name) + ' · ' + escapeHtml(hapmTeam.diagnostics.validation_status.replace(/_/g, ' ')) + '</span><strong>#' + hapmRow.rank + '</strong><small>Hypergraph-adjusted player coefficient ' + signedNumber(hapmRow.impact, 2) + ' per 90 · uncertainty ±' + number(hapmRow.uncertainty, 2) + '</small></div>' : '') +
+      (lapmRow ? '<div class="player-lab-detail-model"><span>LAPM · ' + escapeHtml(lapmTeam.name) + ' · descriptive</span><strong>#' + lapmRow.rank + '</strong><small>Graph-smoothed impact ' + signedNumber(lapmRow.impact, 2) + ' per 90 · uncertainty ±' + number(lapmRow.uncertainty, 2) + '</small></div>' : '') +
       partnershipDetails +
       '<p class="rating-lab-audit-note">Ranks are cohort-specific and use conservative scores, so both estimated contribution and uncertainty matter.</p>';
   }
@@ -532,9 +591,13 @@
   }
 
   function render() {
+    elements.modelTabs.querySelectorAll('button').forEach(function (item) {
+      item.setAttribute('aria-pressed', String(item.dataset.playerModel === state.model));
+    });
     renderTeamOptions();
     renderMetrics();
     renderScope();
+    renderOrderingNote();
     renderTeamCombinations();
     renderChart();
     renderTable();
@@ -664,6 +727,20 @@
     renderChart();
     renderTable();
     renderDetail();
+  });
+  elements.chart.addEventListener('keydown', function (event) {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) === -1) return;
+    var target = event.target.closest('.player-lab-point');
+    if (!target) return;
+    event.preventDefault();
+    var markers = [].slice.call(elements.chart.querySelectorAll('.player-lab-point'));
+    var index = markers.indexOf(target);
+    var next = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? index + 1 : index - 1;
+    if (next < 0) next = markers.length - 1;
+    if (next >= markers.length) next = 0;
+    target.tabIndex = -1;
+    markers[next].tabIndex = 0;
+    markers[next].focus();
   });
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);
