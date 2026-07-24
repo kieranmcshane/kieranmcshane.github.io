@@ -7597,7 +7597,10 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-chart-frame {
   position: relative;
-  width: 760px;
+  // The script measures the available space and publishes it here; a
+  // hardcoded 760px ignored it and overflowed narrow or zoomed windows.
+  width: var(--chart-width, 760px);
+  max-width: 100%;
   height: 390px;
   margin: 0 auto;
   background-image: radial-gradient(circle, #d7d2c7 0.7px, transparent 0.8px);
@@ -7607,8 +7610,8 @@ body:has(.explain-lab) .post-header {
 .player-lab-chart-frame svg {
   position: absolute;
   inset: 0;
-  width: 760px;
-  height: 390px;
+  width: 100%;
+  height: 100%;
 }
 
 .player-lab-chart-frame line {
@@ -10256,5 +10259,21 @@ body:has(.explain-lab) .post-header {
   .rating-lab-predictor-table th:nth-child(7),
   .rating-lab-predictor-table td:nth-child(7) {
     width: 5.2rem;
+  }
+}
+
+// Labels for markers near the right edge render to the left of the marker,
+// so no name can ever poke outside the chart frame.
+.player-lab-point > small.is-label-left {
+  left: auto;
+  right: 7px;
+}
+
+// Narrow desktop windows (or zoomed views): keep the player table inside its
+// wrap by folding the minutes/matches columns; the detail panel carries them.
+@media (min-width: 651px) and (max-width: 860px) {
+  .player-lab-table th:nth-child(n + 5),
+  .player-lab-table td:nth-child(n + 5) {
+    display: none;
   }
 }

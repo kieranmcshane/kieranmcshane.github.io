@@ -402,7 +402,7 @@
 
   function chartSelectionCard(point) {
     var width = chartView.width, height = chartView.height;
-    var cardWidth = Math.min(185, width - 16), cardHeight = 112;
+    var cardWidth = Math.min(185, width - 16), cardHeight = 150;
     var preferredCardLeft = point.px > width / 2 ? point.px - cardWidth - 15 : point.px + 15;
     var preferredCardTop = point.py < cardHeight + 14 ? point.py + 14 : point.py - cardHeight - 14;
     var cardLeft = Math.max(8, Math.min(width - cardWidth - 8, preferredCardLeft));
@@ -498,7 +498,8 @@
       });
     }
     var mobile = window.matchMedia('(max-width: 650px)').matches;
-    var width = mobile ? Math.max(280, Math.floor(elements.chart.clientWidth || 330)) : 760;
+    var width = mobile ? Math.max(280, Math.floor(elements.chart.clientWidth || 330)) :
+      Math.max(480, Math.min(760, Math.floor(elements.chart.clientWidth || 760)));
     var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
     function x(value) { return pad + (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (width - 2 * pad); }
     function y(value) { return height - pad - (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (height - 2 * pad); }
@@ -544,7 +545,7 @@
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
         '" tabindex="' + (point.id === tabbableId ? '0' : '-1') + '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
-        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small>' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
+        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small class="' + (point.px > width - 140 ? 'is-label-left' : '') + '">' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
     elements.chart.innerHTML = '<p class="player-lab-chart-key">' +
       (flaggedIds ? 'Flags mark the most extreme players; the dense middle stays as dots · ' : 'Source-listed nationality · ') +
@@ -809,6 +810,18 @@
   });
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);
+  // Re-render the chart when the available width actually changes (window
+  // resize or browser zoom), so the fixed-width chart can never overflow.
+  var chartResizeDebounce = null;
+  window.addEventListener('resize', function () {
+    if (chartResizeDebounce) window.clearTimeout(chartResizeDebounce);
+    chartResizeDebounce = window.setTimeout(function () {
+      chartResizeDebounce = null;
+      if (!chartView || !currentCohort()) return;
+      var available = Math.max(280, Math.min(760, Math.floor(elements.chart.clientWidth || chartView.width)));
+      if (Math.abs(available - chartView.width) > 4) renderChart();
+    }, 180);
+  });
 
   fetchJson(splitUrl('player-index.json'))
     .catch(loadFullPayload)
