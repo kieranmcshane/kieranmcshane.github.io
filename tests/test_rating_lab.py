@@ -1658,6 +1658,28 @@ class SplitAssetTests(unittest.TestCase):
             self.assertTrue((output / "split/player-cohort-euro-2024.json").exists())
             self.assertTrue((output / "split/tennis-rankings-elo.json").exists())
 
+    def test_player_default_ranking_is_rapm_with_honest_lineup_framing(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "player-lab.md").read_text()
+        script = (root / "assets/js/player-lab.js").read_text()
+        pipeline = (root / "rating_lab/player_pipeline.py").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        # RAPM is the landing lens: its tab is first and pressed.
+        self.assertIn('data-player-model="rapm" aria-pressed="true"', page)
+        self.assertIn('data-player-model="lineup-trueskill" aria-pressed="false"', page)
+        self.assertIn('id="player-quick-model-label">RAPM<', page)
+        self.assertIn("model: 'rapm'", script)
+        # The Lineup baseline carries an explicit noise-domination caveat,
+        # published in the data and rendered only for that model.
+        self.assertIn('"ordering_confidence": "noise-dominated"', pipeline)
+        self.assertIn('"ordering_note"', pipeline)
+        self.assertIn("function renderOrderingNote()", script)
+        self.assertIn("state.model !== 'lineup-trueskill'", script)
+        self.assertIn('id="player-ordering-note"', page)
+        # The note element cannot fall into the hidden-attribute CSS trap.
+        self.assertIn(".player-lab-ordering-note[hidden]", styles)
+        self.assertIn("RAPM remains the primary ranking", script)
+
     def test_on_demand_loading_contract_is_present(self):
         root = Path(__file__).resolve().parents[1]
         script = (root / "assets/js/rating-lab.js").read_text()

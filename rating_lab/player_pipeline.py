@@ -1642,6 +1642,15 @@ def _rate_cohort(
             "lineup-trueskill": {
                 "label": "Lineup TrueSkill",
                 "ranking_rule": "mean − 3 × uncertainty",
+                "ordering_confidence": "noise-dominated",
+                "ordering_note": (
+                    "One shared result per match separates teammates who are usually "
+                    "on the pitch together only weakly, so after this cohort's replay "
+                    "the per-player uncertainties remain comparable to the spread of "
+                    "the means and the conservative ordering is noise-dominated. It "
+                    "is published as the auditable sequential baseline; "
+                    "ridge-regularized RAPM is the default ranking."
+                ),
                 "parameters": {"initial_mean": 25.0, "initial_sigma": round(25.0 / 3.0, 4), "beta": round(25.0 / 6.0, 4), "tau": round(25.0 / 300.0, 4), "draw_probability": 0.25},
                 "metrics": {"chronological_predictions": len(rows), "log_loss": round(sum(log_losses) / len(log_losses), 4), "brier": round(sum(briers) / len(briers), 4)},
                 "rankings": trueskill_rows,

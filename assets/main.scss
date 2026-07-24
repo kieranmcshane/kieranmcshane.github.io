@@ -7539,6 +7539,26 @@ body:has(.explain-lab) .post-header {
   color: #403653;
 }
 
+.player-lab-ordering-note {
+  margin: -0.35rem 0 1.25rem;
+  padding: 0.72rem 0.85rem;
+  color: #6b5326;
+  background: #fdf7e8;
+  border: 1px solid #e8dcbc;
+  border-left: 3px solid #b98a1f;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.player-lab-ordering-note strong {
+  color: #4f3c12;
+}
+
+.player-lab-ordering-note[hidden] {
+  display: none;
+}
+
 .player-lab-comparison-heading {
   display: flex;
   gap: 1rem;

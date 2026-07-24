@@ -45,23 +45,39 @@ test.describe("player lab", () => {
     await expect(rows.first()).toBeVisible();
   });
 
+  test("RAPM is the default ranking and its tab is pressed", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    await expect(
+      page.locator('#player-model-tabs button[data-player-model="rapm"]')
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("#player-ranking-caption")).toContainText(
+      "RAPM"
+    );
+    // The noise-domination note is reserved for the Lineup baseline.
+    await expect(page.locator("#player-ordering-note")).toBeHidden();
+  });
+
   test("model tabs toggle aria-pressed and re-render the list", async ({
     page,
   }) => {
     await gotoPlayerLab(page);
-    const rapm = page.locator(
-      '#player-model-tabs button[data-player-model="rapm"]'
+    const lineup = page.locator(
+      '#player-model-tabs button[data-player-model="lineup-trueskill"]'
     );
-    await rapm.click();
-    await expect(rapm).toHaveAttribute("aria-pressed", "true");
+    await lineup.click();
+    await expect(lineup).toHaveAttribute("aria-pressed", "true");
     await expect(
-      page.locator(
-        '#player-model-tabs button[data-player-model="lineup-trueskill"]'
-      )
+      page.locator('#player-model-tabs button[data-player-model="rapm"]')
     ).toHaveAttribute("aria-pressed", "false");
     await expect(
       page.locator("#player-ranking-body tr[data-player-row]").first()
     ).toBeVisible();
+    // Switching to the Lineup baseline surfaces the honest ordering caveat.
+    const note = page.locator("#player-ordering-note");
+    await expect(note).toBeVisible();
+    await expect(note).toContainText("noise-dominated");
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 

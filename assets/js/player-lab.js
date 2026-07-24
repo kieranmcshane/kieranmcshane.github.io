@@ -3,12 +3,13 @@
 
   var root = document.querySelector('.player-lab');
   if (!root) return;
-  var state = { payload: null, cohort: null, cohortData: {}, model: 'lineup-trueskill', team: null, query: '', visibleCount: 0, selected: null, detailOpen: false };
+  var state = { payload: null, cohort: null, cohortData: {}, model: 'rapm', team: null, query: '', visibleCount: 0, selected: null, detailOpen: false };
   var cohortRequests = {};
   var elements = {
     error: document.getElementById('player-lab-error'),
     generated: document.getElementById('player-lab-generated'),
     sourceStatus: document.getElementById('player-source-status'),
+    orderingNote: document.getElementById('player-ordering-note'),
     cohort: document.getElementById('player-cohort'),
     team: document.getElementById('player-team'),
     teamField: document.getElementById('player-team-field'),
@@ -327,7 +328,19 @@
       number(hapmMetrics.teams_beating_full_lineup_baseline, 0) + ' of ' +
       number(hapmMetrics.teams_evaluated, 0) +
       ' teams beat the simpler full-lineup APM on strictly later held-out stints in this cohort. ' +
-      'Team-level results are visible for diagnosis, but additive Lineup TrueSkill and RAPM remain the primary rankings.';
+      'Team-level results are visible for diagnosis, but ridge-regularized RAPM remains the primary ranking, ' +
+      'with Lineup TrueSkill published as the sequential baseline.';
+  }
+
+  function renderOrderingNote() {
+    var lineupModel = currentCohort().models['lineup-trueskill'];
+    var note = lineupModel.ordering_note ||
+      'One shared result per match separates teammates who are usually on the pitch together only weakly, ' +
+      'so the per-player uncertainties remain comparable to the spread of the means and this conservative ' +
+      'ordering is noise-dominated. It is published as the auditable sequential baseline; ridge-regularized ' +
+      'RAPM is the default ranking.';
+    elements.orderingNote.innerHTML = '<strong>Read this ordering with care.</strong> ' + escapeHtml(note);
+    elements.orderingNote.hidden = state.model !== 'lineup-trueskill';
   }
 
   function renderTeamCombinations() {
@@ -532,9 +545,13 @@
   }
 
   function render() {
+    elements.modelTabs.querySelectorAll('button').forEach(function (item) {
+      item.setAttribute('aria-pressed', String(item.dataset.playerModel === state.model));
+    });
     renderTeamOptions();
     renderMetrics();
     renderScope();
+    renderOrderingNote();
     renderTeamCombinations();
     renderChart();
     renderTable();
