@@ -1711,6 +1711,23 @@ class SplitAssetTests(unittest.TestCase):
         self.assertNotIn("raw.githubusercontent.com", page)
         self.assertIn("assets/images/statsbomb-logo.jpg", page)
 
+    def test_competition_labels_and_rating_context_are_explicit(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "assets/js/rating-lab.js").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        # Cross-year competitions display a spanned season ("2025/26"), never
+        # a bare starting year, and source variants are normalized.
+        self.assertIn("function competitionSeasonLabel(competition)", script)
+        self.assertIn("last > first", script)
+        self.assertIn("spanned[1] + '/' + spanned[2].slice(-2)", script)
+        # Every predictor detail names the protocol behind its ratings and the
+        # entity's position on that protocol's global leaderboard.
+        self.assertIn("function predictorRatingContext(sport, entityId)", script)
+        self.assertEqual(script.count("predictorRatingContext(sport, team.id)"), 4)
+        self.assertIn("on the global ", script)
+        # The competition table cannot silently clip its trailing columns.
+        self.assertIn(".rating-lab-predictor-table th,\n  .rating-lab-predictor-table td {\n    min-width: 0;\n  }", styles)
+
     def test_on_demand_loading_contract_is_present(self):
         root = Path(__file__).resolve().parents[1]
         script = (root / "assets/js/rating-lab.js").read_text()

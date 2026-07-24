@@ -10218,3 +10218,43 @@ body:has(.explain-lab) .post-header {
     min-height: 0;
   }
 }
+
+// The competition table inherits the same post-content 7.5rem cell minimum:
+// seven columns then overflow the clipped wrap and "vs start" / "Reset rank"
+// disappear entirely. Size the numeric columns; the participant flexes.
+@media (min-width: 651px) {
+  .rating-lab-predictor-table th,
+  .rating-lab-predictor-table td {
+    min-width: 0;
+  }
+
+  .rating-lab-predictor-table th:nth-child(1),
+  .rating-lab-predictor-table td:nth-child(1) {
+    width: 4.6rem;
+  }
+
+  .rating-lab-predictor-table th:nth-child(3),
+  .rating-lab-predictor-table td:nth-child(3) {
+    width: 5rem;
+  }
+
+  .rating-lab-predictor-table th:nth-child(4),
+  .rating-lab-predictor-table td:nth-child(4) {
+    width: 5.6rem;
+  }
+
+  .rating-lab-predictor-table th:nth-child(5),
+  .rating-lab-predictor-table td:nth-child(5) {
+    width: 6.6rem;
+  }
+
+  .rating-lab-predictor-table th:nth-child(6),
+  .rating-lab-predictor-table td:nth-child(6) {
+    width: 4.8rem;
+  }
+
+  .rating-lab-predictor-table th:nth-child(7),
+  .rating-lab-predictor-table td:nth-child(7) {
+    width: 5.2rem;
+  }
+}
