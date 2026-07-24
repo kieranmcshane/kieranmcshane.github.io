@@ -395,6 +395,60 @@
     }
   }
 
+  // Geometry and point lookup from the latest full chart render, so a
+  // selection change can update two buttons in place instead of rebuilding
+  // all ~324 markers (which made every click feel slow and flicker flags).
+  var chartView = null;
+
+  function chartSelectionCard(point) {
+    var width = chartView.width, height = chartView.height;
+    var cardWidth = Math.min(185, width - 16), cardHeight = 112;
+    var preferredCardLeft = point.px > width / 2 ? point.px - cardWidth - 15 : point.px + 15;
+    var preferredCardTop = point.py < cardHeight + 14 ? point.py + 14 : point.py - cardHeight - 14;
+    var cardLeft = Math.max(8, Math.min(width - cardWidth - 8, preferredCardLeft));
+    var cardTop = Math.max(8, Math.min(height - cardHeight - 8, preferredCardTop));
+    var pointMeta = point.country && point.country !== point.team
+      ? point.country + ' · ' + point.team
+      : point.team || point.country || 'Nationality unavailable';
+    return '<strong class="player-lab-point-card" style="--card-left:' +
+      (cardLeft - point.px).toFixed(1) + 'px;--card-top:' + (cardTop - point.py).toFixed(1) + 'px;--card-width:' + cardWidth + 'px">' +
+      '<span class="player-lab-point-card-name">' + playerFlag(point.country, '', true) + '<span>' + escapeHtml(point.name) + '</span></span>' +
+      '<span class="player-lab-point-card-meta">' + escapeHtml(pointMeta) + '</span>' +
+      '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>' + chartView.comparisonShort + ' <b>#' + point.comparisonRank + '</b></span></span>' +
+      '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.comparisonScore, 2) + '</span></strong>';
+  }
+
+  function updateChartSelection() {
+    var frame = elements.chart.querySelector('.player-lab-chart-frame');
+    if (!frame || !chartView) return renderChart();
+    var previous = frame.querySelector('.player-lab-point.is-selected');
+    if (previous) {
+      previous.classList.remove('is-selected');
+      var oldCard = previous.querySelector('.player-lab-point-card');
+      if (oldCard) oldCard.remove();
+      // A flag granted only because of the selection goes back to a dot.
+      if (chartView.flagged && !chartView.flagged[previous.dataset.playerId]) {
+        previous.classList.remove('has-country-flag');
+        if (previous.firstElementChild) previous.firstElementChild.innerHTML = '';
+      }
+    }
+    // Exactly one marker stays in the tab order.
+    frame.querySelectorAll('.player-lab-point[tabindex="0"]').forEach(function (marker) {
+      marker.tabIndex = -1;
+    });
+    if (!state.selected) {
+      var first = frame.querySelector('.player-lab-point');
+      if (first) first.tabIndex = 0;
+      return;
+    }
+    var point = chartView.byId[state.selected];
+    var button = point && frame.querySelector('.player-lab-point[data-player-id="' + String(state.selected).replace(/"/g, '\\"') + '"]');
+    if (!button) return renderChart();
+    button.classList.add('is-selected');
+    button.tabIndex = 0;
+    button.insertAdjacentHTML('beforeend', chartSelectionCard(point));
+  }
+
   function standardized(rows) {
     var values = rows.map(function (row) { return row.score; });
     var mean = values.reduce(function (sum, value) { return sum + value; }, 0) / Math.max(values.length, 1);
@@ -463,25 +517,16 @@
     var tabbableId = points.some(function (point) { return point.id === state.selected; })
       ? state.selected
       : points.length ? points[0].id : null;
+    chartView = { width: width, height: height, comparisonShort: comparisonShort, flagged: flaggedIds, byId: {} };
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
       var showFlag = !flaggedIds || flaggedIds[point.id] || point.id === state.selected;
       var flag = showFlag ? playerFlag(point.country, 'is-chart-flag', true) : '';
-      var pointX = x(point.x), pointY = y(point.y);
-      var cardWidth = Math.min(185, width - 16), cardHeight = 112;
-      var preferredCardLeft = pointX > width / 2 ? pointX - cardWidth - 15 : pointX + 15;
-      var preferredCardTop = pointY < cardHeight + 14 ? pointY + 14 : pointY - cardHeight - 14;
-      var cardLeft = Math.max(8, Math.min(width - cardWidth - 8, preferredCardLeft));
-      var cardTop = Math.max(8, Math.min(height - cardHeight - 8, preferredCardTop));
-      var pointMeta = point.country && point.country !== point.team
-        ? point.country + ' · ' + point.team
-        : point.team || point.country || 'Nationality unavailable';
-      var selectionCard = selected ? '<strong class="player-lab-point-card" style="--card-left:' +
-        (cardLeft - pointX).toFixed(1) + 'px;--card-top:' + (cardTop - pointY).toFixed(1) + 'px;--card-width:' + cardWidth + 'px">' +
-        '<span class="player-lab-point-card-name">' + playerFlag(point.country, '', true) + '<span>' + escapeHtml(point.name) + '</span></span>' +
-        '<span class="player-lab-point-card-meta">' + escapeHtml(pointMeta) + '</span>' +
-        '<span class="player-lab-point-card-ranks"><span>Lineup <b>#' + point.trueRank + '</b></span><span>' + comparisonShort + ' <b>#' + point.comparisonRank + '</b></span></span>' +
-        '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.comparisonScore, 2) + '</span></strong>' : '';
+      point.px = x(point.x);
+      point.py = y(point.y);
+      chartView.byId[point.id] = point;
+      var pointX = point.px, pointY = point.py;
+      var selectionCard = selected ? chartSelectionCard(point) : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
         '" tabindex="' + (point.id === tabbableId ? '0' : '-1') + '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
@@ -697,11 +742,17 @@
     elements.quickModel.classList.remove('is-open');
     elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
   });
+  var searchDebounce = null;
   elements.search.addEventListener('input', function () {
     state.query = elements.search.value;
     resetList();
-    renderChart();
-    renderTable();
+    // Debounce so fast typing re-renders the 300-marker chart once, not per key.
+    if (searchDebounce) window.clearTimeout(searchDebounce);
+    searchDebounce = window.setTimeout(function () {
+      searchDebounce = null;
+      renderChart();
+      renderTable();
+    }, 120);
   });
   elements.more.addEventListener('click', function () {
     state.visibleCount = (state.visibleCount || (isMobile() ? 10 : 30)) + (isMobile() ? 10 : 30);
@@ -724,7 +775,7 @@
     var chartPoint = target.classList.contains('player-lab-point');
     state.selected = chartPoint && state.selected === target.dataset.playerId ? null : target.dataset.playerId;
     state.detailOpen = !chartPoint && Boolean(state.selected);
-    renderChart();
+    updateChartSelection();
     renderTable();
     renderDetail();
   });
