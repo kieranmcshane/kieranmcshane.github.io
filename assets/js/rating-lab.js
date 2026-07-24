@@ -349,15 +349,25 @@
     regionCodesByName = {};
     if (typeof Intl.DisplayNames === 'function') {
       var names = new Intl.DisplayNames(['en'], { type: 'region' });
+      // Deprecated ISO 3166 aliases share a display name with the real
+      // code (DY Benin, ZR Congo-Kinshasa, DD Germany, RH Zimbabwe, …) and
+      // would point at flag files that do not exist.
+      var deprecatedCodes = ['AN', 'BU', 'CS', 'DD', 'DY', 'FX', 'HV', 'NH', 'NT', 'RH', 'SU', 'TP', 'UK', 'YD', 'YU', 'ZR'];
       for (var first = 65; first <= 90; first += 1) {
         for (var second = 65; second <= 90; second += 1) {
           var code = String.fromCharCode(first, second);
+          if (deprecatedCodes.indexOf(code) !== -1) continue;
           var name = names.of(code);
-          if (name && name !== code) regionCodesByName[normalizedRegionName(name)] = code;
+          if (!name || name === code) continue;
+          var key = normalizedRegionName(name);
+          // First code wins: deprecated ISO aliases (DY, ZR, …) share a
+          // display name with the canonical code and must not overwrite it.
+          if (!(key in regionCodesByName)) regionCodesByName[key] = code;
         }
       }
     }
     Object.assign(regionCodesByName, {
+      'benin': 'BJ', 'bosnia and herzegovina': 'BA', 'curacao': 'CW',
       'bolivia': 'BO', 'cape verde': 'CV', 'chinese taipei': 'TW', 'congo': 'CG',
       'czech republic': 'CZ', 'democratic republic of the congo': 'CD', 'dr congo': 'CD',
       'england': 'GB', 'eswatini': 'SZ', 'france': 'FR', 'hong kong': 'HK', 'iran': 'IR',

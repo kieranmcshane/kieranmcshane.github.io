@@ -10316,3 +10316,8 @@ body:has(.explain-lab) .post-header {
 .player-lab-point > span {
   cursor: pointer;
 }
+
+// A hidden flag container must actually disappear (see the [hidden] trap).
+.player-lab-country-flag[hidden] {
+  display: none;
+}

@@ -1728,6 +1728,24 @@ class SplitAssetTests(unittest.TestCase):
         # The competition table cannot silently clip its trailing columns.
         self.assertIn(".rating-lab-predictor-table th,\n  .rating-lab-predictor-table td {\n    min-width: 0;\n  }", styles)
 
+    def test_flag_mapping_excludes_deprecated_codes(self):
+        root = Path(__file__).resolve().parents[1]
+        for script_name in ("assets/js/player-lab.js", "assets/js/rating-lab.js"):
+            script = (root / script_name).read_text()
+            # Deprecated ISO aliases must never win the reverse name map, and
+            # the countries they used to break must be pinned explicitly.
+            self.assertIn("deprecatedCodes", script, script_name)
+            self.assertIn("'DY'", script, script_name)
+            self.assertIn("'ZR'", script, script_name)
+            self.assertIn("'DD'", script, script_name)
+            self.assertIn("'RH'", script, script_name)
+            self.assertIn("benin", script.lower(), script_name)
+            self.assertIn("bosnia and herzegovina", script.lower(), script_name)
+        player = (root / "assets/js/player-lab.js").read_text()
+        # A failed flag image hides its container instead of showing a blank box.
+        self.assertIn(".player-lab-country-flag img", player)
+        self.assertIn(".player-lab-country-flag[hidden]", (root / "assets/main.scss").read_text())
+
     def test_on_demand_loading_contract_is_present(self):
         root = Path(__file__).resolve().parents[1]
         script = (root / "assets/js/rating-lab.js").read_text()
