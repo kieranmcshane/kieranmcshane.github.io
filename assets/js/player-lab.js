@@ -418,6 +418,56 @@
       '<span class="player-lab-point-card-scores">Scores ' + number(point.trueScore, 2) + ' · ' + number(point.comparisonScore, 2) + '</span></strong>';
   }
 
+  // A click or hover anywhere near a marker resolves to the nearest one, so
+  // an 8px dot never has to be hit exactly for the chart to respond.
+  function nearestChartPoint(event) {
+    var frame = elements.chart.querySelector('.player-lab-chart-frame');
+    if (!frame || !chartView) return null;
+    var rect = frame.getBoundingClientRect();
+    var ex = event.clientX - rect.left;
+    var ey = event.clientY - rect.top;
+    var best = null;
+    var bestDistance = 26 * 26;
+    Object.keys(chartView.byId).forEach(function (id) {
+      var point = chartView.byId[id];
+      var dx = point.px - ex;
+      var dy = point.py - ey;
+      var distance = dx * dx + dy * dy;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = point;
+      }
+    });
+    return best;
+  }
+
+  var hoverTipId = null;
+
+  function updateHoverTip(point) {
+    var frame = elements.chart.querySelector('.player-lab-chart-frame');
+    if (!frame) return;
+    var tip = frame.querySelector('.player-lab-hover-tip');
+    if (!point) {
+      hoverTipId = null;
+      if (tip) tip.hidden = true;
+      return;
+    }
+    if (point.id === hoverTipId && tip && !tip.hidden) return;
+    hoverTipId = point.id;
+    if (!tip) {
+      tip = document.createElement('span');
+      tip.className = 'player-lab-hover-tip';
+      tip.setAttribute('aria-hidden', 'true');
+      frame.appendChild(tip);
+    }
+    tip.hidden = false;
+    tip.textContent = point.name + (point.team ? ' · ' + point.team : '');
+    var onLeft = point.px > chartView.width / 2;
+    tip.style.left = point.px + 'px';
+    tip.style.top = point.py + 'px';
+    tip.classList.toggle('is-left', onLeft);
+  }
+
   function updateChartSelection() {
     var frame = elements.chart.querySelector('.player-lab-chart-frame');
     if (!frame || !chartView) return renderChart();
@@ -534,6 +584,7 @@
     var tabbableId = points.some(function (point) { return point.id === state.selected; })
       ? state.selected
       : points.length ? points[0].id : null;
+    hoverTipId = null;
     chartView = { width: width, height: height, comparisonShort: comparisonShort, flagged: flaggedIds, byId: {} };
     points.forEach(function (point) { chartView.byId[point.id] = point; });
     var circles = points.map(function (point) {
@@ -543,6 +594,7 @@
       var pointX = point.px, pointY = point.py;
       var selectionCard = selected ? chartSelectionCard(point) : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
+        '" title="' + escapeHtml(point.name + (point.team ? ' · ' + point.team : '')) +
         '" tabindex="' + (point.id === tabbableId ? '0' : '-1') + '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
         '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small class="' + (point.px > width - 140 ? 'is-label-left' : '') + '">' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
@@ -756,6 +808,13 @@
     if (event.key !== 'Escape') return;
     elements.quickModel.classList.remove('is-open');
     elements.quickModelTrigger.setAttribute('aria-expanded', 'false');
+    if (state.selected) {
+      state.selected = null;
+      state.detailOpen = false;
+      updateChartSelection();
+      renderTable();
+      renderDetail();
+    }
   });
   var searchDebounce = null;
   elements.search.addEventListener('input', function () {
@@ -785,6 +844,8 @@
       renderDetail();
       return;
     }
+    // Clicking inside the rank card is reading, not toggling.
+    if (event.target.closest('.player-lab-point-card')) return;
     var target = event.target.closest('[data-player-id]');
     if (!target) return;
     var chartPoint = target.classList.contains('player-lab-point');
@@ -793,6 +854,36 @@
     updateChartSelection();
     renderTable();
     renderDetail();
+  });
+  elements.chart.addEventListener('click', function (event) {
+    // Reading the open card must never dismiss it.
+    if (event.target.closest('.player-lab-point-card')) return;
+    // Direct marker hits keep the existing path (root handler below).
+    if (event.target.closest('[data-player-id]')) return;
+    if (!event.target.closest('.player-lab-chart-frame')) return;
+    var nearest = nearestChartPoint(event);
+    if (nearest) {
+      state.selected = state.selected === nearest.id ? null : nearest.id;
+    } else if (state.selected) {
+      state.selected = null;
+    } else {
+      return;
+    }
+    state.detailOpen = false;
+    updateChartSelection();
+    renderTable();
+    renderDetail();
+  });
+  var hoverFrame = null;
+  elements.chart.addEventListener('mousemove', function (event) {
+    if (hoverFrame !== null) return;
+    hoverFrame = window.requestAnimationFrame(function () {
+      hoverFrame = null;
+      updateHoverTip(nearestChartPoint(event));
+    });
+  });
+  elements.chart.addEventListener('mouseleave', function () {
+    updateHoverTip(null);
   });
   elements.chart.addEventListener('keydown', function (event) {
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) === -1) return;

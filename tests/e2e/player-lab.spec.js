@@ -189,6 +189,54 @@ test.describe("player lab", () => {
     await expect(banner.locator("details > div")).toBeVisible();
   });
 
+  test("a near-miss click still selects the closest marker", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    const frame = page.locator(".player-lab-chart-frame");
+    const target = await page.evaluate(() => {
+      const rect = document
+        .querySelector(".player-lab-chart-frame")
+        .getBoundingClientRect();
+      const point = document.querySelectorAll(".player-lab-point")[40];
+      const style = getComputedStyle(point);
+      return {
+        x: parseFloat(style.getPropertyValue("--point-x")) + 14,
+        y: parseFloat(style.getPropertyValue("--point-y")) + 12,
+        id: point.dataset.playerId,
+      };
+    });
+    // Click 14px wide and 12px below the marker centre — a realistic trackpad miss.
+    await frame.click({ position: { x: target.x, y: target.y } });
+    await expect(page.locator(".player-lab-point.is-selected")).toHaveCount(1);
+    await expect(page.locator(".player-lab-point-card")).toBeVisible();
+    // Clicking inside the card is reading, not dismissing.
+    await page.locator(".player-lab-point-card").click();
+    await expect(page.locator(".player-lab-point-card")).toBeVisible();
+    // Clicking far from any marker dismisses the card.
+    await frame.click({ position: { x: 8, y: 8 } });
+    await expect(page.locator(".player-lab-point-card")).toHaveCount(0);
+  });
+
+  test("hovering near a marker names it before any click", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    const target = await page.evaluate(() => {
+      const point = document.querySelectorAll(".player-lab-point")[40];
+      const style = getComputedStyle(point);
+      return {
+        x: parseFloat(style.getPropertyValue("--point-x")) + 10,
+        y: parseFloat(style.getPropertyValue("--point-y")),
+      };
+    });
+    const frame = page.locator(".player-lab-chart-frame");
+    await frame.hover({ position: { x: target.x, y: target.y } });
+    const tip = page.locator(".player-lab-hover-tip");
+    await expect(tip).toBeVisible();
+    await expect(tip).not.toHaveText("");
+  });
+
   test("chart adapts to narrow desktop widths without overflow", async ({
     page,
   }) => {
