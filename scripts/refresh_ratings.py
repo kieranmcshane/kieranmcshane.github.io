@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from rating_lab.pipeline import write_outputs  # noqa: E402
+from rating_lab.pipeline import write_outputs, write_split_assets  # noqa: E402
 
 
 def main() -> int:
@@ -24,7 +24,16 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=ROOT / "assets/data/rating-lab")
     parser.add_argument("--chess-months", type=int, default=36)
     parser.add_argument("--players-only", action="store_true", help="Refresh only historical football-player cohorts")
+    parser.add_argument(
+        "--split-only",
+        action="store_true",
+        help="Regenerate the on-demand split/ assets from the existing full JSON files, without any network access",
+    )
     args = parser.parse_args()
+    if args.split_only:
+        written = write_split_assets(args.output)
+        print(f"split: {len(written)} files, {sum(written.values()) / 1e6:.2f} MB total")
+        return 0
     if args.players_only:
         manifest = write_outputs(args.output, [], chess_months=args.chess_months)
         player = manifest["player_football"]

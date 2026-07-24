@@ -10115,3 +10115,13 @@ body:has(.explain-lab) .post-header {
     font-size: 0.82rem;
   }
 }
+
+// On-demand data loading: dim interactive sections while a split payload fetch
+// is in flight (aria-busy is set by rating-lab.js / player-lab.js).
+.rating-lab[aria-busy='true'] .rating-lab-explorer,
+.rating-lab[aria-busy='true'] #matchup,
+.player-lab[aria-busy='true'] .player-lab-explorer {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}

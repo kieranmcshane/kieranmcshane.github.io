@@ -3,7 +3,8 @@
 
   var root = document.querySelector('.player-lab');
   if (!root) return;
-  var state = { payload: null, cohort: null, model: 'lineup-trueskill', team: null, query: '', visibleCount: 0, selected: null, detailOpen: false };
+  var state = { payload: null, cohort: null, cohortData: {}, model: 'lineup-trueskill', team: null, query: '', visibleCount: 0, selected: null, detailOpen: false };
+  var cohortRequests = {};
   var elements = {
     error: document.getElementById('player-lab-error'),
     generated: document.getElementById('player-lab-generated'),
@@ -108,7 +109,66 @@
   }
 
   function currentCohort() {
-    return state.payload.cohorts.find(function (cohort) { return cohort.id === state.cohort; });
+    return state.cohortData[state.cohort];
+  }
+
+  function fetchJson(url) {
+    return fetch(url).then(function (response) {
+      if (!response.ok) throw new Error('The historical player ratings could not be loaded.');
+      return response.json();
+    });
+  }
+
+  function splitUrl(file) {
+    return String(root.dataset.playerData).replace(/player-football\.json$/, 'split/' + file);
+  }
+
+  function loadFullPayload() {
+    return fetchJson(root.dataset.playerData).then(function (payload) {
+      (payload.cohorts || []).forEach(function (cohort) { state.cohortData[cohort.id] = cohort; });
+      return payload;
+    });
+  }
+
+  function ensureCohort(id) {
+    if (state.cohortData[id]) return Promise.resolve();
+    if (cohortRequests[id]) return cohortRequests[id];
+    var summary = (state.payload.cohorts || []).find(function (cohort) { return cohort.id === id; });
+    var source = summary && summary.data_url
+      ? fetchJson(splitUrl(summary.data_url)).then(function (payload) { return payload.cohort; })
+      : Promise.reject(new Error('No split cohort file is published.'));
+    cohortRequests[id] = source.catch(function () {
+      return loadFullPayload().then(function (payload) {
+        var full = (payload.cohorts || []).find(function (cohort) { return cohort.id === id; });
+        if (!full) throw new Error('The historical player ratings could not be loaded.');
+        return full;
+      });
+    }).then(function (cohort) {
+      state.cohortData[id] = cohort;
+      delete cohortRequests[id];
+    }, function (error) {
+      delete cohortRequests[id];
+      throw error;
+    });
+    return cohortRequests[id];
+  }
+
+  var syncToken = 0;
+
+  function syncCohort() {
+    var token = ++syncToken;
+    if (!state.cohortData[state.cohort]) root.setAttribute('aria-busy', 'true');
+    return ensureCohort(state.cohort).then(function () {
+      if (token !== syncToken) return;
+      root.removeAttribute('aria-busy');
+      elements.error.hidden = true;
+      render();
+    }, function (error) {
+      if (token !== syncToken) return;
+      root.removeAttribute('aria-busy');
+      elements.error.hidden = false;
+      elements.error.textContent = error.message;
+    });
   }
 
   function isTeamModel(modelId) {
@@ -526,7 +586,7 @@
     state.selected = null;
     state.team = null;
     resetList();
-    render();
+    syncCohort();
   });
   elements.team.addEventListener('change', function () {
     state.team = elements.team.value;
@@ -608,18 +668,15 @@
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);
 
-  fetch(root.dataset.playerData)
-    .then(function (response) {
-      if (!response.ok) throw new Error('The historical player ratings could not be loaded.');
-      return response.json();
-    })
+  fetchJson(splitUrl('player-index.json'))
+    .catch(loadFullPayload)
     .then(function (payload) {
       state.payload = payload;
       state.cohort = payload.cohorts[0].id;
       renderCohortOptions();
       renderSourceStatus();
       elements.generated.textContent = 'Verified ' + date(payload.generated_at) + ' · Cohort-specific sources';
-      render();
+      return syncCohort();
     })
     .catch(function (error) {
       elements.error.hidden = false;
