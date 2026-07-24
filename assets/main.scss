@@ -7750,7 +7750,11 @@ body:has(.explain-lab) .post-header {
   font-weight: 500;
   line-height: 1.35;
   text-align: left;
-  pointer-events: none;
+  // The card must catch its own clicks: with pointer-events none, clicking
+  // "on the card" silently hit whatever marker sat underneath it and the
+  // selection appeared to change or vanish at random.
+  pointer-events: auto;
+  cursor: default;
   animation: rlIn 150ms ease both;
 }
 
@@ -10276,4 +10280,39 @@ body:has(.explain-lab) .post-header {
   .player-lab-table td:nth-child(n + 5) {
     display: none;
   }
+}
+
+// Hover feedback for chart markers: the nearest marker's name follows the
+// pointer, so the chart responds before any click.
+.player-lab-hover-tip {
+  position: absolute;
+  z-index: 6;
+  max-width: 180px;
+  padding: 0.16rem 0.42rem;
+  overflow: hidden;
+  color: #253346;
+  background: rgba(251, 250, 246, 0.96);
+  border: 1px solid var(--lab-line);
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(20, 30, 45, 0.12);
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transform: translate(10px, -50%);
+}
+
+.player-lab-hover-tip.is-left {
+  transform: translate(calc(-100% - 10px), -50%);
+}
+
+.player-lab-hover-tip[hidden] {
+  display: none;
+}
+
+// The markers advertise their interactivity.
+.player-lab-point,
+.player-lab-point > span {
+  cursor: pointer;
 }
