@@ -10145,3 +10145,76 @@ body:has(.explain-lab) .post-header {
   pointer-events: none;
   transition: opacity 0.15s ease;
 }
+
+// ---- Player Lab audit fixes ----
+
+// The hidden attribute must always win over the field's grid display,
+// otherwise the team selector shows under every model.
+.rating-lab-field[hidden] {
+  display: none;
+}
+
+@media (min-width: 651px) {
+  // The lab table inherits .post-content's 7.5rem cell minimum, which forces
+  // six columns past the clipped wrap. Size the numeric columns explicitly.
+  .player-lab-table th,
+  .player-lab-table td {
+    min-width: 0;
+  }
+
+  .player-lab-table th:nth-child(1),
+  .player-lab-table td:nth-child(1) {
+    width: 3.4rem;
+  }
+
+  .player-lab-table th:nth-child(3),
+  .player-lab-table td:nth-child(3) {
+    width: 6rem;
+  }
+
+  .player-lab-table th:nth-child(4),
+  .player-lab-table td:nth-child(4) {
+    width: 6.4rem;
+  }
+
+  .player-lab-table th:nth-child(5),
+  .player-lab-table td:nth-child(5) {
+    width: 5.2rem;
+  }
+
+  .player-lab-table th:nth-child(6),
+  .player-lab-table td:nth-child(6) {
+    width: 5rem;
+  }
+}
+
+// Five model tabs must never clip mid-label; wrap instead of scrolling.
+.player-lab-toolbar .rating-lab-segmented {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+// Collapsed withheld-cohorts banner: one quiet line, details on demand.
+.player-lab-source-status details > summary {
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.player-lab-source-status details > div {
+  margin-top: 0.55rem;
+}
+
+@media (max-width: 650px) {
+  // All four evidence tiles visible at once instead of a clipped scroll strip.
+  .player-lab-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    overflow: visible;
+  }
+
+  .player-lab-metrics .rating-lab-metric {
+    flex: none;
+    min-height: 0;
+  }
+}

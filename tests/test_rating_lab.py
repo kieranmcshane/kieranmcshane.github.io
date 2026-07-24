@@ -1680,6 +1680,37 @@ class SplitAssetTests(unittest.TestCase):
         self.assertIn(".player-lab-ordering-note[hidden]", styles)
         self.assertIn("RAPM remains the primary ranking", script)
 
+    def test_player_lab_audit_fixes_are_present(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "player-lab.md").read_text()
+        script = (root / "assets/js/player-lab.js").read_text()
+        pipeline = (root / "rating_lab/player_pipeline.py").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        head = (root / "_includes/head-custom.html").read_text()
+        # Lineup log loss ships with chronological reference forecasters.
+        self.assertIn('"log_loss_uniform_baseline"', pipeline)
+        self.assertIn('"log_loss_home_prior_baseline"', pipeline)
+        self.assertIn("uniform guess", script)
+        # The hidden attribute wins over the field grid (team selector bug).
+        self.assertIn(".rating-lab-field[hidden]", styles)
+        # Signed zeros are clamped everywhere impacts are displayed.
+        self.assertIn("function signedNumber(value, digits)", script)
+        self.assertNotIn(".impact > 0 ? '+' : ''", script)
+        # Team-scoped models explain an empty search instead of lying.
+        self.assertIn("is fitted within one team", script)
+        # Common names from the source, formal name kept for the detail.
+        self.assertIn('player.get("player_nickname")', pipeline)
+        self.assertIn("full_name", script)
+        # Withheld banner renders as a collapsed summary.
+        self.assertIn("withheld</strong> — why", script)
+        # Scatter overplotting and keyboard controls.
+        self.assertIn("FLAG_BUDGET", script)
+        self.assertIn("tabindex=\"' + (point.id === tabbableId", script)
+        # No render-blocking or hotlinked external dependencies.
+        self.assertIn("script async src=\"https://cdn.jsdelivr.net/npm/mathjax@3", head)
+        self.assertNotIn("raw.githubusercontent.com", page)
+        self.assertIn("assets/images/statsbomb-logo.jpg", page)
+
     def test_on_demand_loading_contract_is_present(self):
         root = Path(__file__).resolve().parents[1]
         script = (root / "assets/js/rating-lab.js").read_text()

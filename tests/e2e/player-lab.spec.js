@@ -129,6 +129,66 @@ test.describe("player lab", () => {
     expect(position).toBe("sticky");
   });
 
+  test("team selector only renders for team-scoped models", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    // Default RAPM is cohort-wide: the field must be visually gone, not just
+    // carrying a hidden attribute that CSS overrides.
+    await expect(page.locator("#player-team-field")).toBeHidden();
+    await page
+      .locator('#player-model-tabs button[data-player-model="hapm"]')
+      .click();
+    await expect(page.locator("#player-team-field")).toBeVisible();
+  });
+
+  test("team-scoped empty search explains its scope", async ({ page }) => {
+    await gotoPlayerLab(page);
+    await page
+      .locator('#player-model-tabs button[data-player-model="hapm"]')
+      .click();
+    await expect(
+      page.locator("#player-ranking-body tr[data-player-row]").first()
+    ).toBeVisible();
+    await page.locator("#player-search").fill("zzzz-no-such-player");
+    const empty = page.locator("#player-ranking-empty");
+    await expect(empty).toBeVisible();
+    await expect(empty).toContainText("within");
+    await expect(empty).toContainText("whole cohort");
+  });
+
+  test("chart is one tab stop with arrow-key marker navigation", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    const chart = page.locator("#player-comparison-chart");
+    const tabbable = chart.locator('.player-lab-point[tabindex="0"]');
+    await expect(tabbable).toHaveCount(1);
+    await tabbable.focus();
+    await page.keyboard.press("ArrowRight");
+    const focused = await page.evaluate(() => ({
+      isPoint: document.activeElement.classList.contains("player-lab-point"),
+      tabIndex: document.activeElement.tabIndex,
+    }));
+    expect(focused.isPoint).toBe(true);
+    expect(focused.tabIndex).toBe(0);
+    await expect(chart.locator('.player-lab-point[tabindex="0"]')).toHaveCount(
+      1
+    );
+  });
+
+  test("withheld banner collapses to a single summary line", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    const banner = page.locator("#player-source-status");
+    if (await banner.isHidden()) return; // nothing withheld in this dataset
+    await expect(banner.locator("summary")).toContainText("withheld");
+    await expect(banner.locator("details > div")).toBeHidden();
+    await banner.locator("summary").click();
+    await expect(banner.locator("details > div")).toBeVisible();
+  });
+
   test("player list @visual", async ({ page }) => {
     await gotoPlayerLab(page);
     await expect(page.locator(".player-lab-table")).toHaveScreenshot(

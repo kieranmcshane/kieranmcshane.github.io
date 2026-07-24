@@ -33,7 +33,7 @@ description: Outcome-only historical men's and women's football player ratings a
       <p id="player-lab-generated">Loading the verified cohort…</p>
     </div>
 
-    <p id="player-source-status" class="rating-lab-notice" role="status" hidden></p>
+    <div id="player-source-status" class="rating-lab-notice player-lab-source-status" role="status" hidden></div>
     <details class="player-lab-boundary" id="player-scope">
       <summary>Verified cohorts and rating scope</summary>
       <p><strong>Men’s and women’s cohorts pass the same evidence gates.</strong> The open-data baseline includes the complete Premier League 2015/16 season, UEFA Euro 2024 and the 2022 FIFA World Cup for men, plus Liga F and the WSL 2023/24 for women. Recent complete Premier League seasons are added independently through API-Football only when all 380 fixtures clear the same source audit. Every view states exactly which fixtures enter the replay.</p>
@@ -198,7 +198,7 @@ description: Outcome-only historical men's and women's football player ratings a
     </details>
 
     <div class="player-lab-attribution">
-      <img src="https://raw.githubusercontent.com/statsbomb/public-images/master/statsbomb_logo_email_new.jpg" alt="StatsBomb">
+      <img src="{{ '/assets/images/statsbomb-logo.jpg' | relative_url }}" alt="StatsBomb">
       <p><strong>Sources are declared per cohort.</strong> StatsBomb Open Data supplies the reproducible historical baseline. API-Football supplies candidate recent Premier League seasons and World Cup 2026; each season is published independently only after every expected match passes the lineup, substitution, minutes, event-score and identifier gates. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata and a response snapshot hash.</p>
     </div>
   </section>
