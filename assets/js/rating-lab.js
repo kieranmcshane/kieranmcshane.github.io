@@ -125,6 +125,73 @@
     return root.dataset.dataRoot.replace(/\/$/, '') + '/' + file;
   }
 
+  function fetchJson(file) {
+    return fetch(dataUrl(file)).then(function (response) {
+      if (!response.ok) throw new Error(file + ' could not be loaded.');
+      return response.json();
+    });
+  }
+
+  function loadSportCore(sport) {
+    return fetchJson('split/' + sport + '-core.json').catch(function () {
+      return fetchJson(sport + '.json');
+    }).then(function (payload) { state.datasets[sport] = payload; });
+  }
+
+  function ensureRankings(sport, model) {
+    var dataset = state.datasets[sport];
+    if (!dataset) return Promise.reject(new Error(sport + ' ratings are not loaded.'));
+    var entry = dataset.models[model];
+    if (entry.rankings) return Promise.resolve();
+    if (entry.rankingsRequest) return entry.rankingsRequest;
+    entry.rankingsRequest = fetchJson('split/' + sport + '-rankings-' + model + '.json').catch(function () {
+      return fetchJson(sport + '.json').then(function (payload) { return payload.models[model]; });
+    }).then(function (payload) {
+      entry.rankings = payload.rankings || [];
+      delete entry.rankingsRequest;
+    }, function (error) {
+      delete entry.rankingsRequest;
+      throw error;
+    });
+    return entry.rankingsRequest;
+  }
+
+  function ensureModels(sport) {
+    return Promise.all(modelKeys.map(function (model) { return ensureRankings(sport, model); }));
+  }
+
+  var renderQueued = false;
+
+  function scheduleRender() {
+    if (renderQueued) return;
+    renderQueued = true;
+    window.requestAnimationFrame(function () {
+      renderQueued = false;
+      render();
+    });
+  }
+
+  var syncToken = 0;
+
+  function syncData() {
+    var token = ++syncToken;
+    var wanted = [ensureRankings(state.sport, 'elo')];
+    if (state.model !== 'elo') wanted.push(ensureRankings(state.sport, state.model));
+    var loaded = state.datasets[state.sport].models[state.model].rankings &&
+      state.datasets[state.sport].models.elo.rankings;
+    if (!loaded) root.setAttribute('aria-busy', 'true');
+    return Promise.all(wanted).then(function () {
+      if (token !== syncToken) return;
+      root.removeAttribute('aria-busy');
+      render();
+    }).catch(function (error) {
+      if (token !== syncToken) return;
+      root.removeAttribute('aria-busy');
+      elements.error.hidden = false;
+      elements.error.textContent = error.message + ' Please try again later.';
+    });
+  }
+
   function formatDate(value) {
     if (!value) return 'Unknown';
     return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -213,7 +280,8 @@
         escapeHtml(labels[sport]) + ' · ' + escapeHtml(formatDate(statuses[sport].latest_result)) + '</span>';
     }).join('');
     var total = sports.reduce(function (sum, sport) {
-      return sum + state.datasets[sport].models.elo.rankings.length;
+      var elo = state.datasets[sport].models.elo;
+      return sum + (elo.rankings ? elo.rankings.length : elo.entity_count || 0);
     }, 0);
     elements.generation.textContent = number(total, 0) + ' published rankings · generated ' +
       formatDate(state.manifest.generated_at) + (stale.length ? ' · delayed sources retain their last valid snapshot' : '');
@@ -360,6 +428,10 @@
     if (row && row.media) return row.media;
     var dataset = state.datasets[sport];
     if (!dataset || !row || !row.id) return null;
+    if (!dataset.models.elo.rankings) {
+      ensureRankings(sport, 'elo').then(scheduleRender, function () {});
+      return null;
+    }
     var match = dataset.models.elo.rankings.find(function (candidate) { return candidate.id === row.id; });
     return match ? match.media || null : null;
   }
@@ -736,12 +808,17 @@
       elements.detail.innerHTML = '';
       return;
     }
+    if (modelKeys.some(function (key) { return !dataset.models[key].rankings; })) {
+      ensureModels(state.sport).then(scheduleRender, function () {});
+    }
     var crossModel = modelKeys.map(function (key) {
-      var modelRow = dataset.models[key].rankings.find(function (candidate) { return candidate.id === row.id; });
+      var loadedRankings = dataset.models[key].rankings;
+      var modelRow = loadedRankings ? loadedRankings.find(function (candidate) { return candidate.id === row.id; }) : null;
+      var placeholder = loadedRankings ? '—' : '…';
       return '<tr><th scope="row">' + escapeHtml(dataset.models[key].label) + '</th><td>' +
-        (modelRow ? '#' + modelRow.rank + (modelRow.provisional ? ' · provisional' : '') : '—') +
-        '</td><td>' + (modelRow ? number(modelRow.score, 1) : '—') +
-        '</td><td>' + (modelRow && modelRow.sigma !== null ? '±' + number(modelRow.sigma, 1) : '—') + '</td></tr>';
+        (modelRow ? '#' + modelRow.rank + (modelRow.provisional ? ' · provisional' : '') : placeholder) +
+        '</td><td>' + (modelRow ? number(modelRow.score, 1) : placeholder) +
+        '</td><td>' + (modelRow && modelRow.sigma !== null ? '±' + number(modelRow.sigma, 1) : placeholder) + '</td></tr>';
     }).join('');
     var isPinned = state.pinned.indexOf(row.id) !== -1;
     var pinnedRows = state.pinned.map(function (id) {
@@ -2034,7 +2111,7 @@
     state.visibleRows = 0;
     state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
-    render();
+    syncData();
   }
 
   function setIncludeProvisional(value) {
@@ -2073,7 +2150,7 @@
     state.matchupVenue = 'neutral';
     setPressed(elements.sportTabs, 'sport', state.sport);
     populateCompetitions();
-    render();
+    syncData();
   });
 
   elements.localNav.addEventListener('click', function (event) {
@@ -2190,7 +2267,7 @@
     state.expanded = false;
     state.visibleRows = 0;
     setPressed(elements.modelTabs, 'model', state.model);
-    render();
+    syncData();
   });
 
   elements.matchupA.addEventListener('change', function () {
@@ -2239,7 +2316,7 @@
     state.matchupVenue = 'neutral';
     setPressed(elements.sportTabs, 'sport', state.sport);
     populateCompetitions();
-    render();
+    syncData();
   });
 
   elements.protocolModelTabs.addEventListener('click', function (event) {
@@ -2250,7 +2327,7 @@
     state.visibleRows = 0;
     state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
-    render();
+    syncData();
   });
 
   elements.competition.addEventListener('change', function () {
@@ -2441,19 +2518,16 @@
     }
   }, true);
 
-  fetch(dataUrl('manifest.json'))
-    .then(function (response) {
-      if (!response.ok) throw new Error('The ratings manifest could not be loaded.');
-      return response.json();
-    })
+  fetchJson('manifest.json')
     .then(function (manifest) {
       state.manifest = manifest;
-      return Promise.all(sports.map(function (sport) {
-        return fetch(dataUrl(sport + '.json')).then(function (response) {
-          if (!response.ok) throw new Error(sport + ' ratings could not be loaded.');
-          return response.json();
-        }).then(function (payload) { state.datasets[sport] = payload; });
-      }));
+      return Promise.all(sports.map(loadSportCore));
+    })
+    .then(function () {
+      return Promise.all([
+        ensureRankings(state.sport, 'elo'),
+        state.model === 'elo' ? null : ensureRankings(state.sport, state.model)
+      ]);
     })
     .then(function () {
       var competitions = predictorCompetitions();

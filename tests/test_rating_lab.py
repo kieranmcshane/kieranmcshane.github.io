@@ -1561,5 +1561,124 @@ h001,Hana,Theta,CZE
         self.assertTrue(payload["models"]["elo"]["rankings"])
 
 
+class SplitAssetTests(unittest.TestCase):
+    @staticmethod
+    def _sport_payload(sport: str) -> dict:
+        return {
+            "schema_version": "1.15.0",
+            "sport": sport,
+            "generated_at": "2026-07-23T22:01:36+00:00",
+            "models": {
+                "elo": {
+                    "label": "Elo",
+                    "metrics": {"brier": 0.2},
+                    "rankings": [{"id": "a", "rank": 1}, {"id": "b", "rank": 2}],
+                },
+                "robust": {
+                    "label": "Robust",
+                    "metrics": {"brier": 0.19},
+                    "rankings": [{"id": "b", "rank": 1}],
+                },
+            },
+            "competitions": [{"id": "league"}],
+        }
+
+    @staticmethod
+    def _player_payload(cohort_ids: list[str]) -> dict:
+        return {
+            "schema_version": "3.0.0",
+            "generated_at": "2026-07-23T22:01:36+00:00",
+            "source": {"name": "Test", "statuses": {}},
+            "methodology": {"note": "test"},
+            "cohorts": [
+                {
+                    "id": cohort_id,
+                    "name": cohort_id,
+                    "gender": "men",
+                    "scope_type": "season",
+                    "matches": 2,
+                    "models": {"lineup-trueskill": {"label": "Lineup", "rankings": [{"id": "p1"}]}},
+                }
+                for cohort_id in cohort_ids
+            ],
+        }
+
+    def test_split_assets_mirror_full_payloads(self):
+        from rating_lab.pipeline import write_split_assets
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            (output / "tennis.json").write_text(json.dumps(self._sport_payload("tennis")))
+            (output / "player-football.json").write_text(
+                json.dumps(self._player_payload(["euro-2024", "wsl-2023-24"]))
+            )
+            written = write_split_assets(output)
+            split = output / "split"
+            core = json.loads((split / "tennis-core.json").read_text())
+            self.assertNotIn("rankings", core["models"]["elo"])
+            self.assertEqual(core["models"]["elo"]["entity_count"], 2)
+            self.assertEqual(core["models"]["elo"]["rankings_url"], "tennis-rankings-elo.json")
+            self.assertEqual(core["models"]["elo"]["label"], "Elo")
+            self.assertEqual(core["models"]["elo"]["metrics"], {"brier": 0.2})
+            self.assertEqual(core["competitions"], [{"id": "league"}])
+            for model_name in ("elo", "robust"):
+                part = json.loads((split / f"tennis-rankings-{model_name}.json").read_text())
+                self.assertEqual(part["generated_at"], "2026-07-23T22:01:36+00:00")
+                self.assertEqual(
+                    part["rankings"],
+                    self._sport_payload("tennis")["models"][model_name]["rankings"],
+                )
+            index = json.loads((split / "player-index.json").read_text())
+            self.assertEqual(len(index["cohorts"]), 2)
+            self.assertNotIn("models", index["cohorts"][0])
+            self.assertEqual(index["cohorts"][0]["data_url"], "player-cohort-euro-2024.json")
+            self.assertEqual(index["source"], {"name": "Test", "statuses": {}})
+            cohort = json.loads((split / "player-cohort-euro-2024.json").read_text())
+            self.assertEqual(
+                cohort["cohort"], self._player_payload(["euro-2024"])["cohorts"][0]
+            )
+            self.assertEqual(set(written), {path.name for path in split.iterdir()})
+
+    def test_split_assets_remove_stale_parts(self):
+        from rating_lab.pipeline import write_split_assets
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            (output / "tennis.json").write_text(json.dumps(self._sport_payload("tennis")))
+            (output / "player-football.json").write_text(
+                json.dumps(self._player_payload(["euro-2024", "wsl-2023-24"]))
+            )
+            write_split_assets(output)
+            self.assertTrue((output / "split/player-cohort-wsl-2023-24.json").exists())
+            (output / "player-football.json").write_text(
+                json.dumps(self._player_payload(["euro-2024"]))
+            )
+            write_split_assets(output)
+            self.assertFalse((output / "split/player-cohort-wsl-2023-24.json").exists())
+            self.assertTrue((output / "split/player-cohort-euro-2024.json").exists())
+            self.assertTrue((output / "split/tennis-rankings-elo.json").exists())
+
+    def test_on_demand_loading_contract_is_present(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "assets/js/rating-lab.js").read_text()
+        player_script = (root / "assets/js/player-lab.js").read_text()
+        styles = (root / "assets/main.scss").read_text()
+        pipeline = (root / "rating_lab/pipeline.py").read_text()
+        self.assertIn("function ensureRankings(sport, model)", script)
+        self.assertIn("'split/' + sport + '-core.json'", script)
+        self.assertIn("'split/' + sport + '-rankings-' + model + '.json'", script)
+        self.assertIn("elo.rankings ? elo.rankings.length : elo.entity_count", script)
+        self.assertIn("root.setAttribute('aria-busy', 'true')", script)
+        self.assertIn("splitUrl('player-index.json')", player_script)
+        self.assertIn(".catch(loadFullPayload)", player_script)
+        self.assertIn("function ensureCohort(id)", player_script)
+        self.assertIn("root.setAttribute('aria-busy', 'true')", player_script)
+        self.assertIn(".rating-lab[aria-busy='true']", styles)
+        self.assertIn("write_split_assets(output_dir)", pipeline)
+        # The canonical full files stay published for downloads and the Android app.
+        self.assertIn("player-football.json' | relative_url }}\" download", (root / "player-lab.md").read_text())
+        self.assertIn('fetch("${sport.fileName}.json")', (root / "android/app/src/main/java/io/github/kieranmcshane/ratinglab/data/RatingRepository.kt").read_text())
+
+
 if __name__ == "__main__":
     unittest.main()

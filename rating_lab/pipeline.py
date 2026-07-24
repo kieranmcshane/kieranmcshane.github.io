@@ -4851,7 +4851,89 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
     staged_manifest = output_dir / ".manifest.json.tmp"
     staged_manifest.write_text(json.dumps(manifest, indent=2) + "\n")
     staged_manifest.replace(output_dir / "manifest.json")
+    write_split_assets(output_dir)
     return manifest
+
+
+def write_split_assets(output_dir: Path) -> dict:
+    """Derive on-demand loading assets from the canonical full JSON files.
+
+    The full per-sport and player files remain the published download and
+    Android contract. This writes an ``split/`` directory next to them with:
+
+    - ``<sport>-core.json``: the sport payload without any ``rankings`` arrays,
+      each model carrying ``entity_count`` and ``rankings_url`` instead.
+    - ``<sport>-rankings-<model>.json``: one model's rankings only.
+    - ``player-index.json``: the player payload with each cohort's ``models``
+      replaced by a ``data_url`` pointer.
+    - ``player-cohort-<id>.json``: one full cohort, including its models.
+
+    Every part restates ``schema_version`` and ``generated_at`` from its source
+    file so a client can detect mixed-deploy fetches. Stale parts (for example
+    a removed cohort) are deleted so the directory always mirrors the canonical
+    files exactly.
+    """
+    split_dir = output_dir / "split"
+    split_dir.mkdir(parents=True, exist_ok=True)
+    written: dict[str, int] = {}
+
+    def _write(name: str, payload: dict) -> None:
+        serialized = json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n"
+        staged = split_dir / f".{name}.tmp"
+        staged.write_text(serialized)
+        staged.replace(split_dir / name)
+        written[name] = len(serialized.encode())
+
+    for sport in SPORTS:
+        source_path = output_dir / f"{sport}.json"
+        if not source_path.exists():
+            continue
+        payload = json.loads(source_path.read_text())
+        core = {key: value for key, value in payload.items() if key != "models"}
+        core["models"] = {}
+        for model_name, model in payload.get("models", {}).items():
+            rankings = model.get("rankings", [])
+            rankings_name = f"{sport}-rankings-{model_name}.json"
+            core_model = {key: value for key, value in model.items() if key != "rankings"}
+            core_model["entity_count"] = len(rankings)
+            core_model["rankings_url"] = rankings_name
+            core["models"][model_name] = core_model
+            _write(
+                rankings_name,
+                {
+                    "schema_version": payload.get("schema_version"),
+                    "generated_at": payload.get("generated_at"),
+                    "sport": sport,
+                    "model": model_name,
+                    "rankings": rankings,
+                },
+            )
+        _write(f"{sport}-core.json", core)
+
+    player_path = output_dir / "player-football.json"
+    if player_path.exists():
+        player_payload = json.loads(player_path.read_text())
+        index = {key: value for key, value in player_payload.items() if key != "cohorts"}
+        index["cohorts"] = []
+        for cohort in player_payload.get("cohorts", []):
+            cohort_name = f"player-cohort-{cohort['id']}.json"
+            summary = {key: value for key, value in cohort.items() if key != "models"}
+            summary["data_url"] = cohort_name
+            index["cohorts"].append(summary)
+            _write(
+                cohort_name,
+                {
+                    "schema_version": player_payload.get("schema_version"),
+                    "generated_at": player_payload.get("generated_at"),
+                    "cohort": cohort,
+                },
+            )
+        _write("player-index.json", index)
+
+    for existing in split_dir.iterdir():
+        if existing.name not in written:
+            existing.unlink()
+    return written
 
 
 def _git_revision() -> str:

@@ -54,6 +54,11 @@ test.describe("page load", () => {
 
   test("shows the error notice when a sport feed fails", async ({ page }) => {
     await freezeClock(page);
+    // The page loads the split core first and falls back to the full sport
+    // file, so a real feed failure means both are unavailable.
+    await page.route("**/assets/data/rating-lab/split/tennis-*.json", (route) =>
+      route.fulfill({ status: 500, body: "boom" })
+    );
     await page.route("**/assets/data/rating-lab/tennis.json", (route) =>
       route.fulfill({ status: 500, body: "boom" })
     );
@@ -283,13 +288,12 @@ test.describe("long names", () => {
   test("an extreme name neither breaks layout nor escapes its row", async ({
     page,
   }) => {
-    const tennis = readDataFile("tennis.json");
-    const topId = tennis.models.elo.rankings[0].id;
-    await routeDataFile(page, "tennis.json", (data) => {
-      Object.values(data.models).forEach((model) => {
-        model.rankings.forEach((row) => {
-          if (row.id === topId) row.name = LONG_NAME;
-        });
+    // The default view loads only the split Elo rankings, so mutate that file.
+    const eloRankings = readDataFile("split/tennis-rankings-elo.json");
+    const topId = eloRankings.rankings[0].id;
+    await routeDataFile(page, "split/tennis-rankings-elo.json", (data) => {
+      data.rankings.forEach((row) => {
+        if (row.id === topId) row.name = LONG_NAME;
       });
     });
     await gotoRatingLab(page);
@@ -379,7 +383,9 @@ test.describe("empty-market states", () => {
   test("both providers explain an empty market instead of rendering blank", async ({
     page,
   }) => {
-    const football = readDataFile("football.json");
+    // The forecast section reads competition and market data from the split
+    // core file, so mutate that payload.
+    const football = readDataFile("split/football-core.json");
     const emptyBenchmark = (benchmark) => {
       if (!benchmark) return benchmark;
       benchmark.competitions = [];
@@ -387,7 +393,7 @@ test.describe("empty-market states", () => {
       benchmark.history = [];
       return benchmark;
     };
-    await routeDataFile(page, "football.json", (data) => {
+    await routeDataFile(page, "split/football-core.json", (data) => {
       const predictor = data.tournament_predictor;
       predictor.market_comparison = emptyBenchmark(predictor.market_comparison);
       predictor.kalshi_comparison = emptyBenchmark(predictor.kalshi_comparison);

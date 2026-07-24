@@ -259,6 +259,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
       <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/tree/main/rating_lab">Model source</a>
     </div>
+    <p class="rating-lab-explainer"><strong>On-demand loading:</strong> the browser first fetches small per-sport core files and then only the ranking lists you actually open, from <code>assets/data/rating-lab/split/</code>. Every split file is derived deterministically from the full per-sport JSON published above, which remains the canonical download and carries the source snapshot hashes.</p>
 
   <details class="rating-lab-disclosure">
     <summary><span>Protocol overview</span><strong>How the four rating models differ</strong></summary>
