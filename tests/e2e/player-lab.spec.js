@@ -189,6 +189,29 @@ test.describe("player lab", () => {
     await expect(banner.locator("details > div")).toBeVisible();
   });
 
+  test("chart adapts to narrow desktop widths without overflow", async ({
+    page,
+  }) => {
+    // Between the mobile breakpoint (650) and ~830 px — including zoomed-in
+    // desktop windows — the chart previously stayed a fixed 760 px and pushed
+    // labels past the section edge.
+    for (const width of [700, 780, 860]) {
+      await page.setViewportSize({ width, height: 900 });
+      await gotoPlayerLab(page);
+      const frame = page.locator(".player-lab-chart-frame");
+      const box = await frame.boundingBox();
+      expect(box.x + box.width, `chart frame exceeds ${width}px viewport`).toBeLessThanOrEqual(width + 1);
+      const stray = await page.evaluate(() => {
+        const limit = document.documentElement.clientWidth + 1;
+        return [...document.querySelectorAll(".player-lab-point > small")].filter(
+          (label) => label.getBoundingClientRect().right > limit
+        ).length;
+      });
+      expect(stray, `labels poke outside a ${width}px viewport`).toBe(0);
+      expect(await hasHorizontalOverflow(page)).toBe(false);
+    }
+  });
+
   test("player list @visual", async ({ page }) => {
     await gotoPlayerLab(page);
     await expect(page.locator(".player-lab-table")).toHaveScreenshot(
