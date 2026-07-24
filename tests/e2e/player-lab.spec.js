@@ -189,6 +189,29 @@ test.describe("player lab", () => {
     await expect(banner.locator("details > div")).toBeVisible();
   });
 
+  test("every rendered flag image actually loads", async ({ page }) => {
+    await gotoPlayerLab(page);
+    await page.waitForTimeout(600);
+    const broken = await page.evaluate(async () => {
+      const images = [...document.querySelectorAll(".player-lab-country-flag img")];
+      // Force lazy images to load; race a timeout so an off-screen image
+      // that never fires load/error cannot hang the test.
+      images.forEach((img) => { img.loading = "eager"; });
+      await Promise.race([
+        Promise.all(
+          images.map((img) =>
+            img.complete ? null : new Promise((resolve) => { img.onload = img.onerror = resolve; })
+          )
+        ),
+        new Promise((resolve) => setTimeout(resolve, 5000)),
+      ]);
+      return images
+        .filter((img) => img.complete && !img.naturalWidth && !img.closest("[hidden]"))
+        .map((img) => img.getAttribute("src"));
+    });
+    expect(broken, `broken flag images: ${broken.join(", ")}`).toEqual([]);
+  });
+
   test("a near-miss click still selects the closest marker", async ({
     page,
   }) => {

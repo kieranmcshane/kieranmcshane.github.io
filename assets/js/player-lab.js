@@ -78,18 +78,33 @@
     regionCodesByName = {};
     if (typeof Intl.DisplayNames === 'function') {
       var names = new Intl.DisplayNames(['en'], { type: 'region' });
+      // Deprecated ISO 3166 aliases share a display name with the real
+      // code (DY Benin, ZR Congo-Kinshasa, DD Germany, RH Zimbabwe, …) and
+      // would point at flag files that do not exist.
+      var deprecatedCodes = ['AN', 'BU', 'CS', 'DD', 'DY', 'FX', 'HV', 'NH', 'NT', 'RH', 'SU', 'TP', 'UK', 'YD', 'YU', 'ZR'];
       for (var first = 65; first <= 90; first += 1) {
         for (var second = 65; second <= 90; second += 1) {
           var code = String.fromCharCode(first, second);
+          if (deprecatedCodes.indexOf(code) !== -1) continue;
           var name = names.of(code);
-          if (name && name !== code) regionCodesByName[normalizedRegionName(name)] = code;
+          if (!name || name === code) continue;
+          var key = normalizedRegionName(name);
+          // First code wins: deprecated ISO aliases (DY for Benin, ZR for
+          // Congo-Kinshasa, …) share a display name with the real code and
+          // used to overwrite it, pointing at flag files that do not exist.
+          if (!(key in regionCodesByName)) regionCodesByName[key] = code;
         }
       }
     }
     Object.assign(regionCodesByName, {
-      'cote d ivoire': 'CI', 'czech republic': 'CZ', england: 'gb-eng', france: 'FR',
-      ireland: 'IE', 'korea south': 'KR', 'macedonia republic of': 'MK',
-      'northern ireland': 'gb-nir', scotland: 'gb-sct', serbia: 'RS',
+      benin: 'BJ', 'bosnia and herzegovina': 'BA', 'cape verde': 'CV',
+      'congo kinshasa': 'CD', 'cote d ivoire': 'CI', curacao: 'CW',
+      'czech republic': 'CZ', 'democratic republic of the congo': 'CD',
+      'dr congo': 'CD', england: 'gb-eng', france: 'FR',
+      ireland: 'IE', 'ivory coast': 'CI', 'korea south': 'KR', kosovo: 'XK',
+      'macedonia republic of': 'MK', 'north macedonia': 'MK',
+      'northern ireland': 'gb-nir', 'republic of ireland': 'IE',
+      scotland: 'gb-sct', serbia: 'RS', turkey: 'TR',
       'united states of america': 'US', 'venezuela bolivarian republic': 'VE',
       wales: 'gb-wls'
     });
@@ -899,6 +914,14 @@
     markers[next].tabIndex = 0;
     markers[next].focus();
   });
+  // If a flag image ever fails to load, hide its container instead of
+  // leaving an empty white box on the chart or in the table.
+  root.addEventListener('error', function (event) {
+    var image = event.target;
+    if (!image || !image.matches || !image.matches('.player-lab-country-flag img')) return;
+    var container = image.closest('.player-lab-country-flag');
+    if (container) container.hidden = true;
+  }, true);
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);
   // Re-render the chart when the available width actually changes (window
