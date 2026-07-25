@@ -374,7 +374,7 @@ test.describe("competition switching", () => {
         total_matches: 3,
         first_fixture: "2026-07-20",
         last_fixture: "2026-07-26",
-        next_fixture: "2026-07-26",
+        next_fixture: "2020-07-26",
         surface: "Clay",
         models: {},
         settled_performance: {
@@ -401,12 +401,18 @@ test.describe("competition switching", () => {
           participants: performanceRows,
         };
       }
+      const futureCompetition = JSON.parse(JSON.stringify(competition));
+      futureCompetition.id = "future-next-event-test";
+      futureCompetition.label = "Future Next Event Test";
+      futureCompetition.state = "upcoming";
+      futureCompetition.status = "upcoming";
+      futureCompetition.next_fixture = "2099-07-26";
       data.tournament_predictor = {
         simulations_per_model: 1000,
         tennis_draw: "Published draw is locked.",
         knockout_draw: "Published draw is locked.",
         availability_rule: "Published fields only.",
-        competitions: [competition],
+        competitions: [competition, futureCompetition],
       };
     });
 
@@ -419,15 +425,15 @@ test.describe("competition switching", () => {
     await expect(page.locator("#predictor-metrics")).toContainText(
       "Next event"
     );
+    await expect(page.locator("#predictor-metrics")).toContainText(
+      "Update pending"
+    );
     await expect(page.locator("#predictor-detail")).toContainText(
-      "next event"
+      "schedule update pending"
     );
     await expect(page.locator("#predictor-detail time")).toHaveAttribute(
       "datetime",
-      "2026-07-26"
-    );
-    await expect(page.locator("#predictor-detail")).toContainText(
-      "exact start time not published"
+      "2020-07-26"
     );
     await expect(
       page.locator("#predictor-performance-title")
@@ -440,6 +446,22 @@ test.describe("competition switching", () => {
     );
     await expect(page.locator("#predictor-detail")).toContainText(
       "Beta Player"
+    );
+    await page
+      .locator("#predictor-competition")
+      .selectOption("future-next-event-test");
+    const alpha = page.locator('[data-predictor-team="atp:alpha"]');
+    await expect(alpha).toHaveCount(1);
+    await alpha.click();
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "next event"
+    );
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "exact start time not published"
+    );
+    await expect(page.locator("#predictor-detail time")).toHaveAttribute(
+      "datetime",
+      "2099-07-26"
     );
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
