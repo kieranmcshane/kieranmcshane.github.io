@@ -512,11 +512,142 @@
   function standardized(rows) {
     var values = rows.map(function (row) { return row.score; });
     var mean = values.reduce(function (sum, value) { return sum + value; }, 0) / Math.max(values.length, 1);
-    var variance = values.reduce(function (sum, value) { return sum + Math.pow(value - mean, 2); }, 0) / Math.max(values.length, 1);
+    // Sample standard deviation (n - 1), stated explicitly in the chart
+    // methods so the displayed z-scores are independently reproducible.
+    var variance = values.reduce(function (sum, value) { return sum + Math.pow(value - mean, 2); }, 0) / Math.max(values.length - 1, 1);
     var scale = Math.sqrt(variance) || 1;
     var result = {};
     rows.forEach(function (row) { result[row.id] = (row.score - mean) / scale; });
     return result;
+  }
+
+  function pearson(points) {
+    if (points.length < 3) return null;
+    var meanX = points.reduce(function (sum, point) { return sum + point.x; }, 0) / points.length;
+    var meanY = points.reduce(function (sum, point) { return sum + point.y; }, 0) / points.length;
+    var cross = 0, sumX = 0, sumY = 0;
+    points.forEach(function (point) {
+      var dx = point.x - meanX, dy = point.y - meanY;
+      cross += dx * dy;
+      sumX += dx * dx;
+      sumY += dy * dy;
+    });
+    var denominator = Math.sqrt(sumX * sumY);
+    return denominator ? cross / denominator : null;
+  }
+
+  function averageRanks(values) {
+    var indexed = values.map(function (value, index) { return { value: value, index: index }; })
+      .sort(function (a, b) { return a.value - b.value; });
+    var ranks = new Array(values.length);
+    var start = 0;
+    while (start < indexed.length) {
+      var end = start + 1;
+      while (end < indexed.length && indexed[end].value === indexed[start].value) end += 1;
+      var rank = (start + 1 + end) / 2;
+      for (var position = start; position < end; position += 1) ranks[indexed[position].index] = rank;
+      start = end;
+    }
+    return ranks;
+  }
+
+  function spearman(points) {
+    if (points.length < 3) return null;
+    var xRanks = averageRanks(points.map(function (point) { return point.x; }));
+    var yRanks = averageRanks(points.map(function (point) { return point.y; }));
+    return pearson(xRanks.map(function (rank, index) { return { x: rank, y: yRanks[index] }; }));
+  }
+
+  function linearFit(points) {
+    if (points.length < 3) return null;
+    var meanX = points.reduce(function (sum, point) { return sum + point.x; }, 0) / points.length;
+    var meanY = points.reduce(function (sum, point) { return sum + point.y; }, 0) / points.length;
+    var numerator = 0, denominator = 0;
+    points.forEach(function (point) {
+      numerator += (point.x - meanX) * (point.y - meanY);
+      denominator += Math.pow(point.x - meanX, 2);
+    });
+    if (!denominator) return null;
+    var slope = numerator / denominator;
+    return { slope: slope, intercept: meanY - slope * meanX };
+  }
+
+  // FNV-1a plus a small deterministic PRNG keeps the cluster bootstrap
+  // exactly reproducible in every browser without shipping a dependency.
+  function diagnosticSeed(value) {
+    var hash = 2166136261;
+    for (var index = 0; index < value.length; index += 1) {
+      hash ^= value.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function seededRandom(seed) {
+    var stateValue = seed >>> 0;
+    return function () {
+      stateValue += 0x6D2B79F5;
+      var value = stateValue;
+      value = Math.imul(value ^ value >>> 15, value | 1);
+      value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+      return ((value ^ value >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function quantile(values, probability) {
+    if (!values.length) return null;
+    var sorted = values.slice().sort(function (a, b) { return a - b; });
+    var position = (sorted.length - 1) * probability;
+    var lower = Math.floor(position), upper = Math.ceil(position);
+    if (lower === upper) return sorted[lower];
+    return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+  }
+
+  function clusterBootstrapCorrelation(points, iterations, seed) {
+    var clustersByTeam = {};
+    points.forEach(function (point) {
+      var team = point.team || 'Unassigned';
+      if (!clustersByTeam[team]) clustersByTeam[team] = [];
+      clustersByTeam[team].push(point);
+    });
+    var teams = Object.keys(clustersByTeam).sort();
+    if (teams.length < 3) return { interval: null, clusters: teams.length };
+    var random = seededRandom(seed), estimates = [];
+    for (var iteration = 0; iteration < iterations; iteration += 1) {
+      var sample = [];
+      for (var cluster = 0; cluster < teams.length; cluster += 1) {
+        var sampledTeam = teams[Math.floor(random() * teams.length)];
+        sample = sample.concat(clustersByTeam[sampledTeam]);
+      }
+      var estimate = pearson(sample);
+      if (estimate !== null && Number.isFinite(estimate)) estimates.push(estimate);
+    }
+    return {
+      interval: estimates.length ? [quantile(estimates, 0.025), quantile(estimates, 0.975)] : null,
+      clusters: teams.length
+    };
+  }
+
+  function comparisonDiagnostics(points, identity) {
+    var seed = diagnosticSeed(identity);
+    var fit = linearFit(points);
+    var correlation = pearson(points);
+    var bootstrap = clusterBootstrapCorrelation(points, 1000, seed);
+    return {
+      n: points.length,
+      clusters: bootstrap.clusters,
+      pearson: correlation,
+      spearman: spearman(points),
+      rSquared: correlation === null ? null : correlation * correlation,
+      fit: fit,
+      interval: bootstrap.interval,
+      iterations: 1000,
+      seed: seed
+    };
+  }
+
+  function diagnosticValue(value) {
+    return value === null || !Number.isFinite(value) ? '—' : value.toFixed(2);
   }
 
   function renderChart() {
@@ -541,6 +672,11 @@
         comparisonRank: row.rank, trueScore: byId[row.id].score, comparisonScore: row.score
       };
     });
+    var diagnosticPoints = points.slice();
+    var diagnostics = comparisonDiagnostics(
+      diagnosticPoints,
+      String(cohort.id || state.cohort || '') + '|' + comparisonId + '|' + diagnosticPoints.length
+    );
     elements.comparisonHeading.textContent = 'Lineup TrueSkill versus ' + comparisonLabel;
     elements.comparisonCopy.textContent = comparisonId === 'pairwise-chemistry'
       ? 'The interaction axis rates residual teammate chemistry after RAPM. Upper-right players rate highly under both lenses; select a marker for exact ranks.'
@@ -563,6 +699,7 @@
     var height = mobile ? 300 : 390, pad = mobile ? 34 : 45, extent = 3.2;
     function x(value) { return pad + (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (width - 2 * pad); }
     function y(value) { return height - pad - (Math.max(-extent, Math.min(extent, value)) + extent) / (2 * extent) * (height - 2 * pad); }
+    var ticks = [-3, -2, -1, 0, 1, 2, 3];
     points.forEach(function (point) {
       point.px = x(point.x);
       point.py = y(point.y);
@@ -610,14 +747,43 @@
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
         '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small class="' + (point.px > width - 140 ? 'is-label-left' : '') + '">' + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
-    elements.chart.innerHTML = '<p class="player-lab-chart-key">' +
+    var interval = diagnostics.interval
+      ? '[' + diagnosticValue(diagnostics.interval[0]) + ', ' + diagnosticValue(diagnostics.interval[1]) + ']'
+      : 'not estimable';
+    var diagnosticScope = diagnostics.interval
+      ? 'The interval is a ' + diagnostics.iterations.toLocaleString('en') +
+        '-draw team-cluster bootstrap (seed ' + diagnostics.seed +
+        '). It describes cohort stability, not causal uncertainty; shared match evidence makes an ordinary player-level p-value inappropriate.'
+      : 'A cluster interval is not estimated with fewer than three team clusters. These are descriptive within-team diagnostics; shared match evidence makes an ordinary player-level p-value inappropriate.';
+    var fit = diagnostics.fit;
+    var fitLine = fit
+      ? '<line class="is-fit-line" x1="' + x(-extent) + '" y1="' + y(fit.intercept + fit.slope * -extent) +
+        '" x2="' + x(extent) + '" y2="' + y(fit.intercept + fit.slope * extent) + '"></line>'
+      : '';
+    var grid = ticks.map(function (tick) {
+      return '<line class="is-grid-line" x1="' + x(tick) + '" y1="' + pad + '" x2="' + x(tick) + '" y2="' + (height - pad) + '"></line>' +
+        '<line class="is-grid-line" x1="' + pad + '" y1="' + y(tick) + '" x2="' + (width - pad) + '" y2="' + y(tick) + '"></line>' +
+        '<text class="is-x-tick" x="' + x(tick) + '" y="' + (height - pad + 16) + '">' + tick + '</text>' +
+        (tick === 0 ? '' : '<text class="is-y-tick" x="' + (pad - 9) + '" y="' + (y(tick) + 4) + '">' + tick + '</text>');
+    }).join('');
+    elements.chart.innerHTML = '<div class="player-lab-chart-diagnostics" aria-label="Full paired-cohort statistical diagnostics">' +
+      '<dl><div><dt>Paired sample</dt><dd>' + diagnostics.n + ' players · ' + diagnostics.clusters + ' team' + (diagnostics.clusters === 1 ? '' : 's') + '</dd></div>' +
+      '<div><dt>Pearson r</dt><dd>' + diagnosticValue(diagnostics.pearson) + ' <small>95% CI ' + interval + '</small></dd></div>' +
+      '<div><dt>Spearman ρ</dt><dd>' + diagnosticValue(diagnostics.spearman) + '</dd></div>' +
+      '<div><dt>Linear R²</dt><dd>' + diagnosticValue(diagnostics.rSquared) + '</dd></div></dl>' +
+      '<p>Full eligible paired cohort. ' + diagnosticScope + '</p></div>' +
+      '<div class="player-lab-chart-legend" aria-label="Chart line legend"><span><i class="is-identity"></i>Equal standardized score</span><span><i class="is-fit"></i>OLS fit</span></div>' +
+      '<p class="player-lab-chart-key">' +
       (prominentFlagIds ? 'Compact flags preserve nationality in the dense middle; larger flags mark the extremes · ' : 'Source-listed nationality · ') +
-      'search a country to isolate it · select a marker for both ranks · arrow keys walk the markers</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
+      'sample z-scores use n − 1 · search a country to isolate it · search changes displayed points, not diagnostics · select a marker for both ranks</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and ' + escapeHtml(comparisonLabel) + ' scores">' +
-      '<line x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +
-      '<line x1="' + pad + '" y1="' + y(0) + '" x2="' + (width - pad) + '" y2="' + y(0) + '"></line>' +
-      '<text x="' + (width / 2) + '" y="' + (height - 8) + '">Lineup TrueSkill score →</text>' +
-      '<text class="is-y-label" transform="translate(14 ' + (height / 2) + ') rotate(-90)">' + escapeHtml(comparisonShort) + ' impact →</text></svg>' + circles + '</div>';
+      grid +
+      '<line class="is-identity-line" x1="' + x(-extent) + '" y1="' + y(-extent) + '" x2="' + x(extent) + '" y2="' + y(extent) + '"></line>' +
+      fitLine +
+      '<line class="is-zero-line" x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +
+      '<line class="is-zero-line" x1="' + pad + '" y1="' + y(0) + '" x2="' + (width - pad) + '" y2="' + y(0) + '"></line>' +
+      '<text class="is-axis-label" x="' + (width / 2) + '" y="' + (height - 4) + '">Lineup TrueSkill z-score →</text>' +
+      '<text class="is-axis-label is-y-label" transform="translate(12 ' + (height / 2) + ') rotate(-90)">' + escapeHtml(comparisonShort) + ' z-score →</text></svg>' + circles + '</div>';
   }
 
   function renderTable() {
