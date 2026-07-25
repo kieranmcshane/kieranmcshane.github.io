@@ -491,11 +491,6 @@
       previous.classList.remove('is-selected');
       var oldCard = previous.querySelector('.player-lab-point-card');
       if (oldCard) oldCard.remove();
-      // A flag granted only because of the selection goes back to a dot.
-      if (chartView.flagged && !chartView.flagged[previous.dataset.playerId]) {
-        previous.classList.remove('has-country-flag');
-        if (previous.firstElementChild) previous.firstElementChild.innerHTML = '';
-      }
     }
     // Exactly one marker stays in the tab order.
     frame.querySelectorAll('.player-lab-point[tabindex="0"]').forEach(function (marker) {
@@ -587,35 +582,36 @@
       });
     }
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
-    // Overplotting control: with a large cohort, only the most extreme points
-    // carry a flag; the dense middle stays as plain dots. Small filtered sets
-    // (for example one searched country) keep every flag.
+    // Overplotting control: every sourced nationality remains visible. With a
+    // large cohort, central markers use compact circular flag crops while the
+    // most extreme points retain the larger rectangular treatment.
     var FLAG_BUDGET = 100;
-    var flaggedIds = null;
+    var prominentFlagIds = null;
     if (points.length > 120) {
-      flaggedIds = byExtremity.slice(0, FLAG_BUDGET).reduce(function (items, point) { items[point.id] = true; return items; }, {});
+      prominentFlagIds = byExtremity.slice(0, FLAG_BUDGET).reduce(function (items, point) { items[point.id] = true; return items; }, {});
     }
     // Roving tabindex: the chart is one tab stop; arrow keys walk the markers.
     var tabbableId = points.some(function (point) { return point.id === state.selected; })
       ? state.selected
       : points.length ? points[0].id : null;
     hoverTipId = null;
-    chartView = { width: width, height: height, comparisonShort: comparisonShort, flagged: flaggedIds, byId: {} };
+    chartView = { width: width, height: height, comparisonShort: comparisonShort, byId: {} };
     points.forEach(function (point) { chartView.byId[point.id] = point; });
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
-      var showFlag = !flaggedIds || flaggedIds[point.id] || point.id === state.selected;
-      var flag = showFlag ? playerFlag(point.country, 'is-chart-flag', true) : '';
+      var flag = playerFlag(point.country, 'is-chart-flag', true);
+      var compact = flag && prominentFlagIds && !prominentFlagIds[point.id] ? ' is-compact-country-flag' : '';
       var pointX = point.px, pointY = point.py;
       var selectionCard = selected ? chartSelectionCard(point) : '';
-      return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + selected + '" data-player-id="' + escapeHtml(point.id) +
+      return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + compact + selected + '" data-player-id="' + escapeHtml(point.id) +
+        '" data-country-code="' + escapeHtml(point.country || '') +
         '" title="' + escapeHtml(point.name + (point.team ? ' · ' + point.team : '')) +
         '" tabindex="' + (point.id === tabbableId ? '0' : '-1') + '" style="--point-x:' + pointX.toFixed(1) + 'px;--point-y:' + pointY.toFixed(1) + 'px" aria-label="' +
         escapeHtml(point.name + ', ' + point.country + ', ' + point.team + ', Lineup TrueSkill ' + point.x.toFixed(2) + ' standard deviations, ' + comparisonLabel + ' ' + point.y.toFixed(2) + ' standard deviations') +
-        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small class="' + (point.px > width - 140 ? 'is-label-left' : '') + '">' + playerFlag(point.country, 'is-label-flag', true) + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
+        '"><span>' + flag + '</span>' + (labelIds[point.id] ? '<small class="' + (point.px > width - 140 ? 'is-label-left' : '') + '">' + escapeHtml(point.name) + '</small>' : '') + selectionCard + '</button>';
     }).join('');
     elements.chart.innerHTML = '<p class="player-lab-chart-key">' +
-      (flaggedIds ? 'Flags mark the most extreme players; the dense middle stays as dots · ' : 'Source-listed nationality · ') +
+      (prominentFlagIds ? 'Compact flags preserve nationality in the dense middle; larger flags mark the extremes · ' : 'Source-listed nationality · ') +
       'search a country to isolate it · select a marker for both ranks · arrow keys walk the markers</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and ' + escapeHtml(comparisonLabel) + ' scores">' +
       '<line x1="' + x(0) + '" y1="' + pad + '" x2="' + x(0) + '" y2="' + (height - pad) + '"></line>' +

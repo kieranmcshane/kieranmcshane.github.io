@@ -97,6 +97,32 @@ test.describe("player lab", () => {
     await expect(chart.locator(".player-lab-point-card")).toBeVisible();
   });
 
+  test("scatter keeps sourced flags at the markers without duplicating them in labels", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    const summary = await page.locator("#player-comparison-chart").evaluate((chart) => {
+      const points = [...chart.querySelectorAll(".player-lab-point")];
+      const sourced = points.filter((point) => point.dataset.countryCode);
+      return {
+        sourced: sourced.length,
+        missingMarkerFlags: sourced
+          .filter((point) => !point.querySelector(":scope > span .player-lab-country-flag"))
+          .map((point) => point.dataset.playerId),
+        labelFlags: chart.querySelectorAll(
+          ".player-lab-point > small .player-lab-country-flag"
+        ).length,
+        compactFlags: chart.querySelectorAll(
+          ".player-lab-point.is-compact-country-flag"
+        ).length,
+      };
+    });
+    expect(summary.sourced).toBeGreaterThan(100);
+    expect(summary.missingMarkerFlags).toEqual([]);
+    expect(summary.labelFlags).toBe(0);
+    expect(summary.compactFlags).toBeGreaterThan(0);
+  });
+
   test("switching cohort re-renders the leaderboard", async ({ page }) => {
     await gotoPlayerLab(page);
     const cohort = page.locator("#player-cohort");

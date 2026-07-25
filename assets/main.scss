@@ -7692,6 +7692,21 @@ body:has(.explain-lab) .post-header {
   box-sizing: border-box;
 }
 
+.player-lab-point.is-compact-country-flag > span {
+  width: 8px;
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  border-radius: 50%;
+  opacity: 0.72;
+}
+
+.player-lab-point.is-compact-country-flag > span > .player-lab-country-flag {
+  border: 0;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
 .player-lab-point:hover > span,
 .player-lab-point:focus-visible > span,
 .player-lab-point.is-selected > span {
@@ -7708,6 +7723,13 @@ body:has(.explain-lab) .post-header {
   width: 19px;
   height: 14px;
   background: #fff;
+  border-radius: 2px;
+}
+
+.player-lab-point.is-compact-country-flag:hover > span > .player-lab-country-flag,
+.player-lab-point.is-compact-country-flag:focus-visible > span > .player-lab-country-flag,
+.player-lab-point.is-compact-country-flag.is-selected > span > .player-lab-country-flag {
+  border-radius: 2px;
 }
 
 .player-lab-point > small {
@@ -7723,12 +7745,6 @@ body:has(.explain-lab) .post-header {
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.player-lab-point > small .is-label-flag {
-  width: 0.78rem;
-  height: 0.55rem;
-  margin-right: 0.22rem;
 }
 
 .player-lab-point-card {
