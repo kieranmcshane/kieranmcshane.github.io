@@ -1663,18 +1663,23 @@
       predictorRatingContext(sport, team.id) + mediaCredit(team, sport);
   }
 
-  function renderTennisPredictorDetail(team, model, sport) {
+  function renderTennisPredictorDetail(team, model, sport, competition) {
     if (!team) {
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a player to inspect the surface-aware matchup and full progression curve.</p>';
       return;
     }
     var nextMatch = team.next_match;
+    var nextEventDate = competition && competition.next_fixture;
+    var nextEvent = nextEventDate ?
+      'next event <time datetime="' + escapeHtml(nextEventDate) + '">' +
+      escapeHtml(formatDate(nextEventDate)) + '</time> · exact start time not published in this source' :
+      'next event date awaiting the official schedule';
     var matchup = nextMatch ?
       '<section class="rating-lab-tennis-matchup"><p class="rating-lab-kicker">Next published matchup · ' +
       escapeHtml(nextMatch.round) + '</p><div><span>' + escapeHtml(team.name) + '</span><strong>' +
       percent(nextMatch.win_probability) + '</strong></div><div><span>' + escapeHtml(nextMatch.opponent_name) +
       '</span><strong>' + percent(1 - nextMatch.win_probability) + '</strong></div><p>' +
-      escapeHtml(nextMatch.surface) + ' · selected protocol · no market input</p></section>' :
+      escapeHtml(nextMatch.surface) + ' · ' + nextEvent + ' · selected protocol · no market input</p></section>' :
       '<p class="rating-lab-performance-note">No direct opponent is currently pending for this player: the player has either already advanced, been eliminated, or is waiting for the preceding bracket match.</p>';
     var progression = (team.round_probabilities || []).map(function (stage) {
       return '<div class="rating-lab-tennis-progression-row"><span>' + escapeHtml(stage.stage) +
@@ -2005,6 +2010,7 @@
         elements.predictorMetrics.innerHTML = [
           ['Current round', model.current_stage],
           ['Surface', model.surface],
+          ['Next event', competition.next_fixture ? formatDate(competition.next_fixture) : 'Awaiting official schedule'],
           ['Forecast sample', number(model.simulations, 0) + ' locked-draw simulations']
         ].map(function (item) {
           return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
@@ -2023,7 +2029,12 @@
             '</td><td class="rating-lab-predictor-title">' + probabilityCell(team.champion) + '</td></tr>';
           return row + (team.id === state.predictorTeam ? tennisInlineDetail(team, model) : '');
         }).join('');
-        renderTennisPredictorDetail(rows.find(function (team) { return team.id === state.predictorTeam; }), model, view.sport);
+        renderTennisPredictorDetail(
+          rows.find(function (team) { return team.id === state.predictorTeam; }),
+          model,
+          view.sport,
+          competition
+        );
         elements.predictorMarket.hidden = true;
         elements.predictorMarket.innerHTML = '';
         elements.predictorMethod.innerHTML = number(model.simulations, 0) +
