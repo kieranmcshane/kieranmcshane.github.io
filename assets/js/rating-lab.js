@@ -199,6 +199,36 @@
       .format(new Date(value + (value.length === 10 ? 'T12:00:00Z' : '')));
   }
 
+  function nextEventStatus(value) {
+    if (!value) {
+      return {
+        summary: 'Awaiting official schedule',
+        detail: 'next event date awaiting the official schedule'
+      };
+    }
+    var now = new Date();
+    var today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    var eventDay = Date.parse(value + (value.length === 10 ? 'T00:00:00Z' : ''));
+    var formatted = formatDate(value);
+    var time = '<time datetime="' + escapeHtml(value) + '">' + escapeHtml(formatted) + '</time>';
+    if (eventDay < today) {
+      return {
+        summary: 'Update pending · last expected ' + formatted,
+        detail: 'schedule update pending · last expected ' + time
+      };
+    }
+    if (eventDay === today) {
+      return {
+        summary: 'Today · ' + formatted,
+        detail: 'next event today · ' + time + ' · exact start time not published in this source'
+      };
+    }
+    return {
+      summary: formatted,
+      detail: 'next event ' + time + ' · exact start time not published in this source'
+    };
+  }
+
   function number(value, digits, minimumDigits) {
     if (value === null || value === undefined) return '—';
     var threshold = 0.5 * Math.pow(10, -digits);
@@ -1669,17 +1699,13 @@
       return;
     }
     var nextMatch = team.next_match;
-    var nextEventDate = competition && competition.next_fixture;
-    var nextEvent = nextEventDate ?
-      'next event <time datetime="' + escapeHtml(nextEventDate) + '">' +
-      escapeHtml(formatDate(nextEventDate)) + '</time> · exact start time not published in this source' :
-      'next event date awaiting the official schedule';
+    var nextEvent = nextEventStatus(competition && competition.next_fixture);
     var matchup = nextMatch ?
       '<section class="rating-lab-tennis-matchup"><p class="rating-lab-kicker">Next published matchup · ' +
       escapeHtml(nextMatch.round) + '</p><div><span>' + escapeHtml(team.name) + '</span><strong>' +
       percent(nextMatch.win_probability) + '</strong></div><div><span>' + escapeHtml(nextMatch.opponent_name) +
       '</span><strong>' + percent(1 - nextMatch.win_probability) + '</strong></div><p>' +
-      escapeHtml(nextMatch.surface) + ' · ' + nextEvent + ' · selected protocol · no market input</p></section>' :
+      escapeHtml(nextMatch.surface) + ' · ' + nextEvent.detail + ' · selected protocol · no market input</p></section>' :
       '<p class="rating-lab-performance-note">No direct opponent is currently pending for this player: the player has either already advanced, been eliminated, or is waiting for the preceding bracket match.</p>';
     var progression = (team.round_probabilities || []).map(function (stage) {
       return '<div class="rating-lab-tennis-progression-row"><span>' + escapeHtml(stage.stage) +
@@ -2007,10 +2033,11 @@
         return;
       }
       if (isTennisDraw) {
+        var tennisNextEvent = nextEventStatus(competition.next_fixture);
         elements.predictorMetrics.innerHTML = [
           ['Current round', model.current_stage],
           ['Surface', model.surface],
-          ['Next event', competition.next_fixture ? formatDate(competition.next_fixture) : 'Awaiting official schedule'],
+          ['Next event', tennisNextEvent.summary],
           ['Forecast sample', number(model.simulations, 0) + ' locked-draw simulations']
         ].map(function (item) {
           return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
