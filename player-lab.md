@@ -175,6 +175,8 @@ description: Outcome-only historical men's and women's football player ratings a
       </div>
       <ul>
         <li>These are within-competition associations with team outcomes, not portable estimates of intrinsic talent.</li>
+        <li>The comparison chart uses sample z-scores (sample standard deviation, denominator <span class="rating-lab-formula">n − 1</span>) over players eligible under both displayed protocols. Pearson correlation describes linear agreement; Spearman correlation describes rank agreement; the solid line is an ordinary least-squares descriptive fit and the dashed line is equal standardized score.</li>
+        <li>The chart’s 95% interval is a deterministic 1,000-draw cluster bootstrap that resamples whole teams. It is a cohort-stability diagnostic, not a causal confidence interval. Because players share match evidence and both ratings are estimated from the same outcomes, the site deliberately does not report a naïve player-level hypothesis-test p-value.</li>
         <li>Players who repeatedly share the pitch remain hard to separate; ridge shrinkage and uncertainty expose rather than eliminate that problem.</li>
         <li>Lineup timestamps that overlap slightly around stoppage-time substitutions are normalized to eleven player-equivalents per side.</li>
         <li>Ratings cannot explain how a player contributed. No event or tracking surrogate is used.</li>

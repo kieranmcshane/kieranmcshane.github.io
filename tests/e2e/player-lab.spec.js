@@ -123,6 +123,23 @@ test.describe("player lab", () => {
     expect(summary.compactFlags).toBeGreaterThan(0);
   });
 
+  test("scatter publishes reproducible descriptive diagnostics", async ({
+    page,
+  }) => {
+    await gotoPlayerLab(page);
+    const chart = page.locator("#player-comparison-chart");
+    const diagnostics = chart.locator(".player-lab-chart-diagnostics");
+    await expect(diagnostics).toContainText("Paired sample");
+    await expect(diagnostics).toContainText("Pearson r");
+    await expect(diagnostics).toContainText("Spearman ρ");
+    await expect(diagnostics).toContainText("team-cluster bootstrap");
+    await expect(diagnostics).toContainText("not causal uncertainty");
+    await expect(chart.locator("line.is-identity-line")).toHaveCount(1);
+    await expect(chart.locator("line.is-fit-line")).toHaveCount(1);
+    await expect(chart.locator("text.is-x-tick")).toHaveCount(7);
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   test("switching cohort re-renders the leaderboard", async ({ page }) => {
     await gotoPlayerLab(page);
     const cohort = page.locator("#player-cohort");
@@ -311,6 +328,19 @@ test.describe("player lab", () => {
 
   test("player list @visual", async ({ page }) => {
     await gotoPlayerLab(page);
+    // The flag assets are intentionally lazy in production. Wait for the
+    // visible table flags so the visual baseline records the completed UI,
+    // not a race between screenshots and image decoding.
+    await expect
+      .poll(() =>
+        page
+          .locator(".player-lab-table .player-lab-country-flag img")
+          .evaluateAll((images) =>
+            images.length > 0 &&
+            images.every((image) => image.complete && image.naturalWidth > 0)
+          )
+      )
+      .toBe(true);
     await expect(page.locator(".player-lab-table")).toHaveScreenshot(
       "player-list.png"
     );
