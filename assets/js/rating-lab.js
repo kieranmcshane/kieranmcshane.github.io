@@ -39,6 +39,7 @@
     predictorCompetition: null,
     predictorModel: 'elo',
     predictorTeam: null,
+    settledPerformanceTeam: null,
     manifest: null,
     datasets: {}
   };
@@ -1799,7 +1800,9 @@
       '<p class="rating-lab-performance-note">The performance rating solves the exact expected-score equation against opponents held at their pre-event beliefs. The reset rank starts everyone from the selected protocol’s neutral prior and uses only this event. The chronological surprise remains actual score minus the expectation recorded before each update.</p>' + mediaCredit(team, sport);
   }
 
-  function renderPerformanceChart(rows, model, competition, sport) {
+  function renderPerformanceChart(rows, model, competition, sport, options) {
+    options = options || {};
+    var liveSettled = options.liveSettled === true;
     var rankedRows = rows.filter(function (team) {
       return Number.isFinite(team.surprise_index) && Number.isFinite(team.expected_score);
     }).slice().sort(function (a, b) {
@@ -1819,10 +1822,16 @@
     var modelLabel = state.datasets[sport].models[state.predictorModel].label;
     elements.predictorPerformanceChart.hidden = false;
     elements.predictorPerformanceChart.innerHTML =
-      '<div class="rating-lab-performance-heading"><div><p class="rating-lab-kicker">Actual versus expected</p>' +
-      '<h3 id="predictor-performance-title">Largest finished-event surprises</h3></div>' +
+      '<div class="rating-lab-performance-heading"><div><p class="rating-lab-kicker">' +
+      (liveSettled ? 'Closed records · live competition' : 'Actual versus expected') + '</p>' +
+      '<h3 id="predictor-performance-title">' +
+      (liveSettled ? 'Performance for eliminated players' : 'Largest finished-event surprises') + '</h3></div>' +
       '<p>Selected protocol: <strong>' + escapeHtml(modelLabel) + '</strong></p></div>' +
-      '<p class="rating-lab-performance-subtitle">The six largest outperformers and underperformers by signed standardized result-score residual. Solid dark bars point right; outlined light bars point left, so color is not the only cue. The complete participant table remains below.</p>' +
+      '<p class="rating-lab-performance-subtitle">' +
+      (liveSettled ?
+        'These players can no longer receive another result in this tournament, so their performance rating is already well-defined. Active players remain in forecast mode until their records close.' :
+        'The six largest outperformers and underperformers by signed standardized result-score residual. Solid dark bars point right; outlined light bars point left, so color is not the only cue. The complete participant table remains below.') +
+      '</p>' +
       '<div class="rating-lab-performance-scroll"><div class="rating-lab-performance-plot" role="group" aria-label="' +
       escapeHtml(competitionTitle(competition) + ' actual result score versus ' + modelLabel + ' expectation') + '">' +
       '<div class="rating-lab-performance-axis" aria-hidden="true"><span>Underperformed</span><span>As expected</span><span>Outperformed</span></div>' +
@@ -1833,11 +1842,15 @@
         var size = Math.min(Math.abs(team.surprise_index) / maxAbs * 50, 50).toFixed(3) + '%';
         var label = team.name + ': actual ' + number(team.points, 2) + ', expected ' + number(team.expected_score, 2) +
           ', residual ' + signedResidual + ', standardized surprise ' + signedSurprise + ', ' + team.matches + ' matches';
+        var selected = liveSettled ? team.id === state.settledPerformanceTeam : team.id === state.predictorTeam;
+        var performanceRating = (team.performance_rating_cap === 'upper' ? '≥' : team.performance_rating_cap === 'lower' ? '≤' : '') +
+          number(team.performance_rating, 2);
         return '<button type="button" class="rating-lab-performance-row' +
-          (team.id === state.predictorTeam ? ' is-selected' : '') + '" data-predictor-team="' + escapeHtml(team.id) +
+          (selected ? ' is-selected' : '') + '" ' +
+          (liveSettled ? 'data-settled-performance-team="' : 'data-predictor-team="') + escapeHtml(team.id) +
           '" aria-label="' + escapeHtml(label) + '"><span class="rating-lab-performance-name"><span class="rating-lab-performance-identity-line">' +
           entityBadge(team, sport) + '<span>' + escapeHtml(team.name) + '</span></span><small>' + team.matches +
-          ' match' + (team.matches === 1 ? '' : 'es') + ' · ' + number(team.points, 2) +
+          ' match' + (team.matches === 1 ? '' : 'es') + ' · performance ' + escapeHtml(performanceRating) + ' · ' + number(team.points, 2) +
           ' actual / ' + number(team.expected_score, 2) + ' expected</small></span><span class="rating-lab-performance-track" aria-hidden="true">' +
           '<span class="rating-lab-performance-zero"></span><span class="rating-lab-performance-bar ' +
           (positive ? 'is-outperformer' : 'is-underperformer') + '" style="--bar-size:' + size + '"></span></span>' +
@@ -1901,6 +1914,17 @@
       predictorTable.classList.add('is-completed');
       renderCompletedPerformance(view);
       return;
+    }
+    var settledModel = currentState === 'live' && competition.settled_performance &&
+      competition.settled_performance.models[state.predictorModel];
+    if (settledModel) {
+      renderPerformanceChart(
+        settledModel.participants,
+        settledModel,
+        competition,
+        view.sport,
+        { liveSettled: true }
+      );
     }
     if (competition.forecast_available === false || !model) {
       setPredictorColumns('knockout');
@@ -2514,6 +2538,7 @@
   elements.predictorCompetition.addEventListener('change', function () {
     state.predictorCompetition = elements.predictorCompetition.value;
     state.predictorTeam = null;
+    state.settledPerformanceTeam = null;
     renderPredictor();
   });
 
@@ -2522,6 +2547,7 @@
     if (!button || button.dataset.predictorModel === state.predictorModel) return;
     state.predictorModel = button.dataset.predictorModel;
     state.predictorTeam = null;
+    state.settledPerformanceTeam = null;
     setPressed(elements.predictorModelTabs, 'predictorModel', state.predictorModel);
     renderPredictor();
   });
@@ -2534,6 +2560,29 @@
   });
 
   elements.predictorPerformanceChart.addEventListener('click', function (event) {
+    var settledButton = event.target.closest('[data-settled-performance-team]');
+    if (settledButton) {
+      var view = predictorData();
+      var settledModel = view && view.competition.settled_performance &&
+        view.competition.settled_performance.models[state.predictorModel];
+      if (!settledModel) return;
+      state.settledPerformanceTeam = settledButton.dataset.settledPerformanceTeam;
+      renderPerformanceChart(
+        settledModel.participants,
+        settledModel,
+        view.competition,
+        view.sport,
+        { liveSettled: true }
+      );
+      renderPerformanceDetail(
+        settledModel.participants.find(function (team) {
+          return team.id === state.settledPerformanceTeam;
+        }),
+        settledModel,
+        view.sport
+      );
+      return;
+    }
     var button = event.target.closest('[data-predictor-team]');
     if (!button) return;
     state.predictorTeam = button.dataset.predictorTeam;

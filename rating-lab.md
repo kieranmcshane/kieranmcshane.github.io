@@ -182,7 +182,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <section class="rating-lab-predictor" id="predictor" aria-labelledby="predictor-heading">
     <p class="rating-lab-kicker">Upcoming · live · finished</p>
     <h2 id="predictor-heading">Competition forecast and performance</h2>
-    <p class="rating-lab-predictor-intro">One lifecycle covers leagues, qualifying rounds, cups, knockout tournaments, chess tournaments, and official ATP draws. Upcoming events show prior-heavy expected outcomes; live events lock the current score, table, or draw before recomputing conditional probabilities; finished events switch to protocol performance ratings and actual-versus-expected analysis. Eligible Polymarket and Kalshi winner quotes are frozen beside all four model forecasts, then receive resolved log-loss and Brier scores once the official winner is known.</p>
+    <p class="rating-lab-predictor-intro">One lifecycle covers leagues, qualifying rounds, cups, knockout tournaments, chess tournaments, and official ATP draws. Upcoming events show prior-heavy expected outcomes; live events lock the current score, table, or draw before recomputing conditional probabilities, while eliminated participants already receive closed-record performance ratings; finished events switch fully to protocol performance ratings and actual-versus-expected analysis. Eligible Polymarket and Kalshi winner quotes are frozen beside all four model forecasts, then receive resolved log-loss and Brier scores once the official winner is known.</p>
     <ol class="rating-lab-state-key" aria-label="Competition lifecycle">
       <li><strong>Upcoming</strong><span>Prior-heavy forecast</span></li>
       <li><strong>Live</strong><span>Conditional on now</span></li>

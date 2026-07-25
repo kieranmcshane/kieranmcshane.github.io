@@ -63,6 +63,7 @@ from rating_lab.pipeline import (
     _simulate_knockout,
     _simulate_qualifying_round,
     _simulate_tennis_draw,
+    _settled_competition_participants,
     _validate_football_coverage,
     _model_candidates,
     build_sport_payload,
@@ -1119,6 +1120,18 @@ h001,Hana,Theta,CZE
         self.assertAlmostEqual(sum(row["replay_change"] for row in result["participants"]), 0, places=1)
         self.assertIn("immediately before", result["surprise_method"])
 
+        beta_only = _competition_performance(
+            schedule,
+            EloModel(k=24, home=65),
+            "elo",
+            entities,
+            prior,
+            participant_ids={"football:name:beta"},
+        )
+        self.assertEqual([row["name"] for row in beta_only["participants"]], ["Beta"])
+        self.assertEqual(beta_only["participants"][0]["rank"], 1)
+        self.assertEqual(beta_only["participants"][0]["reset_rank"], 1)
+
         protocol_models = {
             "glicko2": Glicko2Model(home=65),
             "trueskill": GaussianSkillModel(advantage=1.35, draw_margin=1.35),
@@ -1149,6 +1162,35 @@ h001,Hana,Theta,CZE
                     sorted(row["reset_rank"] for row in protocol_result["participants"]),
                     list(range(1, len(protocol_result["participants"]) + 1)),
                 )
+
+    def test_live_tennis_performance_only_settles_eliminated_players(self):
+        schedule = {
+            "format": "tennis knockout draw",
+            "fixtures": [
+                {
+                    "status": "FINISHED",
+                    "home_id": "atp:alpha",
+                    "away_id": "atp:beta",
+                    "winner_id": "atp:alpha",
+                },
+                {
+                    "status": "FINISHED",
+                    "home_id": "atp:gamma",
+                    "away_id": "atp:delta",
+                    "winner_id": "atp:delta",
+                },
+                {
+                    "status": "SCHEDULED",
+                    "home_id": "atp:alpha",
+                    "away_id": "atp:delta",
+                    "winner_id": None,
+                },
+            ],
+        }
+        self.assertEqual(
+            _settled_competition_participants(schedule),
+            {"atp:beta", "atp:gamma"},
+        )
 
     def test_completed_competition_normalizes_schedule_aliases(self):
         schedule = {
