@@ -328,6 +328,19 @@ test.describe("player lab", () => {
 
   test("player list @visual", async ({ page }) => {
     await gotoPlayerLab(page);
+    // The flag assets are intentionally lazy in production. Wait for the
+    // visible table flags so the visual baseline records the completed UI,
+    // not a race between screenshots and image decoding.
+    await expect
+      .poll(() =>
+        page
+          .locator(".player-lab-table .player-lab-country-flag img")
+          .evaluateAll((images) =>
+            images.length > 0 &&
+            images.every((image) => image.complete && image.naturalWidth > 0)
+          )
+      )
+      .toBe(true);
     await expect(page.locator(".player-lab-table")).toHaveScreenshot(
       "player-list.png"
     );
