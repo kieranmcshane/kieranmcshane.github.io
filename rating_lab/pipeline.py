@@ -3256,8 +3256,9 @@ def _competition_performance(
     matches: list[Match],
     prior_model_cache: dict | None = None,
     prior_model_override=None,
+    participant_ids: set[str] | None = None,
 ) -> dict | None:
-    """Replay a completed event from its strictly pre-event rating state."""
+    """Replay sourced event results from their strictly pre-event rating state."""
     event_matches = _competition_matches(schedule, entities)
     if not event_matches:
         return None
@@ -3400,6 +3401,10 @@ def _competition_performance(
                 "score_rate": round(record["points"] / record["matches"], 4),
             }
         )
+    if participant_ids is not None:
+        rows = [row for row in rows if row["id"] in participant_ids]
+        if not rows:
+            return None
     reset_order = sorted(rows, key=lambda row: (-row["reset_rating"], row["name"]))
     reset_ranks = {row["id"]: rank for rank, row in enumerate(reset_order, 1)}
     for row in rows:
@@ -3418,6 +3423,26 @@ def _competition_performance(
         "reset_method": "Start every event participant from the selected protocol's neutral prior and replay only this competition. The reset rank is internal to the event and carries no global-strength anchor.",
         "participants": rows,
     }
+
+
+def _settled_competition_participants(schedule: dict) -> set[str]:
+    """Return participants whose event record cannot receive another result."""
+    competition_format = schedule.get("format", "")
+    if competition_format == "tennis knockout draw":
+        settled = set()
+        for fixture in schedule.get("fixtures", []):
+            if fixture.get("status") != "FINISHED" or not fixture.get("winner_id"):
+                continue
+            pair = {fixture.get("home_id"), fixture.get("away_id")} - {None}
+            settled.update(pair - {fixture["winner_id"]})
+        return settled
+    if competition_format == "two-legged qualifying round":
+        settled, _grouped = _resolved_knockout_ties(schedule)
+        return settled
+    if "knockout" in competition_format and schedule.get("knockout_fixtures"):
+        settled, _grouped = _resolved_knockout_ties(schedule)
+        return settled
+    return set()
 
 
 def _as_float(value, default: float = 0.0) -> float:
@@ -4255,6 +4280,35 @@ def _build_tournament_predictor(
                     "method": "Publish three complementary completed-event views: an exact performance rating anchored to fixed pre-event opponent beliefs, a neutral-prior reset rank based only on this event, and a chronological actual-minus-expected surprise score. The selected protocol and its tuned parameters are used throughout.",
                     "models": performance_models,
                 }
+        elif competition_state == "live":
+            settled_ids = _settled_competition_participants(schedule)
+            if settled_ids:
+                settled_models = {
+                    model_name: _competition_performance(
+                        schedule,
+                        model,
+                        model_name,
+                        entities,
+                        matches,
+                        prior_model_cache=prior_model_cache,
+                        prior_model_override=(pre_event_models or {}).get(model_name, {}).get(
+                            date.fromisoformat(schedule["first_fixture"])
+                        ),
+                        participant_ids=settled_ids,
+                    )
+                    for model_name, model in models.items()
+                }
+                if all(settled_models.values()):
+                    competition["settled_performance"] = {
+                        "status": "provisional_until_competition_finishes",
+                        "settled_participants": len(settled_ids),
+                        "method": (
+                            "Participants whose elimination is confirmed by the sourced draw receive an "
+                            "immediate closed-record performance rating. Active participants remain in the "
+                            "conditional forecast and are not ranked on incomplete tournament evidence."
+                        ),
+                        "models": settled_models,
+                    }
         competitions.append(competition)
     return {
         "format": "format-aware competition forecast",
@@ -4271,7 +4325,7 @@ def _build_tournament_predictor(
             "live": "Current score, table, or draw with conditional advancement and finishing probabilities.",
             "finished": "Performance ratings plus actual-versus-expected outperformer and underperformer analysis.",
         },
-        "performance_method": "Completed competitions publish an anchored exact performance rating, a tournament-only reset rank, and chronological actual-versus-expected surprise instead of retrospective title probabilities.",
+        "performance_method": "Completed competitions publish an anchored exact performance rating, a tournament-only reset rank, and chronological actual-versus-expected surprise instead of retrospective title probabilities. During live knockout competitions, the same closed-record calculations are published immediately for source-confirmed eliminated participants while active participants remain forecast-only.",
         "competitions": competitions,
     }
 
@@ -4603,6 +4657,20 @@ def validate_payload(payload: dict, schema: dict) -> None:
                 performance = competition.get("performance", {}).get("models", {})
                 if set(performance) != set(MODEL_NAMES):
                     raise ValueError("Finished competition is missing protocol performance ratings")
+            settled = competition.get("settled_performance")
+            if settled:
+                if competition_state != "live":
+                    raise ValueError("Settled-participant performance is only valid for live competitions")
+                if settled.get("status") != "provisional_until_competition_finishes":
+                    raise ValueError("Invalid settled-participant performance status")
+                if set(settled.get("models", {})) != set(MODEL_NAMES):
+                    raise ValueError("Live competition is missing settled-participant protocol ratings")
+                participant_counts = {
+                    len(model.get("participants", []))
+                    for model in settled["models"].values()
+                }
+                if participant_counts != {settled.get("settled_participants")}:
+                    raise ValueError("Settled-participant performance counts disagree")
         for market_key, provider in (("market_comparison", "Polymarket"), ("kalshi_comparison", "Kalshi")):
             market = predictor.get(market_key)
             if not market:
@@ -4828,7 +4896,7 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
             "availability": "Withhold title probabilities until the public source identifies a knockout field. Qualifying rounds publish only current-tie advancement probabilities.",
             "qualifying_rounds": "UEFA's official named ties and results are replayed only for the active two-leg round. Future entrants and draws are withheld until published.",
             "qualifying_scoreline_bridge": "Fit an independent-Poisson scoreline distribution to each protocol's home/draw/away probabilities for unplayed legs; use actual aggregate scores and a neutral decisive probability only when still level.",
-            "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise.",
+            "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise. In live knockout events, publish the same closed-record view immediately for source-confirmed eliminated participants; never grade active participants on incomplete evidence.",
             "market_benchmark": "Polymarket and Kalshi winner quotes are frozen beside all four protocol forecasts at the same dated snapshot. Once the official winner resolves, every forecaster is scored on the unchanged common field using categorical log loss and multiclass Brier score; market data remain comparison-only and never enter a model.",
             "market_snapshot_retention": "The latest successful quote per provider, competition, and UTC date is retained in the published sport JSON with its source hash and simultaneous model probabilities.",
             "market_quality_fields": ["captured_at", "snapshot_sha256", "raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at", "other_probability", "resolution.scores.*.log_loss", "resolution.scores.*.brier"],

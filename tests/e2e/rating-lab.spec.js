@@ -240,6 +240,196 @@ test.describe("competition switching", () => {
       page.locator('#model-tabs button[aria-pressed="true"]')
     ).toHaveAttribute("data-model", leaderboardModel);
   });
+
+  test("a live knockout shows forecasts and closed-record performance together", async ({
+    page,
+  }) => {
+    const performanceRows = [
+      {
+        id: "atp:beta",
+        name: "Beta Player",
+        rank: 1,
+        start_rating: 1900,
+        start_sigma: null,
+        start_volatility: null,
+        start_score: 1900,
+        end_rating: 1888,
+        end_sigma: null,
+        end_volatility: null,
+        performance_rating: 1842,
+        performance_rating_cap: null,
+        performance_delta: -58,
+        replay_rating: 1888,
+        replay_change: -12,
+        reset_rating: 1488,
+        reset_rank: 1,
+        matches: 1,
+        wins: 0,
+        draws: 0,
+        losses: 1,
+        points: 0,
+        expected_score: 0.42,
+        score_residual: -0.42,
+        surprise_index: -0.86,
+      },
+      {
+        id: "atp:gamma",
+        name: "Gamma Player",
+        rank: 2,
+        start_rating: 1875,
+        start_sigma: null,
+        start_volatility: null,
+        start_score: 1875,
+        end_rating: 1867,
+        end_sigma: null,
+        end_volatility: null,
+        performance_rating: 1810,
+        performance_rating_cap: null,
+        performance_delta: -65,
+        replay_rating: 1867,
+        replay_change: -8,
+        reset_rating: 1480,
+        reset_rank: 2,
+        matches: 1,
+        wins: 0,
+        draws: 0,
+        losses: 1,
+        points: 0,
+        expected_score: 0.35,
+        score_residual: -0.35,
+        surprise_index: -0.73,
+      },
+    ];
+    const forecastRows = [
+      {
+        id: "atp:alpha",
+        name: "Alpha Player",
+        rating: 2010,
+        reach_next_stage: 0.63,
+        champion: 0.63,
+        next_match: {
+          opponent_id: "atp:delta",
+          opponent_name: "Delta Player",
+          round: "Final",
+          surface: "Clay",
+          win_probability: 0.63,
+        },
+        round_probabilities: [
+          { stage: "Final", probability: 1 },
+          { stage: "Champion", probability: 0.63 },
+        ],
+        surface_rating: 1995,
+        surface_matches: 20,
+      },
+      {
+        id: "atp:delta",
+        name: "Delta Player",
+        rating: 1940,
+        reach_next_stage: 0.37,
+        champion: 0.37,
+        next_match: {
+          opponent_id: "atp:alpha",
+          opponent_name: "Alpha Player",
+          round: "Final",
+          surface: "Clay",
+          win_probability: 0.37,
+        },
+        round_probabilities: [
+          { stage: "Final", probability: 1 },
+          { stage: "Champion", probability: 0.37 },
+        ],
+        surface_rating: 1925,
+        surface_matches: 18,
+      },
+      ...performanceRows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        rating: row.start_rating,
+        reach_next_stage: 0,
+        champion: 0,
+        next_match: null,
+        round_probabilities: [
+          { stage: "Final", probability: 0 },
+          { stage: "Champion", probability: 0 },
+        ],
+        surface_rating: row.start_rating,
+        surface_matches: 12,
+      })),
+    ];
+    await routeDataFile(page, "split/tennis-core.json", (data) => {
+      const competition = {
+        id: "live-settled-test",
+        label: "Live Settled Test",
+        season: "2026",
+        source_url: "https://example.test/draw",
+        snapshot_sha256: "a".repeat(64),
+        format: "tennis knockout draw",
+        forecast_available: true,
+        state: "live",
+        status: "live",
+        state_view: "conditional_forecast",
+        state_message: "Two sourced results are locked.",
+        completed_matches: 2,
+        remaining_matches: 1,
+        total_matches: 3,
+        first_fixture: "2026-07-20",
+        last_fixture: "2026-07-26",
+        next_fixture: "2026-07-26",
+        surface: "Clay",
+        models: {},
+        settled_performance: {
+          status: "provisional_until_competition_finishes",
+          settled_participants: 2,
+          method: "Closed records only.",
+          models: {},
+        },
+      };
+      for (const model of ["elo", "glicko2", "trueskill", "robust"]) {
+        competition.models[model] = {
+          forecast_type: "tennis_draw",
+          completed_matches: 2,
+          current_stage: "Final",
+          surface: "Clay",
+          simulations: 1000,
+          seed: "test",
+          participants: forecastRows,
+        };
+        competition.settled_performance.models[model] = {
+          rating_type: model === "elo" ? "elo" : "conservative_mu_minus_3_sigma",
+          results: 2,
+          surprise_method: "Chronological actual minus expected.",
+          participants: performanceRows,
+        };
+      }
+      data.tournament_predictor = {
+        simulations_per_model: 1000,
+        tennis_draw: "Published draw is locked.",
+        knockout_draw: "Published draw is locked.",
+        availability_rule: "Published fields only.",
+        competitions: [competition],
+      };
+    });
+
+    await gotoRatingLab(page);
+    await page.locator("#predictor-competition").selectOption("live-settled-test");
+    await expect(page.locator("#predictor-state")).toContainText("Live");
+    await expect(page.locator("#predictor-caption")).toContainText(
+      "surface-aware progression"
+    );
+    await expect(
+      page.locator("#predictor-performance-title")
+    ).toHaveText("Performance for eliminated players");
+    const settledRows = page.locator("[data-settled-performance-team]");
+    await expect(settledRows).toHaveCount(2);
+    await settledRows.filter({ hasText: "Beta Player" }).click();
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "Anchored performance rating"
+    );
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "Beta Player"
+    );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
 });
 
 test.describe("sticky controls", () => {
