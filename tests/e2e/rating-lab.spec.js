@@ -416,6 +416,19 @@ test.describe("competition switching", () => {
     await expect(page.locator("#predictor-caption")).toContainText(
       "surface-aware progression"
     );
+    await expect(page.locator("#predictor-metrics")).toContainText(
+      "Next event"
+    );
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "next event"
+    );
+    await expect(page.locator("#predictor-detail time")).toHaveAttribute(
+      "datetime",
+      "2026-07-26"
+    );
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "exact start time not published"
+    );
     await expect(
       page.locator("#predictor-performance-title")
     ).toHaveText("Performance for eliminated players");
