@@ -57,19 +57,52 @@ test.describe("page load", () => {
   }) => {
     await gotoRatingLab(page);
     if (isMobile(page)) {
-      await expect(page.locator("#ranking-body tr").first()).toBeVisible();
+      await expect(
+        page.locator("#ranking-body tr").first().locator(".rating-lab-identity")
+      ).toBeVisible();
       return;
     }
-    const headerBox = await page.locator("#ranking-table thead").boundingBox();
-    const firstRowBox = await page
-      .locator("#ranking-body tr")
-      .first()
+    const headerCell = page.locator("#ranking-table thead th").first();
+    await headerCell.evaluate((cell) => {
+      const target = cell.getBoundingClientRect().top + window.scrollY - 46;
+      window.scrollTo(0, Math.max(0, target));
+    });
+    const headerBox = await headerCell.boundingBox();
+    const firstRow = page.locator("#ranking-body tr").first();
+    const firstRowBox = await firstRow.boundingBox();
+    const identityBox = await firstRow.locator(".rating-lab-identity").boundingBox();
+    const nameBox = await firstRow
+      .locator(".rating-lab-entity-name-text")
       .boundingBox();
     expect(headerBox).not.toBeNull();
     expect(firstRowBox).not.toBeNull();
+    expect(identityBox).not.toBeNull();
+    expect(nameBox).not.toBeNull();
     expect(firstRowBox.y).toBeGreaterThanOrEqual(
       headerBox.y + headerBox.height - 0.5
     );
+    expect(identityBox.y).toBeGreaterThanOrEqual(
+      headerBox.y + headerBox.height + 6
+    );
+    expect(nameBox.y).toBeGreaterThanOrEqual(
+      headerBox.y + headerBox.height + 6
+    );
+  });
+
+  test("opening the inspector preserves the full first identity", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page);
+    if (isMobile(page)) return;
+    const firstRow = page.locator("#ranking-body tr").first();
+    await firstRow.locator("[data-select]").click();
+    const name = firstRow.locator(".rating-lab-entity-name-text");
+    await expect(name).toHaveText("Jannik Sinner");
+    const clipping = await name.evaluate((element) => ({
+      horizontal: element.scrollWidth > element.clientWidth + 1,
+      vertical: element.scrollHeight > element.clientHeight + 1,
+    }));
+    expect(clipping).toEqual({ horizontal: false, vertical: false });
   });
 
   test("shows the error notice when a sport feed fails", async ({ page }) => {

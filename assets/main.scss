@@ -435,6 +435,13 @@
     border-bottom: 0;
   }
 
+  // Give the first identity its own paint clearance below the sticky header.
+  // Measuring only the <tr> boundary missed glyph/avatar clipping at this seam.
+  #ranking-table tbody > tr:first-child > th,
+  #ranking-table tbody > tr:first-child > td {
+    padding-top: 0.82rem;
+  }
+
   #ranking-table .rating-lab-rank {
     padding-right: 0.45rem;
     color: #71808c;
@@ -3183,6 +3190,10 @@ body:has(.rating-lab) .post-content {
   overflow-x: auto;
 }
 
+.rating-lab-grid > .rating-lab-table-wrap {
+  container-type: inline-size;
+}
+
 .rating-lab-table {
   width: 100%;
   margin: 0;
@@ -3301,6 +3312,53 @@ body:has(.rating-lab) .post-content {
   min-width: 0;
   gap: 0.34rem;
   align-items: center;
+}
+
+.rating-lab-entity-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The inspector can leave a desktop leaderboard too narrow for identities,
+// even when the viewport itself is wide. Prioritise the player/team name over
+// a redundant mini trend chart at the actual table-container width.
+@container (max-width: 47rem) {
+  #ranking-table .rating-lab-trend-column,
+  #ranking-table .rating-lab-recent-column {
+    display: none;
+  }
+
+  #ranking-table:not(.has-uncertainty) th:nth-child(2),
+  #ranking-table:not(.has-uncertainty) td:nth-child(2) {
+    width: 58%;
+  }
+
+  #ranking-table:not(.has-uncertainty) .rating-lab-rating-column {
+    width: 17%;
+  }
+
+  #ranking-table:not(.has-uncertainty) .rating-lab-change-column {
+    width: 19%;
+  }
+
+  #ranking-table.has-uncertainty th:nth-child(2),
+  #ranking-table.has-uncertainty td:nth-child(2) {
+    width: 52%;
+  }
+
+  #ranking-table.has-uncertainty .rating-lab-rating-column {
+    width: 14%;
+  }
+
+  #ranking-table.has-uncertainty .rating-lab-uncertainty-column {
+    width: 15%;
+  }
+
+  #ranking-table.has-uncertainty .rating-lab-change-column {
+    width: 14%;
+  }
 }
 
 .rating-lab-country-flag {
