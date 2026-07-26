@@ -7880,7 +7880,17 @@ body:has(.explain-lab) .post-header {
 .player-lab-point.is-compact-country-flag:hover > span > .player-lab-country-flag,
 .player-lab-point.is-compact-country-flag:focus-visible > span > .player-lab-country-flag,
 .player-lab-point.is-compact-country-flag.is-selected > span > .player-lab-country-flag {
-  border-radius: 2px;
+  border-radius: 50%;
+}
+
+.player-lab-point.is-compact-country-flag:hover > span,
+.player-lab-point.is-compact-country-flag:focus-visible > span,
+.player-lab-point.is-compact-country-flag.is-selected > span {
+  width: 15px;
+  height: 15px;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 50%;
 }
 
 .player-lab-point > small {
