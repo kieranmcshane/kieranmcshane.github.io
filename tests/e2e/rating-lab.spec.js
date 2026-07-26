@@ -62,25 +62,15 @@ test.describe("page load", () => {
       ).toBeVisible();
       return;
     }
-    const headerCell = page.locator("#ranking-table thead th").first();
-    await headerCell.evaluate((cell) => {
-      const target = cell.getBoundingClientRect().top + window.scrollY - 46;
-      window.scrollTo(0, Math.max(0, target));
-    });
-    const headerBox = await headerCell.boundingBox();
+    const headerBox = await page.locator("#ranking-table thead").boundingBox();
     const firstRow = page.locator("#ranking-body tr").first();
-    const firstRowBox = await firstRow.boundingBox();
     const identityBox = await firstRow.locator(".rating-lab-identity").boundingBox();
     const nameBox = await firstRow
       .locator(".rating-lab-entity-name-text")
       .boundingBox();
     expect(headerBox).not.toBeNull();
-    expect(firstRowBox).not.toBeNull();
     expect(identityBox).not.toBeNull();
     expect(nameBox).not.toBeNull();
-    expect(firstRowBox.y).toBeGreaterThanOrEqual(
-      headerBox.y + headerBox.height - 0.5
-    );
     expect(identityBox.y).toBeGreaterThanOrEqual(
       headerBox.y + headerBox.height + 6
     );

@@ -439,7 +439,7 @@
   // Measuring only the <tr> boundary missed glyph/avatar clipping at this seam.
   #ranking-table tbody > tr:first-child > th,
   #ranking-table tbody > tr:first-child > td {
-    padding-top: 0.82rem;
+    padding-top: 1.35rem;
   }
 
   #ranking-table .rating-lab-rank {
@@ -3199,6 +3199,7 @@ body:has(.rating-lab) .post-content {
   margin: 0;
   border-collapse: collapse;
   font-size: 0.84rem;
+  scroll-margin-top: 6rem;
 }
 
 .rating-lab-table caption {
