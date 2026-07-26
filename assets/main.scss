@@ -389,6 +389,7 @@
   }
 
   #ranking-table thead {
+    position: static;
     top: 46px;
     background: #f4f6f7;
   }
@@ -404,6 +405,9 @@
   }
 
   #ranking-table thead th {
+    position: sticky;
+    z-index: 2;
+    top: 46px;
     height: 42px;
     color: #65727d;
     background: #f4f6f7;

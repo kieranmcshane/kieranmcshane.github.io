@@ -52,6 +52,26 @@ test.describe("page load", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("the sticky header never covers the first ranking row", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page);
+    if (isMobile(page)) {
+      await expect(page.locator("#ranking-body tr").first()).toBeVisible();
+      return;
+    }
+    const headerBox = await page.locator("#ranking-table thead").boundingBox();
+    const firstRowBox = await page
+      .locator("#ranking-body tr")
+      .first()
+      .boundingBox();
+    expect(headerBox).not.toBeNull();
+    expect(firstRowBox).not.toBeNull();
+    expect(firstRowBox.y).toBeGreaterThanOrEqual(
+      headerBox.y + headerBox.height - 0.5
+    );
+  });
+
   test("shows the error notice when a sport feed fails", async ({ page }) => {
     await freezeClock(page);
     // The page loads the split core first and falls back to the full sport
@@ -480,10 +500,15 @@ test.describe("sticky controls", () => {
     // Desktop pins the nav with sticky; the mobile layout uses fixed.
     expect(["sticky", "fixed"]).toContain(position);
 
-    const theadPosition = await page
-      .locator("#ranking-table thead")
-      .evaluate((el) => getComputedStyle(el).position);
-    expect(theadPosition).toBe("sticky");
+    if (isMobile(page)) {
+      await expect(page.locator("#ranking-table thead")).toBeHidden();
+    } else {
+      const headerCellPosition = await page
+        .locator("#ranking-table thead th")
+        .first()
+        .evaluate((el) => getComputedStyle(el).position);
+      expect(headerCellPosition).toBe("sticky");
+    }
 
     // After scrolling deep into the page the nav must stay pinned to a
     // viewport edge — top on desktop, bottom bar on mobile.
