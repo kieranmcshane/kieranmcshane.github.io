@@ -120,7 +120,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     </div>
 
     <div class="rating-lab-grid">
-      <div class="rating-lab-table-wrap">
+    <div class="rating-lab-table-wrap rating-lab-ranking-wrap">
         <table class="rating-lab-table" id="ranking-table">
           <caption id="ranking-caption">Current rankings</caption>
           <thead>

@@ -3194,6 +3194,15 @@ body:has(.rating-lab) .post-content {
   container-type: inline-size;
 }
 
+@media (min-width: 651px) {
+  // A horizontal overflow container traps position: sticky on the table
+  // header. The leaderboard now fits by column priority, so let its header
+  // stick to the viewport immediately below the local navigation.
+  .rating-lab-ranking-wrap {
+    overflow: visible;
+  }
+}
+
 .rating-lab-table {
   width: 100%;
   margin: 0;
