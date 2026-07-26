@@ -1807,8 +1807,9 @@ class SplitAssetTests(unittest.TestCase):
         self.assertIn("full_name", script)
         # Withheld banner renders as a collapsed summary.
         self.assertIn("withheld</strong> — why", script)
-        # Scatter overplotting and keyboard controls.
-        self.assertIn("FLAG_BUDGET", script)
+        # Scatter nationality markers use one consistent circular treatment.
+        self.assertIn("Circular flags show source-listed nationality", script)
+        self.assertNotIn("FLAG_BUDGET", script)
         self.assertIn("tabindex=\"' + (point.id === tabbableId", script)
         # No render-blocking or hotlinked external dependencies.
         self.assertIn("script async src=\"https://cdn.jsdelivr.net/npm/mathjax@3", head)

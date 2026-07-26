@@ -719,14 +719,8 @@
       });
     }
     var labelIds = labels.reduce(function (items, point) { items[point.id] = true; return items; }, {});
-    // Overplotting control: every sourced nationality remains visible. With a
-    // large cohort, central markers use compact circular flag crops while the
-    // most extreme points retain the larger rectangular treatment.
-    var FLAG_BUDGET = 100;
-    var prominentFlagIds = null;
-    if (points.length > 120) {
-      prominentFlagIds = byExtremity.slice(0, FLAG_BUDGET).reduce(function (items, point) { items[point.id] = true; return items; }, {});
-    }
+    // Every sourced nationality remains visible using one circular marker
+    // treatment. Rectangular flags remain reserved for prose and table rows.
     // Roving tabindex: the chart is one tab stop; arrow keys walk the markers.
     var tabbableId = points.some(function (point) { return point.id === state.selected; })
       ? state.selected
@@ -737,7 +731,7 @@
     var circles = points.map(function (point) {
       var selected = point.id === state.selected ? ' is-selected' : '';
       var flag = playerFlag(point.country, 'is-chart-flag', true);
-      var compact = flag && prominentFlagIds && !prominentFlagIds[point.id] ? ' is-compact-country-flag' : '';
+      var compact = flag ? ' is-compact-country-flag' : '';
       var pointX = point.px, pointY = point.py;
       var selectionCard = selected ? chartSelectionCard(point) : '';
       return '<button type="button" class="player-lab-point' + (flag ? ' has-country-flag' : '') + compact + selected + '" data-player-id="' + escapeHtml(point.id) +
@@ -774,7 +768,7 @@
       '<p>Full eligible paired cohort. ' + diagnosticScope + '</p></div>' +
       '<div class="player-lab-chart-legend" aria-label="Chart line legend"><span><i class="is-identity"></i>Equal standardized score</span><span><i class="is-fit"></i>OLS fit</span></div>' +
       '<p class="player-lab-chart-key">' +
-      (prominentFlagIds ? 'Compact flags preserve nationality in the dense middle; larger flags mark the extremes · ' : 'Source-listed nationality · ') +
+      'Circular flags show source-listed nationality · ' +
       'sample z-scores use n − 1 · search a country to isolate it · search changes displayed points, not diagnostics · select a marker for both ranks</p><div class="player-lab-chart-frame" style="--chart-width:' + width + 'px;--chart-height:' + height + 'px">' +
       '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Scatter plot comparing standardized Lineup TrueSkill and ' + escapeHtml(comparisonLabel) + ' scores">' +
       grid +

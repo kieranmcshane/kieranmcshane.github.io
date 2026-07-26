@@ -115,12 +115,19 @@ test.describe("player lab", () => {
         compactFlags: chart.querySelectorAll(
           ".player-lab-point.is-compact-country-flag"
         ).length,
+        nonCircularFlags: sourced
+          .map((point) => point.querySelector(":scope > span"))
+          .filter((marker) => {
+            const style = getComputedStyle(marker);
+            return style.borderRadius !== "50%" || style.width !== style.height;
+          }).length,
       };
     });
     expect(summary.sourced).toBeGreaterThan(100);
     expect(summary.missingMarkerFlags).toEqual([]);
     expect(summary.labelFlags).toBe(0);
-    expect(summary.compactFlags).toBeGreaterThan(0);
+    expect(summary.compactFlags).toBe(summary.sourced);
+    expect(summary.nonCircularFlags).toBe(0);
   });
 
   test("scatter publishes reproducible descriptive diagnostics", async ({
