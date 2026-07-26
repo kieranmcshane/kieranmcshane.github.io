@@ -226,9 +226,9 @@ def individual_contribution_protocol() -> dict:
         },
         "source_assessment": {
             "statsbomb_open_data": "Complete declared historical Premier League 2015/16, Euro 2024, World Cup 2022, Liga F and Women's Super League cohorts are published. Newer men's domestic-league entries in the open archive are partial club slices and are not mislabeled as full seasons.",
-            "api_football": "Premier League 2022/23 through 2025/26 and World Cup 2026 are evaluated independently. A league season becomes eligible only when all 380 completed fixtures pass stable-ID, two-starting-lineup, player-minute, substitution-event and reproduced-score gates; World Cup 2026 requires all 104. Provider responses remain private, while derived ratings record coverage, retrieval metadata and the response snapshot hash.",
+            "api_football": "Premier League 2022/23 through 2025/26 and World Cup 2026 are evaluated independently. A league season becomes eligible only when all 380 completed fixtures pass stable-ID, two-starting-lineup, player-minute, substitution-event and reproduced-score gates; World Cup 2026 requires all 104. Validated finished-cohort responses are cached and may be reused when a daily quota is exhausted. Provider responses remain private, while derived ratings record coverage, retrieval metadata and the response snapshot hash.",
             "football_data_org": "Fixtures and results remain the primary club feed, but its configured coverage is not used for historical player attribution.",
-            "openfootball_fallback": "Results and fixtures only; cannot support player attribution.",
+            "openfootball_fallback": "Automatic CC0 fallback for team results and fixtures when the primary feed is unavailable or incomplete. It cannot support player attribution.",
         },
         "publication_rule": "Publish only declared cohorts that pass every gate; never imply that a historical cohort is a live player ranking.",
     }
@@ -241,6 +241,7 @@ def _get(
     api_football_key: str | None = None,
     attempts: int = 3,
     cache_ttl: int = 21_600,
+    stale_if_error: bool = False,
 ) -> bytes:
     global _football_data_last_request
     token = token.strip() if token and token.strip() else None
@@ -285,8 +286,10 @@ def _get(
                 cache_file.parent.mkdir(parents=True, exist_ok=True)
                 cache_file.write_bytes(body)
             return body
-        except (HTTPError, URLError, TimeoutError) as error:
+        except (HTTPError, URLError, TimeoutError, RuntimeError) as error:
             last_error = error
+            if stale_if_error and cache_file and cache_file.exists():
+                return cache_file.read_bytes()
             if attempt + 1 < attempts:
                 retry_after = 0.0
                 if isinstance(error, HTTPError) and error.code == 429:
@@ -1100,9 +1103,9 @@ def _validate_football_coverage(
         )
 
 
-def fetch_football(token: str | None, start_year: int = 2020) -> tuple[list[Match], dict, dict]:
-    if not token:
-        return fetch_open_football(start_year)
+def _fetch_football_data(
+    token: str, start_year: int = 2020
+) -> tuple[list[Match], dict, dict]:
     current_year = datetime.now(timezone.utc).year
     matches: list[Match] = []
     entities: dict[str, dict] = {}
@@ -1169,8 +1172,32 @@ def fetch_football(token: str | None, start_year: int = 2020) -> tuple[list[Matc
     return matches, entities, meta
 
 
+def fetch_football(
+    token: str | None, start_year: int = 2020
+) -> tuple[list[Match], dict, dict]:
+    if not token:
+        return fetch_open_football(start_year)
+    try:
+        return _fetch_football_data(token, start_year)
+    except (RuntimeError, json.JSONDecodeError):
+        matches, entities, meta = fetch_open_football(start_year)
+        meta.update(
+            {
+                "source": "OpenFootball (automatic fallback)",
+                "primary_source": "football-data.org",
+                "source_status": "fallback",
+                "fallback_reason": "primary_source_unavailable_or_incomplete",
+                "fallback_policy": (
+                    "CC0 structured fixtures and results only. This fallback is "
+                    "never used to infer individual-player contribution."
+                ),
+            }
+        )
+        return matches, entities, meta
+
+
 def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict]:
-    """Keyless development fallback; production uses football-data.org."""
+    """Credential-free CC0 fallback for team fixtures and results."""
     current_year = datetime.now(timezone.utc).year
     matches: list[Match] = []
     entities: dict[str, dict] = {}
@@ -1207,7 +1234,7 @@ def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict
     if not matches:
         raise RuntimeError("OpenFootball fallback returned no usable matches")
     meta = {
-        "source": "OpenFootball (development fallback)",
+        "source": "OpenFootball (credential-free fallback)",
         "source_url": "https://github.com/openfootball/football.json",
         "license": "CC0 1.0",
         "latest_result": latest.isoformat() if latest else None,

@@ -201,7 +201,7 @@ description: Outcome-only historical men's and women's football player ratings a
 
     <div class="player-lab-attribution">
       <img src="{{ '/assets/images/statsbomb-logo.jpg' | relative_url }}" alt="StatsBomb">
-      <p><strong>Sources are declared per cohort.</strong> StatsBomb Open Data supplies the reproducible historical baseline. API-Football supplies candidate recent Premier League seasons and World Cup 2026; each season is published independently only after every expected match passes the lineup, substitution, minutes, event-score and identifier gates. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata and a response snapshot hash.</p>
+      <p><strong>Sources are declared per cohort.</strong> StatsBomb Open Data supplies the reproducible historical baseline. API-Football supplies candidate recent Premier League seasons and World Cup 2026; each season is published independently only after every expected match passes the lineup, substitution, minutes, event-score and identifier gates. Finished-cohort responses are cached after validation and can be reused if a later build reaches the provider quota. OpenFootball may replace unavailable team fixtures and results, but never the player-level evidence. Under the <a href="https://api-sports.io/terms">provider terms</a>, responses stay in the private build cache; the public payload contains derived ratings, audit coverage, retrieval metadata and a response snapshot hash.</p>
     </div>
   </section>
 </div>

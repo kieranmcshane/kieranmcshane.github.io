@@ -1892,7 +1892,12 @@ def _build_cohort(definition: dict, fetch: Callable[..., bytes]) -> tuple[dict, 
 def _api_football_json(
     fetch: Callable[..., bytes], url: str, api_key: str, snapshot
 ) -> dict:
-    body = fetch(url, api_football_key=api_key, cache_ttl=35 * 86_400)
+    body = fetch(
+        url,
+        api_football_key=api_key,
+        cache_ttl=10 * 365 * 86_400,
+        stale_if_error=True,
+    )
     snapshot.update(body)
     payload = json.loads(body)
     errors = payload.get("errors")

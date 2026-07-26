@@ -4,10 +4,13 @@ from datetime import date, timedelta
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import tempfile
+import time
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 from rating_lab.player_models import LineupTrueSkill
@@ -41,6 +44,7 @@ from rating_lab.pipeline import (
     _build_tournament_predictor,
     _finalize_market_comparison,
     _football_data_crest_media,
+    fetch_football,
     _get,
     _kalshi_event_snapshot,
     _market_identity_tokens,
@@ -199,6 +203,50 @@ class PipelineTests(unittest.TestCase):
         headers = {name.casefold(): value for name, value in request.header_items()}
         self.assertEqual(headers["x-auth-token"], "football-data-token")
         self.assertEqual(headers["x-apisports-key"], "api-football-key")
+
+    def test_stale_validated_cache_is_reused_after_rate_limit(self):
+        url = "https://v3.football.api-sports.io/fixtures?id=123"
+        cached = b'{"errors":{},"response":[{"fixture":{"id":123}}]}'
+        with tempfile.TemporaryDirectory() as cache_dir:
+            cache_file = Path(cache_dir) / hashlib.sha256(url.encode()).hexdigest()
+            cache_file.write_bytes(cached)
+            old = time.time() - 60
+            os.utime(cache_file, (old, old))
+            rate_limit = HTTPError(url, 429, "quota exhausted", {"Retry-After": "0"}, None)
+            with patch.dict(os.environ, {"RATING_LAB_CACHE_DIR": cache_dir}), patch(
+                "rating_lab.pipeline.urlopen", side_effect=rate_limit
+            ):
+                body = _get(
+                    url,
+                    api_football_key="secret",
+                    attempts=1,
+                    cache_ttl=0,
+                    stale_if_error=True,
+                )
+        self.assertEqual(body, cached)
+
+    def test_primary_football_failure_uses_declared_openfootball_fallback(self):
+        fallback = (
+            [Match(date(2026, 1, 1), "a", "b", 1.0)],
+            {"a": {"name": "A"}, "b": {"name": "B"}},
+            {
+                "source": "OpenFootball (credential-free fallback)",
+                "source_url": "https://github.com/openfootball/football.json",
+                "license": "CC0 1.0",
+            },
+        )
+        with patch(
+            "rating_lab.pipeline._fetch_football_data",
+            side_effect=RuntimeError("quota"),
+        ), patch("rating_lab.pipeline.fetch_open_football", return_value=fallback):
+            matches, entities, meta = fetch_football("secret", 2023)
+        self.assertEqual(matches, fallback[0])
+        self.assertEqual(entities, fallback[1])
+        self.assertEqual(meta["source"], "OpenFootball (automatic fallback)")
+        self.assertEqual(meta["source_status"], "fallback")
+        self.assertEqual(meta["primary_source"], "football-data.org")
+        self.assertNotIn("quota", json.dumps(meta))
+        self.assertIn("never used", meta["fallback_policy"])
 
     def test_context_parameters_cover_chess_color_and_tennis_surface(self):
         self.assertTrue(all(candidate["home"] == 35.0 for candidate in _model_candidates("chess", "elo")))
