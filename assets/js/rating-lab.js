@@ -697,10 +697,10 @@
     if (activeSort) activeSort.closest('th').setAttribute('aria-sort', state.direction === 1 ? 'ascending' : 'descending');
   }
 
-  function historyChart(series, label) {
+  function historyChart(series, label, historyEvents) {
     var usable = series.filter(function (item) { return item.points && item.points.length > 1; });
     if (!usable.length) return '<p class="rating-lab-detail-placeholder">Not enough history to chart yet.</p>';
-    var width = 380, height = 178, left = 43, right = 8, top = 10, bottom = 28;
+    var width = 380, height = 194, left = 43, right = 8, top = 10, bottom = 44;
     var all = usable.reduce(function (items, item) { return items.concat(item.points); }, []);
     var values = all.map(function (point) { return point[1]; });
     var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
@@ -742,6 +742,25 @@
         '" text-anchor="' + (index === 0 ? 'start' : index === 2 ? 'end' : 'middle') + '">' +
         escapeHtml(new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' }).format(new Date(date + 'T12:00:00Z'))) + '</text>';
     }).join('');
+    var lastEventLabelX = -Infinity;
+    var eventMarks = (historyEvents || []).filter(function (item) {
+      var time = new Date(item.date + 'T12:00:00Z').getTime();
+      return time >= firstDate && time <= lastDate;
+    }).map(function (item) {
+      var eventX = x(item.date);
+      var showLabel = eventX - lastEventLabelX >= 31;
+      if (showLabel) lastEventLabelX = eventX;
+      var year = String(item.season || item.date.slice(0, 4)).slice(-2);
+      var eventLabel = item.short_label + ' ’' + year;
+      var accessible = item.label + ' ' + (item.season || '') + ' · ' + item.result;
+      return '<g class="rating-lab-history-event" tabindex="0" role="button" data-history-event data-date="' +
+        escapeHtml(item.date) + '" aria-label="' + escapeHtml(accessible) + '">' +
+        '<line x1="' + eventX.toFixed(1) + '" y1="' + (height - bottom - 3) + '" x2="' + eventX.toFixed(1) +
+        '" y2="' + (height - bottom + 7) + '"></line><circle cx="' + eventX.toFixed(1) + '" cy="' +
+        (height - bottom) + '" r="3"></circle>' + (showLabel ? '<text x="' + eventX.toFixed(1) + '" y="' +
+        (height - bottom + 18) + '" text-anchor="middle">' + escapeHtml(eventLabel) + '</text>' : '') +
+        '<title>' + escapeHtml(accessible) + '</title></g>';
+    }).join('');
     var legend = usable.length > 1 ? '<div class="rating-lab-chart-legend">' + usable.map(function (item, index) {
       return '<span><i class="rating-lab-series-' + (index + 1) + '"></i>' + escapeHtml(item.name) + '</span>';
     }).join('') + '</div>' : '';
@@ -750,10 +769,12 @@
       '<line class="rating-lab-crosshair" x1="0" y1="' + top + '" x2="0" y2="' + (height - bottom) + '"></line>' +
       '<rect class="rating-lab-chart-surface" x="' + left + '" y="' + top + '" width="' + (width - left - right) +
       '" height="' + (height - top - bottom) + '" tabindex="0" data-chart-surface aria-label="Inspect ' +
-      escapeHtml(label) + '. Move across the chart, tap, or use the left and right arrow keys."></rect></svg>' +
+      escapeHtml(label) + '. Move across the chart, tap, or use the left and right arrow keys."></rect>' + eventMarks + '</svg>' +
       '<div class="rating-lab-chart-tooltip" role="presentation" hidden></div></div>' +
       '<p class="rating-lab-chart-readout" aria-live="polite"><span class="rating-lab-chart-readout-pointer">Move across the chart, tap, or use ← → to inspect each update.</span>' +
-      '<span class="rating-lab-chart-readout-touch">Tap the chart to inspect each update.</span></p>' + legend + '</div>';
+      '<span class="rating-lab-chart-readout-touch">Tap the chart to inspect each update.</span></p>' +
+      (eventMarks ? '<p class="rating-lab-history-event-note">Major-event ticks use the first covered match date; select one for its W–D–L record.</p>' : '') +
+      legend + '</div>';
   }
 
   function chartEntries(chartWrap) {
@@ -897,7 +918,7 @@
       provisional +
       '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
       (isPinned ? 'true' : 'false') + '">' + (isPinned ? 'Pinned for comparison' : 'Pin for comparison') + '</button>' +
-      historyChart([{ name: row.name, points: row.history }], row.name + ' rating history') +
+      historyChart([{ name: row.name, points: row.history }], row.name + ' rating history', row.history_events) +
       '<p class="rating-lab-inspector-label">Across all four models</p><table class="rating-lab-model-compare"><thead><tr><th>Model</th><th>Rank</th><th>Score</th><th>Uncertainty</th></tr></thead><tbody>' +
       crossModel + '</tbody></table>' + distribution(row, rows) +
       '<dl><div><dt>Last played</dt><dd>' + formatDate(row.last_played) + '</dd></div><div><dt>Recent matches</dt><dd>' + row.recent_matches + '</dd></div><div><dt>All matches</dt><dd>' + row.matches + '</dd></div>' +
@@ -2501,9 +2522,14 @@
   });
 
   elements.detail.addEventListener('click', function (event) {
+    var historyEvent = event.target.closest('[data-history-event]');
     var pin = event.target.closest('[data-pin]');
     var unpin = event.target.closest('[data-unpin]');
-    if (pin) {
+    if (historyEvent) {
+      var chartWrap = historyEvent.closest('.rating-lab-chart-wrap');
+      selectChartDate(chartWrap, historyEvent.dataset.date);
+      chartWrap.querySelector('.rating-lab-chart-readout').textContent = historyEvent.getAttribute('aria-label');
+    } else if (pin) {
       var index = state.pinned.indexOf(pin.dataset.pin);
       if (index === -1) {
         if (state.pinned.length === 2) state.pinned.shift();
@@ -2547,6 +2573,12 @@
   });
 
   elements.detail.addEventListener('keydown', function (event) {
+    var historyEvent = event.target.closest('[data-history-event]');
+    if (historyEvent && ['Enter', ' '].indexOf(event.key) !== -1) {
+      event.preventDefault();
+      historyEvent.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      return;
+    }
     var surface = event.target.closest('[data-chart-surface]');
     if (!surface || ['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(event.key) === -1) return;
     event.preventDefault();

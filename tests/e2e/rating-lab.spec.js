@@ -151,6 +151,53 @@ test.describe("A vs B state synchronization", () => {
 });
 
 test.describe("chart selection", () => {
+  test("major competitions appear on the rating-history x-axis", async ({
+    page,
+  }) => {
+    await routeDataFile(page, "split/tennis-rankings-elo.json", (payload) => {
+      const row = payload.rankings[0];
+      row.history_events = [
+        {
+          date: row.history[2][0],
+          label: "Australian Open",
+          short_label: "AO",
+          season: "2024",
+          matches: 7,
+          wins: 7,
+          draws: 0,
+          losses: 0,
+          result: "7W–0L",
+        },
+        {
+          date: row.history[row.history.length - 3][0],
+          label: "Wimbledon",
+          short_label: "W",
+          season: "2025",
+          matches: 6,
+          wins: 5,
+          draws: 0,
+          losses: 1,
+          result: "5W–1L",
+        },
+      ];
+    });
+    await gotoRatingLab(page);
+    await page
+      .locator("#ranking-body button.rating-lab-entity")
+      .first()
+      .click();
+    const events = page.locator("#rating-detail [data-history-event]");
+    await expect(events).toHaveCount(2);
+    await expect(events.first()).toHaveAttribute(
+      "aria-label",
+      /Australian Open 2024 · 7W–0L/
+    );
+    await events.first().click();
+    await expect(
+      page.locator("#rating-detail .rating-lab-chart-readout")
+    ).toContainText("Australian Open 2024 · 7W–0L");
+  });
+
   test("selecting a leaderboard entity renders its rating history chart", async ({
     page,
   }) => {
