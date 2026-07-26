@@ -48,6 +48,7 @@ from rating_lab.pipeline import (
     _get,
     _kalshi_event_snapshot,
     _market_identity_tokens,
+    _major_history_events,
     _metrics,
     _merge_schedule_media,
     _merge_schedule_results,
@@ -181,6 +182,19 @@ class RatingModelTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_major_history_events_include_slam_records_and_exclude_minor_events(self):
+        matches = [
+            Match(date(2026, 1, 12), "a", "b", 1.0, "Australian Open", "2026"),
+            Match(date(2026, 1, 14), "a", "c", 0.0, "Australian Open", "2026"),
+            Match(date(2026, 2, 2), "a", "b", 1.0, "Montpellier", "2026"),
+        ]
+        events = _major_history_events(matches, "tennis", {"a", "b", "c"})
+        self.assertEqual(len(events["a"]), 1)
+        self.assertEqual(events["a"][0]["short_label"], "AO")
+        self.assertEqual(events["a"][0]["date"], "2026-01-12")
+        self.assertEqual(events["a"][0]["result"], "1W–1L")
+        self.assertEqual(events["b"][0]["result"], "0W–1L")
+
     def test_http_credentials_strip_accidental_surrounding_whitespace(self):
         class Response:
             def __enter__(self):
@@ -1655,7 +1669,7 @@ class SplitAssetTests(unittest.TestCase):
     @staticmethod
     def _sport_payload(sport: str) -> dict:
         return {
-            "schema_version": "1.15.0",
+            "schema_version": "1.16.0",
             "sport": sport,
             "generated_at": "2026-07-23T22:01:36+00:00",
             "models": {

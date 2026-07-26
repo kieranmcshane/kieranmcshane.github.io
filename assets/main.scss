@@ -3539,6 +3539,46 @@ body:has(.rating-lab) .post-content {
   font-size: 9px;
 }
 
+.rating-lab-history-event {
+  color: var(--lab-secondary);
+  cursor: pointer;
+}
+
+.rating-lab-history-event line {
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.rating-lab-history-event circle {
+  fill: #fff;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.rating-lab-history-event text {
+  fill: #566577;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.rating-lab-history-event:focus {
+  outline: none;
+}
+
+.rating-lab-history-event:focus circle,
+.rating-lab-history-event:hover circle {
+  fill: var(--lab-secondary);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.rating-lab-history-event-note {
+  margin: 0.25rem 0 0.65rem;
+  color: #68758a;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
 .rating-lab-chart-hit {
   fill: transparent;
   stroke: transparent;

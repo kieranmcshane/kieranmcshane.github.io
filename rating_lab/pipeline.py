@@ -29,7 +29,7 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.15.0"
+SCHEMA_VERSION = "1.16.0"
 METHODOLOGY_VERSION = "2026-07-23.4"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
@@ -2477,6 +2477,97 @@ def _compress_history(points: list[list], limit: int = 24) -> list[list]:
     return sampled[-limit:]
 
 
+_MAJOR_HISTORY_COMPETITIONS = {
+    "tennis": (
+        (r"\baustralian open\b", "Australian Open", "AO"),
+        (r"\b(?:roland garros|french open)\b", "Roland Garros", "RG"),
+        (r"\bwimbledon\b", "Wimbledon", "W"),
+        (r"\bu\.?s\.? open\b|\bus open\b", "US Open", "USO"),
+        (r"\b(?:atp finals|masters cup)\b", "ATP Finals", "FIN"),
+        (r"\bolympic", "Olympic Games", "OG"),
+    ),
+    "football": (
+        (r"\bchampions league\b", "UEFA Champions League", "UCL"),
+        (r"\beuropa league\b", "UEFA Europa League", "UEL"),
+        (r"\bconference league\b", "UEFA Conference League", "UECL"),
+        (r"\bclub world cup\b", "FIFA Club World Cup", "CWC"),
+    ),
+    "national-football": (
+        (r"\bworld cup\b", "FIFA World Cup", "WC"),
+        (r"\b(?:uefa euro|european championship)\b", "UEFA European Championship", "EURO"),
+        (r"\bcopa am[eé]rica\b", "Copa América", "COPA"),
+        (r"\bafrica cup of nations\b", "Africa Cup of Nations", "AFCON"),
+        (r"\basian cup\b", "AFC Asian Cup", "ASIA"),
+        (r"\bgold cup\b", "CONCACAF Gold Cup", "GC"),
+    ),
+    "chess": (
+        (r"\bworld chess championship\b|\bworld championship\b", "World Championship", "WCH"),
+        (r"\bcandidates\b", "Candidates Tournament", "CAN"),
+        (r"\bchess olympiad\b", "Chess Olympiad", "OLY"),
+        (r"\btata steel\b", "Tata Steel Masters", "TATA"),
+        (r"\bnorway chess\b", "Norway Chess", "NOR"),
+    ),
+}
+
+
+def _major_history_events(
+    matches: list[Match], sport: str, eligible_entities: set[str]
+) -> dict[str, list[dict]]:
+    rules = _MAJOR_HISTORY_COMPETITIONS.get(sport, ())
+    grouped: dict[tuple[str, str, str], dict] = {}
+    for match in matches:
+        matched_rule = next(
+            (
+                (label, short)
+                for pattern, label, short in rules
+                if re.search(pattern, match.competition, flags=re.IGNORECASE)
+            ),
+            None,
+        )
+        if not matched_rule:
+            continue
+        label, short = matched_rule
+        for entity, score in (
+            (match.entity_a, match.score_a),
+            (match.entity_b, 1.0 - match.score_a),
+        ):
+            if entity not in eligible_entities:
+                continue
+            key = (entity, label, match.season)
+            event = grouped.setdefault(
+                key,
+                {
+                    "date": match.date.isoformat(),
+                    "label": label,
+                    "short_label": short,
+                    "season": match.season,
+                    "matches": 0,
+                    "wins": 0,
+                    "draws": 0,
+                    "losses": 0,
+                },
+            )
+            event["date"] = min(event["date"], match.date.isoformat())
+            event["matches"] += 1
+            if score == 1.0:
+                event["wins"] += 1
+            elif score == 0.5:
+                event["draws"] += 1
+            else:
+                event["losses"] += 1
+    events: dict[str, list[dict]] = defaultdict(list)
+    for (entity, _label, _season), event in grouped.items():
+        event["result"] = (
+            f"{event['wins']}W–{event['draws']}D–{event['losses']}L"
+            if event["draws"]
+            else f"{event['wins']}W–{event['losses']}L"
+        )
+        events[entity].append(event)
+    for entity in events:
+        events[entity].sort(key=lambda event: (event["date"], event["label"]))
+    return events
+
+
 def _simulate_league(
     competition: dict,
     model,
@@ -4408,6 +4499,7 @@ def build_sport_payload(
         for schedule in predictor_schedules or []
         if schedule.get("complete") and schedule.get("first_fixture")
     }
+    history_events = _major_history_events(matches, sport, history_entities)
     for model_name in MODEL_NAMES:
         params = _choose_parameters(matches, sport, model_name, validation_start, evaluation_start)
         selected_parameters[model_name] = params
@@ -4463,6 +4555,7 @@ def build_sport_payload(
                     "recent_matches": recent_counts[entity],
                     "last_played": state.last_played.isoformat() if state.last_played else None,
                     "history": history,
+                    "history_events": history_events.get(entity, [])[-16:],
                 }
             if sport == "football" and model_name == "elo":
                 provisional_reasons = []
@@ -4572,6 +4665,14 @@ def build_sport_payload(
             }[sport],
         },
         "competitions": sorted({info.get("competition", "") for info in entities.values() if info.get("competition")}),
+        "history_event_policy": {
+            "scope": "Major competitions only",
+            "method": "Annotate an eligible competitor's rating history at the first covered result of each matching competition-season. Retain at most the latest 16 qualifying events per entity. Event records publish the covered W-D-L result; they do not alter ratings or imply an official finishing round.",
+            "competition_labels": [
+                {"label": label, "short_label": short}
+                for _pattern, label, short in _MAJOR_HISTORY_COMPETITIONS.get(sport, ())
+            ],
+        },
         "candidate_parameters": {
             name: _model_candidates(sport, name) for name in MODEL_NAMES
         },

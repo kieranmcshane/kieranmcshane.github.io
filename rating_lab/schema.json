@@ -180,13 +180,14 @@
     "prediction_contexts",
     "eligibility",
     "competitions",
+    "history_event_policy",
     "candidate_parameters",
     "parameters",
     "models",
     "media"
   ],
   "properties": {
-    "schema_version": { "const": "1.15.0" },
+    "schema_version": { "const": "1.16.0" },
     "sport": { "enum": ["tennis", "football", "national-football", "chess"] },
     "generated_at": { "type": "string" },
     "latest_result": { "type": "string", "format": "date" },
@@ -240,6 +241,27 @@
       "required": ["minimum_recent_matches", "recent_window_days", "rule"]
     },
     "competitions": { "type": "array", "items": { "type": "string" } },
+    "history_event_policy": {
+      "type": "object",
+      "required": ["scope", "method", "competition_labels"],
+      "properties": {
+        "scope": { "type": "string" },
+        "method": { "type": "string" },
+        "competition_labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "short_label"],
+            "properties": {
+              "label": { "type": "string" },
+              "short_label": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "candidate_parameters": { "type": "object" },
     "parameters": { "type": "object" },
     "models": {
