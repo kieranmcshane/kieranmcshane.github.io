@@ -758,6 +758,15 @@ test.describe("visual baselines", () => {
     await expect(
       page.locator("section.rating-lab-board, #leaderboard-heading").first()
     ).toBeVisible();
+    // Element screenshots do not compose viewport-sticky descendants
+    // deterministically: Chromium can either overlay the local nav on rank 1
+    // or paint the sticky table body as blank. Sticky behavior has dedicated
+    // geometry tests above; this baseline records the unobscured table itself.
+    await page.addStyleTag({
+      content:
+        ".rating-lab-local-nav, #ranking-table thead, #ranking-table thead th {" +
+        "position: static !important; top: auto !important;}",
+    });
     await expect(page.locator("#ranking-table")).toHaveScreenshot(
       "leaderboard-table.png"
     );
