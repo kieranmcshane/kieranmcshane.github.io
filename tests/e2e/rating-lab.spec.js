@@ -57,19 +57,42 @@ test.describe("page load", () => {
   }) => {
     await gotoRatingLab(page);
     if (isMobile(page)) {
-      await expect(page.locator("#ranking-body tr").first()).toBeVisible();
+      await expect(
+        page.locator("#ranking-body tr").first().locator(".rating-lab-identity")
+      ).toBeVisible();
       return;
     }
     const headerBox = await page.locator("#ranking-table thead").boundingBox();
-    const firstRowBox = await page
-      .locator("#ranking-body tr")
-      .first()
+    const firstRow = page.locator("#ranking-body tr").first();
+    const identityBox = await firstRow.locator(".rating-lab-identity").boundingBox();
+    const nameBox = await firstRow
+      .locator(".rating-lab-entity-name-text")
       .boundingBox();
     expect(headerBox).not.toBeNull();
-    expect(firstRowBox).not.toBeNull();
-    expect(firstRowBox.y).toBeGreaterThanOrEqual(
-      headerBox.y + headerBox.height - 0.5
+    expect(identityBox).not.toBeNull();
+    expect(nameBox).not.toBeNull();
+    expect(identityBox.y).toBeGreaterThanOrEqual(
+      headerBox.y + headerBox.height + 6
     );
+    expect(nameBox.y).toBeGreaterThanOrEqual(
+      headerBox.y + headerBox.height + 6
+    );
+  });
+
+  test("opening the inspector preserves the full first identity", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page);
+    if (isMobile(page)) return;
+    const firstRow = page.locator("#ranking-body tr").first();
+    await firstRow.locator("[data-select]").click();
+    const name = firstRow.locator(".rating-lab-entity-name-text");
+    await expect(name).toHaveText("Jannik Sinner");
+    const clipping = await name.evaluate((element) => ({
+      horizontal: element.scrollWidth > element.clientWidth + 1,
+      vertical: element.scrollHeight > element.clientHeight + 1,
+    }));
+    expect(clipping).toEqual({ horizontal: false, vertical: false });
   });
 
   test("shows the error notice when a sport feed fails", async ({ page }) => {
@@ -735,6 +758,15 @@ test.describe("visual baselines", () => {
     await expect(
       page.locator("section.rating-lab-board, #leaderboard-heading").first()
     ).toBeVisible();
+    // Element screenshots do not compose viewport-sticky descendants
+    // deterministically: Chromium can either overlay the local nav on rank 1
+    // or paint the sticky table body as blank. Sticky behavior has dedicated
+    // geometry tests above; this baseline records the unobscured table itself.
+    await page.addStyleTag({
+      content:
+        ".rating-lab-local-nav, #ranking-table thead, #ranking-table thead th {" +
+        "position: static !important; top: auto !important;}",
+    });
     await expect(page.locator("#ranking-table")).toHaveScreenshot(
       "leaderboard-table.png"
     );
