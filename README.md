@@ -61,16 +61,20 @@ Install `requirements-rating-lab.txt` first so the refresh can extract the
 public ATP ProTennisLive draw PDFs. The draw PDF is the bracket authority;
 ManTennisData supplies stable ATP identifiers and the result cross-check.
 
-Without the football token, the script uses CC0 OpenFootball league, Champions
-League, World Cup, and Euro snapshots; the predictor remains functional without
-credentials. Generated JSON follows `rating_lab/schema.json`; source
+Without the football token—or when the primary feed is unavailable, rate-limited,
+or incomplete—the script automatically uses CC0 OpenFootball league, Champions
+League, World Cup, and Euro fixtures/results. The manifest labels the fallback,
+and it is never used as a substitute for player lineups or minutes. The predictor
+remains functional without credentials. Generated JSON follows
+`rating_lab/schema.json`; source
 adapters and rating models live in `rating_lab/`. The public manifest records
 the schema and methodology versions, code revision, source freshness, and data
 snapshot hash where a source is distributed as a single file.
 
 Historical player ratings publish source and retrieval metadata per cohort.
-StatsBomb raw files remain publicly reproducible. API-Football responses are
-cached only during the server-side build under the provider's terms; the site
+StatsBomb raw files remain publicly reproducible. Validated, finished-cohort
+API-Football responses are retained in the private server-side build cache under
+the provider's terms and may be reused when a later build reaches its quota; the site
 publishes derived Lineup TrueSkill, RAPM, experimental pairwise-chemistry,
 team-specific HAPM, and team-specific LAPM
 ratings, coverage gates, and a SHA-256

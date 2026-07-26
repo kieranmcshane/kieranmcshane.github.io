@@ -466,7 +466,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
 cd kieranmcshane.github.io
 RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
 python3 -m unittest discover -s tests -v</code></pre>
-    <p class="rating-lab-audit-note">A <code>FOOTBALL_DATA_TOKEN</code> enables the primary club feed; without it, the documented CC0 OpenFootball fallback is used. Results are deduplicated and sorted by date, competitor IDs, competition, and score. The source snapshot hash is published when the source is a single file. Generated files contain no credentials.</p>
+    <p class="rating-lab-audit-note">A <code>FOOTBALL_DATA_TOKEN</code> enables the primary club feed. If it is absent, rate-limited, unavailable, or fails the coverage gate, the build automatically uses the documented CC0 OpenFootball fixtures/results fallback and labels that state in the manifest. Player-impact cohorts never use that weaker fallback: finished API-Football responses are cached after validation, and publication remains withheld until complete lineups, substitutions, minutes, stable IDs, and score reproduction pass. Results are deduplicated and sorted deterministically. Generated files contain no credentials.</p>
   </section>
   </details>
 
@@ -479,7 +479,7 @@ python3 -m unittest discover -s tests -v</code></pre>
       <li><a href="https://github.com/msolonskyi/ManTennisData">ManTennisData</a> — ATP-derived singles results, MIT.</li>
       <li><a href="https://www.football-data.org/">football-data.org</a> — five major European leagues plus published Champions League, FIFA World Cup, and European Championship stages.</li>
       <li><a href="https://www.uefa.com/uefachampionsleague/accesslist/">UEFA</a> — official 2026/27 Champions League qualifying results, published ties, draw dates, and match calendar.</li>
-      <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures plus credential-free Champions League, World Cup, and Euro structures, CC0 1.0.</li>
+      <li><a href="https://github.com/openfootball">OpenFootball</a> — current league fixtures plus credential-free Champions League, World Cup, and Euro structures, CC0 1.0; automatic team-level fallback only, never a substitute for player minutes or lineups.</li>
       <li><a href="https://github.com/hudl/open-data">Hudl StatsBomb Open Data</a> — lineups and events for selected historical competitions and seasons; a reproducible player-method research source, not the live five-league feed.</li>
       <li><a href="https://github.com/martj42/international_results">International football results</a> — men’s full internationals, CC0 1.0.</li>
       <li><a href="https://database.lichess.org/#broadcasts">Lichess official broadcasts</a> — elite OTB games, CC BY-SA 4.0.</li>
