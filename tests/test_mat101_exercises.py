@@ -191,6 +191,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("math: true", PAGE)
         self.assertIn("103 exercices à travailler ici", PAGE)
         self.assertIn("Couverture complète", PAGE)
+        self.assertIn("103 solutions · niveau L1", PAGE)
+        self.assertNotIn("103 solutions · 59 pages", PAGE)
         self.assertIn("aucune relecture mathématique humaine intégrale", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
@@ -253,6 +255,24 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_solution_source_follows_the_redaction_guidelines(self):
         tex = SOLUTION_TEX.read_text()
+        self.assertIn(
+            "Les transformations successives d'une même expression sont "
+            "disposées sur plusieurs lignes",
+            tex,
+        )
+        self.assertIn(
+            "avec les signes d'égalité alignés",
+            tex,
+        )
+        exercise_11 = tex.split(r"\begin{corrige}{1.1}", 1)[1].split(
+            r"\end{corrige}",
+            1,
+        )[0]
+        self.assertGreaterEqual(exercise_11.count(r"\begin{align*}"), 10)
+        self.assertNotIn(
+            r"\ii^{50}=\ii^{48}\ii^2=(\ii^4)^{12}(-1)",
+            exercise_11,
+        )
         self.assertIn(
             "Lorsqu'un objet est introduit ou identifié, sa nature "
             "mathématique est nommée explicitement",

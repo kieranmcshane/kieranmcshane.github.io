@@ -216,7 +216,7 @@ math: true
     <div class="mat101-file-group mat101-file-group-solution">
       <p class="mat101-file-label">Corrigé détaillé</p>
       <ul>
-        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · 59 pages</span></a></li>
+        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · niveau L1</span></a></li>
         <li><a href="{{ solution_tex_url }}" download><strong>Source LaTeX autonome</strong><span>Un seul fichier compilable</span></a></li>
         <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
       </ul>
