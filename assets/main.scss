@@ -11551,6 +11551,70 @@ body:has(.mat101-library) {
   font-variant-numeric: tabular-nums;
 }
 
+.mat101-root-geometry {
+  margin: 0 0 1.4rem;
+  padding: clamp(0.85rem, 2.5vw, 1.2rem);
+  border: 1px solid #bdd5d9;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at top right, rgba(0, 128, 146, 0.1), transparent 42%),
+    #f7fbfb;
+}
+
+.mat101-root-geometry > h3 {
+  margin: 0 0 0.35rem;
+  color: var(--mat101-accent-dark);
+  font-size: 1rem;
+}
+
+.mat101-root-geometry > p {
+  max-width: 56rem;
+  margin: 0 0 1rem;
+  color: #38545a;
+}
+
+.mat101-root-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.8rem;
+}
+
+.mat101-root-grid-single {
+  grid-template-columns: minmax(0, 22rem);
+  justify-content: center;
+}
+
+.mat101-root-diagram {
+  min-width: 0;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid #d4e2e4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.mat101-root-diagram canvas {
+  display: block;
+  width: 100%;
+  max-width: 17rem;
+  height: auto;
+  margin: 0 auto;
+}
+
+.mat101-root-diagram figcaption {
+  display: grid;
+  gap: 0.18rem;
+  margin-top: 0.45rem;
+  color: #486269;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.mat101-root-diagram figcaption strong {
+  color: #183f47;
+  font-size: 0.82rem;
+}
+
 .mat101-solution-body .center {
   overflow-x: auto;
 }

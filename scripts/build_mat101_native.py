@@ -77,6 +77,41 @@ DOT_NUMBER_CELL = re.compile(
     r'<td style="text-align: left;">\.</td>'
 )
 
+ROOT_DIAGRAMS = {
+    "1.12": r"""
+<section class="mat101-root-geometry" aria-labelledby="mat101-root-geometry-1-12">
+<h3 id="mat101-root-geometry-1-12">Lecture géométrique</h3>
+<p>Pour une équation \(z^n=\rho e^{i\theta}\), les solutions sont les sommets d’un polygone régulier : elles appartiennent au cercle de rayon \(\rho^{1/n}\), sont espacées d’un angle \(2\pi/n\), puis l’ensemble est tourné de \(\theta/n\).</p>
+<div class="mat101-root-grid">
+<figure class="mat101-root-diagram">
+<canvas data-mat101-root-diagram data-root-count="3" data-start-angle="0.5235987756" data-angle-label="π/6" data-labels="z₀|z₁|z₂" width="560" height="560" aria-hidden="true"></canvas>
+<figcaption><strong>\(z^3=i\)</strong><span>Trois racines sur le cercle unité, séparées de \(2\pi/3\) et tournées de \(\pi/6\).</span></figcaption>
+</figure>
+<figure class="mat101-root-diagram">
+<canvas data-mat101-root-diagram data-root-count="4" data-start-angle="0" data-labels="1|i|−1|−i" width="560" height="560" aria-hidden="true"></canvas>
+<figcaption><strong>\(z^4=1\)</strong><span>Les quatre racines de l’unité forment un carré inscrit.</span></figcaption>
+</figure>
+<figure class="mat101-root-diagram">
+<canvas data-mat101-root-diagram data-root-count="4" data-start-angle="0.5235987756" data-angle-label="π/6" data-labels="z₀|z₁|z₂|z₃" width="560" height="560" aria-hidden="true"></canvas>
+<figcaption><strong>\(z^4=e^{2i\pi/3}\)</strong><span>Le même carré est tourné de \((2\pi/3)/4=\pi/6\).</span></figcaption>
+</figure>
+</div>
+</section>
+""".strip(),
+    "1.18": r"""
+<section class="mat101-root-geometry" aria-labelledby="mat101-root-geometry-1-18">
+<h3 id="mat101-root-geometry-1-18">Les cinquièmes racines sur le cercle unité</h3>
+<p>Les arguments \(0,2\pi/5,4\pi/5,6\pi/5,8\pi/5\) découpent le cercle en cinq arcs égaux. Les racines de \(z^5-1\) sont donc exactement les sommets d’un pentagone régulier.</p>
+<div class="mat101-root-grid mat101-root-grid-single">
+<figure class="mat101-root-diagram">
+<canvas data-mat101-root-diagram data-root-count="5" data-start-angle="0" data-labels="1|ζ|ζ²|ζ³|ζ⁴" data-muted-index="0" width="560" height="560" aria-hidden="true"></canvas>
+<figcaption><strong>\(\zeta=e^{2i\pi/5}\)</strong><span>Le point \(1\), dessiné en contour, est une racine de \(P(z)=z^5-1\), mais pas de \(Q(z)=z^4+z^3+z^2+z+1\).</span></figcaption>
+</figure>
+</div>
+</section>
+""".strip(),
+}
+
 
 def run(*args: str, cwd: Path | None = None) -> None:
     subprocess.run(args, cwd=cwd, check=True)
@@ -359,10 +394,14 @@ def build_solution_html() -> dict[str, str]:
             solution,
             flags=re.DOTALL,
         )
-        solutions[match.group(1)] = TABLE_BLOCK.sub(
+        exercise_id = match.group(1)
+        solution = TABLE_BLOCK.sub(
             enhance_table,
             solution,
         )
+        if exercise_id in ROOT_DIAGRAMS:
+            solution = f"{ROOT_DIAGRAMS[exercise_id]}\n{solution}"
+        solutions[exercise_id] = solution
     if len(solutions) != 103:
         raise RuntimeError(f"Expected 103 solution blocks, found {len(solutions)}")
     return solutions

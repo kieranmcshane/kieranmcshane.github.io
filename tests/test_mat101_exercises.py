@@ -104,6 +104,22 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(">13</td>", html)
         self.assertNotIn(">.</td>", html)
 
+    def test_root_of_unity_exercises_have_lightweight_diagrams(self):
+        cubic_roots = next(
+            item["solutionHtml"] for item in NATIVE if item["id"] == "1.12"
+        )
+        fifth_roots = next(
+            item["solutionHtml"] for item in NATIVE if item["id"] == "1.18"
+        )
+        self.assertEqual(cubic_roots.count("data-mat101-root-diagram"), 3)
+        self.assertIn("Lecture géométrique", cubic_roots)
+        self.assertIn("data-root-count=\"3\"", cubic_roots)
+        self.assertIn("data-root-count=\"4\"", cubic_roots)
+        self.assertEqual(fifth_roots.count("data-mat101-root-diagram"), 1)
+        self.assertIn("data-root-count=\"5\"", fifth_roots)
+        self.assertIn("data-muted-index=\"0\"", fifth_roots)
+        self.assertNotIn("<svg", cubic_roots + fifth_roots)
+
     def test_difficulty_markers_match_the_source_booklet(self):
         markers = {item["id"]: item["difficulty"] for item in NATIVE}
         self.assertEqual(set(markers.values()), {"*", "**", "***", "*/**", None})
@@ -265,6 +281,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-exercise-tags", STYLES)
         self.assertIn(".mat101-table-scroll", STYLES)
         self.assertIn(".mat101-math-table", STYLES)
+        self.assertIn(".mat101-root-geometry", STYLES)
+        self.assertIn(".mat101-root-diagram", STYLES)
         self.assertIn(".mat101-statement img", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
@@ -276,6 +294,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("normalize('NFD')", SCRIPT)
         self.assertIn("activeTag", SCRIPT)
         self.assertIn("searchParams.set('notion'", SCRIPT)
+        self.assertIn("initializeRootDiagrams", SCRIPT)
+        self.assertIn("data-mat101-root-diagram", SCRIPT)
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
         self.assertIn("mat101-library.js", (ROOT / "_includes/head-custom.html").read_text())
 

@@ -87,6 +87,36 @@ test.describe("MAT101 native library", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("draws the root-of-unity geometry in the relevant solutions", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("1.12");
+
+    const rootsExercise = page.locator("#exercice-1-12");
+    await rootsExercise.locator(":scope > summary").click();
+    const rootsSolution = rootsExercise.locator(".mat101-native-solution");
+    await rootsSolution.locator(":scope > summary").click();
+
+    await expect(rootsSolution.locator(".mat101-root-diagram canvas")).toHaveCount(3);
+    await expect(rootsSolution.locator(".mat101-root-geometry")).toContainText(
+      "polygone régulier"
+    );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+
+    await page.locator("#mat101-search-input").fill("1.18");
+    const pentagonExercise = page.locator("#exercice-1-18");
+    await pentagonExercise.locator(":scope > summary").click();
+    const pentagonSolution = pentagonExercise.locator(".mat101-native-solution");
+    await pentagonSolution.locator(":scope > summary").click();
+
+    await expect(pentagonSolution.locator(".mat101-root-diagram canvas")).toHaveCount(1);
+    await expect(pentagonSolution.locator(".mat101-root-geometry")).toContainText(
+      "pentagone régulier"
+    );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   test("keeps provenance and the exercise-specific correction route visible", async ({
     page,
   }) => {
