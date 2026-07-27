@@ -7,6 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 POST = ROOT / "_posts" / "2026-07-27-sha1-sha256-certificate-signatures.md"
+STYLES = ROOT / "assets" / "main.scss"
 
 
 class ShaSignaturePostTests(unittest.TestCase):
@@ -57,6 +58,37 @@ class ShaSignaturePostTests(unittest.TestCase):
         for link in required_links:
             with self.subTest(link=link):
                 self.assertIn(link, self.text)
+
+    def test_only_essential_primary_sources_receive_previews(self) -> None:
+        self.assertEqual(self.text.count('<figure class="source-preview">'), 5)
+        self.assertEqual(self.text.count("<figcaption><strong>What to notice.</strong>"), 5)
+        self.assertEqual(self.text.count('target="_blank" rel="noopener"'), 5)
+        self.assertGreaterEqual(self.text.count("<mark>"), 7)
+
+        preview_sources = (
+            "csrc.nist.gov/Projects/hash-functions#security-strengths",
+            "shattered.io/static/shattered.pdf#page=2",
+            "rfc-editor.org/rfc/rfc8017.html#section-9.2",
+            "rfc-editor.org/rfc/rfc5280.html#section-4.1",
+            "support.apple.com/en-gb/103769",
+        )
+        for source in preview_sources:
+            with self.subTest(source=source):
+                self.assertIn(source, self.text)
+
+    def test_source_previews_have_responsive_book_like_styles(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+        required_rules = (
+            ".source-preview-paper",
+            ".source-preview-link:focus-visible",
+            ".source-preview-header",
+            ".source-preview mark",
+            ".source-preview-code",
+            "@media (max-width: 560px)",
+        )
+        for rule in required_rules:
+            with self.subTest(rule=rule):
+                self.assertIn(rule, styles)
 
     def test_self_signed_certificate_is_not_equated_with_trust(self) -> None:
         self.assertIn("does **not** independently prove", self.text)
