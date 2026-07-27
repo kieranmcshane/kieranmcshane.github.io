@@ -16,6 +16,7 @@ sitemap: false
 
 ## Site information
 
+- [Exercices MAT101]({{ '/mat101/exercices/' | absolute_url }}): Index complet de 103 exercices de niveau L1, avec accès direct aux énoncés, recueil PDF et source LaTeX.
 - [About the author and the site]({{ '/about/' | absolute_url }})
 - [RSS feed]({{ '/feed.xml' | absolute_url }})
 - [XML sitemap]({{ '/sitemap.xml' | absolute_url }})

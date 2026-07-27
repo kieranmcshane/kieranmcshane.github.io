@@ -10582,3 +10582,317 @@ body:has(.explain-lab) .post-header {
 .player-lab-country-flag[hidden] {
   display: none;
 }
+
+.mat101-library {
+  --mat101-ink: #172033;
+  --mat101-muted: #5d6778;
+  --mat101-accent: #087f8c;
+  --mat101-accent-dark: #075c66;
+  --mat101-soft: #edf8f8;
+  --mat101-line: #cad6dc;
+  color: var(--mat101-ink);
+}
+
+body:has(.mat101-library) .post-header {
+  display: none;
+}
+
+.mat101-library > :first-child {
+  margin-top: 0;
+}
+
+.mat101-hero {
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  border: 1px solid var(--mat101-line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(8, 127, 140, 0.11), rgba(255, 255, 255, 0) 55%),
+    #fbfdfd;
+}
+
+.mat101-kicker {
+  margin: 0 0 0.7rem;
+  color: var(--mat101-accent-dark);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mat101-hero h1 {
+  max-width: 13ch;
+  margin: 0;
+  font-size: clamp(2rem, 5.4vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.mat101-hero > p:not(.mat101-kicker) {
+  max-width: 65ch;
+  margin: 1.25rem 0 0;
+  color: var(--mat101-muted);
+  font-size: 1.02rem;
+}
+
+.mat101-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.mat101-actions a {
+  display: inline-flex;
+  min-height: 44px;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0.68rem 0.9rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 5px;
+  color: var(--mat101-ink);
+  background: #fff;
+  font-size: 0.86rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.mat101-actions .mat101-primary-action {
+  gap: 0.7rem;
+  border-color: var(--mat101-accent);
+  color: #fff;
+  background: var(--mat101-accent);
+}
+
+.mat101-actions a:hover,
+.mat101-actions a:focus-visible {
+  border-color: var(--mat101-accent-dark);
+  box-shadow: 0 0 0 3px rgba(8, 127, 140, 0.13);
+}
+
+.mat101-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 1rem 0 2rem;
+  overflow: hidden;
+  border: 1px solid var(--mat101-line);
+  border-radius: 6px;
+  background: var(--mat101-line);
+}
+
+.mat101-stats div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 1rem;
+  background: #fff;
+}
+
+.mat101-stats strong {
+  color: var(--mat101-accent-dark);
+  font-size: 1.45rem;
+}
+
+.mat101-stats span {
+  color: var(--mat101-muted);
+  font-size: 0.76rem;
+}
+
+.mat101-chapter-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.mat101-chapter-nav a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.15rem 0.8rem;
+  align-items: center;
+  padding: 0.9rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 5px;
+  color: var(--mat101-ink);
+  background: #fff;
+  text-decoration: none;
+}
+
+.mat101-chapter-nav a:hover,
+.mat101-chapter-nav a:focus-visible {
+  border-color: var(--mat101-accent);
+  background: var(--mat101-soft);
+}
+
+.mat101-chapter-nav span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  grid-row: 1 / 3;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--mat101-accent);
+  font-weight: 800;
+}
+
+.mat101-chapter-nav strong,
+.mat101-chapter-nav small {
+  grid-column: 2;
+}
+
+.mat101-chapter-nav small {
+  color: var(--mat101-muted);
+}
+
+.mat101-reading-note {
+  margin: 2rem 0 2.5rem;
+  padding: 1rem 1.1rem;
+  border-left: 4px solid var(--mat101-accent);
+  color: #33434d;
+  background: var(--mat101-soft);
+}
+
+.mat101-chapter {
+  padding: 1.2rem 0 2.1rem;
+  border-top: 1px solid var(--mat101-line);
+  scroll-margin-top: 1rem;
+}
+
+.mat101-chapter > header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.mat101-chapter-number {
+  color: var(--mat101-accent);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mat101-chapter h2 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.mat101-chapter header p {
+  margin: 0.2rem 0 0;
+  color: var(--mat101-muted);
+  font-size: 0.8rem;
+}
+
+.mat101-exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.mat101-exercise-grid a {
+  display: grid;
+  min-height: 4.6rem;
+  box-sizing: border-box;
+  align-content: center;
+  padding: 0.65rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 4px;
+  color: var(--mat101-ink);
+  background: #fff;
+  text-decoration: none;
+}
+
+.mat101-exercise-grid a:hover,
+.mat101-exercise-grid a:focus-visible {
+  border-color: var(--mat101-accent);
+  background: var(--mat101-soft);
+  transform: translateY(-1px);
+}
+
+.mat101-exercise-grid span,
+.mat101-exercise-grid small {
+  color: var(--mat101-muted);
+  font-size: 0.65rem;
+}
+
+.mat101-exercise-grid strong {
+  color: var(--mat101-accent-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.mat101-exercise-grid small {
+  justify-self: end;
+}
+
+.mat101-downloads {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.65fr);
+  gap: 2rem;
+  margin: 1rem 0 2rem;
+  padding: 1.4rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 6px;
+  background: #f7f9fa;
+}
+
+.mat101-downloads h2 {
+  margin: 0;
+}
+
+.mat101-downloads ul {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mat101-downloads li a {
+  display: grid;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 4px;
+  color: var(--mat101-ink);
+  background: #fff;
+  text-decoration: none;
+}
+
+.mat101-downloads li span {
+  color: var(--mat101-muted);
+  font-size: 0.72rem;
+}
+
+.mat101-source {
+  color: var(--mat101-muted);
+  font-size: 0.82rem;
+}
+
+@media screen and (max-width: 700px) {
+  .mat101-stats,
+  .mat101-chapter-nav,
+  .mat101-downloads {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mat101-downloads > * {
+    grid-column: 1 / -1;
+  }
+
+  .mat101-exercise-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 440px) {
+  .mat101-chapter-nav,
+  .mat101-exercise-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mat101-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+}
