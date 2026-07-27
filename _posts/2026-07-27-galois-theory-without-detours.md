@@ -4,10 +4,13 @@ math: true
 title: "Galois Theory Without Detours"
 subtitle: "Fields, symmetries, fixed points, and the fundamental correspondence"
 date: 2026-07-27 11:00:00 +0200
+last_modified_at: 2026-07-28 02:15:00 +0200
 categories: [mathematics]
 tags: [algebra, field-theory, group-theory, Galois-theory]
 excerpt: "A self-contained route from undergraduate algebra to the fundamental theorem of Galois theory, with a rigorous proof and complete V4 and A4 correspondence diagrams."
 ---
+
+<div class="longform-post galois-post" markdown="1">
 
 Galois theory is often summarized by a picture: a lattice of fields beside an upside-down lattice of groups. The slogan is that intermediate fields correspond to subgroups. That summary is correct, but compressed enough to hide almost every reason it is true.
 
@@ -28,6 +31,34 @@ $$
 Only after that concrete calculation will we introduce the general definitions needed to state and prove the theorem. The proof is complete: it includes the linear independence of distinct field homomorphisms, Artin's fixed-field theorem, the degree formulas, and the normal-subgroup quotient statement. The final section uses the subgroup structure of $A_4$ to reconstruct a much larger field lattice.
 
 The intended reader knows undergraduate linear algebra, basic polynomial algebra, and the definitions of a group and a subgroup. Nothing from ring theory beyond polynomial division is assumed.
+
+<div class="longform-reading-layout" markdown="1">
+
+<nav class="longform-toc" aria-label="Article navigation" data-section-navigation>
+  <details class="longform-toc-details" open>
+    <summary>Contents</summary>
+    <div class="toc-section-links">
+      <a href="#the-destination">The destination</a>
+      <a href="#start-with-the-diamond">1. The diamond</a>
+      <a href="#field-extensions-and-degree">2. Extensions and degree</a>
+      <a href="#why-automorphisms-permute-roots">3. Automorphisms and roots</a>
+      <a href="#splitting-fields-separability-and-normality">4. Splitting fields</a>
+      <a href="#fixed-fields-and-inclusion-reversal">5. Fixed fields</a>
+      <a href="#the-fundamental-theorem">6. Fundamental theorem</a>
+      <a href="#proof-core-i-independence-of-homomorphisms">7–10. Proof core</a>
+      <a href="#re-reading-the-biquadratic-example">11–13. Worked examples</a>
+      <a href="#decoding-an-a4-lattice">The \(A_4\) lattice</a>
+      <a href="#how-to-use-the-theorem-in-practice">14. Using the theorem</a>
+      <a href="#common-mistakes">15. Common mistakes</a>
+      <a href="#what-the-theorem-is-really-saying">16. The big picture</a>
+      <a href="#a-compact-checklist">Checklist</a>
+      <a href="#comprehension-checks-with-solutions">Exercises</a>
+      <a href="#further-reading">Further reading</a>
+    </div>
+  </details>
+</nav>
+
+<div class="longform-main" markdown="1">
 
 ## The destination
 
@@ -2505,3 +2536,9 @@ $$
 - The Stacks Project, [Section 9.21: Galois theory](https://stacks.math.columbia.edu/tag/09DU), including the [fundamental theorem](https://stacks.math.columbia.edu/tag/09DW) and its finite fixed-field lemma.
 - Emil Artin, *Galois Theory*, for the automorphism-first route that motivates the proof used here.
 - Ian Stewart, *Galois Theory*, for further worked examples and applications to polynomial equations.
+
+</div>
+
+</div>
+
+</div>
