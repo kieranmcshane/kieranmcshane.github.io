@@ -1,0 +1,254 @@
+{
+  "tags": [
+    {
+      "slug": "absurde-contraposition",
+      "label": "Absurde et contraposition",
+      "exercises": ["2.24", "2.29"]
+    },
+    {
+      "slug": "approximations-erreur",
+      "label": "Approximations et erreur",
+      "exercises": ["4.1", "4.5", "4.10", "4.11", "4.15", "4.16"]
+    },
+    {
+      "slug": "binome-newton",
+      "label": "Binôme de Newton",
+      "exercises": ["3.27", "3.28", "3.30"]
+    },
+    {
+      "slug": "bornes-extrema",
+      "label": "Bornes et extrema",
+      "exercises": ["3.4", "3.5", "4.3", "4.4", "4.12", "4.13"]
+    },
+    {
+      "slug": "calcul-complexe",
+      "label": "Calcul complexe",
+      "exercises": ["1.1", "1.2", "1.7"]
+    },
+    {
+      "slug": "composition",
+      "label": "Composition",
+      "exercises": ["3.6", "3.10", "3.15", "3.16"]
+    },
+    {
+      "slug": "congruences-divisibilite",
+      "label": "Congruences et divisibilité",
+      "exercises": ["1.20", "2.21", "2.22", "2.28", "3.25", "3.30", "4.6"]
+    },
+    {
+      "slug": "conjugaison",
+      "label": "Conjugaison",
+      "exercises": ["1.1", "1.4", "1.11"]
+    },
+    {
+      "slug": "convergence",
+      "label": "Convergence",
+      "exercises": ["4.8", "4.10", "4.11", "4.12", "4.13", "4.14", "4.15", "4.16"]
+    },
+    {
+      "slug": "continuite",
+      "label": "Continuité",
+      "exercises": ["3.12"]
+    },
+    {
+      "slug": "contre-exemples",
+      "label": "Contre-exemples",
+      "exercises": ["2.13", "2.19", "2.20", "2.34", "2.35", "3.8", "3.9", "4.2", "4.3", "4.6", "4.13", "4.17"]
+    },
+    {
+      "slug": "denombrement",
+      "label": "Dénombrement",
+      "exercises": ["2.23", "2.32", "3.21", "3.22", "3.23", "3.24", "3.25"]
+    },
+    {
+      "slug": "derivation-integration",
+      "label": "Dérivation et intégration",
+      "exercises": ["2.27", "3.28"]
+    },
+    {
+      "slug": "ensembles",
+      "label": "Ensembles",
+      "exercises": ["2.1", "2.2", "2.3", "2.6", "2.7", "2.8", "2.14", "3.2", "3.3", "3.7", "3.8", "4.9"]
+    },
+    {
+      "slug": "equations",
+      "label": "Équations",
+      "exercises": ["1.2", "1.7", "1.10", "2.18", "2.25", "2.33", "3.13"]
+    },
+    {
+      "slug": "epsilon",
+      "label": "Epsilon et seuils",
+      "exercises": ["4.10", "4.11", "4.14"]
+    },
+    {
+      "slug": "forme-exponentielle",
+      "label": "Forme exponentielle",
+      "exercises": ["1.3", "1.5", "1.6", "1.8", "1.9", "1.12", "1.13", "1.14", "1.18"]
+    },
+    {
+      "slug": "fonctions",
+      "label": "Fonctions",
+      "exercises": ["3.1", "3.4", "3.5", "3.6", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    },
+    {
+      "slug": "geometrie-analytique",
+      "label": "Géométrie analytique",
+      "exercises": ["2.18", "2.30"]
+    },
+    {
+      "slug": "geometrie-complexe",
+      "label": "Géométrie complexe",
+      "exercises": ["1.15", "1.16", "1.17", "1.19"]
+    },
+    {
+      "slug": "images-antecedents",
+      "label": "Images et antécédents",
+      "exercises": ["3.2", "3.3", "3.8", "3.11", "3.12", "3.13"]
+    },
+    {
+      "slug": "implication-equivalence",
+      "label": "Implication et équivalence",
+      "exercises": ["2.11", "2.13", "2.15", "2.16", "2.19", "2.20", "2.24", "2.26", "2.34"]
+    },
+    {
+      "slug": "inclusions",
+      "label": "Inclusions",
+      "exercises": ["2.6", "2.8", "3.8", "3.11", "4.9"]
+    },
+    {
+      "slug": "indicatrices",
+      "label": "Fonctions indicatrices",
+      "exercises": ["3.7"]
+    },
+    {
+      "slug": "inegalites",
+      "label": "Inégalités",
+      "exercises": ["2.4", "2.5", "2.17", "2.25", "2.26", "2.33", "4.2", "4.3", "4.4", "4.5", "4.7", "4.8"]
+    },
+    {
+      "slug": "injectivite-surjectivite",
+      "label": "Injectivité et surjectivité",
+      "exercises": ["3.9", "3.10", "3.11", "3.13", "3.14", "3.21"]
+    },
+    {
+      "slug": "intervalles",
+      "label": "Intervalles",
+      "exercises": ["2.3", "2.4", "2.5", "2.35", "3.12", "4.9"]
+    },
+    {
+      "slug": "invariants",
+      "label": "Invariants",
+      "exercises": ["2.23"]
+    },
+    {
+      "slug": "logique",
+      "label": "Logique",
+      "exercises": ["2.9", "2.10", "2.11", "2.12", "2.13", "2.14", "2.15", "2.16", "2.19", "2.20", "2.34", "3.4", "3.5"]
+    },
+    {
+      "slug": "methodes-numeriques",
+      "label": "Méthodes numériques",
+      "exercises": ["4.16"]
+    },
+    {
+      "slug": "module-argument",
+      "label": "Module et argument",
+      "exercises": ["1.3", "1.4", "1.5", "1.6", "1.18", "1.20"]
+    },
+    {
+      "slug": "pavage-fibonacci",
+      "label": "Pavages et Fibonacci",
+      "exercises": ["2.32"]
+    },
+    {
+      "slug": "periodicite",
+      "label": "Périodicité",
+      "exercises": ["4.12", "4.13"]
+    },
+    {
+      "slug": "points-fixes",
+      "label": "Points fixes",
+      "exercises": ["3.15", "3.16", "4.15"]
+    },
+    {
+      "slug": "polynomes-complexes",
+      "label": "Polynômes complexes",
+      "exercises": ["1.10", "1.11", "1.18"]
+    },
+    {
+      "slug": "produit-cartesien",
+      "label": "Produit cartésien",
+      "exercises": ["2.7", "3.1", "3.21"]
+    },
+    {
+      "slug": "quantificateurs",
+      "label": "Quantificateurs",
+      "exercises": ["2.9", "2.10", "2.12", "2.13", "2.20", "2.21", "3.4", "3.5", "4.6", "4.7", "4.8", "4.10", "4.11", "4.14", "4.17"]
+    },
+    {
+      "slug": "racines-complexes",
+      "label": "Racines complexes",
+      "exercises": ["1.8", "1.9", "1.10", "1.12", "1.18"]
+    },
+    {
+      "slug": "racines-unite",
+      "label": "Racines de l’unité",
+      "exercises": ["1.12", "1.18", "3.30"]
+    },
+    {
+      "slug": "raisonnement-cas",
+      "label": "Raisonnement par cas",
+      "exercises": ["1.7", "2.17", "2.19", "2.28", "2.33", "4.13", "4.17"]
+    },
+    {
+      "slug": "rationalite",
+      "label": "Rationalité",
+      "exercises": ["2.5", "2.24", "2.27", "2.29"]
+    },
+    {
+      "slug": "recurrence",
+      "label": "Récurrence",
+      "exercises": ["2.22", "2.31", "2.32", "3.20", "4.15", "4.16", "4.17"]
+    },
+    {
+      "slug": "relations-equivalence",
+      "label": "Relations d’équivalence",
+      "exercises": ["3.31"]
+    },
+    {
+      "slug": "rotations",
+      "label": "Rotations",
+      "exercises": ["1.17", "1.19", "2.30", "3.14", "3.15", "3.16", "3.17"]
+    },
+    {
+      "slug": "sommes-produits",
+      "label": "Sommes et produits",
+      "exercises": ["3.18", "3.19", "3.20", "3.26", "3.27", "3.28", "3.29", "3.30"]
+    },
+    {
+      "slug": "suites",
+      "label": "Suites",
+      "exercises": ["2.31", "2.32", "4.10", "4.11", "4.12", "4.13", "4.14", "4.15", "4.16", "4.17"]
+    },
+    {
+      "slug": "tables-verite",
+      "label": "Tables de vérité",
+      "exercises": ["2.9", "2.13", "2.15", "2.16"]
+    },
+    {
+      "slug": "telescopage",
+      "label": "Télescopage",
+      "exercises": ["3.26", "3.29"]
+    },
+    {
+      "slug": "transformations-complexes",
+      "label": "Transformations complexes",
+      "exercises": ["3.14", "3.15", "3.16", "3.17"]
+    },
+    {
+      "slug": "trigonometrie",
+      "label": "Trigonométrie",
+      "exercises": ["1.6", "1.9", "1.13", "1.14", "1.18"]
+    }
+  ]
+}

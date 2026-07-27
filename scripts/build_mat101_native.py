@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PDF = ROOT / "assets/documents/mat101/mat_101_20220913.pdf"
 SOLUTION_TEX = ROOT / "assets/documents/mat101/corrige-exercices-mat101.tex"
 EXERCISE_DATA = ROOT / "_data/mat101_exercises.json"
+TAG_DATA = ROOT / "_data/mat101_tags.json"
 OUTPUT_DATA = ROOT / "_data/mat101_native.json"
 OUTPUT_IMAGES = ROOT / "assets/images/mat101/statements"
 
@@ -310,6 +311,7 @@ def build_solution_html() -> dict[str, str]:
 
 def main() -> None:
     chapters = json.loads(EXERCISE_DATA.read_text())
+    tag_index = json.loads(TAG_DATA.read_text())["tags"]
     exercise_ids = {
         exercise_id
         for chapter in chapters
@@ -318,6 +320,23 @@ def main() -> None:
     }
     if set(EXERCISE_DIFFICULTIES) != exercise_ids:
         raise RuntimeError("Difficulty markers do not match the exercise index")
+
+    exercise_tags: dict[str, list[dict[str, str]]] = defaultdict(list)
+    known_slugs: set[str] = set()
+    for tag in tag_index:
+        slug = tag["slug"]
+        if slug in known_slugs:
+            raise RuntimeError(f"Duplicate tag slug: {slug}")
+        known_slugs.add(slug)
+        for exercise_id in tag["exercises"]:
+            if exercise_id not in exercise_ids:
+                raise RuntimeError(f"Unknown exercise {exercise_id} in tag {slug}")
+            exercise_tags[exercise_id].append(
+                {"slug": slug, "label": tag["label"]}
+            )
+    untagged = sorted(exercise_ids - set(exercise_tags))
+    if untagged:
+        raise RuntimeError(f"Exercises without tags: {untagged}")
 
     statements = build_statement_images()
     solutions = build_solution_html()
@@ -332,6 +351,7 @@ def main() -> None:
                         "chapterNumber": chapter["number"],
                         "chapterTitle": chapter["title"],
                         "difficulty": EXERCISE_DIFFICULTIES[exercise_id],
+                        "tags": exercise_tags[exercise_id],
                         "statementImages": statements[exercise_id],
                         "solutionHtml": solutions[exercise_id],
                     }

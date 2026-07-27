@@ -5,6 +5,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "calcul-complexe",
+        "label": "Calcul complexe"
+      },
+      {
+        "slug": "conjugaison",
+        "label": "Conjugaison"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-1-1.webp"
     ],
@@ -16,6 +26,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "calcul-complexe",
+        "label": "Calcul complexe"
+      },
+      {
+        "slug": "equations",
+        "label": "Équations"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-2-1.webp"
     ],
@@ -27,6 +47,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "module-argument",
+        "label": "Module et argument"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-3-1.webp"
     ],
@@ -38,6 +68,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "conjugaison",
+        "label": "Conjugaison"
+      },
+      {
+        "slug": "module-argument",
+        "label": "Module et argument"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-4-1.webp"
     ],
@@ -49,6 +89,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "module-argument",
+        "label": "Module et argument"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-5-1.webp"
     ],
@@ -60,6 +110,20 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "module-argument",
+        "label": "Module et argument"
+      },
+      {
+        "slug": "trigonometrie",
+        "label": "Trigonométrie"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-6-1.webp",
       "/assets/images/mat101/statements/exercice-1-6-2.webp"
@@ -72,6 +136,20 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "calcul-complexe",
+        "label": "Calcul complexe"
+      },
+      {
+        "slug": "equations",
+        "label": "Équations"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-7-1.webp"
     ],
@@ -83,6 +161,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "racines-complexes",
+        "label": "Racines complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-8-1.webp"
     ],
@@ -94,6 +182,20 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "racines-complexes",
+        "label": "Racines complexes"
+      },
+      {
+        "slug": "trigonometrie",
+        "label": "Trigonométrie"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-9-1.webp"
     ],
@@ -105,6 +207,20 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "equations",
+        "label": "Équations"
+      },
+      {
+        "slug": "polynomes-complexes",
+        "label": "Polynômes complexes"
+      },
+      {
+        "slug": "racines-complexes",
+        "label": "Racines complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-10-1.webp"
     ],
@@ -116,6 +232,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "conjugaison",
+        "label": "Conjugaison"
+      },
+      {
+        "slug": "polynomes-complexes",
+        "label": "Polynômes complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-11-1.webp",
       "/assets/images/mat101/statements/exercice-1-11-2.webp"
@@ -128,6 +254,20 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "racines-complexes",
+        "label": "Racines complexes"
+      },
+      {
+        "slug": "racines-unite",
+        "label": "Racines de l’unité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-12-1.webp"
     ],
@@ -139,6 +279,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "trigonometrie",
+        "label": "Trigonométrie"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-13-1.webp"
     ],
@@ -150,6 +300,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "trigonometrie",
+        "label": "Trigonométrie"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-14-1.webp"
     ],
@@ -161,6 +321,12 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "geometrie-complexe",
+        "label": "Géométrie complexe"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-15-1.webp"
     ],
@@ -172,6 +338,12 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "geometrie-complexe",
+        "label": "Géométrie complexe"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-16-1.webp"
     ],
@@ -183,6 +355,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "geometrie-complexe",
+        "label": "Géométrie complexe"
+      },
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-17-1.webp"
     ],
@@ -194,6 +376,32 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "forme-exponentielle",
+        "label": "Forme exponentielle"
+      },
+      {
+        "slug": "module-argument",
+        "label": "Module et argument"
+      },
+      {
+        "slug": "polynomes-complexes",
+        "label": "Polynômes complexes"
+      },
+      {
+        "slug": "racines-complexes",
+        "label": "Racines complexes"
+      },
+      {
+        "slug": "racines-unite",
+        "label": "Racines de l’unité"
+      },
+      {
+        "slug": "trigonometrie",
+        "label": "Trigonométrie"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-18-1.webp"
     ],
@@ -205,6 +413,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "geometrie-complexe",
+        "label": "Géométrie complexe"
+      },
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-19-1.webp"
     ],
@@ -216,6 +434,16 @@
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "module-argument",
+        "label": "Module et argument"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-20-1.webp"
     ],
@@ -227,6 +455,12 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-1-1.webp"
     ],
@@ -238,6 +472,12 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-2-1.webp"
     ],
@@ -249,6 +489,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "intervalles",
+        "label": "Intervalles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-3-1.webp"
     ],
@@ -260,6 +510,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      },
+      {
+        "slug": "intervalles",
+        "label": "Intervalles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-4-1.webp",
       "/assets/images/mat101/statements/exercice-2-4-2.webp"
@@ -272,6 +532,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*/**",
+    "tags": [
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      },
+      {
+        "slug": "intervalles",
+        "label": "Intervalles"
+      },
+      {
+        "slug": "rationalite",
+        "label": "Rationalité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-5-1.webp"
     ],
@@ -283,6 +557,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "inclusions",
+        "label": "Inclusions"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-6-1.webp"
     ],
@@ -294,6 +578,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "produit-cartesien",
+        "label": "Produit cartésien"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-7-1.webp"
     ],
@@ -305,6 +599,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "inclusions",
+        "label": "Inclusions"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-8-1.webp",
       "/assets/images/mat101/statements/exercice-2-8-2.webp"
@@ -317,6 +621,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      },
+      {
+        "slug": "tables-verite",
+        "label": "Tables de vérité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-9-1.webp"
     ],
@@ -328,6 +646,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-10-1.webp"
     ],
@@ -339,6 +667,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-11-1.webp",
       "/assets/images/mat101/statements/exercice-2-11-2.webp"
@@ -351,6 +689,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-12-1.webp"
     ],
@@ -362,6 +710,28 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      },
+      {
+        "slug": "tables-verite",
+        "label": "Tables de vérité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-13-1.webp"
     ],
@@ -373,6 +743,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-14-1.webp"
     ],
@@ -384,6 +764,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "tables-verite",
+        "label": "Tables de vérité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-15-1.webp"
     ],
@@ -395,6 +789,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "tables-verite",
+        "label": "Tables de vérité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-16-1.webp"
     ],
@@ -406,6 +814,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-17-1.webp"
     ],
@@ -417,6 +835,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "equations",
+        "label": "Équations"
+      },
+      {
+        "slug": "geometrie-analytique",
+        "label": "Géométrie analytique"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-18-1.webp"
     ],
@@ -428,6 +856,24 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-19-1.webp"
     ],
@@ -439,6 +885,24 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-20-1.webp"
     ],
@@ -450,6 +914,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-21-1.webp"
     ],
@@ -461,6 +935,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-22-1.webp"
     ],
@@ -472,6 +956,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      },
+      {
+        "slug": "invariants",
+        "label": "Invariants"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-23-1.webp",
       "/assets/images/mat101/statements/exercice-2-23-2.webp"
@@ -484,6 +978,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "absurde-contraposition",
+        "label": "Absurde et contraposition"
+      },
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "rationalite",
+        "label": "Rationalité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-24-1.webp"
     ],
@@ -495,6 +1003,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "equations",
+        "label": "Équations"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-25-1.webp"
     ],
@@ -506,6 +1024,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-26-1.webp"
     ],
@@ -517,6 +1045,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "derivation-integration",
+        "label": "Dérivation et intégration"
+      },
+      {
+        "slug": "rationalite",
+        "label": "Rationalité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-27-1.webp",
       "/assets/images/mat101/statements/exercice-2-27-2.webp"
@@ -529,6 +1067,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-28-1.webp"
     ],
@@ -540,6 +1088,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "absurde-contraposition",
+        "label": "Absurde et contraposition"
+      },
+      {
+        "slug": "rationalite",
+        "label": "Rationalité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-29-1.webp"
     ],
@@ -551,6 +1109,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "geometrie-analytique",
+        "label": "Géométrie analytique"
+      },
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-30-1.webp"
     ],
@@ -562,6 +1130,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-31-1.webp"
     ],
@@ -573,6 +1151,24 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      },
+      {
+        "slug": "pavage-fibonacci",
+        "label": "Pavages et Fibonacci"
+      },
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-32-1.webp"
     ],
@@ -584,6 +1180,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "equations",
+        "label": "Équations"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-33-1.webp"
     ],
@@ -595,6 +1205,20 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "implication-equivalence",
+        "label": "Implication et équivalence"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-34-1.webp",
       "/assets/images/mat101/statements/exercice-2-34-2.webp"
@@ -607,6 +1231,16 @@
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "intervalles",
+        "label": "Intervalles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-35-1.webp"
     ],
@@ -618,6 +1252,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "produit-cartesien",
+        "label": "Produit cartésien"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-1-1.webp"
     ],
@@ -629,6 +1273,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "images-antecedents",
+        "label": "Images et antécédents"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-2-1.webp"
     ],
@@ -640,6 +1294,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*/**",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "images-antecedents",
+        "label": "Images et antécédents"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-3-1.webp"
     ],
@@ -651,6 +1315,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "bornes-extrema",
+        "label": "Bornes et extrema"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-4-1.webp",
       "/assets/images/mat101/statements/exercice-3-4-2.webp"
@@ -663,6 +1345,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "bornes-extrema",
+        "label": "Bornes et extrema"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "logique",
+        "label": "Logique"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-5-1.webp"
     ],
@@ -674,6 +1374,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "composition",
+        "label": "Composition"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-6-1.webp"
     ],
@@ -685,6 +1395,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "indicatrices",
+        "label": "Fonctions indicatrices"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-7-1.webp"
     ],
@@ -696,6 +1416,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "images-antecedents",
+        "label": "Images et antécédents"
+      },
+      {
+        "slug": "inclusions",
+        "label": "Inclusions"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-8-1.webp",
       "/assets/images/mat101/statements/exercice-3-8-2.webp"
@@ -708,6 +1446,20 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "injectivite-surjectivite",
+        "label": "Injectivité et surjectivité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-9-1.webp"
     ],
@@ -719,6 +1471,20 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "composition",
+        "label": "Composition"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "injectivite-surjectivite",
+        "label": "Injectivité et surjectivité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-10-1.webp"
     ],
@@ -730,6 +1496,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "images-antecedents",
+        "label": "Images et antécédents"
+      },
+      {
+        "slug": "inclusions",
+        "label": "Inclusions"
+      },
+      {
+        "slug": "injectivite-surjectivite",
+        "label": "Injectivité et surjectivité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-11-1.webp"
     ],
@@ -741,6 +1525,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "continuite",
+        "label": "Continuité"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "images-antecedents",
+        "label": "Images et antécédents"
+      },
+      {
+        "slug": "intervalles",
+        "label": "Intervalles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-12-1.webp"
     ],
@@ -752,6 +1554,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": null,
+    "tags": [
+      {
+        "slug": "equations",
+        "label": "Équations"
+      },
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "images-antecedents",
+        "label": "Images et antécédents"
+      },
+      {
+        "slug": "injectivite-surjectivite",
+        "label": "Injectivité et surjectivité"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-13-1.webp"
     ],
@@ -763,6 +1583,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "fonctions",
+        "label": "Fonctions"
+      },
+      {
+        "slug": "injectivite-surjectivite",
+        "label": "Injectivité et surjectivité"
+      },
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      },
+      {
+        "slug": "transformations-complexes",
+        "label": "Transformations complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-14-1.webp"
     ],
@@ -774,6 +1612,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "composition",
+        "label": "Composition"
+      },
+      {
+        "slug": "points-fixes",
+        "label": "Points fixes"
+      },
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      },
+      {
+        "slug": "transformations-complexes",
+        "label": "Transformations complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-15-1.webp"
     ],
@@ -785,6 +1641,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "composition",
+        "label": "Composition"
+      },
+      {
+        "slug": "points-fixes",
+        "label": "Points fixes"
+      },
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      },
+      {
+        "slug": "transformations-complexes",
+        "label": "Transformations complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-16-1.webp"
     ],
@@ -796,6 +1670,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "rotations",
+        "label": "Rotations"
+      },
+      {
+        "slug": "transformations-complexes",
+        "label": "Transformations complexes"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-17-1.webp",
       "/assets/images/mat101/statements/exercice-3-17-2.webp"
@@ -808,6 +1692,12 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-18-1.webp"
     ],
@@ -819,6 +1709,12 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-19-1.webp"
     ],
@@ -830,6 +1726,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      },
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-20-1.webp",
       "/assets/images/mat101/statements/exercice-3-20-2.webp"
@@ -842,6 +1748,20 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      },
+      {
+        "slug": "injectivite-surjectivite",
+        "label": "Injectivité et surjectivité"
+      },
+      {
+        "slug": "produit-cartesien",
+        "label": "Produit cartésien"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-21-1.webp"
     ],
@@ -853,6 +1773,12 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-22-1.webp",
       "/assets/images/mat101/statements/exercice-3-22-2.webp"
@@ -865,6 +1791,12 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-23-1.webp"
     ],
@@ -876,6 +1808,12 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-24-1.webp"
     ],
@@ -887,6 +1825,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "denombrement",
+        "label": "Dénombrement"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-25-1.webp"
     ],
@@ -898,6 +1846,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      },
+      {
+        "slug": "telescopage",
+        "label": "Télescopage"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-26-1.webp",
       "/assets/images/mat101/statements/exercice-3-26-2.webp"
@@ -910,6 +1868,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "binome-newton",
+        "label": "Binôme de Newton"
+      },
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-27-1.webp"
     ],
@@ -921,6 +1889,20 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "binome-newton",
+        "label": "Binôme de Newton"
+      },
+      {
+        "slug": "derivation-integration",
+        "label": "Dérivation et intégration"
+      },
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-28-1.webp"
     ],
@@ -932,6 +1914,16 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      },
+      {
+        "slug": "telescopage",
+        "label": "Télescopage"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-29-1.webp"
     ],
@@ -943,6 +1935,24 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "binome-newton",
+        "label": "Binôme de Newton"
+      },
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "racines-unite",
+        "label": "Racines de l’unité"
+      },
+      {
+        "slug": "sommes-produits",
+        "label": "Sommes et produits"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-30-1.webp"
     ],
@@ -954,6 +1964,12 @@
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
     "difficulty": "***",
+    "tags": [
+      {
+        "slug": "relations-equivalence",
+        "label": "Relations d’équivalence"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-31-1.webp",
       "/assets/images/mat101/statements/exercice-3-31-2.webp"
@@ -966,6 +1982,12 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "approximations-erreur",
+        "label": "Approximations et erreur"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-1-1.webp"
     ],
@@ -977,6 +1999,16 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-2-1.webp"
     ],
@@ -988,6 +2020,20 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "bornes-extrema",
+        "label": "Bornes et extrema"
+      },
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-3-1.webp"
     ],
@@ -999,6 +2045,16 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "bornes-extrema",
+        "label": "Bornes et extrema"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-4-1.webp"
     ],
@@ -1010,6 +2066,16 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "approximations-erreur",
+        "label": "Approximations et erreur"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-5-1.webp",
       "/assets/images/mat101/statements/exercice-4-5-2.webp"
@@ -1022,6 +2088,20 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "congruences-divisibilite",
+        "label": "Congruences et divisibilité"
+      },
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-6-1.webp"
     ],
@@ -1033,6 +2113,16 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-7-1.webp"
     ],
@@ -1044,6 +2134,20 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "inegalites",
+        "label": "Inégalités"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-8-1.webp"
     ],
@@ -1055,6 +2159,20 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "ensembles",
+        "label": "Ensembles"
+      },
+      {
+        "slug": "inclusions",
+        "label": "Inclusions"
+      },
+      {
+        "slug": "intervalles",
+        "label": "Intervalles"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-9-1.webp",
       "/assets/images/mat101/statements/exercice-4-9-2.webp"
@@ -1067,6 +2185,28 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "approximations-erreur",
+        "label": "Approximations et erreur"
+      },
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "epsilon",
+        "label": "Epsilon et seuils"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-10-1.webp"
     ],
@@ -1078,6 +2218,28 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*/**",
+    "tags": [
+      {
+        "slug": "approximations-erreur",
+        "label": "Approximations et erreur"
+      },
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "epsilon",
+        "label": "Epsilon et seuils"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-11-1.webp",
       "/assets/images/mat101/statements/exercice-4-11-2.webp"
@@ -1090,6 +2252,24 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "bornes-extrema",
+        "label": "Bornes et extrema"
+      },
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "periodicite",
+        "label": "Périodicité"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-12-1.webp"
     ],
@@ -1101,6 +2281,32 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "bornes-extrema",
+        "label": "Bornes et extrema"
+      },
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "periodicite",
+        "label": "Périodicité"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-13-1.webp"
     ],
@@ -1112,6 +2318,24 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "*",
+    "tags": [
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "epsilon",
+        "label": "Epsilon et seuils"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-14-1.webp"
     ],
@@ -1123,6 +2347,28 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "approximations-erreur",
+        "label": "Approximations et erreur"
+      },
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "points-fixes",
+        "label": "Points fixes"
+      },
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-15-1.webp",
       "/assets/images/mat101/statements/exercice-4-15-2.webp"
@@ -1135,6 +2381,28 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "approximations-erreur",
+        "label": "Approximations et erreur"
+      },
+      {
+        "slug": "convergence",
+        "label": "Convergence"
+      },
+      {
+        "slug": "methodes-numeriques",
+        "label": "Méthodes numériques"
+      },
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-16-1.webp"
     ],
@@ -1146,6 +2414,28 @@
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
     "difficulty": "**",
+    "tags": [
+      {
+        "slug": "contre-exemples",
+        "label": "Contre-exemples"
+      },
+      {
+        "slug": "quantificateurs",
+        "label": "Quantificateurs"
+      },
+      {
+        "slug": "raisonnement-cas",
+        "label": "Raisonnement par cas"
+      },
+      {
+        "slug": "recurrence",
+        "label": "Récurrence"
+      },
+      {
+        "slug": "suites",
+        "label": "Suites"
+      }
+    ],
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-17-1.webp"
     ],

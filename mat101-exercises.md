@@ -66,9 +66,26 @@ math: true
       <p id="mat101-result-count" aria-live="polite">103 exercices affichés</p>
     </div>
     <label class="mat101-search">
-      <span>Rechercher par numéro ou chapitre</span>
-      <input id="mat101-search-input" type="search" inputmode="search" placeholder="Par exemple : 2.14, complexes, limites…" autocomplete="off">
+      <span>Rechercher par numéro, chapitre ou notion</span>
+      <input id="mat101-search-input" type="search" inputmode="search" placeholder="Par exemple : 2.14, injectivité, récurrence…" autocomplete="off">
     </label>
+
+    <details class="mat101-tag-index">
+      <summary>
+        <span>Index des notions</span>
+        <small>{{ site.data.mat101_tags.tags.size }} mots-clés</small>
+      </summary>
+      <div class="mat101-tag-controls" aria-label="Filtrer les exercices par notion">
+        <button class="mat101-tag-filter is-active" type="button" data-mat101-tag="" aria-pressed="true">
+          Toutes les notions <span>103</span>
+        </button>
+        {% for tag in site.data.mat101_tags.tags %}
+          <button class="mat101-tag-filter" type="button" data-mat101-tag="{{ tag.slug }}" aria-pressed="false">
+            {{ tag.label }} <span>{{ tag.exercises.size }}</span>
+          </button>
+        {% endfor %}
+      </div>
+    </details>
   </section>
 
   <div id="mat101-no-results" class="mat101-no-results" hidden>
@@ -93,32 +110,43 @@ math: true
             class="mat101-native-card"
             id="exercice-{{ exercise.id | replace: '.', '-' }}"
             data-mat101-exercise
-            data-search="{{ exercise.id }} {{ exercise.chapterTitle | downcase }}"
+            data-tags="{% for tag in exercise.tags %}{{ tag.slug }}{% unless forloop.last %},{% endunless %}{% endfor %}"
+            data-search="{{ exercise.id }} {{ exercise.chapterTitle | downcase }}{% for tag in exercise.tags %} {{ tag.label | downcase }}{% endfor %}"
           >
             <summary>
-              <span class="mat101-exercise-number">
-                <span>Exercice <strong>{{ exercise.id }}</strong></span>
-                {% if exercise.difficulty %}
-                  {% case exercise.difficulty %}
-                    {% when "*" %}
-                      {% assign difficulty_label = "notions essentielles" %}
-                      {% assign difficulty_class = "essential" %}
-                    {% when "**" %}
-                      {% assign difficulty_label = "niveau généralement attendu à l’examen" %}
-                      {% assign difficulty_class = "exam" %}
-                    {% when "***" %}
-                      {% assign difficulty_label = "approfondissement" %}
-                      {% assign difficulty_class = "advanced" %}
-                    {% else %}
-                      {% assign difficulty_label = "niveau intermédiaire" %}
-                      {% assign difficulty_class = "mixed" %}
-                  {% endcase %}
-                  <span
-                    class="mat101-difficulty mat101-difficulty-{{ difficulty_class }}"
-                    aria-label="Difficulté : {{ difficulty_label }}"
-                    title="Difficulté : {{ difficulty_label }}"
-                  >{{ exercise.difficulty }}</span>
-                {% endif %}
+              <span class="mat101-exercise-summary-main">
+                <span class="mat101-exercise-number">
+                  <span>Exercice <strong>{{ exercise.id }}</strong></span>
+                  {% if exercise.difficulty %}
+                    {% case exercise.difficulty %}
+                      {% when "*" %}
+                        {% assign difficulty_label = "notions essentielles" %}
+                        {% assign difficulty_class = "essential" %}
+                      {% when "**" %}
+                        {% assign difficulty_label = "niveau généralement attendu à l’examen" %}
+                        {% assign difficulty_class = "exam" %}
+                      {% when "***" %}
+                        {% assign difficulty_label = "approfondissement" %}
+                        {% assign difficulty_class = "advanced" %}
+                      {% else %}
+                        {% assign difficulty_label = "niveau intermédiaire" %}
+                        {% assign difficulty_class = "mixed" %}
+                    {% endcase %}
+                    <span
+                      class="mat101-difficulty mat101-difficulty-{{ difficulty_class }}"
+                      aria-label="Difficulté : {{ difficulty_label }}"
+                      title="Difficulté : {{ difficulty_label }}"
+                    >{{ exercise.difficulty }}</span>
+                  {% endif %}
+                </span>
+                <span class="mat101-exercise-tags" aria-label="Notions abordées">
+                  {% for tag in exercise.tags limit:3 %}
+                    <span>{{ tag.label }}</span>
+                  {% endfor %}
+                  {% if exercise.tags.size > 3 %}
+                    <span class="mat101-more-tags">+{{ exercise.tags.size | minus: 3 }}</span>
+                  {% endif %}
+                </span>
               </span>
               <span class="mat101-open-label">Lire l’énoncé</span>
             </summary>
