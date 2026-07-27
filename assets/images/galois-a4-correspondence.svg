@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1230 720" role="img" aria-labelledby="title desc">
+  <title id="title">The Galois correspondence for an abstract A4-extension</title>
+  <desc id="desc">Subgroups of A4 appear on the left and the corresponding fixed fields, labelled by degree over K, appear in reverse order on the right.</desc>
+  <style>
+    .bg { fill: #f8fafc; }
+    .edge { stroke: #64748b; stroke-width: 2.25; }
+    .node { fill: #fff; stroke: #0f766e; stroke-width: 2.25; rx: 11; }
+    .field { stroke: #7c3aed; }
+    .label { fill: #0f172a; font: 22px Georgia, serif; text-anchor: middle; dominant-baseline: middle; }
+    .small { font-size: 18px; }
+    .heading { fill: #0f172a; font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+    .note { fill: #475569; font: 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-anchor: middle; }
+  </style>
+  <rect class="bg" width="1230" height="720" rx="18"/>
+  <text class="heading" x="290" y="38">Subgroups of A₄</text>
+  <text class="heading" x="910" y="38">Fixed fields</text>
+
+  <!-- subgroup edges -->
+  <line class="edge" x1="290" y1="88" x2="110" y2="235"/>
+  <line class="edge" x1="290" y1="88" x2="230" y2="235"/>
+  <line class="edge" x1="290" y1="88" x2="350" y2="235"/>
+  <line class="edge" x1="290" y1="88" x2="470" y2="235"/>
+  <line class="edge" x1="290" y1="88" x2="290" y2="402"/>
+  <line class="edge" x1="290" y1="442" x2="170" y2="575"/>
+  <line class="edge" x1="290" y1="442" x2="290" y2="575"/>
+  <line class="edge" x1="290" y1="442" x2="410" y2="575"/>
+  <line class="edge" x1="110" y1="275" x2="290" y2="650"/>
+  <line class="edge" x1="230" y1="275" x2="290" y2="650"/>
+  <line class="edge" x1="350" y1="275" x2="290" y2="650"/>
+  <line class="edge" x1="470" y1="275" x2="290" y2="650"/>
+  <line class="edge" x1="170" y1="615" x2="290" y2="650"/>
+  <line class="edge" x1="290" y1="615" x2="290" y2="650"/>
+  <line class="edge" x1="410" y1="615" x2="290" y2="650"/>
+
+  <rect class="node" x="245" y="64" width="90" height="46"/>
+  <text class="label" x="290" y="87">{1}</text>
+  <rect class="node" x="65" y="225" width="90" height="52"/>
+  <text class="label" x="110" y="251">C₃¹</text>
+  <rect class="node" x="185" y="225" width="90" height="52"/>
+  <text class="label" x="230" y="251">C₃²</text>
+  <rect class="node" x="305" y="225" width="90" height="52"/>
+  <text class="label" x="350" y="251">C₃³</text>
+  <rect class="node" x="425" y="225" width="90" height="52"/>
+  <text class="label" x="470" y="251">C₃⁴</text>
+  <rect class="node" x="235" y="395" width="110" height="52"/>
+  <text class="label" x="290" y="421">V₄</text>
+  <rect class="node" x="125" y="568" width="90" height="52"/>
+  <text class="label" x="170" y="594">C₂¹</text>
+  <rect class="node" x="245" y="568" width="90" height="52"/>
+  <text class="label" x="290" y="594">C₂²</text>
+  <rect class="node" x="365" y="568" width="90" height="52"/>
+  <text class="label" x="410" y="594">C₂³</text>
+  <rect class="node" x="235" y="642" width="110" height="46"/>
+  <text class="label" x="290" y="665">A₄</text>
+
+  <!-- field edges -->
+  <line class="edge" x1="910" y1="88" x2="790" y2="185"/>
+  <line class="edge" x1="910" y1="88" x2="910" y2="185"/>
+  <line class="edge" x1="910" y1="88" x2="1030" y2="185"/>
+  <line class="edge" x1="910" y1="88" x2="670" y2="360"/>
+  <line class="edge" x1="910" y1="88" x2="830" y2="360"/>
+  <line class="edge" x1="910" y1="88" x2="990" y2="360"/>
+  <line class="edge" x1="910" y1="88" x2="1150" y2="360"/>
+  <line class="edge" x1="790" y1="237" x2="910" y2="515"/>
+  <line class="edge" x1="910" y1="237" x2="910" y2="515"/>
+  <line class="edge" x1="1030" y1="237" x2="910" y2="515"/>
+  <line class="edge" x1="670" y1="412" x2="910" y2="650"/>
+  <line class="edge" x1="830" y1="412" x2="910" y2="650"/>
+  <line class="edge" x1="990" y1="412" x2="910" y2="650"/>
+  <line class="edge" x1="1150" y1="412" x2="910" y2="650"/>
+  <line class="edge" x1="910" y1="567" x2="910" y2="650"/>
+
+  <rect class="node field" x="850" y="64" width="120" height="46"/>
+  <text class="label" x="910" y="87">L</text>
+  <rect class="node field" x="725" y="180" width="130" height="58"/>
+  <text class="label small" x="790" y="209">degree 6</text>
+  <rect class="node field" x="845" y="180" width="130" height="58"/>
+  <text class="label small" x="910" y="209">degree 6</text>
+  <rect class="node field" x="965" y="180" width="130" height="58"/>
+  <text class="label small" x="1030" y="209">degree 6</text>
+  <rect class="node field" x="605" y="355" width="130" height="58"/>
+  <text class="label small" x="670" y="384">degree 4</text>
+  <rect class="node field" x="765" y="355" width="130" height="58"/>
+  <text class="label small" x="830" y="384">degree 4</text>
+  <rect class="node field" x="925" y="355" width="130" height="58"/>
+  <text class="label small" x="990" y="384">degree 4</text>
+  <rect class="node field" x="1085" y="355" width="130" height="58"/>
+  <text class="label small" x="1150" y="384">degree 4</text>
+  <rect class="node field" x="840" y="510" width="140" height="58"/>
+  <text class="label small" x="910" y="539">Lⱽ, degree 3</text>
+  <rect class="node field" x="850" y="642" width="120" height="46"/>
+  <text class="label" x="910" y="665">K</text>
+
+  <text class="note" x="600" y="696">Inclusions reverse; subgroup order becomes [L : Lᴴ].</text>
+</svg>
