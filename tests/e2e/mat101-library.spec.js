@@ -114,6 +114,15 @@ test.describe("MAT101 native library", () => {
     await expect(pentagonSolution.locator(".mat101-root-geometry")).toContainText(
       "pentagone régulier"
     );
+    await expect(pentagonSolution.locator(".mat101-solution-body")).toContainText(
+      "On développe directement le produit demandé"
+    );
+    await expect(pentagonSolution.locator(".mat101-solution-body")).toContainText(
+      "s’annulent deux à deux"
+    );
+    await expect(pentagonSolution.locator(".mat101-solution-body")).not.toContainText(
+      "L’identité de la somme géométrique"
+    );
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 

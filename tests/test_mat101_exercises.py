@@ -264,6 +264,18 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             r"f(x)\geq\frac32\iff x\in",
             tex,
         )
+        self.assertIn(
+            r"(z^5+z^4+z^3+z^2+z)-(z^4+z^3+z^2+z+1)",
+            tex,
+        )
+        self.assertIn(
+            "Les termes de degrés $1$ à $4$ s'annulent deux à deux",
+            tex,
+        )
+        self.assertNotIn(
+            "L'identité de la somme géométrique donne",
+            tex,
+        )
 
         with zipfile.ZipFile(SOLUTION_ARCHIVE) as archive:
             autonomous = archive.read(
