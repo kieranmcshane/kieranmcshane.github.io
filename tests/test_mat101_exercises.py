@@ -64,7 +64,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertEqual(len(solution_ids), len(set(solution_ids)))
         self.assertEqual(set(solution_ids), exercise_ids)
         self.assertGreaterEqual(min(solution["pdfPage"] for solution in SOLUTIONS), 6)
-        self.assertLessEqual(max(solution["pdfPage"] for solution in SOLUTIONS), 57)
+        self.assertEqual(max(solution["pdfPage"] for solution in SOLUTIONS), 59)
 
     def test_every_exercise_has_native_statement_and_solution(self):
         expected_ids = [
@@ -142,6 +142,24 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("relations-equivalence", native_tags["3.31"])
         self.assertIn("methodes-numeriques", native_tags["4.16"])
 
+    def test_polya_structure_is_targeted_and_visible_online(self):
+        methods = sum(
+            item["solutionHtml"].count('class="mat101-method"')
+            for item in NATIVE
+        )
+        reviews = sum(
+            item["solutionHtml"].count('class="mat101-solution-review"')
+            for item in NATIVE
+        )
+        self.assertEqual(methods, 17)
+        self.assertEqual(reviews, 16)
+        self.assertIn('class="mat101-method"', next(
+            item["solutionHtml"] for item in NATIVE if item["id"] == "2.23"
+        ))
+        self.assertNotIn('class="mat101-method"', next(
+            item["solutionHtml"] for item in NATIVE if item["id"] == "2.2"
+        ))
+
     def test_downloadable_artifacts_are_present(self):
         self.assertTrue(PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(PDF.stat().st_size, 500_000)
@@ -177,9 +195,12 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Énoncés originaux", PAGE)
         self.assertIn("Adaptation web et interface", PAGE)
         self.assertIn("Rédaction du corrigé", PAGE)
+        self.assertIn("méthode de George Pólya", PAGE)
         self.assertIn("Raphaël Rossignol est indiqué comme responsable", PAGE)
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", PAGE)
         self.assertIn("ni d’un corrigé officiel de l’UGA", PAGE)
+        self.assertIn("'/about/#contact'", PAGE)
+        self.assertNotIn("Découpe fidèle des énoncés", PAGE)
 
     def test_citation_and_rights_language_is_precise(self):
         self.assertIn("Citations bibliographiques recommandées", PAGE)
@@ -189,6 +210,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("@misc{collectif_mat101_2022", bib)
         self.assertIn("@misc{mcshane_recueil_mat101_2026", bib)
         self.assertIn("@misc{mcshane_corrige_mat101_2026", bib)
+        self.assertIn("@book{polya_how_to_solve_it_1945", bib)
 
     def test_pdf_metadata_credits_original_collective(self):
         tex = TEX.read_text()
@@ -208,6 +230,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Ressource pédagogique non officielle", tex)
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", tex)
         self.assertIn("contenu mathématique non relu intégralement", tex)
+        self.assertEqual(tex.count(r"\begin{methode}"), 17)
+        self.assertEqual(tex.count(r"\textbf{Examen de la solution.}"), 16)
+        self.assertIn("George Pólya", tex)
         self.assertNotIn(r"\definecolor{UGAblue}", tex)
 
     def test_solution_source_follows_the_redaction_guidelines(self):
@@ -233,6 +258,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
     def test_mobile_layout_keeps_exercises_accessible(self):
         self.assertIn(".mat101-native-list", STYLES)
         self.assertIn(".mat101-native-solution", STYLES)
+        self.assertIn(".mat101-method", STYLES)
+        self.assertIn(".mat101-solution-review", STYLES)
         self.assertIn(".mat101-difficulty-advanced", STYLES)
         self.assertIn(".mat101-tag-filter.is-active", STYLES)
         self.assertIn(".mat101-exercise-tags", STYLES)

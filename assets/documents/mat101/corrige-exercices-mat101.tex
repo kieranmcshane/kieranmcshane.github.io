@@ -66,7 +66,7 @@
 
 \newenvironment{methode}{%
   \begin{center}\begin{minipage}{0.94\linewidth}
-  \color{MATblue}\textbf{Méthode.}\enspace
+  \color{MATblue}\textbf{Idée et plan.}\enspace
 }{%
   \end{minipage}\end{center}
 }
@@ -107,6 +107,8 @@
 \section*{Avant-propos}
 \addcontentsline{toc}{section}{Avant-propos}
 Ce document accompagne le recueil d'exercices extrait du polycopié MAT101 daté du 13 septembre 2022. Les solutions sont volontairement rédigées : les objets sont introduits, les équivalences sont justifiées et les vérifications finales sont données lorsque l'élévation au carré, une division ou un changement de variable peut créer une difficulté logique.
+
+Pour les problèmes qui demandent une idée plutôt qu'un calcul immédiat, un court encadré « Idée et plan » explicite le passage des données à la stratégie. Cette organisation est inspirée des quatre temps proposés par George Pólya : comprendre le problème, concevoir un plan, l'exécuter, puis examiner la solution obtenue.\footnote{George Pólya, \emph{How to Solve It: A New Aspect of Mathematical Method}, Princeton University Press, 1945.} Elle n'est utilisée que lorsqu'elle éclaire réellement la démarche.
 
 \textbf{Crédits et statut.} Le contenu des énoncés provient du collectif MAT101 de l'Université Grenoble Alpes. Le polycopié cite notamment Bernard Ycart, Agnès Coquio, Éric Dumas, Emmanuel Peyre, Pierre Dehornoy et Raphaël Rossignol, et désigne ce dernier comme responsable de l'édition citée. La rédaction initiale de ce corrigé a été assistée par OpenAI ChatGPT ; Kieran McShane en assure l'édition et la publication avec l'assistance d'OpenAI Codex. Ce document n'est ni un corrigé officiel ni une publication de l'UGA. Sa structure et sa couverture des 103 exercices ont été contrôlées, mais ses solutions n'ont pas encore fait l'objet d'une relecture mathématique humaine intégrale.
 
@@ -676,6 +678,9 @@ m=\frac{a+c}{2},\quad n=\frac{b+d}{2}.
 \end{corrige}
 
 \begin{corrige}{1.17}
+\begin{methode}
+L'inconnue géométrique est la forme du triangle $ABC$, tandis que les données sont des relations linéaires entre ses affixes. Pour les interpréter, on soustrait une même affixe afin de faire apparaître des vecteurs, puis on reconnaît dans la multiplication par $\e^{\pm\ii\pi/3}$ une rotation de $60^\circ$.
+\end{methode}
 On pose $j=\e^{2\ii\pi/3}$. On rappelle que $1+j+j^2=0$ et
 \[
 -j^2=\e^{\ii\pi/3},
@@ -706,6 +711,7 @@ Réciproquement, si $ABC$ est équilatéral et non dégénéré, alors
 z_C-z_A=\e^{\pm\ii\pi/3}(z_B-z_A).
 \]
 En remplaçant $\e^{\ii\pi/3}$ par $-j^2$ et $\e^{-\ii\pi/3}$ par $-j$, on retrouve l'une des deux relations annoncées.
+\textbf{Examen de la solution.} Les deux signes correspondent exactement aux deux orientations possibles d'un triangle équilatéral ; la réciproque vérifie que le critère obtenu n'est pas seulement nécessaire.
 \end{corrige}
 
 \begin{corrige}{1.18}
@@ -779,6 +785,9 @@ En remplaçant $\e^{\ii\pi/3}$ par $-j^2$ et $\e^{-\ii\pi/3}$ par $-j$, on retro
 \end{corrige}
 
 \begin{corrige}{1.19}
+\begin{methode}
+Les centres recherchés sont construits à partir de triangles équilatéraux. On traduit d'abord chaque construction par une rotation complexe de $-\pi/3$, puis on calcule les trois affixes et leurs différences. Le but est de faire apparaître entre ces différences une même rotation de $60^\circ$.
+\end{methode}
 Posons
 \[
 \lambda=\e^{-\ii\pi/3}=\frac12-\frac{\sqrt3}{2}\ii.
@@ -809,6 +818,7 @@ Comme le triangle $ABC$ est parcouru dans le sens trigonométrique, les triangle
   \]
   En effet, les coefficients de $z_A,z_B,z_C$ coïncident après multiplication de $z_Q-z_P$ par $\e^{\ii\pi/3}$. Ainsi $\overrightarrow{PR}$ est l'image de $\overrightarrow{PQ}$ par une rotation de $\pi/3$. Les deux vecteurs ont même norme et forment un angle de $\pi/3$ ; le triangle $PQR$ est donc équilatéral.
 \end{enumerate}
+\textbf{Examen de la solution.} La relation finale fournit simultanément l'égalité $PQ=PR$ et l'angle $\widehat{QPR}=\pi/3$, qui sont bien les deux informations nécessaires.
 \end{corrige}
 
 \begin{corrige}{1.20}
@@ -1306,6 +1316,9 @@ Une récurrence montre immédiatement que tous les $u_n$ sont entiers.
 \end{corrige}
 
 \begin{corrige}{2.23}
+\begin{methode}
+Les opérations changent à la fois les positions et les orientations des cartes : compter seulement les cartes visibles ne suffit donc pas. On cherche un invariant qui combine ces deux informations. On pondère une carte visible par $+1$ en position paire et par $-1$ en position impaire, puis on vérifie que chaque opération conserve la somme obtenue.
+\end{methode}
 Numérotons les positions de $1$ à $2n$ à partir du sommet du paquet. Pour une configuration donnée, posons
 \[
 \begin{aligned}
@@ -1324,6 +1337,7 @@ Ainsi l'opération A conserve $S$.
 Une opération de type B est une permutation cyclique des $2n$ positions. Si le nombre $k$ de cartes déplacées est pair, la parité de chaque position est conservée et $S$ ne change pas. Si $k$ est impair, les positions paires et impaires sont échangées et $S$ est remplacé par $-S$. Dans les deux cas, la valeur $S=0$ est préservée.
 
 Par récurrence sur le nombre d'opérations, on obtient toujours $S=0$, ce qui est exactement la propriété demandée.
+\textbf{Examen de la solution.} L'argument vérifie les trois points indispensables pour un invariant : sa valeur initiale, son comportement sous l'opération A et son comportement sous l'opération B.
 \end{corrige}
 
 \begin{corrige}{2.24}
@@ -1465,6 +1479,9 @@ Les candidats sont $2$ et $-1$, mais seul $2$ satisfait $x\geq0$ et l'équation 
 \end{corrige}
 
 \begin{corrige}{2.30}
+\begin{methode}
+Dans la première question, il faut relier une condition valable pour tout $x\in[0,1]$ aux seules valeurs aux extrémités. On réécrit donc $ax+b$ comme combinaison convexe de $b$ et de $a+b$. Dans la partie géométrique, on remplace la construction équilatérale par les deux rotations de centre $A$ et d'angles $\pm\pi/3$.
+\end{methode}
 \begin{enumerate}
   \item Supposons d'abord $ax+b\geq0$ pour tout $x\in[0,1]$. En prenant $x=0$ puis $x=1$, on obtient $b\geq0$ et $a+b\geq0$.
 
@@ -1494,6 +1511,9 @@ Les candidats sont $2$ et $-1$, mais seul $2$ satisfait $x\geq0$ et l'équation 
 \end{corrige}
 
 \begin{corrige}{2.31}
+\begin{methode}
+La représentation $4a+5b$ suggère de passer d'un entier au suivant en ajoutant $4$ ou $5$. Une récurrence forte permet d'utiliser une représentation déjà obtenue pour un entier voisin. Avant l'hérédité, il faut choisir assez de cas initiaux pour que l'entier auquel on se ramène reste dans le domaine couvert.
+\end{methode}
 \begin{enumerate}
   \item Les quatre premiers cas sont
   \[
@@ -1528,9 +1548,13 @@ Les candidats sont $2$ et $-1$, mais seul $2$ satisfait $x\geq0$ et l'équation 
   \end{align*}
   La propriété est donc vraie pour tout $n\in\N$.
 \end{enumerate}
+\textbf{Examen de la solution.} Dans les deux récurrences, les cas initiaux couvrent exactement les rangs qui ne peuvent pas être ramenés à un rang antérieur ; aucune valeur n'est laissée indéterminée.
 \end{corrige}
 
 \begin{corrige}{2.32}
+\begin{methode}
+Pour reconnaître une suite de Fibonacci, on ne cherche pas d'abord une formule fermée : on partitionne les objets selon leur premier choix. Un pavage commence soit par un domino vertical, soit par deux dominos horizontaux ; ces deux cas ramènent à des rectangles plus courts et produisent la récurrence attendue.
+\end{methode}
 \begin{enumerate}
   \item
   \[
@@ -1576,6 +1600,7 @@ Les candidats sont $2$ et $-1$, mais seul $2$ satisfait $x\geq0$ et l'équation 
   \boxed{F_n^2=F_{n-1}F_{n+1}+(-1)^{n+1}}.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} La même idée -- partitionner ou comparer deux suites satisfaisant la même récurrence -- explique les différentes identités, au lieu de les traiter comme des formules indépendantes.
 \end{corrige}
 
 \begin{corrige}{2.33}
@@ -1607,6 +1632,9 @@ Autrement dit, l'hérédité n'a pas été démontrée au rang initial : $P(1)$ 
 \end{corrige}
 
 \begin{corrige}{2.35}
+\begin{methode}
+L'intersection de plusieurs intervalles est gouvernée par deux nombres : la plus grande extrémité gauche et la plus petite extrémité droite. La condition « intersections deux à deux non vides » doit précisément permettre de comparer ces deux extrêmes. Cette reformulation remplace le dessin par un argument valable pour toute famille finie.
+\end{methode}
 \begin{enumerate}
   \item Pour trois intervalles fermés qui se coupent deux à deux, le dessin montre que l'extrémité gauche la plus à droite ne dépasse pas l'extrémité droite la plus à gauche ; la zone comprise entre ces deux points appartient aux trois intervalles.
 
@@ -1642,6 +1670,7 @@ Autrement dit, l'hérédité n'a pas été démontrée au rang initial : $P(1)$ 
   \bigcap_{n\geq1}I_n=\varnothing.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} Le contre-exemple infini montre que l'existence des deux extrêmes $\alpha$ et $\beta$, donc la finitude de la famille, est essentielle à la preuve.
 \end{corrige}
 
 
@@ -1782,6 +1811,9 @@ Fixons $x\in E$.
 \end{corrige}
 
 \begin{corrige}{3.8}
+\begin{methode}
+Chaque assertion compare une image ou une image réciproque à une opération ensembliste. On revient donc aux définitions d'appartenance : prendre un élément arbitraire donne les inclusions toujours vraies. Lorsqu'une égalité paraît douteuse, on cherche le plus petit contre-exemple possible, avec une fonction non injective ou non surjective.
+\end{methode}
 Les assertions toujours vraies sont
 \[
 \boxed{1,2,3,4,6\text{ et }9}.
@@ -1811,6 +1843,7 @@ Voici les justifications.
   \]
   qui n'est pas toujours $f(A)\cup B$. Par exemple, si $E=\{0\}$, $F=\{0,1\}$, $f(0)=0$, $A=\varnothing$ et $B=\{1\}$, le membre de gauche est vide et celui de droite vaut $\{1\}$.
 \end{enumerate}
+\textbf{Examen de la solution.} Les égalités retenues ont été démontrées par appartenance ; chaque égalité rejetée est accompagnée d'un contre-exemple explicite qui vérifie toutes les données.
 \end{corrige}
 
 \begin{corrige}{3.9}
@@ -1864,6 +1897,9 @@ Réciproquement, supposons l'égalité vraie pour toute partie $A$ de $E$. Si $f
 \end{corrige}
 
 \begin{corrige}{3.12}
+\begin{methode}
+Pour montrer que $f(I)$ est un intervalle, on prend deux valeurs de l'image et une valeur intermédiaire : il faut alors retrouver des antécédents dans $I$ et appliquer le théorème des valeurs intermédiaires entre eux. Les calculs d'images particuliers se ramènent ensuite à la forme canonique et aux variations de la fonction.
+\end{methode}
 \begin{enumerate}
   \item Soient $y_1,y_2\in f(I)$, avec $y_1<y_2$, et soit $y\in[y_1,y_2]$. Il existe $x_1,x_2\in I$ tels que $f(x_1)=y_1$ et $f(x_2)=y_2$. Comme $I$ est un intervalle, le segment d'extrémités $x_1,x_2$ est contenu dans $I$. Le théorème des valeurs intermédiaires fournit un point $x$ entre $x_1$ et $x_2$ tel que $f(x)=y$. Ainsi $f(I)$ contient tout réel situé entre deux de ses éléments : c'est un intervalle.
 
@@ -1880,6 +1916,7 @@ Réciproquement, supposons l'égalité vraie pour toute partie $A$ de $E$. Si $f
   \boxed{f^{-1}(y)=2-\sqrt{y+1}}.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} Pour $y\geq-1$, la formule proposée donne bien un nombre $x\leq2$ et la substitution vérifie $f(x)=y$ ; le domaine et l'image de l'inverse sont donc cohérents.
 \end{corrige}
 
 \begin{corrige}{3.13}
@@ -2080,6 +2117,9 @@ Pour chaque question, on vérifie l'initialisation puis on calcule le terme au r
 \end{corrige}
 
 \begin{corrige}{3.21}
+\begin{methode}
+La formule proposée code un couple $(i,j)$ par un seul entier. On vérifie successivement qu'elle reste dans l'ensemble d'arrivée, que deux couples ne peuvent avoir le même code, puis que tout code possède un antécédent. Pour décoder, la division euclidienne par $q$ fournit naturellement les deux coordonnées.
+\end{methode}
 \begin{enumerate}
   \item Pour $1\leq i\leq p$ et $1\leq j\leq q$,
   \[
@@ -2105,9 +2145,13 @@ Pour chaque question, on vérifie l'initialisation puis on calcule le terme au r
   \boxed{g(i,j)=i+(j-1)p}.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} La formule de décodage fournit directement un antécédent pour chaque entier de $1$ à $pq$ et confirme la surjectivité indépendamment de l'argument de cardinalité.
 \end{corrige}
 
 \begin{corrige}{3.22}
+\begin{methode}
+Le dénombrement devient simple si l'on partitionne les couples selon leur première coordonnée. Les sous-ensembles obtenus sont disjoints, de même cardinal, et leur réunion est l'ensemble à compter. Cette partition correspond exactement aux deux niveaux de l'arbre de choix.
+\end{methode}
 \begin{enumerate}
   \item Une fois la première coordonnée fixée à $a$, la seconde peut être choisie parmi les $n-1$ éléments différents de $a$. Ainsi $\boxed{|E_a|=n-1}$.
   \item Si $a\neq a'$, un même couple ne peut avoir à la fois $a$ et $a'$ pour première coordonnée. Donc $E_a\cap E_{a'}=\varnothing$.
@@ -2122,6 +2166,7 @@ Pour chaque question, on vérifie l'initialisation puis on calcule le terme au r
   \]
   \item Au couple $(x_1,x_2)$, on associe l'application $\varphi:\{1,2\}\to\{1,\ldots,n\}$ définie par $\varphi(1)=x_1$ et $\varphi(2)=x_2$. Elle est injective exactement lorsque $x_1\neq x_2$. Cette correspondance est bijective.
 \end{enumerate}
+\textbf{Examen de la solution.} Le résultat $n(n-1)$ se lit de trois façons concordantes : par partition, sur l'arbre de choix et par correspondance avec les injections.
 \end{corrige}
 
 \begin{corrige}{3.23}
@@ -2442,6 +2487,9 @@ On applique le binôme de Newton.
 \end{corrige}
 
 \begin{corrige}{3.31}
+\begin{methode}
+Une opération sur des classes d'équivalence n'est définie que si son résultat ne dépend pas des représentants choisis. On part donc de deux paires de représentants équivalents, on traduit cette équivalence par des produits en croix, puis on montre que les résultats sont encore équivalents. Les propriétés algébriques peuvent ensuite être vérifiées sur des représentants quelconques.
+\end{methode}
 \begin{enumerate}
   \item Supposons
   \[
@@ -2536,6 +2584,7 @@ On applique le binôme de Newton.
   \]
   donc elles sont équivalentes. C'est cette compatibilité qui permet de définir sans ambiguïté l'addition et la multiplication sur les classes d'équivalence.
 \end{enumerate}
+\textbf{Examen de la solution.} Les deux calculs finaux ne déterminent pas seulement une formule : ils vérifient précisément l'indépendance vis-à-vis des représentants, condition nécessaire à toute opération sur le quotient.
 \end{corrige}
 
 
@@ -2694,6 +2743,9 @@ La relation
 \end{corrige}
 
 \begin{corrige}{4.8}
+\begin{methode}
+Avant de traiter les assertions quantifiées, on simplifie la propriété $P(i,j)$ et on encadre le terme inconnu $u_j$. Ces bornes permettent de repérer les zones du tableau qui sont toujours vraies ou toujours fausses. On choisit ensuite explicitement les indices dans l'ordre imposé par les quantificateurs.
+\end{methode}
 Pour $j\geq3$, on a $j-u_j\geq j-2\geq1$. Comme $i$ et $j-u_j$
 sont strictement positifs, la proposition $P(i,j)$ est vraie exactement
 lorsque
@@ -2722,9 +2774,13 @@ Dans le tableau :
   \boxed{\frac1{j-u_j}\longrightarrow0}.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} Dans (a), l'indice $J$ dépend de $i$ ; dans (b), le choix de $j$ dépend de $i$ et de $J$. Ces dépendances respectent exactement l'ordre des quantificateurs.
 \end{corrige}
 
 \begin{corrige}{4.9}
+\begin{methode}
+Une égalité d'ensembles se démontre par deux inclusions. Pour une union, on part d'un élément appartenant à au moins un des ensembles ; pour une intersection, on exploite le fait qu'il appartient à tous. La réciproque consiste chaque fois à construire un indice ou un paramètre convenable.
+\end{methode}
 \begin{enumerate}
   \item Chaque carré est positif ou nul, donc l'union est incluse dans $[0,+\infty[$. Réciproquement, si $y\geq0$, alors $y=(\sqrt y)^2$. Ainsi
   \[
@@ -2760,6 +2816,7 @@ Dans le tableau :
   \boxed{\bigcup_{n\geq1}\left[\frac1{n+1},\frac1n\right]=]0,1]}.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} Les extrémités ouvertes ou fermées ont été testées séparément ; en particulier, $0$ n'appartient pas à la dernière union tandis que $1$ y appartient.
 \end{corrige}
 
 \begin{corrige}{4.10}
@@ -2913,6 +2970,9 @@ Or $u_n-u_m$ est un entier. Le seul entier de valeur absolue strictement inféri
 \end{corrige}
 
 \begin{corrige}{4.15}
+\begin{methode}
+La valeur $\varphi$ est le point fixe attendu de la récurrence. On commence par construire un intervalle stable contenant tous les termes, puis on compare l'erreur $|u_{n+1}-\varphi|$ à l'erreur précédente. Une contraction géométrique donnera à la fois la convergence et un rang assurant la précision demandée.
+\end{methode}
 \begin{coquille}
 La relation $u_{n+1}=1+1/u_n$ doit être imposée dès $n=0$ ; avec « $n\in\N^*$ », le terme $u_1$ n'est pas défini.
 \end{coquille}
@@ -2981,9 +3041,13 @@ La relation $u_{n+1}=1+1/u_n$ doit être imposée dès $n=0$ ; avec « $n\in\N^*
   \]
   Le choix $\boxed{n=18}$ convient.
 \end{enumerate}
+\textbf{Examen de la solution.} Les valeurs aux rangs $17$ et $18$ encadrent le seuil demandé : $18$ est donc le premier rang certifié par cette majoration.
 \end{corrige}
 
 \begin{corrige}{4.16}
+\begin{methode}
+La limite attendue est $r=\sqrt a$. On introduit l'erreur $e_n=u_n-r$ afin de transformer la récurrence en une relation portant directement sur la distance à la limite. On établit d'abord que les termes restent au-dessus de $r$, puis on obtient successivement une majoration géométrique et une majoration quadratique de l'erreur.
+\end{methode}
 Posons $r=\sqrt a$ et $e_n=u_n-r$. On a $u_0=\lfloor r\rfloor+1>r$.
 \begin{enumerate}
   \item Supposons $u_n>r$. Alors
@@ -3032,9 +3096,13 @@ Posons $r=\sqrt a$ et $e_n=u_n-r$. On a $u_0=\lfloor r\rfloor+1>r$.
   \]
   Ainsi le choix universel $\boxed{n=5}$ convient.
 \end{enumerate}
+\textbf{Examen de la solution.} La borne $2^{-31}<10^{-6}$ est indépendante de $a$ sous les hypothèses de l'exercice ; le rang $5$ convient donc uniformément.
 \end{corrige}
 
 \begin{corrige}{4.17}
+\begin{methode}
+L'évolution dépend de la parité de la valeur courante. Pour montrer que toute trajectoire atteint $1$, on cherche à rejoindre en une ou deux étapes une valeur strictement plus petite que la valeur initiale. Cela suggère une récurrence forte sur cette valeur initiale, plutôt qu'une récurrence sur le rang.
+\end{methode}
 \begin{coquille}
 La parité doit porter sur la valeur $u_n$, et non sur l'indice $n$, comme le confirme la remarque sur le problème de Syracuse. Avec la formule imprimée, l'assertion est fausse : pour $u_0=3$, on obtient $u_{2k}=2+2^{-k}$, qui n'est jamais égal à $1$.
 \end{coquille}
@@ -3065,6 +3133,7 @@ u_n/2,&u_n\text{ pair}.
   \boxed{\forall u_0\in\N^*,\ \exists N\in\N,\ u_N=1}.
   \]
 \end{enumerate}
+\textbf{Examen de la solution.} Pour toute valeur initiale $m>1$, une ou deux étapes conduisent à une valeur strictement plus petite ; c'est exactement la condition qui rend la récurrence forte applicable.
 \end{corrige}
 
 

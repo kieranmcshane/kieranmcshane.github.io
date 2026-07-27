@@ -11555,6 +11555,35 @@ body:has(.mat101-library) {
   margin-bottom: 0;
 }
 
+.mat101-method {
+  margin: 0.9rem 0 1.1rem;
+  padding: 0.85rem 0.95rem;
+  border-left: 4px solid var(--mat101-accent);
+  border-radius: 0 6px 6px 0;
+  color: #24434d;
+  background: #edf8f8;
+}
+
+.mat101-method > strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--mat101-accent-dark);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mat101-method p {
+  margin: 0;
+}
+
+.mat101-solution-review {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--mat101-line);
+  color: #394b55;
+}
+
 .mat101-solution-body h3,
 .mat101-solution-body h4 {
   color: var(--mat101-solution);

@@ -216,7 +216,7 @@ math: true
     <div class="mat101-file-group mat101-file-group-solution">
       <p class="mat101-file-label">Corrigé détaillé</p>
       <ul>
-        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · 57 pages</span></a></li>
+        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · 59 pages</span></a></li>
         <li><a href="{{ solution_tex_url }}" download><strong>Source LaTeX autonome</strong><span>Un seul fichier compilable</span></a></li>
         <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
       </ul>
@@ -234,11 +234,11 @@ math: true
       </article>
       <article>
         <h3>Adaptation web et interface</h3>
-        <p><strong>Kieran McShane, avec l’assistance d’OpenAI Codex.</strong> Découpe fidèle des énoncés depuis le document source, indexation des 103 exercices, conversion du corrigé LaTeX en contenu web, correspondance énoncé–corrigé, conception et publication de l’interface.</p>
+        <p><strong>Kieran McShane, avec l’assistance d’OpenAI Codex.</strong></p>
       </article>
       <article>
         <h3>Rédaction du corrigé</h3>
-        <p><strong>Rédaction initiale assistée par OpenAI ChatGPT ; édition et publication par Kieran McShane, avec OpenAI Codex.</strong> Version du 27 juillet 2026. Il ne s’agit ni d’un corrigé officiel de l’UGA ni d’une validation institutionnelle.</p>
+        <p><strong>Rédaction initiale assistée par OpenAI ChatGPT ; édition et publication par Kieran McShane, avec OpenAI Codex.</strong> Les encadrés « Idée et plan » s’inspirent de la méthode de George Pólya. Version du 27 juillet 2026. Il ne s’agit ni d’un corrigé officiel de l’UGA ni d’une validation institutionnelle.</p>
       </article>
     </div>
 
@@ -258,7 +258,8 @@ math: true
       <p><cite>Collectif MAT101, <em>Langage mathématique, algèbre et géométrie élémentaires</em>, UE MAT101, Université Grenoble Alpes, édition du 13 septembre 2022. Responsable de l’édition citée : Raphaël Rossignol.</cite></p>
       <p><cite>Kieran McShane (éd.), <em>Recueil des exercices MAT101</em>, sélection, indexation et interface web, 2026, d’après le polycopié collectif MAT101 de l’Université Grenoble Alpes, avec l’assistance d’OpenAI Codex.</cite></p>
       <p><cite>Kieran McShane (éd.), <em>Corrigé détaillé des exercices MAT101</em>, rédaction initiale assistée par OpenAI ChatGPT, édition et publication avec l’assistance d’OpenAI Codex, version du 27 juillet 2026, corrigé non officiel.</cite></p>
-      <a href="{{ bib_url }}" download>Télécharger les trois références BibTeX</a>
+      <p><cite>George Pólya, <em>How to Solve It: A New Aspect of Mathematical Method</em>, Princeton University Press, 1945.</cite></p>
+      <a href="{{ bib_url }}" download>Télécharger les quatre références BibTeX</a>
     </details>
 
     <div class="mat101-rights-note">

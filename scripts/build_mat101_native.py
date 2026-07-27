@@ -346,9 +346,22 @@ def build_solution_html() -> dict[str, str]:
 
     solutions = {}
     for match in SOLUTION_HEADING.finditer(html):
+        solution = match.group(2).strip()
+        solution = re.sub(
+            r"<p><strong>Idée et plan\.</strong></p>\s*(<p>.*?</p>)",
+            r'<aside class="mat101-method"><strong>Idée et plan.</strong>\1</aside>',
+            solution,
+            flags=re.DOTALL,
+        )
+        solution = re.sub(
+            r"<p>(?=(?:(?!</p>).)*<strong>Examen de la solution\.</strong>)",
+            '<p class="mat101-solution-review">',
+            solution,
+            flags=re.DOTALL,
+        )
         solutions[match.group(1)] = TABLE_BLOCK.sub(
             enhance_table,
-            match.group(2).strip(),
+            solution,
         )
     if len(solutions) != 103:
         raise RuntimeError(f"Expected 103 solution blocks, found {len(solutions)}")
