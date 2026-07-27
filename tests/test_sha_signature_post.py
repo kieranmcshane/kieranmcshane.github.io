@@ -28,12 +28,29 @@ class ShaSignaturePostTests(unittest.TestCase):
         self.assertIn(r"\sqrt{2\log 2}", self.text)
         self.assertIn(r"2^{n/2}", self.text)
 
+    def test_advanced_extensions_remain_conceptually_separated(self) -> None:
+        self.assertIn("Length extension and why HMAC has two layers", self.text)
+        self.assertIn("Bitcoin: hashing and signing are still different jobs", self.text)
+        self.assertIn("What an ideal quantum computer would change", self.text)
+        self.assertIn("This is a repeated preimage-style threshold search, not a birthday collision search", self.text)
+        self.assertIn("SHA-256 itself is still not the signature", self.text)
+
+    def test_official_sha256_test_vector_is_complete(self) -> None:
+        digest = (
+            "ba7816bf8f01cfea414140de5dae2223"
+            "\n  b00361a396177a9cb410ff61f20015ad"
+        )
+        self.assertIn(digest, self.text)
+
     def test_primary_sources_are_linked_at_the_relevant_claims(self) -> None:
         required_links = (
             "fips180-4.pdf#page=14",
             "fips180-4.pdf#page=26",
             "rfc8017.html#section-8.2",
             "rfc5280.html#section-4.1",
+            "rfc2104.html#section-2",
+            "developer.bitcoin.org/reference/block_chain.html#block-headers",
+            "bips.dev/340",
             "shattered.io/static/shattered.pdf",
             "support.apple.com/en-gb/103769",
         )
