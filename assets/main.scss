@@ -10864,7 +10864,78 @@ body:has(.mat101-library) .post-header {
   font-size: 0.72rem;
 }
 
-.mat101-source {
+.mat101-credits {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--mat101-line);
+}
+
+.mat101-credits > h2 {
+  margin-top: 0;
+}
+
+.mat101-credit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.mat101-credit-grid article {
+  padding: 1rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 5px;
+  background: #fbfdfd;
+}
+
+.mat101-credit-grid h3 {
+  margin: 0 0 0.55rem;
+  color: var(--mat101-accent-dark);
+  font-size: 0.95rem;
+}
+
+.mat101-credit-grid p {
+  margin: 0;
+  color: var(--mat101-muted);
+  font-size: 0.8rem;
+}
+
+.mat101-citation {
+  margin-top: 0.85rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 5px;
+  background: #fff;
+}
+
+.mat101-citation summary {
+  cursor: pointer;
+  color: var(--mat101-ink);
+  font-weight: 800;
+}
+
+.mat101-citation p {
+  color: var(--mat101-muted);
+  font-size: 0.82rem;
+}
+
+.mat101-rights-note {
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #a36222;
+  color: #574638;
+  background: #fff8ef;
+  font-size: 0.8rem;
+}
+
+.mat101-rights-note p {
+  margin: 0;
+}
+
+.mat101-rights-note p + p {
+  margin-top: 0.55rem;
+}
+
+.mat101-solution-status {
   color: var(--mat101-muted);
   font-size: 0.82rem;
 }
@@ -10872,11 +10943,13 @@ body:has(.mat101-library) .post-header {
 @media screen and (max-width: 700px) {
   .mat101-stats,
   .mat101-chapter-nav,
-  .mat101-downloads {
+  .mat101-downloads,
+  .mat101-credit-grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .mat101-downloads > * {
+  .mat101-downloads > *,
+  .mat101-credit-grid article:last-child {
     grid-column: 1 / -1;
   }
 
@@ -10887,8 +10960,13 @@ body:has(.mat101-library) .post-header {
 
 @media screen and (max-width: 440px) {
   .mat101-chapter-nav,
-  .mat101-exercise-grid {
+  .mat101-exercise-grid,
+  .mat101-credit-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .mat101-credit-grid article {
+    grid-column: 1 / -1;
   }
 
   .mat101-actions a {

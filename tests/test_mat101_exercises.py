@@ -11,6 +11,7 @@ STYLES = (ROOT / "assets/main.scss").read_text()
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
 ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
+BIB = ROOT / "assets/documents/mat101/mat101-citations.bib"
 
 
 class Mat101ExerciseLibraryTests(unittest.TestCase):
@@ -51,8 +52,33 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
     def test_section_is_visible_and_explains_solution_status(self):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
         self.assertIn("103 exercices de mathématiques", PAGE)
-        self.assertIn("Un corrigé intégral n’est pas publié ici", PAGE)
+        self.assertIn("Un corrigé intégral ne sera publié", PAGE)
         self.assertIn("mat101-exercises.md", CONFIG)
+
+    def test_credits_distinguish_original_adaptation_and_future_solutions(self):
+        self.assertIn("Contenu mathématique original", PAGE)
+        self.assertIn("Cette édition et cette interface", PAGE)
+        self.assertIn("Futurs corrigés", PAGE)
+        self.assertIn("Raphaël Rossignol comme dernier responsable", PAGE)
+        self.assertIn("avec l’assistance d’OpenAI Codex", PAGE)
+        self.assertIn("non officielles et non attribuées à l’UGA", PAGE)
+
+    def test_citation_and_rights_language_is_precise(self):
+        self.assertIn("Citation bibliographique recommandée", PAGE)
+        self.assertIn("Aucune licence de réutilisation explicite", PAGE)
+        self.assertIn("ni une édition officielle de l’UGA ni un corrigé officiel", PAGE)
+        bib = BIB.read_text()
+        self.assertIn("@misc{collectif_mat101_2022", bib)
+        self.assertIn("@misc{mcshane_recueil_mat101_2026", bib)
+
+    def test_pdf_metadata_credits_original_collective(self):
+        tex = TEX.read_text()
+        self.assertIn(
+            "pdfauthor={Collectif MAT101, Université Grenoble Alpes}",
+            tex,
+        )
+        self.assertIn("responsable de l'édition citée", tex)
+        self.assertIn("avec l'assistance d'OpenAI Codex", tex)
 
     def test_mobile_layout_keeps_exercises_accessible(self):
         self.assertIn(".mat101-exercise-grid", STYLES)
