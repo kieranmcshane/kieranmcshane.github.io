@@ -96,7 +96,30 @@ math: true
             data-search="{{ exercise.id }} {{ exercise.chapterTitle | downcase }}"
           >
             <summary>
-              <span class="mat101-exercise-number">Exercice <strong>{{ exercise.id }}</strong></span>
+              <span class="mat101-exercise-number">
+                <span>Exercice <strong>{{ exercise.id }}</strong></span>
+                {% if exercise.difficulty %}
+                  {% case exercise.difficulty %}
+                    {% when "*" %}
+                      {% assign difficulty_label = "notions essentielles" %}
+                      {% assign difficulty_class = "essential" %}
+                    {% when "**" %}
+                      {% assign difficulty_label = "niveau généralement attendu à l’examen" %}
+                      {% assign difficulty_class = "exam" %}
+                    {% when "***" %}
+                      {% assign difficulty_label = "approfondissement" %}
+                      {% assign difficulty_class = "advanced" %}
+                    {% else %}
+                      {% assign difficulty_label = "niveau intermédiaire" %}
+                      {% assign difficulty_class = "mixed" %}
+                  {% endcase %}
+                  <span
+                    class="mat101-difficulty mat101-difficulty-{{ difficulty_class }}"
+                    aria-label="Difficulté : {{ difficulty_label }}"
+                    title="Difficulté : {{ difficulty_label }}"
+                  >{{ exercise.difficulty }}</span>
+                {% endif %}
+              </span>
               <span class="mat101-open-label">Lire l’énoncé</span>
             </summary>
 

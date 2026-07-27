@@ -12,6 +12,7 @@ test.describe("MAT101 native library", () => {
   }) => {
     await gotoLibrary(page);
     await expect(page.locator("[data-mat101-exercise]")).toHaveCount(103);
+    await expect(page.locator(".mat101-difficulty")).toHaveCount(102);
     await expect(page.locator(".mat101-statement img")).toHaveCount(122);
     await expect(page.locator(".mat101-solution-body")).toHaveCount(103);
     expect(await hasHorizontalOverflow(page)).toBe(false);
@@ -29,6 +30,11 @@ test.describe("MAT101 native library", () => {
     );
 
     const exercise = page.locator("#exercice-3-31");
+    await expect(exercise.locator(".mat101-difficulty")).toHaveText("***");
+    await expect(exercise.locator(".mat101-difficulty")).toHaveAttribute(
+      "aria-label",
+      "Difficulté : approfondissement"
+    );
     await exercise.locator(":scope > summary").click();
     await expect(exercise).toHaveAttribute("open", "");
     await expect(exercise.locator(".mat101-statement img")).toHaveCount(2);

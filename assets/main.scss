@@ -10958,6 +10958,9 @@ body:has(.mat101-library) {
 }
 
 .mat101-exercise-number {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
   font-size: 0.82rem;
 }
 
@@ -10966,6 +10969,47 @@ body:has(.mat101-library) {
   color: var(--mat101-accent-dark);
   font-size: 1.08rem;
   font-variant-numeric: tabular-nums;
+}
+
+.mat101-difficulty {
+  display: inline-flex;
+  min-width: 1.8rem;
+  min-height: 1.45rem;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0.12rem 0.42rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.mat101-difficulty-essential {
+  border-color: #b9d7d5;
+  color: #176d70;
+  background: #eaf7f6;
+}
+
+.mat101-difficulty-exam {
+  border-color: #e5c789;
+  color: #805a12;
+  background: #fff7df;
+}
+
+.mat101-difficulty-advanced {
+  border-color: #cdbbd9;
+  color: #68427d;
+  background: #f6effa;
+}
+
+.mat101-difficulty-mixed {
+  border-color: #c6ccd4;
+  color: #4d5b69;
+  background: #f2f5f7;
 }
 
 .mat101-open-label {
