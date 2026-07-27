@@ -4,6 +4,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-1-1.webp"
     ],
@@ -14,6 +15,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-2-1.webp"
     ],
@@ -24,6 +26,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-3-1.webp"
     ],
@@ -34,6 +37,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-4-1.webp"
     ],
@@ -44,6 +48,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-5-1.webp"
     ],
@@ -54,6 +59,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-6-1.webp",
       "/assets/images/mat101/statements/exercice-1-6-2.webp"
@@ -65,6 +71,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-7-1.webp"
     ],
@@ -75,6 +82,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-8-1.webp"
     ],
@@ -85,6 +93,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-9-1.webp"
     ],
@@ -95,6 +104,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-10-1.webp"
     ],
@@ -105,6 +115,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-11-1.webp",
       "/assets/images/mat101/statements/exercice-1-11-2.webp"
@@ -116,6 +127,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-12-1.webp"
     ],
@@ -126,6 +138,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-13-1.webp"
     ],
@@ -136,6 +149,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-14-1.webp"
     ],
@@ -146,6 +160,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-15-1.webp"
     ],
@@ -156,6 +171,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-16-1.webp"
     ],
@@ -166,6 +182,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-17-1.webp"
     ],
@@ -176,6 +193,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-18-1.webp"
     ],
@@ -186,6 +204,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-19-1.webp"
     ],
@@ -196,6 +215,7 @@
     "chapterId": "complexes",
     "chapterNumber": "1",
     "chapterTitle": "Nombres complexes",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-1-20-1.webp"
     ],
@@ -206,6 +226,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-1-1.webp"
     ],
@@ -216,6 +237,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-2-1.webp"
     ],
@@ -226,6 +248,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-3-1.webp"
     ],
@@ -236,6 +259,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-4-1.webp",
       "/assets/images/mat101/statements/exercice-2-4-2.webp"
@@ -247,6 +271,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*/**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-5-1.webp"
     ],
@@ -257,6 +282,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-6-1.webp"
     ],
@@ -267,6 +293,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-7-1.webp"
     ],
@@ -277,6 +304,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-8-1.webp",
       "/assets/images/mat101/statements/exercice-2-8-2.webp"
@@ -288,6 +316,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-9-1.webp"
     ],
@@ -298,6 +327,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-10-1.webp"
     ],
@@ -308,6 +338,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-11-1.webp",
       "/assets/images/mat101/statements/exercice-2-11-2.webp"
@@ -319,6 +350,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-12-1.webp"
     ],
@@ -329,6 +361,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-13-1.webp"
     ],
@@ -339,6 +372,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-14-1.webp"
     ],
@@ -349,6 +383,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-15-1.webp"
     ],
@@ -359,6 +394,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-16-1.webp"
     ],
@@ -369,6 +405,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-17-1.webp"
     ],
@@ -379,6 +416,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-18-1.webp"
     ],
@@ -389,6 +427,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-19-1.webp"
     ],
@@ -399,6 +438,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-20-1.webp"
     ],
@@ -409,6 +449,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-21-1.webp"
     ],
@@ -419,6 +460,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-22-1.webp"
     ],
@@ -429,6 +471,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-23-1.webp",
       "/assets/images/mat101/statements/exercice-2-23-2.webp"
@@ -440,6 +483,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-24-1.webp"
     ],
@@ -450,6 +494,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-25-1.webp"
     ],
@@ -460,6 +505,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-26-1.webp"
     ],
@@ -470,6 +516,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-27-1.webp",
       "/assets/images/mat101/statements/exercice-2-27-2.webp"
@@ -481,6 +528,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-28-1.webp"
     ],
@@ -491,6 +539,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-29-1.webp"
     ],
@@ -501,6 +550,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-30-1.webp"
     ],
@@ -511,6 +561,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-31-1.webp"
     ],
@@ -521,6 +572,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-32-1.webp"
     ],
@@ -531,6 +583,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-33-1.webp"
     ],
@@ -541,6 +594,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-34-1.webp",
       "/assets/images/mat101/statements/exercice-2-34-2.webp"
@@ -552,6 +606,7 @@
     "chapterId": "ensembles",
     "chapterNumber": "2",
     "chapterTitle": "Ensembles et langage mathématique",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-2-35-1.webp"
     ],
@@ -562,6 +617,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-1-1.webp"
     ],
@@ -572,6 +628,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-2-1.webp"
     ],
@@ -582,6 +639,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*/**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-3-1.webp"
     ],
@@ -592,6 +650,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-4-1.webp",
       "/assets/images/mat101/statements/exercice-3-4-2.webp"
@@ -603,6 +662,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-5-1.webp"
     ],
@@ -613,6 +673,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-6-1.webp"
     ],
@@ -623,6 +684,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-7-1.webp"
     ],
@@ -633,6 +695,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-8-1.webp",
       "/assets/images/mat101/statements/exercice-3-8-2.webp"
@@ -644,6 +707,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-9-1.webp"
     ],
@@ -654,6 +718,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-10-1.webp"
     ],
@@ -664,6 +729,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-11-1.webp"
     ],
@@ -674,6 +740,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-12-1.webp"
     ],
@@ -684,6 +751,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": null,
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-13-1.webp"
     ],
@@ -694,6 +762,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-14-1.webp"
     ],
@@ -704,6 +773,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-15-1.webp"
     ],
@@ -714,6 +784,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-16-1.webp"
     ],
@@ -724,6 +795,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-17-1.webp",
       "/assets/images/mat101/statements/exercice-3-17-2.webp"
@@ -735,6 +807,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-18-1.webp"
     ],
@@ -745,6 +818,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-19-1.webp"
     ],
@@ -755,6 +829,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-20-1.webp",
       "/assets/images/mat101/statements/exercice-3-20-2.webp"
@@ -766,6 +841,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-21-1.webp"
     ],
@@ -776,6 +852,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-22-1.webp",
       "/assets/images/mat101/statements/exercice-3-22-2.webp"
@@ -787,6 +864,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-23-1.webp"
     ],
@@ -797,6 +875,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-24-1.webp"
     ],
@@ -807,6 +886,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-25-1.webp"
     ],
@@ -817,6 +897,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-26-1.webp",
       "/assets/images/mat101/statements/exercice-3-26-2.webp"
@@ -828,6 +909,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-27-1.webp"
     ],
@@ -838,6 +920,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-28-1.webp"
     ],
@@ -848,6 +931,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-29-1.webp"
     ],
@@ -858,6 +942,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-30-1.webp"
     ],
@@ -868,6 +953,7 @@
     "chapterId": "fonctions",
     "chapterNumber": "3",
     "chapterTitle": "Fonctions et dénombrement",
+    "difficulty": "***",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-3-31-1.webp",
       "/assets/images/mat101/statements/exercice-3-31-2.webp"
@@ -879,6 +965,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-1-1.webp"
     ],
@@ -889,6 +976,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-2-1.webp"
     ],
@@ -899,6 +987,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-3-1.webp"
     ],
@@ -909,6 +998,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-4-1.webp"
     ],
@@ -919,6 +1009,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-5-1.webp",
       "/assets/images/mat101/statements/exercice-4-5-2.webp"
@@ -930,6 +1021,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-6-1.webp"
     ],
@@ -940,6 +1032,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-7-1.webp"
     ],
@@ -950,6 +1043,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-8-1.webp"
     ],
@@ -960,6 +1054,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-9-1.webp",
       "/assets/images/mat101/statements/exercice-4-9-2.webp"
@@ -971,6 +1066,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-10-1.webp"
     ],
@@ -981,6 +1077,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*/**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-11-1.webp",
       "/assets/images/mat101/statements/exercice-4-11-2.webp"
@@ -992,6 +1089,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-12-1.webp"
     ],
@@ -1002,6 +1100,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-13-1.webp"
     ],
@@ -1012,6 +1111,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "*",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-14-1.webp"
     ],
@@ -1022,6 +1122,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-15-1.webp",
       "/assets/images/mat101/statements/exercice-4-15-2.webp"
@@ -1033,6 +1134,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-16-1.webp"
     ],
@@ -1043,6 +1145,7 @@
     "chapterId": "limites",
     "chapterNumber": "4",
     "chapterTitle": "Limites de suites",
+    "difficulty": "**",
     "statementImages": [
       "/assets/images/mat101/statements/exercice-4-17-1.webp"
     ],

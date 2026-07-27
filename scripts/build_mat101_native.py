@@ -34,6 +34,33 @@ CHAPTER_SOURCE_STARTS = {
     "limites": 116,
 }
 
+# Difficulty markers transcribed from the headings in the source booklet.
+# Exercise 3.13 is the only exercise without a printed marker.
+EXERCISE_DIFFICULTIES = {
+    "1.1": "*", "1.2": "*", "1.3": "*", "1.4": "*", "1.5": "*",
+    "1.6": "**", "1.7": "**", "1.8": "**", "1.9": "**", "1.10": "**",
+    "1.11": "**", "1.12": "**", "1.13": "**", "1.14": "**", "1.15": "*",
+    "1.16": "*", "1.17": "**", "1.18": "***", "1.19": "***", "1.20": "***",
+    "2.1": "*", "2.2": "*", "2.3": "*", "2.4": "*", "2.5": "*/**",
+    "2.6": "**", "2.7": "**", "2.8": "**", "2.9": "*", "2.10": "*",
+    "2.11": "*", "2.12": "**", "2.13": "**", "2.14": "*", "2.15": "*",
+    "2.16": "*", "2.17": "**", "2.18": "**", "2.19": "*", "2.20": "*",
+    "2.21": "*", "2.22": "*", "2.23": "***", "2.24": "*", "2.25": "*",
+    "2.26": "**", "2.27": "**", "2.28": "**", "2.29": "**", "2.30": "**",
+    "2.31": "**", "2.32": "**", "2.33": "***", "2.34": "**", "2.35": "***",
+    "3.1": "*", "3.2": "*", "3.3": "*/**", "3.4": "**", "3.5": "**",
+    "3.6": "*", "3.7": "**", "3.8": "**", "3.9": "*", "3.10": "**",
+    "3.11": "**", "3.12": "*", "3.13": None, "3.14": "**", "3.15": "**",
+    "3.16": "**", "3.17": "**", "3.18": "*", "3.19": "*", "3.20": "**",
+    "3.21": "*", "3.22": "**", "3.23": "*", "3.24": "*", "3.25": "**",
+    "3.26": "**", "3.27": "**", "3.28": "**", "3.29": "**", "3.30": "***",
+    "3.31": "***",
+    "4.1": "*", "4.2": "*", "4.3": "*", "4.4": "*", "4.5": "**",
+    "4.6": "**", "4.7": "**", "4.8": "**", "4.9": "**", "4.10": "*",
+    "4.11": "*/**", "4.12": "**", "4.13": "**", "4.14": "*", "4.15": "**",
+    "4.16": "**", "4.17": "**",
+}
+
 HEADING_ID = re.compile(r"^([1-4]\.\d+)\.$")
 SOLUTION_HEADING = re.compile(
     r'<h2 class="unnumbered" id="exercice-([1-4]\.\d+)">.*?</h2>\s*'
@@ -283,6 +310,15 @@ def build_solution_html() -> dict[str, str]:
 
 def main() -> None:
     chapters = json.loads(EXERCISE_DATA.read_text())
+    exercise_ids = {
+        exercise_id
+        for chapter in chapters
+        for page in chapter["pages"]
+        for exercise_id in page["exercises"]
+    }
+    if set(EXERCISE_DIFFICULTIES) != exercise_ids:
+        raise RuntimeError("Difficulty markers do not match the exercise index")
+
     statements = build_statement_images()
     solutions = build_solution_html()
     records = []
@@ -295,6 +331,7 @@ def main() -> None:
                         "chapterId": chapter["id"],
                         "chapterNumber": chapter["number"],
                         "chapterTitle": chapter["title"],
+                        "difficulty": EXERCISE_DIFFICULTIES[exercise_id],
                         "statementImages": statements[exercise_id],
                         "solutionHtml": solutions[exercise_id],
                     }

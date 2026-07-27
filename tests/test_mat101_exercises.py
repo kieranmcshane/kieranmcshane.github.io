@@ -85,6 +85,16 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 self.assertTrue(image.exists(), image)
                 self.assertGreater(image.stat().st_size, 1_000)
 
+    def test_difficulty_markers_match_the_source_booklet(self):
+        markers = {item["id"]: item["difficulty"] for item in NATIVE}
+        self.assertEqual(set(markers.values()), {"*", "**", "***", "*/**", None})
+        self.assertEqual(markers["1.1"], "*")
+        self.assertEqual(markers["2.5"], "*/**")
+        self.assertEqual(markers["2.23"], "***")
+        self.assertIsNone(markers["3.13"])
+        self.assertEqual(markers["3.31"], "***")
+        self.assertEqual(markers["4.17"], "**")
+
     def test_downloadable_artifacts_are_present(self):
         self.assertTrue(PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(PDF.stat().st_size, 500_000)
@@ -102,6 +112,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Couverture complète", PAGE)
         self.assertIn("aucune relecture mathématique humaine intégrale", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
+        self.assertIn("mat101-difficulty", PAGE)
+        self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
         self.assertIn("exercise.statementImages", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
@@ -147,6 +159,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
     def test_mobile_layout_keeps_exercises_accessible(self):
         self.assertIn(".mat101-native-list", STYLES)
         self.assertIn(".mat101-native-solution", STYLES)
+        self.assertIn(".mat101-difficulty-advanced", STYLES)
         self.assertIn(".mat101-statement img", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
