@@ -254,6 +254,27 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
     def test_solution_source_follows_the_redaction_guidelines(self):
         tex = SOLUTION_TEX.read_text()
         self.assertIn(
+            "Lorsqu'un objet est introduit ou identifié, sa nature "
+            "mathématique est nommée explicitement",
+            tex,
+        )
+        self.assertIn(
+            "La notation ne doit pas porter seule cette information de catégorie",
+            tex,
+        )
+        self.assertIn(
+            "racine du polynôme $R(Y)=Y^2+Y-1$",
+            tex,
+        )
+        self.assertIn(
+            "Les racines du polynôme $R$ sont",
+            tex,
+        )
+        self.assertNotIn(
+            "racine de $R(Y)=Y^2+Y-1$",
+            tex,
+        )
+        self.assertIn(
             r"Soient $n\in\N^*$, $\rho>0$ et $\theta\in\R$",
             tex,
         )
