@@ -1,0 +1,44 @@
+name: Site contact or feedback
+description: Contact Kieran McShane about this site, its content, accessibility, attribution, or rights.
+title: "[Site] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for getting in touch. This form creates a public GitHub issue so the request can be tracked and linked to a precise version of the site. Do not include personal or confidential information.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type of request
+      options:
+        - Accessibility or display problem
+        - Attribution, licensing, or removal request
+        - Correction to a research note
+        - Research-related feedback
+        - Other site matter
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: Related page
+      description: Add the page URL or title when the request concerns specific content.
+      placeholder: "https://kieranmcshane.github.io/…"
+
+  - type: textarea
+    id: message
+    attributes:
+      label: Message
+      description: Describe the request and the outcome you are seeking.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: public
+    attributes:
+      label: Public submission
+      options:
+        - label: I understand that this message will be publicly visible and contains no personal or confidential information.
+          required: true
