@@ -1,0 +1,1051 @@
+[
+  {
+    "id": "1.1",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-1-1.webp"
+    ],
+    "solutionHtml": "<p>On utilise <span class=\"math inline\">\\(\\overline{x+\\mathrm\niy}=x-\\mathrm iy\\)</span>, la relation <span\nclass=\"math inline\">\\(\\mathrm i^2=-1\\)</span> et, pour les quotients, la\nmultiplication par le conjugué du dénominateur.</p>\n<ol>\n<li><p><span class=\"math inline\">\\(1-2\\mathrm i-(-4+7\\mathrm\ni)=\\boxed{5-9\\mathrm i}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\overline{1+2\\mathrm\ni}+\\overline{-4+6\\mathrm i}=(1-2\\mathrm i)+(-4-6\\mathrm\ni)=\\boxed{-3-8\\mathrm i}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((1+2\\mathrm i)(-4+6\\mathrm\ni)=-4+6\\mathrm i-8\\mathrm i+12\\mathrm i^2=\\boxed{-16-2\\mathrm\ni}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((2-3\\mathrm i)(-3+2\\mathrm\ni)=-6+4\\mathrm i+9\\mathrm i-6\\mathrm i^2=\\boxed{13\\mathrm\ni}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((a+\\mathrm\nib)^2=\\boxed{a^2-b^2+2ab\\mathrm i}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((a-\\mathrm\nib)^2=\\boxed{a^2-b^2-2ab\\mathrm i}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\mathrm i^{50}=\\mathrm i^{48}\\mathrm\ni^2=(\\mathrm i^4)^{12}(-1)=\\boxed{-1}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\overline{\\frac{1+2\\mathrm\ni}{-4+6\\mathrm i}}\n  =\\overline{\\frac{(1+2\\mathrm i)(-4-6\\mathrm i)}{52}}\n  =\\overline{\\frac{8-14\\mathrm i}{52}}\n  =\\boxed{\\frac{2}{13}+\\frac{7}{26}\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\frac{3+6\\mathrm i}{3-4\\mathrm i}\n  =\\frac{(3+6\\mathrm i)(3+4\\mathrm i)}{25}\n  =\\boxed{-\\frac35+\\frac65\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\frac{5+2\\mathrm i}{1-2\\mathrm i}\n  =\\frac{(5+2\\mathrm i)(1+2\\mathrm i)}5\n  =\\boxed{\\frac15+\\frac{12}{5}\\mathrm i}.\\]</span></p></li>\n<li><p>Le dénominateur vaut <span class=\"math inline\">\\((1-2\\mathrm\ni)-(\\mathrm i-1)=2-3\\mathrm i\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\frac{(5+2\\mathrm i)(1-\\mathrm i)}{2-3\\mathrm i}\n  =\\frac{7-3\\mathrm i}{2-3\\mathrm i}\n  =\\frac{(7-3\\mathrm i)(2+3\\mathrm i)}{13}\n  =\\boxed{\\frac{23}{13}+\\frac{15}{13}\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\frac{-2}{1-\\mathrm i\\sqrt3}\n  =\\frac{-2(1+\\mathrm i\\sqrt3)}4\n  =\\boxed{-\\frac12-\\frac{\\sqrt3}{2}\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\left(\\frac{1+\\mathrm i}{2-\\mathrm\ni}\\right)^2\n  =\\left(\\frac{1+3\\mathrm i}{5}\\right)^2\n  =\\frac{-8+6\\mathrm i}{25},\n  \\qquad\n  \\frac{3+6\\mathrm i}{3-4\\mathrm i}=-\\frac35+\\frac65\\mathrm i.\\]</span>\nPar addition, <span\nclass=\"math display\">\\[\\boxed{-\\frac{23}{25}+\\frac{36}{25}\\mathrm\ni}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\frac{2+5\\mathrm i}{1-\\mathrm\ni}=\\frac{-3+7\\mathrm i}{2},\n  \\qquad\n  \\frac{2-5\\mathrm i}{1+\\mathrm i}=\\frac{-3-7\\mathrm i}{2},\\]</span>\ndonc la somme vaut <span\nclass=\"math inline\">\\(\\boxed{-3}\\)</span>.</p></li>\n<li><p>Comme <span class=\"math display\">\\[\\frac{1+\\mathrm\ni-\\sqrt3(1-\\mathrm i)}{1+\\mathrm i}\n  =1-\\sqrt3\\frac{1-\\mathrm i}{1+\\mathrm i}=1+\\sqrt3\\mathrm i,\\]</span>\nle carré demandé est <span class=\"math display\">\\[(1+\\sqrt3\\mathrm\ni)^2=\\boxed{-2+2\\sqrt3\\mathrm i}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "1.2",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-2-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Puisque <span class=\"math inline\">\\(\\mathrm i-3\\neq0\\)</span>,\n<span class=\"math display\">\\[z=\\frac2{\\mathrm i-3}=\\frac{2(-3-\\mathrm\ni)}{10}\n  =\\boxed{-\\frac35-\\frac15\\mathrm i}.\\]</span></p></li>\n<li><p>L’équation donne <span class=\"math inline\">\\(-\\mathrm\niz=3-4\\mathrm i\\)</span>, donc <span class=\"math display\">\\[z=\\mathrm\ni(3-4\\mathrm i)=\\boxed{4+3\\mathrm i}.\\]</span></p></li>\n<li><p>Posons <span class=\"math inline\">\\(z=x+\\mathrm iy\\)</span>, avec\n<span class=\"math inline\">\\(x,y\\in\\mathbb R\\)</span>. Alors <span\nclass=\"math display\">\\[(1-\\mathrm i)z+\\overline z=(2x+y)-\\mathrm\nix.\\]</span> L’identification des parties réelle et imaginaire donne\n<span class=\"math display\">\\[2x+y=4,\n  \\qquad -x=-3.\\]</span> Ainsi <span class=\"math inline\">\\(x=3\\)</span>,\n<span class=\"math inline\">\\(y=-2\\)</span>, et <span\nclass=\"math inline\">\\(\\boxed{z=3-2\\mathrm i}\\)</span>.</p></li>\n<li><p>On factorise directement : <span class=\"math display\">\\[3\\mathrm\niz+2z=(2+3\\mathrm i)z=6\\mathrm i.\\]</span> Comme <span\nclass=\"math inline\">\\(2+3\\mathrm i\\neq0\\)</span>, <span\nclass=\"math display\">\\[z=\\frac{6\\mathrm i}{2+3\\mathrm i}\n   =\\frac{6\\mathrm i(2-3\\mathrm i)}{(2+3\\mathrm i)(2-3\\mathrm i)}\n   =\\boxed{\\frac{18}{13}+\\frac{12}{13}\\mathrm i}.\\]</span></p></li>\n<li><p>Le dénominateur doit être non nul. En multipliant par celui-ci,\n<span class=\"math display\">\\[2z+\\mathrm i=(2+3\\mathrm i)(1-3\\mathrm\niz)=(2+3\\mathrm i)+(9-6\\mathrm i)z.\\]</span> Donc <span\nclass=\"math inline\">\\((-7+6\\mathrm i)z=2+2\\mathrm i\\)</span>, puis <span\nclass=\"math display\">\\[z=\\frac{2+2\\mathrm i}{-7+6\\mathrm i}\n  =\\boxed{-\\frac2{85}-\\frac{26}{85}\\mathrm i}.\\]</span> Pour cette\nvaleur, <span class=\"math inline\">\\(1-3\\mathrm iz\\neq0\\)</span>, donc\naucune solution étrangère n’a été introduite.</p></li>\n<li><p>Posons <span class=\"math inline\">\\(w=\\overline z\\)</span>.\nPuisque <span class=\"math display\">\\[\\overline{2z+\\mathrm i}=2\\overline\nz-\\mathrm i=2w-\\mathrm i,\\]</span> l’équation devient <span\nclass=\"math display\">\\[\\frac{2w-\\mathrm i}{1-w}=2+\\mathrm i,\n  \\qquad w\\neq1.\\]</span> Après multiplication par <span\nclass=\"math inline\">\\(1-w\\)</span>, <span\nclass=\"math display\">\\[2w-\\mathrm i=(2+\\mathrm i)(1-w),\\]</span> soit\n<span class=\"math inline\">\\((4+\\mathrm i)w=2+2\\mathrm i\\)</span>. Ainsi\n<span class=\"math display\">\\[w=\\frac{2+2\\mathrm i}{4+\\mathrm i}\n   =\\frac{(2+2\\mathrm i)(4-\\mathrm i)}{17}\n   =\\frac{10+6\\mathrm i}{17}.\\]</span> On en déduit <span\nclass=\"math display\">\\[\\boxed{z=\\frac{10-6\\mathrm i}{17}}.\\]</span>\nCette valeur vérifie <span class=\"math inline\">\\(1-\\overline\nz\\neq0\\)</span>, donc elle est bien admissible.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.3",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-3-1.webp"
+    ],
+    "solutionHtml": "<p>Les arguments sont donnés modulo <span\nclass=\"math inline\">\\(2\\pi\\)</span>.</p>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\"></th>\n<th style=\"text-align: left;\">Nombre</th>\n<th style=\"text-align: left;\">Module</th>\n<th style=\"text-align: left;\">Un argument</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(1+\\mathrm\ni=\\sqrt2\\,\\mathrm e^{\\mathrm i\\pi/4}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\sqrt2\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/4\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(3+3\\mathrm\ni=3\\sqrt2\\,\\mathrm e^{\\mathrm i\\pi/4}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(3\\sqrt2\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/4\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(1+\\mathrm\ni\\sqrt3=2\\mathrm e^{\\mathrm i\\pi/3}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(2\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/3\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(-1+\\mathrm\ni\\sqrt3=2\\mathrm e^{2\\mathrm i\\pi/3}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(2\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(2\\pi/3\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(\\sqrt3+\\mathrm\ni=2\\mathrm e^{\\mathrm i\\pi/6}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(2\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/6\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(-\\frac43\\mathrm i\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(4/3\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(-\\pi/2\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\dfrac{1+\\mathrm i}{1-\\mathrm i}=\\mathrm\ni\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(1\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/2\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\left(\\dfrac{1+\\mathrm i}{1-\\mathrm\ni}\\right)^3=\\mathrm i^3=-\\mathrm i\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(1\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(-\\pi/2\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\((1+\\mathrm\ni\\sqrt3)^4=16\\mathrm e^{4\\mathrm i\\pi/3}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(16\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(4\\pi/3\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(32\\bigl(\\mathrm e^{5\\mathrm i\\pi/3}+\\mathrm\ne^{-5\\mathrm i\\pi/3}\\bigr)=32\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(32\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(0\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\dfrac{2\\mathrm e^{\\mathrm i\\pi/3}}{2\\mathrm\ne^{-\\mathrm i\\pi/6}}=\\mathrm i\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(1\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/2\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\dfrac{2\\sqrt2\\,\\mathrm e^{-\\mathrm\ni\\pi/6}}{2\\sqrt2\\,\\mathrm e^{-\\mathrm i\\pi/4}}=\\mathrm e^{\\mathrm\ni\\pi/12}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(1\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\pi/12\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">.</td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(\\mathrm\ne^{\\mathrm e^{\\mathrm i\\theta}}=\\mathrm e^{\\cos\\theta}\\mathrm e^{\\mathrm\ni\\sin\\theta}\\)</span></td>\n<td style=\"text-align: left;\"><span class=\"math inline\">\\(\\mathrm\ne^{\\cos\\theta}\\)</span></td>\n<td style=\"text-align: left;\"><span\nclass=\"math inline\">\\(\\sin\\theta\\)</span></td>\n</tr>\n</tbody>\n</table>\n<p>Dans la ligne 10, on a utilisé <span\nclass=\"math inline\">\\(1\\pm\\mathrm i\\sqrt3=2\\mathrm e^{\\pm\\mathrm\ni\\pi/3}\\)</span>.</p>"
+  },
+  {
+    "id": "1.4",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-4-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><strong>Faux.</strong> Le nombre <span\nclass=\"math inline\">\\(0\\)</span> n’a pas d’argument, et un réel négatif\nn’a pas <span class=\"math inline\">\\(0\\)</span> pour argument.</p></li>\n<li><p><strong>Vrai.</strong> Si <span\nclass=\"math inline\">\\(x&lt;0\\)</span>, alors <span\nclass=\"math inline\">\\(x=|x|\\mathrm e^{\\mathrm i\\pi}\\)</span>.</p></li>\n<li><p><strong>Vrai.</strong> Un imaginaire pur non nul est de la forme\n<span class=\"math inline\">\\(\\mathrm iy\\)</span>. Si <span\nclass=\"math inline\">\\(y&gt;0\\)</span>, <span\nclass=\"math inline\">\\(\\pi/2\\)</span> est un argument ; si <span\nclass=\"math inline\">\\(y&lt;0\\)</span>, <span\nclass=\"math inline\">\\(3\\pi/2\\)</span> en est un.</p></li>\n<li><p><strong>Vrai.</strong> Si <span class=\"math inline\">\\(z=\\mathrm\niy\\)</span>, alors <span class=\"math inline\">\\(\\overline z=-\\mathrm\niy=-z\\)</span>.</p></li>\n<li><p><strong>Faux.</strong> Les nombres <span\nclass=\"math inline\">\\(1+\\mathrm i\\)</span> et <span\nclass=\"math inline\">\\(1+\\mathrm i\\)</span> ont le même argument, mais\nleur produit vaut <span class=\"math inline\">\\(2\\mathrm i\\)</span>, qui\nn’est pas réel.</p></li>\n<li><p><strong>Vrai.</strong> Pour <span\nclass=\"math inline\">\\(a,b\\in\\mathbb R\\)</span>, <span\nclass=\"math inline\">\\((\\mathrm ia)(\\mathrm ib)=-ab\\in\\mathbb\nR\\)</span>.</p></li>\n<li><p><strong>Vrai.</strong> Si <span\nclass=\"math inline\">\\(z_1=r_1\\mathrm e^{\\mathrm i\\theta}\\)</span> et\n<span class=\"math inline\">\\(z_2=r_2\\mathrm e^{\\mathrm i\\theta}\\)</span>\navec <span class=\"math inline\">\\(r_1,r_2&gt;0\\)</span>, alors <span\nclass=\"math inline\">\\(z_1/z_2=r_1/r_2\\in\\mathbb R_+^*\\)</span>.</p></li>\n<li><p><strong>Vrai.</strong> <span\nclass=\"math inline\">\\(\\left|z_1/z_2\\right|=|z_1|/|z_2|=1\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.5",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-5-1.webp"
+    ],
+    "solutionHtml": "<p>On écrit <span class=\"math inline\">\\(z=r\\mathrm e^{\\mathrm\ni\\theta}\\)</span>, avec <span class=\"math inline\">\\(r&gt;0\\)</span>.</p>\n<ol>\n<li><p><strong>Vrai :</strong> <span class=\"math inline\">\\(|\\overline\nz|=|z|=r\\)</span>.</p></li>\n<li><p><strong>Vrai modulo <span class=\"math inline\">\\(2\\pi\\)</span>\n:</strong> <span class=\"math inline\">\\(\\overline z=r\\mathrm e^{-\\mathrm\ni\\theta}\\)</span>.</p></li>\n<li><p><strong>Vrai :</strong> toute racine <span\nclass=\"math inline\">\\(n\\)</span>-ième de l’unité <span\nclass=\"math inline\">\\(\\omega\\)</span> vérifie <span\nclass=\"math inline\">\\(|\\omega|=1\\)</span>, donc <span\nclass=\"math inline\">\\(|z\\omega|=|z|\\)</span>.</p></li>\n<li><p><strong>Faux :</strong> un argument de <span\nclass=\"math inline\">\\(-z\\)</span> est <span\nclass=\"math inline\">\\(\\theta+\\pi\\)</span>, et non en général <span\nclass=\"math inline\">\\(-\\theta\\)</span>. Par exemple, pour <span\nclass=\"math inline\">\\(z=1\\)</span>, <span\nclass=\"math inline\">\\(0\\)</span> est un argument de <span\nclass=\"math inline\">\\(z\\)</span> tandis que <span\nclass=\"math inline\">\\(\\pi\\)</span> est un argument de <span\nclass=\"math inline\">\\(-z\\)</span>.</p></li>\n<li><p>L’énoncé est <strong>vrai pour l’argument principal</strong> : si\n<span class=\"math inline\">\\(\\operatorname{Im}z&gt;0\\)</span>, celui-ci\nappartient à <span class=\"math inline\">\\(]0,\\pi[\\)</span>. Il est faux\nsi l’on prétend que tous les arguments appartiennent à cet intervalle,\npuisqu’on peut toujours ajouter <span\nclass=\"math inline\">\\(2\\pi\\)</span>.</p></li>\n<li><p><strong>Vrai modulo <span class=\"math inline\">\\(2\\pi\\)</span>\n:</strong> <span class=\"math inline\">\\(z^2=r^2\\mathrm e^{2\\mathrm\ni\\theta}\\)</span>.</p></li>\n<li><p><strong>Vrai modulo <span class=\"math inline\">\\(2\\pi\\)</span>\n:</strong> <span class=\"math display\">\\[\\frac{z}{\\overline z}=\\mathrm\ne^{2\\mathrm i\\theta},\n  \\qquad z^2=r^2\\mathrm e^{2\\mathrm i\\theta}.\\]</span> Les deux nombres\nont donc les mêmes arguments.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.6",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-6-1.webp",
+      "/assets/images/mat101/statements/exercice-1-6-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>On factorise par l’exponentielle correspondant à la moyenne des\nangles : <span class=\"math display\">\\[\\begin{align*}\n  a+b\n  &amp;=\\rho\\left(\\mathrm e^{\\mathrm i\\theta}+\\mathrm e^{\\mathrm\ni\\theta&#39;}\\right)\\\\\n  &amp;=\\rho\\mathrm e^{\\mathrm i(\\theta+\\theta&#39;)/2}\n    \\left(\\mathrm e^{\\mathrm i(\\theta-\\theta&#39;)/2}+\\mathrm\ne^{-\\mathrm i(\\theta-\\theta&#39;)/2}\\right)\\\\\n  &amp;=2\\rho\\cos\\left(\\frac{\\theta-\\theta&#39;}2\\right)\n    \\mathrm e^{\\mathrm i(\\theta+\\theta&#39;)/2}.\n\\end{align*}\\]</span></p></li>\n<li><ol>\n<li><p>Comme <span class=\"math inline\">\\(1+\\mathrm i=\\sqrt2\\mathrm\ne^{\\mathrm i\\pi/4}\\)</span> et <span class=\"math inline\">\\(\\mathrm\ni\\sqrt2=\\sqrt2\\mathrm e^{\\mathrm i\\pi/2}\\)</span>, <span\nclass=\"math display\">\\[1+\\mathrm i(1+\\sqrt2)\n    =2\\sqrt2\\cos\\left(\\frac\\pi8\\right)\\mathrm e^{3\\mathrm\ni\\pi/8}.\\]</span> Le module est <span\nclass=\"math inline\">\\(\\boxed{\\sqrt{4+2\\sqrt2}}\\)</span> et un argument\nest <span class=\"math inline\">\\(\\boxed{3\\pi/8}\\)</span>.</p></li>\n<li><p>On écrit <span class=\"math inline\">\\((1+\\sqrt2)-\\mathrm\ni=(1-\\mathrm i)+\\sqrt2\\)</span>. Les deux termes ont le module <span\nclass=\"math inline\">\\(\\sqrt2\\)</span> et les arguments <span\nclass=\"math inline\">\\(-\\pi/4\\)</span> et <span\nclass=\"math inline\">\\(0\\)</span>. Ainsi le module est encore <span\nclass=\"math inline\">\\(\\boxed{\\sqrt{4+2\\sqrt2}}\\)</span> et un argument\nest <span class=\"math inline\">\\(\\boxed{-\\pi/8}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\mathrm e^{\\mathrm i\\theta}+\\mathrm\ne^{2\\mathrm i\\theta}\n    =2\\cos\\left(\\frac\\theta2\\right)\\mathrm e^{3\\mathrm\ni\\theta/2}.\\]</span> Le module vaut <span\nclass=\"math display\">\\[\\boxed{2\\left|\\cos\\left(\\frac\\theta2\\right)\\right|}.\\]</span>\nSi <span class=\"math inline\">\\(\\cos(\\theta/2)&gt;0\\)</span>, un argument\nest <span class=\"math inline\">\\(3\\theta/2\\)</span> ; s’il est négatif,\nun argument est <span class=\"math inline\">\\(3\\theta/2+\\pi\\)</span>. Si\n<span class=\"math inline\">\\(\\cos(\\theta/2)=0\\)</span>, le nombre est nul\net n’a pas d’argument.</p></li>\n<li><p><span class=\"math display\">\\[1+\\cos\\theta+\\mathrm\ni\\sin\\theta=1+\\mathrm e^{\\mathrm i\\theta}\n    =2\\cos\\left(\\frac\\theta2\\right)\\mathrm e^{\\mathrm\ni\\theta/2}.\\]</span> Le module est <span\nclass=\"math inline\">\\(\\boxed{2|\\cos(\\theta/2)|}\\)</span>. Un argument\nest <span class=\"math inline\">\\(\\theta/2\\)</span> si le cosinus est\npositif, et <span class=\"math inline\">\\(\\theta/2+\\pi\\)</span> s’il est\nnégatif. Le nombre est nul lorsque <span\nclass=\"math inline\">\\(\\theta\\equiv\\pi\\pmod{2\\pi}\\)</span>.</p></li>\n</ol></li>\n</ol>"
+  },
+  {
+    "id": "1.7",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-7-1.webp"
+    ],
+    "solutionHtml": "<div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>Dans la seconde équation, le symbole <span\nclass=\"math inline\">\\(b\\)</span> apparaît sans avoir été introduit. On\nrésout donc cette question pour deux paramètres <span\nclass=\"math inline\">\\(a,b\\in\\mathbb C\\)</span>.</p>\n</div>\n</div>\n<ol>\n<li><p>L’équation est <span class=\"math inline\">\\((a-2)z=\\mathrm\ni-3\\)</span>.</p>\n<ul>\n<li><p>Si <span class=\"math inline\">\\(a\\neq2\\)</span>, elle admet\nl’unique solution <span class=\"math display\">\\[\\boxed{z=\\frac{\\mathrm\ni-3}{a-2}}.\\]</span></p></li>\n<li><p>Si <span class=\"math inline\">\\(a=2\\)</span>, elle devient <span\nclass=\"math inline\">\\(3=\\mathrm i\\)</span>, ce qui est impossible : il\nn’y a aucune solution.</p></li>\n</ul></li>\n<li><p>On factorise : <span\nclass=\"math display\">\\[az^2+bz=z(az+b).\\]</span> Ainsi <span\nclass=\"math inline\">\\(z=0\\)</span> est toujours solution. Plus\nprécisément :</p>\n<ul>\n<li><p>si <span class=\"math inline\">\\(a\\neq0\\)</span> et <span\nclass=\"math inline\">\\(b\\neq0\\)</span>, les solutions sont <span\nclass=\"math inline\">\\(\\boxed{0\\text{ et }-b/a}\\)</span> ;</p></li>\n<li><p>si <span class=\"math inline\">\\(a\\neq0\\)</span> et <span\nclass=\"math inline\">\\(b=0\\)</span>, l’unique solution est <span\nclass=\"math inline\">\\(\\boxed{0}\\)</span> ;</p></li>\n<li><p>si <span class=\"math inline\">\\(a=0\\)</span> et <span\nclass=\"math inline\">\\(b\\neq0\\)</span>, l’unique solution est encore\n<span class=\"math inline\">\\(\\boxed{0}\\)</span> ;</p></li>\n<li><p>si <span class=\"math inline\">\\(a=b=0\\)</span>, tout <span\nclass=\"math inline\">\\(z\\in\\mathbb C\\)</span> est solution.</p></li>\n</ul></li>\n</ol>"
+  },
+  {
+    "id": "1.8",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-8-1.webp"
+    ],
+    "solutionHtml": "<p>Chaque nombre non nul possède exactement deux racines carrées,\nopposées l’une de l’autre.</p>\n<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{\\pm\\mathrm\ni}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\displaystyle\n\\pm\\frac{1+\\mathrm i}{\\sqrt2}}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\boxed{\\displaystyle\n  \\pm\\left(\n  \\sqrt{\\frac{\\sqrt2+1}{2}}\n  +\\mathrm i\\sqrt{\\frac{\\sqrt2-1}{2}}\n  \\right)}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\boxed{\\displaystyle\n  \\pm\\left(\n  \\sqrt{\\frac{\\sqrt2-1}{2}}\n  -\\mathrm i\\sqrt{\\frac{\\sqrt2+1}{2}}\n  \\right)}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(1+\\mathrm i\\sqrt3=2\\mathrm e^{\\mathrm\ni\\pi/3}\\)</span>, donc <span class=\"math display\">\\[\\boxed{\\displaystyle\n\\pm\\left(\\frac{\\sqrt6}{2}+\\frac{\\sqrt2}{2}\\mathrm\ni\\right)}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\((2+\\mathrm i)^2=3+4\\mathrm\ni\\)</span>, donc <span class=\"math inline\">\\(\\boxed{\\pm(2+\\mathrm\ni)}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((3-\\mathrm i)^2=8-6\\mathrm\ni\\)</span>, donc <span class=\"math inline\">\\(\\boxed{\\pm(3-\\mathrm\ni)}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((4+3\\mathrm i)^2=7+24\\mathrm\ni\\)</span>, donc <span class=\"math inline\">\\(\\boxed{\\pm(4+3\\mathrm\ni)}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((2-\\mathrm i)^2=3-4\\mathrm\ni\\)</span>, donc <span class=\"math inline\">\\(\\boxed{\\pm(2-\\mathrm\ni)}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((5-\\mathrm i)^2=24-10\\mathrm\ni\\)</span>, donc <span class=\"math inline\">\\(\\boxed{\\pm(5-\\mathrm\ni)}\\)</span>.</p></li>\n</ol>\n<p>Pour les questions 3 et 4, on peut retrouver les coefficients en\nposant <span class=\"math inline\">\\((x+\\mathrm iy)^2=a+\\mathrm\nib\\)</span> et en utilisant <span\nclass=\"math inline\">\\(x^2-y^2=a\\)</span>, <span\nclass=\"math inline\">\\(2xy=b\\)</span>, <span\nclass=\"math inline\">\\(x^2+y^2=\\sqrt{a^2+b^2}\\)</span>.</p>"
+  },
+  {
+    "id": "1.9",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-9-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>On a <span class=\"math display\">\\[\\frac{1+\\mathrm\ni}{\\sqrt2}=\\mathrm e^{\\mathrm i\\pi/4}.\\]</span> Ses racines carrées sont\n<span class=\"math inline\">\\(\\pm\\mathrm e^{\\mathrm i\\pi/8}\\)</span>. Sous\nforme algébrique, <span class=\"math display\">\\[\\boxed{\\displaystyle\n  \\pm\\left(\n  \\frac{\\sqrt{2+\\sqrt2}}2\n  +\\mathrm i\\frac{\\sqrt{2-\\sqrt2}}2\n  \\right)}.\\]</span> Comme <span\nclass=\"math inline\">\\(\\pi/8\\in(0,\\pi/2)\\)</span>, <span\nclass=\"math display\">\\[\\boxed{\\cos\\frac\\pi8=\\frac{\\sqrt{2+\\sqrt2}}2},\n  \\qquad\n  \\boxed{\\sin\\frac\\pi8=\\frac{\\sqrt{2-\\sqrt2}}2}.\\]</span></p></li>\n<li><p>De même, <span class=\"math display\">\\[\\frac{\\sqrt3+\\mathrm\ni}{2}=\\mathrm e^{\\mathrm i\\pi/6}.\\]</span> Ses racines carrées sont\n<span class=\"math inline\">\\(\\pm\\mathrm e^{\\mathrm i\\pi/12}\\)</span>,\nsoit <span class=\"math display\">\\[\\boxed{\\displaystyle\n  \\pm\\left(\n  \\frac{\\sqrt6+\\sqrt2}{4}\n  +\\mathrm i\\frac{\\sqrt6-\\sqrt2}{4}\n  \\right)}.\\]</span> On en déduit <span\nclass=\"math display\">\\[\\boxed{\\cos\\frac\\pi{12}=\\frac{\\sqrt6+\\sqrt2}{4}},\n  \\qquad\n  \\boxed{\\sin\\frac\\pi{12}=\\frac{\\sqrt6-\\sqrt2}{4}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "1.10",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-10-1.webp"
+    ],
+    "solutionHtml": "<p>On calcule le discriminant dans <span class=\"math inline\">\\(\\mathbb\nC\\)</span> et l’on choisit l’une de ses racines carrées.</p>\n<ol>\n<li><p><span class=\"math inline\">\\(\\Delta=-3=(\\mathrm\ni\\sqrt3)^2\\)</span>, donc <span\nclass=\"math display\">\\[\\boxed{z=-\\frac12\\pm\\frac{\\sqrt3}{2}\\mathrm\ni}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=-3\\)</span>, donc <span\nclass=\"math display\">\\[\\boxed{z=\\frac12\\pm\\frac{\\sqrt3}{2}\\mathrm\ni}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=-12=(2\\sqrt3\\mathrm\ni)^2\\)</span>, donc <span\nclass=\"math display\">\\[\\boxed{z=-1\\pm\\sqrt3\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=-4=(2\\mathrm i)^2\\)</span>,\ndonc <span class=\"math inline\">\\(\\boxed{z=-2\\pm\\mathrm\ni}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=-12=(2\\sqrt3\\mathrm\ni)^2\\)</span>, et <span class=\"math inline\">\\(2a=8\\)</span>, donc <span\nclass=\"math display\">\\[\\boxed{z=\\frac14\\pm\\frac{\\sqrt3}{4}\\mathrm\ni}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=(1+2\\mathrm i)^2-4(\\mathrm\ni-1)=1\\)</span>, d’où <span class=\"math display\">\\[\\boxed{z=-\\mathrm\ni\\quad\\text{ou}\\quad z=-1-\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=(3+4\\mathrm i)^2-4(-1+5\\mathrm\ni)=-3+4\\mathrm i=(1+2\\mathrm i)^2\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{z=1+\\mathrm i\\quad\\text{ou}\\quad\nz=2+3\\mathrm i}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=(-1+\\mathrm i)^2+4\\mathrm\ni=2\\mathrm i=(1+\\mathrm i)^2\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{z=1\\quad\\text{ou}\\quad z=-\\mathrm\ni}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\Delta=(11-5\\mathrm\ni)^2-4(24-27\\mathrm i)=-2\\mathrm i=(1-\\mathrm i)^2\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{z=5-2\\mathrm i\\quad\\text{ou}\\quad\nz=6-3\\mathrm i}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "1.11",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-11-1.webp",
+      "/assets/images/mat101/statements/exercice-1-11-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Écrivons <span class=\"math inline\">\\(P(X)=\\sum_{k=0}^n\na_kX^k\\)</span>, avec <span class=\"math inline\">\\(a_k\\in\\mathbb\nR\\)</span>. Pour tout <span class=\"math inline\">\\(w\\in\\mathbb\nC\\)</span>, <span class=\"math display\">\\[P(\\overline w)=\\sum_{k=0}^n\na_k\\overline w^{\\,k}\n  =\\overline{\\sum_{k=0}^n a_kw^k}\n  =\\overline{P(w)}.\\]</span> Si <span\nclass=\"math inline\">\\(P(z)=0\\)</span>, alors <span\nclass=\"math inline\">\\(P(\\overline z)=\\overline0=0\\)</span>. Ainsi <span\nclass=\"math inline\">\\(\\overline z\\)</span> est aussi racine.</p></li>\n<li><p>Écrivons <span class=\"math inline\">\\(z=x+\\mathrm iy\\)</span>,\navec <span class=\"math inline\">\\(y\\neq0\\)</span>. Les nombres <span\nclass=\"math inline\">\\(z\\)</span> et <span\nclass=\"math inline\">\\(\\overline z\\)</span> sont les racines du polynôme\n<span class=\"math display\">\\[(X-z)(X-\\overline z)\n  =X^2-(z+\\overline z)X+z\\overline z\n  =X^2-2xX+(x^2+y^2).\\]</span> Il suffit donc de prendre <span\nclass=\"math display\">\\[\\boxed{p=-2\\operatorname{Re}z},\n  \\qquad\n  \\boxed{q=|z|^2}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "1.12",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-12-1.webp"
+    ],
+    "solutionHtml": "<p>La formule générale utilisée est <span\nclass=\"math display\">\\[z^n=\\rho\\mathrm e^{\\mathrm i\\theta}\n\\quad\\Longleftrightarrow\\quad\nz=\\rho^{1/n}\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n},\n\\qquad k=0,\\ldots,n-1.\\]</span></p>\n<ol>\n<li><p>Les solutions de <span class=\"math inline\">\\(z^3=\\mathrm\ni\\)</span> sont <span class=\"math display\">\\[\\boxed{\\mathrm e^{\\mathrm\ni\\pi/6},\\quad \\mathrm e^{5\\mathrm i\\pi/6},\\quad \\mathrm e^{3\\mathrm\ni\\pi/2}},\\]</span> c’est-à-dire <span\nclass=\"math inline\">\\(\\sqrt3/2+\\mathrm i/2\\)</span>, <span\nclass=\"math inline\">\\(-\\sqrt3/2+\\mathrm i/2\\)</span> et <span\nclass=\"math inline\">\\(-\\mathrm i\\)</span>.</p></li>\n<li><p>Comme <span class=\"math inline\">\\((-1+\\mathrm\ni)/4=(\\sqrt2/4)\\mathrm e^{3\\mathrm i\\pi/4}\\)</span> et <span\nclass=\"math inline\">\\((\\sqrt2/4)^{1/3}=1/\\sqrt2\\)</span>, <span\nclass=\"math display\">\\[\\boxed{z=\\frac1{\\sqrt2}\\mathrm e^{\\mathrm\ni(\\pi/4+2k\\pi/3)},\\qquad k=0,1,2}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(2-2\\mathrm i=2\\sqrt2\\mathrm\ne^{-\\mathrm i\\pi/4}\\)</span>, donc <span\nclass=\"math display\">\\[\\boxed{z=\\sqrt2\\,\\mathrm e^{\\mathrm\ni(-\\pi/12+2k\\pi/3)},\\qquad k=0,1,2}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{z\\in\\{1,\\mathrm i,-1,-\\mathrm\ni\\}}\\)</span>.</p></li>\n<li><p>Le second membre vaut <span class=\"math inline\">\\(\\mathrm\ne^{2\\mathrm i\\pi/3}\\)</span>. Les solutions sont <span\nclass=\"math display\">\\[\\boxed{z=\\mathrm e^{\\mathrm\ni(\\pi/6+k\\pi/2)},\\qquad k=0,1,2,3}.\\]</span></p></li>\n<li><p>Posons <span class=\"math inline\">\\(w=(2z+1)/(z-1)\\)</span>. On\ndoit avoir <span class=\"math inline\">\\(z\\neq1\\)</span>, puis <span\nclass=\"math inline\">\\(w^4=1\\)</span>, donc <span\nclass=\"math inline\">\\(w\\in\\{1,-1,\\mathrm i,-\\mathrm i\\}\\)</span>. La\nrelation <span class=\"math inline\">\\(w(z-1)=2z+1\\)</span> donne <span\nclass=\"math display\">\\[z=\\frac{w+1}{w-2}.\\]</span> On obtient finalement\n<span\nclass=\"math display\">\\[\\boxed{z\\in\\left\\{-2,0,-\\frac15-\\frac35\\mathrm\ni,-\\frac15+\\frac35\\mathrm i\\right\\}}.\\]</span> Aucune de ces valeurs\nn’est égale à <span class=\"math inline\">\\(1\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.13",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-13-1.webp"
+    ],
+    "solutionHtml": "<p>Posons <span class=\"math inline\">\\(c=\\cos x\\)</span> et <span\nclass=\"math inline\">\\(s=\\sin x\\)</span>. Par la formule de Moivre, <span\nclass=\"math display\">\\[(c+\\mathrm is)^4=\\cos(4x)+\\mathrm\ni\\sin(4x).\\]</span> Or <span class=\"math display\">\\[(c+\\mathrm\nis)^4=(c^4-6c^2s^2+s^4)+\\mathrm i(4c^3s-4cs^3).\\]</span></p>\n<ol>\n<li><p>En utilisant <span class=\"math inline\">\\(s^2=1-c^2\\)</span>,\n<span class=\"math display\">\\[c^4-6c^2s^2+s^4=8c^4-8c^2+1.\\]</span> Ainsi\n<span\nclass=\"math display\">\\[\\boxed{\\cos(4x)=8\\cos^4x-8\\cos^2x+1}.\\]</span></p></li>\n<li><p><span\nclass=\"math display\">\\[4c^3s-4cs^3=4cs(c^2-s^2)=8c^3s-4cs,\\]</span> donc\n<span class=\"math display\">\\[\\boxed{\\sin(4x)=8\\cos^3x\\sin x-4\\cos x\\sin\nx}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "1.14",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-14-1.webp"
+    ],
+    "solutionHtml": "<p>Les formules d’Euler, ou les formules produit-somme, donnent : <span\nclass=\"math display\">\\[\\begin{align*}\n1.\\quad \\cos^3x&amp;=\\boxed{\\frac{3\\cos x+\\cos3x}{4}},\\\\\n2.\\quad \\sin^3x&amp;=\\boxed{\\frac{3\\sin x-\\sin3x}{4}},\\\\\n3.\\quad \\cos^4x&amp;=\\boxed{\\frac38+\\frac12\\cos2x+\\frac18\\cos4x},\\\\\n4.\\quad \\sin^4x&amp;=\\boxed{\\frac38-\\frac12\\cos2x+\\frac18\\cos4x},\\\\\n5.\\quad \\cos^2x\\sin^2x&amp;=\\boxed{\\frac18-\\frac18\\cos4x},\\\\\n6.\\quad \\cos x\\sin^3x&amp;=\\boxed{\\frac14\\sin2x-\\frac18\\sin4x},\\\\\n7.\\quad \\cos^3x\\sin x&amp;=\\boxed{\\frac14\\sin2x+\\frac18\\sin4x},\\\\\n8.\\quad \\cos^3x\\sin^2x&amp;=\\boxed{\\frac18\\cos\nx-\\frac1{16}\\cos3x-\\frac1{16}\\cos5x},\\\\\n9.\\quad \\cos^2x\\sin^3x&amp;=\\boxed{\\frac18\\sin\nx+\\frac1{16}\\sin3x-\\frac1{16}\\sin5x},\\\\\n10.\\quad \\cos x\\sin^4x&amp;=\\boxed{\\frac18\\cos\nx-\\frac3{16}\\cos3x+\\frac1{16}\\cos5x}.\n\\end{align*}\\]</span> Par exemple, la formule 6 s’obtient à partir de\n<span class=\"math inline\">\\(\\sin^3x=(3\\sin x-\\sin3x)/4\\)</span> puis de\n<span class=\"math inline\">\\(\\sin u\\cos\nv=\\bigl(\\sin(u+v)+\\sin(u-v)\\bigr)/2\\)</span>.</p>"
+  },
+  {
+    "id": "1.15",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-15-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Les vecteurs <span\nclass=\"math inline\">\\(\\overrightarrow{OA}\\)</span> et <span\nclass=\"math inline\">\\(\\overrightarrow{OB}\\)</span> ont pour coordonnées\n<span class=\"math inline\">\\((3,1)\\)</span> et <span\nclass=\"math inline\">\\((1,2)\\)</span>. Leur déterminant vaut <span\nclass=\"math display\">\\[\\begin{vmatrix}3&amp;1\\\\1&amp;2\\end{vmatrix}=6-1=5\\neq0.\\]</span>\nLes points <span class=\"math inline\">\\(O,A,B\\)</span> ne sont donc pas\nalignés.</p></li>\n<li><p>Dans un parallélogramme <span class=\"math inline\">\\(ABCD\\)</span>\ndont les sommets sont pris dans cet ordre, <span\nclass=\"math display\">\\[z_A+z_C=z_B+z_D.\\]</span> Ainsi <span\nclass=\"math display\">\\[z_D=z_A+z_C-z_B=(3+\\mathrm i)+(-1-\\mathrm\ni)-(1+2\\mathrm i)=\\boxed{1-2\\mathrm i}.\\]</span></p></li>\n<li><p>Le centre est le milieu de <span\nclass=\"math inline\">\\([AC]\\)</span> : <span\nclass=\"math display\">\\[z_{\\mathrm{centre}}=\\frac{z_A+z_C}{2}\n  =\\frac{(3+\\mathrm i)+(-1-\\mathrm i)}2=\\boxed1.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "1.16",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-16-1.webp"
+    ],
+    "solutionHtml": "<p>Notons <span class=\"math inline\">\\(a,b,c,d\\)</span> les affixes de\n<span class=\"math inline\">\\(A,B,C,D\\)</span>. Alors <span\nclass=\"math display\">\\[i=\\frac{a+b}{2},\\quad j=\\frac{b+c}{2},\\quad\nk=\\frac{c+d}{2},\\quad \\ell=\\frac{d+a}{2},\\quad\nm=\\frac{a+c}{2},\\quad n=\\frac{b+d}{2}.\\]</span></p>\n<ol>\n<li><p>Le milieu de <span class=\"math inline\">\\([IK]\\)</span> a pour\naffixe <span\nclass=\"math display\">\\[\\frac{i+k}{2}=\\frac{a+b+c+d}{4}.\\]</span> Le même\ncalcul donne <span\nclass=\"math display\">\\[\\frac{j+\\ell}{2}=\\frac{m+n}{2}=\\frac{a+b+c+d}{4}.\\]</span>\nLes trois segments ont donc le même milieu.</p></li>\n<li><p>Les diagonales <span class=\"math inline\">\\([IK]\\)</span> et <span\nclass=\"math inline\">\\([JL]\\)</span> du quadrilatère <span\nclass=\"math inline\">\\(IJKL\\)</span> ont le même milieu. Un quadrilatère\ndont les diagonales se coupent en leur milieu est un parallélogramme.\nAinsi <span class=\"math inline\">\\(IJKL\\)</span> est un\nparallélogramme.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.17",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-17-1.webp"
+    ],
+    "solutionHtml": "<p>On pose <span class=\"math inline\">\\(j=\\mathrm e^{2\\mathrm\ni\\pi/3}\\)</span>. On rappelle que <span\nclass=\"math inline\">\\(1+j+j^2=0\\)</span> et <span\nclass=\"math display\">\\[-j^2=\\mathrm e^{\\mathrm i\\pi/3},\n\\qquad -j=\\mathrm e^{-\\mathrm i\\pi/3}.\\]</span> Supposons d’abord <span\nclass=\"math display\">\\[z_A+jz_B+j^2z_C=0.\\]</span> En soustrayant <span\nclass=\"math inline\">\\(z_A(1+j+j^2)=0\\)</span>, on obtient <span\nclass=\"math display\">\\[j(z_B-z_A)+j^2(z_C-z_A)=0,\\]</span> donc <span\nclass=\"math display\">\\[z_C-z_A=-j^2(z_B-z_A)=\\mathrm e^{\\mathrm\ni\\pi/3}(z_B-z_A).\\]</span> Le vecteur <span\nclass=\"math inline\">\\(\\overrightarrow{AC}\\)</span> est donc l’image de\n<span class=\"math inline\">\\(\\overrightarrow{AB}\\)</span> par une\nrotation d’angle <span class=\"math inline\">\\(\\pi/3\\)</span> : les deux\nvecteurs ont même norme et forment un angle de <span\nclass=\"math inline\">\\(\\pi/3\\)</span>. Le triangle est équilatéral.</p>\n<p>La seconde relation conduit de même à <span\nclass=\"math display\">\\[z_C-z_A=-j(z_B-z_A)=\\mathrm e^{-\\mathrm\ni\\pi/3}(z_B-z_A),\\]</span> qui correspond à l’autre orientation.</p>\n<p>Réciproquement, si <span class=\"math inline\">\\(ABC\\)</span> est\néquilatéral et non dégénéré, alors <span\nclass=\"math display\">\\[z_C-z_A=\\mathrm e^{\\pm\\mathrm\ni\\pi/3}(z_B-z_A).\\]</span> En remplaçant <span\nclass=\"math inline\">\\(\\mathrm e^{\\mathrm i\\pi/3}\\)</span> par <span\nclass=\"math inline\">\\(-j^2\\)</span> et <span\nclass=\"math inline\">\\(\\mathrm e^{-\\mathrm i\\pi/3}\\)</span> par <span\nclass=\"math inline\">\\(-j\\)</span>, on retrouve l’une des deux relations\nannoncées.</p>"
+  },
+  {
+    "id": "1.18",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-18-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Les racines de <span class=\"math inline\">\\(P(z)=z^5-1\\)</span>\nsont <span class=\"math display\">\\[\\boxed{z_k=\\mathrm e^{2k\\mathrm\ni\\pi/5},\\qquad k=0,1,2,3,4}.\\]</span></p></li>\n<li><p>L’identité de la somme géométrique donne <span\nclass=\"math display\">\\[(z-1)(z^4+z^3+z^2+z+1)=z^5-1.\\]</span> Les\nracines de <span class=\"math inline\">\\(Q\\)</span> sont donc les racines\ncinquièmes de l’unité autres que <span class=\"math inline\">\\(1\\)</span>,\nsoit <span class=\"math display\">\\[\\boxed{\\mathrm e^{\\pm2\\mathrm\ni\\pi/5},\\quad \\mathrm e^{\\pm4\\mathrm i\\pi/5}}.\\]</span></p></li>\n<li><p>Chacun de ces nombres a pour module <span\nclass=\"math inline\">\\(1\\)</span>. Pour tout <span\nclass=\"math inline\">\\(z\\)</span> de module <span\nclass=\"math inline\">\\(1\\)</span>, <span\nclass=\"math display\">\\[z^{-1}=\\frac{\\overline z}{|z|^2}=\\overline\nz.\\]</span> L’inverse de <span class=\"math inline\">\\(\\mathrm e^{\\mathrm\ni\\theta}\\)</span> est donc <span class=\"math inline\">\\(\\mathrm\ne^{-\\mathrm i\\theta}\\)</span>.</p></li>\n<li><p>Si <span class=\"math inline\">\\(Q(z)=0\\)</span>, alors <span\nclass=\"math inline\">\\(z\\neq0\\)</span> et, en divisant par <span\nclass=\"math inline\">\\(z^2\\)</span>, <span\nclass=\"math display\">\\[z^2+z+1+z^{-1}+z^{-2}=0.\\]</span> Posons <span\nclass=\"math inline\">\\(y=z+z^{-1}\\)</span>. Comme <span\nclass=\"math display\">\\[z^2+z^{-2}=y^2-2,\\]</span> on obtient <span\nclass=\"math display\">\\[y^2+y-1=0.\\]</span> Ainsi <span\nclass=\"math inline\">\\(y\\)</span> est racine de <span\nclass=\"math inline\">\\(R(Y)=Y^2+Y-1\\)</span>.</p></li>\n<li><p>Les racines de <span class=\"math inline\">\\(R\\)</span> sont <span\nclass=\"math display\">\\[\\boxed{y_1=\\frac{-1+\\sqrt5}{2}},\n  \\qquad\n  \\boxed{y_2=\\frac{-1-\\sqrt5}{2}}.\\]</span> Elles sont réelles et <span\nclass=\"math inline\">\\(y_1&gt;0&gt;y_2\\)</span>.</p></li>\n<li><p>Pour <span class=\"math inline\">\\(z=\\mathrm e^{2\\mathrm\ni\\pi/5}\\)</span>, <span\nclass=\"math display\">\\[z+z^{-1}=2\\cos\\frac{2\\pi}{5}&gt;0,\\]</span> donc\ncette quantité vaut <span class=\"math inline\">\\(y_1\\)</span>. De même,\n<span class=\"math inline\">\\(2\\cos(4\\pi/5)=y_2\\)</span>. Par conséquent\n<span\nclass=\"math display\">\\[\\boxed{\\cos\\frac{2\\pi}{5}=\\frac{-1+\\sqrt5}{4}},\n  \\qquad\n  \\boxed{\\cos\\frac{4\\pi}{5}=\\frac{-1-\\sqrt5}{4}}.\\]</span></p></li>\n<li><p>À partir d’un segment unité, on construit un segment de longueur\n<span class=\"math inline\">\\(2\\)</span>, puis un triangle rectangle dont\nles côtés de l’angle droit mesurent <span\nclass=\"math inline\">\\(1\\)</span> et <span\nclass=\"math inline\">\\(2\\)</span>. Son hypoténuse mesure <span\nclass=\"math inline\">\\(\\sqrt{1^2+2^2}=\\sqrt5\\)</span>.</p></li>\n<li><p>On soustrait une longueur <span class=\"math inline\">\\(1\\)</span>\nà la longueur <span class=\"math inline\">\\(\\sqrt5\\)</span>, puis on\npartage deux fois le segment obtenu en deux. On construit ainsi une\nlongueur <span\nclass=\"math inline\">\\((\\sqrt5-1)/4=\\cos(2\\pi/5)\\)</span>.</p></li>\n<li><p>Sur l’axe des abscisses, on place le point d’abscisse <span\nclass=\"math inline\">\\(c=(\\sqrt5-1)/4\\)</span>. La verticale passant par\nce point coupe le cercle unité dans le demi-plan supérieur au point\n<span\nclass=\"math display\">\\[\\left(c,\\sqrt{1-c^2}\\right)=\\left(\\cos\\frac{2\\pi}{5},\\sin\\frac{2\\pi}{5}\\right).\\]</span>\nToutes ces opérations sont réalisables à la règle et au compas.</p></li>\n<li><p>On construit sur le cercle unité un premier sommet, puis le\nsommet obtenu par l’angle au centre <span\nclass=\"math inline\">\\(2\\pi/5\\)</span>. La longueur de la corde entre ces\ndeux points est reportée successivement au compas sur le cercle : les\ncinq points obtenus sont les sommets d’un pentagone régulier.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.19",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-19-1.webp"
+    ],
+    "solutionHtml": "<p>Posons <span class=\"math display\">\\[\\lambda=\\mathrm e^{-\\mathrm\ni\\pi/3}=\\frac12-\\frac{\\sqrt3}{2}\\mathrm i.\\]</span> Comme le triangle\n<span class=\"math inline\">\\(ABC\\)</span> est parcouru dans le sens\ntrigonométrique, les triangles équilatéraux extérieurs se construisent\nen faisant tourner chacun des côtés orientés de l’angle <span\nclass=\"math inline\">\\(-\\pi/3\\)</span>.</p>\n<ol>\n<li><p>Pour le triangle <span class=\"math inline\">\\(ABI\\)</span>, <span\nclass=\"math display\">\\[\\boxed{z_I=z_A+\\lambda(z_B-z_A)}.\\]</span> Son\ncentre, qui est aussi son centre de gravité, a pour affixe <span\nclass=\"math display\">\\[\\boxed{z_P=\\frac{z_A+z_B+z_I}{3}\n  =\\frac{z_A+z_B}{2}-\\frac{\\sqrt3}{6}\\mathrm\ni(z_B-z_A)}.\\]</span></p></li>\n<li><p>De même, <span class=\"math display\">\\[\\begin{align*}\n  z_J&amp;=z_B+\\lambda(z_C-z_B),\n  &amp;z_Q&amp;=\\frac{z_B+z_C}{2}-\\frac{\\sqrt3}{6}\\mathrm i(z_C-z_B),\\\\\n  z_K&amp;=z_C+\\lambda(z_A-z_C),\n  &amp;z_R&amp;=\\frac{z_C+z_A}{2}-\\frac{\\sqrt3}{6}\\mathrm i(z_A-z_C).\n\\end{align*}\\]</span></p></li>\n<li><p>Un calcul direct à partir des expressions précédentes donne <span\nclass=\"math display\">\\[z_R-z_P=\\mathrm e^{\\mathrm\ni\\pi/3}(z_Q-z_P).\\]</span> En effet, les coefficients de <span\nclass=\"math inline\">\\(z_A,z_B,z_C\\)</span> coïncident après\nmultiplication de <span class=\"math inline\">\\(z_Q-z_P\\)</span> par <span\nclass=\"math inline\">\\(\\mathrm e^{\\mathrm i\\pi/3}\\)</span>. Ainsi <span\nclass=\"math inline\">\\(\\overrightarrow{PR}\\)</span> est l’image de <span\nclass=\"math inline\">\\(\\overrightarrow{PQ}\\)</span> par une rotation de\n<span class=\"math inline\">\\(\\pi/3\\)</span>. Les deux vecteurs ont même\nnorme et forment un angle de <span class=\"math inline\">\\(\\pi/3\\)</span>\n; le triangle <span class=\"math inline\">\\(PQR\\)</span> est donc\néquilatéral.</p></li>\n</ol>"
+  },
+  {
+    "id": "1.20",
+    "chapterId": "complexes",
+    "chapterNumber": "1",
+    "chapterTitle": "Nombres complexes",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-1-20-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Par exemple, <span class=\"math display\">\\[5=1^2+2^2\\in\nG.\\]</span> En revanche <span class=\"math inline\">\\(3\\notin G\\)</span>,\ncar le carré d’un entier est congru à <span\nclass=\"math inline\">\\(0\\)</span> ou <span\nclass=\"math inline\">\\(1\\)</span> modulo <span\nclass=\"math inline\">\\(4\\)</span>, et une somme de deux carrés ne peut\ndonc pas être congrue à <span class=\"math inline\">\\(3\\)</span> modulo\n<span class=\"math inline\">\\(4\\)</span>.</p></li>\n<li><p>Soient <span class=\"math display\">\\[p=m^2+n^2=|m+\\mathrm in|^2,\n  \\qquad\n  q=r^2+s^2=|r+\\mathrm is|^2.\\]</span> Par multiplicativité du module,\n<span class=\"math display\">\\[\\begin{align*}\n  pq&amp;=|(m+\\mathrm in)(r+\\mathrm is)|^2\\\\\n    &amp;=|(mr-ns)+\\mathrm i(ms+nr)|^2\\\\\n    &amp;=(mr-ns)^2+(ms+nr)^2.\n\\end{align*}\\]</span> Les deux nombres <span\nclass=\"math inline\">\\(mr-ns\\)</span> et <span\nclass=\"math inline\">\\(ms+nr\\)</span> sont entiers, donc <span\nclass=\"math inline\">\\(pq\\in G\\)</span>.</p></li>\n<li><p>On a <span class=\"math inline\">\\(13=2^2+3^2\\)</span> et <span\nclass=\"math inline\">\\(17=1^2+4^2\\)</span>. Comme <span\nclass=\"math inline\">\\(221=13\\times17\\)</span>, la stabilité précédente\ndonne <span class=\"math inline\">\\(221\\in G\\)</span>. Plus explicitement,\n<span class=\"math display\">\\[\\boxed{221=14^2+5^2}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.1",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-1-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{1,2,3,4,5,6\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{1,2,3,4,5\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{1,2,3,4\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\varnothing}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{2,3\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\((\\{1,2\\}\\cup\\{1,3\\})\\cap\\{3,4\\}=\\boxed{\\{3\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\((\\{1,2,3\\}\\cap\\{2,3,4\\})\\cup\\{5,6\\}=\\boxed{\\{2,3,5,6\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\((\\{1,2\\}\\cup\\{3,4\\})\\cap\\{2,4\\}=\\boxed{\\{2,4\\}}\\)</span>.</p></li>\n<li><p>L’union contient les objets <span\nclass=\"math inline\">\\(1,\\{2\\},2,3\\)</span>. Parmi les objets <span\nclass=\"math inline\">\\(\\{2\\}\\)</span> et <span\nclass=\"math inline\">\\(\\{3\\}\\)</span>, seul <span\nclass=\"math inline\">\\(\\{2\\}\\)</span> appartient à cette union. Le\nrésultat est donc <span\nclass=\"math display\">\\[\\boxed{\\{\\{2\\}\\}}.\\]</span></p></li>\n<li><p>La première intersection vaut déjà <span\nclass=\"math inline\">\\(\\{\\{2\\}\\}\\)</span> ; la seconde ne la modifie pas.\nLe résultat est <span\nclass=\"math inline\">\\(\\boxed{\\{\\{2\\}\\}}\\)</span>.</p></li>\n<li><p>Comme <span class=\"math inline\">\\(\\sqrt2\\simeq1{,}414\\)</span> et\n<span class=\"math inline\">\\(2\\pi\\simeq6{,}283\\)</span>, les entiers\nconcernés sont <span\nclass=\"math display\">\\[\\boxed{\\{2,3,4,5,6\\}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.2",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-2-1.webp"
+    ],
+    "solutionHtml": "<p>Avec <span class=\"math inline\">\\(A=\\{1,2,3\\}\\)</span> et <span\nclass=\"math inline\">\\(B=\\{-1,0,1\\}\\)</span> :</p>\n<ol>\n<li><p><span class=\"math inline\">\\(A\\cap\nB=\\boxed{\\{1\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(A\\cup\nB=\\boxed{\\{-1,0,1,2,3\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(A\\setminus\nB=\\boxed{\\{2,3\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(B\\setminus\nA=\\boxed{\\{-1,0\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{3,4,5\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{-2,0,2\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{1,\\tfrac12,\\tfrac13\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{0,1,2,3,4\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{2,3,4,5,6\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{2,4,6\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{-3,-2,-1,0,1,2,3\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{2,3\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\varnothing}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{A=\\{1,2,3\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{0,1,2,3\\}}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.3",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-3-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span\nclass=\"math inline\">\\([0,1]\\cup[1,2]=\\boxed{[0,2]}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\([0,1]\\cap[1,2]=\\boxed{\\{1\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\([0,1]\\cap\\mathbb\nZ=\\boxed{\\{0,1\\}}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.4",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-4-1.webp",
+      "/assets/images/mat101/statements/exercice-2-4-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{[2,6[}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(|x|&lt;0{,}5\\iff-0{,}5&lt;x&lt;0{,}5\\)</span>,\ndonc <span\nclass=\"math inline\">\\(\\boxed{]-0{,}5,0{,}5[}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(|x-2|&lt;0{,}1\\iff1{,}9&lt;x&lt;2{,}1\\)</span>,\ndonc <span\nclass=\"math inline\">\\(\\boxed{]1{,}9,2{,}1[}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(|x-5|\\leq0{,}01\\)</span>, donc <span\nclass=\"math inline\">\\(\\boxed{[4{,}99,5{,}01]}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(|x-0{,}1|&lt;0{,}2\\)</span>, donc\n<span class=\"math inline\">\\(\\boxed{]-0{,}1,0{,}3[}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(x^2&lt;3\\iff|x|&lt;\\sqrt3\\)</span>,\ndonc <span\nclass=\"math inline\">\\(\\boxed{]-\\sqrt3,\\sqrt3[}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(x^4\\geq1\\iff |x|\\geq1\\)</span>, donc\n<span\nclass=\"math display\">\\[\\boxed{]-\\infty,-1]\\cup[1,+\\infty[}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(x^2-x=x(x-1)\\geq0\\)</span>, donc\n<span\nclass=\"math display\">\\[\\boxed{]-\\infty,0]\\cup[1,+\\infty[}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.5",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-5-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Par définition de la partie entière, <span\nclass=\"math display\">\\[\\lfloor x\\rfloor=3\\iff3\\leq x&lt;4.\\]</span> Le\nrésultat est <span\nclass=\"math inline\">\\(\\boxed{[3,4[}\\)</span>.</p></li>\n<li><p>Les conditions <span class=\"math inline\">\\(2\\leq\\lfloor\nx\\rfloor\\leq6\\)</span> équivalent à <span class=\"math inline\">\\(2\\leq\nx&lt;7\\)</span>. Le résultat est <span\nclass=\"math inline\">\\(\\boxed{[2,7[}\\)</span>.</p></li>\n<li><p>On doit conserver la condition de rationalité : <span\nclass=\"math display\">\\[\\boxed{\\mathbb Q\\cap[-3,3]}.\\]</span></p></li>\n<li><p>Si <span class=\"math inline\">\\(x\\geq0\\)</span>, l’égalité <span\nclass=\"math inline\">\\(|x|=\\lfloor x\\rfloor\\)</span> devient <span\nclass=\"math inline\">\\(x=\\lfloor x\\rfloor\\)</span>, donc <span\nclass=\"math inline\">\\(x\\)</span> est un entier naturel. Si <span\nclass=\"math inline\">\\(x&lt;0\\)</span>, alors <span\nclass=\"math inline\">\\(|x|&gt;0\\)</span> tandis que <span\nclass=\"math inline\">\\(\\lfloor x\\rfloor\\leq-1\\)</span>, ce qui est\nimpossible. L’ensemble est donc <span\nclass=\"math inline\">\\(\\boxed{\\mathbb N}\\)</span>.</p></li>\n<li><p>Pour <span class=\"math inline\">\\(i\\)</span> fixé, <span\nclass=\"math display\">\\[\\bigcap_{j\\in\\{2,3\\}}[i+j,i+2j]\n  =[i+2,i+4]\\cap[i+3,i+6]=[i+3,i+4].\\]</span> Ainsi <span\nclass=\"math display\">\\[\\bigcup_{i=1}^3[i+3,i+4]=[4,5]\\cup[5,6]\\cup[6,7]=\\boxed{[4,7]}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.6",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-6-1.webp"
+    ],
+    "solutionHtml": "<p>Notons les sept ensembles <span\nclass=\"math inline\">\\(E_1,\\ldots,E_7\\)</span> dans l’ordre de l’énoncé.\nOn a <span class=\"math display\">\\[E_4=\\{0,1\\},\\qquad E_5=]-1/5,1/5[,\n\\qquad E_6=]0{,}1,0{,}3[.\\]</span> De plus, <span\nclass=\"math display\">\\[x^3-2x^2-x+2=(x-1)(x+1)(x-2),\\]</span> donc <span\nclass=\"math display\">\\[E_7=]-1,1[\\ \\cup\\ ]2,+\\infty[.\\]</span> Les\ninclusions non triviales sont alors : <span\nclass=\"math display\">\\[\\boxed{E_6\\subset E_3\\subset E_1},\n\\qquad\n\\boxed{E_5\\subset E_2\\subset E_7},\n\\qquad\n\\boxed{E_3\\subset E_2},\n\\qquad\n\\boxed{E_4\\subset E_1}.\\]</span> On en déduit aussi, par transitivité,\n<span class=\"math inline\">\\(E_6\\subset E_1,E_2,E_7\\)</span> et <span\nclass=\"math inline\">\\(E_3\\subset E_7\\)</span>. Il n’y a pas d’autre\ninclusion entre deux ensembles distincts de la liste. Par exemple, <span\nclass=\"math inline\">\\(E_1\\not\\subset E_2\\)</span> car <span\nclass=\"math inline\">\\(1\\notin E_2\\)</span>, et <span\nclass=\"math inline\">\\(E_5\\not\\subset E_3\\)</span> car <span\nclass=\"math inline\">\\(E_5\\)</span> contient des nombres négatifs.</p>"
+  },
+  {
+    "id": "2.7",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-7-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><strong>Oui.</strong> Les répétitions et l’ordre ne comptent pas\ndans un ensemble.</p></li>\n<li><p><strong>Non.</strong> Le premier ensemble contient deux objets,\n<span class=\"math inline\">\\(1\\)</span> et <span\nclass=\"math inline\">\\((1,2)\\)</span> ; le second est le singleton dont\nl’élément est <span class=\"math inline\">\\((1,1)\\)</span>.</p></li>\n<li><p><strong>Non.</strong> Les couples <span\nclass=\"math inline\">\\((1,2)\\)</span> et <span\nclass=\"math inline\">\\((2,1)\\)</span> sont distincts.</p></li>\n<li><p><strong>Oui.</strong> On a <span\nclass=\"math inline\">\\(\\{1,2\\}=\\{2,1\\}\\)</span>.</p></li>\n<li><p><strong>Non.</strong> Le second ensemble contient aussi tous les\nentiers négatifs.</p></li>\n<li><p><strong>Oui.</strong> Dans <span class=\"math inline\">\\(\\mathbb\nN=\\{0,1,2,\\ldots\\}\\)</span>, les éléments inférieurs ou égaux à <span\nclass=\"math inline\">\\(3\\)</span> sont exactement <span\nclass=\"math inline\">\\(0,1,2,3\\)</span>.</p></li>\n<li><p><strong>Oui.</strong> Les deux écritures décrivent les couples\n<span class=\"math inline\">\\((x,y)\\)</span> tels que <span\nclass=\"math inline\">\\(x\\in\\{1,2,3\\}\\)</span> et <span\nclass=\"math inline\">\\(y\\in\\{0,1,2,3\\}\\)</span>.</p></li>\n<li><p><strong>Oui.</strong> La liste donnée énumère exactement les\ncouples d’entiers naturels vérifiant <span class=\"math inline\">\\(0\\leq\nx&lt;y\\leq3\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.8",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-8-1.webp",
+      "/assets/images/mat101/statements/exercice-2-8-2.webp"
+    ],
+    "solutionHtml": "<p>Les complémentaires sont pris dans <span\nclass=\"math inline\">\\(E\\)</span>.</p>\n<ol>\n<li><p>Par distributivité, <span class=\"math display\">\\[\\begin{align*}\n  &amp;(A\\cap B\\cap C)\\cup(A^c\\cap B\\cap C)\\\\\n  &amp;\\qquad=(A\\cup A^c)\\cap B\\cap C=B\\cap C.\n\\end{align*}\\]</span> L’expression complète vaut donc <span\nclass=\"math display\">\\[(B\\cap C)\\cup B^c\\cup C^c\n  =(B\\cap C)\\cup(B\\cap C)^c\n  =\\boxed E.\\]</span></p></li>\n<li><p>Les trois ensembles s’écrivent tous <span\nclass=\"math display\">\\[\\boxed{A\\cap B^c\\cap C^c}.\\]</span> En\nparticulier, <span class=\"math inline\">\\(B^c\\cap C^c=(B\\cup\nC)^c\\)</span> par une loi de De Morgan.</p></li>\n<li><p>Oui. En intersectant d’abord avec <span\nclass=\"math inline\">\\(B^c\\)</span>, le facteur <span\nclass=\"math inline\">\\(A\\cup B\\)</span> impose <span\nclass=\"math inline\">\\(A\\)</span>. Le facteur <span\nclass=\"math inline\">\\(A^c\\cup C^c\\)</span> impose alors <span\nclass=\"math inline\">\\(C^c\\)</span>. Mais, sous les conditions <span\nclass=\"math inline\">\\(A\\)</span>, <span\nclass=\"math inline\">\\(B^c\\)</span> et <span\nclass=\"math inline\">\\(C^c\\)</span>, le dernier facteur <span\nclass=\"math inline\">\\(A^c\\cup B\\cup C\\)</span> est faux. L’intersection\nvaut donc toujours <span\nclass=\"math display\">\\[\\boxed{\\varnothing}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.9",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-9-1.webp"
+    ],
+    "solutionHtml": "<p>L’assertion <span class=\"math inline\">\\(A\\)</span> signifie « toutes\nles cases valent <span class=\"math inline\">\\(1\\)</span> », <span\nclass=\"math inline\">\\(B\\)</span> signifie « chaque ligne contient au\nmoins un <span class=\"math inline\">\\(1\\)</span> », <span\nclass=\"math inline\">\\(C\\)</span> signifie « une ligne entière est formée\nde <span class=\"math inline\">\\(1\\)</span> », et <span\nclass=\"math inline\">\\(D\\)</span> signifie « le tableau contient au moins\nun <span class=\"math inline\">\\(1\\)</span> ».</p>\n<div class=\"center\">\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\">Tableau</th>\n<th style=\"text-align: center;\">Assertions vraies</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\">(a)</td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(B,D\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">(b)</td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(A,B,C,D\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">(c)</td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(C,D\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">(d)</td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(B,C,D\\)</span></td>\n</tr>\n</tbody>\n</table>\n</div>\n<p>Par exemple, dans le tableau (c), la deuxième ligne ne contient aucun\n<span class=\"math inline\">\\(1\\)</span>, donc <span\nclass=\"math inline\">\\(B\\)</span> est fausse, tandis que la troisième\nligne est entièrement formée de <span class=\"math inline\">\\(1\\)</span>,\ndonc <span class=\"math inline\">\\(C\\)</span> est vraie.</p>"
+  },
+  {
+    "id": "2.10",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-10-1.webp"
+    ],
+    "solutionHtml": "<p>On peut traduire les énoncés comme suit.</p>\n<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall x\\in\\mathbb R_+,\\\n\\exists y\\in\\mathbb R,\\ x=y^2}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall x\\in P,\\ \\exists\nn\\in\\mathbb Z,\\ x=2n}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall n\\in\\mathbb Z,\\\n\\exists m\\in\\mathbb Z,\\ m&gt;n}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall x\\in\\mathbb R,\\\n\\exists q\\in\\mathbb Q,\\ |x-q|&lt;0{,}1}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\boxed{\\forall z\\in\\mathbb C^*,\\\n\\exists u,v\\in\\mathbb C,\n  \\quad u\\neq v,\\quad u^2=z,\\quad v^2=z}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\boxed{\\exists x,y\\in\\mathbb\nR\\setminus\\mathbb Q,\\quad xy\\in\\mathbb Q}.\\]</span> Par exemple, <span\nclass=\"math inline\">\\(x=y=\\sqrt2\\)</span> convient.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.11",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-11-1.webp",
+      "/assets/images/mat101/statements/exercice-2-11-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(\\neg(P\\land\\neg Q)\\equiv\\boxed{(\\neg\nP)\\lor Q}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\neg\\bigl((P\\Rightarrow Q)\\land\nR\\bigr)\n  \\equiv\\neg(P\\Rightarrow Q)\\lor\\neg R\n  \\equiv\\boxed{(P\\land\\neg Q)\\lor\\neg R}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\boxed{\\forall x\\in[1,+\\infty[,\\quad\na&lt;b+x}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\boxed{\\forall x\\in\\mathbb R_+,\\quad\na\\neq b+x}.\\]</span></p></li>\n<li><p>L’écriture <span class=\"math inline\">\\(a=b=c\\)</span> signifie\n<span class=\"math inline\">\\((a=b)\\land(b=c)\\)</span>. Sa négation est\n<span class=\"math display\">\\[\\boxed{a\\neq b\\quad\\text{ou}\\quad b\\neq\nc}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.12",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-12-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(x\\)</span> et <span\nclass=\"math inline\">\\(y\\)</span> sont libres. L’assertion, ouverte,\nsignifie « <span class=\"math inline\">\\(x\\)</span> est strictement\nsupérieur à <span class=\"math inline\">\\(y\\)</span> ».</p></li>\n<li><p><span class=\"math inline\">\\(x\\)</span> est liée et <span\nclass=\"math inline\">\\(y\\)</span> est libre. L’assertion dépend du\nparamètre <span class=\"math inline\">\\(y\\)</span> : « tout réel est\nstrictement supérieur à <span class=\"math inline\">\\(y\\)</span>\n».</p></li>\n<li><p><span class=\"math inline\">\\(x\\)</span> est liée. L’assertion est\nclose et <strong>fausse</strong>, par exemple pour <span\nclass=\"math inline\">\\(x=0\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(x\\)</span> et <span\nclass=\"math inline\">\\(y\\)</span> sont liées. L’assertion est close et\n<strong>vraie</strong> : pour un réel <span\nclass=\"math inline\">\\(x\\)</span>, choisir <span\nclass=\"math inline\">\\(y=x-1\\)</span>.</p></li>\n<li><p>Les deux variables sont liées. L’assertion est\n<strong>fausse</strong> : pour tout candidat <span\nclass=\"math inline\">\\(x\\)</span>, le réel <span\nclass=\"math inline\">\\(y=x+1\\)</span> vérifie <span\nclass=\"math inline\">\\(x\\not&gt;y\\)</span>.</p></li>\n<li><p>Les deux variables sont liées. L’assertion est\n<strong>fausse</strong> : pour <span class=\"math inline\">\\(x=0\\)</span>,\naucun <span class=\"math inline\">\\(y\\in\\mathbb N\\)</span> ne satisfait\n<span class=\"math inline\">\\(0&gt;y\\)</span>.</p></li>\n<li><p>Les deux variables sont liées. L’assertion est\n<strong>vraie</strong> : on peut choisir, par exemple, <span\nclass=\"math inline\">\\(y=\\lfloor x\\rfloor-1\\)</span>.</p></li>\n<li><p>Toutes les variables sont liées. En français : « pour tout réel\n<span class=\"math inline\">\\(x\\)</span>, il existe un entier <span\nclass=\"math inline\">\\(y&lt;x\\)</span> qui est strictement supérieur à\ntout entier <span class=\"math inline\">\\(z&lt;x\\)</span> ». L’assertion\nest <strong>fausse telle qu’elle est écrite</strong>. En effet, puisque\n<span class=\"math inline\">\\(x&gt;y\\)</span>, on peut prendre <span\nclass=\"math inline\">\\(z=y\\)</span> dans le quantificateur universel ;\nl’implication imposerait alors <span\nclass=\"math inline\">\\(y&gt;y\\)</span>. Avec la conclusion corrigée <span\nclass=\"math inline\">\\(y\\geq z\\)</span>, on obtiendrait la propriété de\nla partie entière stricte.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.13",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-13-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><strong>Fausse :</strong> l’antécédent est vrai et le conséquent\nest faux.</p></li>\n<li><p><strong>Vraie :</strong> l’antécédent <span\nclass=\"math inline\">\\(1+1=3\\)</span> est faux ; une implication\nd’antécédent faux est vraie.</p></li>\n<li><p><strong>Vraie</strong> pour la même raison : <span\nclass=\"math inline\">\\(1=0\\)</span> est faux.</p></li>\n<li><p><strong>Fausse :</strong> <span\nclass=\"math inline\">\\(x=5/2\\)</span> vérifie <span\nclass=\"math inline\">\\(x&gt;2\\)</span> mais pas <span\nclass=\"math inline\">\\(x\\geq3\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> <span\nclass=\"math inline\">\\(x&gt;3\\)</span> entraîne immédiatement <span\nclass=\"math inline\">\\(x\\geq3\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> <span\nclass=\"math inline\">\\([2,3]\\subset[0,4]\\)</span>.</p></li>\n<li><p><strong>Vraie</strong> par définition de l’intervalle <span\nclass=\"math inline\">\\([2,3]\\)</span>.</p></li>\n<li><p><strong>Fausse :</strong> <span\nclass=\"math inline\">\\(x=0\\)</span> n’appartient pas à <span\nclass=\"math inline\">\\([2,3]\\)</span>, mais <span\nclass=\"math inline\">\\(0\\not\\geq3\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> <span\nclass=\"math inline\">\\(x\\notin[2,+\\infty[\\)</span> signifie <span\nclass=\"math inline\">\\(x&lt;2\\)</span>, donc <span\nclass=\"math inline\">\\(x\\leq3\\)</span>.</p></li>\n<li><p><strong>Fausse :</strong> prendre <span\nclass=\"math inline\">\\(x=1\\)</span>, <span\nclass=\"math inline\">\\(y=-1\\)</span>. Alors <span\nclass=\"math inline\">\\(x&gt;y\\)</span>, mais <span\nclass=\"math inline\">\\(1/x=1\\not&lt; -1=1/y\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> <span\nclass=\"math inline\">\\(x=1/4\\)</span> donne <span\nclass=\"math inline\">\\(x&lt;\\sqrt x=1/2\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> <span\nclass=\"math inline\">\\(x=1\\)</span>, <span\nclass=\"math inline\">\\(y=0\\)</span> convient.</p></li>\n<li><p><strong>Fausse :</strong> pour tout <span\nclass=\"math inline\">\\(x\\)</span>, le choix <span\nclass=\"math inline\">\\(y=-x-1\\)</span> donne <span\nclass=\"math inline\">\\(x+y=-1\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> pour un <span\nclass=\"math inline\">\\(x\\)</span> donné, choisir <span\nclass=\"math inline\">\\(y=1-x\\)</span>.</p></li>\n<li><p><strong>Fausse :</strong> <span\nclass=\"math inline\">\\(x=y=0\\)</span> donne une somme nulle.</p></li>\n<li><p><strong>Fausse :</strong> pour <span\nclass=\"math inline\">\\(\\varepsilon=0\\)</span>, l’inégalité <span\nclass=\"math inline\">\\(|x|&lt;0\\)</span> est impossible.</p></li>\n<li><p><strong>Vraie :</strong> le choix <span\nclass=\"math inline\">\\(x=-1\\)</span> convient pour tout <span\nclass=\"math inline\">\\(\\varepsilon\\)</span>, car <span\nclass=\"math inline\">\\(-1&lt;|\\varepsilon|\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> on peut même choisir <span\nclass=\"math inline\">\\(x=0\\)</span>, puisque <span\nclass=\"math inline\">\\(|\\varepsilon|&gt;0\\)</span>.</p></li>\n<li><p><strong>Vraie :</strong> choisir par exemple <span\nclass=\"math inline\">\\(t=1\\)</span>. Si <span\nclass=\"math inline\">\\(|x|&lt;1\\)</span>, alors <span\nclass=\"math inline\">\\(x^2&lt;1&lt;3\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.14",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-14-1.webp"
+    ],
+    "solutionHtml": "<p>Les complémentaires sont pris dans <span\nclass=\"math inline\">\\(E\\)</span>.</p>\n<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{A\\cap B\\cap\nC}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{A\\cup B\\cup\nC}\\)</span>.</p></li>\n<li><p>« Au plus deux » signifie « pas dans les trois » : <span\nclass=\"math display\">\\[\\boxed{E\\setminus(A\\cap B\\cap\nC)}.\\]</span></p></li>\n<li><p>« Exactement un » correspond à <span\nclass=\"math display\">\\[\\boxed{(A\\cap B^c\\cap C^c)\\cup(A^c\\cap B\\cap\nC^c)\\cup(A^c\\cap B^c\\cap C)}.\\]</span></p></li>\n<li><p>« Au moins deux » correspond à <span\nclass=\"math display\">\\[\\boxed{(A\\cap B)\\cup(A\\cap C)\\cup(B\\cap\nC)}.\\]</span></p></li>\n<li><p>« Au plus un » est le complémentaire du précédent : <span\nclass=\"math display\">\\[\\boxed{E\\setminus\\bigl((A\\cap B)\\cup(A\\cap\nC)\\cup(B\\cap C)\\bigr)}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.15",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-15-1.webp"
+    ],
+    "solutionHtml": "<p>On dresse la table suivante.</p>\n<div class=\"center\">\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(P\\)</span></th>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(Q\\)</span></th>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(R\\)</span></th>\n<th style=\"text-align: center;\"><span class=\"math inline\">\\(P\\Rightarrow\nQ\\)</span></th>\n<th style=\"text-align: center;\"><span class=\"math inline\">\\(Q\\Rightarrow\nR\\)</span></th>\n<th style=\"text-align: center;\"><span class=\"math inline\">\\(P\\Rightarrow\nR\\)</span></th>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(((P\\Rightarrow Q)\\land(Q\\Rightarrow\nR))\\Rightarrow(P\\Rightarrow R)\\)</span></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n</tbody>\n</table>\n</div>\n<p>La dernière colonne ne contient que V : l’assertion est une\ntautologie.</p>"
+  },
+  {
+    "id": "2.16",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-16-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><div class=\"center\">\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(P\\)</span></th>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(Q\\)</span></th>\n<th style=\"text-align: center;\"><span class=\"math inline\">\\(P\\oplus\nQ\\)</span></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">V</td>\n<td style=\"text-align: center;\">V</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n<td style=\"text-align: center;\">F</td>\n</tr>\n</tbody>\n</table>\n</div></li>\n<li><p>L’assertion <span class=\"math inline\">\\((P\\land\\neg Q)\\lor(\\neg\nP\\land Q)\\)</span> est vraie exactement dans les deux lignes où une\nseule des assertions <span class=\"math inline\">\\(P,Q\\)</span> est vraie.\nElle a donc la même table de vérité que <span\nclass=\"math inline\">\\(P\\oplus Q\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\((P\\lor Q)\\land\\neg(P\\land Q)\\)</span>\nsignifie : au moins l’une de <span class=\"math inline\">\\(P,Q\\)</span>\nest vraie, mais elles ne sont pas vraies simultanément. C’est\nprécisément le « ou exclusif », donc <span\nclass=\"math display\">\\[\\boxed{P\\oplus Q\\iff(P\\lor Q)\\land\\neg(P\\land\nQ)}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.17",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-17-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>L’inéquation équivaut à <span\nclass=\"math display\">\\[(a-2)x\\leq-2.\\]</span> Il faut distinguer le\nsigne de <span class=\"math inline\">\\(a-2\\)</span> : <span\nclass=\"math display\">\\[\\boxed{\n  \\begin{cases}\n  x\\leq-\\dfrac2{a-2},&amp;a&gt;2,\\\\[1ex]\n  x\\geq-\\dfrac2{a-2}=\\dfrac2{2-a},&amp;a&lt;2,\\\\[1ex]\n  \\varnothing,&amp;a=2.\n  \\end{cases}}\\]</span> Pour <span class=\"math inline\">\\(a=2\\)</span>,\nl’inéquation initiale devient <span\nclass=\"math inline\">\\(3\\leq1\\)</span>.</p></li>\n<li><p>Les deux membres étant positifs ou nuls, on peut élever au carré\n: <span class=\"math display\">\\[\\begin{align*}\n  |3x-1|\\leq|x+4|\n  &amp;\\iff(3x-1)^2\\leq(x+4)^2\\\\\n  &amp;\\iff(2x-5)(4x+3)\\leq0.\n\\end{align*}\\]</span> Le produit est négatif ou nul entre ses deux\nracines, donc <span\nclass=\"math display\">\\[\\boxed{x\\in\\left[-\\frac34,\\frac52\\right]}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.18",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-18-1.webp"
+    ],
+    "solutionHtml": "<p>La droite <span class=\"math inline\">\\(D_a\\)</span> a pour équation\ncartésienne <span class=\"math display\">\\[x-y+2a=0.\\]</span> La distance\ndu centre <span class=\"math inline\">\\((a,1)\\)</span> du cercle <span\nclass=\"math inline\">\\(C_a\\)</span> à cette droite vaut <span\nclass=\"math display\">\\[d(a)=\\frac{|a-1+2a|}{\\sqrt{1^2+(-1)^2}}\n=\\frac{|3a-1|}{\\sqrt2}.\\]</span></p>\n<ol>\n<li><p>Il existe des points communs si et seulement si cette distance\nest inférieure ou égale au rayon <span class=\"math inline\">\\(1\\)</span>\n: <span class=\"math display\">\\[|3a-1|\\leq\\sqrt2.\\]</span> Ainsi <span\nclass=\"math display\">\\[\\boxed{\\frac{1-\\sqrt2}{3}\\leq\na\\leq\\frac{1+\\sqrt2}{3}}.\\]</span></p></li>\n<li><p>La droite est tangente lorsque la distance vaut exactement <span\nclass=\"math inline\">\\(1\\)</span>, c’est-à-dire <span\nclass=\"math display\">\\[\\boxed{a=\\frac{1-\\sqrt2}{3}\\quad\\text{ou}\\quad\na=\\frac{1+\\sqrt2}{3}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.19",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-19-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><strong>Faux.</strong> Le produit de trois nombres négatifs est\nnégatif, alors qu’il n’y a pas exactement un facteur négatif. Le bon\ncritère est : le produit est négatif si et seulement si le nombre de\nfacteurs négatifs est impair, aucun facteur n’étant nul.</p></li>\n<li><p><strong>Vrai.</strong> Si le produit est positif, aucun facteur\nn’est nul. Chaque facteur négatif apporte un signe <span\nclass=\"math inline\">\\(-1\\)</span> ; le signe du produit est donc <span\nclass=\"math inline\">\\((-1)^r\\)</span>, où <span\nclass=\"math inline\">\\(r\\)</span> est le nombre de facteurs négatifs. Il\nest positif exactement lorsque <span class=\"math inline\">\\(r\\)</span>\nest pair.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.20",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-20-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>La négation de <span class=\"math inline\">\\(x&gt;1\\lor\ny&gt;1\\)</span> est <span class=\"math inline\">\\(x\\leq1\\land\ny\\leq1\\)</span>. La contraposée est donc <span\nclass=\"math display\">\\[\\boxed{\\forall x,y\\in\\mathbb R,\\quad (x\\leq1\\land\ny\\leq1)\\Rightarrow x+y\\leq2}.\\]</span></p></li>\n<li><p>Cette contraposée est vraie : en additionnant <span\nclass=\"math inline\">\\(x\\leq1\\)</span> et <span\nclass=\"math inline\">\\(y\\leq1\\)</span>, on obtient <span\nclass=\"math inline\">\\(x+y\\leq2\\)</span>. L’assertion initiale est donc\nvraie.</p></li>\n<li><p>La réciproque est <span class=\"math display\">\\[\\forall\nx,y\\in\\mathbb R,\\quad (x&gt;1\\lor y&gt;1)\\Rightarrow x+y&gt;2.\\]</span>\nElle est fausse : <span class=\"math inline\">\\(x=2\\)</span>, <span\nclass=\"math inline\">\\(y=-100\\)</span> vérifient l’antécédent, mais pas\nla conclusion.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.21",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-21-1.webp"
+    ],
+    "solutionHtml": "<p>Notons <span class=\"math inline\">\\(\\mathcal P\\)</span> l’ensemble des\nnombres premiers.</p>\n<ol>\n<li><p>La conjecture forte s’écrit <span class=\"math display\">\\[\\forall\nn\\in\\mathbb N,\\quad\n  (n&gt;4\\land 2\\mid n)\n  \\Rightarrow\n  \\exists p,q\\in\\mathcal P,\\ n=p+q.\\]</span> La conjecture faible\ns’écrit <span class=\"math display\">\\[\\forall n\\in\\mathbb N,\\quad\n  (n&gt;7\\land n\\text{ impair})\n  \\Rightarrow\n  \\exists p,q,r\\in\\mathcal P,\\ n=p+q+r.\\]</span></p></li>\n<li><p>Supposons la conjecture forte. Soit <span\nclass=\"math inline\">\\(n&gt;7\\)</span> impair. Alors <span\nclass=\"math inline\">\\(n-3\\)</span> est pair et <span\nclass=\"math inline\">\\(n-3&gt;4\\)</span>. Il existe donc des nombres\npremiers <span class=\"math inline\">\\(p,q\\)</span> tels que <span\nclass=\"math inline\">\\(n-3=p+q\\)</span>. Comme <span\nclass=\"math inline\">\\(3\\)</span> est premier, <span\nclass=\"math display\">\\[n=p+q+3,\\]</span> ce qui démontre la conjecture\nfaible.</p>\n<p>L’argument n’est pas réversible : une décomposition d’un impair en\ntrois nombres premiers ne garantit pas que l’un d’eux soit <span\nclass=\"math inline\">\\(3\\)</span>, condition qui permettrait de revenir à\nune décomposition d’un pair en deux nombres premiers. L’énoncé faible ne\nfournit donc pas, à lui seul, la conjecture forte.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.22",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-22-1.webp"
+    ],
+    "solutionHtml": "<p>Pour <span class=\"math inline\">\\(n\\geq1\\)</span>, la somme\ngéométrique donne <span\nclass=\"math display\">\\[\\frac{10^n-1}{9}=1+10+10^2+\\cdots+10^{n-1},\\]</span>\nqui est un entier. Pour <span class=\"math inline\">\\(n=0\\)</span>, le\nquotient vaut <span class=\"math inline\">\\(0\\)</span>. Ainsi le résultat\nest vrai pour tout <span class=\"math inline\">\\(n\\in\\mathbb\nN\\)</span>.</p>\n<p>On peut aussi poser <span\nclass=\"math inline\">\\(u_n=(10^n-1)/9\\)</span>. Alors <span\nclass=\"math inline\">\\(u_0=0\\)</span> et <span\nclass=\"math display\">\\[u_{n+1}=10u_n+1.\\]</span> Une récurrence montre\nimmédiatement que tous les <span class=\"math inline\">\\(u_n\\)</span> sont\nentiers.</p>"
+  },
+  {
+    "id": "2.23",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-23-1.webp",
+      "/assets/images/mat101/statements/exercice-2-23-2.webp"
+    ],
+    "solutionHtml": "<p>Numérotons les positions de <span class=\"math inline\">\\(1\\)</span> à\n<span class=\"math inline\">\\(2n\\)</span> à partir du sommet du paquet.\nPour une configuration donnée, posons <span\nclass=\"math display\">\\[\\begin{aligned}\nS={}&amp;\\#\\{\\text{cartes face visible en position paire}\\}\\\\\n   &amp;-\\#\\{\\text{cartes face visible en position impaire}\\}.\n\\end{aligned}\\]</span> La propriété demandée est <span\nclass=\"math inline\">\\(S=0\\)</span>. Initialement, toutes les cartes sont\nface cachée, donc <span class=\"math inline\">\\(S=0\\)</span>.</p>\n<p>Considérons une opération de type A. Si les orientations des deux\npremières cartes valent <span\nclass=\"math inline\">\\(a,b\\in\\{0,1\\}\\)</span>, leur contribution à <span\nclass=\"math inline\">\\(S\\)</span> est <span\nclass=\"math inline\">\\(b-a\\)</span>. Après retournement du bloc, les\nnouvelles orientations sont <span class=\"math inline\">\\(1-b\\)</span> en\npremière position et <span class=\"math inline\">\\(1-a\\)</span> en seconde\nposition. La contribution devient <span\nclass=\"math display\">\\[(1-a)-(1-b)=b-a.\\]</span> Ainsi l’opération A\nconserve <span class=\"math inline\">\\(S\\)</span>.</p>\n<p>Une opération de type B est une permutation cyclique des <span\nclass=\"math inline\">\\(2n\\)</span> positions. Si le nombre <span\nclass=\"math inline\">\\(k\\)</span> de cartes déplacées est pair, la parité\nde chaque position est conservée et <span\nclass=\"math inline\">\\(S\\)</span> ne change pas. Si <span\nclass=\"math inline\">\\(k\\)</span> est impair, les positions paires et\nimpaires sont échangées et <span class=\"math inline\">\\(S\\)</span> est\nremplacé par <span class=\"math inline\">\\(-S\\)</span>. Dans les deux cas,\nla valeur <span class=\"math inline\">\\(S=0\\)</span> est préservée.</p>\n<p>Par récurrence sur le nombre d’opérations, on obtient toujours <span\nclass=\"math inline\">\\(S=0\\)</span>, ce qui est exactement la propriété\ndemandée.</p>"
+  },
+  {
+    "id": "2.24",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-24-1.webp"
+    ],
+    "solutionHtml": "<p>Démontrons la contraposée. Si <span class=\"math inline\">\\(a\\)</span>\net <span class=\"math inline\">\\(b\\)</span> sont rationnels, il existe des\nentiers <span class=\"math inline\">\\(p,q,r,s\\)</span> avec <span\nclass=\"math inline\">\\(q,s\\neq0\\)</span> tels que <span\nclass=\"math display\">\\[a=\\frac pq,\n\\qquad b=\\frac rs.\\]</span> Alors <span\nclass=\"math display\">\\[a+b=\\frac{ps+rq}{qs}\\in\\mathbb Q.\\]</span> La\ncontraposée étant vraie, si <span class=\"math inline\">\\(a+b\\)</span> est\nirrationnel, au moins l’un des deux nombres <span\nclass=\"math inline\">\\(a,b\\)</span> est irrationnel.</p>"
+  },
+  {
+    "id": "2.25",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-25-1.webp"
+    ],
+    "solutionHtml": "<p>L’équation <span class=\"math inline\">\\(\\sqrt{x+2}=x\\)</span> impose\nd’abord <span class=\"math inline\">\\(x\\geq0\\)</span>. Sous cette\ncondition, on peut élever au carré sans changer l’équation : <span\nclass=\"math display\">\\[\\sqrt{x+2}=x\n\\iff x+2=x^2\n\\iff(x-2)(x+1)=0.\\]</span> Les candidats sont <span\nclass=\"math inline\">\\(2\\)</span> et <span\nclass=\"math inline\">\\(-1\\)</span>, mais seul <span\nclass=\"math inline\">\\(2\\)</span> satisfait <span\nclass=\"math inline\">\\(x\\geq0\\)</span> et l’équation initiale. L’ensemble\ndes solutions est <span\nclass=\"math display\">\\[\\boxed{\\{2\\}}.\\]</span></p>"
+  },
+  {
+    "id": "2.26",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-26-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Partons de <span class=\"math inline\">\\(3x+2\\leq-2x+1\\)</span>.\n<span class=\"math display\">\\[\\begin{align*}\n  3x+2\\leq-2x+1\n  &amp;\\iff5x+2\\leq1 &amp;&amp;\\text{ajout de $2x$, règle (17)},\\\\\n  &amp;\\iff5x\\leq-1 &amp;&amp;\\text{ajout de $-2$, règle (17)},\\\\\n  &amp;\\iff x\\leq-\\frac15 &amp;&amp;\\text{multiplication par $1/5&gt;0$,\nrègle (18)}.\n\\end{align*}\\]</span> Chaque étape est réversible en ajoutant l’opposé\nou en multipliant par <span class=\"math inline\">\\(5&gt;0\\)</span>. La\nsolution est <span\nclass=\"math inline\">\\(\\boxed{]-\\infty,-1/5]}\\)</span>.</p></li>\n<li><p>De <span class=\"math inline\">\\(a\\leq b\\)</span>, la règle (17)\ndonne <span class=\"math inline\">\\(a+c\\leq b+c\\)</span>. De <span\nclass=\"math inline\">\\(c\\leq d\\)</span>, elle donne <span\nclass=\"math inline\">\\(b+c\\leq b+d\\)</span>. La transitivité (16) donne\nalors <span class=\"math display\">\\[a+c\\leq b+d.\\]</span></p></li>\n<li><p>Si <span class=\"math inline\">\\(c\\leq0\\)</span>, alors <span\nclass=\"math inline\">\\(-c\\geq0\\)</span>. La règle (18), appliquée à <span\nclass=\"math inline\">\\(a\\leq b\\)</span>, donne <span\nclass=\"math display\">\\[-ac\\leq-bc.\\]</span> En ajoutant <span\nclass=\"math inline\">\\(ac+bc\\)</span> aux deux membres, on obtient <span\nclass=\"math inline\">\\(bc\\leq ac\\)</span>, c’est-à-dire <span\nclass=\"math display\">\\[ac\\geq bc.\\]</span></p></li>\n<li><p>La règle (18) donne d’abord <span class=\"math inline\">\\(ac\\leq\nbc\\)</span>. Si l’on avait <span class=\"math inline\">\\(ac=bc\\)</span>,\nalors <span class=\"math inline\">\\((b-a)c=0\\)</span>. Or <span\nclass=\"math inline\">\\(b-a&gt;0\\)</span> et <span\nclass=\"math inline\">\\(c&gt;0\\)</span>, donc les deux facteurs sont non\nnuls, contradiction. Ainsi <span\nclass=\"math display\">\\[ac&lt;bc.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.27",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-27-1.webp",
+      "/assets/images/mat101/statements/exercice-2-27-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Puisque <span class=\"math inline\">\\(f\\)</span> est paire, <span\nclass=\"math inline\">\\(f(-x)=f(x)\\)</span> pour tout <span\nclass=\"math inline\">\\(x\\)</span>. En dérivant cette identité, la règle\nde dérivation d’une composée donne <span\nclass=\"math display\">\\[-f&#39;(-x)=f&#39;(x),\\]</span> donc <span\nclass=\"math inline\">\\(f&#39;(-x)=-f&#39;(x)\\)</span>. Ainsi <span\nclass=\"math inline\">\\(f&#39;\\)</span> est impaire.</p></li>\n<li><p>Soit <span class=\"math inline\">\\(x\\in\\mathbb Q\\)</span> avec\n<span class=\"math inline\">\\(x&gt;0\\)</span>. Écrivons <span\nclass=\"math inline\">\\(x=p/q\\)</span> avec <span\nclass=\"math inline\">\\(p,q\\in\\mathbb N^*\\)</span> et <span\nclass=\"math inline\">\\(q&gt;0\\)</span>. Le nombre <span\nclass=\"math inline\">\\(n=p+1\\)</span> est un entier strictement positif\net <span class=\"math display\">\\[n=p+1&gt;p\\geq\\frac\npq=x.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.28",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-28-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Soit <span class=\"math inline\">\\(x\\in\\mathbb R\\)</span>. Si <span\nclass=\"math inline\">\\(x\\notin\\mathbb Q\\)</span>, la première assertion\nde la disjonction est vraie. Si <span class=\"math inline\">\\(x\\in\\mathbb\nQ\\)</span>, écrivons <span class=\"math inline\">\\(x=p/q\\)</span> avec\n<span class=\"math inline\">\\(p\\in\\mathbb Z\\)</span> et <span\nclass=\"math inline\">\\(q\\in\\mathbb N^*\\)</span>. Le choix <span\nclass=\"math inline\">\\(n=q\\)</span> donne <span\nclass=\"math inline\">\\(nx=p\\in\\mathbb Z\\)</span>. Dans tous les cas, la\ndisjonction est vraie.</p></li>\n<li><p>Si <span class=\"math inline\">\\(a\\geq b\\)</span>, alors <span\nclass=\"math inline\">\\(|a-b|=a-b\\)</span> et <span\nclass=\"math display\">\\[\\frac{a+b+|a-b|}{2}=a=\\max(a,b),\n  \\quad\n  \\frac{a+b-|a-b|}{2}=b=\\min(a,b).\\]</span> Le cas <span\nclass=\"math inline\">\\(a\\leq b\\)</span> est symétrique.</p></li>\n<li><p>On distingue les trois restes possibles modulo <span\nclass=\"math inline\">\\(3\\)</span> :</p>\n<ul>\n<li><p>si <span class=\"math inline\">\\(n\\equiv0\\)</span>, le facteur\n<span class=\"math inline\">\\(n\\)</span> est divisible par <span\nclass=\"math inline\">\\(3\\)</span> ;</p></li>\n<li><p>si <span class=\"math inline\">\\(n\\equiv1\\)</span>, alors <span\nclass=\"math inline\">\\(2n+1\\equiv0\\)</span> ;</p></li>\n<li><p>si <span class=\"math inline\">\\(n\\equiv2\\)</span>, alors <span\nclass=\"math inline\">\\(n+1\\equiv0\\)</span>.</p></li>\n</ul>\n<p>Dans tous les cas, <span class=\"math inline\">\\(3\\)</span> divise\n<span class=\"math inline\">\\(n(n+1)(2n+1)\\)</span>.</p></li>\n<li><p>Si <span class=\"math inline\">\\(n\\)</span> est pair, prenons <span\nclass=\"math inline\">\\(m=1\\)</span> : <span\nclass=\"math inline\">\\(n+m\\)</span> est impair et <span\nclass=\"math inline\">\\(nm\\)</span> est pair. Si <span\nclass=\"math inline\">\\(n\\)</span> est impair, prenons <span\nclass=\"math inline\">\\(m=2\\)</span> : la somme est impaire et le produit\nest pair.</p></li>\n<li><p>L’équation équivaut à <span\nclass=\"math display\">\\[|x+1|+|3x-2|=3.\\]</span> Les changements de signe\nont lieu en <span class=\"math inline\">\\(-1\\)</span> et <span\nclass=\"math inline\">\\(2/3\\)</span>.</p>\n<ul>\n<li><p>Si <span class=\"math inline\">\\(x\\leq-1\\)</span>, l’équation donne\n<span class=\"math inline\">\\(1-4x=3\\)</span>, soit <span\nclass=\"math inline\">\\(x=-1/2\\)</span>, hors de l’intervalle.</p></li>\n<li><p>Si <span class=\"math inline\">\\(-1\\leq x\\leq2/3\\)</span>, elle\ndonne <span class=\"math inline\">\\(3-2x=3\\)</span>, donc <span\nclass=\"math inline\">\\(x=0\\)</span>.</p></li>\n<li><p>Si <span class=\"math inline\">\\(x\\geq2/3\\)</span>, elle donne\n<span class=\"math inline\">\\(4x-1=3\\)</span>, donc <span\nclass=\"math inline\">\\(x=1\\)</span>.</p></li>\n</ul>\n<p>Les solutions sont <span\nclass=\"math inline\">\\(\\boxed{\\{0,1\\}}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.29",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-29-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Supposons par l’absurde que <span\nclass=\"math inline\">\\(\\ln2/\\ln3=p/q\\)</span> avec <span\nclass=\"math inline\">\\(p,q\\in\\mathbb N^*\\)</span>. Alors <span\nclass=\"math display\">\\[q\\ln2=p\\ln3,\\]</span> donc, par injectivité de\nl’exponentielle, <span class=\"math display\">\\[2^q=3^p.\\]</span> Le\nmembre de gauche est pair et celui de droite impair, contradiction.\nAinsi <span class=\"math display\">\\[\\boxed{\\frac{\\ln2}{\\ln3}\\notin\\mathbb\nQ}.\\]</span></p></li>\n<li><div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>L’assertion avec « strictement plus petit que <span\nclass=\"math inline\">\\(1/n\\)</span> » est fausse : si <span\nclass=\"math inline\">\\(a_1=\\cdots=a_n=1/n\\)</span>, la somme vaut <span\nclass=\"math inline\">\\(1\\)</span> et aucun terme n’est strictement\ninférieur à <span class=\"math inline\">\\(1/n\\)</span>.</p>\n</div>\n</div>\n<p>La version correcte est : « l’un des réels est inférieur ou égal à\n<span class=\"math inline\">\\(1/n\\)</span> ». En effet, si tous les <span\nclass=\"math inline\">\\(a_i\\)</span> étaient strictement supérieurs à\n<span class=\"math inline\">\\(1/n\\)</span>, alors <span\nclass=\"math display\">\\[a_1+\\cdots+a_n&gt;n\\times\\frac1n=1,\\]</span>\ncontradiction.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.30",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-30-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Supposons d’abord <span class=\"math inline\">\\(ax+b\\geq0\\)</span>\npour tout <span class=\"math inline\">\\(x\\in[0,1]\\)</span>. En prenant\n<span class=\"math inline\">\\(x=0\\)</span> puis <span\nclass=\"math inline\">\\(x=1\\)</span>, on obtient <span\nclass=\"math inline\">\\(b\\geq0\\)</span> et <span\nclass=\"math inline\">\\(a+b\\geq0\\)</span>.</p>\n<p>Réciproquement, supposons <span class=\"math inline\">\\(b\\geq0\\)</span>\net <span class=\"math inline\">\\(a+b\\geq0\\)</span>. Pour <span\nclass=\"math inline\">\\(x\\in[0,1]\\)</span>, <span\nclass=\"math display\">\\[ax+b=(1-x)b+x(a+b).\\]</span> C’est une\ncombinaison à coefficients positifs ou nuls de deux nombres positifs ou\nnuls. Ainsi <span class=\"math inline\">\\(ax+b\\geq0\\)</span>. Les deux\nassertions sont donc équivalentes.</p></li>\n<li><p>Notons <span class=\"math inline\">\\(r_+\\)</span> et <span\nclass=\"math inline\">\\(r_-\\)</span> les rotations de centre <span\nclass=\"math inline\">\\(A\\)</span> et d’angles respectifs <span\nclass=\"math inline\">\\(\\pi/3\\)</span> et <span\nclass=\"math inline\">\\(-\\pi/3\\)</span>. Pour obtenir un triangle d’une\norientation donnée, il faut avoir <span\nclass=\"math inline\">\\(C=r_+(B)\\)</span>, donc <span\nclass=\"math display\">\\[B\\in D_1\\cap r_+^{-1}(D_2)=D_1\\cap\nr_-(D_2).\\]</span> La droite <span\nclass=\"math inline\">\\(r_-(D_2)\\)</span> forme un angle <span\nclass=\"math inline\">\\(\\pi/3\\)</span> avec <span\nclass=\"math inline\">\\(D_2\\)</span> et n’est donc pas parallèle à <span\nclass=\"math inline\">\\(D_1\\)</span>. Elle coupe <span\nclass=\"math inline\">\\(D_1\\)</span> en un unique point <span\nclass=\"math inline\">\\(B\\)</span>, puis <span\nclass=\"math inline\">\\(C=r_+(B)\\)</span> est déterminé. L’autre\norientation se construit avec <span class=\"math inline\">\\(r_-\\)</span>\net donne un second triangle. Il y a donc <span\nclass=\"math inline\">\\(\\boxed{2}\\)</span> triangles, un pour chaque\norientation.</p></li>\n<li><p>Pour une fonction quelconque <span\nclass=\"math inline\">\\(f:\\mathbb R\\to\\mathbb R\\)</span>, posons <span\nclass=\"math display\">\\[f_{\\mathrm p}(x)=\\frac{f(x)+f(-x)}2,\n  \\qquad\n  f_{\\mathrm i}(x)=\\frac{f(x)-f(-x)}2.\\]</span> Alors <span\nclass=\"math inline\">\\(f_{\\mathrm p}(-x)=f_{\\mathrm p}(x)\\)</span>, donc\n<span class=\"math inline\">\\(f_{\\mathrm p}\\)</span> est paire, et <span\nclass=\"math inline\">\\(f_{\\mathrm i}(-x)=-f_{\\mathrm i}(x)\\)</span>, donc\n<span class=\"math inline\">\\(f_{\\mathrm i}\\)</span> est impaire. Enfin\n<span class=\"math display\">\\[f_{\\mathrm p}(x)+f_{\\mathrm\ni}(x)=f(x).\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.31",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-31-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Les quatre premiers cas sont <span\nclass=\"math display\">\\[12=3\\times4,\n  \\quad13=2\\times4+5,\n  \\quad14=4+2\\times5,\n  \\quad15=3\\times5.\\]</span> Supposons, par récurrence forte, que tout\nentier compris entre <span class=\"math inline\">\\(12\\)</span> et <span\nclass=\"math inline\">\\(N\\)</span> possède une représentation <span\nclass=\"math inline\">\\(4a+5b\\)</span>, et soit <span\nclass=\"math inline\">\\(N+1\\geq16\\)</span>. Alors <span\nclass=\"math inline\">\\(N-3\\geq12\\)</span> et <span\nclass=\"math display\">\\[N-3=4a+5b\\]</span> pour certains <span\nclass=\"math inline\">\\(a,b\\in\\mathbb N\\)</span>. Par conséquent <span\nclass=\"math display\">\\[N+1=4(a+1)+5b.\\]</span> Tout entier supérieur ou\négal à <span class=\"math inline\">\\(12\\)</span> possède donc la forme\ndemandée.</p></li>\n<li><div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>La relation de récurrence doit être imposée pour tout <span\nclass=\"math inline\">\\(n\\geq0\\)</span> ; telle qu’elle est imprimée avec\n<span class=\"math inline\">\\(n\\geq2\\)</span>, les termes <span\nclass=\"math inline\">\\(u_2\\)</span> et <span\nclass=\"math inline\">\\(u_3\\)</span> ne sont pas déterminés.</p>\n</div>\n</div>\n<p>Pour la version corrigée, on montre par récurrence d’ordre deux que\n<span class=\"math display\">\\[u_n=3^n-2^n.\\]</span> La formule est vraie\npour <span class=\"math inline\">\\(n=0\\)</span> et <span\nclass=\"math inline\">\\(n=1\\)</span>. Si elle est vraie aux rangs <span\nclass=\"math inline\">\\(n\\)</span> et <span\nclass=\"math inline\">\\(n+1\\)</span>, alors <span\nclass=\"math display\">\\[\\begin{align*}\n  u_{n+2}\n  &amp;=5(3^{n+1}-2^{n+1})-6(3^n-2^n)\\\\\n  &amp;=3^{n+2}-2^{n+2}.\n\\end{align*}\\]</span> La propriété est donc vraie pour tout <span\nclass=\"math inline\">\\(n\\in\\mathbb N\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "2.32",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-32-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span\nclass=\"math display\">\\[\\boxed{1,1,2,3,5,8,13,21,34,55}.\\]</span></p></li>\n<li><p>Notons <span class=\"math inline\">\\(T_n\\)</span> le nombre de\npavages d’un rectangle <span class=\"math inline\">\\(2\\times n\\)</span>. À\ngauche, le pavage commence soit par un domino vertical, suivi d’un\npavage de taille <span class=\"math inline\">\\(2\\times(n-1)\\)</span>, soit\npar deux dominos horizontaux superposés, suivis d’un pavage de taille\n<span class=\"math inline\">\\(2\\times(n-2)\\)</span>. Ainsi <span\nclass=\"math display\">\\[T_n=T_{n-1}+T_{n-2}.\\]</span> De plus <span\nclass=\"math inline\">\\(T_1=1=F_2\\)</span> et <span\nclass=\"math inline\">\\(T_2=2=F_3\\)</span>. Les deux suites satisfaisant\nla même récurrence avec les mêmes valeurs initiales, <span\nclass=\"math display\">\\[\\boxed{T_n=F_{n+1}}.\\]</span></p></li>\n<li><p>Fixons <span class=\"math inline\">\\(n\\geq2\\)</span> et posons\n<span class=\"math display\">\\[G_m=F_{n-1}F_m+F_nF_{m+1}.\\]</span> On\nvérifie <span class=\"math display\">\\[G_1=F_{n+1},\n  \\qquad G_2=F_{n+2},\\]</span> et <span\nclass=\"math inline\">\\(G_{m+2}=G_{m+1}+G_m\\)</span>. La suite <span\nclass=\"math inline\">\\(m\\mapsto F_{n+m}\\)</span> satisfait la même\nrécurrence et les mêmes deux valeurs initiales. Par récurrence d’ordre\ndeux, <span\nclass=\"math display\">\\[\\boxed{F_{n+m}=F_{n-1}F_m+F_nF_{m+1}}.\\]</span></p></li>\n<li><p>Posons <span\nclass=\"math display\">\\[D_n=F_n^2-F_{n-1}F_{n+1}.\\]</span> Pour <span\nclass=\"math inline\">\\(n=2\\)</span>, <span\nclass=\"math inline\">\\(D_2=1-2=-1=(-1)^3\\)</span>. De plus <span\nclass=\"math display\">\\[\\begin{align*}\n  D_{n+1}\n  &amp;=F_{n+1}^2-F_nF_{n+2}\\\\\n  &amp;=F_{n+1}^2-F_n(F_{n+1}+F_n)\\\\\n  &amp;=F_{n+1}F_{n-1}-F_n^2=-D_n.\n\\end{align*}\\]</span> Les signes alternent donc, et <span\nclass=\"math display\">\\[\\boxed{F_n^2=F_{n-1}F_{n+1}+(-1)^{n+1}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "2.33",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-33-1.webp"
+    ],
+    "solutionHtml": "<p>Écrivons <span class=\"math inline\">\\(z=x+\\mathrm iy\\)</span>. Le\nquotient n’est défini que si <span\nclass=\"math inline\">\\((x,y)\\neq(0,-1)\\)</span>. En multipliant par le\nconjugué du dénominateur, <span\nclass=\"math display\">\\[\\operatorname{Re}\\left(\\frac{z^2}{z+\\mathrm\ni}\\right)\n=\\frac{x(x^2+y^2+2y)}{x^2+(y+1)^2}.\\]</span> Le dénominateur est\nstrictement positif sur le domaine. Le quotient est imaginaire pur si et\nseulement si sa partie réelle est nulle, c’est-à-dire <span\nclass=\"math display\">\\[x\\bigl(x^2+(y+1)^2-1\\bigr)=0.\\]</span> Le lieu\ncherché est donc la réunion de l’axe imaginaire, privé du point où le\nquotient n’est pas défini, et du cercle de centre <span\nclass=\"math inline\">\\(-\\mathrm i\\)</span> et de rayon <span\nclass=\"math inline\">\\(1\\)</span> : <span\nclass=\"math display\">\\[\\boxed{\\bigl(\\mathrm i\\mathbb\nR\\setminus\\{-\\mathrm i\\}\\bigr)\\ \\cup\\ \\{z\\in\\mathbb C:|z+\\mathrm\ni|=1\\}}.\\]</span></p>"
+  },
+  {
+    "id": "2.34",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-34-1.webp",
+      "/assets/images/mat101/statements/exercice-2-34-2.webp"
+    ],
+    "solutionHtml": "<p>L’erreur se situe dans le passage de <span\nclass=\"math inline\">\\(P(1)\\)</span> à <span\nclass=\"math inline\">\\(P(2)\\)</span>. Pour <span\nclass=\"math inline\">\\(n\\geq2\\)</span>, les deux familles <span\nclass=\"math display\">\\[(u_1,\\ldots,u_n)\n\\quad\\text{et}\\quad\n(u_2,\\ldots,u_{n+1})\\]</span> ont les éléments <span\nclass=\"math inline\">\\(u_2,\\ldots,u_n\\)</span> en commun ; ces éléments\npermettent de relier les deux chaînes d’égalités. Mais pour <span\nclass=\"math inline\">\\(n=1\\)</span>, les familles <span\nclass=\"math inline\">\\((u_1)\\)</span> et <span\nclass=\"math inline\">\\((u_2)\\)</span> n’ont aucun élément commun.\nL’hypothèse <span class=\"math inline\">\\(P(1)\\)</span> ne donne donc\naucune relation entre <span class=\"math inline\">\\(u_1\\)</span> et <span\nclass=\"math inline\">\\(u_2\\)</span>.</p>\n<p>Autrement dit, l’hérédité n’a pas été démontrée au rang initial :\n<span class=\"math inline\">\\(P(1)\\)</span> n’implique pas <span\nclass=\"math inline\">\\(P(2)\\)</span>.</p>"
+  },
+  {
+    "id": "2.35",
+    "chapterId": "ensembles",
+    "chapterNumber": "2",
+    "chapterTitle": "Ensembles et langage mathématique",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-2-35-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Pour trois intervalles fermés qui se coupent deux à deux, le\ndessin montre que l’extrémité gauche la plus à droite ne dépasse pas\nl’extrémité droite la plus à gauche ; la zone comprise entre ces deux\npoints appartient aux trois intervalles.</p></li>\n<li><p>Le résultat devient faux pour des sous-ensembles quelconques.\nPrenons <span class=\"math display\">\\[A=\\{1,2\\},\\qquad B=\\{2,3\\},\\qquad\nC=\\{1,3\\}.\\]</span> Les intersections deux à deux sont non vides, mais\n<span class=\"math inline\">\\(A\\cap B\\cap C=\\varnothing\\)</span>.</p></li>\n<li><p>Écrivons <span class=\"math inline\">\\(I_i=[a_i,b_i]\\)</span>.\nPosons <span class=\"math display\">\\[\\alpha=\\max_{1\\leq i\\leq n}a_i,\n  \\qquad\n  \\beta=\\min_{1\\leq i\\leq n}b_i.\\]</span> L’hypothèse <span\nclass=\"math inline\">\\(I_i\\cap I_j\\neq\\varnothing\\)</span> implique <span\nclass=\"math inline\">\\(a_i\\leq b_j\\)</span> pour tous <span\nclass=\"math inline\">\\(i,j\\)</span>. En choisissant un indice <span\nclass=\"math inline\">\\(i_0\\)</span> où le maximum <span\nclass=\"math inline\">\\(\\alpha\\)</span> est atteint et un indice <span\nclass=\"math inline\">\\(j_0\\)</span> où le minimum <span\nclass=\"math inline\">\\(\\beta\\)</span> est atteint, on obtient <span\nclass=\"math display\">\\[\\alpha=a_{i_0}\\leq b_{j_0}=\\beta.\\]</span> Par\nconséquent <span class=\"math display\">\\[\\bigcap_{i=1}^n\nI_i=[\\alpha,\\beta],\\]</span> qui est un intervalle fermé non\nvide.</p></li>\n<li><p>Non pour une famille infinie. Les intervalles <span\nclass=\"math display\">\\[I_n=[n,+\\infty[,\n  \\qquad n\\geq1,\\]</span> ont des intersections deux à deux non vides,\nmais <span\nclass=\"math display\">\\[\\bigcap_{n\\geq1}I_n=\\varnothing.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.1",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-1-1.webp"
+    ],
+    "solutionHtml": "<p>Un sous-ensemble de <span class=\"math inline\">\\(\\mathbb R^2\\)</span>\nest le graphe d’une application définie sur un sous-ensemble <span\nclass=\"math inline\">\\(D\\)</span> de <span class=\"math inline\">\\(\\mathbb\nR\\)</span> si, pour chaque <span class=\"math inline\">\\(x\\in D\\)</span>,\nil contient exactement un couple de première coordonnée <span\nclass=\"math inline\">\\(x\\)</span>.</p>\n<ol>\n<li><p>L’équation donne <span class=\"math inline\">\\(y=x-1\\)</span>. Pour\nchaque <span class=\"math inline\">\\(x\\in\\mathbb R\\)</span>, il existe un\nunique <span class=\"math inline\">\\(y\\)</span>. C’est le graphe de <span\nclass=\"math inline\">\\(x\\mapsto x-1\\)</span>, de domaine <span\nclass=\"math inline\">\\(\\boxed{\\mathbb R}\\)</span>.</p></li>\n<li><p>L’équation donne <span class=\"math inline\">\\(y=x^2\\)</span>.\nC’est le graphe de <span class=\"math inline\">\\(x\\mapsto x^2\\)</span>, de\ndomaine <span class=\"math inline\">\\(\\boxed{\\mathbb R}\\)</span>.</p></li>\n<li><p>Pour tout <span class=\"math inline\">\\(x&gt;0\\)</span>, les deux\nvaleurs <span class=\"math inline\">\\(y=\\sqrt x\\)</span> et <span\nclass=\"math inline\">\\(y=-\\sqrt x\\)</span> conviennent. Ce n’est donc pas\nle graphe d’une application.</p></li>\n<li><p>Les conditions <span class=\"math inline\">\\(x=y^2\\)</span> et\n<span class=\"math inline\">\\(y\\geq0\\)</span> imposent <span\nclass=\"math inline\">\\(y=\\sqrt x\\)</span> et <span\nclass=\"math inline\">\\(x\\geq0\\)</span>. C’est le graphe de la fonction\nracine carrée, de domaine <span\nclass=\"math inline\">\\(\\boxed{[0,+\\infty[}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.2",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-2-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{3,4,5\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{-2,0,2\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{1,\\tfrac12,\\tfrac13\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{0,1,2,3,4\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{2,3,4,5,6\\}}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{2,4,6\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{-3,-2,-1,0,1,2,3\\}}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.3",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-3-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{5,8,11\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{5,7,9,11\\}}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\{5,8,11\\}\\cup\\{7,11,15,19\\}\n  =\\boxed{\\{5,7,8,11,15,19\\}}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{11\\}}\\)</span>.</p></li>\n<li><p>Après réduction des fractions et suppression des répétitions,\n<span class=\"math display\">\\[\\boxed{\\left\\{\n  \\frac14,\\frac13,\\frac12,\\frac23,\\frac34,1,\n  \\frac43,\\frac32,2,3,4\n  \\right\\}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.4",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-4-1.webp",
+      "/assets/images/mat101/statements/exercice-3-4-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{\\exists x\\in I,\\\nf(x)=0}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall x\\in I,\\\nf(x)=0}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\exists x,y\\in I,\\ f(x)\\neq\nf(y)}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall x,y\\in I,\\\nf(x)=f(y)\\Rightarrow x=y}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\exists x_0\\in I,\\ \\forall\nx\\in I,\\ f(x_0)\\leq f(x)}\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\forall M\\in\\mathbb R,\\\n\\exists x\\in I,\\ f(x)&gt;M}\\)</span>.</p></li>\n<li><p>« Ne peut s’annuler qu’une seule fois » signifie « a au plus un\nzéro » : <span class=\"math display\">\\[\\boxed{\\forall x,y\\in I,\\\n(f(x)=0\\land f(y)=0)\\Rightarrow x=y}.\\]</span> Pour exprimer « s’annule\nexactement une fois », il faudrait ajouter l’existence d’un\nzéro.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.5",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-5-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Ce sont exactement les fonctions constantes.</p></li>\n<li><p>Toutes les fonctions conviennent : pour chaque <span\nclass=\"math inline\">\\(x\\)</span>, il suffit de choisir <span\nclass=\"math inline\">\\(y=x\\)</span>.</p></li>\n<li><p>Aucune fonction ne convient, car le choix <span\nclass=\"math inline\">\\(y=x\\)</span> imposerait <span\nclass=\"math inline\">\\(f(x)&lt;f(x)\\)</span>.</p></li>\n<li><p>L’image de <span class=\"math inline\">\\(f\\)</span> n’a pas de plus\ngrand élément : toute valeur prise par <span\nclass=\"math inline\">\\(f\\)</span> est strictement dépassée par une autre.\nCela n’impose pas que <span class=\"math inline\">\\(f\\)</span> soit non\nbornée.</p></li>\n<li><p><span class=\"math inline\">\\(f\\)</span> est négative ou nulle sur\n<span class=\"math inline\">\\(]-\\infty,0]\\)</span>.</p></li>\n<li><p>Toute valeur négative ou nulle ne peut être prise qu’en un point\n<span class=\"math inline\">\\(x\\leq0\\)</span>. Par contraposée, <span\nclass=\"math inline\">\\(x&gt;0\\Rightarrow f(x)&gt;0\\)</span>.</p></li>\n<li><p>On a <span class=\"math inline\">\\(f(x)&gt;0\\)</span> pour tout\n<span class=\"math inline\">\\(x&gt;0\\)</span> : la fonction est\nstrictement positive sur <span\nclass=\"math inline\">\\(]0,+\\infty[\\)</span>. Aucune condition n’est\nimposée à <span class=\"math inline\">\\(f(0)\\)</span>.</p></li>\n<li><p>Cette assertion équivaut simplement à <span\nclass=\"math inline\">\\(\\boxed{f(0)=0}\\)</span>.</p></li>\n<li><p>Le seul zéro possible de <span class=\"math inline\">\\(f\\)</span>\nest <span class=\"math inline\">\\(0\\)</span> ; il n’est pas imposé que\n<span class=\"math inline\">\\(f(0)=0\\)</span>.</p></li>\n<li><p>Toutes les fonctions conviennent, car tout réel est inférieur ou\négal à <span class=\"math inline\">\\(0\\)</span> ou supérieur ou égal à\n<span class=\"math inline\">\\(0\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.6",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-6-1.webp"
+    ],
+    "solutionHtml": "<p>Pour tout <span class=\"math inline\">\\(n\\in\\mathbb N\\)</span>, <span\nclass=\"math display\">\\[(g\\circ f)(n)=g(2n)=n,\\]</span> donc <span\nclass=\"math inline\">\\(\\boxed{g\\circ f=\\operatorname{id}_{\\mathbb\nN}}\\)</span>.</p>\n<p>Ensuite, <span class=\"math display\">\\[(f\\circ g)(n)=\n\\begin{cases}\nn,&amp;n\\text{ pair},\\\\\n0,&amp;n\\text{ impair}.\n\\end{cases}\\]</span></p>\n<p>Pour appliquer deux fois <span class=\"math inline\">\\(g\\)</span>, il\nfaut que <span class=\"math inline\">\\(n\\)</span> soit divisible par <span\nclass=\"math inline\">\\(4\\)</span> ; sinon, l’une des deux applications\nrencontre un entier impair et renvoie <span\nclass=\"math inline\">\\(0\\)</span>. Ainsi <span\nclass=\"math display\">\\[(g\\circ g)(n)=\n\\begin{cases}\nn/4,&amp;4\\mid n,\\\\\n0,&amp;4\\nmid n.\n\\end{cases}\\]</span> De même, <span class=\"math display\">\\[(g\\circ\ng\\circ g)(n)=\n\\begin{cases}\nn/8,&amp;8\\mid n,\\\\\n0,&amp;8\\nmid n.\n\\end{cases}\\]</span></p>"
+  },
+  {
+    "id": "3.7",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-7-1.webp"
+    ],
+    "solutionHtml": "<p>Fixons <span class=\"math inline\">\\(x\\in E\\)</span>.</p>\n<ol>\n<li><p>Si <span class=\"math inline\">\\(x\\in A\\)</span>, alors <span\nclass=\"math inline\">\\(I_A(x)=1\\)</span> et <span\nclass=\"math inline\">\\(I_{A^c}(x)=0=1-I_A(x)\\)</span>. Si <span\nclass=\"math inline\">\\(x\\notin A\\)</span>, les deux valeurs sont\ninversées. Donc <span\nclass=\"math display\">\\[I_{A^c}(x)=1-I_A(x).\\]</span></p></li>\n<li><p>Les deux nombres <span class=\"math inline\">\\(I_A(x)\\)</span> et\n<span class=\"math inline\">\\(I_B(x)\\)</span> appartiennent à <span\nclass=\"math inline\">\\(\\{0,1\\}\\)</span>. Leur minimum et leur produit\nvalent <span class=\"math inline\">\\(1\\)</span> exactement lorsqu’ils\nvalent tous deux <span class=\"math inline\">\\(1\\)</span>, c’est-à-dire\nexactement lorsque <span class=\"math inline\">\\(x\\in A\\cap B\\)</span>.\nAinsi <span class=\"math display\">\\[I_{A\\cap\nB}(x)=\\min(I_A(x),I_B(x))=I_A(x)I_B(x).\\]</span></p></li>\n<li><p>Leur maximum vaut <span class=\"math inline\">\\(1\\)</span>\nexactement lorsqu’au moins l’un des deux vaut <span\nclass=\"math inline\">\\(1\\)</span>, c’est-à-dire lorsque <span\nclass=\"math inline\">\\(x\\in A\\cup B\\)</span>. La formule <span\nclass=\"math display\">\\[u+v-uv\\]</span> vaut aussi <span\nclass=\"math inline\">\\(0,1,1,1\\)</span> pour <span\nclass=\"math inline\">\\((u,v)=(0,0),(1,0),(0,1),(1,1)\\)</span>. Donc <span\nclass=\"math display\">\\[I_{A\\cup B}(x)=\\max(I_A(x),I_B(x))\n  =I_A(x)+I_B(x)-I_A(x)I_B(x).\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.8",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-8-1.webp",
+      "/assets/images/mat101/statements/exercice-3-8-2.webp"
+    ],
+    "solutionHtml": "<p>Les assertions toujours vraies sont <span\nclass=\"math display\">\\[\\boxed{1,2,3,4,6\\text{ et }9}.\\]</span> Voici les\njustifications.</p>\n<ol>\n<li><p>Si <span class=\"math inline\">\\(A\\subset A&#39;\\)</span>, toute\nimage d’un élément de <span class=\"math inline\">\\(A\\)</span> est aussi\nl’image d’un élément de <span class=\"math inline\">\\(A&#39;\\)</span>,\ndonc <span class=\"math inline\">\\(f(A)\\subset\nf(A&#39;)\\)</span>.</p></li>\n<li><p>Même raisonnement pour les images réciproques.</p></li>\n<li><p>Un élément est image d’un élément de <span\nclass=\"math inline\">\\(A\\cup A&#39;\\)</span> si et seulement s’il est\nimage d’un élément de <span class=\"math inline\">\\(A\\)</span> ou de <span\nclass=\"math inline\">\\(A&#39;\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(x\\in f^{-1}(B\\cup B&#39;)\\)</span> si\net seulement si <span class=\"math inline\">\\(f(x)\\in B\\)</span> ou <span\nclass=\"math inline\">\\(f(x)\\in B&#39;\\)</span>.</p></li>\n<li><p>En général, on a seulement <span class=\"math display\">\\[f(A\\cap\nA&#39;)\\subset f(A)\\cap f(A&#39;).\\]</span> L’égalité peut échouer si\n<span class=\"math inline\">\\(f\\)</span> n’est pas injective. Par exemple,\npour <span class=\"math inline\">\\(f:\\{0,1\\}\\to\\{0\\}\\)</span>, <span\nclass=\"math inline\">\\(A=\\{0\\}\\)</span> et <span\nclass=\"math inline\">\\(A&#39;=\\{1\\}\\)</span>, le membre de gauche est\nvide et celui de droite vaut <span\nclass=\"math inline\">\\(\\{0\\}\\)</span>.</p></li>\n<li><p>La préimage commute avec les intersections, donc l’égalité est\nvraie.</p></li>\n<li><p>On a toujours <span class=\"math inline\">\\(A\\subset\nf^{-1}(f(A))\\)</span>, mais l’égalité peut échouer pour la même fonction\nconstante : si <span class=\"math inline\">\\(A=\\{0\\}\\)</span>, alors <span\nclass=\"math inline\">\\(f^{-1}(f(A))=\\{0,1\\}\\)</span>.</p></li>\n<li><p>En général, <span class=\"math display\">\\[f(f^{-1}(B))=B\\cap\nf(E).\\]</span> Si <span class=\"math inline\">\\(f\\)</span> n’est pas\nsurjective, cela peut être strictement plus petit que <span\nclass=\"math inline\">\\(B\\)</span>.</p></li>\n<li><p>Un élément <span class=\"math inline\">\\(y\\)</span> appartient au\nmembre de gauche si et seulement s’il existe <span\nclass=\"math inline\">\\(x\\in A\\)</span> tel que <span\nclass=\"math inline\">\\(f(x)=y\\)</span> et <span\nclass=\"math inline\">\\(f(x)\\in B\\)</span>. Cela équivaut à <span\nclass=\"math inline\">\\(y\\in f(A)\\cap B\\)</span>.</p></li>\n<li><p>Le membre de gauche vaut <span\nclass=\"math display\">\\[f(A)\\cup(B\\cap f(E)),\\]</span> qui n’est pas\ntoujours <span class=\"math inline\">\\(f(A)\\cup B\\)</span>. Par exemple,\nsi <span class=\"math inline\">\\(E=\\{0\\}\\)</span>, <span\nclass=\"math inline\">\\(F=\\{0,1\\}\\)</span>, <span\nclass=\"math inline\">\\(f(0)=0\\)</span>, <span\nclass=\"math inline\">\\(A=\\varnothing\\)</span> et <span\nclass=\"math inline\">\\(B=\\{1\\}\\)</span>, le membre de gauche est vide et\ncelui de droite vaut <span\nclass=\"math inline\">\\(\\{1\\}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.9",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-9-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Supposons <span class=\"math inline\">\\(f\\)</span> strictement\ncroissante. Si <span class=\"math inline\">\\(x_1&lt;x_2\\)</span>, alors\n<span class=\"math inline\">\\(f(x_1)&lt;f(x_2)\\)</span> ; deux points\ndistincts ne peuvent donc avoir la même image. Le raisonnement est\nidentique pour une fonction strictement décroissante. Ainsi toute\nfonction strictement monotone est injective.</p>\n<p>La réciproque est fausse. Sur <span\nclass=\"math inline\">\\(A=\\{0,1,2\\}\\)</span>, définissons <span\nclass=\"math display\">\\[f(0)=0,\n  \\qquad f(1)=2,\n  \\qquad f(2)=1.\\]</span> Cette fonction est injective, mais ni\ncroissante ni décroissante.</p></li>\n<li><p>Non. La positivité de la dérivée assure la stricte croissance sur\nchacun des deux intervalles connexes, mais ne compare pas les valeurs\nprises sur des composantes différentes. Par exemple, <span\nclass=\"math display\">\\[f(x)=\n  \\begin{cases}\nx,&amp;x\\in]-1,1[,\\\\x-3,&amp;x\\in]2,3[.\n  \\end{cases}\\]</span> On a <span\nclass=\"math inline\">\\(f&#39;(x)=1\\)</span> partout sur <span\nclass=\"math inline\">\\(A\\)</span>, mais <span\nclass=\"math inline\">\\(f(-1/2)=f(5/2)=-1/2\\)</span>. La fonction n’est\npas injective.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.10",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-10-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Supposons <span class=\"math inline\">\\(g\\circ f\\)</span>\ninjective. Si <span class=\"math inline\">\\(f(x_1)=f(x_2)\\)</span>, alors\n<span class=\"math display\">\\[(g\\circ f)(x_1)=(g\\circ f)(x_2).\\]</span>\nL’injectivité de <span class=\"math inline\">\\(g\\circ f\\)</span> donne\n<span class=\"math inline\">\\(x_1=x_2\\)</span>. Ainsi <span\nclass=\"math inline\">\\(f\\)</span> est injective.</p></li>\n<li><p>Supposons <span class=\"math inline\">\\(g\\circ f\\)</span>\nsurjective. Pour tout <span class=\"math inline\">\\(z\\in G\\)</span>, il\nexiste <span class=\"math inline\">\\(x\\in E\\)</span> tel que <span\nclass=\"math inline\">\\(g(f(x))=z\\)</span>. En posant <span\nclass=\"math inline\">\\(y=f(x)\\in F\\)</span>, on obtient <span\nclass=\"math inline\">\\(g(y)=z\\)</span>. Ainsi <span\nclass=\"math inline\">\\(g\\)</span> est surjective.</p></li>\n<li><p>L’affirmation est fausse. Prenons <span\nclass=\"math display\">\\[E=\\{1,2\\},\\quad F=\\{a,b,c\\},\\quad\nG=\\{0,1\\},\\]</span> avec <span class=\"math inline\">\\(f(1)=a\\)</span>,\n<span class=\"math inline\">\\(f(2)=b\\)</span>, puis <span\nclass=\"math inline\">\\(g(a)=0\\)</span>, <span\nclass=\"math inline\">\\(g(b)=g(c)=1\\)</span>. La composée <span\nclass=\"math inline\">\\(g\\circ f\\)</span> est injective, mais <span\nclass=\"math inline\">\\(g\\)</span> ne l’est pas puisque <span\nclass=\"math inline\">\\(g(b)=g(c)\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.11",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-11-1.webp"
+    ],
+    "solutionHtml": "<p>Supposons d’abord <span class=\"math inline\">\\(f\\)</span> injective.\nL’inclusion <span class=\"math inline\">\\(A\\subset f^{-1}(f(A))\\)</span>\nest toujours vraie. Réciproquement, si <span class=\"math inline\">\\(x\\in\nf^{-1}(f(A))\\)</span>, il existe <span class=\"math inline\">\\(a\\in\nA\\)</span> tel que <span class=\"math inline\">\\(f(x)=f(a)\\)</span>.\nL’injectivité donne <span class=\"math inline\">\\(x=a\\in A\\)</span>. Ainsi\n<span class=\"math display\">\\[f^{-1}(f(A))=A.\\]</span></p>\n<p>Réciproquement, supposons l’égalité vraie pour toute partie <span\nclass=\"math inline\">\\(A\\)</span> de <span\nclass=\"math inline\">\\(E\\)</span>. Si <span\nclass=\"math inline\">\\(f(x)=f(y)\\)</span>, prenons <span\nclass=\"math inline\">\\(A=\\{x\\}\\)</span>. Alors <span\nclass=\"math inline\">\\(y\\in f^{-1}(f(A))=A\\)</span>, donc <span\nclass=\"math inline\">\\(y=x\\)</span>. La fonction est injective.</p>"
+  },
+  {
+    "id": "3.12",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-12-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Soient <span class=\"math inline\">\\(y_1,y_2\\in f(I)\\)</span>, avec\n<span class=\"math inline\">\\(y_1&lt;y_2\\)</span>, et soit <span\nclass=\"math inline\">\\(y\\in[y_1,y_2]\\)</span>. Il existe <span\nclass=\"math inline\">\\(x_1,x_2\\in I\\)</span> tels que <span\nclass=\"math inline\">\\(f(x_1)=y_1\\)</span> et <span\nclass=\"math inline\">\\(f(x_2)=y_2\\)</span>. Comme <span\nclass=\"math inline\">\\(I\\)</span> est un intervalle, le segment\nd’extrémités <span class=\"math inline\">\\(x_1,x_2\\)</span> est contenu\ndans <span class=\"math inline\">\\(I\\)</span>. Le théorème des valeurs\nintermédiaires fournit un point <span class=\"math inline\">\\(x\\)</span>\nentre <span class=\"math inline\">\\(x_1\\)</span> et <span\nclass=\"math inline\">\\(x_2\\)</span> tel que <span\nclass=\"math inline\">\\(f(x)=y\\)</span>. Ainsi <span\nclass=\"math inline\">\\(f(I)\\)</span> contient tout réel situé entre deux\nde ses éléments : c’est un intervalle.</p></li>\n<li><p>On écrit <span\nclass=\"math display\">\\[f(x)=x^2-4x+3=(x-2)^2-1.\\]</span> Sur <span\nclass=\"math inline\">\\(I=]-\\infty,2]\\)</span>, la fonction est\nstrictement décroissante, donc injective. Pour tout <span\nclass=\"math inline\">\\(x\\leq2\\)</span>, <span\nclass=\"math inline\">\\((x-2)^2\\geq0\\)</span>, donc <span\nclass=\"math inline\">\\(f(x)\\geq-1\\)</span>. Réciproquement, pour <span\nclass=\"math inline\">\\(y\\geq-1\\)</span>, le réel <span\nclass=\"math display\">\\[x=2-\\sqrt{y+1}\\]</span> appartient à <span\nclass=\"math inline\">\\(I\\)</span> et vérifie <span\nclass=\"math inline\">\\(f(x)=y\\)</span>. La fonction réalise donc une\nbijection de <span class=\"math inline\">\\(I\\)</span> sur <span\nclass=\"math inline\">\\([-1,+\\infty[\\)</span>, d’inverse <span\nclass=\"math display\">\\[\\boxed{f^{-1}(y)=2-\\sqrt{y+1}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.13",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-13-1.webp"
+    ],
+    "solutionHtml": "<p>Sur <span class=\"math inline\">\\([0,1/2]\\)</span>, la première branche\n<span class=\"math inline\">\\(2x+1\\)</span> prend les valeurs de <span\nclass=\"math inline\">\\([1,2]\\)</span>. Sur <span\nclass=\"math inline\">\\(]1/2,1[\\)</span>, la seconde branche <span\nclass=\"math inline\">\\(2x-1\\)</span> prend les valeurs de <span\nclass=\"math inline\">\\(]0,1[\\)</span>.</p>\n<ol>\n<li><p>Chaque branche est injective et leurs images sont disjointes.\nAinsi <span class=\"math inline\">\\(f\\)</span> est injective.</p></li>\n<li><p>L’union des images est <span\nclass=\"math inline\">\\(]0,1[\\cup[1,2]=]0,2]\\)</span>, qui est exactement\nl’ensemble d’arrivée. La fonction est surjective.</p></li>\n<li><p>Elle est donc bijective.</p></li>\n<li><p>Sur la seconde branche, <span\nclass=\"math inline\">\\(f(x)&lt;1\\)</span>, donc <span\nclass=\"math inline\">\\(f(x)\\geq3/2\\)</span> est impossible. Sur la\npremière branche, <span class=\"math display\">\\[2x+1\\geq\\frac32\n  \\iff x\\geq\\frac14.\\]</span> En tenant compte de <span\nclass=\"math inline\">\\(x\\leq1/2\\)</span>, on obtient <span\nclass=\"math display\">\\[\\boxed{f(x)\\geq\\frac32\\iff\nx\\in\\left[\\frac14,\\frac12\\right]}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.14",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-14-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Si <span class=\"math inline\">\\(a=0\\)</span>, la fonction est\nconstante égale à <span class=\"math inline\">\\(b\\)</span>, donc elle\nn’est pas bijective. Si <span class=\"math inline\">\\(a\\neq0\\)</span>,\npour tout <span class=\"math inline\">\\(w\\in\\mathbb C\\)</span>, l’équation\n<span class=\"math inline\">\\(az+b=w\\)</span> possède l’unique solution\n<span class=\"math display\">\\[z=\\frac{w-b}{a}.\\]</span> La fonction est\ndonc bijective, d’inverse <span\nclass=\"math inline\">\\(w\\mapsto(w-b)/a\\)</span>.</p></li>\n<li><p>Pour deux points <span class=\"math inline\">\\(X,Y\\)</span>, <span\nclass=\"math display\">\\[z_{f(Y)}-z_{f(X)}=a(z_Y-z_X).\\]</span> Par\nconséquent, toutes les distances sont multipliées par le même facteur\n<span class=\"math inline\">\\(|a|\\)</span> : <span\nclass=\"math display\">\\[|z_{f(Y)}-z_{f(X)}|=|a|\\,|z_Y-z_X|.\\]</span> Si\nles trois côtés de <span class=\"math inline\">\\(ABC\\)</span> ont même\nlongueur, les trois côtés de <span\nclass=\"math inline\">\\(f(A)f(B)f(C)\\)</span> ont donc encore même\nlongueur. Comme <span class=\"math inline\">\\(a\\neq0\\)</span>, les images\nrestent distinctes ; le triangle image est équilatéral.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.15",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-15-1.webp"
+    ],
+    "solutionHtml": "<p>Posons <span class=\"math inline\">\\(\\omega=\\mathrm e^{\\mathrm\ni\\pi/3}\\)</span>.</p>\n<ol>\n<li><p>Un point fixe <span class=\"math inline\">\\(a\\)</span> vérifie\n<span class=\"math display\">\\[a=\\omega a+2,\n  \\qquad (1-\\omega)a=2.\\]</span> Comme <span\nclass=\"math inline\">\\(1-\\omega=\\mathrm e^{-\\mathrm\ni\\pi/3}\\neq0\\)</span>, il existe un unique point fixe : <span\nclass=\"math display\">\\[\\boxed{a=\\frac2{1-\\omega}=2\\mathrm e^{\\mathrm\ni\\pi/3}=1+\\sqrt3\\mathrm i}.\\]</span></p></li>\n<li><p>La relation <span class=\"math inline\">\\(2=a-\\omega a\\)</span>\ndonne, pour tout <span class=\"math inline\">\\(z\\)</span>, <span\nclass=\"math display\">\\[f(z)-a=\\omega z+2-a=\\omega(z-a).\\]</span> Le\nvecteur allant de <span class=\"math inline\">\\(a\\)</span> à <span\nclass=\"math inline\">\\(f(z)\\)</span> s’obtient donc en multipliant le\nvecteur allant de <span class=\"math inline\">\\(a\\)</span> à <span\nclass=\"math inline\">\\(z\\)</span> par <span class=\"math inline\">\\(\\mathrm\ne^{\\mathrm i\\pi/3}\\)</span>. C’est exactement la rotation de centre\n<span class=\"math inline\">\\(a\\)</span> et d’angle <span\nclass=\"math inline\">\\(\\pi/3\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.16",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-16-1.webp"
+    ],
+    "solutionHtml": "<div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>L’énoncé est faux avec la formule imprimée <span\nclass=\"math inline\">\\(f(z)=\\mathrm e^{\\mathrm i\\pi/3}\\overline\nz+1\\)</span>.</p>\n</div>\n</div>\n<p>Posons <span class=\"math inline\">\\(\\alpha=\\mathrm e^{\\mathrm\ni\\pi/3}\\)</span>. Si <span class=\"math inline\">\\(z\\)</span> était fixe,\non aurait <span class=\"math display\">\\[z=\\alpha\\overline z+1.\\]</span>\nEn appliquant une seconde fois <span class=\"math inline\">\\(f\\)</span>,\non obtient <span class=\"math display\">\\[f(f(z))\n=\\alpha\\overline{\\alpha\\overline z+1}+1\n=z+(1+\\alpha).\\]</span> Or un point fixe de <span\nclass=\"math inline\">\\(f\\)</span> serait aussi fixe de <span\nclass=\"math inline\">\\(f^2\\)</span>, ce qui imposerait <span\nclass=\"math inline\">\\(1+\\alpha=0\\)</span>. Cette égalité est fausse.\nAinsi <span class=\"math inline\">\\(f\\)</span> ne possède aucun point fixe\n; son ensemble de points fixes n’est donc pas une droite, et <span\nclass=\"math inline\">\\(f\\)</span> n’est pas une symétrie orthogonale.</p>\n<p>Plus généralement, une application <span\nclass=\"math inline\">\\(z\\mapsto\\alpha\\overline z+b\\)</span>, avec <span\nclass=\"math inline\">\\(|\\alpha|=1\\)</span>, est une réflexion lorsque la\ncondition de compatibilité <span\nclass=\"math display\">\\[b+\\alpha\\overline b=0\\]</span> est satisfaite.\nIci, elle ne l’est pas.</p>"
+  },
+  {
+    "id": "3.17",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-17-1.webp",
+      "/assets/images/mat101/statements/exercice-3-17-2.webp"
+    ],
+    "solutionHtml": "<div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>Il faut supposer <span class=\"math inline\">\\(a\\neq0\\)</span>. Si\n<span class=\"math inline\">\\(a=0\\)</span>, toutes les images coïncident\net les angles de l’énoncé ne sont pas définis.</p>\n</div>\n</div>\n<p>Supposons <span class=\"math inline\">\\(a\\neq0\\)</span>. On a <span\nclass=\"math display\">\\[z_{N&#39;}-z_{M&#39;}=a\\,\\overline{z_N-z_M},\n\\qquad\nz_{Q&#39;}-z_{P&#39;}=a\\,\\overline{z_Q-z_P}.\\]</span> Par conséquent,\n<span class=\"math display\">\\[\\begin{align*}\n\\operatorname{Arg}\\left(\\frac{z_{Q&#39;}-z_{P&#39;}}{z_{N&#39;}-z_{M&#39;}}\\right)\n&amp;=\\operatorname{Arg}\\left(\n\\frac{\\overline{z_Q-z_P}}{\\overline{z_N-z_M}}\n\\right)\\\\\n&amp;=\\operatorname{Arg}\\left(\n\\overline{\\frac{z_Q-z_P}{z_N-z_M}}\n\\right)\\\\\n&amp;=-\\operatorname{Arg}\\left(\\frac{z_Q-z_P}{z_N-z_M}\\right)\n\\quad[2\\pi].\n\\end{align*}\\]</span> Ainsi <span\nclass=\"math display\">\\[\\boxed{(\\overrightarrow{M&#39;N&#39;},\\overrightarrow{P&#39;Q&#39;})\n=-(\\overrightarrow{MN},\\overrightarrow{PQ})\\quad[2\\pi]}.\\]</span></p>"
+  },
+  {
+    "id": "3.18",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-18-1.webp"
+    ],
+    "solutionHtml": "<p>En développant les sommes et produits : <span\nclass=\"math display\">\\[\\begin{align*}\n\\sum_{k=1}^3\\sum_{h=1}^k1&amp;=1+2+3=\\boxed6,\\\\\n\\sum_{k=1}^3\\sum_{h=1}^kh&amp;=1+(1+2)+(1+2+3)=\\boxed{10},\\\\\n\\sum_{k=1}^3\\sum_{h=1}^kk&amp;=1^2+2^2+3^2=\\boxed{14},\\\\\n\\sum_{k=1}^3\\prod_{h=1}^kh&amp;=1!+2!+3!=\\boxed9,\\\\\n\\sum_{k=1}^3\\prod_{h=1}^kk&amp;=1^1+2^2+3^3=\\boxed{32},\\\\\n\\prod_{k=1}^3\\sum_{h=1}^kh&amp;=1\\cdot3\\cdot6=\\boxed{18},\\\\\n\\prod_{k=1}^3\\sum_{h=1}^kk&amp;=1^2\\cdot2^2\\cdot3^2=\\boxed{36},\\\\\n\\prod_{k=1}^3\\prod_{h=1}^kh&amp;=1!\\,2!\\,3!=\\boxed{12},\\\\\n\\prod_{k=1}^3\\prod_{h=1}^kk&amp;=1^1\\cdot2^2\\cdot3^3=\\boxed{108}.\n\\end{align*}\\]</span></p>"
+  },
+  {
+    "id": "3.19",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-19-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\displaystyle\\sum_{k=1}^4a_k}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\displaystyle\\sum_{k=1}^4\\prod_{j=1}^ka_j}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\displaystyle\\sum_{k=1}^3a_ka_{k+1}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\displaystyle\\sum_{k=1}^2a_ka_{k+1}a_{k+2}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\displaystyle\\sum_{i=1}^3\\sum_{j=i+1}^4a_ia_j}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\displaystyle\\prod_{k=1}^4\\left(\\sum_{j=1}^ka_j\\right)}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.20",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-20-1.webp",
+      "/assets/images/mat101/statements/exercice-3-20-2.webp"
+    ],
+    "solutionHtml": "<p>Pour chaque question, on vérifie l’initialisation puis on calcule le\nterme au rang <span class=\"math inline\">\\(n+1\\)</span> à partir de\nl’hypothèse au rang <span class=\"math inline\">\\(n\\)</span>.</p>\n<ol>\n<li><p>L’égalité est vraie pour <span\nclass=\"math inline\">\\(n=0\\)</span>. Si elle est vraie au rang <span\nclass=\"math inline\">\\(n\\)</span>, alors <span\nclass=\"math display\">\\[\\sum_{k=0}^{n+1}(k+1)\n  =\\frac{(n+1)(n+2)}2+(n+2)\n  =\\frac{(n+2)(n+3)}2.\\]</span></p></li>\n<li><p>Pour <span class=\"math inline\">\\(n=0\\)</span>, les deux membres\nsont nuls. Puis <span class=\"math display\">\\[\\begin{align*}\n  \\sum_{k=0}^{n+1}k^2\n  &amp;=\\frac{n(n+1)(2n+1)}6+(n+1)^2\\\\\n  &amp;=\\frac{(n+1)(n+2)(2n+3)}6.\n\\end{align*}\\]</span></p></li>\n<li><p>Pour <span class=\"math inline\">\\(n=0\\)</span>, l’égalité est\nvraie. Ensuite <span class=\"math display\">\\[\\begin{align*}\n  \\sum_{k=0}^{n+1}k^3\n  &amp;=\\frac{n^2(n+1)^2}{4}+(n+1)^3\\\\\n  &amp;=\\frac{(n+1)^2(n+2)^2}{4}.\n\\end{align*}\\]</span></p></li>\n<li><p>Pour <span class=\"math inline\">\\(n=0\\)</span>, <span\nclass=\"math inline\">\\(1=2-1\\)</span>. Si la formule vaut au rang <span\nclass=\"math inline\">\\(n\\)</span>, <span\nclass=\"math display\">\\[\\sum_{k=0}^{n+1}2^k=(2^{n+1}-1)+2^{n+1}=2^{n+2}-1.\\]</span></p></li>\n<li><p>Pour <span class=\"math inline\">\\(n=0\\)</span>, les deux membres\nvalent <span class=\"math inline\">\\(0\\)</span>. Si la formule est vraie\nau rang <span class=\"math inline\">\\(n\\)</span>, <span\nclass=\"math display\">\\[\\begin{align*}\n  \\sum_{k=0}^{n+1}k2^k\n  &amp;=(n-1)2^{n+1}+2+(n+1)2^{n+1}\\\\\n  &amp;=n2^{n+2}+2,\n\\end{align*}\\]</span> qui est la formule demandée au rang <span\nclass=\"math inline\">\\(n+1\\)</span>.</p></li>\n<li><p>Au rang <span class=\"math inline\">\\(n=3\\)</span>, <span\nclass=\"math display\">\\[\\frac{3^2-4}{3}=\\frac53\n  =\\frac{5!}{12\\cdot3\\cdot2}.\\]</span> Si la formule est vraie au rang\n<span class=\"math inline\">\\(n\\geq3\\)</span>, alors <span\nclass=\"math display\">\\[\\begin{align*}\n  \\prod_{k=3}^{n+1}\\frac{k^2-4}{k}\n  &amp;=\\frac{(n+2)!}{12n(n-1)}\n    \\frac{(n+1)^2-4}{n+1}\\\\\n  &amp;=\\frac{(n+2)!}{12n(n-1)}\n    \\frac{(n-1)(n+3)}{n+1}\\\\\n  &amp;=\\frac{(n+3)!}{12(n+1)n}.\n\\end{align*}\\]</span></p></li>\n<li><p>Pour <span class=\"math inline\">\\(n=1\\)</span>, les deux membres\nvalent <span class=\"math inline\">\\(2\\)</span>. Notons <span\nclass=\"math inline\">\\(L_n=\\prod_{k=1}^n(n+k)\\)</span>. Alors <span\nclass=\"math display\">\\[L_{n+1}=L_n\\frac{(2n+1)(2n+2)}{n+1}=2(2n+1)L_n.\\]</span>\nLe membre de droite <span\nclass=\"math inline\">\\(R_n=2^n\\prod_{k=1}^n(2k-1)\\)</span> vérifie lui\naussi <span class=\"math display\">\\[R_{n+1}=2(2n+1)R_n.\\]</span>\nL’égalité se propage donc par récurrence.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.21",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-21-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Pour <span class=\"math inline\">\\(1\\leq i\\leq p\\)</span> et <span\nclass=\"math inline\">\\(1\\leq j\\leq q\\)</span>, <span\nclass=\"math display\">\\[1\\leq j+(i-1)q\\leq q+(p-1)q=pq,\\]</span> donc\n<span class=\"math inline\">\\(f\\)</span> est bien définie.</p>\n<p>Si <span class=\"math inline\">\\(f(i,j)=f(i&#39;,j&#39;)\\)</span>,\nalors <span class=\"math display\">\\[(i-i&#39;)q=j&#39;-j.\\]</span> Le\nmembre de droite a une valeur absolue au plus <span\nclass=\"math inline\">\\(q-1\\)</span>, tandis que le membre de gauche est\nun multiple de <span class=\"math inline\">\\(q\\)</span>. Il est donc nul :\n<span class=\"math inline\">\\(i=i&#39;\\)</span> puis <span\nclass=\"math inline\">\\(j=j&#39;\\)</span>. La fonction est injective. Les\nensembles de départ et d’arrivée ont tous deux <span\nclass=\"math inline\">\\(pq\\)</span> éléments ; elle est donc\nbijective.</p>\n<p>On peut aussi exhiber l’antécédent de <span\nclass=\"math inline\">\\(r\\in\\{1,\\ldots,pq\\}\\)</span> : <span\nclass=\"math display\">\\[i=\\left\\lfloor\\frac{r-1}{q}\\right\\rfloor+1,\n  \\qquad\n  j=(r-1)\\bmod q+1.\\]</span></p></li>\n<li><p>Pour un parcours colonne par colonne, la bijection est <span\nclass=\"math display\">\\[\\boxed{g(i,j)=i+(j-1)p}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.22",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-22-1.webp",
+      "/assets/images/mat101/statements/exercice-3-22-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Une fois la première coordonnée fixée à <span\nclass=\"math inline\">\\(a\\)</span>, la seconde peut être choisie parmi les\n<span class=\"math inline\">\\(n-1\\)</span> éléments différents de <span\nclass=\"math inline\">\\(a\\)</span>. Ainsi <span\nclass=\"math inline\">\\(\\boxed{|E_a|=n-1}\\)</span>.</p></li>\n<li><p>Si <span class=\"math inline\">\\(a\\neq a&#39;\\)</span>, un même\ncouple ne peut avoir à la fois <span class=\"math inline\">\\(a\\)</span> et\n<span class=\"math inline\">\\(a&#39;\\)</span> pour première coordonnée.\nDonc <span class=\"math inline\">\\(E_a\\cap\nE_{a&#39;}=\\varnothing\\)</span>.</p></li>\n<li><p>Tout couple de <span class=\"math inline\">\\(A_{n,2}\\)</span>\npossède une unique première coordonnée <span\nclass=\"math inline\">\\(a\\)</span>, donc <span\nclass=\"math display\">\\[A_{n,2}=\\bigcup_{a=1}^nE_a.\\]</span> L’arbre de\ndénombrement possède <span class=\"math inline\">\\(n\\)</span> branches au\npremier niveau, puis <span class=\"math inline\">\\(n-1\\)</span> branches\nau second niveau pour chacune d’elles.</p></li>\n<li><p>Par le principe d’addition appliqué à cette union disjointe,\n<span class=\"math display\">\\[\\boxed{|A_{n,2}|=n(n-1)}.\\]</span></p></li>\n<li><p>Au couple <span class=\"math inline\">\\((x_1,x_2)\\)</span>, on\nassocie l’application <span\nclass=\"math inline\">\\(\\varphi:\\{1,2\\}\\to\\{1,\\ldots,n\\}\\)</span> définie\npar <span class=\"math inline\">\\(\\varphi(1)=x_1\\)</span> et <span\nclass=\"math inline\">\\(\\varphi(2)=x_2\\)</span>. Elle est injective\nexactement lorsque <span class=\"math inline\">\\(x_1\\neq x_2\\)</span>.\nCette correspondance est bijective.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.23",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-23-1.webp"
+    ],
+    "solutionHtml": "<p>Avec répétition autorisée, chacune des trois positions peut recevoir\nl’une des <span class=\"math inline\">\\(26\\)</span> lettres : <span\nclass=\"math display\">\\[\\boxed{26^3=17576}.\\]</span> Si les lettres\ndoivent être distinctes, on a successivement <span\nclass=\"math inline\">\\(26\\)</span>, puis <span\nclass=\"math inline\">\\(25\\)</span>, puis <span\nclass=\"math inline\">\\(24\\)</span> choix : <span\nclass=\"math display\">\\[\\boxed{26\\times25\\times24=15600}.\\]</span></p>"
+  },
+  {
+    "id": "3.24",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-24-1.webp"
+    ],
+    "solutionHtml": "<p>Les trois jetons sont tirés simultanément : l’ordre ne compte pas. Il\nfaut choisir un sous-ensemble de trois lettres parmi <span\nclass=\"math inline\">\\(26\\)</span>, soit <span\nclass=\"math display\">\\[\\boxed{\\binom{26}{3}=\\frac{26\\cdot25\\cdot24}{6}=2600}.\\]</span></p>"
+  },
+  {
+    "id": "3.25",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-25-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Entre <span class=\"math inline\">\\(1\\)</span> et <span\nclass=\"math inline\">\\(100\\)</span>, il y a <span\nclass=\"math inline\">\\(20\\)</span> multiples de <span\nclass=\"math inline\">\\(5\\)</span>, <span\nclass=\"math inline\">\\(14\\)</span> multiples de <span\nclass=\"math inline\">\\(7\\)</span> et <span\nclass=\"math inline\">\\(2\\)</span> multiples de <span\nclass=\"math inline\">\\(35\\)</span>. Le nombre d’entiers divisibles par\n<span class=\"math inline\">\\(5\\)</span> ou <span\nclass=\"math inline\">\\(7\\)</span> est <span\nclass=\"math display\">\\[20+14-2=32.\\]</span> Il en reste donc <span\nclass=\"math inline\">\\(\\boxed{100-32=68}\\)</span>.</p></li>\n<li><p>Entre <span class=\"math inline\">\\(1\\)</span> et <span\nclass=\"math inline\">\\(3000\\)</span>, il y a <span\nclass=\"math inline\">\\(1000\\)</span> multiples de <span\nclass=\"math inline\">\\(3\\)</span>, <span\nclass=\"math inline\">\\(600\\)</span> multiples de <span\nclass=\"math inline\">\\(5\\)</span> et <span\nclass=\"math inline\">\\(200\\)</span> multiples de <span\nclass=\"math inline\">\\(15\\)</span>. Il y a donc <span\nclass=\"math display\">\\[1000+600-200=1400\\]</span> entiers divisibles par\n<span class=\"math inline\">\\(3\\)</span> ou <span\nclass=\"math inline\">\\(5\\)</span>, et <span\nclass=\"math inline\">\\(\\boxed{3000-1400=1600}\\)</span> qui ne le sont ni\npar l’un ni par l’autre.</p></li>\n</ol>"
+  },
+  {
+    "id": "3.26",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-26-1.webp",
+      "/assets/images/mat101/statements/exercice-3-26-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span\nclass=\"math display\">\\[\\prod_{k=1}^n(2k)=2^n\\prod_{k=1}^nk=\\boxed{2^n\nn!}.\\]</span></p></li>\n<li><p>En séparant les facteurs pairs et impairs de <span\nclass=\"math inline\">\\((2n)!\\)</span>, <span\nclass=\"math display\">\\[(2n)!=(2\\cdot4\\cdots2n)(1\\cdot3\\cdots(2n-1))\n  =2^n n!\\prod_{k=1}^{n-1}(2k+1).\\]</span> D’où <span\nclass=\"math display\">\\[\\boxed{\\prod_{k=1}^{n-1}(2k+1)=\\frac{(2n)!}{2^n\nn!}}.\\]</span></p></li>\n<li><p>Le produit télescope : <span\nclass=\"math display\">\\[\\prod_{k=1}^n\\frac{2k+1}{2k-1}\n  =\\frac31\\frac53\\cdots\\frac{2n+1}{2n-1}\n  =\\boxed{2n+1}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\begin{align*}\n  \\prod_{k=2}^n\\frac{k^2-1}{k}\n  &amp;=\\frac{\\prod_{k=2}^n(k-1)\\prod_{k=2}^n(k+1)}{\\prod_{k=2}^nk}\\\\\n  &amp;=\\frac{(n-1)!\\,(n+1)!/2}{n!}\n  =\\boxed{\\frac{(n+1)!}{2n}}.\n\\end{align*}\\]</span></p></li>\n<li><p>En posant <span class=\"math inline\">\\(j=n-k\\)</span>, <span\nclass=\"math display\">\\[\\sum_{k=0}^n(n-k)=\\sum_{j=0}^nj=\\boxed{\\frac{n(n+1)}2}.\\]</span></p></li>\n<li><p>En posant <span class=\"math inline\">\\(j=k+1\\)</span>, <span\nclass=\"math display\">\\[\\sum_{k=0}^n(k+1)=\\sum_{j=1}^{n+1}j\n  =\\boxed{\\frac{(n+1)(n+2)}2}.\\]</span></p></li>\n<li><p>La somme des <span class=\"math inline\">\\(n+1\\)</span> premiers\nnombres impairs vaut <span\nclass=\"math display\">\\[\\sum_{k=0}^n(2k+1)=2\\frac{n(n+1)}2+(n+1)=\\boxed{(n+1)^2}.\\]</span></p></li>\n<li><p>Somme géométrique : <span\nclass=\"math display\">\\[\\sum_{k=1}^{n-1}2^k=2\\frac{2^{n-1}-1}{2-1}=\\boxed{2^n-2}.\\]</span></p></li>\n<li><p>Le rapport est <span class=\"math inline\">\\(\\sqrt2\\)</span> et il\ny a <span class=\"math inline\">\\(2n\\)</span> termes : <span\nclass=\"math display\">\\[\\sum_{k=0}^{2n-1}2^{k/2}\n  =\\frac{(\\sqrt2)^{2n}-1}{\\sqrt2-1}\n  =\\boxed{\\frac{2^n-1}{\\sqrt2-1}}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\sum_{k=0}^{2n}2^{2k-1}\n  =\\frac12\\sum_{k=0}^{2n}4^k\n  =\\boxed{\\frac{4^{2n+1}-1}{6}}.\\]</span></p></li>\n<li><p>Par l’identité <span\nclass=\"math inline\">\\(a^{n+1}-b^{n+1}=(a-b)\\sum_{k=0}na^{n-k}b^k\\)</span>\navec <span class=\"math inline\">\\(a=3\\)</span>, <span\nclass=\"math inline\">\\(b=2\\)</span>, <span\nclass=\"math display\">\\[\\sum_{k=0}^n2^k3^{n-k}=\\boxed{3^{n+1}-2^{n+1}}.\\]</span></p></li>\n<li><p>De même, avec <span class=\"math inline\">\\(a=2\\)</span>, <span\nclass=\"math inline\">\\(b=-1\\)</span>, <span\nclass=\"math display\">\\[2^{n+1}-(-1)^{n+1}\n  =3\\sum_{k=0}^n2^{n-k}(-1)^k,\\]</span> d’où <span\nclass=\"math display\">\\[\\boxed{\\sum_{k=0}^n(-1)^k2^{n-k}\n  =\\frac{2^{n+1}-(-1)^{n+1}}3}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.27",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-27-1.webp"
+    ],
+    "solutionHtml": "<p>On applique le binôme de Newton.</p>\n<ol>\n<li><p><span class=\"math display\">\\[\\sum_{k=0}^n\\binom\nnk=(1+1)^n=\\boxed{2^n}.\\]</span></p></li>\n<li><div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>La formule est valable pour <span\nclass=\"math inline\">\\(n\\geq1\\)</span>, mais pas pour <span\nclass=\"math inline\">\\(n=0\\)</span>, où le membre de gauche vaut <span\nclass=\"math inline\">\\(1\\)</span>.</p>\n</div>\n</div>\n<p>Pour <span class=\"math inline\">\\(n\\geq1\\)</span>, <span\nclass=\"math display\">\\[\\sum_{k=0}^n(-1)^k\\binom\nnk=(1-1)^n=\\boxed0.\\]</span></p></li>\n<li><div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>Ici encore, il faut supposer <span\nclass=\"math inline\">\\(n\\geq1\\)</span>.</p>\n</div>\n</div>\n<p>En ajoutant <span\nclass=\"math display\">\\[\\sum_{r=0}^{2n}\\binom{2n}{r}=2^{2n}\n  \\quad\\text{et}\\quad\n  \\sum_{r=0}^{2n}(-1)^r\\binom{2n}{r}=0,\\]</span> les termes d’indice\nimpair disparaissent et les termes d’indice pair sont doublés. Ainsi\n<span\nclass=\"math display\">\\[2\\sum_{k=0}^n\\binom{2n}{2k}=2^{2n},\\]</span> donc\n<span\nclass=\"math display\">\\[\\boxed{\\sum_{k=0}^n\\binom{2n}{2k}=2^{2n-1}}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\sum_{k=0}^n2^k\\binom\nnk=(1+2)^n=\\boxed{3^n}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\sum_{k=0}^n2^{3k-1}\\binom nk\n  =\\frac12\\sum_{k=0}^n8^k\\binom nk\n  =\\boxed{\\frac{9^n}{2}}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\begin{align*}\n  \\sum_{k=0}^n2^{3k}3^{n-2k}\\binom nk\n  &amp;=3^n\\sum_{k=0}^n\\left(\\frac89\\right)^k\\binom nk\\\\\n  &amp;=3^n\\left(1+\\frac89\\right)^n\n  =\\boxed{\\left(\\frac{17}{3}\\right)^n}.\n\\end{align*}\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\sum_{k=0}^n\\mathrm i^k\\binom\nnk=(1+\\mathrm i)^n\n  =(\\sqrt2\\mathrm e^{\\mathrm i\\pi/4})^n\n  =\\boxed{2^{n/2}\\mathrm e^{\\mathrm in\\pi/4}}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\sum_{k=0}^n3^{k/2}\\mathrm i^k\\binom\nnk\n  =(1+\\mathrm i\\sqrt3)^n\n  =(2\\mathrm e^{\\mathrm i\\pi/3})^n\n  =\\boxed{2^n\\mathrm e^{\\mathrm in\\pi/3}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.28",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-28-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math display\">\\[\\boxed{(1+x)^n=\\sum_{k=0}^n\\binom\nnkx^k}.\\]</span></p></li>\n<li><p>En dérivant terme à terme, <span\nclass=\"math display\">\\[f&#39;(x)=\\sum_{k=1}^nk\\binom nkx^{k-1}.\\]</span>\nEn intégrant terme à terme sur <span\nclass=\"math inline\">\\([0,1]\\)</span>, <span\nclass=\"math display\">\\[\\int_0^1f(x)\\,dx\n  =\\sum_{k=0}^n\\frac1{k+1}\\binom nk.\\]</span></p></li>\n<li><p>En évaluant <span class=\"math inline\">\\(f(1)\\)</span>, <span\nclass=\"math inline\">\\(f&#39;(1)\\)</span> et l’intégrale : <span\nclass=\"math display\">\\[\\boxed{\\sum_{k=0}^n\\binom nk=2^n},\\]</span> <span\nclass=\"math display\">\\[\\boxed{\\sum_{k=0}^nk\\binom nk=n2^{n-1}},\\]</span>\n<span class=\"math display\">\\[\\boxed{\\sum_{k=0}^n\\frac1{k+1}\\binom nk\n  =\\frac{2^{n+1}-1}{n+1}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.29",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-29-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>La somme télescope : <span\nclass=\"math display\">\\[\\sum_{k=0}^n(P(k+1)-P(k))\n  =\\boxed{P(n+1)-P(0)}.\\]</span></p></li>\n<li><p>Pour <span class=\"math inline\">\\(P(x)=ax^3+bx^2+cx\\)</span>,\n<span class=\"math display\">\\[P(x+1)-P(x)\n  =3ax^2+(3a+2b)x+(a+b+c).\\]</span></p></li>\n<li><p>On identifie avec <span class=\"math inline\">\\(x^2\\)</span> :\n<span class=\"math display\">\\[3a=1,\n  \\qquad 3a+2b=0,\n  \\qquad a+b+c=0.\\]</span> Ainsi <span\nclass=\"math display\">\\[\\boxed{a=\\frac13,\n  \\qquad b=-\\frac12,\n  \\qquad c=\\frac16}.\\]</span></p></li>\n<li><p>Pour ce choix, <span\nclass=\"math inline\">\\(P(k+1)-P(k)=k^2\\)</span>. Comme <span\nclass=\"math inline\">\\(P(0)=0\\)</span>, <span\nclass=\"math display\">\\[\\begin{align*}\n  \\sum_{k=0}^nk^2\n  &amp;=P(n+1)\\\\\n  &amp;=\\frac{(n+1)^3}{3}-\\frac{(n+1)^2}{2}+\\frac{n+1}{6}\\\\\n  &amp;=\\boxed{\\frac{n(n+1)(2n+1)}6}.\n\\end{align*}\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.30",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-30-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p><span class=\"math display\">\\[\\boxed{T_0(0)=1,\n  \\quad T_0(1)=2,\n  \\quad T_0(2)=22,\n  \\quad T_0(3)=170}.\\]</span> En effet, par exemple <span\nclass=\"math inline\">\\(T_0(3)=\\binom90+\\binom93+\\binom96+\\binom99=170\\)</span>.</p></li>\n<li><p>Le binôme de Newton donne <span\nclass=\"math display\">\\[2^n=(1+1)^n=\\sum_{k=0}^n\\binom\nnk.\\]</span></p></li>\n<li><p>Les indices <span class=\"math inline\">\\(0,1,\\ldots,3n\\)</span> se\nrépartissent selon leur reste modulo <span\nclass=\"math inline\">\\(3\\)</span>. Donc <span\nclass=\"math display\">\\[\\boxed{T_0(n)+T_1(n)+T_2(n)=2^{3n}}.\\]</span></p></li>\n<li><p>Comme <span class=\"math inline\">\\(j=\\mathrm e^{2\\mathrm\ni\\pi/3}\\)</span>, on a <span class=\"math inline\">\\(j^3=1\\)</span> et\n<span class=\"math inline\">\\(j\\neq1\\)</span>. La factorisation <span\nclass=\"math display\">\\[j^3-1=(j-1)(j^2+j+1)\\]</span> donne <span\nclass=\"math inline\">\\(\\boxed{1+j+j^2=0}\\)</span>.</p></li>\n<li><p>Dans le développement de <span\nclass=\"math inline\">\\((1+j)^{3n}\\)</span>, les puissances <span\nclass=\"math inline\">\\(j^{3k}\\)</span>, <span\nclass=\"math inline\">\\(j^{3k+1}\\)</span> et <span\nclass=\"math inline\">\\(j^{3k+2}\\)</span> valent respectivement <span\nclass=\"math inline\">\\(1,j,j^2\\)</span>. Ainsi <span\nclass=\"math display\">\\[(1+j)^{3n}=T_0+jT_1+j^2T_2.\\]</span> De même,\n<span\nclass=\"math display\">\\[(1+j^2)^{3n}=T_0+j^2T_1+jT_2.\\]</span></p></li>\n<li><p>En ajoutant les deux égalités précédentes à <span\nclass=\"math inline\">\\(2^{3n}=T_0+T_1+T_2\\)</span>, les coefficients de\n<span class=\"math inline\">\\(T_1\\)</span> et <span\nclass=\"math inline\">\\(T_2\\)</span> valent <span\nclass=\"math inline\">\\(1+j+j^2=0\\)</span>, tandis que celui de <span\nclass=\"math inline\">\\(T_0\\)</span> vaut <span\nclass=\"math inline\">\\(3\\)</span>. Par conséquent <span\nclass=\"math display\">\\[\\boxed{3T_0(n)=2^{3n}+(1+j)^{3n}+(1+j^2)^{3n}}.\\]</span></p></li>\n<li><p>On vérifie <span class=\"math display\">\\[1+j=\\mathrm e^{\\mathrm\ni\\pi/3},\n  \\qquad\n  1+j^2=\\mathrm e^{-\\mathrm i\\pi/3}.\\]</span> Donc <span\nclass=\"math display\">\\[(1+j)^{3n}=(1+j^2)^{3n}=\\mathrm e^{\\pm\\mathrm\nin\\pi}=(-1)^n.\\]</span> Finalement, <span\nclass=\"math display\">\\[\\boxed{T_0(n)=\\frac{2^{3n}+2(-1)^n}{3}}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "3.31",
+    "chapterId": "fonctions",
+    "chapterNumber": "3",
+    "chapterTitle": "Fonctions et dénombrement",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-3-31-1.webp",
+      "/assets/images/mat101/statements/exercice-3-31-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Supposons <span class=\"math display\">\\[\\frac\npq=\\frac{p&#39;}{q&#39;},\n  \\qquad\n  \\frac st=\\frac{s&#39;}{t&#39;},\\]</span> c’est-à-dire <span\nclass=\"math inline\">\\(pq&#39;=p&#39;q\\)</span> et <span\nclass=\"math inline\">\\(st&#39;=s&#39;t\\)</span>. Pour l’addition, il faut\nmontrer <span\nclass=\"math display\">\\[\\frac{pt+sq}{qt}=\\frac{p&#39;t&#39;+s&#39;q&#39;}{q&#39;t&#39;}.\\]</span>\nAprès produit en croix, le membre de gauche devient <span\nclass=\"math display\">\\[(pt+sq)q&#39;t&#39;=ptq&#39;t&#39;+sqq&#39;t&#39;.\\]</span>\nLa première égalité <span class=\"math inline\">\\(pq&#39;=p&#39;q\\)</span>\nidentifie les premiers termes, et la seconde <span\nclass=\"math inline\">\\(st&#39;=s&#39;t\\)</span> les seconds. Les deux\nfractions sont donc égales.</p>\n<p>Pour le produit, <span\nclass=\"math display\">\\[psq&#39;t&#39;=(pq&#39;)(st&#39;)=(p&#39;q)(s&#39;t)=p&#39;s&#39;qt,\\]</span>\nce qui donne <span\nclass=\"math display\">\\[\\frac{ps}{qt}=\\frac{p&#39;s&#39;}{q&#39;t&#39;}.\\]</span></p></li>\n<li><p>La réflexivité de <span class=\"math inline\">\\(\\mathcal R\\)</span>\ndonne <span class=\"math inline\">\\((x,x)\\in\\mathcal R\\)</span>, donc, par\ndéfinition de la classe, <span class=\"math display\">\\[\\boxed{x\\in\nC_{\\mathcal R}(x)}.\\]</span></p></li>\n<li><p>Sur <span class=\"math inline\">\\(E=\\mathbb Z\\times\\mathbb\nN^*\\)</span>, définissons <span\nclass=\"math display\">\\[(p,q)\\mathrel{\\mathcal R}(p&#39;,q&#39;)\n  \\iff pq&#39;=p&#39;q.\\]</span> La relation est réflexive car <span\nclass=\"math inline\">\\(pq=pq\\)</span>, symétrique car une égalité peut\nêtre lue dans les deux sens, et transitive : si <span\nclass=\"math display\">\\[pq&#39;=p&#39;q,\n  \\qquad p&#39;q&#39;&#39;=p&#39;&#39;q&#39;,\\]</span> alors <span\nclass=\"math display\">\\[p q&#39; q&#39;&#39;=p&#39; q\nq&#39;&#39;=p&#39;&#39;q&#39;q.\\]</span> Comme <span\nclass=\"math inline\">\\(q&#39;&gt;0\\)</span>, on simplifie par <span\nclass=\"math inline\">\\(q&#39;\\)</span> et l’on obtient <span\nclass=\"math inline\">\\(pq&#39;&#39;=p&#39;&#39;q\\)</span>. Ainsi <span\nclass=\"math inline\">\\(\\mathcal R\\)</span> est une relation\nd’équivalence.</p></li>\n<li><p>Sous l’hypothèse (29) telle qu’elle est écrite, prenons <span\nclass=\"math inline\">\\(u,v\\in C_{\\mathcal R}(x)\\)</span> et <span\nclass=\"math inline\">\\(u&#39;,v&#39;\\in C_{\\mathcal R}(x&#39;)\\)</span>.\nOn a <span class=\"math inline\">\\(u\\mathcal R v\\)</span> et <span\nclass=\"math inline\">\\(u&#39;\\mathcal R v&#39;\\)</span>, donc <span\nclass=\"math display\">\\[f(u,u&#39;)=f(v,v&#39;).\\]</span> Toutes les\nvaleurs de <span class=\"math inline\">\\(f\\)</span> sur <span\nclass=\"math inline\">\\(C_{\\mathcal R}(x)\\times C_{\\mathcal\nR}(x&#39;)\\)</span> sont égales : cette image est un singleton.</p></li>\n<li><div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>Les questions 5 et 6 ne peuvent pas être vraies avec la condition\n(29) imprimée, qui exige l’égalité des couples obtenus. Par exemple,\n<span class=\"math inline\">\\((1,2)\\mathcal R(2,4)\\)</span>, mais <span\nclass=\"math display\">\\[f((1,2),(1,2))=(4,4)\n  \\quad\\text{et}\\quad\n  f((2,4),(1,2))=(8,8),\\]</span> qui ne sont pas égaux. Ils sont\nseulement équivalents. La condition correcte est <span\nclass=\"math display\">\\[x\\mathcal R x&#39;,\\ y\\mathcal R y&#39;\n  \\Rightarrow f(x,y)\\mathcal R f(x&#39;,y&#39;).\\]</span></p>\n</div>\n</div>\n<p>Vérifions cette version. Supposons <span\nclass=\"math display\">\\[(p,q)\\mathcal R(r,s),\n  \\qquad\n  (p&#39;,q&#39;)\\mathcal R(r&#39;,s&#39;),\\]</span> donc <span\nclass=\"math inline\">\\(ps=rq\\)</span> et <span\nclass=\"math inline\">\\(p&#39;s&#39;=r&#39;q&#39;\\)</span>. Les images par\nl’addition sont <span class=\"math display\">\\[(pq&#39;+p&#39;q,qq&#39;)\n  \\quad\\text{et}\\quad\n  (rs&#39;+r&#39;s,ss&#39;).\\]</span> Or <span\nclass=\"math display\">\\[\\begin{align*}\n  (pq&#39;+p&#39;q)ss&#39;\n  &amp;=p q&#39;ss&#39;+p&#39; qss&#39;\\\\\n  &amp;=rqq&#39;s&#39;+r&#39;qq&#39;s\\\\\n  &amp;=(rs&#39;+r&#39;s)qq&#39;.\n\\end{align*}\\]</span> Les deux résultats sont donc équivalents.</p></li>\n<li><p>Pour la multiplication, les images sont <span\nclass=\"math inline\">\\((pp&#39;,qq&#39;)\\)</span> et <span\nclass=\"math inline\">\\((rr&#39;,ss&#39;)\\)</span>. On a <span\nclass=\"math display\">\\[pp&#39;ss&#39;=(ps)(p&#39;s&#39;)=(rq)(r&#39;q&#39;)=rr&#39;qq&#39;,\\]</span>\ndonc elles sont équivalentes. C’est cette compatibilité qui permet de\ndéfinir sans ambiguïté l’addition et la multiplication sur les classes\nd’équivalence.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.1",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-1-1.webp"
+    ],
+    "solutionHtml": "<p>On compare l’erreur absolue à la marge annoncée.</p>\n<ol>\n<li><p><span\nclass=\"math inline\">\\(|\\pi-3{,}14|\\simeq1{,}59\\times10^{-3}&lt;10^{-2}\\)</span>\n: <strong>oui</strong>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(|\\pi-3{,}1416|\\simeq7{,}35\\times10^{-6}&lt;10^{-3}\\)</span>\n: <strong>oui</strong>.</p></li>\n<li><p>La même erreur est aussi inférieure à <span\nclass=\"math inline\">\\(10^{-5}\\)</span> : <strong>oui</strong>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(|\\sqrt2-1{,}41|\\simeq4{,}21\\times10^{-3}&gt;10^{-3}\\)</span>\n: <strong>non</strong>. Par exemple, <span\nclass=\"math inline\">\\(1{,}414\\)</span> est une approximation de <span\nclass=\"math inline\">\\(\\sqrt2\\)</span> à <span\nclass=\"math inline\">\\(10^{-3}\\)</span> près.</p></li>\n<li><p><span class=\"math inline\">\\(|\\mathrm\ne-2{,}72|\\simeq1{,}72\\times10^{-3}&lt;10^{-2}\\)</span> :\n<strong>oui</strong>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.2",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-2-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Comme <span class=\"math inline\">\\(|\\sin x|\\leq1\\)</span> et <span\nclass=\"math inline\">\\(x&gt;10\\)</span>, <span\nclass=\"math display\">\\[\\left|\\frac{2\\sin x}{x}\\right|\n  \\leq\\frac2x&lt;\\frac2{10}=\\frac15.\\]</span></p></li>\n<li><p>La réciproque est fausse. Pour <span\nclass=\"math inline\">\\(x=\\pi\\)</span>, on a <span\nclass=\"math display\">\\[\\left|\\frac{2\\sin\nx}{x}\\right|=0\\leq\\frac15,\\]</span> alors que <span\nclass=\"math inline\">\\(\\pi&lt;10\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.3",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-3-1.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Supposons <span class=\"math inline\">\\(a\\geq b\\geq1\\)</span>.\nD’une part, <span\nclass=\"math display\">\\[1-\\frac1b\\leq1\\leq1+\\frac1a-\\frac1{a^2},\\]</span>\ncar <span class=\"math inline\">\\((a-1)/a^2\\geq0\\)</span>. D’autre part,\n<span\nclass=\"math display\">\\[\\frac1a-\\frac1{a^2}\\leq\\frac1a\\leq\\frac1b,\\]</span>\ndonc <span\nclass=\"math display\">\\[1+\\frac1a-\\frac1{a^2}\\leq1+\\frac1b.\\]</span></p></li>\n<li><p>La réciproque est fausse. Pour <span\nclass=\"math inline\">\\(a=1\\)</span> et <span\nclass=\"math inline\">\\(b=2\\)</span>, on a <span\nclass=\"math display\">\\[\\frac12\\leq1\\leq\\frac32,\\]</span> mais <span\nclass=\"math inline\">\\(a\\not\\geq b\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.4",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-4-1.webp"
+    ],
+    "solutionHtml": "<p>L’hypothèse <span class=\"math inline\">\\(|b|\\leq a/2\\)</span> donne\n<span class=\"math display\">\\[\\frac a2\\leq a+b\\leq\\frac{3a}{2}.\\]</span>\nComme <span class=\"math inline\">\\(0\\leq a\\leq1/2\\)</span>, on a aussi\n<span class=\"math display\">\\[1\\leq1+a\\leq\\frac32.\\]</span> Les\nnumérateurs étant non négatifs et les dénominateurs strictement\npositifs, <span class=\"math display\">\\[\\frac{a+b}{1+a}\n\\geq\\frac{a/2}{3/2}=\\frac a3\\]</span> et <span\nclass=\"math display\">\\[\\frac{a+b}{1+a}\n\\leq\\frac{3a/2}{1}=\\frac{3a}{2}.\\]</span> Ainsi <span\nclass=\"math display\">\\[\\boxed{\\frac\na3\\leq\\frac{a+b}{1+a}\\leq\\frac{3a}{2}}.\\]</span></p>"
+  },
+  {
+    "id": "4.5",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-5-1.webp",
+      "/assets/images/mat101/statements/exercice-4-5-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Les hypothèses donnent <span class=\"math inline\">\\(0\\leq\ny&lt;1\\)</span>. On peut donc multiplier par <span\nclass=\"math inline\">\\(1-y&gt;0\\)</span>. L’inégalité équivaut à <span\nclass=\"math display\">\\[1\\leq(1+cy)(1-y)\n  =1+y(c-1-cy).\\]</span> Or <span\nclass=\"math inline\">\\(y\\leq1-1/c=(c-1)/c\\)</span>, donc <span\nclass=\"math inline\">\\(c-1-cy\\geq0\\)</span>. Le membre de droite est bien\nsupérieur ou égal à <span class=\"math inline\">\\(1\\)</span>.</p></li>\n<li><p>Supposons <span class=\"math inline\">\\(a\\geq b&gt;10\\)</span>. On\ncalcule <span\nclass=\"math display\">\\[\\frac{a^2+a+1}{a-5}-a=\\frac{6a+1}{a-5}&gt;0,\\]</span>\nce qui donne la première inégalité. Pour la seconde, <span\nclass=\"math display\">\\[\\frac{a^2+a+1}{a(a-5)}\n  =1+\\frac{6a+1}{a(a-5)}.\\]</span> Comme <span\nclass=\"math inline\">\\(a&gt;10&gt;66/7\\)</span>, on a <span\nclass=\"math inline\">\\(6a+1\\leq13(a-5)\\)</span>, donc <span\nclass=\"math display\">\\[\\frac{6a+1}{a(a-5)}\\leq\\frac{13}{a}\\leq\\frac{13}{b}.\\]</span>\nAinsi <span class=\"math display\">\\[\\boxed{a\\leq\\frac{a^2+a+1}{a-5}\\leq\na\\left(1+\\frac{13}{b}\\right)}.\\]</span></p></li>\n<li><p>Posons <span class=\"math display\">\\[A=\\frac{a^2+a+1}{a-5},\n  \\qquad B=a.\\]</span> En appliquant la question précédente avec <span\nclass=\"math inline\">\\(b=a\\)</span>, on obtient <span\nclass=\"math display\">\\[a\\leq A\\leq a+13.\\]</span> Par conséquent <span\nclass=\"math display\">\\[\\frac{|B-A|}{|A|}\n  =\\frac{A-a}{A}\n  \\leq\\frac{A-a}{a}\n  \\leq\\frac{13}{a}.\\]</span> Si <span\nclass=\"math inline\">\\(a&gt;13\\cdot10^k\\)</span>, cette dernière quantité\nest strictement inférieure à <span\nclass=\"math inline\">\\(10^{-k}\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.6",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-6-1.webp"
+    ],
+    "solutionHtml": "<p>Dans le tableau, la ligne <span class=\"math inline\">\\(i\\)</span>\ncontient V exactement dans les colonnes <span\nclass=\"math inline\">\\(i,2i,3i,\\ldots\\)</span>.</p>\n<ol>\n<li><p>L’assertion est <strong>fausse</strong>. Pour <span\nclass=\"math inline\">\\(i=2\\)</span>, quel que soit <span\nclass=\"math inline\">\\(J\\)</span>, il existe un entier impair <span\nclass=\"math inline\">\\(j&gt;J\\)</span>. Cet entier n’est pas multiple de\n<span class=\"math inline\">\\(2\\)</span>.</p></li>\n<li><p>L’assertion est <strong>vraie</strong>. Pour <span\nclass=\"math inline\">\\(i,J\\in\\mathbb N^*\\)</span>, le choix <span\nclass=\"math display\">\\[j=i(J+1)\\]</span> vérifie <span\nclass=\"math inline\">\\(j&gt;J\\)</span> et <span\nclass=\"math inline\">\\(i\\mid j\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.7",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-7-1.webp"
+    ],
+    "solutionHtml": "<p>La relation <span\nclass=\"math display\">\\[\\frac1{j^2}\\leq\\frac1i\\]</span> équivaut, puisque\n<span class=\"math inline\">\\(i,j&gt;0\\)</span>, à <span\nclass=\"math inline\">\\(j^2\\geq i\\)</span>. Dans la ligne <span\nclass=\"math inline\">\\(i\\)</span>, toutes les cases à partir de <span\nclass=\"math inline\">\\(j=\\lceil\\sqrt i\\rceil\\)</span> sont donc\nvraies.</p>\n<ol>\n<li><p>L’assertion est <strong>vraie</strong>. Pour un <span\nclass=\"math inline\">\\(i\\)</span> fixé, choisir par exemple <span\nclass=\"math inline\">\\(J=i\\)</span>. Si <span\nclass=\"math inline\">\\(j&gt;J\\)</span>, alors <span\nclass=\"math inline\">\\(j^2&gt;i\\)</span>.</p></li>\n<li><p>Elle est également <strong>vraie</strong>. Pour <span\nclass=\"math inline\">\\(i,J\\)</span> donnés, prendre <span\nclass=\"math display\">\\[j=\\max(J+1,i).\\]</span> Alors <span\nclass=\"math inline\">\\(j&gt;J\\)</span> et <span\nclass=\"math inline\">\\(j^2\\geq i\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.8",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-8-1.webp"
+    ],
+    "solutionHtml": "<p>Pour <span class=\"math inline\">\\(j\\geq3\\)</span>, on a <span\nclass=\"math inline\">\\(j-u_j\\geq j-2\\geq1\\)</span>, donc <span\nclass=\"math display\">\\[P(i,j)\\iff \\frac1{j-u_j}\\leq\\frac1i\n\\iff j-u_j\\geq i.\\]</span> Comme <span\nclass=\"math inline\">\\(u_j\\in\\{0,1,2\\}\\)</span>, <span\nclass=\"math display\">\\[j-2\\leq j-u_j\\leq j.\\]</span> Dans le tableau\n:</p>\n<ul>\n<li><p>si <span class=\"math inline\">\\(j-2\\geq i\\)</span>, la case est\nnécessairement V ;</p></li>\n<li><p>si <span class=\"math inline\">\\(j&lt;i\\)</span>, elle est\nnécessairement F ;</p></li>\n<li><p>pour <span class=\"math inline\">\\(j=i\\)</span> ou <span\nclass=\"math inline\">\\(j=i+1\\)</span>, sa valeur dépend de <span\nclass=\"math inline\">\\(u_j\\)</span> et l’on inscrit « ? ».</p></li>\n</ul>\n<ol>\n<li><p>L’assertion est <strong>vraie</strong>. Pour un <span\nclass=\"math inline\">\\(i\\)</span> fixé, choisissons <span\nclass=\"math inline\">\\(J=i+2\\)</span>. Si <span\nclass=\"math inline\">\\(j&gt;J\\)</span>, alors <span\nclass=\"math inline\">\\(j-2&gt;i\\)</span>, donc <span\nclass=\"math inline\">\\(j-u_j\\geq j-2&gt;i\\)</span>.</p></li>\n<li><p>Elle est aussi <strong>vraie</strong>, par exemple en choisissant\n<span class=\"math inline\">\\(j&gt;\\max(J,i+2)\\)</span>.</p></li>\n<li><p>La suite converge vers <span class=\"math inline\">\\(0\\)</span>. En\neffet, <span\nclass=\"math display\">\\[0&lt;\\frac1{j-u_j}\\leq\\frac1{j-2},\\]</span> et le\nmembre de droite tend vers <span class=\"math inline\">\\(0\\)</span>. Le\nthéorème des gendarmes donne <span\nclass=\"math display\">\\[\\boxed{\\frac1{j-u_j}\\longrightarrow0}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "4.9",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-9-1.webp",
+      "/assets/images/mat101/statements/exercice-4-9-2.webp"
+    ],
+    "solutionHtml": "<ol>\n<li><p>Chaque carré est positif ou nul, donc l’union est incluse dans\n<span class=\"math inline\">\\([0,+\\infty[\\)</span>. Réciproquement, si\n<span class=\"math inline\">\\(y\\geq0\\)</span>, alors <span\nclass=\"math inline\">\\(y=(\\sqrt y)^2\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{\\bigcup_{x\\in\\mathbb\nR}\\{x^2\\}=[0,+\\infty[}.\\]</span></p></li>\n<li><p>Si <span class=\"math inline\">\\(y\\in]x-1,x+1[\\)</span> pour un\n<span class=\"math inline\">\\(x\\in[0,1]\\)</span>, alors <span\nclass=\"math inline\">\\(-1&lt;y&lt;2\\)</span>. L’union est donc incluse\ndans <span class=\"math inline\">\\(]-1,2[\\)</span>. Réciproquement, si\n<span class=\"math inline\">\\(-1&lt;y&lt;2\\)</span>, les intervalles <span\nclass=\"math inline\">\\([0,1]\\)</span> et <span\nclass=\"math inline\">\\(]y-1,y+1[\\)</span> ont une intersection non vide ;\ntout <span class=\"math inline\">\\(x\\)</span> dans cette intersection\nvérifie <span class=\"math inline\">\\(y\\in]x-1,x+1[\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{\\bigcup_{x\\in[0,1]}]x-1,x+1[=]-1,2[}.\\]</span></p></li>\n<li><p>Appartenir à tous les intervalles ouverts impose en particulier,\npour <span class=\"math inline\">\\(x=1\\)</span>, <span\nclass=\"math inline\">\\(y&gt;0\\)</span>, et pour <span\nclass=\"math inline\">\\(x=0\\)</span>, <span\nclass=\"math inline\">\\(y&lt;1\\)</span>. Réciproquement, si <span\nclass=\"math inline\">\\(0&lt;y&lt;1\\)</span> et <span\nclass=\"math inline\">\\(x\\in[0,1]\\)</span>, alors <span\nclass=\"math inline\">\\(x-1\\leq0&lt;y\\)</span> et <span\nclass=\"math inline\">\\(y&lt;1\\leq x+1\\)</span>. Donc <span\nclass=\"math display\">\\[\\boxed{\\bigcap_{x\\in[0,1]}]x-1,x+1[=]0,1[}.\\]</span></p></li>\n<li><p>Le même raisonnement avec des inégalités larges donne <span\nclass=\"math display\">\\[\\boxed{\\bigcap_{x\\in[0,1]}[x-1,x+1]=[0,1]}.\\]</span></p></li>\n<li><p>Le nombre <span class=\"math inline\">\\(0\\)</span> appartient à\ntous les intervalles. Si <span class=\"math inline\">\\(y&gt;0\\)</span>, on\nchoisit <span class=\"math inline\">\\(n&gt;1/y\\)</span>, alors <span\nclass=\"math inline\">\\(1/n&lt;y\\)</span> et <span\nclass=\"math inline\">\\(y\\notin[0,1/n]\\)</span>. Aucun nombre négatif\nn’appartient à ces intervalles. Donc <span\nclass=\"math display\">\\[\\boxed{\\bigcap_{n\\geq1}\\left[0,\\frac1n\\right]=\\{0\\}}.\\]</span></p></li>\n<li><p>Chaque intervalle est contenu dans <span\nclass=\"math inline\">\\(]0,1]\\)</span>, donc l’union aussi.\nRéciproquement, pour <span class=\"math inline\">\\(y\\in]0,1]\\)</span>, il\nexiste <span class=\"math inline\">\\(n\\geq1\\)</span> tel que <span\nclass=\"math display\">\\[\\frac1{n+1}\\leq y\\leq\\frac1n\\]</span> (prendre\n<span class=\"math inline\">\\(n=\\lfloor1/y\\rfloor\\)</span>, avec\nl’ajustement évident lorsque <span class=\"math inline\">\\(1/y\\)</span>\nest entier). Ainsi <span\nclass=\"math display\">\\[\\boxed{\\bigcup_{n\\geq1}\\left[\\frac1{n+1},\\frac1n\\right]=]0,1]}.\\]</span></p></li>\n</ol>"
+  },
+  {
+    "id": "4.10",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-10-1.webp"
+    ],
+    "solutionHtml": "<p>Les choix suivants conviennent ; ils ne sont pas tous minimaux, mais\nils donnent des preuves immédiates.</p>\n<div class=\"center\">\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\">Suite</th>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(N_{10}\\)</span></th>\n<th style=\"text-align: center;\"><span\nclass=\"math inline\">\\(N_{100}\\)</span></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(1/n\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(11\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(101\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(1/n^2\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(4\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(11\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\((-1)^n/n^2\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(4\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(11\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(2^{-n}\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(4\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(7\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(10^{-n}\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(2\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(3\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span class=\"math inline\">\\(1/n\\)</span>\nsi <span class=\"math inline\">\\(n\\)</span> pair, <span\nclass=\"math inline\">\\(1/n^2\\)</span> sinon</td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(11\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(101\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(2^{-n}\\)</span> si <span\nclass=\"math inline\">\\(n\\)</span> pair, <span\nclass=\"math inline\">\\(3^{-n}\\)</span> sinon</td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(3\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(7\\)</span></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(\\cos(n)/3^n\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(3\\)</span></td>\n<td style=\"text-align: center;\"><span\nclass=\"math inline\">\\(5\\)</span></td>\n</tr>\n</tbody>\n</table>\n</div>\n<p>Par exemple, dans la dernière ligne, <span\nclass=\"math display\">\\[\\left|\\frac{\\cos\nn}{3^n}\\right|\\leq3^{-n};\\]</span> les rangs <span\nclass=\"math inline\">\\(3\\)</span> et <span\nclass=\"math inline\">\\(5\\)</span> assurent respectivement <span\nclass=\"math inline\">\\(3^{-n}&lt;10^{-1}\\)</span> et <span\nclass=\"math inline\">\\(3^{-n}&lt;10^{-2}\\)</span>.</p>"
+  },
+  {
+    "id": "4.11",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-11-1.webp",
+      "/assets/images/mat101/statements/exercice-4-11-2.webp"
+    ],
+    "solutionHtml": "<p>Pour <span class=\"math inline\">\\(\\varepsilon&gt;0\\)</span>, les choix\nsuivants conviennent. Le symbole <span\nclass=\"math inline\">\\(\\lfloor\\cdot\\rfloor\\)</span> désigne la partie\nentière ; on prend le maximum avec <span\nclass=\"math inline\">\\(1\\)</span> lorsque la suite n’est définie qu’à\npartir de <span class=\"math inline\">\\(n=1\\)</span>.</p>\n<ol>\n<li><p><span\nclass=\"math display\">\\[\\boxed{N_\\varepsilon=\\left\\lfloor\\frac1\\varepsilon\\right\\rfloor+1}.\\]</span></p></li>\n<li><p><span\nclass=\"math display\">\\[\\boxed{N_\\varepsilon=\\left\\lfloor\\frac1{\\sqrt\\varepsilon}\\right\\rfloor+1}.\\]</span></p></li>\n<li><p>Le même choix que dans la question 2, car <span\nclass=\"math inline\">\\(|(-1)^n/n^2|=1/n^2\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\boxed{N_\\varepsilon=\n  \\max\\left(1,\\left\\lfloor\\log_2\\frac1\\varepsilon\\right\\rfloor+1\\right)}.\\]</span></p></li>\n<li><p><span class=\"math display\">\\[\\boxed{N_\\varepsilon=\n  \\max\\left(1,\\left\\lfloor\\log_{10}\\frac1\\varepsilon\\right\\rfloor+1\\right)}.\\]</span></p></li>\n<li><p>Comme <span class=\"math inline\">\\(|u_n|\\leq1/n\\)</span>, le choix\nde la question 1 convient.</p></li>\n<li><p>Comme <span class=\"math inline\">\\(|u_n|\\leq2^{-n}\\)</span>, le\nchoix de la question 4 convient.</p></li>\n<li><p>Comme <span class=\"math inline\">\\(|u_n|\\leq3^{-n}\\)</span>, <span\nclass=\"math display\">\\[\\boxed{N_\\varepsilon=\n  \\max\\left(1,\\left\\lfloor\\log_3\\frac1\\varepsilon\\right\\rfloor+1\\right)}.\\]</span></p></li>\n</ol>\n<p>Dans chaque cas, la définition assure que <span\nclass=\"math inline\">\\(N_\\varepsilon\\)</span> est strictement supérieur\nau seuil réel obtenu en résolvant l’inégalité <span\nclass=\"math inline\">\\(|u_n|&lt;\\varepsilon\\)</span>.</p>"
+  },
+  {
+    "id": "4.12",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-12-1.webp"
+    ],
+    "solutionHtml": "<p>L’affirmation est vraie. Soit <span\nclass=\"math inline\">\\(p\\geq1\\)</span> une période de la suite. Tout\nentier <span class=\"math inline\">\\(n\\)</span> s’écrit <span\nclass=\"math display\">\\[n=qp+r,\n\\qquad0\\leq r\\leq p-1.\\]</span> Par périodicité, <span\nclass=\"math inline\">\\(u_n=u_r\\)</span>. La suite ne prend donc que les\nvaleurs du sous-ensemble fini <span\nclass=\"math display\">\\[\\{u_0,u_1,\\ldots,u_{p-1}\\}.\\]</span> En posant\n<span class=\"math display\">\\[m=\\min_{0\\leq r&lt;p}u_r,\n\\qquad\nM=\\max_{0\\leq r&lt;p}u_r,\\]</span> on obtient <span\nclass=\"math inline\">\\(m\\leq u_n\\leq M\\)</span> pour tout <span\nclass=\"math inline\">\\(n\\)</span>. La suite est bornée.</p>"
+  },
+  {
+    "id": "4.13",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-13-1.webp"
+    ],
+    "solutionHtml": "<p>Les suites contenant <span class=\"math inline\">\\(1/n\\)</span> sont\nconsidérées pour <span class=\"math inline\">\\(n\\geq1\\)</span>.</p>\n<ol>\n<li><p><span class=\"math inline\">\\(u_n=(-1)^n\\)</span> est périodique de\npériode <span class=\"math inline\">\\(2\\)</span>, majorée par <span\nclass=\"math inline\">\\(1\\)</span>, minorée par <span\nclass=\"math inline\">\\(-1\\)</span> et bornée. Les sous-suites paires et\nimpaires valent respectivement <span class=\"math inline\">\\(1\\)</span> et\n<span class=\"math inline\">\\(-1\\)</span> ; elle ne converge pas et ne\ntend pas vers l’infini.</p></li>\n<li><p><span class=\"math inline\">\\(u_n=1/n\\)</span> n’est pas\npériodique. Elle est positive, majorée par <span\nclass=\"math inline\">\\(1\\)</span>, bornée et converge vers <span\nclass=\"math inline\">\\(0\\)</span>.</p></li>\n<li><p>Même conclusion pour <span\nclass=\"math inline\">\\(u_n=1/n^2\\)</span> : elle est positive, bornée et\nconverge vers <span class=\"math inline\">\\(0\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[u_n=\\frac\nn{n+1}=1-\\frac1{n+1}.\\]</span> Elle est comprise entre <span\nclass=\"math inline\">\\(0\\)</span> et <span\nclass=\"math inline\">\\(1\\)</span>, n’est pas périodique et converge vers\n<span class=\"math inline\">\\(1\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(u_n=(-1)^n+1/n\\)</span> est bornée :\npour <span class=\"math inline\">\\(n\\geq1\\)</span>, <span\nclass=\"math inline\">\\(-1&lt;u_n\\leq3/2\\)</span>. Elle n’est pas\npériodique. Les sous-suites paires et impaires convergent respectivement\nvers <span class=\"math inline\">\\(1\\)</span> et <span\nclass=\"math inline\">\\(-1\\)</span>, donc la suite diverge sans tendre\nvers <span class=\"math inline\">\\(\\pm\\infty\\)</span>.</p></li>\n<li><p>La suite <span class=\"math inline\">\\(\\cos n\\)</span> est bornée\nentre <span class=\"math inline\">\\(-1\\)</span> et <span\nclass=\"math inline\">\\(1\\)</span>. Elle n’est pas périodique : si un\nentier <span class=\"math inline\">\\(p&gt;0\\)</span> était une période, on\naurait en particulier <span class=\"math inline\">\\(\\cos\np=\\cos0=1\\)</span>, donc <span class=\"math inline\">\\(p\\in2\\pi\\mathbb\nZ\\)</span>, impossible puisque <span class=\"math inline\">\\(\\pi\\)</span>\nest irrationnel.</p>\n<p>Elle ne converge pas. En effet, supposons <span\nclass=\"math inline\">\\(\\cos n\\to L\\)</span>. L’identité <span\nclass=\"math display\">\\[\\cos(n+1)+\\cos(n-1)=2\\cos1\\cos n\\]</span>\ndonnerait <span class=\"math inline\">\\(2L=2\\cos1\\,L\\)</span>, donc <span\nclass=\"math inline\">\\(L=0\\)</span>. Mais <span\nclass=\"math display\">\\[\\sin\nn=\\frac{\\cos(n-1)-\\cos(n+1)}{2\\sin1}\\longrightarrow0,\\]</span> et\nl’identité <span class=\"math inline\">\\(\\cos^2n+\\sin^2n=1\\)</span>\ndonnerait alors <span class=\"math inline\">\\(L^2=1\\)</span>,\ncontradiction.</p></li>\n<li><p><span class=\"math inline\">\\(u_n=2^{-n}\\)</span> est positive,\nbornée, non périodique et converge vers <span\nclass=\"math inline\">\\(0\\)</span>.</p></li>\n<li><p><span class=\"math inline\">\\(u_n=n+(-1)^n\\)</span> vérifie <span\nclass=\"math inline\">\\(u_n\\geq n-1\\)</span>, donc tend vers <span\nclass=\"math inline\">\\(+\\infty\\)</span>. Elle est minorée, non majorée,\nnon bornée et non périodique.</p></li>\n<li><p><span class=\"math display\">\\[u_n=n(1+(-1)^n)=\n  \\begin{cases}2n,&amp;n\\text{ pair},\\\\0,&amp;n\\text{ impair}.\n  \\end{cases}\\]</span> Elle est minorée par <span\nclass=\"math inline\">\\(0\\)</span>, non majorée et non bornée. Elle ne\ntend pas vers <span class=\"math inline\">\\(+\\infty\\)</span> à cause des\ntermes impairs nuls, et elle n’a aucune limite finie. Elle\ndiverge.</p></li>\n<li><p><span\nclass=\"math display\">\\[u_n=\\frac{n+1}{n^2}=\\frac1n+\\frac1{n^2}.\\]</span>\nElle est positive, bornée, non périodique et converge vers <span\nclass=\"math inline\">\\(0\\)</span>.</p></li>\n<li><p><span\nclass=\"math display\">\\[u_n=\\frac{2n^2+n+3}{n^2}=2+\\frac1n+\\frac3{n^2}.\\]</span>\nElle est positive, bornée, non périodique et converge vers <span\nclass=\"math inline\">\\(2\\)</span>.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.14",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-14-1.webp"
+    ],
+    "solutionHtml": "<p>Soit <span class=\"math inline\">\\(\\ell\\)</span> la limite de la suite.\nPour <span class=\"math inline\">\\(\\varepsilon=1/2\\)</span>, il existe\n<span class=\"math inline\">\\(N\\)</span> tel que, pour tous <span\nclass=\"math inline\">\\(n,m\\geq N\\)</span>, <span\nclass=\"math display\">\\[|u_n-\\ell|&lt;\\frac12,\n\\qquad\n|u_m-\\ell|&lt;\\frac12.\\]</span> L’inégalité triangulaire donne <span\nclass=\"math display\">\\[|u_n-u_m|\n\\leq|u_n-\\ell|+|u_m-\\ell|&lt;1.\\]</span> Or <span\nclass=\"math inline\">\\(u_n-u_m\\)</span> est un entier. Le seul entier de\nvaleur absolue strictement inférieure à <span\nclass=\"math inline\">\\(1\\)</span> est <span\nclass=\"math inline\">\\(0\\)</span>. Ainsi <span\nclass=\"math inline\">\\(u_n=u_m\\)</span> pour tous <span\nclass=\"math inline\">\\(n,m\\geq N\\)</span>. En particulier, <span\nclass=\"math display\">\\[\\boxed{\\forall n\\geq N,\\quad\nu_n=u_N}.\\]</span></p>"
+  },
+  {
+    "id": "4.15",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-15-1.webp",
+      "/assets/images/mat101/statements/exercice-4-15-2.webp"
+    ],
+    "solutionHtml": "<div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>La relation <span class=\"math inline\">\\(u_{n+1}=1+1/u_n\\)</span> doit\nêtre imposée dès <span class=\"math inline\">\\(n=0\\)</span> ; avec « <span\nclass=\"math inline\">\\(n\\in\\mathbb N^*\\)</span> », le terme <span\nclass=\"math inline\">\\(u_1\\)</span> n’est pas défini.</p>\n</div>\n</div>\n<ol>\n<li><p>Les racines de <span class=\"math inline\">\\(x^2-x-1=0\\)</span>\nsont <span class=\"math display\">\\[\\frac{1\\pm\\sqrt5}{2}.\\]</span> La\nracine positive est <span\nclass=\"math display\">\\[\\boxed{\\varphi=\\frac{1+\\sqrt5}{2}}.\\]</span></p></li>\n<li><p>L’identité <span\nclass=\"math inline\">\\(\\varphi^2=\\varphi+1\\)</span> et le fait que <span\nclass=\"math inline\">\\(\\varphi\\neq0\\)</span> donnent <span\nclass=\"math display\">\\[\\boxed{\\varphi=1+\\frac1\\varphi}.\\]</span></p></li>\n<li><p>On a <span class=\"math inline\">\\(u_0=2\\in[3/2,2]\\)</span>.\nSupposons <span class=\"math inline\">\\(3/2\\leq u_n\\leq2\\)</span>. Alors\n<span class=\"math display\">\\[\\frac12\\leq\\frac1{u_n}\\leq\\frac23,\\]</span>\ndonc <span class=\"math display\">\\[\\frac32\\leq\nu_{n+1}=1+\\frac1{u_n}\\leq\\frac53\\leq2.\\]</span> Par récurrence, <span\nclass=\"math display\">\\[\\boxed{\\frac32\\leq u_n\\leq2}.\\]</span></p></li>\n<li><p>En utilisant la question 2, <span\nclass=\"math display\">\\[\\begin{align*}\n  |u_{n+1}-\\varphi|\n  &amp;=\\left|\\frac1{u_n}-\\frac1\\varphi\\right|\\\\\n  &amp;=\\frac{|u_n-\\varphi|}{u_n\\varphi}.\n\\end{align*}\\]</span> Or <span class=\"math inline\">\\(u_n\\geq3/2\\)</span>\net <span class=\"math inline\">\\(\\varphi&gt;3/2\\)</span>, donc <span\nclass=\"math inline\">\\(u_n\\varphi\\geq9/4\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{|u_{n+1}-\\varphi|\\leq\\frac49|u_n-\\varphi|}.\\]</span></p></li>\n<li><p>Par itération, <span\nclass=\"math display\">\\[|u_n-\\varphi|\\leq\\left(\\frac49\\right)^n|u_0-\\varphi|.\\]</span>\nComme <span class=\"math inline\">\\(|2-\\varphi|&lt;1\\)</span>, <span\nclass=\"math display\">\\[\\boxed{|u_n-\\varphi|\\leq\\left(\\frac49\\right)^n}.\\]</span></p></li>\n<li><p>Le membre de droite tend vers <span\nclass=\"math inline\">\\(0\\)</span>, donc <span\nclass=\"math inline\">\\(|u_n-\\varphi|\\to0\\)</span>. Par définition, <span\nclass=\"math display\">\\[\\boxed{u_n\\longrightarrow\\varphi}.\\]</span></p></li>\n<li><p>Il suffit d’imposer <span\nclass=\"math display\">\\[\\left(\\frac49\\right)^n\\leq10^{-6}.\\]</span> Or\n<span class=\"math display\">\\[\\left(\\frac49\\right)^{17}&gt;10^{-6},\n  \\qquad\n  \\left(\\frac49\\right)^{18}&lt;10^{-6}.\\]</span> Le choix <span\nclass=\"math inline\">\\(\\boxed{n=18}\\)</span> convient.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.16",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-16-1.webp"
+    ],
+    "solutionHtml": "<p>Posons <span class=\"math inline\">\\(r=\\sqrt a\\)</span> et <span\nclass=\"math inline\">\\(e_n=u_n-r\\)</span>. On a <span\nclass=\"math inline\">\\(u_0=\\lfloor r\\rfloor+1&gt;r\\)</span>.</p>\n<ol>\n<li><p>Supposons <span class=\"math inline\">\\(u_n&gt;r\\)</span>. Alors\n<span class=\"math display\">\\[u_{n+1}-r\n  =\\frac{u_n+a/u_n-2r}{2}\n  =\\frac{(u_n-r)^2}{2u_n}&gt;0.\\]</span> Donc <span\nclass=\"math inline\">\\(u_{n+1}&gt;r\\)</span>. De plus, <span\nclass=\"math display\">\\[u_n-u_{n+1}\n  =\\frac{u_n-a/u_n}{2}\n  =\\frac{u_n^2-a}{2u_n}&gt;0.\\]</span> Par récurrence, <span\nclass=\"math inline\">\\(u_n&gt;r\\)</span> pour tout <span\nclass=\"math inline\">\\(n\\)</span> et la suite est strictement\ndécroissante.</p></li>\n<li><p>La formule précédente donne exactement <span\nclass=\"math display\">\\[|u_{n+1}-r|=\\frac{|u_n-r|^2}{2u_n}.\\]</span>\nComme <span class=\"math inline\">\\(u_n&gt;r&gt;0\\)</span>, <span\nclass=\"math display\">\\[\\boxed{|u_{n+1}-r|\\leq\\frac{|u_n-r|^2}{2r}}.\\]</span></p></li>\n<li><p>On a <span class=\"math inline\">\\(0&lt;e_0\\leq1\\)</span> et <span\nclass=\"math inline\">\\(r&gt;1\\)</span>. Par la question 2, <span\nclass=\"math display\">\\[0&lt;e_{n+1}\\leq\\frac{e_n^2}{2r}\\leq\\frac{e_n}{2},\\]</span>\ncar <span class=\"math inline\">\\(e_n\\leq1\\)</span>. Ainsi <span\nclass=\"math inline\">\\(e_n\\leq e_0/2^n\\to0\\)</span>, ce qui donne <span\nclass=\"math display\">\\[\\boxed{u_n\\longrightarrow\\sqrt\na}.\\]</span></p></li>\n<li><p>On peut exploiter la convergence quadratique. Puisque <span\nclass=\"math inline\">\\(r&gt;1\\)</span> et <span\nclass=\"math inline\">\\(e_0\\leq1\\)</span>, <span\nclass=\"math display\">\\[e_{n+1}\\leq\\frac{e_n^2}{2}.\\]</span> Une\nrécurrence donne <span\nclass=\"math display\">\\[e_n\\leq2^{-(2^n-1)}.\\]</span> En effet, le carré\ndu majorant au rang <span class=\"math inline\">\\(n\\)</span>, puis la\ndivision par <span class=\"math inline\">\\(2\\)</span>, donnent le majorant\nau rang <span class=\"math inline\">\\(n+1\\)</span>. Pour <span\nclass=\"math inline\">\\(n=5\\)</span>, <span\nclass=\"math display\">\\[e_5\\leq2^{-31}&lt;10^{-6}.\\]</span> Ainsi le\nchoix universel <span class=\"math inline\">\\(\\boxed{n=5}\\)</span>\nconvient.</p></li>\n</ol>"
+  },
+  {
+    "id": "4.17",
+    "chapterId": "limites",
+    "chapterNumber": "4",
+    "chapterTitle": "Limites de suites",
+    "statementImages": [
+      "/assets/images/mat101/statements/exercice-4-17-1.webp"
+    ],
+    "solutionHtml": "<div class=\"center\">\n<div class=\"minipage\">\n<p><strong>Remarque sur l’énoncé.</strong></p>\n<p>La parité doit porter sur la valeur <span\nclass=\"math inline\">\\(u_n\\)</span>, et non sur l’indice <span\nclass=\"math inline\">\\(n\\)</span>, comme le confirme la remarque sur le\nproblème de Syracuse. Avec la formule imprimée, l’assertion est fausse :\npour <span class=\"math inline\">\\(u_0=3\\)</span>, on obtient <span\nclass=\"math inline\">\\(u_{2k}=2+2^{-k}\\)</span>, qui n’est jamais égal à\n<span class=\"math inline\">\\(1\\)</span>.</p>\n</div>\n</div>\n<p>On résout donc la version attendue : <span\nclass=\"math display\">\\[u_{n+1}=\n\\begin{cases}\nu_n+1,&amp;u_n\\text{ impair},\\\\\nu_n/2,&amp;u_n\\text{ pair}.\n\\end{cases}\\]</span></p>\n<ol>\n<li><p>La suite n’est en général ni croissante ni décroissante. À partir\nde <span class=\"math inline\">\\(u_0=3\\)</span>, on obtient <span\nclass=\"math inline\">\\(3,4,2,1,2,1,\\ldots\\)</span> : il y a des\naugmentations et des diminutions.</p></li>\n<li><p>On raisonne par récurrence forte sur la valeur initiale <span\nclass=\"math inline\">\\(m=u_0\\in\\mathbb N^*\\)</span>.</p>\n<ul>\n<li><p>Pour <span class=\"math inline\">\\(m=1\\)</span>, la propriété est\ndéjà vraie au rang <span class=\"math inline\">\\(0\\)</span>.</p></li>\n<li><p>Supposons la propriété vraie pour toutes les valeurs initiales\nstrictement inférieures à <span class=\"math inline\">\\(m&gt;1\\)</span>.\nSi <span class=\"math inline\">\\(m\\)</span> est pair, le terme suivant\nvaut <span class=\"math inline\">\\(m/2&lt;m\\)</span> ; l’hypothèse de\nrécurrence s’applique. Si <span class=\"math inline\">\\(m\\)</span> est\nimpair, alors <span class=\"math inline\">\\(m+1\\)</span> est pair et,\naprès deux étapes, <span\nclass=\"math display\">\\[u_2=\\frac{m+1}{2}&lt;m.\\]</span> L’hypothèse de\nrécurrence s’applique encore.</p></li>\n</ul>\n<p>Dans tous les cas, la trajectoire atteint finalement <span\nclass=\"math inline\">\\(1\\)</span>. Ainsi <span\nclass=\"math display\">\\[\\boxed{\\forall u_0\\in\\mathbb N^*,\\ \\exists\nN\\in\\mathbb N,\\ u_N=1}.\\]</span></p></li>\n</ol>"
+  }
+]

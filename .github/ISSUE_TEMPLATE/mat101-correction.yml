@@ -1,0 +1,64 @@
+name: Correction ou amélioration MAT101
+description: Signaler précisément une erreur ou proposer une amélioration d’un énoncé ou d’un corrigé.
+title: "[MAT101] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de contribuer à la relecture. Une proposition vérifiable et limitée à un exercice peut être examinée, attribuée et intégrée plus facilement.
+
+  - type: input
+    id: exercise
+    attributes:
+      label: Exercice concerné
+      description: Indiquez le numéro exact affiché dans la bibliothèque.
+      placeholder: "Par exemple : 3.12"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Nature de la remarque
+      options:
+        - Erreur mathématique dans le corrigé
+        - Énoncé ambigu ou incohérent
+        - Étape insuffisamment justifiée
+        - Coquille, notation ou mise en page
+        - Solution alternative
+        - Crédit, citation ou attribution
+    validations:
+      required: true
+
+  - type: textarea
+    id: passage
+    attributes:
+      label: Passage exact
+      description: Recopiez seulement le court passage concerné ou décrivez précisément son emplacement.
+      placeholder: "Dans la deuxième implication, juste après…"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Analyse et correction proposée
+      description: Expliquez le problème, puis donnez une correction argumentée. Les formules LaTeX entre $…$ sont acceptées.
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Références utiles
+      description: Ajoutez, si nécessaire, un théorème, un calcul reproductible ou un lien vers une source fiable.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications
+      options:
+        - label: J’ai vérifié que ma remarque concerne bien la version actuellement publiée.
+          required: true
+        - label: Cette contribution ne contient aucune donnée personnelle ou confidentielle.
+          required: true

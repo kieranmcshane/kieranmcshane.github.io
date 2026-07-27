@@ -1,0 +1,312 @@
+#!/usr/bin/env python3
+"""Build the site-native MAT101 exercise and solution data.
+
+The statement images are lossless crops of the credited source PDF, preserving
+the mathematical typography exactly. The solution HTML is generated from the
+credited standalone LaTeX correction with Pandoc and remains MathJax-ready.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import shutil
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ET
+from collections import defaultdict
+from pathlib import Path
+
+from PIL import Image, ImageChops
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE_PDF = ROOT / "assets/documents/mat101/mat_101_20220913.pdf"
+SOLUTION_TEX = ROOT / "assets/documents/mat101/corrige-exercices-mat101.tex"
+EXERCISE_DATA = ROOT / "_data/mat101_exercises.json"
+OUTPUT_DATA = ROOT / "_data/mat101_native.json"
+OUTPUT_IMAGES = ROOT / "assets/images/mat101/statements"
+
+CHAPTER_SOURCE_STARTS = {
+    "complexes": 30,
+    "ensembles": 61,
+    "fonctions": 93,
+    "limites": 116,
+}
+
+HEADING_ID = re.compile(r"^([1-4]\.\d+)\.$")
+SOLUTION_HEADING = re.compile(
+    r'<h2 class="unnumbered" id="exercice-([1-4]\.\d+)">.*?</h2>\s*'
+    r"(.*?)(?=<h[12]\b|\Z)",
+    re.DOTALL,
+)
+
+
+def run(*args: str, cwd: Path | None = None) -> None:
+    subprocess.run(args, cwd=cwd, check=True)
+
+
+def page_plan() -> list[tuple[int, list[str]]]:
+    chapters = json.loads(EXERCISE_DATA.read_text())
+    plan: list[tuple[int, list[str]]] = []
+    for chapter in chapters:
+        source_page = CHAPTER_SOURCE_STARTS[chapter["id"]]
+        for page in chapter["pages"]:
+            plan.append((source_page, page["exercises"]))
+            source_page += 1
+    return plan
+
+
+def render_page(source_page: int, work: Path) -> tuple[Path, Path]:
+    prefix = work / f"page-{source_page}"
+    run(
+        "pdftoppm",
+        "-f",
+        str(source_page),
+        "-l",
+        str(source_page),
+        "-r",
+        "144",
+        "-png",
+        "-singlefile",
+        str(SOURCE_PDF),
+        str(prefix),
+    )
+    xml_base = work / f"page-{source_page}.xml"
+    run(
+        "pdftohtml",
+        "-f",
+        str(source_page),
+        "-l",
+        str(source_page),
+        "-xml",
+        "-hidden",
+        "-nodrm",
+        str(SOURCE_PDF),
+        str(xml_base),
+    )
+    xml_path = xml_base if xml_base.exists() else xml_base.with_suffix(".xml.xml")
+    return prefix.with_suffix(".png"), xml_path
+
+
+def heading_markers(xml_path: Path, expected: set[str]) -> tuple[int, int, list[tuple[str, int]]]:
+    page = ET.parse(xml_path).getroot().find("page")
+    if page is None:
+        raise RuntimeError(f"No page node in {xml_path}")
+    width = int(page.attrib["width"])
+    height = int(page.attrib["height"])
+    text_nodes = list(page.findall("text"))
+    markers: list[tuple[str, int]] = []
+    for node in text_nodes:
+        match = HEADING_ID.match("".join(node.itertext()).strip())
+        if not match or match.group(1) not in expected:
+            continue
+        top = int(node.attrib["top"])
+        same_line = [
+            "".join(candidate.itertext()).strip().lower()
+            for candidate in text_nodes
+            if abs(int(candidate.attrib["top"]) - top) <= 2
+        ]
+        if any(label.startswith("exer") for label in same_line):
+            markers.append((match.group(1), top))
+    return width, height, sorted(set(markers), key=lambda marker: marker[1])
+
+
+def trim_white(image: Image.Image, padding: int = 16) -> Image.Image:
+    background = Image.new(image.mode, image.size, "white")
+    difference = ImageChops.difference(image, background).convert("L")
+    bounds = difference.point(lambda value: 255 if value > 12 else 0).getbbox()
+    if not bounds:
+        return image
+    left, top, right, bottom = bounds
+    return image.crop(
+        (
+            max(0, left - padding),
+            max(0, top - padding),
+            min(image.width, right + padding),
+            min(image.height, bottom + padding),
+        )
+    )
+
+
+def save_segment(
+    page_image: Image.Image,
+    xml_width: int,
+    xml_height: int,
+    top: int,
+    bottom: int,
+    exercise_id: str,
+    segment_number: int,
+) -> str:
+    scale_x = page_image.width / xml_width
+    scale_y = page_image.height / xml_height
+    left = int(96 * scale_x)
+    right = int((xml_width - 96) * scale_x)
+    crop = page_image.crop(
+        (
+            left,
+            max(0, int(top * scale_y)),
+            right,
+            min(page_image.height, int(bottom * scale_y)),
+        )
+    )
+    crop = trim_white(crop)
+    filename = f"exercice-{exercise_id.replace('.', '-')}-{segment_number}.webp"
+    output = OUTPUT_IMAGES / filename
+    crop.save(output, "WEBP", lossless=True, method=6)
+    return f"/assets/images/mat101/statements/{filename}"
+
+
+def build_statement_images() -> dict[str, list[str]]:
+    chapters = json.loads(EXERCISE_DATA.read_text())
+    all_ids = [
+        exercise
+        for chapter in chapters
+        for page in chapter["pages"]
+        for exercise in page["exercises"]
+    ]
+    expected = set(all_ids)
+    images: dict[str, list[str]] = defaultdict(list)
+    segment_counts: dict[str, int] = defaultdict(int)
+    previous_exercise: str | None = None
+    previous_source_page: int | None = None
+
+    if OUTPUT_IMAGES.exists():
+        shutil.rmtree(OUTPUT_IMAGES)
+    OUTPUT_IMAGES.mkdir(parents=True)
+
+    with tempfile.TemporaryDirectory(prefix="mat101-native-") as directory:
+        work = Path(directory)
+        for source_page, declared_ids in page_plan():
+            if (
+                previous_source_page is not None
+                and source_page != previous_source_page + 1
+            ):
+                previous_exercise = None
+            previous_source_page = source_page
+
+            png_path, xml_path = render_page(source_page, work)
+            xml_width, xml_height, markers = heading_markers(xml_path, expected)
+            found_ids = [exercise_id for exercise_id, _ in markers]
+            if found_ids != declared_ids:
+                raise RuntimeError(
+                    f"Page {source_page}: headings {found_ids} != declared {declared_ids}"
+                )
+
+            with Image.open(png_path).convert("RGB") as page_image:
+                # Continuation pages begin just below the running header.  Keep
+                # this deliberately above the first body line: whitespace is
+                # trimmed later, while cutting too low can lose a question.
+                body_top = 230
+                # Stop above the printed page number while retaining footnotes.
+                body_bottom = xml_height - 200
+
+                if not markers:
+                    if previous_exercise is None:
+                        raise RuntimeError(f"Unassigned continuation on page {source_page}")
+                    segment_counts[previous_exercise] += 1
+                    images[previous_exercise].append(
+                        save_segment(
+                            page_image,
+                            xml_width,
+                            xml_height,
+                            body_top,
+                            body_bottom,
+                            previous_exercise,
+                            segment_counts[previous_exercise],
+                        )
+                    )
+                    continue
+
+                first_top = markers[0][1]
+                if previous_exercise is not None and first_top > body_top + 70:
+                    segment_counts[previous_exercise] += 1
+                    images[previous_exercise].append(
+                        save_segment(
+                            page_image,
+                            xml_width,
+                            xml_height,
+                            body_top,
+                            first_top - 12,
+                            previous_exercise,
+                            segment_counts[previous_exercise],
+                        )
+                    )
+
+                for index, (exercise_id, marker_top) in enumerate(markers):
+                    next_top = (
+                        markers[index + 1][1] - 12
+                        if index + 1 < len(markers)
+                        else body_bottom
+                    )
+                    segment_counts[exercise_id] += 1
+                    images[exercise_id].append(
+                        save_segment(
+                            page_image,
+                            xml_width,
+                            xml_height,
+                            marker_top - 12,
+                            next_top,
+                            exercise_id,
+                            segment_counts[exercise_id],
+                        )
+                    )
+                    previous_exercise = exercise_id
+
+    missing = [exercise_id for exercise_id in all_ids if not images[exercise_id]]
+    if missing:
+        raise RuntimeError(f"Exercises without statement images: {missing}")
+    return images
+
+
+def build_solution_html() -> dict[str, str]:
+    with tempfile.TemporaryDirectory(prefix="mat101-pandoc-") as directory:
+        html_path = Path(directory) / "solutions.html"
+        run(
+            "pandoc",
+            str(SOLUTION_TEX),
+            "--from=latex",
+            "--to=html5",
+            "--mathjax",
+            "--output",
+            str(html_path),
+        )
+        html = html_path.read_text()
+    solutions = {
+        match.group(1): match.group(2).strip()
+        for match in SOLUTION_HEADING.finditer(html)
+    }
+    if len(solutions) != 103:
+        raise RuntimeError(f"Expected 103 solution blocks, found {len(solutions)}")
+    return solutions
+
+
+def main() -> None:
+    chapters = json.loads(EXERCISE_DATA.read_text())
+    statements = build_statement_images()
+    solutions = build_solution_html()
+    records = []
+    for chapter in chapters:
+        for page in chapter["pages"]:
+            for exercise_id in page["exercises"]:
+                records.append(
+                    {
+                        "id": exercise_id,
+                        "chapterId": chapter["id"],
+                        "chapterNumber": chapter["number"],
+                        "chapterTitle": chapter["title"],
+                        "statementImages": statements[exercise_id],
+                        "solutionHtml": solutions[exercise_id],
+                    }
+                )
+    OUTPUT_DATA.write_text(
+        json.dumps(records, ensure_ascii=False, indent=2) + "\n"
+    )
+    print(
+        f"Built {len(records)} native exercises, "
+        f"{sum(len(record['statementImages']) for record in records)} statement images"
+    )
+
+
+if __name__ == "__main__":
+    main()
