@@ -10,6 +10,96 @@
   --soft: #f3f6ff;
 }
 
+/* About and contact */
+.contact-section {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #d8dee4;
+}
+
+.contact-kicker {
+  margin-bottom: 0.35rem;
+  color: #0d7580;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contact-section h2 {
+  margin-top: 0;
+}
+
+.contact-routes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.contact-routes article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.25rem;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.contact-route-label {
+  color: #0d7580;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.contact-routes h3 {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.contact-routes p {
+  flex: 1;
+  margin-bottom: 1rem;
+  color: #4e5965;
+  font-size: 0.9rem;
+}
+
+.contact-routes a {
+  display: inline-flex;
+  min-height: 44px;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  color: #fff;
+  background: #0d7580;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-routes a:hover,
+.contact-routes a:focus-visible {
+  color: #fff;
+  background: #095b63;
+  text-decoration: none;
+}
+
+.contact-account {
+  color: #5b6570;
+  font-size: 0.86rem;
+}
+
+@media screen and (max-width: 640px) {
+  .contact-routes {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Rating Lab mobile market-pattern pass */
 .rating-lab-filter-trigger,
 .rating-lab-mobile-row-expansion,
