@@ -6,9 +6,12 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 DATA = json.loads((ROOT / "_data/mat101_exercises.json").read_text())
 SOLUTIONS = json.loads((ROOT / "_data/mat101_solutions.json").read_text())
+NATIVE = json.loads((ROOT / "_data/mat101_native.json").read_text())
 PAGE = (ROOT / "mat101-exercises.md").read_text()
 CONFIG = (ROOT / "_config.yml").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
+SCRIPT = (ROOT / "assets/js/mat101-library.js").read_text()
+ISSUE_FORM = (ROOT / ".github/ISSUE_TEMPLATE/mat101-correction.yml").read_text()
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
 ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
@@ -61,6 +64,27 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertGreaterEqual(min(solution["pdfPage"] for solution in SOLUTIONS), 6)
         self.assertLessEqual(max(solution["pdfPage"] for solution in SOLUTIONS), 57)
 
+    def test_every_exercise_has_native_statement_and_solution(self):
+        expected_ids = [
+            exercise
+            for chapter in DATA
+            for page in chapter["pages"]
+            for exercise in page["exercises"]
+        ]
+        native_ids = [exercise["id"] for exercise in NATIVE]
+        self.assertEqual(native_ids, expected_ids)
+        self.assertEqual(len(NATIVE), 103)
+        self.assertEqual(sum(len(item["statementImages"]) for item in NATIVE), 122)
+
+        for item in NATIVE:
+            self.assertGreater(len(item["solutionHtml"]), 100)
+            self.assertNotIn("TODO", item["solutionHtml"])
+            self.assertTrue(item["statementImages"])
+            for image_url in item["statementImages"]:
+                image = ROOT / image_url.lstrip("/")
+                self.assertTrue(image.exists(), image)
+                self.assertGreater(image.stat().st_size, 1_000)
+
     def test_downloadable_artifacts_are_present(self):
         self.assertTrue(PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(PDF.stat().st_size, 500_000)
@@ -73,15 +97,19 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_section_is_visible_and_explains_solution_status(self):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
-        self.assertIn("103 exercices, 103 corrigés détaillés", PAGE)
+        self.assertIn("math: true", PAGE)
+        self.assertIn("103 exercices à travailler ici", PAGE)
         self.assertIn("Couverture complète", PAGE)
         self.assertIn("aucune relecture mathématique humaine intégrale", PAGE)
-        self.assertIn("Voir la solution", PAGE)
+        self.assertIn("Afficher le corrigé détaillé", PAGE)
+        self.assertIn("exercise.statementImages", PAGE)
+        self.assertIn("exercise.solutionHtml", PAGE)
+        self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
         self.assertIn("mat101-exercises.md", CONFIG)
 
     def test_credits_distinguish_original_adaptation_and_solution(self):
         self.assertIn("Énoncés originaux", PAGE)
-        self.assertIn("Recueil et interface", PAGE)
+        self.assertIn("Adaptation web et interface", PAGE)
         self.assertIn("Rédaction du corrigé", PAGE)
         self.assertIn("Raphaël Rossignol est indiqué comme responsable", PAGE)
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", PAGE)
@@ -117,11 +145,26 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn(r"\definecolor{UGAblue}", tex)
 
     def test_mobile_layout_keeps_exercises_accessible(self):
-        self.assertIn(".mat101-exercise-grid", STYLES)
-        self.assertIn(".mat101-solution-reveal", STYLES)
+        self.assertIn(".mat101-native-list", STYLES)
+        self.assertIn(".mat101-native-solution", STYLES)
+        self.assertIn(".mat101-statement img", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
         self.assertIn("min-height: 44px", STYLES)
+
+    def test_search_and_hash_navigation_are_progressive_enhancements(self):
+        self.assertIn("mat101-search-input", PAGE)
+        self.assertIn("data-mat101-exercise", PAGE)
+        self.assertIn("normalize('NFD')", SCRIPT)
+        self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
+        self.assertIn("mat101-library.js", (ROOT / "_includes/head-custom.html").read_text())
+
+    def test_correction_ticket_collects_verifiable_evidence(self):
+        self.assertIn("Exercice concerné", ISSUE_FORM)
+        self.assertIn("Passage exact", ISSUE_FORM)
+        self.assertIn("Analyse et correction proposée", ISSUE_FORM)
+        self.assertIn("Crédit, citation ou attribution", ISSUE_FORM)
+        self.assertIn("mat101-correction.yml", PAGE)
 
 
 if __name__ == "__main__":
