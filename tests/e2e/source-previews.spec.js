@@ -17,6 +17,7 @@ test.describe("primary-source facsimiles", () => {
 
     for (let index = 0; index < 5; index += 1) {
       const preview = previews.nth(index);
+      await preview.scrollIntoViewIfNeeded();
       const link = preview.locator(".source-facsimile-link");
       await expect(link).toHaveAttribute("href", /^https:\/\//);
       await expect(link).toHaveAttribute("target", "_blank");
