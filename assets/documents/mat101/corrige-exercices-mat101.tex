@@ -1,0 +1,3069 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=2.25cm,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{enumitem}
+\usepackage{array,booktabs,longtable}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{MATblue}{HTML}{244A72}
+\definecolor{MATred}{HTML}{9D2A2E}
+\definecolor{MATgrey}{HTML}{F3F5F7}
+
+\hypersetup{
+  pdftitle={Corrigé détaillé des exercices - UE MAT101},
+  pdfauthor={Kieran McShane, avec l'assistance d'OpenAI ChatGPT et Codex},
+  pdfsubject={Solutions rigoureuses de niveau L1},
+  pdfkeywords={MAT101, corrigé, L1, nombres complexes, ensembles, fonctions, dénombrement, limites}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Corrigé MAT101}
+\fancyhead[R]{\small \nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlist[enumerate]{itemsep=0.35em,topsep=0.35em}
+\setlist[itemize]{itemsep=0.25em,topsep=0.3em}
+\allowdisplaybreaks
+
+\newcommand{\C}{\mathbb C}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\N}{\mathbb N}
+\newcommand{\e}{\mathrm e}
+\newcommand{\ii}{\mathrm i}
+\newcommand{\card}{\operatorname{card}}
+\newcommand{\Arg}{\operatorname{Arg}}
+\newcommand{\Ree}{\operatorname{Re}}
+\newcommand{\Imm}{\operatorname{Im}}
+\newcommand{\1}{\mathbf 1}
+
+\newenvironment{corrige}[1]{%
+  \Needspace{5\baselineskip}%
+  \subsection*{Exercice #1}%
+  \addcontentsline{toc}{subsection}{Exercice #1}%
+}{\medskip}
+
+\newenvironment{coquille}{%
+  \begin{center}\begin{minipage}{0.94\linewidth}
+  \color{MATred}\textbf{Remarque sur l'énoncé.}\enspace
+}{%
+  \end{minipage}\end{center}
+}
+
+\newenvironment{methode}{%
+  \begin{center}\begin{minipage}{0.94\linewidth}
+  \color{MATblue}\textbf{Méthode.}\enspace
+}{%
+  \end{minipage}\end{center}
+}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+
+\begin{titlepage}
+  \centering
+  \vspace*{1.6cm}
+  {\Large Ressource pédagogique non officielle\par}
+  \vspace{0.8cm}
+  {\color{MATblue}\rule{0.86\textwidth}{1.2pt}\par}
+  \vspace{0.9cm}
+  {\Huge\bfseries Corrigé détaillé des exercices\par}
+  \vspace{0.35cm}
+  {\LARGE UE MAT101\par}
+  \vspace{0.65cm}
+  {\large Langage mathématique, algèbre et géométrie élémentaires\par}
+  \vspace{0.9cm}
+  {\color{MATblue}\rule{0.86\textwidth}{1.2pt}\par}
+  \vfill
+  \begin{tabular}{>{\bfseries}l r}
+    Nombres complexes & exercices 1.1--1.20 \\
+    Ensembles et langage mathématique & exercices 2.1--2.35 \\
+    Fonctions et dénombrement & exercices 3.1--3.31 \\
+    Limites de suites & exercices 4.1--4.17 \\
+    \midrule
+    Total & 103 exercices
+  \end{tabular}
+  \vfill
+  {\small D'après le polycopié collectif MAT101 de l'Université Grenoble Alpes (édition du 13 septembre 2022).\par}
+  {\small Rédaction initiale assistée par OpenAI ChatGPT ; édition, contrôle de structure et publication : Kieran McShane, avec OpenAI Codex.\par}
+  {\small\bfseries Statut : corrigé non officiel ; exhaustivité et correspondance vérifiées, contenu mathématique non relu intégralement.\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+\section*{Avant-propos}
+\addcontentsline{toc}{section}{Avant-propos}
+Ce document accompagne le recueil d'exercices extrait du polycopié MAT101 daté du 13 septembre 2022. Les solutions sont volontairement rédigées : les objets sont introduits, les équivalences sont justifiées et les vérifications finales sont données lorsque l'élévation au carré, une division ou un changement de variable peut créer une difficulté logique.
+
+\textbf{Crédits et statut.} Le contenu des énoncés provient du collectif MAT101 de l'Université Grenoble Alpes. Le polycopié cite notamment Bernard Ycart, Agnès Coquio, Éric Dumas, Emmanuel Peyre, Pierre Dehornoy et Raphaël Rossignol, et désigne ce dernier comme responsable de l'édition citée. La rédaction initiale de ce corrigé a été assistée par OpenAI ChatGPT ; Kieran McShane en assure l'édition et la publication avec l'assistance d'OpenAI Codex. Ce document n'est ni un corrigé officiel ni une publication de l'UGA. Sa structure et sa couverture des 103 exercices ont été contrôlées, mais ses solutions n'ont pas encore fait l'objet d'une relecture mathématique humaine intégrale.
+
+Le mot « argument » d'un nombre complexe est toujours compris modulo $2\pi$. Lorsqu'un argument principal est utile, il est choisi dans $]-\pi,\pi]$. Pour les suites contenant $1/n$, l'indice commence naturellement à $n=1$.
+
+Quelques énoncés du polycopié comportent une coquille manifeste. Plutôt que de la masquer, le corrigé donne d'abord le diagnostic exact, puis résout la version mathématiquement cohérente lorsque celle-ci est identifiable sans ambiguïté.
+
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\hypersetup{pageanchor=true}
+
+
+% ============================================================
+% Chapitre 1
+% ============================================================
+\section{Nombres complexes}
+\markboth{Nombres complexes}{Nombres complexes}
+
+\begin{corrige}{1.1}
+On utilise $\overline{x+\ii y}=x-\ii y$, la relation $\ii^2=-1$ et, pour les quotients, la multiplication par le conjugué du dénominateur.
+\begin{enumerate}
+  \item $1-2\ii-(-4+7\ii)=\boxed{5-9\ii}$.
+  \item $\overline{1+2\ii}+\overline{-4+6\ii}=(1-2\ii)+(-4-6\ii)=\boxed{-3-8\ii}$.
+  \item $(1+2\ii)(-4+6\ii)=-4+6\ii-8\ii+12\ii^2=\boxed{-16-2\ii}$.
+  \item $(2-3\ii)(-3+2\ii)=-6+4\ii+9\ii-6\ii^2=\boxed{13\ii}$.
+  \item $(a+\ii b)^2=\boxed{a^2-b^2+2ab\ii}$.
+  \item $(a-\ii b)^2=\boxed{a^2-b^2-2ab\ii}$.
+  \item $\ii^{50}=\ii^{48}\ii^2=(\ii^4)^{12}(-1)=\boxed{-1}$.
+  \item
+  \[
+  \overline{\frac{1+2\ii}{-4+6\ii}}
+  =\overline{\frac{(1+2\ii)(-4-6\ii)}{52}}
+  =\overline{\frac{8-14\ii}{52}}
+  =\boxed{\frac{2}{13}+\frac{7}{26}\ii}.
+  \]
+  \item
+  \[
+  \frac{3+6\ii}{3-4\ii}
+  =\frac{(3+6\ii)(3+4\ii)}{25}
+  =\boxed{-\frac35+\frac65\ii}.
+  \]
+  \item
+  \[
+  \frac{5+2\ii}{1-2\ii}
+  =\frac{(5+2\ii)(1+2\ii)}5
+  =\boxed{\frac15+\frac{12}{5}\ii}.
+  \]
+  \item Le dénominateur vaut $(1-2\ii)-(\ii-1)=2-3\ii$. Ainsi
+  \[
+  \frac{(5+2\ii)(1-\ii)}{2-3\ii}
+  =\frac{7-3\ii}{2-3\ii}
+  =\frac{(7-3\ii)(2+3\ii)}{13}
+  =\boxed{\frac{23}{13}+\frac{15}{13}\ii}.
+  \]
+  \item
+  \[
+  \frac{-2}{1-\ii\sqrt3}
+  =\frac{-2(1+\ii\sqrt3)}4
+  =\boxed{-\frac12-\frac{\sqrt3}{2}\ii}.
+  \]
+  \item
+  \[
+  \left(\frac{1+\ii}{2-\ii}\right)^2
+  =\left(\frac{1+3\ii}{5}\right)^2
+  =\frac{-8+6\ii}{25},
+  \qquad
+  \frac{3+6\ii}{3-4\ii}=-\frac35+\frac65\ii.
+  \]
+  Par addition,
+  \[
+  \boxed{-\frac{23}{25}+\frac{36}{25}\ii}.
+  \]
+  \item
+  \[
+  \frac{2+5\ii}{1-\ii}=\frac{-3+7\ii}{2},
+  \qquad
+  \frac{2-5\ii}{1+\ii}=\frac{-3-7\ii}{2},
+  \]
+  donc la somme vaut $\boxed{-3}$.
+  \item Comme
+  \[
+  \frac{1+\ii-\sqrt3(1-\ii)}{1+\ii}
+  =1-\sqrt3\frac{1-\ii}{1+\ii}=1+\sqrt3\ii,
+  \]
+  le carré demandé est
+  \[
+  (1+\sqrt3\ii)^2=\boxed{-2+2\sqrt3\ii}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.2}
+\begin{enumerate}
+  \item Puisque $\ii-3\neq0$,
+  \[
+  z=\frac2{\ii-3}=\frac{2(-3-\ii)}{10}
+  =\boxed{-\frac35-\frac15\ii}.
+  \]
+  \item L'équation donne $-\ii z=3-4\ii$, donc
+  \[
+  z=\ii(3-4\ii)=\boxed{4+3\ii}.
+  \]
+  \item Posons $z=x+\ii y$, avec $x,y\in\R$. Alors
+  \[
+  (1-\ii)z+\overline z=(2x+y)-\ii x.
+  \]
+  L'identification des parties réelle et imaginaire donne
+  \[
+  2x+y=4,
+  \qquad -x=-3.
+  \]
+  Ainsi $x=3$, $y=-2$, et $\boxed{z=3-2\ii}$.
+  \item On factorise directement :
+  \[
+  3\ii z+2z=(2+3\ii)z=6\ii.
+  \]
+  Comme $2+3\ii\neq0$,
+  \[
+  z=\frac{6\ii}{2+3\ii}
+   =\frac{6\ii(2-3\ii)}{(2+3\ii)(2-3\ii)}
+   =\boxed{\frac{18}{13}+\frac{12}{13}\ii}.
+  \]
+  \item Le dénominateur doit être non nul. En multipliant par celui-ci,
+  \[
+  2z+\ii=(2+3\ii)(1-3\ii z)=(2+3\ii)+(9-6\ii)z.
+  \]
+  Donc $(-7+6\ii)z=2+2\ii$, puis
+  \[
+  z=\frac{2+2\ii}{-7+6\ii}
+  =\boxed{-\frac2{85}-\frac{26}{85}\ii}.
+  \]
+  Pour cette valeur, $1-3\ii z\neq0$, donc aucune solution étrangère n'a été introduite.
+  \item Posons $w=\overline z$. Puisque
+  \[
+  \overline{2z+\ii}=2\overline z-\ii=2w-\ii,
+  \]
+  l'équation devient
+  \[
+  \frac{2w-\ii}{1-w}=2+\ii,
+  \qquad w\neq1.
+  \]
+  Après multiplication par $1-w$,
+  \[
+  2w-\ii=(2+\ii)(1-w),
+  \]
+  soit $(4+\ii)w=2+2\ii$. Ainsi
+  \[
+  w=\frac{2+2\ii}{4+\ii}
+   =\frac{(2+2\ii)(4-\ii)}{17}
+   =\frac{10+6\ii}{17}.
+  \]
+  On en déduit
+  \[
+  \boxed{z=\frac{10-6\ii}{17}}.
+  \]
+  Cette valeur vérifie $1-\overline z\neq0$, donc elle est bien admissible.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.3}
+Les arguments sont donnés modulo $2\pi$.
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.07\textwidth}p{0.42\textwidth}p{0.18\textwidth}p{0.22\textwidth}}
+\toprule
+& Nombre & Module & Un argument \\
+\midrule
+1. & $1+\ii=\sqrt2\,\e^{\ii\pi/4}$ & $\sqrt2$ & $\pi/4$ \\
+2. & $3+3\ii=3\sqrt2\,\e^{\ii\pi/4}$ & $3\sqrt2$ & $\pi/4$ \\
+3. & $1+\ii\sqrt3=2\e^{\ii\pi/3}$ & $2$ & $\pi/3$ \\
+4. & $-1+\ii\sqrt3=2\e^{2\ii\pi/3}$ & $2$ & $2\pi/3$ \\
+5. & $\sqrt3+\ii=2\e^{\ii\pi/6}$ & $2$ & $\pi/6$ \\
+6. & $-\frac43\ii$ & $4/3$ & $-\pi/2$ \\
+7. & $\dfrac{1+\ii}{1-\ii}=\ii$ & $1$ & $\pi/2$ \\
+8. & $\left(\dfrac{1+\ii}{1-\ii}\right)^3=\ii^3=-\ii$ & $1$ & $-\pi/2$ \\
+9. & $(1+\ii\sqrt3)^4=16\e^{4\ii\pi/3}$ & $16$ & $4\pi/3$ \\
+10. & $32\bigl(\e^{5\ii\pi/3}+\e^{-5\ii\pi/3}\bigr)=32$ & $32$ & $0$ \\
+11. & $\dfrac{2\e^{\ii\pi/3}}{2\e^{-\ii\pi/6}}=\ii$ & $1$ & $\pi/2$ \\
+12. & $\dfrac{2\sqrt2\,\e^{-\ii\pi/6}}{2\sqrt2\,\e^{-\ii\pi/4}}=\e^{\ii\pi/12}$ & $1$ & $\pi/12$ \\
+13. & $\e^{\e^{\ii\theta}}=\e^{\cos\theta}\e^{\ii\sin\theta}$ & $\e^{\cos\theta}$ & $\sin\theta$ \\
+\bottomrule
+\end{longtable}
+Dans la ligne 10, on a utilisé $1\pm\ii\sqrt3=2\e^{\pm\ii\pi/3}$.
+\end{corrige}
+
+\begin{corrige}{1.4}
+\begin{enumerate}
+  \item \textbf{Faux.} Le nombre $0$ n'a pas d'argument, et un réel négatif n'a pas $0$ pour argument.
+  \item \textbf{Vrai.} Si $x<0$, alors $x=|x|\e^{\ii\pi}$.
+  \item \textbf{Vrai.} Un imaginaire pur non nul est de la forme $\ii y$. Si $y>0$, $\pi/2$ est un argument ; si $y<0$, $3\pi/2$ en est un.
+  \item \textbf{Vrai.} Si $z=\ii y$, alors $\overline z=-\ii y=-z$.
+  \item \textbf{Faux.} Les nombres $1+\ii$ et $1+\ii$ ont le même argument, mais leur produit vaut $2\ii$, qui n'est pas réel.
+  \item \textbf{Vrai.} Pour $a,b\in\R$, $(\ii a)(\ii b)=-ab\in\R$.
+  \item \textbf{Vrai.} Si $z_1=r_1\e^{\ii\theta}$ et $z_2=r_2\e^{\ii\theta}$ avec $r_1,r_2>0$, alors $z_1/z_2=r_1/r_2\in\R_+^*$.
+  \item \textbf{Vrai.} $\left|z_1/z_2\right|=|z_1|/|z_2|=1$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.5}
+On écrit $z=r\e^{\ii\theta}$, avec $r>0$.
+\begin{enumerate}
+  \item \textbf{Vrai :} $|\overline z|=|z|=r$.
+  \item \textbf{Vrai modulo $2\pi$ :} $\overline z=r\e^{-\ii\theta}$.
+  \item \textbf{Vrai :} toute racine $n$-ième de l'unité $\omega$ vérifie $|\omega|=1$, donc $|z\omega|=|z|$.
+  \item \textbf{Faux :} un argument de $-z$ est $\theta+\pi$, et non en général $-\theta$. Par exemple, pour $z=1$, $0$ est un argument de $z$ tandis que $\pi$ est un argument de $-z$.
+  \item L'énoncé est \textbf{vrai pour l'argument principal} : si $\Imm z>0$, celui-ci appartient à $]0,\pi[$. Il est faux si l'on prétend que tous les arguments appartiennent à cet intervalle, puisqu'on peut toujours ajouter $2\pi$.
+  \item \textbf{Vrai modulo $2\pi$ :} $z^2=r^2\e^{2\ii\theta}$.
+  \item \textbf{Vrai modulo $2\pi$ :}
+  \[
+  \frac{z}{\overline z}=\e^{2\ii\theta},
+  \qquad z^2=r^2\e^{2\ii\theta}.
+  \]
+  Les deux nombres ont donc les mêmes arguments.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.6}
+\begin{enumerate}
+  \item On factorise par l'exponentielle correspondant à la moyenne des angles :
+  \begin{align*}
+  a+b
+  &=\rho\left(\e^{\ii\theta}+\e^{\ii\theta'}\right)\\
+  &=\rho\e^{\ii(\theta+\theta')/2}
+    \left(\e^{\ii(\theta-\theta')/2}+\e^{-\ii(\theta-\theta')/2}\right)\\
+  &=2\rho\cos\left(\frac{\theta-\theta'}2\right)
+    \e^{\ii(\theta+\theta')/2}.
+  \end{align*}
+
+  \item
+  \begin{enumerate}[label=(\alph*)]
+    \item Comme $1+\ii=\sqrt2\e^{\ii\pi/4}$ et $\ii\sqrt2=\sqrt2\e^{\ii\pi/2}$,
+    \[
+    1+\ii(1+\sqrt2)
+    =2\sqrt2\cos\left(\frac\pi8\right)\e^{3\ii\pi/8}.
+    \]
+    Le module est $\boxed{\sqrt{4+2\sqrt2}}$ et un argument est $\boxed{3\pi/8}$.
+
+    \item On écrit $(1+\sqrt2)-\ii=(1-\ii)+\sqrt2$. Les deux termes ont le module $\sqrt2$ et les arguments $-\pi/4$ et $0$. Ainsi le module est encore
+    $\boxed{\sqrt{4+2\sqrt2}}$ et un argument est $\boxed{-\pi/8}$.
+
+    \item
+    \[
+    \e^{\ii\theta}+\e^{2\ii\theta}
+    =2\cos\left(\frac\theta2\right)\e^{3\ii\theta/2}.
+    \]
+    Le module vaut
+    \[
+    \boxed{2\left|\cos\left(\frac\theta2\right)\right|}.
+    \]
+    Si $\cos(\theta/2)>0$, un argument est $3\theta/2$ ; s'il est négatif, un argument est $3\theta/2+\pi$. Si $\cos(\theta/2)=0$, le nombre est nul et n'a pas d'argument.
+
+    \item
+    \[
+    1+\cos\theta+\ii\sin\theta=1+\e^{\ii\theta}
+    =2\cos\left(\frac\theta2\right)\e^{\ii\theta/2}.
+    \]
+    Le module est $\boxed{2|\cos(\theta/2)|}$. Un argument est $\theta/2$ si le cosinus est positif, et $\theta/2+\pi$ s'il est négatif. Le nombre est nul lorsque $\theta\equiv\pi\pmod{2\pi}$.
+  \end{enumerate}
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.7}
+\begin{coquille}
+Dans la seconde équation, le symbole $b$ apparaît sans avoir été introduit. On résout donc cette question pour deux paramètres $a,b\in\C$.
+\end{coquille}
+\begin{enumerate}
+  \item L'équation est $(a-2)z=\ii-3$.
+  \begin{itemize}
+    \item Si $a\neq2$, elle admet l'unique solution
+    \[
+    \boxed{z=\frac{\ii-3}{a-2}}.
+    \]
+    \item Si $a=2$, elle devient $3=\ii$, ce qui est impossible : il n'y a aucune solution.
+  \end{itemize}
+
+  \item On factorise :
+  \[
+  az^2+bz=z(az+b).
+  \]
+  Ainsi $z=0$ est toujours solution. Plus précisément :
+  \begin{itemize}
+    \item si $a\neq0$ et $b\neq0$, les solutions sont $\boxed{0\text{ et }-b/a}$ ;
+    \item si $a\neq0$ et $b=0$, l'unique solution est $\boxed{0}$ ;
+    \item si $a=0$ et $b\neq0$, l'unique solution est encore $\boxed{0}$ ;
+    \item si $a=b=0$, tout $z\in\C$ est solution.
+  \end{itemize}
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.8}
+Chaque nombre non nul possède exactement deux racines carrées, opposées l'une de l'autre.
+\begin{enumerate}
+  \item $\boxed{\pm\ii}$.
+  \item $\boxed{\displaystyle \pm\frac{1+\ii}{\sqrt2}}$.
+  \item
+  \[
+  \boxed{\displaystyle
+  \pm\left(
+  \sqrt{\frac{\sqrt2+1}{2}}
+  +\ii\sqrt{\frac{\sqrt2-1}{2}}
+  \right)}.
+  \]
+  \item
+  \[
+  \boxed{\displaystyle
+  \pm\left(
+  \sqrt{\frac{\sqrt2-1}{2}}
+  -\ii\sqrt{\frac{\sqrt2+1}{2}}
+  \right)}.
+  \]
+  \item $1+\ii\sqrt3=2\e^{\ii\pi/3}$, donc
+  \[
+  \boxed{\displaystyle \pm\left(\frac{\sqrt6}{2}+\frac{\sqrt2}{2}\ii\right)}.
+  \]
+  \item $(2+\ii)^2=3+4\ii$, donc $\boxed{\pm(2+\ii)}$.
+  \item $(3-\ii)^2=8-6\ii$, donc $\boxed{\pm(3-\ii)}$.
+  \item $(4+3\ii)^2=7+24\ii$, donc $\boxed{\pm(4+3\ii)}$.
+  \item $(2-\ii)^2=3-4\ii$, donc $\boxed{\pm(2-\ii)}$.
+  \item $(5-\ii)^2=24-10\ii$, donc $\boxed{\pm(5-\ii)}$.
+\end{enumerate}
+Pour les questions 3 et 4, on peut retrouver les coefficients en posant $(x+\ii y)^2=a+\ii b$ et en utilisant
+$x^2-y^2=a$, $2xy=b$, $x^2+y^2=\sqrt{a^2+b^2}$.
+\end{corrige}
+
+\begin{corrige}{1.9}
+\begin{enumerate}
+  \item On a
+  \[
+  \frac{1+\ii}{\sqrt2}=\e^{\ii\pi/4}.
+  \]
+  Ses racines carrées sont $\pm\e^{\ii\pi/8}$. Sous forme algébrique,
+  \[
+  \boxed{\displaystyle
+  \pm\left(
+  \frac{\sqrt{2+\sqrt2}}2
+  +\ii\frac{\sqrt{2-\sqrt2}}2
+  \right)}.
+  \]
+  Comme $\pi/8\in(0,\pi/2)$,
+  \[
+  \boxed{\cos\frac\pi8=\frac{\sqrt{2+\sqrt2}}2},
+  \qquad
+  \boxed{\sin\frac\pi8=\frac{\sqrt{2-\sqrt2}}2}.
+  \]
+
+  \item De même,
+  \[
+  \frac{\sqrt3+\ii}{2}=\e^{\ii\pi/6}.
+  \]
+  Ses racines carrées sont $\pm\e^{\ii\pi/12}$, soit
+  \[
+  \boxed{\displaystyle
+  \pm\left(
+  \frac{\sqrt6+\sqrt2}{4}
+  +\ii\frac{\sqrt6-\sqrt2}{4}
+  \right)}.
+  \]
+  On en déduit
+  \[
+  \boxed{\cos\frac\pi{12}=\frac{\sqrt6+\sqrt2}{4}},
+  \qquad
+  \boxed{\sin\frac\pi{12}=\frac{\sqrt6-\sqrt2}{4}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.10}
+On calcule le discriminant dans $\C$ et l'on choisit l'une de ses racines carrées.
+\begin{enumerate}
+  \item $\Delta=-3=(\ii\sqrt3)^2$, donc
+  \[
+  \boxed{z=-\frac12\pm\frac{\sqrt3}{2}\ii}.
+  \]
+  \item $\Delta=-3$, donc
+  \[
+  \boxed{z=\frac12\pm\frac{\sqrt3}{2}\ii}.
+  \]
+  \item $\Delta=-12=(2\sqrt3\ii)^2$, donc
+  \[
+  \boxed{z=-1\pm\sqrt3\ii}.
+  \]
+  \item $\Delta=-4=(2\ii)^2$, donc $\boxed{z=-2\pm\ii}$.
+  \item $\Delta=-12=(2\sqrt3\ii)^2$, et $2a=8$, donc
+  \[
+  \boxed{z=\frac14\pm\frac{\sqrt3}{4}\ii}.
+  \]
+  \item $\Delta=(1+2\ii)^2-4(\ii-1)=1$, d'où
+  \[
+  \boxed{z=-\ii\quad\text{ou}\quad z=-1-\ii}.
+  \]
+  \item $\Delta=(3+4\ii)^2-4(-1+5\ii)=-3+4\ii=(1+2\ii)^2$. Ainsi
+  \[
+  \boxed{z=1+\ii\quad\text{ou}\quad z=2+3\ii}.
+  \]
+  \item $\Delta=(-1+\ii)^2+4\ii=2\ii=(1+\ii)^2$. Ainsi
+  \[
+  \boxed{z=1\quad\text{ou}\quad z=-\ii}.
+  \]
+  \item $\Delta=(11-5\ii)^2-4(24-27\ii)=-2\ii=(1-\ii)^2$. Ainsi
+  \[
+  \boxed{z=5-2\ii\quad\text{ou}\quad z=6-3\ii}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.11}
+\begin{enumerate}
+  \item Écrivons $P(X)=\sum_{k=0}^n a_kX^k$, avec $a_k\in\R$. Pour tout $w\in\C$,
+  \[
+  P(\overline w)=\sum_{k=0}^n a_k\overline w^{\,k}
+  =\overline{\sum_{k=0}^n a_kw^k}
+  =\overline{P(w)}.
+  \]
+  Si $P(z)=0$, alors $P(\overline z)=\overline0=0$. Ainsi $\overline z$ est aussi racine.
+
+  \item Écrivons $z=x+\ii y$, avec $y\neq0$. Les nombres $z$ et $\overline z$ sont les racines du polynôme
+  \[
+  (X-z)(X-\overline z)
+  =X^2-(z+\overline z)X+z\overline z
+  =X^2-2xX+(x^2+y^2).
+  \]
+  Il suffit donc de prendre
+  \[
+  \boxed{p=-2\Ree z},
+  \qquad
+  \boxed{q=|z|^2}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.12}
+La formule générale utilisée est
+\[
+z^n=\rho\e^{\ii\theta}
+\quad\Longleftrightarrow\quad
+z=\rho^{1/n}\e^{\ii(\theta+2k\pi)/n},
+\qquad k=0,\ldots,n-1.
+\]
+\begin{enumerate}
+  \item Les solutions de $z^3=\ii$ sont
+  \[
+  \boxed{\e^{\ii\pi/6},\quad \e^{5\ii\pi/6},\quad \e^{3\ii\pi/2}},
+  \]
+  c'est-à-dire $\sqrt3/2+\ii/2$, $-\sqrt3/2+\ii/2$ et $-\ii$.
+
+  \item Comme $(-1+\ii)/4=(\sqrt2/4)\e^{3\ii\pi/4}$ et $(\sqrt2/4)^{1/3}=1/\sqrt2$,
+  \[
+  \boxed{z=\frac1{\sqrt2}\e^{\ii(\pi/4+2k\pi/3)},\qquad k=0,1,2}.
+  \]
+
+  \item $2-2\ii=2\sqrt2\e^{-\ii\pi/4}$, donc
+  \[
+  \boxed{z=\sqrt2\,\e^{\ii(-\pi/12+2k\pi/3)},\qquad k=0,1,2}.
+  \]
+
+  \item $\boxed{z\in\{1,\ii,-1,-\ii\}}$.
+
+  \item Le second membre vaut $\e^{2\ii\pi/3}$. Les solutions sont
+  \[
+  \boxed{z=\e^{\ii(\pi/6+k\pi/2)},\qquad k=0,1,2,3}.
+  \]
+
+  \item Posons $w=(2z+1)/(z-1)$. On doit avoir $z\neq1$, puis $w^4=1$, donc
+  $w\in\{1,-1,\ii,-\ii\}$. La relation $w(z-1)=2z+1$ donne
+  \[
+  z=\frac{w+1}{w-2}.
+  \]
+  On obtient finalement
+  \[
+  \boxed{z\in\left\{-2,0,-\frac15-\frac35\ii,-\frac15+\frac35\ii\right\}}.
+  \]
+  Aucune de ces valeurs n'est égale à $1$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.13}
+Posons $c=\cos x$ et $s=\sin x$. Par la formule de Moivre,
+\[
+(c+\ii s)^4=\cos(4x)+\ii\sin(4x).
+\]
+Or
+\[
+(c+\ii s)^4=(c^4-6c^2s^2+s^4)+\ii(4c^3s-4cs^3).
+\]
+\begin{enumerate}
+  \item En utilisant $s^2=1-c^2$,
+  \[
+  c^4-6c^2s^2+s^4=8c^4-8c^2+1.
+  \]
+  Ainsi
+  \[
+  \boxed{\cos(4x)=8\cos^4x-8\cos^2x+1}.
+  \]
+  \item
+  \[
+  4c^3s-4cs^3=4cs(c^2-s^2)=8c^3s-4cs,
+  \]
+  donc
+  \[
+  \boxed{\sin(4x)=8\cos^3x\sin x-4\cos x\sin x}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.14}
+Les formules d'Euler, ou les formules produit-somme, donnent :
+\begin{align*}
+1.\quad \cos^3x&=\boxed{\frac{3\cos x+\cos3x}{4}},\\
+2.\quad \sin^3x&=\boxed{\frac{3\sin x-\sin3x}{4}},\\
+3.\quad \cos^4x&=\boxed{\frac38+\frac12\cos2x+\frac18\cos4x},\\
+4.\quad \sin^4x&=\boxed{\frac38-\frac12\cos2x+\frac18\cos4x},\\
+5.\quad \cos^2x\sin^2x&=\boxed{\frac18-\frac18\cos4x},\\
+6.\quad \cos x\sin^3x&=\boxed{\frac14\sin2x-\frac18\sin4x},\\
+7.\quad \cos^3x\sin x&=\boxed{\frac14\sin2x+\frac18\sin4x},\\
+8.\quad \cos^3x\sin^2x&=\boxed{\frac18\cos x-\frac1{16}\cos3x-\frac1{16}\cos5x},\\
+9.\quad \cos^2x\sin^3x&=\boxed{\frac18\sin x+\frac1{16}\sin3x-\frac1{16}\sin5x},\\
+10.\quad \cos x\sin^4x&=\boxed{\frac18\cos x-\frac3{16}\cos3x+\frac1{16}\cos5x}.
+\end{align*}
+Par exemple, la formule 6 s'obtient à partir de
+$\sin^3x=(3\sin x-\sin3x)/4$ puis de
+$\sin u\cos v=\bigl(\sin(u+v)+\sin(u-v)\bigr)/2$.
+\end{corrige}
+
+\begin{corrige}{1.15}
+\begin{enumerate}
+  \item Les vecteurs $\overrightarrow{OA}$ et $\overrightarrow{OB}$ ont pour coordonnées $(3,1)$ et $(1,2)$. Leur déterminant vaut
+  \[
+  \begin{vmatrix}3&1\\1&2\end{vmatrix}=6-1=5\neq0.
+  \]
+  Les points $O,A,B$ ne sont donc pas alignés.
+
+  \item Dans un parallélogramme $ABCD$ dont les sommets sont pris dans cet ordre,
+  \[
+  z_A+z_C=z_B+z_D.
+  \]
+  Ainsi
+  \[
+  z_D=z_A+z_C-z_B=(3+\ii)+(-1-\ii)-(1+2\ii)=\boxed{1-2\ii}.
+  \]
+
+  \item Le centre est le milieu de $[AC]$ :
+  \[
+  z_{\mathrm{centre}}=\frac{z_A+z_C}{2}
+  =\frac{(3+\ii)+(-1-\ii)}2=\boxed1.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.16}
+Notons $a,b,c,d$ les affixes de $A,B,C,D$. Alors
+\[
+i=\frac{a+b}{2},\quad j=\frac{b+c}{2},\quad
+k=\frac{c+d}{2},\quad \ell=\frac{d+a}{2},\quad
+m=\frac{a+c}{2},\quad n=\frac{b+d}{2}.
+\]
+\begin{enumerate}
+  \item Le milieu de $[IK]$ a pour affixe
+  \[
+  \frac{i+k}{2}=\frac{a+b+c+d}{4}.
+  \]
+  Le même calcul donne
+  \[
+  \frac{j+\ell}{2}=\frac{m+n}{2}=\frac{a+b+c+d}{4}.
+  \]
+  Les trois segments ont donc le même milieu.
+
+  \item Les diagonales $[IK]$ et $[JL]$ du quadrilatère $IJKL$ ont le même milieu. Un quadrilatère dont les diagonales se coupent en leur milieu est un parallélogramme. Ainsi $IJKL$ est un parallélogramme.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.17}
+On pose $j=\e^{2\ii\pi/3}$. On rappelle que $1+j+j^2=0$ et
+\[
+-j^2=\e^{\ii\pi/3},
+\qquad -j=\e^{-\ii\pi/3}.
+\]
+Supposons d'abord
+\[
+z_A+jz_B+j^2z_C=0.
+\]
+En soustrayant $z_A(1+j+j^2)=0$, on obtient
+\[
+j(z_B-z_A)+j^2(z_C-z_A)=0,
+\]
+donc
+\[
+z_C-z_A=-j^2(z_B-z_A)=\e^{\ii\pi/3}(z_B-z_A).
+\]
+Le vecteur $\overrightarrow{AC}$ est donc l'image de $\overrightarrow{AB}$ par une rotation d'angle $\pi/3$ : les deux vecteurs ont même norme et forment un angle de $\pi/3$. Le triangle est équilatéral.
+
+La seconde relation conduit de même à
+\[
+z_C-z_A=-j(z_B-z_A)=\e^{-\ii\pi/3}(z_B-z_A),
+\]
+qui correspond à l'autre orientation.
+
+Réciproquement, si $ABC$ est équilatéral et non dégénéré, alors
+\[
+z_C-z_A=\e^{\pm\ii\pi/3}(z_B-z_A).
+\]
+En remplaçant $\e^{\ii\pi/3}$ par $-j^2$ et $\e^{-\ii\pi/3}$ par $-j$, on retrouve l'une des deux relations annoncées.
+\end{corrige}
+
+\begin{corrige}{1.18}
+\begin{enumerate}
+  \item Les racines de $P(z)=z^5-1$ sont
+  \[
+  \boxed{z_k=\e^{2k\ii\pi/5},\qquad k=0,1,2,3,4}.
+  \]
+
+  \item L'identité de la somme géométrique donne
+  \[
+  (z-1)(z^4+z^3+z^2+z+1)=z^5-1.
+  \]
+  Les racines de $Q$ sont donc les racines cinquièmes de l'unité autres que $1$, soit
+  \[
+  \boxed{\e^{\pm2\ii\pi/5},\quad \e^{\pm4\ii\pi/5}}.
+  \]
+
+  \item Chacun de ces nombres a pour module $1$. Pour tout $z$ de module $1$,
+  \[
+  z^{-1}=\frac{\overline z}{|z|^2}=\overline z.
+  \]
+  L'inverse de $\e^{\ii\theta}$ est donc $\e^{-\ii\theta}$.
+
+  \item Si $Q(z)=0$, alors $z\neq0$ et, en divisant par $z^2$,
+  \[
+  z^2+z+1+z^{-1}+z^{-2}=0.
+  \]
+  Posons $y=z+z^{-1}$. Comme
+  \[
+  z^2+z^{-2}=y^2-2,
+  \]
+  on obtient
+  \[
+  y^2+y-1=0.
+  \]
+  Ainsi $y$ est racine de $R(Y)=Y^2+Y-1$.
+
+  \item Les racines de $R$ sont
+  \[
+  \boxed{y_1=\frac{-1+\sqrt5}{2}},
+  \qquad
+  \boxed{y_2=\frac{-1-\sqrt5}{2}}.
+  \]
+  Elles sont réelles et $y_1>0>y_2$.
+
+  \item Pour $z=\e^{2\ii\pi/5}$,
+  \[
+  z+z^{-1}=2\cos\frac{2\pi}{5}>0,
+  \]
+  donc cette quantité vaut $y_1$. De même,
+  $2\cos(4\pi/5)=y_2$. Par conséquent
+  \[
+  \boxed{\cos\frac{2\pi}{5}=\frac{-1+\sqrt5}{4}},
+  \qquad
+  \boxed{\cos\frac{4\pi}{5}=\frac{-1-\sqrt5}{4}}.
+  \]
+
+  \item À partir d'un segment unité, on construit un segment de longueur $2$, puis un triangle rectangle dont les côtés de l'angle droit mesurent $1$ et $2$. Son hypoténuse mesure $\sqrt{1^2+2^2}=\sqrt5$.
+
+  \item On soustrait une longueur $1$ à la longueur $\sqrt5$, puis on partage deux fois le segment obtenu en deux. On construit ainsi une longueur $(\sqrt5-1)/4=\cos(2\pi/5)$.
+
+  \item Sur l'axe des abscisses, on place le point d'abscisse $c=(\sqrt5-1)/4$. La verticale passant par ce point coupe le cercle unité dans le demi-plan supérieur au point
+  \[
+  \left(c,\sqrt{1-c^2}\right)=\left(\cos\frac{2\pi}{5},\sin\frac{2\pi}{5}\right).
+  \]
+  Toutes ces opérations sont réalisables à la règle et au compas.
+
+  \item On construit sur le cercle unité un premier sommet, puis le sommet obtenu par l'angle au centre $2\pi/5$. La longueur de la corde entre ces deux points est reportée successivement au compas sur le cercle : les cinq points obtenus sont les sommets d'un pentagone régulier.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.19}
+Posons
+\[
+\lambda=\e^{-\ii\pi/3}=\frac12-\frac{\sqrt3}{2}\ii.
+\]
+Comme le triangle $ABC$ est parcouru dans le sens trigonométrique, les triangles équilatéraux extérieurs se construisent en faisant tourner chacun des côtés orientés de l'angle $-\pi/3$.
+\begin{enumerate}
+  \item Pour le triangle $ABI$,
+  \[
+  \boxed{z_I=z_A+\lambda(z_B-z_A)}.
+  \]
+  Son centre, qui est aussi son centre de gravité, a pour affixe
+  \[
+  \boxed{z_P=\frac{z_A+z_B+z_I}{3}
+  =\frac{z_A+z_B}{2}-\frac{\sqrt3}{6}\ii(z_B-z_A)}.
+  \]
+
+  \item De même,
+  \begin{align*}
+  z_J&=z_B+\lambda(z_C-z_B),
+  &z_Q&=\frac{z_B+z_C}{2}-\frac{\sqrt3}{6}\ii(z_C-z_B),\\
+  z_K&=z_C+\lambda(z_A-z_C),
+  &z_R&=\frac{z_C+z_A}{2}-\frac{\sqrt3}{6}\ii(z_A-z_C).
+  \end{align*}
+
+  \item Un calcul direct à partir des expressions précédentes donne
+  \[
+  z_R-z_P=\e^{\ii\pi/3}(z_Q-z_P).
+  \]
+  En effet, les coefficients de $z_A,z_B,z_C$ coïncident après multiplication de $z_Q-z_P$ par $\e^{\ii\pi/3}$. Ainsi $\overrightarrow{PR}$ est l'image de $\overrightarrow{PQ}$ par une rotation de $\pi/3$. Les deux vecteurs ont même norme et forment un angle de $\pi/3$ ; le triangle $PQR$ est donc équilatéral.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{1.20}
+\begin{enumerate}
+  \item Par exemple,
+  \[
+  5=1^2+2^2\in G.
+  \]
+  En revanche $3\notin G$, car le carré d'un entier est congru à $0$ ou $1$ modulo $4$, et une somme de deux carrés ne peut donc pas être congrue à $3$ modulo $4$.
+
+  \item Soient
+  \[
+  p=m^2+n^2=|m+\ii n|^2,
+  \qquad
+  q=r^2+s^2=|r+\ii s|^2.
+  \]
+  Par multiplicativité du module,
+  \begin{align*}
+  pq&=|(m+\ii n)(r+\ii s)|^2\\
+    &=|(mr-ns)+\ii(ms+nr)|^2\\
+    &=(mr-ns)^2+(ms+nr)^2.
+  \end{align*}
+  Les deux nombres $mr-ns$ et $ms+nr$ sont entiers, donc $pq\in G$.
+
+  \item On a $13=2^2+3^2$ et $17=1^2+4^2$. Comme $221=13\times17$, la stabilité précédente donne $221\in G$. Plus explicitement,
+  \[
+  \boxed{221=14^2+5^2}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+
+% ============================================================
+% Chapitre 2
+% ============================================================
+\section{Ensembles et langage mathématique}
+\markboth{Ensembles et langage mathématique}{Ensembles et langage mathématique}
+
+\begin{corrige}{2.1}
+\begin{enumerate}
+  \item $\boxed{\{1,2,3,4,5,6\}}$.
+  \item $\boxed{\{1,2,3,4,5\}}$.
+  \item $\boxed{\{1,2,3,4\}}$.
+  \item $\boxed{\varnothing}$.
+  \item $\boxed{\{2,3\}}$.
+  \item $(\{1,2\}\cup\{1,3\})\cap\{3,4\}=\boxed{\{3\}}$.
+  \item $(\{1,2,3\}\cap\{2,3,4\})\cup\{5,6\}=\boxed{\{2,3,5,6\}}$.
+  \item $(\{1,2\}\cup\{3,4\})\cap\{2,4\}=\boxed{\{2,4\}}$.
+  \item L'union contient les objets $1,\{2\},2,3$. Parmi les objets $\{2\}$ et $\{3\}$, seul $\{2\}$ appartient à cette union. Le résultat est donc
+  \[
+  \boxed{\{\{2\}\}}.
+  \]
+  \item La première intersection vaut déjà $\{\{2\}\}$ ; la seconde ne la modifie pas. Le résultat est $\boxed{\{\{2\}\}}$.
+  \item Comme $\sqrt2\simeq1{,}414$ et $2\pi\simeq6{,}283$, les entiers concernés sont
+  \[
+  \boxed{\{2,3,4,5,6\}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.2}
+Avec $A=\{1,2,3\}$ et $B=\{-1,0,1\}$ :
+\begin{enumerate}
+  \item $A\cap B=\boxed{\{1\}}$.
+  \item $A\cup B=\boxed{\{-1,0,1,2,3\}}$.
+  \item $A\setminus B=\boxed{\{2,3\}}$.
+  \item $B\setminus A=\boxed{\{-1,0\}}$.
+  \item $\boxed{\{3,4,5\}}$.
+  \item $\boxed{\{-2,0,2\}}$.
+  \item $\boxed{\{1,\tfrac12,\tfrac13\}}$.
+  \item $\boxed{\{0,1,2,3,4\}}$.
+  \item $\boxed{\{2,3,4,5,6\}}$.
+  \item $\boxed{\{2,4,6\}}$.
+  \item $\boxed{\{-3,-2,-1,0,1,2,3\}}$.
+  \item $\boxed{\{2,3\}}$.
+  \item $\boxed{\varnothing}$.
+  \item $\boxed{A=\{1,2,3\}}$.
+  \item $\boxed{\{0,1,2,3\}}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.3}
+\begin{enumerate}
+  \item $[0,1]\cup[1,2]=\boxed{[0,2]}$.
+  \item $[0,1]\cap[1,2]=\boxed{\{1\}}$.
+  \item $[0,1]\cap\Z=\boxed{\{0,1\}}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.4}
+\begin{enumerate}
+  \item $\boxed{[2,6[}$.
+  \item $|x|<0{,}5\iff-0{,}5<x<0{,}5$, donc $\boxed{]-0{,}5,0{,}5[}$.
+  \item $|x-2|<0{,}1\iff1{,}9<x<2{,}1$, donc $\boxed{]1{,}9,2{,}1[}$.
+  \item $|x-5|\leq0{,}01$, donc $\boxed{[4{,}99,5{,}01]}$.
+  \item $|x-0{,}1|<0{,}2$, donc $\boxed{]-0{,}1,0{,}3[}$.
+  \item $x^2<3\iff|x|<\sqrt3$, donc $\boxed{]-\sqrt3,\sqrt3[}$.
+  \item $x^4\geq1\iff |x|\geq1$, donc
+  \[
+  \boxed{]-\infty,-1]\cup[1,+\infty[}.
+  \]
+  \item $x^2-x=x(x-1)\geq0$, donc
+  \[
+  \boxed{]-\infty,0]\cup[1,+\infty[}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.5}
+\begin{enumerate}
+  \item Par définition de la partie entière,
+  \[
+  \lfloor x\rfloor=3\iff3\leq x<4.
+  \]
+  Le résultat est $\boxed{[3,4[}$.
+
+  \item Les conditions $2\leq\lfloor x\rfloor\leq6$ équivalent à $2\leq x<7$. Le résultat est $\boxed{[2,7[}$.
+
+  \item On doit conserver la condition de rationalité :
+  \[
+  \boxed{\Q\cap[-3,3]}.
+  \]
+
+  \item Si $x\geq0$, l'égalité $|x|=\lfloor x\rfloor$ devient $x=\lfloor x\rfloor$, donc $x$ est un entier naturel. Si $x<0$, alors $|x|>0$ tandis que $\lfloor x\rfloor\leq-1$, ce qui est impossible. L'ensemble est donc $\boxed{\N}$.
+
+  \item Pour $i$ fixé,
+  \[
+  \bigcap_{j\in\{2,3\}}[i+j,i+2j]
+  =[i+2,i+4]\cap[i+3,i+6]=[i+3,i+4].
+  \]
+  Ainsi
+  \[
+  \bigcup_{i=1}^3[i+3,i+4]=[4,5]\cup[5,6]\cup[6,7]=\boxed{[4,7]}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.6}
+Notons les sept ensembles $E_1,\ldots,E_7$ dans l'ordre de l'énoncé. On a
+\[
+E_4=\{0,1\},\qquad E_5=]-1/5,1/5[,
+\qquad E_6=]0{,}1,0{,}3[.
+\]
+De plus,
+\[
+x^3-2x^2-x+2=(x-1)(x+1)(x-2),
+\]
+donc
+\[
+E_7=]-1,1[\ \cup\ ]2,+\infty[.
+\]
+Les inclusions non triviales sont alors :
+\[
+\boxed{E_6\subset E_3\subset E_1},
+\qquad
+\boxed{E_5\subset E_2\subset E_7},
+\qquad
+\boxed{E_3\subset E_2},
+\qquad
+\boxed{E_4\subset E_1}.
+\]
+On en déduit aussi, par transitivité, $E_6\subset E_1,E_2,E_7$ et $E_3\subset E_7$. Il n'y a pas d'autre inclusion entre deux ensembles distincts de la liste. Par exemple, $E_1\not\subset E_2$ car $1\notin E_2$, et $E_5\not\subset E_3$ car $E_5$ contient des nombres négatifs.
+\end{corrige}
+
+\begin{corrige}{2.7}
+\begin{enumerate}
+  \item \textbf{Oui.} Les répétitions et l'ordre ne comptent pas dans un ensemble.
+  \item \textbf{Non.} Le premier ensemble contient deux objets, $1$ et $(1,2)$ ; le second est le singleton dont l'élément est $(1,1)$.
+  \item \textbf{Non.} Les couples $(1,2)$ et $(2,1)$ sont distincts.
+  \item \textbf{Oui.} On a $\{1,2\}=\{2,1\}$.
+  \item \textbf{Non.} Le second ensemble contient aussi tous les entiers négatifs.
+  \item \textbf{Oui.} Dans $\N=\{0,1,2,\ldots\}$, les éléments inférieurs ou égaux à $3$ sont exactement $0,1,2,3$.
+  \item \textbf{Oui.} Les deux écritures décrivent les couples $(x,y)$ tels que $x\in\{1,2,3\}$ et $y\in\{0,1,2,3\}$.
+  \item \textbf{Oui.} La liste donnée énumère exactement les couples d'entiers naturels vérifiant $0\leq x<y\leq3$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.8}
+Les complémentaires sont pris dans $E$.
+\begin{enumerate}
+  \item Par distributivité,
+  \begin{align*}
+  &(A\cap B\cap C)\cup(A^c\cap B\cap C)\\
+  &\qquad=(A\cup A^c)\cap B\cap C=B\cap C.
+  \end{align*}
+  L'expression complète vaut donc
+  \[
+  (B\cap C)\cup B^c\cup C^c
+  =(B\cap C)\cup(B\cap C)^c
+  =\boxed E.
+  \]
+
+  \item Les trois ensembles s'écrivent tous
+  \[
+  \boxed{A\cap B^c\cap C^c}.
+  \]
+  En particulier, $B^c\cap C^c=(B\cup C)^c$ par une loi de De Morgan.
+
+  \item Oui. En intersectant d'abord avec $B^c$, le facteur $A\cup B$ impose $A$. Le facteur $A^c\cup C^c$ impose alors $C^c$. Mais, sous les conditions $A$, $B^c$ et $C^c$, le dernier facteur $A^c\cup B\cup C$ est faux. L'intersection vaut donc toujours
+  \[
+  \boxed{\varnothing}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.9}
+L'assertion $A$ signifie « toutes les cases valent $1$ », $B$ signifie « chaque ligne contient au moins un $1$ », $C$ signifie « une ligne entière est formée de $1$ », et $D$ signifie « le tableau contient au moins un $1$ ».
+\begin{center}
+\begin{tabular}{c@{\qquad}c}
+\toprule
+Tableau & Assertions vraies \\
+\midrule
+(a) & $B,D$ \\
+(b) & $A,B,C,D$ \\
+(c) & $C,D$ \\
+(d) & $B,C,D$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Par exemple, dans le tableau (c), la deuxième ligne ne contient aucun $1$, donc $B$ est fausse, tandis que la troisième ligne est entièrement formée de $1$, donc $C$ est vraie.
+\end{corrige}
+
+\begin{corrige}{2.10}
+On peut traduire les énoncés comme suit.
+\begin{enumerate}
+  \item $\boxed{\forall x\in\R_+,\ \exists y\in\R,\ x=y^2}$.
+  \item $\boxed{\forall x\in P,\ \exists n\in\Z,\ x=2n}$.
+  \item $\boxed{\forall n\in\Z,\ \exists m\in\Z,\ m>n}$.
+  \item $\boxed{\forall x\in\R,\ \exists q\in\Q,\ |x-q|<0{,}1}$.
+  \item
+  \[
+  \boxed{\forall z\in\C^*,\ \exists u,v\in\C,
+  \quad u\neq v,\quad u^2=z,\quad v^2=z}.
+  \]
+  \item
+  \[
+  \boxed{\exists x,y\in\R\setminus\Q,\quad xy\in\Q}.
+  \]
+  Par exemple, $x=y=\sqrt2$ convient.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.11}
+\begin{enumerate}
+  \item $\neg(P\land\neg Q)\equiv\boxed{(\neg P)\lor Q}$.
+  \item
+  \[
+  \neg\bigl((P\Rightarrow Q)\land R\bigr)
+  \equiv\neg(P\Rightarrow Q)\lor\neg R
+  \equiv\boxed{(P\land\neg Q)\lor\neg R}.
+  \]
+  \item
+  \[
+  \boxed{\forall x\in[1,+\infty[,\quad a<b+x}.
+  \]
+  \item
+  \[
+  \boxed{\forall x\in\R_+,\quad a\neq b+x}.
+  \]
+  \item L'écriture $a=b=c$ signifie $(a=b)\land(b=c)$. Sa négation est
+  \[
+  \boxed{a\neq b\quad\text{ou}\quad b\neq c}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.12}
+\begin{enumerate}
+  \item $x$ et $y$ sont libres. L'assertion, ouverte, signifie « $x$ est strictement supérieur à $y$ ».
+  \item $x$ est liée et $y$ est libre. L'assertion dépend du paramètre $y$ : « tout réel est strictement supérieur à $y$ ».
+  \item $x$ est liée. L'assertion est close et \textbf{fausse}, par exemple pour $x=0$.
+  \item $x$ et $y$ sont liées. L'assertion est close et \textbf{vraie} : pour un réel $x$, choisir $y=x-1$.
+  \item Les deux variables sont liées. L'assertion est \textbf{fausse} : pour tout candidat $x$, le réel $y=x+1$ vérifie $x\not>y$.
+  \item Les deux variables sont liées. L'assertion est \textbf{fausse} : pour $x=0$, aucun $y\in\N$ ne satisfait $0>y$.
+  \item Les deux variables sont liées. L'assertion est \textbf{vraie} : on peut choisir, par exemple, $y=\lfloor x\rfloor-1$.
+  \item Toutes les variables sont liées. En français : « pour tout réel $x$, il existe un entier $y<x$ qui est strictement supérieur à tout entier $z<x$ ». L'assertion est \textbf{fausse telle qu'elle est écrite}. En effet, puisque $x>y$, on peut prendre $z=y$ dans le quantificateur universel ; l'implication imposerait alors $y>y$. Avec la conclusion corrigée $y\geq z$, on obtiendrait la propriété de la partie entière stricte.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.13}
+\begin{enumerate}
+  \item \textbf{Fausse :} l'antécédent est vrai et le conséquent est faux.
+  \item \textbf{Vraie :} l'antécédent $1+1=3$ est faux ; une implication d'antécédent faux est vraie.
+  \item \textbf{Vraie} pour la même raison : $1=0$ est faux.
+  \item \textbf{Fausse :} $x=5/2$ vérifie $x>2$ mais pas $x\geq3$.
+  \item \textbf{Vraie :} $x>3$ entraîne immédiatement $x\geq3$.
+  \item \textbf{Vraie :} $[2,3]\subset[0,4]$.
+  \item \textbf{Vraie} par définition de l'intervalle $[2,3]$.
+  \item \textbf{Fausse :} $x=0$ n'appartient pas à $[2,3]$, mais $0\not\geq3$.
+  \item \textbf{Vraie :} $x\notin[2,+\infty[$ signifie $x<2$, donc $x\leq3$.
+  \item \textbf{Fausse :} prendre $x=1$, $y=-1$. Alors $x>y$, mais $1/x=1\not< -1=1/y$.
+  \item \textbf{Vraie :} $x=1/4$ donne $x<\sqrt x=1/2$.
+  \item \textbf{Vraie :} $x=1$, $y=0$ convient.
+  \item \textbf{Fausse :} pour tout $x$, le choix $y=-x-1$ donne $x+y=-1$.
+  \item \textbf{Vraie :} pour un $x$ donné, choisir $y=1-x$.
+  \item \textbf{Fausse :} $x=y=0$ donne une somme nulle.
+  \item \textbf{Fausse :} pour $\varepsilon=0$, l'inégalité $|x|<0$ est impossible.
+  \item \textbf{Vraie :} le choix $x=-1$ convient pour tout $\varepsilon$, car $-1<|\varepsilon|$.
+  \item \textbf{Vraie :} on peut même choisir $x=0$, puisque $|\varepsilon|>0$.
+  \item \textbf{Vraie :} choisir par exemple $t=1$. Si $|x|<1$, alors $x^2<1<3$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.14}
+Les complémentaires sont pris dans $E$.
+\begin{enumerate}
+  \item $\boxed{A\cap B\cap C}$.
+  \item $\boxed{A\cup B\cup C}$.
+  \item « Au plus deux » signifie « pas dans les trois » :
+  \[
+  \boxed{E\setminus(A\cap B\cap C)}.
+  \]
+  \item « Exactement un » correspond à
+  \[
+  \boxed{(A\cap B^c\cap C^c)\cup(A^c\cap B\cap C^c)\cup(A^c\cap B^c\cap C)}.
+  \]
+  \item « Au moins deux » correspond à
+  \[
+  \boxed{(A\cap B)\cup(A\cap C)\cup(B\cap C)}.
+  \]
+  \item « Au plus un » est le complémentaire du précédent :
+  \[
+  \boxed{E\setminus\bigl((A\cap B)\cup(A\cap C)\cup(B\cap C)\bigr)}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.15}
+On dresse la table suivante.
+\begin{center}
+\begin{tabular}{ccc|ccc|c}
+\toprule
+$P$&$Q$&$R$&$P\Rightarrow Q$&$Q\Rightarrow R$&$P\Rightarrow R$&$((P\Rightarrow Q)\land(Q\Rightarrow R))\Rightarrow(P\Rightarrow R)$\\
+\midrule
+V&V&V&V&V&V&V\\
+V&V&F&V&F&F&V\\
+V&F&V&F&V&V&V\\
+V&F&F&F&V&F&V\\
+F&V&V&V&V&V&V\\
+F&V&F&V&F&V&V\\
+F&F&V&V&V&V&V\\
+F&F&F&V&V&V&V\\
+\bottomrule
+\end{tabular}
+\end{center}
+La dernière colonne ne contient que V : l'assertion est une tautologie.
+\end{corrige}
+
+\begin{corrige}{2.16}
+\begin{enumerate}
+  \item
+  \begin{center}
+  \begin{tabular}{cc|c}
+  \toprule
+  $P$&$Q$&$P\oplus Q$\\
+  \midrule
+  V&V&F\\
+  V&F&V\\
+  F&V&V\\
+  F&F&F\\
+  \bottomrule
+  \end{tabular}
+  \end{center}
+  \item L'assertion $(P\land\neg Q)\lor(\neg P\land Q)$ est vraie exactement dans les deux lignes où une seule des assertions $P,Q$ est vraie. Elle a donc la même table de vérité que $P\oplus Q$.
+  \item $(P\lor Q)\land\neg(P\land Q)$ signifie : au moins l'une de $P,Q$ est vraie, mais elles ne sont pas vraies simultanément. C'est précisément le « ou exclusif », donc
+  \[
+  \boxed{P\oplus Q\iff(P\lor Q)\land\neg(P\land Q)}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.17}
+\begin{enumerate}
+  \item L'inéquation équivaut à
+  \[
+  (a-2)x\leq-2.
+  \]
+  Il faut distinguer le signe de $a-2$ :
+  \[
+  \boxed{
+  \begin{cases}
+  x\leq-\dfrac2{a-2},&a>2,\\[1ex]
+  x\geq-\dfrac2{a-2}=\dfrac2{2-a},&a<2,\\[1ex]
+  \varnothing,&a=2.
+  \end{cases}}
+  \]
+  Pour $a=2$, l'inéquation initiale devient $3\leq1$.
+
+  \item Les deux membres étant positifs ou nuls, on peut élever au carré :
+  \begin{align*}
+  |3x-1|\leq|x+4|
+  &\iff(3x-1)^2\leq(x+4)^2\\
+  &\iff(2x-5)(4x+3)\leq0.
+  \end{align*}
+  Le produit est négatif ou nul entre ses deux racines, donc
+  \[
+  \boxed{x\in\left[-\frac34,\frac52\right]}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.18}
+La droite $D_a$ a pour équation cartésienne
+\[
+x-y+2a=0.
+\]
+La distance du centre $(a,1)$ du cercle $C_a$ à cette droite vaut
+\[
+d(a)=\frac{|a-1+2a|}{\sqrt{1^2+(-1)^2}}
+=\frac{|3a-1|}{\sqrt2}.
+\]
+\begin{enumerate}
+  \item Il existe des points communs si et seulement si cette distance est inférieure ou égale au rayon $1$ :
+  \[
+  |3a-1|\leq\sqrt2.
+  \]
+  Ainsi
+  \[
+  \boxed{\frac{1-\sqrt2}{3}\leq a\leq\frac{1+\sqrt2}{3}}.
+  \]
+  \item La droite est tangente lorsque la distance vaut exactement $1$, c'est-à-dire
+  \[
+  \boxed{a=\frac{1-\sqrt2}{3}\quad\text{ou}\quad a=\frac{1+\sqrt2}{3}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.19}
+\begin{enumerate}
+  \item \textbf{Faux.} Le produit de trois nombres négatifs est négatif, alors qu'il n'y a pas exactement un facteur négatif. Le bon critère est : le produit est négatif si et seulement si le nombre de facteurs négatifs est impair, aucun facteur n'étant nul.
+  \item \textbf{Vrai.} Si le produit est positif, aucun facteur n'est nul. Chaque facteur négatif apporte un signe $-1$ ; le signe du produit est donc $(-1)^r$, où $r$ est le nombre de facteurs négatifs. Il est positif exactement lorsque $r$ est pair.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.20}
+\begin{enumerate}
+  \item La négation de $x>1\lor y>1$ est $x\leq1\land y\leq1$. La contraposée est donc
+  \[
+  \boxed{\forall x,y\in\R,\quad (x\leq1\land y\leq1)\Rightarrow x+y\leq2}.
+  \]
+  \item Cette contraposée est vraie : en additionnant $x\leq1$ et $y\leq1$, on obtient $x+y\leq2$. L'assertion initiale est donc vraie.
+  \item La réciproque est
+  \[
+  \forall x,y\in\R,\quad (x>1\lor y>1)\Rightarrow x+y>2.
+  \]
+  Elle est fausse : $x=2$, $y=-100$ vérifient l'antécédent, mais pas la conclusion.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.21}
+Notons $\mathcal P$ l'ensemble des nombres premiers.
+\begin{enumerate}
+  \item La conjecture forte s'écrit
+  \[
+  \forall n\in\N,\quad
+  (n>4\land 2\mid n)
+  \Rightarrow
+  \exists p,q\in\mathcal P,\ n=p+q.
+  \]
+  La conjecture faible s'écrit
+  \[
+  \forall n\in\N,\quad
+  (n>7\land n\text{ impair})
+  \Rightarrow
+  \exists p,q,r\in\mathcal P,\ n=p+q+r.
+  \]
+
+  \item Supposons la conjecture forte. Soit $n>7$ impair. Alors $n-3$ est pair et $n-3>4$. Il existe donc des nombres premiers $p,q$ tels que $n-3=p+q$. Comme $3$ est premier,
+  \[
+  n=p+q+3,
+  \]
+  ce qui démontre la conjecture faible.
+
+  L'argument n'est pas réversible : une décomposition d'un impair en trois nombres premiers ne garantit pas que l'un d'eux soit $3$, condition qui permettrait de revenir à une décomposition d'un pair en deux nombres premiers. L'énoncé faible ne fournit donc pas, à lui seul, la conjecture forte.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.22}
+Pour $n\geq1$, la somme géométrique donne
+\[
+\frac{10^n-1}{9}=1+10+10^2+\cdots+10^{n-1},
+\]
+qui est un entier. Pour $n=0$, le quotient vaut $0$. Ainsi le résultat est vrai pour tout $n\in\N$.
+
+On peut aussi poser $u_n=(10^n-1)/9$. Alors $u_0=0$ et
+\[
+u_{n+1}=10u_n+1.
+\]
+Une récurrence montre immédiatement que tous les $u_n$ sont entiers.
+\end{corrige}
+
+\begin{corrige}{2.23}
+Numérotons les positions de $1$ à $2n$ à partir du sommet du paquet. Pour une configuration donnée, posons
+\[
+\begin{aligned}
+S={}&\#\{\text{cartes face visible en position paire}\}\\
+   &-\#\{\text{cartes face visible en position impaire}\}.
+\end{aligned}
+\]
+La propriété demandée est $S=0$. Initialement, toutes les cartes sont face cachée, donc $S=0$.
+
+Considérons une opération de type A. Si les orientations des deux premières cartes valent $a,b\in\{0,1\}$, leur contribution à $S$ est $b-a$. Après retournement du bloc, les nouvelles orientations sont $1-b$ en première position et $1-a$ en seconde position. La contribution devient
+\[
+(1-a)-(1-b)=b-a.
+\]
+Ainsi l'opération A conserve $S$.
+
+Une opération de type B est une permutation cyclique des $2n$ positions. Si le nombre $k$ de cartes déplacées est pair, la parité de chaque position est conservée et $S$ ne change pas. Si $k$ est impair, les positions paires et impaires sont échangées et $S$ est remplacé par $-S$. Dans les deux cas, la valeur $S=0$ est préservée.
+
+Par récurrence sur le nombre d'opérations, on obtient toujours $S=0$, ce qui est exactement la propriété demandée.
+\end{corrige}
+
+\begin{corrige}{2.24}
+Démontrons la contraposée. Si $a$ et $b$ sont rationnels, il existe des entiers $p,q,r,s$ avec $q,s\neq0$ tels que
+\[
+a=\frac pq,
+\qquad b=\frac rs.
+\]
+Alors
+\[
+a+b=\frac{ps+rq}{qs}\in\Q.
+\]
+La contraposée étant vraie, si $a+b$ est irrationnel, au moins l'un des deux nombres $a,b$ est irrationnel.
+\end{corrige}
+
+\begin{corrige}{2.25}
+L'équation $\sqrt{x+2}=x$ impose d'abord $x\geq0$. Sous cette condition, on peut élever au carré sans changer l'équation :
+\[
+\sqrt{x+2}=x
+\iff x+2=x^2
+\iff(x-2)(x+1)=0.
+\]
+Les candidats sont $2$ et $-1$, mais seul $2$ satisfait $x\geq0$ et l'équation initiale. L'ensemble des solutions est
+\[
+\boxed{\{2\}}.
+\]
+\end{corrige}
+
+\begin{corrige}{2.26}
+\begin{enumerate}
+  \item Partons de $3x+2\leq-2x+1$.
+  \begin{align*}
+  3x+2\leq-2x+1
+  &\iff5x+2\leq1 &&\text{ajout de $2x$, règle (17)},\\
+  &\iff5x\leq-1 &&\text{ajout de $-2$, règle (17)},\\
+  &\iff x\leq-\frac15 &&\text{multiplication par $1/5>0$, règle (18)}.
+  \end{align*}
+  Chaque étape est réversible en ajoutant l'opposé ou en multipliant par $5>0$. La solution est $\boxed{]-\infty,-1/5]}$.
+
+  \item De $a\leq b$, la règle (17) donne $a+c\leq b+c$. De $c\leq d$, elle donne $b+c\leq b+d$. La transitivité (16) donne alors
+  \[
+  a+c\leq b+d.
+  \]
+
+  \item Si $c\leq0$, alors $-c\geq0$. La règle (18), appliquée à $a\leq b$, donne
+  \[
+  -ac\leq-bc.
+  \]
+  En ajoutant $ac+bc$ aux deux membres, on obtient $bc\leq ac$, c'est-à-dire
+  \[
+  ac\geq bc.
+  \]
+
+  \item La règle (18) donne d'abord $ac\leq bc$. Si l'on avait $ac=bc$, alors $(b-a)c=0$. Or $b-a>0$ et $c>0$, donc les deux facteurs sont non nuls, contradiction. Ainsi
+  \[
+  ac<bc.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.27}
+\begin{enumerate}
+  \item Puisque $f$ est paire, $f(-x)=f(x)$ pour tout $x$. En dérivant cette identité, la règle de dérivation d'une composée donne
+  \[
+  -f'(-x)=f'(x),
+  \]
+  donc $f'(-x)=-f'(x)$. Ainsi $f'$ est impaire.
+
+  \item Soit $x\in\Q$ avec $x>0$. Écrivons $x=p/q$ avec $p,q\in\N^*$ et $q>0$. Le nombre $n=p+1$ est un entier strictement positif et
+  \[
+  n=p+1>p\geq\frac pq=x.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.28}
+\begin{enumerate}
+  \item Soit $x\in\R$. Si $x\notin\Q$, la première assertion de la disjonction est vraie. Si $x\in\Q$, écrivons $x=p/q$ avec $p\in\Z$ et $q\in\N^*$. Le choix $n=q$ donne $nx=p\in\Z$. Dans tous les cas, la disjonction est vraie.
+
+  \item Si $a\geq b$, alors $|a-b|=a-b$ et
+  \[
+  \frac{a+b+|a-b|}{2}=a=\max(a,b),
+  \quad
+  \frac{a+b-|a-b|}{2}=b=\min(a,b).
+  \]
+  Le cas $a\leq b$ est symétrique.
+
+  \item On distingue les trois restes possibles modulo $3$ :
+  \begin{itemize}
+    \item si $n\equiv0$, le facteur $n$ est divisible par $3$ ;
+    \item si $n\equiv1$, alors $2n+1\equiv0$ ;
+    \item si $n\equiv2$, alors $n+1\equiv0$.
+  \end{itemize}
+  Dans tous les cas, $3$ divise $n(n+1)(2n+1)$.
+
+  \item Si $n$ est pair, prenons $m=1$ : $n+m$ est impair et $nm$ est pair. Si $n$ est impair, prenons $m=2$ : la somme est impaire et le produit est pair.
+
+  \item L'équation équivaut à
+  \[
+  |x+1|+|3x-2|=3.
+  \]
+  Les changements de signe ont lieu en $-1$ et $2/3$.
+  \begin{itemize}
+    \item Si $x\leq-1$, l'équation donne $1-4x=3$, soit $x=-1/2$, hors de l'intervalle.
+    \item Si $-1\leq x\leq2/3$, elle donne $3-2x=3$, donc $x=0$.
+    \item Si $x\geq2/3$, elle donne $4x-1=3$, donc $x=1$.
+  \end{itemize}
+  Les solutions sont $\boxed{\{0,1\}}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.29}
+\begin{enumerate}
+  \item Supposons par l'absurde que $\ln2/\ln3=p/q$ avec $p,q\in\N^*$. Alors
+  \[
+  q\ln2=p\ln3,
+  \]
+  donc, par injectivité de l'exponentielle,
+  \[
+  2^q=3^p.
+  \]
+  Le membre de gauche est pair et celui de droite impair, contradiction. Ainsi
+  \[
+  \boxed{\frac{\ln2}{\ln3}\notin\Q}.
+  \]
+
+  \item
+  \begin{coquille}
+  L'assertion avec « strictement plus petit que $1/n$ » est fausse : si $a_1=\cdots=a_n=1/n$, la somme vaut $1$ et aucun terme n'est strictement inférieur à $1/n$.
+  \end{coquille}
+  La version correcte est : « l'un des réels est inférieur ou égal à $1/n$ ». En effet, si tous les $a_i$ étaient strictement supérieurs à $1/n$, alors
+  \[
+  a_1+\cdots+a_n>n\times\frac1n=1,
+  \]
+  contradiction.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.30}
+\begin{enumerate}
+  \item Supposons d'abord $ax+b\geq0$ pour tout $x\in[0,1]$. En prenant $x=0$ puis $x=1$, on obtient $b\geq0$ et $a+b\geq0$.
+
+  Réciproquement, supposons $b\geq0$ et $a+b\geq0$. Pour $x\in[0,1]$,
+  \[
+  ax+b=(1-x)b+x(a+b).
+  \]
+  C'est une combinaison à coefficients positifs ou nuls de deux nombres positifs ou nuls. Ainsi $ax+b\geq0$. Les deux assertions sont donc équivalentes.
+
+  \item Notons $r_+$ et $r_-$ les rotations de centre $A$ et d'angles respectifs $\pi/3$ et $-\pi/3$. Pour obtenir un triangle d'une orientation donnée, il faut avoir $C=r_+(B)$, donc
+  \[
+  B\in D_1\cap r_+^{-1}(D_2)=D_1\cap r_-(D_2).
+  \]
+  La droite $r_-(D_2)$ forme un angle $\pi/3$ avec $D_2$ et n'est donc pas parallèle à $D_1$. Elle coupe $D_1$ en un unique point $B$, puis $C=r_+(B)$ est déterminé. L'autre orientation se construit avec $r_-$ et donne un second triangle. Il y a donc $\boxed{2}$ triangles, un pour chaque orientation.
+
+  \item Pour une fonction quelconque $f:\R\to\R$, posons
+  \[
+  f_{\mathrm p}(x)=\frac{f(x)+f(-x)}2,
+  \qquad
+  f_{\mathrm i}(x)=\frac{f(x)-f(-x)}2.
+  \]
+  Alors $f_{\mathrm p}(-x)=f_{\mathrm p}(x)$, donc $f_{\mathrm p}$ est paire, et $f_{\mathrm i}(-x)=-f_{\mathrm i}(x)$, donc $f_{\mathrm i}$ est impaire. Enfin
+  \[
+  f_{\mathrm p}(x)+f_{\mathrm i}(x)=f(x).
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.31}
+\begin{enumerate}
+  \item Les quatre premiers cas sont
+  \[
+  12=3\times4,
+  \quad13=2\times4+5,
+  \quad14=4+2\times5,
+  \quad15=3\times5.
+  \]
+  Supposons, par récurrence forte, que tout entier compris entre $12$ et $N$ possède une représentation $4a+5b$, et soit $N+1\geq16$. Alors $N-3\geq12$ et
+  \[
+  N-3=4a+5b
+  \]
+  pour certains $a,b\in\N$. Par conséquent
+  \[
+  N+1=4(a+1)+5b.
+  \]
+  Tout entier supérieur ou égal à $12$ possède donc la forme demandée.
+
+  \item
+  \begin{coquille}
+  La relation de récurrence doit être imposée pour tout $n\geq0$ ; telle qu'elle est imprimée avec $n\geq2$, les termes $u_2$ et $u_3$ ne sont pas déterminés.
+  \end{coquille}
+  Pour la version corrigée, on montre par récurrence d'ordre deux que
+  \[
+  u_n=3^n-2^n.
+  \]
+  La formule est vraie pour $n=0$ et $n=1$. Si elle est vraie aux rangs $n$ et $n+1$, alors
+  \begin{align*}
+  u_{n+2}
+  &=5(3^{n+1}-2^{n+1})-6(3^n-2^n)\\
+  &=3^{n+2}-2^{n+2}.
+  \end{align*}
+  La propriété est donc vraie pour tout $n\in\N$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.32}
+\begin{enumerate}
+  \item
+  \[
+  \boxed{1,1,2,3,5,8,13,21,34,55}.
+  \]
+
+  \item Notons $T_n$ le nombre de pavages d'un rectangle $2\times n$. À gauche, le pavage commence soit par un domino vertical, suivi d'un pavage de taille $2\times(n-1)$, soit par deux dominos horizontaux superposés, suivis d'un pavage de taille $2\times(n-2)$. Ainsi
+  \[
+  T_n=T_{n-1}+T_{n-2}.
+  \]
+  De plus $T_1=1=F_2$ et $T_2=2=F_3$. Les deux suites satisfaisant la même récurrence avec les mêmes valeurs initiales,
+  \[
+  \boxed{T_n=F_{n+1}}.
+  \]
+
+  \item Fixons $n\geq2$ et posons
+  \[
+  G_m=F_{n-1}F_m+F_nF_{m+1}.
+  \]
+  On vérifie
+  \[
+  G_1=F_{n+1},
+  \qquad G_2=F_{n+2},
+  \]
+  et $G_{m+2}=G_{m+1}+G_m$. La suite $m\mapsto F_{n+m}$ satisfait la même récurrence et les mêmes deux valeurs initiales. Par récurrence d'ordre deux,
+  \[
+  \boxed{F_{n+m}=F_{n-1}F_m+F_nF_{m+1}}.
+  \]
+
+  \item Posons
+  \[
+  D_n=F_n^2-F_{n-1}F_{n+1}.
+  \]
+  Pour $n=2$, $D_2=1-2=-1=(-1)^3$. De plus
+  \begin{align*}
+  D_{n+1}
+  &=F_{n+1}^2-F_nF_{n+2}\\
+  &=F_{n+1}^2-F_n(F_{n+1}+F_n)\\
+  &=F_{n+1}F_{n-1}-F_n^2=-D_n.
+  \end{align*}
+  Les signes alternent donc, et
+  \[
+  \boxed{F_n^2=F_{n-1}F_{n+1}+(-1)^{n+1}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{2.33}
+Écrivons $z=x+\ii y$. Le quotient n'est défini que si $(x,y)\neq(0,-1)$. En multipliant par le conjugué du dénominateur,
+\[
+\Ree\left(\frac{z^2}{z+\ii}\right)
+=\frac{x(x^2+y^2+2y)}{x^2+(y+1)^2}.
+\]
+Le dénominateur est strictement positif sur le domaine. Le quotient est imaginaire pur si et seulement si sa partie réelle est nulle, c'est-à-dire
+\[
+x\bigl(x^2+(y+1)^2-1\bigr)=0.
+\]
+Le lieu cherché est donc la réunion de l'axe imaginaire, privé du point où le quotient n'est pas défini, et du cercle de centre $-\ii$ et de rayon $1$ :
+\[
+\boxed{\bigl(\ii\R\setminus\{-\ii\}\bigr)\ \cup\ \{z\in\C:|z+\ii|=1\}}.
+\]
+\end{corrige}
+
+\begin{corrige}{2.34}
+L'erreur se situe dans le passage de $P(1)$ à $P(2)$. Pour $n\geq2$, les deux familles
+\[
+(u_1,\ldots,u_n)
+\quad\text{et}\quad
+(u_2,\ldots,u_{n+1})
+\]
+ont les éléments $u_2,\ldots,u_n$ en commun ; ces éléments permettent de relier les deux chaînes d'égalités. Mais pour $n=1$, les familles $(u_1)$ et $(u_2)$ n'ont aucun élément commun. L'hypothèse $P(1)$ ne donne donc aucune relation entre $u_1$ et $u_2$.
+
+Autrement dit, l'hérédité n'a pas été démontrée au rang initial : $P(1)$ n'implique pas $P(2)$.
+\end{corrige}
+
+\begin{corrige}{2.35}
+\begin{enumerate}
+  \item Pour trois intervalles fermés qui se coupent deux à deux, le dessin montre que l'extrémité gauche la plus à droite ne dépasse pas l'extrémité droite la plus à gauche ; la zone comprise entre ces deux points appartient aux trois intervalles.
+
+  \item Le résultat devient faux pour des sous-ensembles quelconques. Prenons
+  \[
+  A=\{1,2\},\qquad B=\{2,3\},\qquad C=\{1,3\}.
+  \]
+  Les intersections deux à deux sont non vides, mais $A\cap B\cap C=\varnothing$.
+
+  \item Écrivons $I_i=[a_i,b_i]$. Posons
+  \[
+  \alpha=\max_{1\leq i\leq n}a_i,
+  \qquad
+  \beta=\min_{1\leq i\leq n}b_i.
+  \]
+  L'hypothèse $I_i\cap I_j\neq\varnothing$ implique $a_i\leq b_j$ pour tous $i,j$. En choisissant un indice $i_0$ où le maximum $\alpha$ est atteint et un indice $j_0$ où le minimum $\beta$ est atteint, on obtient
+  \[
+  \alpha=a_{i_0}\leq b_{j_0}=\beta.
+  \]
+  Par conséquent
+  \[
+  \bigcap_{i=1}^n I_i=[\alpha,\beta],
+  \]
+  qui est un intervalle fermé non vide.
+
+  \item Non pour une famille infinie. Les intervalles
+  \[
+  I_n=[n,+\infty[,
+  \qquad n\geq1,
+  \]
+  ont des intersections deux à deux non vides, mais
+  \[
+  \bigcap_{n\geq1}I_n=\varnothing.
+  \]
+\end{enumerate}
+\end{corrige}
+
+
+% ============================================================
+% Chapitre 3
+% ============================================================
+\section{Fonctions et dénombrement}
+\markboth{Fonctions et dénombrement}{Fonctions et dénombrement}
+
+\begin{corrige}{3.1}
+Un sous-ensemble de $\R^2$ est le graphe d'une application définie sur un sous-ensemble $D$ de $\R$ si, pour chaque $x\in D$, il contient exactement un couple de première coordonnée $x$.
+\begin{enumerate}
+  \item L'équation donne $y=x-1$. Pour chaque $x\in\R$, il existe un unique $y$. C'est le graphe de $x\mapsto x-1$, de domaine $\boxed{\R}$.
+  \item L'équation donne $y=x^2$. C'est le graphe de $x\mapsto x^2$, de domaine $\boxed{\R}$.
+  \item Pour tout $x>0$, les deux valeurs $y=\sqrt x$ et $y=-\sqrt x$ conviennent. Ce n'est donc pas le graphe d'une application.
+  \item Les conditions $x=y^2$ et $y\geq0$ imposent $y=\sqrt x$ et $x\geq0$. C'est le graphe de la fonction racine carrée, de domaine $\boxed{[0,+\infty[}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.2}
+\begin{enumerate}
+  \item $\boxed{\{3,4,5\}}$.
+  \item $\boxed{\{-2,0,2\}}$.
+  \item $\boxed{\{1,\tfrac12,\tfrac13\}}$.
+  \item $\boxed{\{0,1,2,3,4\}}$.
+  \item $\boxed{\{2,3,4,5,6\}}$.
+  \item $\boxed{\{2,4,6\}}$.
+  \item $\boxed{\{-3,-2,-1,0,1,2,3\}}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.3}
+\begin{enumerate}
+  \item $\boxed{\{5,8,11\}}$.
+  \item $\boxed{\{5,7,9,11\}}$.
+  \item
+  \[
+  \{5,8,11\}\cup\{7,11,15,19\}
+  =\boxed{\{5,7,8,11,15,19\}}.
+  \]
+  \item $\boxed{\{11\}}$.
+  \item Après réduction des fractions et suppression des répétitions,
+  \[
+  \boxed{\left\{
+  \frac14,\frac13,\frac12,\frac23,\frac34,1,
+  \frac43,\frac32,2,3,4
+  \right\}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.4}
+\begin{enumerate}
+  \item $\boxed{\exists x\in I,\ f(x)=0}$.
+  \item $\boxed{\forall x\in I,\ f(x)=0}$.
+  \item $\boxed{\exists x,y\in I,\ f(x)\neq f(y)}$.
+  \item $\boxed{\forall x,y\in I,\ f(x)=f(y)\Rightarrow x=y}$.
+  \item $\boxed{\exists x_0\in I,\ \forall x\in I,\ f(x_0)\leq f(x)}$.
+  \item $\boxed{\forall M\in\R,\ \exists x\in I,\ f(x)>M}$.
+  \item « Ne peut s'annuler qu'une seule fois » signifie « a au plus un zéro » :
+  \[
+  \boxed{\forall x,y\in I,\ (f(x)=0\land f(y)=0)\Rightarrow x=y}.
+  \]
+  Pour exprimer « s'annule exactement une fois », il faudrait ajouter l'existence d'un zéro.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.5}
+\begin{enumerate}
+  \item Ce sont exactement les fonctions constantes.
+  \item Toutes les fonctions conviennent : pour chaque $x$, il suffit de choisir $y=x$.
+  \item Aucune fonction ne convient, car le choix $y=x$ imposerait $f(x)<f(x)$.
+  \item L'image de $f$ n'a pas de plus grand élément : toute valeur prise par $f$ est strictement dépassée par une autre. Cela n'impose pas que $f$ soit non bornée.
+  \item $f$ est négative ou nulle sur $]-\infty,0]$.
+  \item Toute valeur négative ou nulle ne peut être prise qu'en un point $x\leq0$. Par contraposée, $x>0\Rightarrow f(x)>0$.
+  \item On a $f(x)>0$ pour tout $x>0$ : la fonction est strictement positive sur $]0,+\infty[$. Aucune condition n'est imposée à $f(0)$.
+  \item Cette assertion équivaut simplement à $\boxed{f(0)=0}$.
+  \item Le seul zéro possible de $f$ est $0$ ; il n'est pas imposé que $f(0)=0$.
+  \item Toutes les fonctions conviennent, car tout réel est inférieur ou égal à $0$ ou supérieur ou égal à $0$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.6}
+Pour tout $n\in\N$,
+\[
+(g\circ f)(n)=g(2n)=n,
+\]
+donc $\boxed{g\circ f=\operatorname{id}_{\N}}$.
+
+Ensuite,
+\[
+(f\circ g)(n)=
+\begin{cases}
+n,&n\text{ pair},\\
+0,&n\text{ impair}.
+\end{cases}
+\]
+
+Pour appliquer deux fois $g$, il faut que $n$ soit divisible par $4$ ; sinon, l'une des deux applications rencontre un entier impair et renvoie $0$. Ainsi
+\[
+(g\circ g)(n)=
+\begin{cases}
+n/4,&4\mid n,\\
+0,&4\nmid n.
+\end{cases}
+\]
+De même,
+\[
+(g\circ g\circ g)(n)=
+\begin{cases}
+n/8,&8\mid n,\\
+0,&8\nmid n.
+\end{cases}
+\]
+\end{corrige}
+
+\begin{corrige}{3.7}
+Fixons $x\in E$.
+\begin{enumerate}
+  \item Si $x\in A$, alors $I_A(x)=1$ et $I_{A^c}(x)=0=1-I_A(x)$. Si $x\notin A$, les deux valeurs sont inversées. Donc
+  \[
+  I_{A^c}(x)=1-I_A(x).
+  \]
+  \item Les deux nombres $I_A(x)$ et $I_B(x)$ appartiennent à $\{0,1\}$. Leur minimum et leur produit valent $1$ exactement lorsqu'ils valent tous deux $1$, c'est-à-dire exactement lorsque $x\in A\cap B$. Ainsi
+  \[
+  I_{A\cap B}(x)=\min(I_A(x),I_B(x))=I_A(x)I_B(x).
+  \]
+  \item Leur maximum vaut $1$ exactement lorsqu'au moins l'un des deux vaut $1$, c'est-à-dire lorsque $x\in A\cup B$. La formule
+  \[
+  u+v-uv
+  \]
+  vaut aussi $0,1,1,1$ pour $(u,v)=(0,0),(1,0),(0,1),(1,1)$. Donc
+  \[
+  I_{A\cup B}(x)=\max(I_A(x),I_B(x))
+  =I_A(x)+I_B(x)-I_A(x)I_B(x).
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.8}
+Les assertions toujours vraies sont
+\[
+\boxed{1,2,3,4,6\text{ et }9}.
+\]
+Voici les justifications.
+\begin{enumerate}
+  \item Si $A\subset A'$, toute image d'un élément de $A$ est aussi l'image d'un élément de $A'$, donc $f(A)\subset f(A')$.
+  \item Même raisonnement pour les images réciproques.
+  \item Un élément est image d'un élément de $A\cup A'$ si et seulement s'il est image d'un élément de $A$ ou de $A'$.
+  \item $x\in f^{-1}(B\cup B')$ si et seulement si $f(x)\in B$ ou $f(x)\in B'$.
+  \item En général, on a seulement
+  \[
+  f(A\cap A')\subset f(A)\cap f(A').
+  \]
+  L'égalité peut échouer si $f$ n'est pas injective. Par exemple, pour $f:\{0,1\}\to\{0\}$, $A=\{0\}$ et $A'=\{1\}$, le membre de gauche est vide et celui de droite vaut $\{0\}$.
+  \item La préimage commute avec les intersections, donc l'égalité est vraie.
+  \item On a toujours $A\subset f^{-1}(f(A))$, mais l'égalité peut échouer pour la même fonction constante : si $A=\{0\}$, alors $f^{-1}(f(A))=\{0,1\}$.
+  \item En général,
+  \[
+  f(f^{-1}(B))=B\cap f(E).
+  \]
+  Si $f$ n'est pas surjective, cela peut être strictement plus petit que $B$.
+  \item Un élément $y$ appartient au membre de gauche si et seulement s'il existe $x\in A$ tel que $f(x)=y$ et $f(x)\in B$. Cela équivaut à $y\in f(A)\cap B$.
+  \item Le membre de gauche vaut
+  \[
+  f(A)\cup(B\cap f(E)),
+  \]
+  qui n'est pas toujours $f(A)\cup B$. Par exemple, si $E=\{0\}$, $F=\{0,1\}$, $f(0)=0$, $A=\varnothing$ et $B=\{1\}$, le membre de gauche est vide et celui de droite vaut $\{1\}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.9}
+\begin{enumerate}
+  \item Supposons $f$ strictement croissante. Si $x_1<x_2$, alors $f(x_1)<f(x_2)$ ; deux points distincts ne peuvent donc avoir la même image. Le raisonnement est identique pour une fonction strictement décroissante. Ainsi toute fonction strictement monotone est injective.
+
+  La réciproque est fausse. Sur $A=\{0,1,2\}$, définissons
+  \[
+  f(0)=0,
+  \qquad f(1)=2,
+  \qquad f(2)=1.
+  \]
+  Cette fonction est injective, mais ni croissante ni décroissante.
+
+  \item Non. La positivité de la dérivée assure la stricte croissance sur chacun des deux intervalles connexes, mais ne compare pas les valeurs prises sur des composantes différentes. Par exemple,
+  \[
+  f(x)=
+  \begin{cases}
+x,&x\in]-1,1[,\\x-3,&x\in]2,3[.
+  \end{cases}
+  \]
+  On a $f'(x)=1$ partout sur $A$, mais $f(-1/2)=f(5/2)=-1/2$. La fonction n'est pas injective.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.10}
+\begin{enumerate}
+  \item Supposons $g\circ f$ injective. Si $f(x_1)=f(x_2)$, alors
+  \[
+  (g\circ f)(x_1)=(g\circ f)(x_2).
+  \]
+  L'injectivité de $g\circ f$ donne $x_1=x_2$. Ainsi $f$ est injective.
+
+  \item Supposons $g\circ f$ surjective. Pour tout $z\in G$, il existe $x\in E$ tel que $g(f(x))=z$. En posant $y=f(x)\in F$, on obtient $g(y)=z$. Ainsi $g$ est surjective.
+
+  \item L'affirmation est fausse. Prenons
+  \[
+  E=\{1,2\},\quad F=\{a,b,c\},\quad G=\{0,1\},
+  \]
+  avec $f(1)=a$, $f(2)=b$, puis $g(a)=0$, $g(b)=g(c)=1$. La composée $g\circ f$ est injective, mais $g$ ne l'est pas puisque $g(b)=g(c)$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.11}
+Supposons d'abord $f$ injective. L'inclusion $A\subset f^{-1}(f(A))$ est toujours vraie. Réciproquement, si $x\in f^{-1}(f(A))$, il existe $a\in A$ tel que $f(x)=f(a)$. L'injectivité donne $x=a\in A$. Ainsi
+\[
+f^{-1}(f(A))=A.
+\]
+
+Réciproquement, supposons l'égalité vraie pour toute partie $A$ de $E$. Si $f(x)=f(y)$, prenons $A=\{x\}$. Alors $y\in f^{-1}(f(A))=A$, donc $y=x$. La fonction est injective.
+\end{corrige}
+
+\begin{corrige}{3.12}
+\begin{enumerate}
+  \item Soient $y_1,y_2\in f(I)$, avec $y_1<y_2$, et soit $y\in[y_1,y_2]$. Il existe $x_1,x_2\in I$ tels que $f(x_1)=y_1$ et $f(x_2)=y_2$. Comme $I$ est un intervalle, le segment d'extrémités $x_1,x_2$ est contenu dans $I$. Le théorème des valeurs intermédiaires fournit un point $x$ entre $x_1$ et $x_2$ tel que $f(x)=y$. Ainsi $f(I)$ contient tout réel situé entre deux de ses éléments : c'est un intervalle.
+
+  \item On écrit
+  \[
+  f(x)=x^2-4x+3=(x-2)^2-1.
+  \]
+  Sur $I=]-\infty,2]$, la fonction est strictement décroissante, donc injective. Pour tout $x\leq2$, $(x-2)^2\geq0$, donc $f(x)\geq-1$. Réciproquement, pour $y\geq-1$, le réel
+  \[
+  x=2-\sqrt{y+1}
+  \]
+  appartient à $I$ et vérifie $f(x)=y$. La fonction réalise donc une bijection de $I$ sur $[-1,+\infty[$, d'inverse
+  \[
+  \boxed{f^{-1}(y)=2-\sqrt{y+1}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.13}
+Sur $[0,1/2]$, la première branche $2x+1$ prend les valeurs de $[1,2]$. Sur $]1/2,1[$, la seconde branche $2x-1$ prend les valeurs de $]0,1[$.
+\begin{enumerate}
+  \item Chaque branche est injective et leurs images sont disjointes. Ainsi $f$ est injective.
+  \item L'union des images est $]0,1[\cup[1,2]=]0,2]$, qui est exactement l'ensemble d'arrivée. La fonction est surjective.
+  \item Elle est donc bijective.
+  \item Sur la seconde branche, $f(x)<1$, donc $f(x)\geq3/2$ est impossible. Sur la première branche,
+  \[
+  2x+1\geq\frac32
+  \iff x\geq\frac14.
+  \]
+  En tenant compte de $x\leq1/2$, on obtient
+  \[
+  \boxed{f(x)\geq\frac32\iff x\in\left[\frac14,\frac12\right]}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.14}
+\begin{enumerate}
+  \item Si $a=0$, la fonction est constante égale à $b$, donc elle n'est pas bijective. Si $a\neq0$, pour tout $w\in\C$, l'équation $az+b=w$ possède l'unique solution
+  \[
+  z=\frac{w-b}{a}.
+  \]
+  La fonction est donc bijective, d'inverse $w\mapsto(w-b)/a$.
+
+  \item Pour deux points $X,Y$,
+  \[
+  z_{f(Y)}-z_{f(X)}=a(z_Y-z_X).
+  \]
+  Par conséquent, toutes les distances sont multipliées par le même facteur $|a|$ :
+  \[
+  |z_{f(Y)}-z_{f(X)}|=|a|\,|z_Y-z_X|.
+  \]
+  Si les trois côtés de $ABC$ ont même longueur, les trois côtés de $f(A)f(B)f(C)$ ont donc encore même longueur. Comme $a\neq0$, les images restent distinctes ; le triangle image est équilatéral.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.15}
+Posons $\omega=\e^{\ii\pi/3}$.
+\begin{enumerate}
+  \item Un point fixe $a$ vérifie
+  \[
+  a=\omega a+2,
+  \qquad (1-\omega)a=2.
+  \]
+  Comme $1-\omega=\e^{-\ii\pi/3}\neq0$, il existe un unique point fixe :
+  \[
+  \boxed{a=\frac2{1-\omega}=2\e^{\ii\pi/3}=1+\sqrt3\ii}.
+  \]
+
+  \item La relation $2=a-\omega a$ donne, pour tout $z$,
+  \[
+  f(z)-a=\omega z+2-a=\omega(z-a).
+  \]
+  Le vecteur allant de $a$ à $f(z)$ s'obtient donc en multipliant le vecteur allant de $a$ à $z$ par $\e^{\ii\pi/3}$. C'est exactement la rotation de centre $a$ et d'angle $\pi/3$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.16}
+\begin{coquille}
+L'énoncé est faux avec la formule imprimée
+$f(z)=\e^{\ii\pi/3}\overline z+1$.
+\end{coquille}
+Posons $\alpha=\e^{\ii\pi/3}$. Si $z$ était fixe, on aurait
+\[
+z=\alpha\overline z+1.
+\]
+En appliquant une seconde fois $f$, on obtient
+\[
+f(f(z))
+=\alpha\overline{\alpha\overline z+1}+1
+=z+(1+\alpha).
+\]
+Or un point fixe de $f$ serait aussi fixe de $f^2$, ce qui imposerait $1+\alpha=0$. Cette égalité est fausse. Ainsi $f$ ne possède aucun point fixe ; son ensemble de points fixes n'est donc pas une droite, et $f$ n'est pas une symétrie orthogonale.
+
+Plus généralement, une application $z\mapsto\alpha\overline z+b$, avec $|\alpha|=1$, est une réflexion lorsque la condition de compatibilité
+\[
+b+\alpha\overline b=0
+\]
+est satisfaite. Ici, elle ne l'est pas.
+\end{corrige}
+
+\begin{corrige}{3.17}
+\begin{coquille}
+Il faut supposer $a\neq0$. Si $a=0$, toutes les images coïncident et les angles de l'énoncé ne sont pas définis.
+\end{coquille}
+Supposons $a\neq0$. On a
+\[
+z_{N'}-z_{M'}=a\,\overline{z_N-z_M},
+\qquad
+z_{Q'}-z_{P'}=a\,\overline{z_Q-z_P}.
+\]
+Par conséquent,
+\begin{align*}
+\Arg\left(\frac{z_{Q'}-z_{P'}}{z_{N'}-z_{M'}}\right)
+&=\Arg\left(
+\frac{\overline{z_Q-z_P}}{\overline{z_N-z_M}}
+\right)\\
+&=\Arg\left(
+\overline{\frac{z_Q-z_P}{z_N-z_M}}
+\right)\\
+&=-\Arg\left(\frac{z_Q-z_P}{z_N-z_M}\right)
+\quad[2\pi].
+\end{align*}
+Ainsi
+\[
+\boxed{(\overrightarrow{M'N'},\overrightarrow{P'Q'})
+=-(\overrightarrow{MN},\overrightarrow{PQ})\quad[2\pi]}.
+\]
+\end{corrige}
+
+\begin{corrige}{3.18}
+En développant les sommes et produits :
+\begin{align*}
+\sum_{k=1}^3\sum_{h=1}^k1&=1+2+3=\boxed6,\\
+\sum_{k=1}^3\sum_{h=1}^kh&=1+(1+2)+(1+2+3)=\boxed{10},\\
+\sum_{k=1}^3\sum_{h=1}^kk&=1^2+2^2+3^2=\boxed{14},\\
+\sum_{k=1}^3\prod_{h=1}^kh&=1!+2!+3!=\boxed9,\\
+\sum_{k=1}^3\prod_{h=1}^kk&=1^1+2^2+3^3=\boxed{32},\\
+\prod_{k=1}^3\sum_{h=1}^kh&=1\cdot3\cdot6=\boxed{18},\\
+\prod_{k=1}^3\sum_{h=1}^kk&=1^2\cdot2^2\cdot3^2=\boxed{36},\\
+\prod_{k=1}^3\prod_{h=1}^kh&=1!\,2!\,3!=\boxed{12},\\
+\prod_{k=1}^3\prod_{h=1}^kk&=1^1\cdot2^2\cdot3^3=\boxed{108}.
+\end{align*}
+\end{corrige}
+
+\begin{corrige}{3.19}
+\begin{enumerate}
+  \item $\boxed{\displaystyle\sum_{k=1}^4a_k}$.
+  \item $\boxed{\displaystyle\sum_{k=1}^4\prod_{j=1}^ka_j}$.
+  \item $\boxed{\displaystyle\sum_{k=1}^3a_ka_{k+1}}$.
+  \item $\boxed{\displaystyle\sum_{k=1}^2a_ka_{k+1}a_{k+2}}$.
+  \item $\boxed{\displaystyle\sum_{i=1}^3\sum_{j=i+1}^4a_ia_j}$.
+  \item $\boxed{\displaystyle\prod_{k=1}^4\left(\sum_{j=1}^ka_j\right)}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.20}
+Pour chaque question, on vérifie l'initialisation puis on calcule le terme au rang $n+1$ à partir de l'hypothèse au rang $n$.
+\begin{enumerate}
+  \item L'égalité est vraie pour $n=0$. Si elle est vraie au rang $n$, alors
+  \[
+  \sum_{k=0}^{n+1}(k+1)
+  =\frac{(n+1)(n+2)}2+(n+2)
+  =\frac{(n+2)(n+3)}2.
+  \]
+
+  \item Pour $n=0$, les deux membres sont nuls. Puis
+  \begin{align*}
+  \sum_{k=0}^{n+1}k^2
+  &=\frac{n(n+1)(2n+1)}6+(n+1)^2\\
+  &=\frac{(n+1)(n+2)(2n+3)}6.
+  \end{align*}
+
+  \item Pour $n=0$, l'égalité est vraie. Ensuite
+  \begin{align*}
+  \sum_{k=0}^{n+1}k^3
+  &=\frac{n^2(n+1)^2}{4}+(n+1)^3\\
+  &=\frac{(n+1)^2(n+2)^2}{4}.
+  \end{align*}
+
+  \item Pour $n=0$, $1=2-1$. Si la formule vaut au rang $n$,
+  \[
+  \sum_{k=0}^{n+1}2^k=(2^{n+1}-1)+2^{n+1}=2^{n+2}-1.
+  \]
+
+  \item Pour $n=0$, les deux membres valent $0$. Si la formule est vraie au rang $n$,
+  \begin{align*}
+  \sum_{k=0}^{n+1}k2^k
+  &=(n-1)2^{n+1}+2+(n+1)2^{n+1}\\
+  &=n2^{n+2}+2,
+  \end{align*}
+  qui est la formule demandée au rang $n+1$.
+
+  \item Au rang $n=3$,
+  \[
+  \frac{3^2-4}{3}=\frac53
+  =\frac{5!}{12\cdot3\cdot2}.
+  \]
+  Si la formule est vraie au rang $n\geq3$, alors
+  \begin{align*}
+  \prod_{k=3}^{n+1}\frac{k^2-4}{k}
+  &=\frac{(n+2)!}{12n(n-1)}
+    \frac{(n+1)^2-4}{n+1}\\
+  &=\frac{(n+2)!}{12n(n-1)}
+    \frac{(n-1)(n+3)}{n+1}\\
+  &=\frac{(n+3)!}{12(n+1)n}.
+  \end{align*}
+
+  \item Pour $n=1$, les deux membres valent $2$. Notons $L_n=\prod_{k=1}^n(n+k)$. Alors
+  \[
+  L_{n+1}=L_n\frac{(2n+1)(2n+2)}{n+1}=2(2n+1)L_n.
+  \]
+  Le membre de droite $R_n=2^n\prod_{k=1}^n(2k-1)$ vérifie lui aussi
+  \[
+  R_{n+1}=2(2n+1)R_n.
+  \]
+  L'égalité se propage donc par récurrence.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.21}
+\begin{enumerate}
+  \item Pour $1\leq i\leq p$ et $1\leq j\leq q$,
+  \[
+  1\leq j+(i-1)q\leq q+(p-1)q=pq,
+  \]
+  donc $f$ est bien définie.
+
+  Si $f(i,j)=f(i',j')$, alors
+  \[
+  (i-i')q=j'-j.
+  \]
+  Le membre de droite a une valeur absolue au plus $q-1$, tandis que le membre de gauche est un multiple de $q$. Il est donc nul : $i=i'$ puis $j=j'$. La fonction est injective. Les ensembles de départ et d'arrivée ont tous deux $pq$ éléments ; elle est donc bijective.
+
+  On peut aussi exhiber l'antécédent de $r\in\{1,\ldots,pq\}$ :
+  \[
+  i=\left\lfloor\frac{r-1}{q}\right\rfloor+1,
+  \qquad
+  j=(r-1)\bmod q+1.
+  \]
+
+  \item Pour un parcours colonne par colonne, la bijection est
+  \[
+  \boxed{g(i,j)=i+(j-1)p}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.22}
+\begin{enumerate}
+  \item Une fois la première coordonnée fixée à $a$, la seconde peut être choisie parmi les $n-1$ éléments différents de $a$. Ainsi $\boxed{|E_a|=n-1}$.
+  \item Si $a\neq a'$, un même couple ne peut avoir à la fois $a$ et $a'$ pour première coordonnée. Donc $E_a\cap E_{a'}=\varnothing$.
+  \item Tout couple de $A_{n,2}$ possède une unique première coordonnée $a$, donc
+  \[
+  A_{n,2}=\bigcup_{a=1}^nE_a.
+  \]
+  L'arbre de dénombrement possède $n$ branches au premier niveau, puis $n-1$ branches au second niveau pour chacune d'elles.
+  \item Par le principe d'addition appliqué à cette union disjointe,
+  \[
+  \boxed{|A_{n,2}|=n(n-1)}.
+  \]
+  \item Au couple $(x_1,x_2)$, on associe l'application $\varphi:\{1,2\}\to\{1,\ldots,n\}$ définie par $\varphi(1)=x_1$ et $\varphi(2)=x_2$. Elle est injective exactement lorsque $x_1\neq x_2$. Cette correspondance est bijective.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.23}
+Avec répétition autorisée, chacune des trois positions peut recevoir l'une des $26$ lettres :
+\[
+\boxed{26^3=17576}.
+\]
+Si les lettres doivent être distinctes, on a successivement $26$, puis $25$, puis $24$ choix :
+\[
+\boxed{26\times25\times24=15600}.
+\]
+\end{corrige}
+
+\begin{corrige}{3.24}
+Les trois jetons sont tirés simultanément : l'ordre ne compte pas. Il faut choisir un sous-ensemble de trois lettres parmi $26$, soit
+\[
+\boxed{\binom{26}{3}=\frac{26\cdot25\cdot24}{6}=2600}.
+\]
+\end{corrige}
+
+\begin{corrige}{3.25}
+\begin{enumerate}
+  \item Entre $1$ et $100$, il y a $20$ multiples de $5$, $14$ multiples de $7$ et $2$ multiples de $35$. Le nombre d'entiers divisibles par $5$ ou $7$ est
+  \[
+  20+14-2=32.
+  \]
+  Il en reste donc $\boxed{100-32=68}$.
+
+  \item Entre $1$ et $3000$, il y a $1000$ multiples de $3$, $600$ multiples de $5$ et $200$ multiples de $15$. Il y a donc
+  \[
+  1000+600-200=1400
+  \]
+  entiers divisibles par $3$ ou $5$, et $\boxed{3000-1400=1600}$ qui ne le sont ni par l'un ni par l'autre.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.26}
+\begin{enumerate}
+  \item
+  \[
+  \prod_{k=1}^n(2k)=2^n\prod_{k=1}^nk=\boxed{2^n n!}.
+  \]
+
+  \item En séparant les facteurs pairs et impairs de $(2n)!$,
+  \[
+  (2n)!=(2\cdot4\cdots2n)(1\cdot3\cdots(2n-1))
+  =2^n n!\prod_{k=1}^{n-1}(2k+1).
+  \]
+  D'où
+  \[
+  \boxed{\prod_{k=1}^{n-1}(2k+1)=\frac{(2n)!}{2^n n!}}.
+  \]
+
+  \item Le produit télescope :
+  \[
+  \prod_{k=1}^n\frac{2k+1}{2k-1}
+  =\frac31\frac53\cdots\frac{2n+1}{2n-1}
+  =\boxed{2n+1}.
+  \]
+
+  \item
+  \begin{align*}
+  \prod_{k=2}^n\frac{k^2-1}{k}
+  &=\frac{\prod_{k=2}^n(k-1)\prod_{k=2}^n(k+1)}{\prod_{k=2}^nk}\\
+  &=\frac{(n-1)!\,(n+1)!/2}{n!}
+  =\boxed{\frac{(n+1)!}{2n}}.
+  \end{align*}
+
+  \item En posant $j=n-k$,
+  \[
+  \sum_{k=0}^n(n-k)=\sum_{j=0}^nj=\boxed{\frac{n(n+1)}2}.
+  \]
+
+  \item En posant $j=k+1$,
+  \[
+  \sum_{k=0}^n(k+1)=\sum_{j=1}^{n+1}j
+  =\boxed{\frac{(n+1)(n+2)}2}.
+  \]
+
+  \item La somme des $n+1$ premiers nombres impairs vaut
+  \[
+  \sum_{k=0}^n(2k+1)=2\frac{n(n+1)}2+(n+1)=\boxed{(n+1)^2}.
+  \]
+
+  \item Somme géométrique :
+  \[
+  \sum_{k=1}^{n-1}2^k=2\frac{2^{n-1}-1}{2-1}=\boxed{2^n-2}.
+  \]
+
+  \item Le rapport est $\sqrt2$ et il y a $2n$ termes :
+  \[
+  \sum_{k=0}^{2n-1}2^{k/2}
+  =\frac{(\sqrt2)^{2n}-1}{\sqrt2-1}
+  =\boxed{\frac{2^n-1}{\sqrt2-1}}.
+  \]
+
+  \item
+  \[
+  \sum_{k=0}^{2n}2^{2k-1}
+  =\frac12\sum_{k=0}^{2n}4^k
+  =\boxed{\frac{4^{2n+1}-1}{6}}.
+  \]
+
+  \item Par l'identité $a^{n+1}-b^{n+1}=(a-b)\sum_{k=0}na^{n-k}b^k$ avec $a=3$, $b=2$,
+  \[
+  \sum_{k=0}^n2^k3^{n-k}=\boxed{3^{n+1}-2^{n+1}}.
+  \]
+
+  \item De même, avec $a=2$, $b=-1$,
+  \[
+  2^{n+1}-(-1)^{n+1}
+  =3\sum_{k=0}^n2^{n-k}(-1)^k,
+  \]
+  d'où
+  \[
+  \boxed{\sum_{k=0}^n(-1)^k2^{n-k}
+  =\frac{2^{n+1}-(-1)^{n+1}}3}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.27}
+On applique le binôme de Newton.
+\begin{enumerate}
+  \item
+  \[
+  \sum_{k=0}^n\binom nk=(1+1)^n=\boxed{2^n}.
+  \]
+
+  \item
+  \begin{coquille}
+  La formule est valable pour $n\geq1$, mais pas pour $n=0$, où le membre de gauche vaut $1$.
+  \end{coquille}
+  Pour $n\geq1$,
+  \[
+  \sum_{k=0}^n(-1)^k\binom nk=(1-1)^n=\boxed0.
+  \]
+
+  \item
+  \begin{coquille}
+  Ici encore, il faut supposer $n\geq1$.
+  \end{coquille}
+  En ajoutant
+  \[
+  \sum_{r=0}^{2n}\binom{2n}{r}=2^{2n}
+  \quad\text{et}\quad
+  \sum_{r=0}^{2n}(-1)^r\binom{2n}{r}=0,
+  \]
+  les termes d'indice impair disparaissent et les termes d'indice pair sont doublés. Ainsi
+  \[
+  2\sum_{k=0}^n\binom{2n}{2k}=2^{2n},
+  \]
+  donc
+  \[
+  \boxed{\sum_{k=0}^n\binom{2n}{2k}=2^{2n-1}}.
+  \]
+
+  \item
+  \[
+  \sum_{k=0}^n2^k\binom nk=(1+2)^n=\boxed{3^n}.
+  \]
+
+  \item
+  \[
+  \sum_{k=0}^n2^{3k-1}\binom nk
+  =\frac12\sum_{k=0}^n8^k\binom nk
+  =\boxed{\frac{9^n}{2}}.
+  \]
+
+  \item
+  \begin{align*}
+  \sum_{k=0}^n2^{3k}3^{n-2k}\binom nk
+  &=3^n\sum_{k=0}^n\left(\frac89\right)^k\binom nk\\
+  &=3^n\left(1+\frac89\right)^n
+  =\boxed{\left(\frac{17}{3}\right)^n}.
+  \end{align*}
+
+  \item
+  \[
+  \sum_{k=0}^n\ii^k\binom nk=(1+\ii)^n
+  =(\sqrt2\e^{\ii\pi/4})^n
+  =\boxed{2^{n/2}\e^{\ii n\pi/4}}.
+  \]
+
+  \item
+  \[
+  \sum_{k=0}^n3^{k/2}\ii^k\binom nk
+  =(1+\ii\sqrt3)^n
+  =(2\e^{\ii\pi/3})^n
+  =\boxed{2^n\e^{\ii n\pi/3}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.28}
+\begin{enumerate}
+  \item
+  \[
+  \boxed{(1+x)^n=\sum_{k=0}^n\binom nkx^k}.
+  \]
+  \item En dérivant terme à terme,
+  \[
+  f'(x)=\sum_{k=1}^nk\binom nkx^{k-1}.
+  \]
+  En intégrant terme à terme sur $[0,1]$,
+  \[
+  \int_0^1f(x)\,dx
+  =\sum_{k=0}^n\frac1{k+1}\binom nk.
+  \]
+  \item En évaluant $f(1)$, $f'(1)$ et l'intégrale :
+  \[
+  \boxed{\sum_{k=0}^n\binom nk=2^n},
+  \]
+  \[
+  \boxed{\sum_{k=0}^nk\binom nk=n2^{n-1}},
+  \]
+  \[
+  \boxed{\sum_{k=0}^n\frac1{k+1}\binom nk
+  =\frac{2^{n+1}-1}{n+1}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.29}
+\begin{enumerate}
+  \item La somme télescope :
+  \[
+  \sum_{k=0}^n(P(k+1)-P(k))
+  =\boxed{P(n+1)-P(0)}.
+  \]
+
+  \item Pour $P(x)=ax^3+bx^2+cx$,
+  \[
+  P(x+1)-P(x)
+  =3ax^2+(3a+2b)x+(a+b+c).
+  \]
+
+  \item On identifie avec $x^2$ :
+  \[
+  3a=1,
+  \qquad 3a+2b=0,
+  \qquad a+b+c=0.
+  \]
+  Ainsi
+  \[
+  \boxed{a=\frac13,
+  \qquad b=-\frac12,
+  \qquad c=\frac16}.
+  \]
+
+  \item Pour ce choix, $P(k+1)-P(k)=k^2$. Comme $P(0)=0$,
+  \begin{align*}
+  \sum_{k=0}^nk^2
+  &=P(n+1)\\
+  &=\frac{(n+1)^3}{3}-\frac{(n+1)^2}{2}+\frac{n+1}{6}\\
+  &=\boxed{\frac{n(n+1)(2n+1)}6}.
+  \end{align*}
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.30}
+\begin{enumerate}
+  \item
+  \[
+  \boxed{T_0(0)=1,
+  \quad T_0(1)=2,
+  \quad T_0(2)=22,
+  \quad T_0(3)=170}.
+  \]
+  En effet, par exemple $T_0(3)=\binom90+\binom93+\binom96+\binom99=170$.
+
+  \item Le binôme de Newton donne
+  \[
+  2^n=(1+1)^n=\sum_{k=0}^n\binom nk.
+  \]
+
+  \item Les indices $0,1,\ldots,3n$ se répartissent selon leur reste modulo $3$. Donc
+  \[
+  \boxed{T_0(n)+T_1(n)+T_2(n)=2^{3n}}.
+  \]
+
+  \item Comme $j=\e^{2\ii\pi/3}$, on a $j^3=1$ et $j\neq1$. La factorisation
+  \[
+  j^3-1=(j-1)(j^2+j+1)
+  \]
+  donne $\boxed{1+j+j^2=0}$.
+
+  \item Dans le développement de $(1+j)^{3n}$, les puissances $j^{3k}$, $j^{3k+1}$ et $j^{3k+2}$ valent respectivement $1,j,j^2$. Ainsi
+  \[
+  (1+j)^{3n}=T_0+jT_1+j^2T_2.
+  \]
+  De même,
+  \[
+  (1+j^2)^{3n}=T_0+j^2T_1+jT_2.
+  \]
+
+  \item En ajoutant les deux égalités précédentes à
+  $2^{3n}=T_0+T_1+T_2$, les coefficients de $T_1$ et $T_2$ valent $1+j+j^2=0$, tandis que celui de $T_0$ vaut $3$. Par conséquent
+  \[
+  \boxed{3T_0(n)=2^{3n}+(1+j)^{3n}+(1+j^2)^{3n}}.
+  \]
+
+  \item On vérifie
+  \[
+  1+j=\e^{\ii\pi/3},
+  \qquad
+  1+j^2=\e^{-\ii\pi/3}.
+  \]
+  Donc
+  \[
+  (1+j)^{3n}=(1+j^2)^{3n}=\e^{\pm\ii n\pi}=(-1)^n.
+  \]
+  Finalement,
+  \[
+  \boxed{T_0(n)=\frac{2^{3n}+2(-1)^n}{3}}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{3.31}
+\begin{enumerate}
+  \item Supposons
+  \[
+  \frac pq=\frac{p'}{q'},
+  \qquad
+  \frac st=\frac{s'}{t'},
+  \]
+  c'est-à-dire $pq'=p'q$ et $st'=s't$. Pour l'addition, il faut montrer
+  \[
+  \frac{pt+sq}{qt}=\frac{p't'+s'q'}{q't'}.
+  \]
+  Après produit en croix, le membre de gauche devient
+  \[
+  (pt+sq)q't'=ptq't'+sqq't'.
+  \]
+  La première égalité $pq'=p'q$ identifie les premiers termes, et la seconde $st'=s't$ les seconds. Les deux fractions sont donc égales.
+
+  Pour le produit,
+  \[
+  psq't'=(pq')(st')=(p'q)(s't)=p's'qt,
+  \]
+  ce qui donne
+  \[
+  \frac{ps}{qt}=\frac{p's'}{q't'}.
+  \]
+
+  \item La réflexivité de $\mathcal R$ donne $(x,x)\in\mathcal R$, donc, par définition de la classe,
+  \[
+  \boxed{x\in C_{\mathcal R}(x)}.
+  \]
+
+  \item Sur $E=\Z\times\N^*$, définissons
+  \[
+  (p,q)\mathrel{\mathcal R}(p',q')
+  \iff pq'=p'q.
+  \]
+  La relation est réflexive car $pq=pq$, symétrique car une égalité peut être lue dans les deux sens, et transitive : si
+  \[
+  pq'=p'q,
+  \qquad p'q''=p''q',
+  \]
+  alors
+  \[
+  p q' q''=p' q q''=p''q'q.
+  \]
+  Comme $q'>0$, on simplifie par $q'$ et l'on obtient $pq''=p''q$. Ainsi $\mathcal R$ est une relation d'équivalence.
+
+  \item Sous l'hypothèse (29) telle qu'elle est écrite, prenons $u,v\in C_{\mathcal R}(x)$ et $u',v'\in C_{\mathcal R}(x')$. On a $u\mathcal R v$ et $u'\mathcal R v'$, donc
+  \[
+  f(u,u')=f(v,v').
+  \]
+  Toutes les valeurs de $f$ sur $C_{\mathcal R}(x)\times C_{\mathcal R}(x')$ sont égales : cette image est un singleton.
+
+  \item
+  \begin{coquille}
+  Les questions 5 et 6 ne peuvent pas être vraies avec la condition (29) imprimée, qui exige l'égalité des couples obtenus. Par exemple, $(1,2)\mathcal R(2,4)$, mais
+  \[
+  f((1,2),(1,2))=(4,4)
+  \quad\text{et}\quad
+  f((2,4),(1,2))=(8,8),
+  \]
+  qui ne sont pas égaux. Ils sont seulement équivalents. La condition correcte est
+  \[
+  x\mathcal R x',\ y\mathcal R y'
+  \Rightarrow f(x,y)\mathcal R f(x',y').
+  \]
+  \end{coquille}
+  Vérifions cette version. Supposons
+  \[
+  (p,q)\mathcal R(r,s),
+  \qquad
+  (p',q')\mathcal R(r',s'),
+  \]
+  donc $ps=rq$ et $p's'=r'q'$. Les images par l'addition sont
+  \[
+  (pq'+p'q,qq')
+  \quad\text{et}\quad
+  (rs'+r's,ss').
+  \]
+  Or
+  \begin{align*}
+  (pq'+p'q)ss'
+  &=p q'ss'+p' qss'\\
+  &=rqq's'+r'qq's\\
+  &=(rs'+r's)qq'.
+  \end{align*}
+  Les deux résultats sont donc équivalents.
+
+  \item Pour la multiplication, les images sont $(pp',qq')$ et $(rr',ss')$. On a
+  \[
+  pp'ss'=(ps)(p's')=(rq)(r'q')=rr'qq',
+  \]
+  donc elles sont équivalentes. C'est cette compatibilité qui permet de définir sans ambiguïté l'addition et la multiplication sur les classes d'équivalence.
+\end{enumerate}
+\end{corrige}
+
+
+% ============================================================
+% Chapitre 4
+% ============================================================
+\section{Limites de suites}
+\markboth{Limites de suites}{Limites de suites}
+
+\begin{corrige}{4.1}
+On compare l'erreur absolue à la marge annoncée.
+\begin{enumerate}
+  \item $|\pi-3{,}14|\simeq1{,}59\times10^{-3}<10^{-2}$ : \textbf{oui}.
+  \item $|\pi-3{,}1416|\simeq7{,}35\times10^{-6}<10^{-3}$ : \textbf{oui}.
+  \item La même erreur est aussi inférieure à $10^{-5}$ : \textbf{oui}.
+  \item $|\sqrt2-1{,}41|\simeq4{,}21\times10^{-3}>10^{-3}$ : \textbf{non}. Par exemple, $1{,}414$ est une approximation de $\sqrt2$ à $10^{-3}$ près.
+  \item $|\e-2{,}72|\simeq1{,}72\times10^{-3}<10^{-2}$ : \textbf{oui}.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.2}
+\begin{enumerate}
+  \item Comme $|\sin x|\leq1$ et $x>10$,
+  \[
+  \left|\frac{2\sin x}{x}\right|
+  \leq\frac2x<\frac2{10}=\frac15.
+  \]
+  \item La réciproque est fausse. Pour $x=\pi$, on a
+  \[
+  \left|\frac{2\sin x}{x}\right|=0\leq\frac15,
+  \]
+  alors que $\pi<10$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.3}
+\begin{enumerate}
+  \item Supposons $a\geq b\geq1$. D'une part,
+  \[
+  1-\frac1b\leq1\leq1+\frac1a-\frac1{a^2},
+  \]
+  car $(a-1)/a^2\geq0$. D'autre part,
+  \[
+  \frac1a-\frac1{a^2}\leq\frac1a\leq\frac1b,
+  \]
+  donc
+  \[
+  1+\frac1a-\frac1{a^2}\leq1+\frac1b.
+  \]
+  \item La réciproque est fausse. Pour $a=1$ et $b=2$, on a
+  \[
+  \frac12\leq1\leq\frac32,
+  \]
+  mais $a\not\geq b$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.4}
+L'hypothèse $|b|\leq a/2$ donne
+\[
+\frac a2\leq a+b\leq\frac{3a}{2}.
+\]
+Comme $0\leq a\leq1/2$, on a aussi
+\[
+1\leq1+a\leq\frac32.
+\]
+Les numérateurs étant non négatifs et les dénominateurs strictement positifs,
+\[
+\frac{a+b}{1+a}
+\geq\frac{a/2}{3/2}=\frac a3
+\]
+et
+\[
+\frac{a+b}{1+a}
+\leq\frac{3a/2}{1}=\frac{3a}{2}.
+\]
+Ainsi
+\[
+\boxed{\frac a3\leq\frac{a+b}{1+a}\leq\frac{3a}{2}}.
+\]
+\end{corrige}
+
+\begin{corrige}{4.5}
+\begin{enumerate}
+  \item Les hypothèses donnent $0\leq y<1$. On peut donc multiplier par $1-y>0$. L'inégalité équivaut à
+  \[
+  1\leq(1+cy)(1-y)
+  =1+y(c-1-cy).
+  \]
+  Or $y\leq1-1/c=(c-1)/c$, donc $c-1-cy\geq0$. Le membre de droite est bien supérieur ou égal à $1$.
+
+  \item Supposons $a\geq b>10$. On calcule
+  \[
+  \frac{a^2+a+1}{a-5}-a=\frac{6a+1}{a-5}>0,
+  \]
+  ce qui donne la première inégalité. Pour la seconde,
+  \[
+  \frac{a^2+a+1}{a(a-5)}
+  =1+\frac{6a+1}{a(a-5)}.
+  \]
+  Comme $a>10>66/7$, on a $6a+1\leq13(a-5)$, donc
+  \[
+  \frac{6a+1}{a(a-5)}\leq\frac{13}{a}\leq\frac{13}{b}.
+  \]
+  Ainsi
+  \[
+  \boxed{a\leq\frac{a^2+a+1}{a-5}\leq a\left(1+\frac{13}{b}\right)}.
+  \]
+
+  \item Posons
+  \[
+  A=\frac{a^2+a+1}{a-5},
+  \qquad B=a.
+  \]
+  En appliquant la question précédente avec $b=a$, on obtient
+  \[
+  a\leq A\leq a+13.
+  \]
+  Par conséquent
+  \[
+  \frac{|B-A|}{|A|}
+  =\frac{A-a}{A}
+  \leq\frac{A-a}{a}
+  \leq\frac{13}{a}.
+  \]
+  Si $a>13\cdot10^k$, cette dernière quantité est strictement inférieure à $10^{-k}$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.6}
+Dans le tableau, la ligne $i$ contient V exactement dans les colonnes $i,2i,3i,\ldots$.
+\begin{enumerate}
+  \item[(a)] L'assertion est \textbf{fausse}. Pour $i=2$, quel que soit $J$, il existe un entier impair $j>J$. Cet entier n'est pas multiple de $2$.
+  \item[(b)] L'assertion est \textbf{vraie}. Pour $i,J\in\N^*$, le choix
+  \[
+  j=i(J+1)
+  \]
+  vérifie $j>J$ et $i\mid j$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.7}
+La relation
+\[
+\frac1{j^2}\leq\frac1i
+\]
+équivaut, puisque $i,j>0$, à $j^2\geq i$. Dans la ligne $i$, toutes les cases à partir de $j=\lceil\sqrt i\rceil$ sont donc vraies.
+\begin{enumerate}
+  \item[(a)] L'assertion est \textbf{vraie}. Pour un $i$ fixé, choisir par exemple $J=i$. Si $j>J$, alors $j^2>i$.
+  \item[(b)] Elle est également \textbf{vraie}. Pour $i,J$ donnés, prendre
+  \[
+  j=\max(J+1,i).
+  \]
+  Alors $j>J$ et $j^2\geq i$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.8}
+Pour $j\geq3$, on a $j-u_j\geq j-2\geq1$, donc
+\[
+P(i,j)\iff \frac1{j-u_j}\leq\frac1i
+\iff j-u_j\geq i.
+\]
+Comme $u_j\in\{0,1,2\}$,
+\[
+j-2\leq j-u_j\leq j.
+\]
+Dans le tableau :
+\begin{itemize}
+  \item si $j-2\geq i$, la case est nécessairement V ;
+  \item si $j<i$, elle est nécessairement F ;
+  \item pour $j=i$ ou $j=i+1$, sa valeur dépend de $u_j$ et l'on inscrit « ? ».
+\end{itemize}
+\begin{enumerate}
+  \item[(a)] L'assertion est \textbf{vraie}. Pour un $i$ fixé, choisissons $J=i+2$. Si $j>J$, alors $j-2>i$, donc $j-u_j\geq j-2>i$.
+  \item[(b)] Elle est aussi \textbf{vraie}, par exemple en choisissant $j>\max(J,i+2)$.
+  \item[(c)] La suite converge vers $0$. En effet,
+  \[
+  0<\frac1{j-u_j}\leq\frac1{j-2},
+  \]
+  et le membre de droite tend vers $0$. Le théorème des gendarmes donne
+  \[
+  \boxed{\frac1{j-u_j}\longrightarrow0}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.9}
+\begin{enumerate}
+  \item Chaque carré est positif ou nul, donc l'union est incluse dans $[0,+\infty[$. Réciproquement, si $y\geq0$, alors $y=(\sqrt y)^2$. Ainsi
+  \[
+  \boxed{\bigcup_{x\in\R}\{x^2\}=[0,+\infty[}.
+  \]
+
+  \item Si $y\in]x-1,x+1[$ pour un $x\in[0,1]$, alors $-1<y<2$. L'union est donc incluse dans $]-1,2[$. Réciproquement, si $-1<y<2$, les intervalles $[0,1]$ et $]y-1,y+1[$ ont une intersection non vide ; tout $x$ dans cette intersection vérifie $y\in]x-1,x+1[$. Ainsi
+  \[
+  \boxed{\bigcup_{x\in[0,1]}]x-1,x+1[=]-1,2[}.
+  \]
+
+  \item Appartenir à tous les intervalles ouverts impose en particulier, pour $x=1$, $y>0$, et pour $x=0$, $y<1$. Réciproquement, si $0<y<1$ et $x\in[0,1]$, alors $x-1\leq0<y$ et $y<1\leq x+1$. Donc
+  \[
+  \boxed{\bigcap_{x\in[0,1]}]x-1,x+1[=]0,1[}.
+  \]
+
+  \item Le même raisonnement avec des inégalités larges donne
+  \[
+  \boxed{\bigcap_{x\in[0,1]}[x-1,x+1]=[0,1]}.
+  \]
+
+  \item Le nombre $0$ appartient à tous les intervalles. Si $y>0$, on choisit $n>1/y$, alors $1/n<y$ et $y\notin[0,1/n]$. Aucun nombre négatif n'appartient à ces intervalles. Donc
+  \[
+  \boxed{\bigcap_{n\geq1}\left[0,\frac1n\right]=\{0\}}.
+  \]
+
+  \item Chaque intervalle est contenu dans $]0,1]$, donc l'union aussi. Réciproquement, pour $y\in]0,1]$, il existe $n\geq1$ tel que
+  \[
+  \frac1{n+1}\leq y\leq\frac1n
+  \]
+  (prendre $n=\lfloor1/y\rfloor$, avec l'ajustement évident lorsque $1/y$ est entier). Ainsi
+  \[
+  \boxed{\bigcup_{n\geq1}\left[\frac1{n+1},\frac1n\right]=]0,1]}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.10}
+Les choix suivants conviennent ; ils ne sont pas tous minimaux, mais ils donnent des preuves immédiates.
+\begin{center}
+\begin{tabular}{c|c|c}
+\toprule
+Suite & $N_{10}$ & $N_{100}$\\
+\midrule
+$1/n$ & $11$ & $101$\\
+$1/n^2$ & $4$ & $11$\\
+$(-1)^n/n^2$ & $4$ & $11$\\
+$2^{-n}$ & $4$ & $7$\\
+$10^{-n}$ & $2$ & $3$\\
+$1/n$ si $n$ pair, $1/n^2$ sinon & $11$ & $101$\\
+$2^{-n}$ si $n$ pair, $3^{-n}$ sinon & $3$ & $7$\\
+$\cos(n)/3^n$ & $3$ & $5$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Par exemple, dans la dernière ligne,
+\[
+\left|\frac{\cos n}{3^n}\right|\leq3^{-n};
+\]
+les rangs $3$ et $5$ assurent respectivement $3^{-n}<10^{-1}$ et $3^{-n}<10^{-2}$.
+\end{corrige}
+
+\begin{corrige}{4.11}
+Pour $\varepsilon>0$, les choix suivants conviennent. Le symbole $\lfloor\cdot\rfloor$ désigne la partie entière ; on prend le maximum avec $1$ lorsque la suite n'est définie qu'à partir de $n=1$.
+\begin{enumerate}
+  \item
+  \[
+  \boxed{N_\varepsilon=\left\lfloor\frac1\varepsilon\right\rfloor+1}.
+  \]
+  \item
+  \[
+  \boxed{N_\varepsilon=\left\lfloor\frac1{\sqrt\varepsilon}\right\rfloor+1}.
+  \]
+  \item Le même choix que dans la question 2, car $|(-1)^n/n^2|=1/n^2$.
+  \item
+  \[
+  \boxed{N_\varepsilon=
+  \max\left(1,\left\lfloor\log_2\frac1\varepsilon\right\rfloor+1\right)}.
+  \]
+  \item
+  \[
+  \boxed{N_\varepsilon=
+  \max\left(1,\left\lfloor\log_{10}\frac1\varepsilon\right\rfloor+1\right)}.
+  \]
+  \item Comme $|u_n|\leq1/n$, le choix de la question 1 convient.
+  \item Comme $|u_n|\leq2^{-n}$, le choix de la question 4 convient.
+  \item Comme $|u_n|\leq3^{-n}$,
+  \[
+  \boxed{N_\varepsilon=
+  \max\left(1,\left\lfloor\log_3\frac1\varepsilon\right\rfloor+1\right)}.
+  \]
+\end{enumerate}
+Dans chaque cas, la définition assure que $N_\varepsilon$ est strictement supérieur au seuil réel obtenu en résolvant l'inégalité $|u_n|<\varepsilon$.
+\end{corrige}
+
+\begin{corrige}{4.12}
+L'affirmation est vraie. Soit $p\geq1$ une période de la suite. Tout entier $n$ s'écrit
+\[
+n=qp+r,
+\qquad0\leq r\leq p-1.
+\]
+Par périodicité, $u_n=u_r$. La suite ne prend donc que les valeurs du sous-ensemble fini
+\[
+\{u_0,u_1,\ldots,u_{p-1}\}.
+\]
+En posant
+\[
+m=\min_{0\leq r<p}u_r,
+\qquad
+M=\max_{0\leq r<p}u_r,
+\]
+on obtient $m\leq u_n\leq M$ pour tout $n$. La suite est bornée.
+\end{corrige}
+
+\begin{corrige}{4.13}
+Les suites contenant $1/n$ sont considérées pour $n\geq1$.
+\begin{enumerate}
+  \item $u_n=(-1)^n$ est périodique de période $2$, majorée par $1$, minorée par $-1$ et bornée. Les sous-suites paires et impaires valent respectivement $1$ et $-1$ ; elle ne converge pas et ne tend pas vers l'infini.
+
+  \item $u_n=1/n$ n'est pas périodique. Elle est positive, majorée par $1$, bornée et converge vers $0$.
+
+  \item Même conclusion pour $u_n=1/n^2$ : elle est positive, bornée et converge vers $0$.
+
+  \item
+  \[
+  u_n=\frac n{n+1}=1-\frac1{n+1}.
+  \]
+  Elle est comprise entre $0$ et $1$, n'est pas périodique et converge vers $1$.
+
+  \item $u_n=(-1)^n+1/n$ est bornée : pour $n\geq1$, $-1<u_n\leq3/2$. Elle n'est pas périodique. Les sous-suites paires et impaires convergent respectivement vers $1$ et $-1$, donc la suite diverge sans tendre vers $\pm\infty$.
+
+  \item La suite $\cos n$ est bornée entre $-1$ et $1$. Elle n'est pas périodique : si un entier $p>0$ était une période, on aurait en particulier $\cos p=\cos0=1$, donc $p\in2\pi\Z$, impossible puisque $\pi$ est irrationnel.
+
+  Elle ne converge pas. En effet, supposons $\cos n\to L$. L'identité
+  \[
+  \cos(n+1)+\cos(n-1)=2\cos1\cos n
+  \]
+  donnerait $2L=2\cos1\,L$, donc $L=0$. Mais
+  \[
+  \sin n=\frac{\cos(n-1)-\cos(n+1)}{2\sin1}\longrightarrow0,
+  \]
+  et l'identité $\cos^2n+\sin^2n=1$ donnerait alors $L^2=1$, contradiction.
+
+  \item $u_n=2^{-n}$ est positive, bornée, non périodique et converge vers $0$.
+
+  \item $u_n=n+(-1)^n$ vérifie $u_n\geq n-1$, donc tend vers $+\infty$. Elle est minorée, non majorée, non bornée et non périodique.
+
+  \item
+  \[
+  u_n=n(1+(-1)^n)=
+  \begin{cases}2n,&n\text{ pair},\\0,&n\text{ impair}.
+  \end{cases}
+  \]
+  Elle est minorée par $0$, non majorée et non bornée. Elle ne tend pas vers $+\infty$ à cause des termes impairs nuls, et elle n'a aucune limite finie. Elle diverge.
+
+  \item
+  \[
+  u_n=\frac{n+1}{n^2}=\frac1n+\frac1{n^2}.
+  \]
+  Elle est positive, bornée, non périodique et converge vers $0$.
+
+  \item
+  \[
+  u_n=\frac{2n^2+n+3}{n^2}=2+\frac1n+\frac3{n^2}.
+  \]
+  Elle est positive, bornée, non périodique et converge vers $2$.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.14}
+Soit $\ell$ la limite de la suite. Pour $\varepsilon=1/2$, il existe $N$ tel que, pour tous $n,m\geq N$,
+\[
+|u_n-\ell|<\frac12,
+\qquad
+|u_m-\ell|<\frac12.
+\]
+L'inégalité triangulaire donne
+\[
+|u_n-u_m|
+\leq|u_n-\ell|+|u_m-\ell|<1.
+\]
+Or $u_n-u_m$ est un entier. Le seul entier de valeur absolue strictement inférieure à $1$ est $0$. Ainsi $u_n=u_m$ pour tous $n,m\geq N$. En particulier,
+\[
+\boxed{\forall n\geq N,\quad u_n=u_N}.
+\]
+\end{corrige}
+
+\begin{corrige}{4.15}
+\begin{coquille}
+La relation $u_{n+1}=1+1/u_n$ doit être imposée dès $n=0$ ; avec « $n\in\N^*$ », le terme $u_1$ n'est pas défini.
+\end{coquille}
+\begin{enumerate}
+  \item Les racines de $x^2-x-1=0$ sont
+  \[
+  \frac{1\pm\sqrt5}{2}.
+  \]
+  La racine positive est
+  \[
+  \boxed{\varphi=\frac{1+\sqrt5}{2}}.
+  \]
+
+  \item L'identité $\varphi^2=\varphi+1$ et le fait que $\varphi\neq0$ donnent
+  \[
+  \boxed{\varphi=1+\frac1\varphi}.
+  \]
+
+  \item On a $u_0=2\in[3/2,2]$. Supposons $3/2\leq u_n\leq2$. Alors
+  \[
+  \frac12\leq\frac1{u_n}\leq\frac23,
+  \]
+  donc
+  \[
+  \frac32\leq u_{n+1}=1+\frac1{u_n}\leq\frac53\leq2.
+  \]
+  Par récurrence,
+  \[
+  \boxed{\frac32\leq u_n\leq2}.
+  \]
+
+  \item En utilisant la question 2,
+  \begin{align*}
+  |u_{n+1}-\varphi|
+  &=\left|\frac1{u_n}-\frac1\varphi\right|\\
+  &=\frac{|u_n-\varphi|}{u_n\varphi}.
+  \end{align*}
+  Or $u_n\geq3/2$ et $\varphi>3/2$, donc $u_n\varphi\geq9/4$. Ainsi
+  \[
+  \boxed{|u_{n+1}-\varphi|\leq\frac49|u_n-\varphi|}.
+  \]
+
+  \item Par itération,
+  \[
+  |u_n-\varphi|\leq\left(\frac49\right)^n|u_0-\varphi|.
+  \]
+  Comme $|2-\varphi|<1$,
+  \[
+  \boxed{|u_n-\varphi|\leq\left(\frac49\right)^n}.
+  \]
+
+  \item Le membre de droite tend vers $0$, donc $|u_n-\varphi|\to0$. Par définition,
+  \[
+  \boxed{u_n\longrightarrow\varphi}.
+  \]
+
+  \item Il suffit d'imposer
+  \[
+  \left(\frac49\right)^n\leq10^{-6}.
+  \]
+  Or
+  \[
+  \left(\frac49\right)^{17}>10^{-6},
+  \qquad
+  \left(\frac49\right)^{18}<10^{-6}.
+  \]
+  Le choix $\boxed{n=18}$ convient.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.16}
+Posons $r=\sqrt a$ et $e_n=u_n-r$. On a $u_0=\lfloor r\rfloor+1>r$.
+\begin{enumerate}
+  \item Supposons $u_n>r$. Alors
+  \[
+  u_{n+1}-r
+  =\frac{u_n+a/u_n-2r}{2}
+  =\frac{(u_n-r)^2}{2u_n}>0.
+  \]
+  Donc $u_{n+1}>r$. De plus,
+  \[
+  u_n-u_{n+1}
+  =\frac{u_n-a/u_n}{2}
+  =\frac{u_n^2-a}{2u_n}>0.
+  \]
+  Par récurrence, $u_n>r$ pour tout $n$ et la suite est strictement décroissante.
+
+  \item La formule précédente donne exactement
+  \[
+  |u_{n+1}-r|=\frac{|u_n-r|^2}{2u_n}.
+  \]
+  Comme $u_n>r>0$,
+  \[
+  \boxed{|u_{n+1}-r|\leq\frac{|u_n-r|^2}{2r}}.
+  \]
+
+  \item On a $0<e_0\leq1$ et $r>1$. Par la question 2,
+  \[
+  0<e_{n+1}\leq\frac{e_n^2}{2r}\leq\frac{e_n}{2},
+  \]
+  car $e_n\leq1$. Ainsi $e_n\leq e_0/2^n\to0$, ce qui donne
+  \[
+  \boxed{u_n\longrightarrow\sqrt a}.
+  \]
+
+  \item On peut exploiter la convergence quadratique. Puisque $r>1$ et $e_0\leq1$,
+  \[
+  e_{n+1}\leq\frac{e_n^2}{2}.
+  \]
+  Une récurrence donne
+  \[
+  e_n\leq2^{-(2^n-1)}.
+  \]
+  En effet, le carré du majorant au rang $n$, puis la division par $2$, donnent le majorant au rang $n+1$. Pour $n=5$,
+  \[
+  e_5\leq2^{-31}<10^{-6}.
+  \]
+  Ainsi le choix universel $\boxed{n=5}$ convient.
+\end{enumerate}
+\end{corrige}
+
+\begin{corrige}{4.17}
+\begin{coquille}
+La parité doit porter sur la valeur $u_n$, et non sur l'indice $n$, comme le confirme la remarque sur le problème de Syracuse. Avec la formule imprimée, l'assertion est fausse : pour $u_0=3$, on obtient $u_{2k}=2+2^{-k}$, qui n'est jamais égal à $1$.
+\end{coquille}
+On résout donc la version attendue :
+\[
+u_{n+1}=
+\begin{cases}
+u_n+1,&u_n\text{ impair},\\
+u_n/2,&u_n\text{ pair}.
+\end{cases}
+\]
+\begin{enumerate}
+  \item La suite n'est en général ni croissante ni décroissante. À partir de $u_0=3$, on obtient $3,4,2,1,2,1,\ldots$ : il y a des augmentations et des diminutions.
+
+  \item On raisonne par récurrence forte sur la valeur initiale $m=u_0\in\N^*$.
+  \begin{itemize}
+    \item Pour $m=1$, la propriété est déjà vraie au rang $0$.
+    \item Supposons la propriété vraie pour toutes les valeurs initiales strictement inférieures à $m>1$.
+      Si $m$ est pair, le terme suivant vaut $m/2<m$ ; l'hypothèse de récurrence s'applique.
+      Si $m$ est impair, alors $m+1$ est pair et, après deux étapes,
+      \[
+      u_2=\frac{m+1}{2}<m.
+      \]
+      L'hypothèse de récurrence s'applique encore.
+  \end{itemize}
+  Dans tous les cas, la trajectoire atteint finalement $1$. Ainsi
+  \[
+  \boxed{\forall u_0\in\N^*,\ \exists N\in\N,\ u_N=1}.
+  \]
+\end{enumerate}
+\end{corrige}
+
+
+\end{document}

@@ -10588,6 +10588,8 @@ body:has(.explain-lab) .post-header {
   --mat101-muted: #5d6778;
   --mat101-accent: #087f8c;
   --mat101-accent-dark: #075c66;
+  --mat101-solution: #8b4a1e;
+  --mat101-solution-soft: #fff4eb;
   --mat101-soft: #edf8f8;
   --mat101-line: #cad6dc;
   color: var(--mat101-ink);
@@ -10664,6 +10666,12 @@ body:has(.mat101-library) .post-header {
   background: var(--mat101-accent);
 }
 
+.mat101-actions .mat101-solution-action {
+  border-color: var(--mat101-solution);
+  color: #fff;
+  background: var(--mat101-solution);
+}
+
 .mat101-actions a:hover,
 .mat101-actions a:focus-visible {
   border-color: var(--mat101-accent-dark);
@@ -10696,6 +10704,45 @@ body:has(.mat101-library) .post-header {
 .mat101-stats span {
   color: var(--mat101-muted);
   font-size: 0.76rem;
+}
+
+.mat101-verification {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.45fr) minmax(0, 1.55fr);
+  gap: 1rem;
+  align-items: center;
+  margin: 0 0 2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #d9c2af;
+  border-radius: 6px;
+  background: var(--mat101-solution-soft);
+}
+
+.mat101-verification > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 0.55rem;
+  align-items: center;
+}
+
+.mat101-status-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  grid-row: 1 / 3;
+  border-radius: 50%;
+  background: #2d8a58;
+  box-shadow: 0 0 0 4px rgba(45, 138, 88, 0.12);
+}
+
+.mat101-verification span:last-child {
+  color: var(--mat101-muted);
+  font-size: 0.74rem;
+}
+
+.mat101-verification p {
+  margin: 0;
+  color: #604b3d;
+  font-size: 0.8rem;
 }
 
 .mat101-chapter-nav {
@@ -10786,49 +10833,125 @@ body:has(.mat101-library) .post-header {
 
 .mat101-exercise-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 
-.mat101-exercise-grid a {
+.mat101-exercise-card {
   display: grid;
-  min-height: 4.6rem;
+  min-width: 0;
   box-sizing: border-box;
-  align-content: center;
-  padding: 0.65rem;
+  gap: 0.55rem;
+  align-content: start;
+  padding: 0.75rem;
   border: 1px solid var(--mat101-line);
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--mat101-ink);
   background: #fff;
-  text-decoration: none;
 }
 
-.mat101-exercise-grid a:hover,
-.mat101-exercise-grid a:focus-visible {
-  border-color: var(--mat101-accent);
-  background: var(--mat101-soft);
-  transform: translateY(-1px);
+.mat101-exercise-card > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
-.mat101-exercise-grid span,
-.mat101-exercise-grid small {
+.mat101-exercise-card > header span {
   color: var(--mat101-muted);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.mat101-exercise-grid strong {
+.mat101-exercise-card > header strong {
   color: var(--mat101-accent-dark);
   font-variant-numeric: tabular-nums;
 }
 
-.mat101-exercise-grid small {
-  justify-self: end;
+.mat101-statement-link,
+.mat101-solution-reveal a {
+  display: flex;
+  min-height: 44px;
+  box-sizing: border-box;
+  justify-content: space-between;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.55rem 0.6rem;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.mat101-statement-link {
+  border: 1px solid var(--mat101-line);
+  color: var(--mat101-accent-dark);
+  background: var(--mat101-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.mat101-statement-link:hover,
+.mat101-statement-link:focus-visible {
+  border-color: var(--mat101-accent);
+  background: var(--mat101-soft);
+  box-shadow: 0 0 0 2px rgba(8, 127, 140, 0.11);
+}
+
+.mat101-statement-link small,
+.mat101-solution-reveal small {
+  color: var(--mat101-muted);
+  font-size: 0.68rem;
+}
+
+.mat101-solution-reveal {
+  margin: 0;
+  border: 1px dashed #d7bda9;
+  border-radius: 4px;
+  background: #fffaf6;
+}
+
+.mat101-solution-reveal summary {
+  display: flex;
+  min-height: 44px;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0.55rem 0.6rem;
+  color: var(--mat101-solution);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 800;
+  list-style: none;
+}
+
+.mat101-solution-reveal summary::-webkit-details-marker {
+  display: none;
+}
+
+.mat101-solution-reveal summary::before {
+  content: "+";
+  margin-right: 0.4rem;
+  font-size: 1rem;
+}
+
+.mat101-solution-reveal[open] summary::before {
+  content: "−";
+}
+
+.mat101-solution-reveal a {
+  margin: 0 0.45rem 0.45rem;
+  color: #fff;
+  background: var(--mat101-solution);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.mat101-solution-reveal a small {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .mat101-downloads {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.65fr);
-  gap: 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
   margin: 1rem 0 2rem;
   padding: 1.4rem;
   border: 1px solid var(--mat101-line);
@@ -10840,7 +10963,36 @@ body:has(.mat101-library) .post-header {
   margin: 0;
 }
 
-.mat101-downloads ul {
+.mat101-download-intro {
+  grid-column: 1 / -1;
+}
+
+.mat101-file-group {
+  padding: 1rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 5px;
+  background: #fff;
+}
+
+.mat101-file-group-solution {
+  border-color: #d9c2af;
+  background: #fffaf6;
+}
+
+.mat101-file-label {
+  margin: 0 0 0.65rem;
+  color: var(--mat101-accent-dark);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mat101-file-group-solution .mat101-file-label {
+  color: var(--mat101-solution);
+}
+
+.mat101-file-group ul {
   display: grid;
   gap: 0.5rem;
   align-content: start;
@@ -10849,8 +11001,10 @@ body:has(.mat101-library) .post-header {
   list-style: none;
 }
 
-.mat101-downloads li a {
+.mat101-file-group li a {
   display: grid;
+  min-height: 44px;
+  box-sizing: border-box;
   padding: 0.7rem 0.8rem;
   border: 1px solid var(--mat101-line);
   border-radius: 4px;
@@ -10899,6 +11053,26 @@ body:has(.mat101-library) .post-header {
   font-size: 0.8rem;
 }
 
+.mat101-review-ledger {
+  margin-top: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #c8d9ce;
+  border-left: 4px solid #2d8a58;
+  border-radius: 5px;
+  background: #f3faf6;
+  color: #354a3c;
+  font-size: 0.82rem;
+}
+
+.mat101-review-ledger ul {
+  margin: 0.55rem 0;
+  padding-left: 1.15rem;
+}
+
+.mat101-review-ledger p {
+  margin: 0.55rem 0 0;
+}
+
 .mat101-citation {
   margin-top: 0.85rem;
   padding: 0.9rem 1rem;
@@ -10943,12 +11117,10 @@ body:has(.mat101-library) .post-header {
 @media screen and (max-width: 700px) {
   .mat101-stats,
   .mat101-chapter-nav,
-  .mat101-downloads,
   .mat101-credit-grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .mat101-downloads > *,
   .mat101-credit-grid article:last-child {
     grid-column: 1 / -1;
   }
@@ -10961,11 +11133,15 @@ body:has(.mat101-library) .post-header {
 @media screen and (max-width: 440px) {
   .mat101-chapter-nav,
   .mat101-exercise-grid,
-  .mat101-credit-grid {
+  .mat101-credit-grid,
+  .mat101-downloads,
+  .mat101-verification {
     grid-template-columns: 1fr 1fr;
   }
 
-  .mat101-credit-grid article {
+  .mat101-credit-grid article,
+  .mat101-downloads > *,
+  .mat101-verification > * {
     grid-column: 1 / -1;
   }
 
