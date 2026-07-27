@@ -87,6 +87,23 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 self.assertTrue(image.exists(), image)
                 self.assertGreater(image.stat().st_size, 1_000)
 
+    def test_solution_tables_are_accessible_and_keep_row_numbers(self):
+        tables = [
+            item
+            for item in NATIVE
+            if "mat101-math-table" in item["solutionHtml"]
+        ]
+        self.assertEqual(len(tables), 5)
+        self.assertTrue(
+            all("mat101-table-scroll" in item["solutionHtml"] for item in tables)
+        )
+        exercise = next(item for item in NATIVE if item["id"] == "1.3")
+        html = exercise["solutionHtml"]
+        self.assertIn(">N°</th>", html)
+        self.assertIn(">1</td>", html)
+        self.assertIn(">13</td>", html)
+        self.assertNotIn(">.</td>", html)
+
     def test_difficulty_markers_match_the_source_booklet(self):
         markers = {item["id"]: item["difficulty"] for item in NATIVE}
         self.assertEqual(set(markers.values()), {"*", "**", "***", "*/**", None})
@@ -246,6 +263,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-difficulty-advanced", STYLES)
         self.assertIn(".mat101-tag-filter.is-active", STYLES)
         self.assertIn(".mat101-exercise-tags", STYLES)
+        self.assertIn(".mat101-table-scroll", STYLES)
+        self.assertIn(".mat101-math-table", STYLES)
         self.assertIn(".mat101-statement img", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)

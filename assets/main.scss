@@ -11598,15 +11598,73 @@ body:has(.mat101-library) {
   margin-top: 0.5rem;
 }
 
-.mat101-solution-body table {
+.mat101-table-scroll {
   width: 100%;
-  border-collapse: collapse;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 1.1rem 0;
+  overflow-x: auto;
+  border: 1px solid #c9d9dc;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(24, 64, 72, 0.06);
+  -webkit-overflow-scrolling: touch;
 }
 
-.mat101-solution-body th,
-.mat101-solution-body td {
-  padding: 0.45rem;
-  border: 1px solid var(--mat101-line);
+.mat101-table-scroll:focus-visible {
+  outline: 3px solid rgba(0, 128, 146, 0.24);
+  outline-offset: 3px;
+}
+
+.mat101-solution-body .mat101-math-table {
+  width: 100%;
+  min-width: 34rem;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.mat101-solution-body .mat101-math-table th,
+.mat101-solution-body .mat101-math-table td {
+  padding: 0.7rem 0.75rem;
+  border: 0;
+  border-right: 1px solid #d7e1e3;
+  border-bottom: 1px solid #d7e1e3;
+  vertical-align: middle;
+}
+
+.mat101-solution-body .mat101-math-table th {
+  color: #183f47;
+  background: #eaf4f5;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.mat101-solution-body .mat101-math-table tbody tr:nth-child(even) {
+  background: #f8fbfb;
+}
+
+.mat101-solution-body .mat101-math-table tr > :last-child {
+  border-right: 0;
+}
+
+.mat101-solution-body .mat101-math-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.mat101-solution-body .mat101-math-table th:first-child,
+.mat101-solution-body .mat101-math-table td:first-child {
+  width: 2.75rem;
+  text-align: center !important;
+}
+
+.mat101-solution-body .mat101-row-number {
+  color: #60757a;
+  background: #f1f6f6;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 .mat101-solution-body .center {

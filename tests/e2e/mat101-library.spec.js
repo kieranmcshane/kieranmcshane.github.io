@@ -67,6 +67,26 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
   });
 
+  test("renders the complex-number results table with useful row numbers", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("1.3");
+
+    const exercise = page.locator("#exercice-1-3");
+    await exercise.locator(":scope > summary").click();
+    const solution = exercise.locator(".mat101-native-solution");
+    await solution.locator(":scope > summary").click();
+
+    const table = solution.locator(".mat101-math-table");
+    await expect(table).toBeVisible();
+    await expect(table.locator("thead")).toContainText("N°");
+    await expect(table.locator(".mat101-row-number")).toHaveCount(13);
+    await expect(table.locator(".mat101-row-number").first()).toHaveText("1");
+    await expect(table.locator(".mat101-row-number").last()).toHaveText("13");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   test("keeps provenance and the exercise-specific correction route visible", async ({
     page,
   }) => {
