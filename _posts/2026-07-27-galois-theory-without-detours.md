@@ -241,9 +241,9 @@ $$
 
 The identity fixes all of $L$, while the whole group fixes only $\mathbb Q$. We have already found the entire correspondence:
 
-| Subgroup $H\leq G$ | Order $|H|$ | Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |
+| Subgroup $H\leq G$ | Order $\lvert H\rvert$ | Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |
 |---|---:|---|---:|
-| $\{1\}$ | $1$ | $\mathbb Q(\sqrt2,\sqrt3)$ | $4$ |
+| $\lbrace 1\rbrace$ | $1$ | $\mathbb Q(\sqrt2,\sqrt3)$ | $4$ |
 | $\langle\sigma\rangle$ | $2$ | $\mathbb Q(\sqrt3)$ | $2$ |
 | $\langle\tau\rangle$ | $2$ | $\mathbb Q(\sqrt2)$ | $2$ |
 | $\langle\sigma\tau\rangle$ | $2$ | $\mathbb Q(\sqrt6)$ | $2$ |
@@ -1695,7 +1695,7 @@ Thus the complete list is:
 
 | Subgroup type | Number | Order |
 |---|---:|---:|
-| $\{1\}$ | $1$ | $1$ |
+| $\lbrace 1\rbrace$ | $1$ | $1$ |
 | $C_2$ | $3$ | $2$ |
 | $C_3$ | $4$ | $3$ |
 | $V_4$ | $1$ | $4$ |
@@ -1719,7 +1719,7 @@ Therefore:
 
 | Subgroup $H$ | Number of such fields | $[L:L^H]$ | $[L^H:K]$ |
 |---|---:|---:|---:|
-| $\{1\}$ | $1$ | $1$ | $12$ |
+| $\lbrace 1\rbrace$ | $1$ | $1$ | $12$ |
 | $C_2$ | $3$ | $2$ | $6$ |
 | $C_3$ | $4$ | $3$ | $4$ |
 | $V_4$ | $1$ | $4$ | $3$ |

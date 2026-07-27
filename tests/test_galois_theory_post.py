@@ -41,6 +41,22 @@ class GaloisTheoryPostTests(unittest.TestCase):
             with self.subTest(expression=expression):
                 self.assertIn(expression, self.text)
 
+    def test_markdown_tables_do_not_use_raw_absolute_value_bars(self) -> None:
+        table_lines = (
+            line for line in self.text.splitlines() if line.startswith("|")
+        )
+        for line in table_lines:
+            with self.subTest(line=line):
+                self.assertNotIn("$|", line)
+                self.assertNotIn("|$", line)
+                self.assertNotIn(r"$\{", line)
+        self.assertIn(
+            r"| Subgroup $H\leq G$ | Order $\lvert H\rvert$ "
+            r"| Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |",
+            self.text,
+        )
+        self.assertEqual(self.text.count(r"| $\lbrace 1\rbrace$ |"), 3)
+
     def test_proof_core_contains_required_lemmas(self) -> None:
         self.assertIn("Dedekind independence lemma", self.text)
         self.assertIn("Artin's fixed-field theorem", self.text)
