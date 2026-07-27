@@ -8,6 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 POST = ROOT / "_posts" / "2026-07-27-sha1-sha256-certificate-signatures.md"
 STYLES = ROOT / "assets" / "main.scss"
+SOURCE_EXCERPTS = ROOT / "assets" / "images" / "source-excerpts"
 
 
 class ShaSignaturePostTests(unittest.TestCase):
@@ -60,10 +61,10 @@ class ShaSignaturePostTests(unittest.TestCase):
                 self.assertIn(link, self.text)
 
     def test_only_essential_primary_sources_receive_previews(self) -> None:
-        self.assertEqual(self.text.count('<figure class="source-preview">'), 5)
-        self.assertEqual(self.text.count("<figcaption><strong>What to notice.</strong>"), 5)
-        self.assertEqual(self.text.count('target="_blank" rel="noopener"'), 5)
-        self.assertGreaterEqual(self.text.count("<mark>"), 7)
+        self.assertEqual(self.text.count('<figure class="source-facsimile '), 5)
+        self.assertEqual(self.text.count("<figcaption><strong>Source excerpt.</strong>"), 5)
+        self.assertEqual(self.text.count("Yellow highlighting added."), 5)
+        self.assertEqual(self.text.count('class="source-facsimile-link"'), 5)
 
         preview_sources = (
             "csrc.nist.gov/Projects/hash-functions#security-strengths",
@@ -76,14 +77,28 @@ class ShaSignaturePostTests(unittest.TestCase):
             with self.subTest(source=source):
                 self.assertIn(source, self.text)
 
+        excerpt_files = (
+            "sha256-nist-security-strengths.png",
+            "sha1-shattered-abstract.png",
+            "sha256-rfc8017-encoding.png",
+            "sha256-rfc5280-certificate.png",
+            "sha256-apple-tls-requirement.png",
+        )
+        for file_name in excerpt_files:
+            with self.subTest(file_name=file_name):
+                path = SOURCE_EXCERPTS / file_name
+                self.assertTrue(path.is_file())
+                self.assertGreater(path.stat().st_size, 20_000)
+                self.assertIn(file_name, self.text)
+
     def test_source_previews_have_responsive_book_like_styles(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
         required_rules = (
-            ".source-preview-paper",
-            ".source-preview-link:focus-visible",
-            ".source-preview-header",
-            ".source-preview mark",
-            ".source-preview-code",
+            ".source-facsimile-viewport",
+            ".source-facsimile-link:focus-visible",
+            ".source-facsimile img",
+            ".source-facsimile--paper",
+            ".source-facsimile--wide .source-facsimile-link",
             "@media (max-width: 560px)",
         )
         for rule in required_rules:
