@@ -101,6 +101,28 @@ $$
 
 The digest length therefore suggests $80$ bits of generic collision resistance for SHA-1 and $128$ bits for SHA-256. These numbers describe an idealized random function. A concrete hash algorithm can be weaker if its internal structure supplies a shortcut.
 
+### What the number 256 actually controls
+
+The number in “SHA-256” is the digest length:
+
+$$
+256\ \text{bits}
+=
+32\ \text{bytes}
+=
+64\ \text{hexadecimal digits}.
+$$
+
+The last equality holds because one hexadecimal digit encodes four bits. It is convenient, but it is not a security theorem. The security estimates come from the search problem:
+
+| Task against an ideal SHA-256-like function | Generic classical scale |
+|---|---:|
+| Find a preimage of a prescribed digest | $2^{256}$ |
+| Find any collision | $2^{128}$ |
+| Guess a uniformly random 256-bit value | probability $2^{-256}$ per attempt |
+
+The distinction explains why “256-bit hash” should not automatically be read as “256 bits of security.” NIST’s [hash-function security table](https://csrc.nist.gov/Projects/hash-functions) assigns SHA-256 a collision strength of $128$ bits and a preimage strength of $256$ bits under its stated model.
+
 ## The iterated structure
 
 SHA-1 and SHA-256 both pad the message, divide it into $512$-bit blocks, and update a fixed-size state. In schematic form,
@@ -144,6 +166,71 @@ $$
 and $\Sigma_0,\Sigma_1$ combine rotations of a $32$-bit word. The Boolean functions are defined in [Section 4.1.2 of FIPS 180-4](https://csrc.nist.gov/files/pubs/fips/180-4/final/docs/fips180-4.pdf#page=14), while the complete SHA-256 round update appears in [Section 6.2](https://csrc.nist.gov/files/pubs/fips/180-4/final/docs/fips180-4.pdf#page=26).
 
 The purpose of these operations is diffusion: a small input difference should spread through the state in a way that is hard to control. Collision cryptanalysis looks for the opposite—a carefully chosen difference whose propagation can be predicted and eventually cancelled.
+
+### The equations in 32-bit C
+
+The round equations translate closely into unsigned 32-bit arithmetic. For example:
+
+```c
+#include <stdint.h>
+
+static inline uint32_t rotr32(uint32_t x, unsigned n) {
+    /* SHA-256 calls this only with 1 <= n < 32. */
+    return (x >> n) | (x << (32u - n));
+}
+
+static inline uint32_t choose(uint32_t x, uint32_t y, uint32_t z) {
+    return (x & y) ^ (~x & z);
+}
+
+static inline uint32_t majority(uint32_t x, uint32_t y, uint32_t z) {
+    return (x & y) ^ (x & z) ^ (y & z);
+}
+
+static inline uint32_t big_sigma_1(uint32_t x) {
+    return rotr32(x, 6) ^ rotr32(x, 11) ^ rotr32(x, 25);
+}
+```
+
+The type `uint32_t` matters: unsigned overflow implements addition modulo $2^{32}$, exactly as required by the standard. A complete implementation still has to get byte order, padding, the message schedule, all $64$ constants, state updates and arbitrarily long inputs right. The fragment above explains the correspondence with the formulas; it is not a substitute for a reviewed cryptographic library.
+
+A useful end-to-end check is the official [NIST one-block example](https://csrc.nist.gov/csrc/media/projects/cryptographic-standards-and-guidelines/documents/examples/sha256.pdf). It gives
+
+```text
+SHA-256("abc")
+= ba7816bf8f01cfea414140de5dae2223
+  b00361a396177a9cb410ff61f20015ad
+```
+
+Here the three ASCII bytes are followed by the mandatory padding and processed as one $512$-bit block. Reproducing the digest is a necessary implementation check, not evidence that an implementation is secure against side channels or malformed inputs.
+
+### Length extension and why HMAC has two layers
+
+Merkle–Damgård iteration has a consequence that is separate from collisions. Given $H(M)$ and the length of $M$, an attacker can use the published digest as a new chaining state and compute
+
+$$
+H\!\left(M\,\|\,\operatorname{pad}(M)\,\|\,X\right)
+$$
+
+for a chosen suffix $X$, without knowing $M$. This is a **length-extension attack**. It does not invert the hash and does not produce two equal digests. It shows instead why the naive construction
+
+$$
+\operatorname{MAC}_K(M)=H(K\|M)
+$$
+
+is not a safe general-purpose message-authentication code when instantiated directly with SHA-256.
+
+HMAC changes the construction:
+
+$$
+\operatorname{HMAC}_K(M)
+=
+H\!\left((K'\oplus\mathrm{opad})
+\,\|\,
+H((K'\oplus\mathrm{ipad})\|M)\right).
+$$
+
+The inner digest is therefore not exposed as the final state of a message that an attacker can simply continue. The precise definition, including the fixed `ipad` and `opad` blocks, appears in [Section 2 of RFC 2104](https://www.rfc-editor.org/rfc/rfc2104.html#section-2). This is another reason that “use SHA-256” is incomplete advice: the surrounding construction determines what security property is obtained.
 
 ## What failed in SHA-1
 
@@ -261,6 +348,50 @@ Nor should plain SHA-256 be used for every task involving a digest:
 
 “Use SHA-256” is consequently incomplete advice. The right statement is that SHA-256 is a currently approved cryptographic hash function, suitable as one component inside a protocol whose other components and encodings are also chosen correctly.
 
+## Bitcoin: hashing and signing are still different jobs
+
+Bitcoin is a useful example precisely because SHA-256 appears in several roles while remaining distinct from the signature algorithm.
+
+A Bitcoin block header is an $80$-byte record containing, among other fields, the previous block hash, a Merkle root and a nonce. The consensus rules apply SHA-256 twice:
+
+$$
+\operatorname{SHA256d}(x)
+=
+\operatorname{SHA256}(\operatorname{SHA256}(x)).
+$$
+
+The [Bitcoin block-header specification](https://developer.bitcoin.org/reference/block_chain.html#block-headers) records both the $80$-byte layout and this double-SHA-256 convention. Proof of work asks for a header whose interpreted hash is at most a target $T$. Under the idealized uniform-hash model, one trial succeeds with probability
+
+$$
+p=\frac{\lfloor T\rfloor+1}{2^{256}}.
+$$
+
+If successive nonce trials are modelled as independent, the number $N$ of trials until success is geometric:
+
+$$
+\Pr(N=k)=(1-p)^{k-1}p,
+\qquad
+\mathbb E[N]=\frac1p.
+$$
+
+This is a repeated preimage-style threshold search, not a birthday collision search. The double application of SHA-256 does not turn a $256$-bit output into a $512$-bit output, and it does not change the generic $2^{128}$ collision scale.
+
+Transaction authorization is another layer. Bitcoin originally used ECDSA over the curve `secp256k1`; Taproot also introduced Schnorr signatures specified in [BIP 340](https://bips.dev/340/). BIP 340 uses tagged SHA-256 internally for domain separation, but SHA-256 itself is still not the signature. The same conceptual separation seen in
+
+```text
+sha256WithRSAEncryption
+```
+
+therefore reappears in a different protocol: a hash function supplies digests and challenges, while elliptic-curve algebra supplies possession of a signing key.
+
+## What an ideal quantum computer would change
+
+The usual quantum estimates also depend on which inverse problem is considered. [Grover search](https://arxiv.org/abs/quant-ph/9605043) reduces an unstructured preimage search from order $2^n$ to order $2^{n/2}$ quantum queries. The [Brassard–Høyer–Tapp collision algorithm](https://arxiv.org/abs/quant-ph/9705002) uses order $2^{n/3}$ queries in its black-box model. For $n=256$, these idealized exponents become $128$ for preimages and approximately $85.3$ for collisions.
+
+These are query-complexity statements, not forecasts of a practical machine: circuit depth, error correction and quantum memory matter. In particular, the collision algorithm’s resource requirements make the slogan “quantum computers divide every hash exponent by two” false.
+
+The more immediate conceptual contrast is with public-key cryptography. A sufficiently capable fault-tolerant quantum computer running Shor’s algorithm would attack the number-theoretic problem behind RSA and the discrete-logarithm problem behind elliptic-curve signatures. It would not make SHA-256 freely invertible. A future certificate migration must therefore replace the signature primitive, not merely lengthen its hash output.
+
 ## The practical conclusion
 
 The change
@@ -285,5 +416,10 @@ The line is short, but reading it correctly requires keeping four questions sepa
 - Marc Stevens, Elie Bursztein, Pierre Karpman, Ange Albertini and Yarik Markov, [*The First Collision for Full SHA-1*](https://shattered.io/static/shattered.pdf), 2017.
 - K. Moriarty et al., [*PKCS #1: RSA Cryptography Specifications Version 2.2*, RFC 8017](https://www.rfc-editor.org/rfc/rfc8017.html), 2016.
 - D. Cooper et al., [*Internet X.509 Public Key Infrastructure Certificate and CRL Profile*, RFC 5280](https://www.rfc-editor.org/rfc/rfc5280.html), 2008.
+- H. Krawczyk, M. Bellare and R. Canetti, [*HMAC: Keyed-Hashing for Message Authentication*, RFC 2104](https://www.rfc-editor.org/rfc/rfc2104.html), 1997.
+- Satoshi Nakamoto, [*Bitcoin: A Peer-to-Peer Electronic Cash System*](https://bitcoin.org/bitcoin.pdf), 2008.
+- P. Wuille, J. Nick and T. Ruffing, [*BIP 340: Schnorr Signatures for secp256k1*](https://bips.dev/340/).
+- L. K. Grover, [“A Fast Quantum Mechanical Algorithm for Database Search”](https://arxiv.org/abs/quant-ph/9605043), 1996.
+- G. Brassard, P. Høyer and A. Tapp, [“Quantum Algorithm for the Collision Problem”](https://arxiv.org/abs/quant-ph/9705002), 1997.
 - Apple, [“Available trusted root certificates for Apple operating systems” — TLS certificate requirements](https://support.apple.com/en-gb/103769).
 - Apple, [“Intro to certificate management for Apple devices”](https://support.apple.com/guide/deployment/intro-to-certificate-management-depb5eff8914/web).
