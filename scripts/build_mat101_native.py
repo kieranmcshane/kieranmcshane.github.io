@@ -68,6 +68,14 @@ SOLUTION_HEADING = re.compile(
     r"(.*?)(?=<h[12]\b|\Z)",
     re.DOTALL,
 )
+TABLE_BLOCK = re.compile(r"<table>.*?</table>", re.DOTALL)
+EMPTY_FIRST_HEADER = re.compile(
+    r"(<thead>\s*<tr>\s*)<th([^>]*)></th>",
+    re.DOTALL,
+)
+DOT_NUMBER_CELL = re.compile(
+    r'<td style="text-align: left;">\.</td>'
+)
 
 
 def run(*args: str, cwd: Path | None = None) -> None:
@@ -300,10 +308,48 @@ def build_solution_html() -> dict[str, str]:
             str(html_path),
         )
         html = html_path.read_text()
-    solutions = {
-        match.group(1): match.group(2).strip()
-        for match in SOLUTION_HEADING.finditer(html)
-    }
+    def enhance_table(match: re.Match[str]) -> str:
+        table = match.group(0)
+        dot_cells = DOT_NUMBER_CELL.findall(table)
+        if dot_cells and EMPTY_FIRST_HEADER.search(table):
+            table = EMPTY_FIRST_HEADER.sub(
+                r"\1<th\2>N°</th>",
+                table,
+                count=1,
+            )
+            row_number = 0
+
+            def restore_row_number(_: re.Match[str]) -> str:
+                nonlocal row_number
+                row_number += 1
+                return (
+                    '<td class="mat101-row-number" '
+                    'style="text-align: center;">'
+                    f"{row_number}"
+                    "</td>"
+                )
+
+            table = DOT_NUMBER_CELL.sub(restore_row_number, table)
+
+        table = table.replace(
+            "<table>",
+            '<table class="mat101-math-table">',
+            1,
+        )
+        table = table.replace("<th ", '<th scope="col" ')
+        return (
+            '<div class="mat101-table-scroll" role="region" '
+            'aria-label="Tableau de résultats mathématiques" tabindex="0">\n'
+            f"{table}\n"
+            "</div>"
+        )
+
+    solutions = {}
+    for match in SOLUTION_HEADING.finditer(html):
+        solutions[match.group(1)] = TABLE_BLOCK.sub(
+            enhance_table,
+            match.group(2).strip(),
+        )
     if len(solutions) != 103:
         raise RuntimeError(f"Expected 103 solution blocks, found {len(solutions)}")
     return solutions
