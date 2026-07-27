@@ -415,7 +415,53 @@ $$
 
 This is a repeated preimage-style threshold search, not a birthday collision search. The double application of SHA-256 does not turn a $256$-bit output into a $512$-bit output, and it does not change the generic $2^{128}$ collision scale.
 
-Transaction authorization is another layer. Bitcoin originally used ECDSA over the curve `secp256k1`; Taproot also introduced Schnorr signatures specified in [BIP 340](https://bips.dev/340/). BIP 340 uses tagged SHA-256 internally for domain separation, but SHA-256 itself is still not the signature. The same conceptual separation seen in
+### ECDSA in one calculation
+
+Fix an elliptic-curve point $G$ of prime order $n$. An ECDSA private key is an integer $d\in\{1,\ldots,n-1\}$, and the corresponding public key is
+
+$$
+Q=dG.
+$$
+
+To sign a message $M$, derive an integer $z$ from its hash, choose a secret per-message value $k\in\{1,\ldots,n-1\}$, and compute
+
+$$
+R=kG,
+\qquad
+r=x(R)\bmod n,
+\qquad
+s=k^{-1}(z+rd)\bmod n.
+$$
+
+If $r=0$ or $s=0$, the signer chooses another $k$. Otherwise, the signature is the pair $(r,s)$. A verifier computes
+
+$$
+u_1=zs^{-1}\bmod n,
+\qquad
+u_2=rs^{-1}\bmod n,
+$$
+
+and accepts when the $x$-coordinate of
+
+$$
+u_1G+u_2Q
+$$
+
+reduces to $r$ modulo $n$. Indeed,
+
+$$
+u_1G+u_2Q
+=
+s^{-1}(z+rd)G
+=
+kG
+=
+R.
+$$
+
+The secret value $k$ must not be reused: two signatures with the same $k$ can reveal the private key. [SEC 1, Sections 4.1.3–4.1.4](https://www.secg.org/sec1-v2.pdf#page=51) specifies the signing and verification operations. It does not prescribe one particular curve. [SEC 2, Section 2.4.1](https://www.secg.org/sec2-v2.pdf#page=13) separately specifies the field, curve, base point and order called `secp256k1`. Thus **ECDSA is the signature scheme; `secp256k1` is the domain-parameter choice on which Bitcoin instantiates it**.
+
+Transaction authorization is therefore another layer. At the mathematical level, Bitcoin historically—and still for many outputs—uses ECDSA with the `secp256k1` parameters. Taproot also introduced Schnorr signatures specified in [BIP 340](https://bips.dev/340/). BIP 340 uses tagged SHA-256 internally for domain separation, but SHA-256 itself is still not the signature. The same conceptual separation seen in
 
 ```text
 sha256WithRSAEncryption
@@ -457,6 +503,8 @@ The line is short, but reading it correctly requires keeping four questions sepa
 - D. Cooper et al., [*Internet X.509 Public Key Infrastructure Certificate and CRL Profile*, RFC 5280](https://www.rfc-editor.org/rfc/rfc5280.html), 2008.
 - H. Krawczyk, M. Bellare and R. Canetti, [*HMAC: Keyed-Hashing for Message Authentication*, RFC 2104](https://www.rfc-editor.org/rfc/rfc2104.html), 1997.
 - Satoshi Nakamoto, [*Bitcoin: A Peer-to-Peer Electronic Cash System*](https://bitcoin.org/bitcoin.pdf), 2008.
+- Certicom Research, [*SEC 1: Elliptic Curve Cryptography*, Version 2.0, Sections 4.1.3–4.1.4](https://www.secg.org/sec1-v2.pdf#page=51), 2009.
+- Certicom Research, [*SEC 2: Recommended Elliptic Curve Domain Parameters*, Version 2.0, Section 2.4.1](https://www.secg.org/sec2-v2.pdf#page=13), 2010.
 - P. Wuille, J. Nick and T. Ruffing, [*BIP 340: Schnorr Signatures for secp256k1*](https://bips.dev/340/).
 - L. K. Grover, [“A Fast Quantum Mechanical Algorithm for Database Search”](https://arxiv.org/abs/quant-ph/9605043), 1996.
 - G. Brassard, P. Høyer and A. Tapp, [“Quantum Algorithm for the Collision Problem”](https://arxiv.org/abs/quant-ph/9705002), 1997.
