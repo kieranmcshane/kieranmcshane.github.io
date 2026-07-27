@@ -8,6 +8,9 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 POST = ROOT / "_posts" / "2026-07-27-galois-theory-without-detours.md"
+HEAD = ROOT / "_includes" / "head-custom.html"
+NAVIGATION = ROOT / "assets" / "js" / "correction-navigation.js"
+STYLES = ROOT / "assets" / "main.scss"
 IMAGES = (
     ROOT / "assets" / "images" / "galois-v4-correspondence.svg",
     ROOT / "assets" / "images" / "galois-a4-correspondence.svg",
@@ -40,6 +43,53 @@ class GaloisTheoryPostTests(unittest.TestCase):
         for expression in required:
             with self.subTest(expression=expression):
                 self.assertIn(expression, self.text)
+
+    def test_markdown_tables_do_not_use_raw_absolute_value_bars(self) -> None:
+        table_lines = (
+            line for line in self.text.splitlines() if line.startswith("|")
+        )
+        for line in table_lines:
+            with self.subTest(line=line):
+                self.assertNotIn("$|", line)
+                self.assertNotIn("|$", line)
+                self.assertNotIn(r"$\{", line)
+        self.assertIn(
+            r"| Subgroup $H\leq G$ | Order $\lvert H\rvert$ "
+            r"| Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |",
+            self.text,
+        )
+        self.assertEqual(self.text.count(r"| $\lbrace 1\rbrace$ |"), 3)
+
+    def test_interactive_table_of_contents_is_wired_for_long_reading(self) -> None:
+        links = re.findall(r'<a href="#([^"]+)">', self.text)
+        self.assertGreaterEqual(len(links), 16)
+        self.assertEqual(len(links), len(set(links)))
+        for target in (
+            "the-destination",
+            "proof-core-i-independence-of-homomorphisms",
+            "decoding-an-a4-lattice",
+            "comprehension-checks-with-solutions",
+            "further-reading",
+        ):
+            with self.subTest(target=target):
+                self.assertIn(target, links)
+
+        self.assertIn('data-section-navigation', self.text)
+        self.assertIn("longform-toc-details", self.text)
+        self.assertIn(
+            "page.url == '/2026/07/27/galois-theory-without-detours/'",
+            HEAD.read_text(encoding="utf-8"),
+        )
+        navigation = NAVIGATION.read_text(encoding="utf-8")
+        self.assertIn("configureResponsiveLongformIndex", navigation)
+        self.assertIn("initializeSectionHighlighting(article, navigation)", navigation)
+        self.assertIn(
+            "document.getElementById(link.getAttribute('href').slice(1))",
+            navigation,
+        )
+        styles = STYLES.read_text(encoding="utf-8")
+        self.assertIn(".longform-reading-layout", styles)
+        self.assertIn(".longform-toc a[aria-current=\"location\"]", styles)
 
     def test_proof_core_contains_required_lemmas(self) -> None:
         self.assertIn("Dedekind independence lemma", self.text)
