@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import unittest
+import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -159,6 +160,26 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", tex)
         self.assertIn("contenu mathématique non relu intégralement", tex)
         self.assertNotIn(r"\definecolor{UGAblue}", tex)
+
+    def test_solution_source_follows_the_redaction_guidelines(self):
+        tex = SOLUTION_TEX.read_text()
+        self.assertIn(
+            r"Soient $n\in\N^*$, $\rho>0$ et $\theta\in\R$",
+            tex,
+        )
+        self.assertIn("La loi de De Morgan montre", tex)
+        self.assertNotIn(r"x>0\Rightarrow f(x)>0", tex)
+        self.assertNotIn(r"P(i,j)\iff", tex)
+        self.assertNotIn(
+            r"f(x)\geq\frac32\iff x\in",
+            tex,
+        )
+
+        with zipfile.ZipFile(SOLUTION_ARCHIVE) as archive:
+            autonomous = archive.read(
+                "Corrige_exercices_MAT101_autonome.tex"
+            ).decode()
+        self.assertEqual(autonomous, tex)
 
     def test_mobile_layout_keeps_exercises_accessible(self):
         self.assertIn(".mat101-native-list", STYLES)
