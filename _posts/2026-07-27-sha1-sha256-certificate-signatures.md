@@ -123,20 +123,13 @@ The last equality holds because one hexadecimal digit encodes four bits. It is c
 
 The distinction explains why “256-bit hash” should not automatically be read as “256 bits of security.” NIST’s security-strength table assigns SHA-256 a collision strength of $128$ bits and a preimage strength of $256$ bits under its stated model.
 
-<figure class="source-preview">
-  <a class="source-preview-link" href="https://csrc.nist.gov/Projects/hash-functions#security-strengths-of-approved-hash-functions" target="_blank" rel="noopener" aria-label="Open NIST’s security-strength table for approved hash functions">
-    <div class="source-preview-paper">
-      <div class="source-preview-header">
-        <span class="source-preview-source">NIST · Security strengths of approved hash functions</span>
-        <span class="source-preview-open" aria-hidden="true">Open source ↗</span>
-      </div>
-      <div class="source-preview-table" role="presentation">
-        <span>Algorithm</span><span>Collision</span><span>Preimage</span>
-        <strong>SHA-256</strong><mark>128 bits</mark><mark>256 bits</mark>
-      </div>
-    </div>
-  </a>
-  <figcaption><strong>What to notice.</strong> The output has 256 bits, but generic collisions require about 128 bits of work; prescribed preimages retain the 256-bit scale.</figcaption>
+<figure class="source-facsimile source-facsimile--wide">
+  <div class="source-facsimile-viewport">
+    <a class="source-facsimile-link" href="https://csrc.nist.gov/Projects/hash-functions#security-strengths-of-approved-hash-functions" target="_blank" rel="noopener" aria-label="Open NIST’s complete security-strength table">
+      <img src="{{ '/assets/images/source-excerpts/sha256-nist-security-strengths.png' | relative_url }}" alt="Facsimile of NIST’s security-strength table. The highlighted SHA-256 row gives 128 bits for collision resistance and 256 bits for preimage resistance." loading="lazy" decoding="async">
+    </a>
+  </div>
+  <figcaption><strong>Source excerpt.</strong> NIST’s table separates the two figures: the highlighted SHA-256 row gives 128-bit collision strength and 256-bit preimage strength. Yellow highlighting added. <a href="https://csrc.nist.gov/Projects/hash-functions#security-strengths-of-approved-hash-functions" target="_blank" rel="noopener">Open the complete table ↗</a></figcaption>
 </figure>
 
 ## The iterated structure
@@ -252,18 +245,13 @@ The inner digest is therefore not exposed as the final state of a message that a
 
 SHA-1’s $160$-bit output would suggest a generic collision cost around $2^{80}$. Its round structure permits substantially better differential attacks. In 2017, Marc Stevens, Elie Bursztein, Pierre Karpman, Ange Albertini and Yarik Markov produced two different PDF files with exactly the same SHA-1 digest. Their SHAttered paper estimates the computation at roughly $2^{63.1}$ SHA-1 evaluations.
 
-<figure class="source-preview">
-  <a class="source-preview-link" href="https://shattered.io/static/shattered.pdf#page=2" target="_blank" rel="noopener" aria-label="Open the SHAttered paper at its statement of the practical SHA-1 collision">
-    <div class="source-preview-paper">
-      <div class="source-preview-header">
-        <span class="source-preview-source">Stevens et al. · The first collision for full SHA-1</span>
-        <span class="source-preview-open" aria-hidden="true">Open paper ↗</span>
-      </div>
-      <p class="source-preview-excerpt">The paper exhibits <mark>the first practical collision for the full SHA-1 function</mark>.</p>
-      <p class="source-preview-result">Estimated work: <mark>2<sup>63.1</sup> SHA-1 compressions</mark></p>
-    </div>
-  </a>
-  <figcaption><strong>What to notice.</strong> This is a collision result: two distinct files share one digest. It is not a preimage attack and it does not recover a signing key.</figcaption>
+<figure class="source-facsimile source-facsimile--paper">
+  <div class="source-facsimile-viewport">
+    <a class="source-facsimile-link" href="https://shattered.io/static/shattered.pdf#page=2" target="_blank" rel="noopener" aria-label="Open the complete SHAttered paper">
+      <img src="{{ '/assets/images/source-excerpts/sha1-shattered-abstract.png' | relative_url }}" alt="Facsimile of the SHAttered paper’s title and abstract. Highlighted passages announce the first practical collision for full SHA-1 and estimate its cost at 2 to the power 63.1 SHA-1 compressions." loading="lazy" decoding="async">
+    </a>
+  </div>
+  <figcaption><strong>Source excerpt.</strong> The abstract of Stevens and coauthors reports the first practical collision for full SHA-1 and estimates a cost of about $2^{63.1}$ compression calls. This is a collision result, not a preimage attack or key recovery. Yellow highlighting added. <a href="https://shattered.io/static/shattered.pdf#page=2" target="_blank" rel="noopener">Open the complete paper ↗</a></figcaption>
 </figure>
 
 That result did not produce arbitrary preimages, reveal private RSA keys or invert SHA-1 in general. It did something narrower and decisive: it exhibited a practical collision for the full hash function. Collision resistance is precisely the property needed to prevent one signature from being transferred between two messages with the same digest.
@@ -300,22 +288,13 @@ $$
 
 The exact signature procedure is given in [Section 8.2 of PKCS #1](https://www.rfc-editor.org/rfc/rfc8017.html#section-8.2); its message encoding is specified separately in Section 9.2.
 
-<figure class="source-preview">
-  <a class="source-preview-link" href="https://www.rfc-editor.org/rfc/rfc8017.html#section-9.2" target="_blank" rel="noopener" aria-label="Open RFC 8017 Section 9.2 on PKCS number 1 version 1.5 message encoding">
-    <div class="source-preview-paper">
-      <div class="source-preview-header">
-        <span class="source-preview-source">RFC 8017 · §9.2 · EMSA-PKCS1-v1_5</span>
-        <span class="source-preview-open" aria-hidden="true">Open standard ↗</span>
-      </div>
-      <pre class="source-preview-code"><code>DigestInfo ::= SEQUENCE {
-    <mark>digestAlgorithm</mark>  AlgorithmIdentifier,
-    <mark>digest</mark>           OCTET STRING
-}
-
-EM = 0x00 || 0x01 || PS || 0x00 || T</code></pre>
-    </div>
-  </a>
-  <figcaption><strong>What to notice.</strong> RSA signs a structured encoding, not a bare digest. The encoded value identifies the hash algorithm as well as carrying the hash itself.</figcaption>
+<figure class="source-facsimile source-facsimile--wide">
+  <div class="source-facsimile-viewport">
+    <a class="source-facsimile-link" href="https://www.rfc-editor.org/rfc/rfc8017.html#section-9.2" target="_blank" rel="noopener" aria-label="Open RFC 8017 Section 9.2">
+      <img src="{{ '/assets/images/source-excerpts/sha256-rfc8017-encoding.png' | relative_url }}" alt="Facsimile of RFC 8017 Section 9.2. The highlighted lines name digestAlgorithm inside DigestInfo and show the padded encoded message EM." loading="lazy" decoding="async">
+    </a>
+  </div>
+  <figcaption><strong>Source excerpt.</strong> RFC 8017 names the hash algorithm inside <code>DigestInfo</code>, then places that structure inside the padded encoded message <code>EM</code>. RSA therefore signs neither the original message nor a bare hash. Yellow highlighting added. <a href="https://www.rfc-editor.org/rfc/rfc8017.html#section-9.2" target="_blank" rel="noopener">Open the complete section ↗</a></figcaption>
 </figure>
 
 Now suppose an attacker constructs $M\neq M'$ with
@@ -340,21 +319,13 @@ This does not mean that every hash collision is immediately an exploit. The atta
 
 An X.509 certificate has three top-level fields. RFC 5280 gives their precise ASN.1 structure:
 
-<figure class="source-preview">
-  <a class="source-preview-link" href="https://www.rfc-editor.org/rfc/rfc5280.html#section-4.1" target="_blank" rel="noopener" aria-label="Open RFC 5280 Section 4.1 on the basic fields of an X.509 certificate">
-    <div class="source-preview-paper">
-      <div class="source-preview-header">
-        <span class="source-preview-source">RFC 5280 · §4.1 · Basic certificate fields</span>
-        <span class="source-preview-open" aria-hidden="true">Open standard ↗</span>
-      </div>
-      <pre class="source-preview-code"><code>Certificate ::= SEQUENCE {
-    <mark>tbsCertificate</mark>      TBSCertificate,
-    signatureAlgorithm  AlgorithmIdentifier,
-    signatureValue      BIT STRING
-}</code></pre>
-    </div>
-  </a>
-  <figcaption><strong>What to notice.</strong> The issuer signs the DER encoding of <code>tbsCertificate</code>. The algorithm identifier and resulting signature are stored beside it.</figcaption>
+<figure class="source-facsimile source-facsimile--wide">
+  <div class="source-facsimile-viewport">
+    <a class="source-facsimile-link" href="https://www.rfc-editor.org/rfc/rfc5280.html#section-4.1" target="_blank" rel="noopener" aria-label="Open RFC 5280 Section 4.1">
+      <img src="{{ '/assets/images/source-excerpts/sha256-rfc5280-certificate.png' | relative_url }}" alt="Facsimile of RFC 5280 Section 4.1. The highlighted tbsCertificate field is followed by signatureAlgorithm and signatureValue." loading="lazy" decoding="async">
+    </a>
+  </div>
+  <figcaption><strong>Source excerpt.</strong> RFC 5280 places <code>tbsCertificate</code>, <code>signatureAlgorithm</code> and <code>signatureValue</code> side by side. The DER encoding of <code>tbsCertificate</code> is the part the issuer signs. Yellow highlighting added. <a href="https://www.rfc-editor.org/rfc/rfc5280.html#section-4.1" target="_blank" rel="noopener">Open the complete section ↗</a></figcaption>
 </figure>
 
 The `tbsCertificate`—“to be signed certificate”—contains the subject, issuer, validity interval, public key and extensions. The issuer hashes and signs that structure. The fields `signatureAlgorithm` and `signatureValue` tell the verifier how.
@@ -378,18 +349,13 @@ A self-signed certificate uses its own private key for the signature, so its sub
 
 For Apple clients, the choice of hash is not merely cosmetic. Apple’s published TLS certificate requirements make the migration rule explicit:
 
-<figure class="source-preview">
-  <a class="source-preview-link" href="https://support.apple.com/en-gb/103769" target="_blank" rel="noopener" aria-label="Open Apple’s requirements for trusted TLS certificates">
-    <div class="source-preview-paper">
-      <div class="source-preview-header">
-        <span class="source-preview-source">Apple · Requirements for trusted TLS certificates</span>
-        <span class="source-preview-open" aria-hidden="true">Open guidance ↗</span>
-      </div>
-      <p class="source-preview-excerpt"><mark>TLS server certificates must use SHA-2.</mark></p>
-      <p class="source-preview-excerpt"><mark>SHA-1-signed TLS server certificates are no longer trusted.</mark></p>
-    </div>
-  </a>
-  <figcaption><strong>What to notice.</strong> This is a client trust requirement. It does not imply that SHA-1 is the cause of every local connection failure.</figcaption>
+<figure class="source-facsimile source-facsimile--wide">
+  <div class="source-facsimile-viewport">
+    <a class="source-facsimile-link" href="https://support.apple.com/en-gb/103769" target="_blank" rel="noopener" aria-label="Open Apple’s complete requirements for trusted TLS certificates">
+      <img src="{{ '/assets/images/source-excerpts/sha256-apple-tls-requirement.png' | relative_url }}" alt="Facsimile of Apple’s TLS certificate requirements. The highlighted paragraph requires a SHA-2-family certificate signature and says SHA-1-signed TLS certificates are not trusted." loading="lazy" decoding="async">
+    </a>
+  </div>
+  <figcaption><strong>Source excerpt.</strong> Apple requires a SHA-2-family signature for trusted TLS certificates and states that SHA-1-signed TLS certificates are not trusted. This is a client trust policy, not a general diagnosis of connection failure. Yellow highlighting added. <a href="https://support.apple.com/en-gb/103769" target="_blank" rel="noopener">Open the complete guidance ↗</a></figcaption>
 </figure>
 
 An old SHA-1 certificate is therefore an independent compatibility and security problem worth removing. It is not, by itself, a diagnosis of the entire connection.
