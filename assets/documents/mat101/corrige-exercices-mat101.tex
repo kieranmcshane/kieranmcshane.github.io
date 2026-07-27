@@ -537,12 +537,11 @@ On calcule le discriminant dans $\C$ et l'on choisit l'une de ses racines carré
 \end{corrige}
 
 \begin{corrige}{1.12}
-La formule générale utilisée est
+Soient $n\in\N^*$, $\rho>0$ et $\theta\in\R$. Les solutions de
+$z^n=\rho\e^{\ii\theta}$ sont les $n$ nombres
 \[
-z^n=\rho\e^{\ii\theta}
-\quad\Longleftrightarrow\quad
-z=\rho^{1/n}\e^{\ii(\theta+2k\pi)/n},
-\qquad k=0,\ldots,n-1.
+z_k=\rho^{1/n}\e^{\ii(\theta+2k\pi)/n},
+\qquad k\in\{0,\ldots,n-1\}.
 \]
 \begin{enumerate}
   \item Les solutions de $z^3=\ii$ sont
@@ -902,12 +901,12 @@ Avec $A=\{1,2,3\}$ et $B=\{-1,0,1\}$ :
 \begin{corrige}{2.4}
 \begin{enumerate}
   \item $\boxed{[2,6[}$.
-  \item $|x|<0{,}5\iff-0{,}5<x<0{,}5$, donc $\boxed{]-0{,}5,0{,}5[}$.
-  \item $|x-2|<0{,}1\iff1{,}9<x<2{,}1$, donc $\boxed{]1{,}9,2{,}1[}$.
-  \item $|x-5|\leq0{,}01$, donc $\boxed{[4{,}99,5{,}01]}$.
-  \item $|x-0{,}1|<0{,}2$, donc $\boxed{]-0{,}1,0{,}3[}$.
-  \item $x^2<3\iff|x|<\sqrt3$, donc $\boxed{]-\sqrt3,\sqrt3[}$.
-  \item $x^4\geq1\iff |x|\geq1$, donc
+  \item La condition $|x|<0{,}5$ signifie $-0{,}5<x<0{,}5$. L'intervalle est donc $\boxed{]-0{,}5,0{,}5[}$.
+  \item La condition $|x-2|<0{,}1$ signifie $1{,}9<x<2{,}1$. L'intervalle est donc $\boxed{]1{,}9,2{,}1[}$.
+  \item La condition $|x-5|\leq0{,}01$ signifie $4{,}99\leq x\leq5{,}01$. L'intervalle est donc $\boxed{[4{,}99,5{,}01]}$.
+  \item La condition $|x-0{,}1|<0{,}2$ signifie $-0{,}1<x<0{,}3$. L'intervalle est donc $\boxed{]-0{,}1,0{,}3[}$.
+  \item L'inégalité $x^2<3$ revient à $|x|<\sqrt3$. L'intervalle est donc $\boxed{]-\sqrt3,\sqrt3[}$.
+  \item L'inégalité $x^4\geq1$ revient à $|x|\geq1$. L'ensemble recherché est
   \[
   \boxed{]-\infty,-1]\cup[1,+\infty[}.
   \]
@@ -920,11 +919,7 @@ Avec $A=\{1,2,3\}$ et $B=\{-1,0,1\}$ :
 
 \begin{corrige}{2.5}
 \begin{enumerate}
-  \item Par définition de la partie entière,
-  \[
-  \lfloor x\rfloor=3\iff3\leq x<4.
-  \]
-  Le résultat est $\boxed{[3,4[}$.
+  \item Par définition de la partie entière, l'égalité $\lfloor x\rfloor=3$ est satisfaite exactement lorsque $3\leq x<4$. Le résultat est $\boxed{[3,4[}$.
 
   \item Les conditions $2\leq\lfloor x\rfloor\leq6$ équivalent à $2\leq x<7$. Le résultat est $\boxed{[2,7[}$.
 
@@ -1054,12 +1049,17 @@ On peut traduire les énoncés comme suit.
 
 \begin{corrige}{2.11}
 \begin{enumerate}
-  \item $\neg(P\land\neg Q)\equiv\boxed{(\neg P)\lor Q}$.
-  \item
+  \item La loi de De Morgan donne
   \[
-  \neg\bigl((P\Rightarrow Q)\land R\bigr)
-  \equiv\neg(P\Rightarrow Q)\lor\neg R
-  \equiv\boxed{(P\land\neg Q)\lor\neg R}.
+  \neg(P\land\neg Q)=\boxed{(\neg P)\lor Q}.
+  \]
+  \item La loi de De Morgan montre que la négation de
+  $(P\Rightarrow Q)\land R$ est
+  $\neg(P\Rightarrow Q)\lor\neg R$. Or l'implication $P\Rightarrow Q$
+  est fausse exactement lorsque $P$ est vraie et $Q$ est fausse. La
+  négation demandée est donc
+  \[
+  \boxed{(P\land\neg Q)\lor\neg R}.
   \]
   \item
   \[
@@ -1198,12 +1198,16 @@ La dernière colonne ne contient que V : l'assertion est une tautologie.
   \]
   Pour $a=2$, l'inéquation initiale devient $3\leq1$.
 
-  \item Les deux membres étant positifs ou nuls, on peut élever au carré :
-  \begin{align*}
-  |3x-1|\leq|x+4|
-  &\iff(3x-1)^2\leq(x+4)^2\\
-  &\iff(2x-5)(4x+3)\leq0.
-  \end{align*}
+  \item Les deux membres étant positifs ou nuls, on peut élever au carré
+  sans changer l'ensemble des solutions. L'inégalité devient
+  \[
+  (3x-1)^2\leq(x+4)^2.
+  \]
+  En faisant passer le membre de droite à gauche et en factorisant, on
+  obtient
+  \[
+  (2x-5)(4x+3)\leq0.
+  \]
   Le produit est négatif ou nul entre ses deux racines, donc
   \[
   \boxed{x\in\left[-\frac34,\frac52\right]}.
@@ -1338,9 +1342,11 @@ La contraposée étant vraie, si $a+b$ est irrationnel, au moins l'un des deux n
 \begin{corrige}{2.25}
 L'équation $\sqrt{x+2}=x$ impose d'abord $x\geq0$. Sous cette condition, on peut élever au carré sans changer l'équation :
 \[
-\sqrt{x+2}=x
-\iff x+2=x^2
-\iff(x-2)(x+1)=0.
+x+2=x^2.
+\]
+Après factorisation, cette dernière équation s'écrit
+\[
+(x-2)(x+1)=0.
 \]
 Les candidats sont $2$ et $-1$, mais seul $2$ satisfait $x\geq0$ et l'équation initiale. L'ensemble des solutions est
 \[
@@ -1710,7 +1716,7 @@ Un sous-ensemble de $\R^2$ est le graphe d'une application définie sur un sous-
   \item Aucune fonction ne convient, car le choix $y=x$ imposerait $f(x)<f(x)$.
   \item L'image de $f$ n'a pas de plus grand élément : toute valeur prise par $f$ est strictement dépassée par une autre. Cela n'impose pas que $f$ soit non bornée.
   \item $f$ est négative ou nulle sur $]-\infty,0]$.
-  \item Toute valeur négative ou nulle ne peut être prise qu'en un point $x\leq0$. Par contraposée, $x>0\Rightarrow f(x)>0$.
+  \item Toute valeur négative ou nulle ne peut être prise qu'en un point $x\leq0$. Par contraposée, si $x>0$, alors $f(x)>0$.
   \item On a $f(x)>0$ pour tout $x>0$ : la fonction est strictement positive sur $]0,+\infty[$. Aucune condition n'est imposée à $f(0)$.
   \item Cette assertion équivaut simplement à $\boxed{f(0)=0}$.
   \item Le seul zéro possible de $f$ est $0$ ; il n'est pas imposé que $f(0)=0$.
@@ -1882,14 +1888,9 @@ Sur $[0,1/2]$, la première branche $2x+1$ prend les valeurs de $[1,2]$. Sur $]1
   \item Chaque branche est injective et leurs images sont disjointes. Ainsi $f$ est injective.
   \item L'union des images est $]0,1[\cup[1,2]=]0,2]$, qui est exactement l'ensemble d'arrivée. La fonction est surjective.
   \item Elle est donc bijective.
-  \item Sur la seconde branche, $f(x)<1$, donc $f(x)\geq3/2$ est impossible. Sur la première branche,
+  \item Sur la seconde branche, $f(x)<1$, donc $f(x)\geq3/2$ est impossible. Sur la première branche, l'inégalité $2x+1\geq3/2$ est satisfaite exactement lorsque $x\geq1/4$. En tenant compte de $x\leq1/2$, l'ensemble des solutions est
   \[
-  2x+1\geq\frac32
-  \iff x\geq\frac14.
-  \]
-  En tenant compte de $x\leq1/2$, on obtient
-  \[
-  \boxed{f(x)\geq\frac32\iff x\in\left[\frac14,\frac12\right]}.
+  \boxed{\left[\frac14,\frac12\right]}.
   \]
 \end{enumerate}
 \end{corrige}
@@ -2693,10 +2694,11 @@ La relation
 \end{corrige}
 
 \begin{corrige}{4.8}
-Pour $j\geq3$, on a $j-u_j\geq j-2\geq1$, donc
+Pour $j\geq3$, on a $j-u_j\geq j-2\geq1$. Comme $i$ et $j-u_j$
+sont strictement positifs, la proposition $P(i,j)$ est vraie exactement
+lorsque
 \[
-P(i,j)\iff \frac1{j-u_j}\leq\frac1i
-\iff j-u_j\geq i.
+j-u_j\geq i.
 \]
 Comme $u_j\in\{0,1,2\}$,
 \[
