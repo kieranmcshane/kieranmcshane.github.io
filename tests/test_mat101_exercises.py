@@ -5,12 +5,16 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = json.loads((ROOT / "_data/mat101_exercises.json").read_text())
+SOLUTIONS = json.loads((ROOT / "_data/mat101_solutions.json").read_text())
 PAGE = (ROOT / "mat101-exercises.md").read_text()
 CONFIG = (ROOT / "_config.yml").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
 ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
+SOLUTION_PDF = ROOT / "assets/documents/mat101/corrige-exercices-mat101.pdf"
+SOLUTION_TEX = ROOT / "assets/documents/mat101/corrige-exercices-mat101.tex"
+SOLUTION_ARCHIVE = ROOT / "assets/documents/mat101/corrige-exercices-mat101-sources.zip"
 BIB = ROOT / "assets/documents/mat101/mat101-citations.bib"
 
 
@@ -43,33 +47,54 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertGreaterEqual(min(targets), 3)
         self.assertLessEqual(max(targets), 34)
 
+    def test_every_exercise_has_one_solution_page(self):
+        exercise_ids = {
+            exercise
+            for chapter in DATA
+            for page in chapter["pages"]
+            for exercise in page["exercises"]
+        }
+        solution_ids = [solution["id"] for solution in SOLUTIONS]
+        self.assertEqual(len(solution_ids), 103)
+        self.assertEqual(len(solution_ids), len(set(solution_ids)))
+        self.assertEqual(set(solution_ids), exercise_ids)
+        self.assertGreaterEqual(min(solution["pdfPage"] for solution in SOLUTIONS), 6)
+        self.assertLessEqual(max(solution["pdfPage"] for solution in SOLUTIONS), 57)
+
     def test_downloadable_artifacts_are_present(self):
         self.assertTrue(PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(PDF.stat().st_size, 500_000)
         self.assertIn(r"\includepdf[pages=61-70]", TEX.read_text())
         self.assertGreater(ARCHIVE.stat().st_size, 500_000)
+        self.assertTrue(SOLUTION_PDF.read_bytes().startswith(b"%PDF-"))
+        self.assertGreater(SOLUTION_PDF.stat().st_size, 400_000)
+        self.assertIn(r"\begin{corrige}{4.17}", SOLUTION_TEX.read_text())
+        self.assertGreater(SOLUTION_ARCHIVE.stat().st_size, 50_000)
 
     def test_section_is_visible_and_explains_solution_status(self):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
-        self.assertIn("103 exercices de mathématiques", PAGE)
-        self.assertIn("Un corrigé intégral ne sera publié", PAGE)
+        self.assertIn("103 exercices, 103 corrigés détaillés", PAGE)
+        self.assertIn("Couverture complète", PAGE)
+        self.assertIn("aucune relecture mathématique humaine intégrale", PAGE)
+        self.assertIn("Voir la solution", PAGE)
         self.assertIn("mat101-exercises.md", CONFIG)
 
-    def test_credits_distinguish_original_adaptation_and_future_solutions(self):
-        self.assertIn("Contenu mathématique original", PAGE)
-        self.assertIn("Cette édition et cette interface", PAGE)
-        self.assertIn("Futurs corrigés", PAGE)
-        self.assertIn("Raphaël Rossignol comme dernier responsable", PAGE)
-        self.assertIn("avec l’assistance d’OpenAI Codex", PAGE)
-        self.assertIn("non officielles et non attribuées à l’UGA", PAGE)
+    def test_credits_distinguish_original_adaptation_and_solution(self):
+        self.assertIn("Énoncés originaux", PAGE)
+        self.assertIn("Recueil et interface", PAGE)
+        self.assertIn("Rédaction du corrigé", PAGE)
+        self.assertIn("Raphaël Rossignol est indiqué comme responsable", PAGE)
+        self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", PAGE)
+        self.assertIn("ni d’un corrigé officiel de l’UGA", PAGE)
 
     def test_citation_and_rights_language_is_precise(self):
-        self.assertIn("Citation bibliographique recommandée", PAGE)
+        self.assertIn("Citations bibliographiques recommandées", PAGE)
         self.assertIn("Aucune licence de réutilisation explicite", PAGE)
-        self.assertIn("ni une édition officielle de l’UGA ni un corrigé officiel", PAGE)
+        self.assertIn("ne constituent pas une publication de l’UGA", PAGE)
         bib = BIB.read_text()
         self.assertIn("@misc{collectif_mat101_2022", bib)
         self.assertIn("@misc{mcshane_recueil_mat101_2026", bib)
+        self.assertIn("@misc{mcshane_corrige_mat101_2026", bib)
 
     def test_pdf_metadata_credits_original_collective(self):
         tex = TEX.read_text()
@@ -80,8 +105,20 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("responsable de l'édition citée", tex)
         self.assertIn("avec l'assistance d'OpenAI Codex", tex)
 
+    def test_solution_source_discloses_provenance_and_review_status(self):
+        tex = SOLUTION_TEX.read_text()
+        self.assertIn(
+            "pdfauthor={Kieran McShane, avec l'assistance d'OpenAI ChatGPT et Codex}",
+            tex,
+        )
+        self.assertIn("Ressource pédagogique non officielle", tex)
+        self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", tex)
+        self.assertIn("contenu mathématique non relu intégralement", tex)
+        self.assertNotIn(r"\definecolor{UGAblue}", tex)
+
     def test_mobile_layout_keeps_exercises_accessible(self):
         self.assertIn(".mat101-exercise-grid", STYLES)
+        self.assertIn(".mat101-solution-reveal", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
         self.assertIn("min-height: 44px", STYLES)
