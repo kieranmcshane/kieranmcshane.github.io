@@ -87,4 +87,31 @@ test.describe("MAT101 native library", () => {
       /template=mat101-correction\.yml.*MAT101.*1\.1/
     );
   });
+
+  test("shows the Polya plan and review only where they aid the reasoning", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("2.23");
+
+    const exercise = page.locator("#exercice-2-23");
+    await exercise.locator(":scope > summary").click();
+    const solution = exercise.locator(".mat101-native-solution");
+    await solution.locator(":scope > summary").click();
+
+    await expect(solution.locator(".mat101-method")).toContainText(
+      "Idée et plan."
+    );
+    await expect(solution.locator(".mat101-solution-review")).toContainText(
+      "Examen de la solution."
+    );
+
+    await page.locator("#mat101-search-input").fill("2.2");
+    const routineExercise = page.locator("#exercice-2-2");
+    await routineExercise.locator(":scope > summary").click();
+    await routineExercise
+      .locator(".mat101-native-solution > summary")
+      .click();
+    await expect(routineExercise.locator(".mat101-method")).toHaveCount(0);
+  });
 });
