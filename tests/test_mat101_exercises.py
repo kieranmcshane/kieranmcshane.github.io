@@ -114,6 +114,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
+        self.assertNotIn(
+            "{{ chapter.count }} exercices · pages originales",
+            PAGE,
+        )
         self.assertIn("exercise.statementImages", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)

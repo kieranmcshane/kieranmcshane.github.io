@@ -83,7 +83,7 @@ math: true
         <span class="mat101-chapter-number">{{ chapter.number }}</span>
         <div>
           <h2>{{ chapter.title }}</h2>
-          <p>{{ chapter.count }} exercices · pages originales {{ chapter.originalPages }}</p>
+          <p>{{ chapter.count }} exercices</p>
         </div>
       </header>
 
