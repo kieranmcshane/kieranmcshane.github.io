@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = json.loads((ROOT / "_data/mat101_exercises.json").read_text())
 SOLUTIONS = json.loads((ROOT / "_data/mat101_solutions.json").read_text())
 NATIVE = json.loads((ROOT / "_data/mat101_native.json").read_text())
+TAGS = json.loads((ROOT / "_data/mat101_tags.json").read_text())["tags"]
 PAGE = (ROOT / "mat101-exercises.md").read_text()
 CONFIG = (ROOT / "_config.yml").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
@@ -95,6 +96,34 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertEqual(markers["3.31"], "***")
         self.assertEqual(markers["4.17"], "**")
 
+    def test_tag_index_covers_every_exercise(self):
+        expected_ids = {
+            exercise
+            for chapter in DATA
+            for page in chapter["pages"]
+            for exercise in page["exercises"]
+        }
+        slugs = [tag["slug"] for tag in TAGS]
+        labels = [tag["label"] for tag in TAGS]
+        tagged_ids = {
+            exercise
+            for tag in TAGS
+            for exercise in tag["exercises"]
+        }
+        self.assertEqual(len(TAGS), 50)
+        self.assertEqual(len(slugs), len(set(slugs)))
+        self.assertEqual(len(labels), len(set(labels)))
+        self.assertEqual(tagged_ids, expected_ids)
+
+        native_tags = {
+            item["id"]: {tag["slug"] for tag in item["tags"]}
+            for item in NATIVE
+        }
+        self.assertTrue(all(native_tags.values()))
+        self.assertIn("invariants", native_tags["2.23"])
+        self.assertIn("relations-equivalence", native_tags["3.31"])
+        self.assertIn("methodes-numeriques", native_tags["4.16"])
+
     def test_downloadable_artifacts_are_present(self):
         self.assertTrue(PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(PDF.stat().st_size, 500_000)
@@ -114,6 +143,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
+        self.assertIn("Index des notions", PAGE)
+        self.assertIn("data-mat101-tag", PAGE)
+        self.assertIn("exercise.tags", PAGE)
         self.assertNotIn(
             "{{ chapter.count }} exercices · pages originales",
             PAGE,
@@ -164,6 +196,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-native-list", STYLES)
         self.assertIn(".mat101-native-solution", STYLES)
         self.assertIn(".mat101-difficulty-advanced", STYLES)
+        self.assertIn(".mat101-tag-filter.is-active", STYLES)
+        self.assertIn(".mat101-exercise-tags", STYLES)
         self.assertIn(".mat101-statement img", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
@@ -173,6 +207,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-search-input", PAGE)
         self.assertIn("data-mat101-exercise", PAGE)
         self.assertIn("normalize('NFD')", SCRIPT)
+        self.assertIn("activeTag", SCRIPT)
+        self.assertIn("searchParams.set('notion'", SCRIPT)
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
         self.assertIn("mat101-library.js", (ROOT / "_includes/head-custom.html").read_text())
 

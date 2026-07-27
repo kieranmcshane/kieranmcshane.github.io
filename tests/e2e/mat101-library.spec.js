@@ -13,6 +13,7 @@ test.describe("MAT101 native library", () => {
     await gotoLibrary(page);
     await expect(page.locator("[data-mat101-exercise]")).toHaveCount(103);
     await expect(page.locator(".mat101-difficulty")).toHaveCount(102);
+    await expect(page.locator(".mat101-exercise-tags")).toHaveCount(103);
     await expect(page.locator(".mat101-statement img")).toHaveCount(122);
     await expect(page.locator(".mat101-solution-body")).toHaveCount(103);
     expect(await hasHorizontalOverflow(page)).toBe(false);
@@ -46,6 +47,24 @@ test.describe("MAT101 native library", () => {
       "Supposons"
     );
     expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("filters the library from the notion index", async ({ page }) => {
+    await gotoLibrary(page);
+
+    const index = page.locator(".mat101-tag-index");
+    await index.locator(":scope > summary").click();
+
+    const invariantTag = page.locator('[data-mat101-tag="invariants"]');
+    await invariantTag.click();
+
+    await expect(invariantTag).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(1);
+    await expect(page.locator("#exercice-2-23")).toBeVisible();
+    await expect(page).toHaveURL(/notion=invariants/);
+
+    await page.locator('[data-mat101-tag=""]').click();
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
   });
 
   test("keeps provenance and the exercise-specific correction route visible", async ({
