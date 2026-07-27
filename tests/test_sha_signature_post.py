@@ -52,6 +52,8 @@ class ShaSignaturePostTests(unittest.TestCase):
             "rfc5280.html#section-4.1",
             "rfc2104.html#section-2",
             "developer.bitcoin.org/reference/block_chain.html#block-headers",
+            "secg.org/sec1-v2.pdf#page=51",
+            "secg.org/sec2-v2.pdf#page=13",
             "bips.dev/340",
             "shattered.io/static/shattered.pdf",
             "support.apple.com/en-gb/103769",
@@ -108,6 +110,18 @@ class ShaSignaturePostTests(unittest.TestCase):
     def test_self_signed_certificate_is_not_equated_with_trust(self) -> None:
         self.assertIn("does **not** independently prove", self.text)
         self.assertIn("trust decision", self.text)
+
+    def test_ecdsa_is_defined_before_bitcoin_uses_it(self) -> None:
+        definition = self.text.index("### ECDSA in one calculation")
+        bitcoin_use = self.text.index("Bitcoin historically—and still for many outputs—uses ECDSA")
+        self.assertLess(definition, bitcoin_use)
+        self.assertIn("Q=dG", self.text)
+        self.assertIn(r"s=k^{-1}(z+rd)\bmod n", self.text)
+        self.assertIn(r"u_1G+u_2Q", self.text)
+        self.assertIn(
+            "**ECDSA is the signature scheme; `secp256k1` is the domain-parameter choice",
+            self.text,
+        )
 
     def test_math_and_code_delimiters_are_balanced(self) -> None:
         self.assertEqual(self.text.count("$$") % 2, 0)
