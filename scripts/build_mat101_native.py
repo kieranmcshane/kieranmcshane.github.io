@@ -201,6 +201,39 @@ SOURCE_TEXT_REPLACEMENTS = {
     "récurren e": "récurrence",
 }
 
+# Formula-heavy passages whose PDF text layer does not preserve the mathematical
+# structure are transcribed explicitly and reviewed against the source page.
+# Keeping these overrides beside the extractor prevents a future regeneration
+# from silently restoring flattened fractions or delimiter glyphs.
+STATEMENT_OVERRIDES = {
+    "3.3": {
+        "html": r"""<div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
+<p>Écrire le plus simplement possible les ensembles suivants (aucune justification n’est attendue).</p>
+<ol class="mat101-statement-list">
+<li>\(\left\{3n+2\;\middle|\;n\in\{1,2,3\}\right\}\).</li>
+<li>\(\left\{2n+1\;\middle|\;n\in[\![2,5]\!]\right\}\).</li>
+<li>\(\left\{3n+2\;\middle|\;n\in\{1,2,3\}\right\}\cup
+\left\{4n+3\;\middle|\;n\in\{1,2,3,4\}\right\}\).</li>
+<li>\(\left\{3n+2\;\middle|\;n\in\{1,2,3\}\right\}\cap
+\left\{4n+3\;\middle|\;n\in\{1,2,3,4\}\right\}\).</li>
+<li>\(\left\{\dfrac{p}{q}\;\middle|\;p\in\{1,2,3,4\},
+q\in\{1,2,3,4\}\right\}\).</li>
+</ol>
+</div>""",
+        "searchText": (
+            "Écrire le plus simplement possible les ensembles suivants "
+            "(aucune justification n’est attendue). "
+            "1. {3n+2 | n∈{1,2,3}}. "
+            "2. {2n+1 | n∈⟦2,5⟧}. "
+            "3. {3n+2 | n∈{1,2,3}} ∪ {4n+3 | n∈{1,2,3,4}}. "
+            "4. {3n+2 | n∈{1,2,3}} ∩ {4n+3 | n∈{1,2,3,4}}. "
+            "5. {p/q | p∈{1,2,3,4}, q∈{1,2,3,4}}."
+        ),
+        "transcriptionStatus": "curated",
+        "mathematicalReviewStatus": "reviewed",
+    },
+}
+
 ROOT_DIAGRAMS = {
     "1.12": r"""
 <section class="mat101-root-geometry" aria-labelledby="mat101-root-geometry-1-12">
@@ -370,6 +403,10 @@ def build_statement_text() -> dict[str, dict[str, str | int]]:
     missing = [exercise_id for exercise_id in expected_ids if exercise_id not in statements]
     if missing:
         raise RuntimeError(f"Exercises without semantic statements: {missing}")
+    for exercise_id, override in STATEMENT_OVERRIDES.items():
+        if exercise_id not in statements:
+            raise RuntimeError(f"Statement override targets unknown exercise {exercise_id}")
+        statements[exercise_id].update(override)
     return statements
 
 
@@ -497,8 +534,12 @@ def main() -> None:
                         "statementSearchText": statements[exercise_id]["searchText"],
                         "statementSourcePage": statements[exercise_id]["sourcePage"],
                         "statementPdfPage": statements[exercise_id]["recueilPage"],
-                        "transcriptionStatus": "extracted",
-                        "mathematicalReviewStatus": "pending",
+                        "transcriptionStatus": statements[exercise_id].get(
+                            "transcriptionStatus", "extracted"
+                        ),
+                        "mathematicalReviewStatus": statements[exercise_id].get(
+                            "mathematicalReviewStatus", "pending"
+                        ),
                         "solutionHtml": solutions[exercise_id],
                     }
                 )
