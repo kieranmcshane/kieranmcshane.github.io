@@ -135,11 +135,73 @@
     var exercises = Array.from(document.querySelectorAll('[data-mat101-exercise]'));
     var chapters = Array.from(document.querySelectorAll('[data-mat101-chapter]'));
     var tagButtons = Array.from(document.querySelectorAll('[data-mat101-tag]'));
+    var tocDetails = document.querySelector('[data-mat101-toc]');
+    var tocCurrent = document.getElementById('mat101-toc-current');
+    var tocLinks = Array.from(document.querySelectorAll('[data-mat101-toc-link]'));
+    var tocChapters = Array.from(
+      document.querySelectorAll('[data-mat101-toc-chapter]')
+    );
+    var tocChapterLinks = Array.from(
+      document.querySelectorAll('[data-mat101-toc-chapter-link]')
+    );
     var activeTag = '';
+    var currentExercise;
 
     initializeRootDiagrams();
 
     if (!input || !exercises.length) return;
+
+    if (tocDetails && window.matchMedia('(min-width: 701px)').matches) {
+      tocDetails.open = true;
+    }
+
+    function updateToc(visibleCount) {
+      tocLinks.forEach(function (link) {
+        var exercise = exercises.find(function (candidate) {
+          return candidate.dataset.exerciseId === link.dataset.exerciseId;
+        });
+        link.hidden = !exercise || exercise.hidden;
+      });
+
+      tocChapters.forEach(function (chapter) {
+        chapter.hidden = !chapter.querySelector(
+          '[data-mat101-toc-link]:not([hidden])'
+        );
+      });
+
+      if (!tocCurrent) return;
+
+      if (normalize(input.value) || activeTag) {
+        tocCurrent.textContent =
+          visibleCount +
+          (visibleCount > 1 ? ' exercices disponibles' : ' exercice disponible');
+      } else if (currentExercise) {
+        var currentLink = tocLinks.find(function (link) {
+          return link.dataset.exerciseId === currentExercise.dataset.exerciseId;
+        });
+        tocCurrent.textContent = currentLink
+          ? 'Exercice ' +
+            currentLink.dataset.exerciseId +
+            ' · ' +
+            currentLink.dataset.chapterTitle
+          : '4 chapitres · 103 exercices';
+      } else {
+        tocCurrent.textContent = '4 chapitres · 103 exercices';
+      }
+    }
+
+    function setCurrentExercise(exercise) {
+      currentExercise = exercise;
+      tocLinks.forEach(function (link) {
+        var selected =
+          exercise && link.dataset.exerciseId === exercise.dataset.exerciseId;
+        if (selected) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      updateToc(exercises.filter(function (candidate) {
+        return !candidate.hidden;
+      }).length);
+    }
 
     function updateTagButtons() {
       tagButtons.forEach(function (button) {
@@ -180,6 +242,7 @@
       counter.textContent =
         visibleCount + (visibleCount > 1 ? ' exercices affichés' : ' exercice affiché');
       noResults.hidden = visibleCount !== 0;
+      updateToc(visibleCount);
     }
 
     function openHashTarget() {
@@ -192,6 +255,7 @@
       updateTagUrl();
       filterExercises();
       exercise.open = true;
+      setCurrentExercise(exercise);
     }
 
     input.addEventListener('input', filterExercises);
@@ -201,6 +265,37 @@
         updateTagButtons();
         updateTagUrl();
         filterExercises();
+      });
+    });
+    tocLinks.forEach(function (link) {
+      link.addEventListener('click', function () {
+        var exercise = exercises.find(function (candidate) {
+          return candidate.dataset.exerciseId === link.dataset.exerciseId;
+        });
+        if (!exercise) return;
+
+        input.value = '';
+        activeTag = '';
+        updateTagButtons();
+        updateTagUrl();
+        filterExercises();
+        exercise.open = true;
+        setCurrentExercise(exercise);
+        if (tocDetails && window.matchMedia('(max-width: 700px)').matches) {
+          tocDetails.open = false;
+        }
+      });
+    });
+    tocChapterLinks.forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (tocDetails && window.matchMedia('(max-width: 700px)').matches) {
+          tocDetails.open = false;
+        }
+      });
+    });
+    exercises.forEach(function (exercise) {
+      exercise.addEventListener('toggle', function () {
+        if (exercise.open) setCurrentExercise(exercise);
       });
     });
 
