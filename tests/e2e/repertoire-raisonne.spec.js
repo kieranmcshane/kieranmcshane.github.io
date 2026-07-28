@@ -14,6 +14,12 @@ test.describe("Répertoire raisonné", () => {
     await expect(page.locator("[data-repertoire-problem]")).toHaveCount(127);
     await expect(page.locator("[data-repertoire-section]")).toHaveCount(5);
     await expect(page.locator("[data-repertoire-chapter]")).toHaveCount(14);
+    await expect(
+      page.locator("[data-repertoire-audit-problem]")
+    ).toHaveCount(17);
+    await expect(
+      page.locator('[data-repertoire-audit-problem="121"]')
+    ).toContainText("Les points de X y étant d’accumulation");
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
