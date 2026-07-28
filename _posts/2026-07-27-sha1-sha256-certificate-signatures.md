@@ -245,7 +245,7 @@ The inner digest is therefore not exposed as the final state of a message that a
 
 ## What failed in SHA-1
 
-SHA-1’s $160$-bit output would suggest a generic collision cost around $2^{80}$. Its round structure permits substantially better <span id="definition-differential-attack" class="definition-target">**differential attacks**, which engineer and track carefully chosen input differences through the internal rounds instead of treating the hash as a black box</span>. In 2017, Marc Stevens, Elie Bursztein, Pierre Karpman, Ange Albertini and Yarik Markov produced two different PDF files with exactly the same SHA-1 digest. Their SHAttered paper estimates the computation at roughly $2^{63.1}$ SHA-1 evaluations.
+SHA-1’s $160$-bit output would suggest a generic collision cost around $2^{80}$. Its round structure permits substantially better <span id="definition-differential-attack" class="definition-target">**differential attacks**, which engineer and track carefully chosen input differences through the internal rounds instead of treating the hash as a black box</span>. In 2017, Marc Stevens, Elie Bursztein, Pierre Karpman, Ange Albertini and Yarik Markov produced two different PDF files with exactly the same SHA-1 digest. Their SHAttered paper estimates the computation at roughly $2^{63.1}$ SHA-1 compressions.
 
 <figure class="source-facsimile source-facsimile--paper">
   <div class="source-facsimile-viewport">

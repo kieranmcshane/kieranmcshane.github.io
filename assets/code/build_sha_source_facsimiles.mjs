@@ -154,6 +154,7 @@ async function saveRfcExcerpt({
   fileName,
   beforeLines,
   afterLines,
+  clipWidth,
 }) {
   const page = await newPage();
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
@@ -190,7 +191,7 @@ async function saveRfcExcerpt({
     clip: {
       x: preBox.x,
       y: top,
-      width: preBox.width,
+      width: Math.min(preBox.width, clipWidth ?? preBox.width),
       height: bottom - top,
     },
   });
@@ -263,8 +264,13 @@ async function saveShatteredAbstract() {
     "-vf",
     [
       "crop=1070:930:210:120",
-      "drawbox=x=35:y=590:w=1000:h=150:color=yellow@0.28:t=fill",
-      "drawbox=x=35:y=750:w=1000:h=105:color=yellow@0.28:t=fill",
+      // Highlight only the two claims quoted by the article: practicality
+      // and the measured computational effort. Avoid starting mid-sentence
+      // or highlighting the separate PDF-construction claim.
+      "drawbox=x=35:y=632:w=1000:h=27:color=yellow@0.28:t=fill",
+      "drawbox=x=35:y=659:w=570:h=30:color=yellow@0.28:t=fill",
+      "drawbox=x=575:y=768:w=425:h=28:color=yellow@0.28:t=fill",
+      "drawbox=x=35:y=796:w=445:h=28:color=yellow@0.28:t=fill",
     ].join(","),
     "-frames:v",
     "1",
@@ -284,6 +290,10 @@ await saveRfcExcerpt({
   fileName: "sha256-rfc8017-encoding.png",
   beforeLines: 5,
   afterLines: 2,
+  // The RFC's <pre> spans the browser viewport although the relevant text
+  // occupies only its left side. Cropping the empty right margin keeps the
+  // source legible when the image is fitted to the article column.
+  clipWidth: 700,
 });
 await saveRfcExcerpt({
   url: "https://www.rfc-editor.org/rfc/rfc5280.html#section-4.1",

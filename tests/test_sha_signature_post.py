@@ -25,6 +25,10 @@ class ShaSignaturePostTests(unittest.TestCase):
         self.assertIn("SHA-256 is a hash function, not a signature algorithm", self.text)
         self.assertIn("signature primitive", self.text)
 
+    def test_shattered_cost_uses_the_source_unit(self) -> None:
+        self.assertIn(r"$2^{63.1}$ SHA-1 compressions", self.text)
+        self.assertNotIn("SHA-1 evaluations", self.text)
+
     def test_birthday_bound_is_derived(self) -> None:
         self.assertIn(r"q_{1/2}", self.text)
         self.assertIn(r"\sqrt{2\log 2}", self.text)
