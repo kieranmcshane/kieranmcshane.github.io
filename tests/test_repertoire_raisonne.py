@@ -1,7 +1,8 @@
 from pathlib import Path
 import json
-import subprocess
 import unittest
+
+from pypdf import PdfReader
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,14 +67,12 @@ class RepertoireRaisonneTests(unittest.TestCase):
     def test_pdf_is_the_reviewed_sixty_six_page_document(self):
         self.assertTrue(PDF.is_file())
         self.assertGreater(PDF.stat().st_size, 400_000)
-        info = subprocess.run(
-            ["pdfinfo", str(PDF)],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout
-        self.assertIn("Pages:           66", info)
-        self.assertIn("Répertoire raisonné d'algèbre et d'analyse", info)
+        reader = PdfReader(PDF)
+        self.assertEqual(len(reader.pages), 66)
+        self.assertEqual(
+            reader.metadata.title,
+            "Répertoire raisonné d'algèbre et d'analyse",
+        )
 
     def test_page_exposes_navigation_review_and_download(self):
         self.assertIn("127 problèmes, un outil décisif à chaque fois", PAGE)
