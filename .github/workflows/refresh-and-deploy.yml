@@ -5,7 +5,16 @@ on:
     branches: [main]
   schedule:
     - cron: "17 4 * * *"
+    - cron: "47 2 * * 0"
   workflow_dispatch:
+    inputs:
+      refresh_scope:
+        description: "Ratings to refresh before deployment"
+        type: choice
+        options:
+          - sports
+          - historical-players
+        default: sports
 
 permissions:
   contents: read
@@ -14,7 +23,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -22,12 +31,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        if: github.event_name != 'push'
         with:
           python-version: "3.12"
       - name: Set cache date
+        if: github.event_name != 'push'
         id: cache-date
         run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
+        if: github.event_name != 'push'
         with:
           path: .cache/rating-lab
           key: rating-lab-public-data-v4-${{ runner.os }}-${{ steps.cache-date.outputs.date }}
@@ -49,17 +61,32 @@ jobs:
             fi
           done
       - name: Install archive reader
+        if: github.event_name != 'push'
         run: sudo apt-get update && sudo apt-get install --yes zstd
       - name: Install rating pipeline dependencies
+        if: github.event_name != 'push'
         run: python -m pip install --requirement requirements-rating-lab.txt
-      - name: Refresh public ratings
+      - name: Refresh daily team and individual-sport ratings
+        if: >-
+          (github.event_name == 'schedule' && github.event.schedule == '17 4 * * *') ||
+          (github.event_name == 'workflow_dispatch' && inputs.refresh_scope == 'sports')
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
-          python scripts/refresh_ratings.py --sports tennis football national-football chess
+          python scripts/refresh_ratings.py --sports tennis football national-football chess --skip-players
+      - name: Refresh weekly historical player cohorts
+        if: >-
+          (github.event_name == 'schedule' && github.event.schedule == '47 2 * * 0') ||
+          (github.event_name == 'workflow_dispatch' && inputs.refresh_scope == 'historical-players')
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          RATING_LAB_CACHE_DIR: .cache/rating-lab
+        run: |
+          python scripts/refresh_ratings.py --players-only
       - name: Preserve validated public snapshot
+        if: github.event_name != 'push'
         run: |
           mkdir -p .cache/rating-lab-output
           cp assets/data/rating-lab/{manifest,tennis,football,national-football,chess,player-football,player-schema}.json .cache/rating-lab-output/
