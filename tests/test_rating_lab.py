@@ -675,6 +675,19 @@ h001,Hana,Theta,CZE
         self.assertIn(full_refresh, workflow)
         self.assertEqual(workflow.count(full_refresh), 1)
         self.assertLess(workflow.index(full_refresh), workflow.index("actions/jekyll-build-pages"))
+        self.assertIn("cancel-in-progress: true", workflow)
+        self.assertGreaterEqual(
+            workflow.count("if: github.event_name != 'push'"),
+            4,
+        )
+        self.assertIn(
+            'cp -R ".cache/rating-lab-output/." "assets/data/rating-lab/"',
+            workflow,
+        )
+        self.assertIn(
+            "cp -R assets/data/rating-lab/. .cache/rating-lab-output/",
+            workflow,
+        )
         self.assertIn("rating-lab-public-data-v4-", workflow)
         refresh_script = (
             Path(__file__).resolve().parents[1] / "scripts/refresh_ratings.py"
