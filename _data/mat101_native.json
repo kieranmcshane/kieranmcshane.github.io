@@ -1467,12 +1467,12 @@
         "label": "Images et antécédents"
       }
     ],
-    "statementHtml": "<div class=\"mat101-statement-transcription\" lang=\"fr\">\n<p>Écrire le plus simplement possible les ensembles suivants (au une justifi ation n&#x27;est attendue).</p>\n<p>1. {3n + 2;n ∈ {1,2,3}},</p>\n<p>2. {2n + 1;n ∈ [[2,5]]},</p>\n<p>3. {3n + 2;n ∈ {1,2,3}} ∪ {4n + 3;n ∈ {1,2,3,4}},</p>\n<p>4. {3n + 2;n ∈ {1,2,3}} ∩ {4n + 3;n ∈ {1,2,3,4}},</p>\n<p>5. ∞ p q ;p ∈ {1,2,3,4},q ∈ {1,2,3,4} ff .</p>\n</div>",
-    "statementSearchText": "Écrire le plus simplement possible les ensembles suivants (au une justifi ation n'est attendue). 1. {3n + 2;n ∈ {1,2,3}}, 2. {2n + 1;n ∈ [[2,5]]}, 3. {3n + 2;n ∈ {1,2,3}} ∪ {4n + 3;n ∈ {1,2,3,4}}, 4. {3n + 2;n ∈ {1,2,3}} ∩ {4n + 3;n ∈ {1,2,3,4}}, 5. ∞ p q ;p ∈ {1,2,3,4},q ∈ {1,2,3,4} ff .",
+    "statementHtml": "<div class=\"mat101-statement-transcription mat101-statement-curated\" lang=\"fr\">\n<p>Écrire le plus simplement possible les ensembles suivants (aucune justification n’est attendue).</p>\n<ol class=\"mat101-statement-list\">\n<li>\\(\\left\\{3n+2\\;\\middle|\\;n\\in\\{1,2,3\\}\\right\\}\\).</li>\n<li>\\(\\left\\{2n+1\\;\\middle|\\;n\\in[\\![2,5]\\!]\\right\\}\\).</li>\n<li>\\(\\left\\{3n+2\\;\\middle|\\;n\\in\\{1,2,3\\}\\right\\}\\cup\n\\left\\{4n+3\\;\\middle|\\;n\\in\\{1,2,3,4\\}\\right\\}\\).</li>\n<li>\\(\\left\\{3n+2\\;\\middle|\\;n\\in\\{1,2,3\\}\\right\\}\\cap\n\\left\\{4n+3\\;\\middle|\\;n\\in\\{1,2,3,4\\}\\right\\}\\).</li>\n<li>\\(\\left\\{\\dfrac{p}{q}\\;\\middle|\\;p\\in\\{1,2,3,4\\},\nq\\in\\{1,2,3,4\\}\\right\\}\\).</li>\n</ol>\n</div>",
+    "statementSearchText": "Écrire le plus simplement possible les ensembles suivants (aucune justification n’est attendue). 1. {3n+2 | n∈{1,2,3}}. 2. {2n+1 | n∈⟦2,5⟧}. 3. {3n+2 | n∈{1,2,3}} ∪ {4n+3 | n∈{1,2,3,4}}. 4. {3n+2 | n∈{1,2,3}} ∩ {4n+3 | n∈{1,2,3,4}}. 5. {p/q | p∈{1,2,3,4}, q∈{1,2,3,4}}.",
     "statementSourcePage": 93,
     "statementPdfPage": 19,
-    "transcriptionStatus": "extracted",
-    "mathematicalReviewStatus": "pending",
+    "transcriptionStatus": "curated",
+    "mathematicalReviewStatus": "reviewed",
     "solutionHtml": "<ol>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{5,8,11\\}}\\)</span>.</p></li>\n<li><p><span\nclass=\"math inline\">\\(\\boxed{\\{5,7,9,11\\}}\\)</span>.</p></li>\n<li><p><span class=\"math display\">\\[\\{5,8,11\\}\\cup\\{7,11,15,19\\}\n  =\\boxed{\\{5,7,8,11,15,19\\}}.\\]</span></p></li>\n<li><p><span class=\"math inline\">\\(\\boxed{\\{11\\}}\\)</span>.</p></li>\n<li><p>Après réduction des fractions et suppression des répétitions,\n<span class=\"math display\">\\[\\boxed{\\left\\{\n  \\frac14,\\frac13,\\frac12,\\frac23,\\frac34,1,\n  \\frac43,\\frac32,2,3,4\n  \\right\\}}.\\]</span></p></li>\n</ol>"
   },
   {

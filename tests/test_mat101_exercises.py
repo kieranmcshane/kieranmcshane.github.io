@@ -87,8 +87,18 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             self.assertNotIn("<img", item["statementHtml"])
             self.assertGreaterEqual(item["statementSourcePage"], 30)
             self.assertGreaterEqual(item["statementPdfPage"], 3)
-            self.assertEqual(item["transcriptionStatus"], "extracted")
-            self.assertEqual(item["mathematicalReviewStatus"], "pending")
+            self.assertIn(item["transcriptionStatus"], {"extracted", "curated"})
+            self.assertIn(
+                item["mathematicalReviewStatus"], {"pending", "reviewed"}
+            )
+
+        curated = next(item for item in NATIVE if item["id"] == "3.3")
+        self.assertEqual(curated["transcriptionStatus"], "curated")
+        self.assertEqual(curated["mathematicalReviewStatus"], "reviewed")
+        self.assertIn(r"\dfrac{p}{q}", curated["statementHtml"])
+        self.assertIn(r"[\![2,5]\!]", curated["statementHtml"])
+        self.assertNotIn("∞ p q", curated["statementSearchText"])
+        self.assertNotIn("justifi ation", curated["statementSearchText"])
 
     def test_statement_images_are_not_primary_content(self):
         self.assertNotIn("statementImages", PAGE)

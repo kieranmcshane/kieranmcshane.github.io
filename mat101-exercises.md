@@ -177,8 +177,17 @@ math: true
               {% capture issue_title %}[MAT101 {{ exercise.id }}] Correction proposée{% endcapture %}
               <footer class="mat101-exercise-footer">
                 <span>
-                  <strong>Transcription textuelle extraite</strong> ·
-                  Relecture mathématique indépendante en attente
+                  {% if exercise.transcriptionStatus == 'curated' %}
+                    <strong>Transcription mathématique relue</strong>
+                  {% else %}
+                    <strong>Transcription textuelle extraite</strong>
+                  {% endif %}
+                  ·
+                  {% if exercise.mathematicalReviewStatus == 'reviewed' %}
+                    Vérification effectuée sur le document source
+                  {% else %}
+                    Relecture mathématique indépendante en attente
+                  {% endif %}
                 </span>
                 <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml&amp;title={{ issue_title | url_encode }}">Signaler une erreur ou proposer une amélioration</a>
               </footer>

@@ -233,6 +233,26 @@ test.describe("MAT101 native library", () => {
     );
   });
 
+  test("renders the reviewed fraction and integer interval in exercise 3.3", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("3.3");
+    const exercise = page.locator("#exercice-3-3");
+    await exercise.locator(":scope > summary").click();
+
+    await expect(exercise.locator(".mat101-statement")).toContainText(
+      "aucune justification n’est attendue"
+    );
+    await expect(exercise.locator(".mat101-statement")).not.toContainText("∞ p q");
+    await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
+      "Transcription mathématique relue"
+    );
+    await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
+      "Vérification effectuée sur le document source"
+    );
+  });
+
   test("shows the Polya plan and review only where they aid the reasoning", async ({
     page,
   }) => {
