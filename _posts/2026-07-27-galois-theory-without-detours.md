@@ -1444,7 +1444,7 @@ $$
 
 The third field is not an accident of $2$ and $3$. It is forced by the third order-$2$ subgroup.
 
-## 12. A nonabelian checkpoint: the splitting field of \(X^3-2\)
+## 12. A nonabelian checkpoint: the splitting field of $X^3-2$
 
 Before approaching $A_4$, it helps to see what changes when the Galois group is nonabelian.
 
@@ -1651,7 +1651,7 @@ Without a normality or linear-disjointness hypothesis, one should not use that p
 
 These operations clarify why the theorem is an anti-isomorphism of lattices, not merely a bijection of sets.
 
-## 13. Decoding an \(A_4\)-lattice
+## 13. Decoding an $A_4$-lattice
 
 Now suppose $L/K$ is a finite Galois extension with
 
@@ -1775,7 +1775,7 @@ None of the order-$3$ subgroups is contained in $V$, and no $C_3$ contains a non
   <figcaption>An abstract $A_4$-extension. The three $C_2$ subgroups sit inside $V_4$, so the cubic fixed field of $V_4$ sits inside the three degree-$6$ fixed fields.</figcaption>
 </figure>
 
-### Which intermediate fields are Galois over \(K\)?
+### Which intermediate fields are Galois over $K$?
 
 The normal subgroups of $A_4$ are
 
@@ -2124,7 +2124,7 @@ $$
 
 This formula is often introduced before the correspondence as an observation about conjugates. The theorem reveals its group-theoretic content: the degree of an element is the index of its stabilizer.
 
-### Example: \(\sqrt2+\sqrt3\)
+### Example: $\sqrt2+\sqrt3$
 
 Take
 
@@ -2174,7 +2174,7 @@ $$
 
 The apparent irrationalities cancel because the coefficients are fixed by all of $G$ and therefore lie in $\mathbb Q$.
 
-### Example: one cube root inside the \(S_3\)-extension
+### Example: one cube root inside the $S_3$-extension
 
 In the splitting field of $X^3-2$, the element
 
@@ -2472,7 +2472,7 @@ L^G
 \mathbb Q.
 $$
 
-### 6. The cubic field in an \(A_4\)-extension
+### 6. The cubic field in an $A_4$-extension
 
 Suppose $\operatorname{Gal}(L/K)\cong A_4$, and let $V\cong V_4$ be its normal Klein four-subgroup. Determine the degree and Galois group of $L^V/K$.
 
@@ -2496,7 +2496,7 @@ $$
 \operatorname{Gal}(L^V/K)\cong C_3.
 $$
 
-### 7. Why the degree-\(4\) fields in the \(A_4\) lattice are not Galois
+### 7. Why the degree-$4$ fields in the $A_4$ lattice are not Galois
 
 Each degree-$4$ field is fixed by an order-$3$ subgroup $C_i$. Explain why it is not Galois over $K$.
 
