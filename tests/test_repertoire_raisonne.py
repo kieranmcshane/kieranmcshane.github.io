@@ -80,18 +80,30 @@ class RepertoireRaisonneTests(unittest.TestCase):
         self.assertIn("data-repertoire-problem", PAGE)
         self.assertIn("data-repertoire-part", PAGE)
         self.assertIn("data-repertoire-preset", PAGE)
-        self.assertIn("Relecture détaillée des 17 derniers problèmes", PAGE)
-        self.assertIn("Problèmes 111–121", PAGE)
-        self.assertIn("Problèmes 122–125", PAGE)
-        self.assertIn("Problèmes 126–127", PAGE)
+        self.assertIn("17 problèmes à travailler directement ici", PAGE)
+        self.assertIn("onze énoncés et solutions", PAGE)
+        self.assertIn("quatre énoncés et solutions", PAGE)
+        self.assertIn("deux énoncés et solutions", PAGE)
         self.assertEqual(PAGE.count("data-repertoire-audit-problem="), 17)
+        self.assertEqual(PAGE.count("data-repertoire-native-problem="), 17)
         for number in range(111, 128):
             self.assertIn(
                 f'data-repertoire-audit-problem="{number}"',
                 PAGE,
             )
-        self.assertIn("L’itération", PAGE)
-        self.assertIn("Les formules de Taylor aux points", PAGE)
+            self.assertIn(
+                f'data-repertoire-native-problem="{number}"',
+                PAGE,
+            )
+            self.assertIn(f'id="probleme-natif-{number}"', PAGE)
+        self.assertEqual(PAGE.count("Afficher la solution"), 17)
+        self.assertIn(r"\lVert f(x)-f(y)\rVert", PAGE)
+        self.assertIn(r"\varnothing\ne X\cap I\subset S_n", PAGE)
+        self.assertIn(r"A_{jk}=\frac{j^k}{k!}", PAGE)
+        self.assertIn(
+            "Le fac-similé PDF n’apparaît qu’en source secondaire",
+            PAGE,
+        )
         self.assertIn("Une correction, quatre précisions", PAGE)
         self.assertIn("Correction mathématique", PAGE)
         self.assertIn(r"\overline f\,P_k", PAGE)
@@ -105,7 +117,8 @@ class RepertoireRaisonneTests(unittest.TestCase):
     def test_interaction_and_styling_are_scoped_to_the_page(self):
         self.assertIn("repertoire-library", STYLES)
         self.assertIn("repertoire-problem-list", STYLES)
-        self.assertIn("repertoire-audit-list", STYLES)
+        self.assertIn("repertoire-native-list", STYLES)
+        self.assertIn("repertoire-native-solution", STYLES)
         self.assertIn("repertoire-search-input", SCRIPT)
         self.assertIn("normalize", SCRIPT)
         self.assertIn("data-repertoire-section", SCRIPT)

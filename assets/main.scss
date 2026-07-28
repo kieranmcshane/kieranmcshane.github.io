@@ -11153,7 +11153,7 @@ body:has(.repertoire-library) {
 
 .repertoire-paths,
 .repertoire-highlights,
-.repertoire-audit,
+.repertoire-native,
 .repertoire-errata {
   margin: 3rem 0;
 }
@@ -11475,31 +11475,36 @@ body:has(.repertoire-library) {
   font-weight: 800;
 }
 
-.repertoire-audit-intro {
+.repertoire-native {
+  scroll-margin-top: 1rem;
+}
+
+.repertoire-native-intro {
   max-width: 80ch;
   margin: 0.7rem 0 1.25rem;
   color: var(--repertoire-muted);
-  font-size: 0.8rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
 }
 
-.repertoire-audit-chapter {
-  margin-top: 1rem;
+.repertoire-native-chapter {
+  margin-top: 1.25rem;
   overflow: hidden;
   border: 1px solid var(--repertoire-line);
   border-radius: 8px;
-  background: #fff;
+  background: #fbfafc;
 }
 
-.repertoire-audit-chapter > header {
+.repertoire-native-chapter > header {
   display: flex;
   gap: 0.85rem;
   align-items: center;
-  padding: 0.9rem 1rem;
+  padding: 1rem;
   border-bottom: 1px solid var(--repertoire-line);
   background: var(--repertoire-soft);
 }
 
-.repertoire-audit-chapter > header > span {
+.repertoire-native-chapter > header > span {
   display: grid;
   width: 2.25rem;
   height: 2.25rem;
@@ -11512,44 +11517,63 @@ body:has(.repertoire-library) {
   font-weight: 800;
 }
 
-.repertoire-audit-chapter h3 {
+.repertoire-native-chapter h3 {
   margin: 0;
   font-size: 1.05rem;
 }
 
-.repertoire-audit-chapter > header p {
+.repertoire-native-chapter > header p {
   margin: 0.15rem 0 0;
   color: var(--repertoire-muted);
   font-size: 0.7rem;
 }
 
-.repertoire-audit-list article {
-  padding: 0.9rem 1rem;
+.repertoire-native-list {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
 }
 
-.repertoire-audit-list article + article {
-  border-top: 1px solid #e6e1e8;
+.repertoire-native-list > article {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dcd6e0;
+  border-radius: 8px;
+  background: #fff;
+  scroll-margin-top: 1rem;
 }
 
-.repertoire-audit-list article > header {
+.repertoire-native-list > article > header {
   display: flex;
-  gap: 0.75rem;
-  align-items: center;
+  gap: 1rem;
+  align-items: flex-start;
   justify-content: space-between;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e4dfe7;
+  background: #fdfcfe;
 }
 
-.repertoire-audit-list h4 {
-  margin: 0;
-  font-size: 0.86rem;
+.repertoire-native-list > article > header > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
 }
 
-.repertoire-audit-list h4 a {
+.repertoire-native-list > article > header span {
   color: var(--repertoire-accent-dark);
-  font-weight: 750;
-  text-underline-offset: 0.18em;
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.repertoire-audit-list article > header > span {
+.repertoire-native-list h4 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.repertoire-native-list > article > header > strong {
   flex: 0 0 auto;
   padding: 0.2rem 0.45rem;
   border-radius: 999px;
@@ -11559,16 +11583,137 @@ body:has(.repertoire-library) {
   font-weight: 800;
 }
 
-.repertoire-audit-list article > p {
-  margin: 0.45rem 0 0;
-  color: #4f4b55;
-  font-size: 0.79rem;
+.repertoire-native-statement {
+  padding: 1rem;
+}
+
+.repertoire-native-statement h5 {
+  margin: 0 0 0.55rem;
+  color: var(--repertoire-accent-dark);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.repertoire-native-statement p {
+  margin: 0;
+  color: #343746;
+  font-size: 0.88rem;
   line-height: 1.55;
 }
 
-.repertoire-audit-list .repertoire-audit-featured {
-  border-left: 4px solid var(--repertoire-warm);
+.repertoire-native-statement mjx-container[display="true"],
+.repertoire-native-solution mjx-container[display="true"] {
+  max-width: 100%;
+  margin: 0.8rem 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0;
+}
+
+.repertoire-native-solution {
+  margin: 0 1rem 1rem;
+  overflow: hidden;
+  border: 1px solid #d9c2af;
+  border-radius: 6px;
   background: var(--repertoire-warm-soft);
+}
+
+.repertoire-native-solution > summary {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  box-sizing: border-box;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.8rem;
+  color: #713f28;
+  cursor: pointer;
+  list-style: none;
+}
+
+.repertoire-native-solution > summary::-webkit-details-marker {
+  display: none;
+}
+
+.repertoire-native-solution > summary::before {
+  content: "+";
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--repertoire-warm);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.repertoire-native-solution[open] > summary::before {
+  content: "−";
+}
+
+.repertoire-native-solution > summary span {
+  margin-right: auto;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.repertoire-native-solution > summary small {
+  color: #786257;
+  font-size: 0.68rem;
+  text-align: right;
+}
+
+.repertoire-native-solution[open] > summary {
+  border-bottom: 1px solid #dfc9b8;
+}
+
+.repertoire-native-solution > div {
+  padding: 0.9rem;
+  color: #4d4039;
+  font-size: 0.84rem;
+  line-height: 1.58;
+}
+
+.repertoire-native-solution > div > :first-child {
+  margin-top: 0;
+}
+
+.repertoire-native-solution > div > :last-child {
+  margin-bottom: 0;
+}
+
+.repertoire-native-list > article > aside {
+  margin: 0 1rem 1rem;
+  padding: 0.75rem 0.85rem;
+  border-left: 3px solid #63806c;
+  color: #405046;
+  background: #f3f8f5;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.repertoire-native-list > article > footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid #e7e2e9;
+  background: #faf9fb;
+}
+
+.repertoire-native-list > article > footer a {
+  color: var(--repertoire-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-underline-offset: 0.16em;
+}
+
+.repertoire-native-list .repertoire-native-featured {
+  border-left: 4px solid var(--repertoire-warm);
+  box-shadow: 0 10px 30px rgba(64, 35, 79, 0.08);
 }
 
 .repertoire-errata > article {
@@ -11677,9 +11822,20 @@ body:has(.repertoire-library) {
     flex-direction: column;
   }
 
-  .repertoire-audit-list article > header {
+  .repertoire-native-list > article > header,
+  .repertoire-native-solution > summary {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .repertoire-native-solution > summary::before {
+    position: absolute;
+  }
+
+  .repertoire-native-solution > summary span,
+  .repertoire-native-solution > summary small {
+    margin-left: 2.1rem;
+    text-align: left;
   }
 
   .repertoire-section-heading > p,
