@@ -4864,7 +4864,13 @@ def validate_payload(payload: dict, schema: dict) -> None:
                 raise ValueError(f"Incomplete {name} ranking row")
 
 
-def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int = 36) -> dict:
+def write_outputs(
+    output_dir: Path,
+    requested: list[str],
+    *,
+    chess_months: int = 36,
+    refresh_players: bool = True,
+) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     schema = json.loads((Path(__file__).with_name("schema.json")).read_text())
     token = os.environ.get("FOOTBALL_DATA_TOKEN")
@@ -4957,25 +4963,53 @@ def write_outputs(output_dir: Path, requested: list[str], *, chess_months: int =
 
     player_path = output_dir / "player-football.json"
     try:
-        player_payload = build_player_payload(
-            _get, api_football_key=os.environ.get("API_FOOTBALL_KEY")
-        )
-        validate_player_payload(player_payload)
-        staged_player = output_dir / ".player-football.json.tmp"
-        player_serialized = (
-            json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False) + "\n"
-        )
-        staged_player.write_text(player_serialized)
-        staged_player.replace(player_path)
-        player_status = {
-            "status": "current",
-            "checked_at": player_payload["generated_at"],
-            "source": player_payload["source"]["name"],
-            "cohorts": [cohort["id"] for cohort in player_payload["cohorts"]],
-            "data_url": "/assets/data/rating-lab/player-football.json",
-            "snapshot_sha256": hashlib.sha256(player_serialized.encode()).hexdigest(),
-            "source_statuses": player_payload["source"].get("statuses", {}),
-        }
+        if not refresh_players:
+            if not player_path.exists():
+                raise FileNotFoundError(
+                    "No validated historical football-player snapshot is available"
+                )
+            previous_player = json.loads(player_path.read_text())
+            player_status = {
+                "status": "retained",
+                "checked_at": previous_player.get("generated_at"),
+                "source": previous_player.get("source", {}).get(
+                    "name", "StatsBomb Open Data"
+                ),
+                "cohorts": [
+                    cohort.get("id") for cohort in previous_player.get("cohorts", [])
+                ],
+                "data_url": "/assets/data/rating-lab/player-football.json",
+                "snapshot_sha256": hashlib.sha256(player_path.read_bytes()).hexdigest(),
+                "source_statuses": previous_player.get("source", {}).get(
+                    "statuses", {}
+                ),
+                "message": (
+                    "Historical player cohorts use the last validated weekly snapshot."
+                ),
+            }
+        else:
+            player_payload = build_player_payload(
+                _get, api_football_key=os.environ.get("API_FOOTBALL_KEY")
+            )
+            validate_player_payload(player_payload)
+            staged_player = output_dir / ".player-football.json.tmp"
+            player_serialized = (
+                json.dumps(player_payload, separators=(",", ":"), ensure_ascii=False)
+                + "\n"
+            )
+            staged_player.write_text(player_serialized)
+            staged_player.replace(player_path)
+            player_status = {
+                "status": "current",
+                "checked_at": player_payload["generated_at"],
+                "source": player_payload["source"]["name"],
+                "cohorts": [cohort["id"] for cohort in player_payload["cohorts"]],
+                "data_url": "/assets/data/rating-lab/player-football.json",
+                "snapshot_sha256": hashlib.sha256(
+                    player_serialized.encode()
+                ).hexdigest(),
+                "source_statuses": player_payload["source"].get("statuses", {}),
+            }
     except Exception as error:
         if not player_path.exists():
             raise

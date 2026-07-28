@@ -23,7 +23,17 @@ def main() -> int:
     )
     parser.add_argument("--output", type=Path, default=ROOT / "assets/data/rating-lab")
     parser.add_argument("--chess-months", type=int, default=36)
-    parser.add_argument("--players-only", action="store_true", help="Refresh only historical football-player cohorts")
+    player_scope = parser.add_mutually_exclusive_group()
+    player_scope.add_argument(
+        "--players-only",
+        action="store_true",
+        help="Refresh only historical football-player cohorts",
+    )
+    player_scope.add_argument(
+        "--skip-players",
+        action="store_true",
+        help="Reuse the last validated historical football-player snapshot",
+    )
     parser.add_argument(
         "--split-only",
         action="store_true",
@@ -43,7 +53,12 @@ def main() -> int:
             + ")"
         )
         return 0
-    manifest = write_outputs(args.output, args.sports, chess_months=args.chess_months)
+    manifest = write_outputs(
+        args.output,
+        args.sports,
+        chess_months=args.chess_months,
+        refresh_players=not args.skip_players,
+    )
     for sport, status in manifest["sports"].items():
         print(f"{sport}: {status['status']} ({status['latest_result']})")
     return 0

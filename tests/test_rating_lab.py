@@ -666,21 +666,68 @@ h001,Hana,Theta,CZE
         self.assertEqual(schema["properties"]["schema_version"]["const"], "1.6.0")
         self.assertFalse(schema["additionalProperties"])
 
-    def test_pages_workflow_regenerates_player_data_before_jekyll(self):
+    def test_pages_workflow_decouples_deploys_from_rating_refreshes(self):
         workflow = (
             Path(__file__).resolve().parents[1]
             / ".github/workflows/refresh-and-deploy.yml"
         ).read_text()
-        full_refresh = "python scripts/refresh_ratings.py --sports tennis football national-football chess"
-        self.assertIn(full_refresh, workflow)
-        self.assertEqual(workflow.count(full_refresh), 1)
-        self.assertLess(workflow.index(full_refresh), workflow.index("actions/jekyll-build-pages"))
+        daily_refresh = (
+            "python scripts/refresh_ratings.py --sports tennis football "
+            "national-football chess --skip-players"
+        )
+        player_refresh = "python scripts/refresh_ratings.py --players-only"
+        self.assertIn(daily_refresh, workflow)
+        self.assertIn(player_refresh, workflow)
+        self.assertLess(workflow.index(daily_refresh), workflow.index("actions/jekyll-build-pages"))
+        self.assertLess(workflow.index(player_refresh), workflow.index("actions/jekyll-build-pages"))
+        self.assertIn("if: github.event_name != 'push'", workflow)
+        self.assertIn("cancel-in-progress: true", workflow)
+        self.assertIn('cron: "47 2 * * 0"', workflow)
         self.assertIn("rating-lab-public-data-v4-", workflow)
         refresh_script = (
             Path(__file__).resolve().parents[1] / "scripts/refresh_ratings.py"
         ).read_text()
         self.assertIn("write_outputs(args.output, [], chess_months=args.chess_months)", refresh_script)
+        self.assertIn("refresh_players=not args.skip_players", refresh_script)
         self.assertNotIn('(args.output / "player-football.json").write_text', refresh_script)
+
+    def test_daily_refresh_reuses_the_validated_player_snapshot(self):
+        sport_payload = {
+            "latest_result": "2026-07-22",
+            "generated_at": "2026-07-23T00:00:00+00:00",
+            "source": {
+                "source": "fixture",
+                "stale_after_hours": 24,
+                "license": "test",
+                "source_url": "https://example.test",
+                "snapshot_sha256": "source-hash",
+            },
+            "parameters": {},
+        }
+        player_payload = {
+            "generated_at": "2026-07-21T01:00:00+00:00",
+            "source": {"name": "Verified fixture", "statuses": {}},
+            "cohorts": [{"id": "verified-cohort"}],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            for sport in ("tennis", "football", "national-football", "chess"):
+                (output / f"{sport}.json").write_text(json.dumps(sport_payload))
+            player_path = output / "player-football.json"
+            player_path.write_text(json.dumps(player_payload))
+            with patch(
+                "rating_lab.player_pipeline.build_player_payload"
+            ) as build_player:
+                manifest = write_outputs(output, [], refresh_players=False)
+            build_player.assert_not_called()
+            self.assertEqual(manifest["player_football"]["status"], "retained")
+            self.assertEqual(
+                manifest["player_football"]["cohorts"], ["verified-cohort"]
+            )
+            self.assertEqual(
+                manifest["player_football"]["snapshot_sha256"],
+                hashlib.sha256(player_path.read_bytes()).hexdigest(),
+            )
 
     def test_player_snapshot_and_manifest_are_published_as_one_contract(self):
         sport_payload = {
