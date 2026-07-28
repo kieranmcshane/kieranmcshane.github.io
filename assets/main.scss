@@ -11028,6 +11028,7 @@ body:has(.repertoire-library) {
 
 .repertoire-paths,
 .repertoire-highlights,
+.repertoire-audit,
 .repertoire-errata {
   margin: 3rem 0;
 }
@@ -11349,12 +11350,69 @@ body:has(.repertoire-library) {
   font-weight: 800;
 }
 
+.repertoire-audit-intro {
+  max-width: 72ch;
+  margin: 0.7rem 0 1rem;
+  color: var(--repertoire-muted);
+  font-size: 0.78rem;
+}
+
+.repertoire-audit-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.repertoire-audit-grid article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--repertoire-line);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.repertoire-audit-grid article > span {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--repertoire-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.repertoire-audit-grid h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.repertoire-audit-grid p {
+  margin: 0.3rem 0 0;
+  color: #4f4b55;
+  font-size: 0.79rem;
+}
+
+.repertoire-audit-grid a {
+  color: var(--repertoire-accent-dark);
+  font-weight: 750;
+  text-underline-offset: 0.18em;
+}
+
 .repertoire-errata > article {
   margin-top: 0.7rem;
   padding: 0.9rem 1rem;
   border: 1px solid #dbc8ba;
   border-radius: 7px;
   background: var(--repertoire-warm-soft);
+}
+
+.repertoire-errata > .repertoire-erratum-major {
+  border-color: #bd8b72;
+  background: #fbede4;
 }
 
 .repertoire-errata article header {
