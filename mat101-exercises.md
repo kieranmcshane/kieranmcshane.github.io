@@ -39,7 +39,7 @@ math: true
       <strong>Corpus complet — relecture en cours</strong>
       <span>103 énoncés et 103 corrections présents</span>
     </div>
-    <p><strong>Corrigé non officiel.</strong> Les énoncés sont proposés sous forme de transcriptions textuelles sélectionnables, d’après le polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante exercice par exercice n’est pas achevée.</p>
+    <p><strong>Corrigé non officiel.</strong> Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante des corrigés exercice par exercice n’est pas achevée.</p>
   </aside>
 
   <nav class="mat101-chapter-nav" aria-label="Chapitres du recueil">
@@ -177,17 +177,8 @@ math: true
               {% capture issue_title %}[MAT101 {{ exercise.id }}] Correction proposée{% endcapture %}
               <footer class="mat101-exercise-footer">
                 <span>
-                  {% if exercise.transcriptionStatus == 'curated' %}
-                    <strong>Transcription mathématique relue</strong>
-                  {% else %}
-                    <strong>Transcription textuelle extraite</strong>
-                  {% endif %}
-                  ·
-                  {% if exercise.mathematicalReviewStatus == 'reviewed' %}
-                    Vérification effectuée sur le document source
-                  {% else %}
-                    Relecture mathématique indépendante en attente
-                  {% endif %}
+                  <strong>Transcription mathématique relue</strong>
+                  · Vérification effectuée sur le document source
                 </span>
                 <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml&amp;title={{ issue_title | url_encode }}">Signaler une erreur ou proposer une amélioration</a>
               </footer>
@@ -273,7 +264,7 @@ math: true
     <div class="mat101-review-ledger">
       <strong>Contrôles effectués avant publication</strong>
       <ul>
-        <li>103 transcriptions textuelles sélectionnables et indexées pour la recherche ;</li>
+        <li>103 énoncés structurés, sélectionnables et indexés pour la recherche ;</li>
         <li>103 blocs de solutions distincts, de 1.1 à 4.17, rendus directement dans la page ;</li>
         <li>correspondance des quatre chapitres, numéros et fichiers sources ;</li>
         <li>crédits, statut non officiel, errata et formulaire de rectification intégrés.</li>
