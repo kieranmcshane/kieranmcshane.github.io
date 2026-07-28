@@ -206,6 +206,35 @@ SOURCE_TEXT_REPLACEMENTS = {
 # Keeping these overrides beside the extractor prevents a future regeneration
 # from silently restoring flattened fractions or delimiter glyphs.
 STATEMENT_OVERRIDES = {
+    "1.19": {
+        "html": r"""<div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
+<p>On va démontrer le théorème de Napoléon.<sup class="mat101-note-reference"><a href="#mat101-note-1-19-history" aria-label="Lire la note historique sur l’attribution du théorème">1</a></sup></p>
+<p>Soient \(A\), \(B\), \(C\) trois points quelconques du plan, d’affixes respectives \(z_A\), \(z_B\), \(z_C\). On suppose qu’on tourne autour de \(ABC\) dans le sens trigonométrique direct. On construit à l’extérieur du triangle \(ABC\) trois triangles équilatéraux \(ABI\), \(BCJ\) et \(CAK\). On note \(P\), \(Q\), \(R\) les centres de ces triangles équilatéraux.</p>
+<ol class="mat101-statement-list">
+<li>Donner les affixes des points \(I\) et \(P\) en fonction de \(z_A\) et \(z_B\).</li>
+<li>Donner de même les affixes des points \(J\), \(K\), \(Q\), \(R\) en fonction de \(z_A\), \(z_B\) et \(z_C\).</li>
+<li>Montrer que le triangle \(PQR\) est équilatéral.</li>
+</ol>
+<aside class="mat101-statement-note" id="mat101-note-1-19-history" role="note">
+<p><strong>1. Note historique.</strong> L’appellation est traditionnelle, mais l’attribution de ce théorème à Napoléon Bonaparte n’est étayée par aucune preuve documentaire connue. La propriété a été publiée pour la première fois en 1825. <a href="https://www.treccani.it/enciclopedia/teorema-di-napoleone_%28Enciclopedia-della-Matematica%29/" target="_blank" rel="noopener noreferrer">Notice historique de l’Enciclopedia della Matematica</a>.</p>
+</aside>
+</div>""",
+        "searchText": (
+            "On va démontrer le théorème de Napoléon. Soient A, B, C trois "
+            "points quelconques du plan, d’affixes respectives z_A, z_B, z_C. "
+            "On suppose qu’on tourne autour de ABC dans le sens trigonométrique "
+            "direct. On construit à l’extérieur du triangle ABC trois triangles "
+            "équilatéraux ABI, BCJ et CAK. On note P, Q, R les centres de ces "
+            "triangles équilatéraux. 1. Donner les affixes des points I et P en "
+            "fonction de z_A et z_B. 2. Donner de même les affixes des points J, "
+            "K, Q, R en fonction de z_A, z_B et z_C. 3. Montrer que le triangle "
+            "PQR est équilatéral. Note historique : l’appellation est "
+            "traditionnelle, mais l’attribution à Napoléon Bonaparte n’est pas "
+            "étayée par une preuve documentaire connue."
+        ),
+        "transcriptionStatus": "curated",
+        "mathematicalReviewStatus": "reviewed",
+    },
     "2.23": {
         "html": r"""<div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
 <p>On dispose d’un jeu de \(2n\) cartes rangées en un tas où toutes les cartes sont initialement face vers le bas. On considère deux types d’opérations sur ce jeu&nbsp;:</p>

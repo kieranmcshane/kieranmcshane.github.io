@@ -253,6 +253,30 @@ test.describe("MAT101 native library", () => {
     );
   });
 
+  test("replaces the dead Napoleon link with an accessible historical note", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("1.19");
+
+    const exercise = page.locator("#exercice-1-19");
+    await exercise.locator(":scope > summary").click();
+    const statement = exercise.locator(".mat101-statement");
+    const note = statement.locator(".mat101-statement-note");
+
+    await expect(statement).not.toContainText("node19.html");
+    await expect(statement.locator('a[href*="node19.html"]')).toHaveCount(0);
+    await expect(note).toContainText("L’appellation est traditionnelle");
+    await expect(note).toContainText("aucune preuve documentaire connue");
+    await expect(
+      statement.getByRole("link", {
+        name: "Lire la note historique sur l’attribution du théorème",
+      })
+    ).toHaveAttribute("href", "#mat101-note-1-19-history");
+    await expect(note.getByRole("link")).toHaveAttribute("href", /treccani\.it/);
+    await expect(statement.locator("mjx-container")).toHaveCount(26);
+  });
+
   test("shows the Polya plan and review only where they aid the reasoning", async ({
     page,
   }) => {

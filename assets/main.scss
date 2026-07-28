@@ -11436,6 +11436,36 @@ body:has(.mat101-library) {
   margin-bottom: 0;
 }
 
+.mat101-note-reference {
+  margin-left: 0.12em;
+  font-family: $base-font-family;
+  font-size: 0.7em;
+  font-weight: 700;
+  line-height: 0;
+  vertical-align: super;
+}
+
+.mat101-note-reference a {
+  text-decoration: none;
+}
+
+.mat101-statement-note {
+  margin-top: 1.4rem;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid rgba($mat101-teal, 0.58);
+  border-radius: 0 6px 6px 0;
+  background: rgba($mat101-teal, 0.055);
+  color: $mat101-muted;
+  font-family: $base-font-family;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.mat101-statement-note:target {
+  outline: 2px solid rgba($mat101-teal, 0.35);
+  outline-offset: 3px;
+}
+
 .mat101-native-solution {
   min-width: 0;
   max-width: 100%;
