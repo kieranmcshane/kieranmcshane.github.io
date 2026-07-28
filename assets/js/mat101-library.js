@@ -136,6 +136,7 @@
     var chapters = Array.from(document.querySelectorAll('[data-mat101-chapter]'));
     var tagButtons = Array.from(document.querySelectorAll('[data-mat101-tag]'));
     var tocDetails = document.querySelector('[data-mat101-toc]');
+    var tocSummary = tocDetails && tocDetails.querySelector(':scope > summary');
     var tocCurrent = document.getElementById('mat101-toc-current');
     var tocLinks = Array.from(document.querySelectorAll('[data-mat101-toc-link]'));
     var tocChapters = Array.from(
@@ -150,10 +151,6 @@
     initializeRootDiagrams();
 
     if (!input || !exercises.length) return;
-
-    if (tocDetails && window.matchMedia('(min-width: 701px)').matches) {
-      tocDetails.open = true;
-    }
 
     function updateToc(visibleCount) {
       tocLinks.forEach(function (link) {
@@ -281,17 +278,18 @@
         filterExercises();
         exercise.open = true;
         setCurrentExercise(exercise);
-        if (tocDetails && window.matchMedia('(max-width: 700px)').matches) {
-          tocDetails.open = false;
-        }
+        if (tocDetails) tocDetails.open = false;
       });
     });
     tocChapterLinks.forEach(function (link) {
       link.addEventListener('click', function () {
-        if (tocDetails && window.matchMedia('(max-width: 700px)').matches) {
-          tocDetails.open = false;
-        }
+        if (tocDetails) tocDetails.open = false;
       });
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== 'Escape' || !tocDetails || !tocDetails.open) return;
+      tocDetails.open = false;
+      if (tocSummary) tocSummary.focus();
     });
     exercises.forEach(function (exercise) {
       exercise.addEventListener('toggle', function () {
