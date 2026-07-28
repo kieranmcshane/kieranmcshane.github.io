@@ -10,7 +10,7 @@ This site collects research notes, mathematical writing, and interactive resourc
 <section class="contact-section" id="contact" aria-labelledby="contact-title">
   <p class="contact-kicker">Contact</p>
   <h2 id="contact-title">Choose the appropriate route</h2>
-  <p>Corrections and requests are tracked publicly on GitHub so that they can be attributed, discussed, and linked to a precise version. Please do not include personal or confidential information.</p>
+  <p>Corrections and requests are publicly readable on GitHub so that they can be attributed, discussed, and linked to a precise version. Submitting a form requires a free GitHub account. Please do not include personal or confidential information.</p>
 
   <div class="contact-routes">
     <article>

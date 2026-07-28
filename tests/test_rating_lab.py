@@ -1812,7 +1812,8 @@ class SplitAssetTests(unittest.TestCase):
         self.assertNotIn("FLAG_BUDGET", script)
         self.assertIn("tabindex=\"' + (point.id === tabbableId", script)
         # No render-blocking or hotlinked external dependencies.
-        self.assertIn("script async src=\"https://cdn.jsdelivr.net/npm/mathjax@3", head)
+        self.assertIn("src=\"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/", head)
+        self.assertIn("integrity=\"sha384-", head)
         self.assertNotIn("raw.githubusercontent.com", page)
         self.assertIn("assets/images/statsbomb-logo.jpg", page)
 
