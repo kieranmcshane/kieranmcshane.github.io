@@ -18,8 +18,12 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=predictor" data-rating-view="predictor">Forecast competitions</a>
     </div>
     <div class="rating-lab-trust-bar">
-      <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
-      <p class="rating-lab-generation" id="rating-lab-generation"></p>
+      <div class="rating-lab-freshness-strip{% if site.data.rating_lab_default.has_delayed_sources %} is-stale{% endif %}" id="rating-lab-freshness" role="status" aria-live="polite">
+        {% for source in site.data.rating_lab_default.freshness %}
+        <span class="rating-lab-freshness-chip{% if source.delayed %} is-stale{% endif %}" title="{{ source.message | escape }}"><i aria-hidden="true"></i>{{ source.label }} · {{ source.latest_result | date: "%b %-d, %Y" }}</span>
+        {% endfor %}
+      </div>
+      <p class="rating-lab-generation" id="rating-lab-generation">{{ site.data.rating_lab_default.published_rankings }} published rankings · generated {{ site.data.rating_lab_default.manifest_generated_at | date: "%b %-d, %Y" }}{% if site.data.rating_lab_default.has_delayed_sources %} · delayed sources retain their last valid snapshot{% endif %}</p>
       <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=methods" data-rating-view="methods">Data, code, and methods</a>
     </div>
   </header>
@@ -50,16 +54,17 @@ description: Live alternative ratings for tennis, club and national-team footbal
         </div>
       </div>
       <button type="button" class="rating-lab-filter-trigger" id="rating-mobile-filters" aria-haspopup="dialog" aria-controls="rating-mobile-filter-sheet">
-        <span><strong id="rating-mobile-model-label">Elo</strong><small>scored out-of-sample</small></span>
+        <span><strong id="rating-mobile-model-label">{{ site.data.rating_lab_default.model_label }}</strong><small>scored out-of-sample</small></span>
         <span>Filters</span>
       </button>
       <div class="rating-lab-control-group rating-lab-desktop-filter" aria-label="Rating model">
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="model-tabs">
-          <button type="button" data-model="elo" aria-pressed="true">Elo</button>
-          <button type="button" data-model="glicko2" aria-pressed="false">Glicko-2</button>
-          <button type="button" data-model="trueskill" aria-pressed="false">Gaussian</button>
-          <button type="button" data-model="robust" aria-pressed="false">Robust</button>
+          <button type="button" data-model="elo" aria-pressed="{% if site.data.rating_lab_default.model == 'elo' %}true{% else %}false{% endif %}">Elo</button>
+          <button type="button" data-model="glicko2" aria-pressed="{% if site.data.rating_lab_default.model == 'glicko2' %}true{% else %}false{% endif %}">Glicko-2</button>
+    <button type="button" data-model="trueskill" aria-pressed="{% if site.data.rating_lab_default.model == 'trueskill' %}true{% else %}false{% endif %}">Gaussian</button>
+    <button type="button" data-model="robust" aria-pressed="{% if site.data.rating_lab_default.model == 'robust' %}true{% else %}false{% endif %}">Robust</button>
+    <button type="button" data-model="ensemble" aria-pressed="{% if site.data.rating_lab_default.model == 'ensemble' %}true{% else %}false{% endif %}">Ensemble</button>
         </div>
       </div>
       <label class="rating-lab-field rating-lab-desktop-filter">
@@ -81,10 +86,11 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <div class="rating-lab-control-group" aria-label="Mobile rating model">
         <span class="rating-lab-control-label">Model</span>
         <div class="rating-lab-segmented" id="rating-mobile-model-tabs">
-          <button type="button" data-mobile-model="elo" aria-pressed="true">Elo</button>
-          <button type="button" data-mobile-model="glicko2" aria-pressed="false">Glicko-2</button>
-          <button type="button" data-mobile-model="trueskill" aria-pressed="false">Gaussian</button>
-          <button type="button" data-mobile-model="robust" aria-pressed="false">Robust</button>
+          <button type="button" data-mobile-model="elo" aria-pressed="{% if site.data.rating_lab_default.model == 'elo' %}true{% else %}false{% endif %}">Elo</button>
+          <button type="button" data-mobile-model="glicko2" aria-pressed="{% if site.data.rating_lab_default.model == 'glicko2' %}true{% else %}false{% endif %}">Glicko-2</button>
+          <button type="button" data-mobile-model="trueskill" aria-pressed="{% if site.data.rating_lab_default.model == 'trueskill' %}true{% else %}false{% endif %}">Gaussian</button>
+          <button type="button" data-mobile-model="robust" aria-pressed="{% if site.data.rating_lab_default.model == 'robust' %}true{% else %}false{% endif %}">Robust</button>
+          <button type="button" data-mobile-model="ensemble" aria-pressed="{% if site.data.rating_lab_default.model == 'ensemble' %}true{% else %}false{% endif %}">Ensemble</button>
         </div>
       </div>
       <label class="rating-lab-field">
@@ -102,11 +108,12 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <div class="rating-lab-quick-model-menu" id="rating-quick-model-menu" role="group" aria-label="Choose the model">
         <button type="button" data-quick-model="elo">Elo</button>
         <button type="button" data-quick-model="glicko2">Glicko-2</button>
-        <button type="button" data-quick-model="trueskill">Gaussian</button>
-        <button type="button" data-quick-model="robust">Robust</button>
+      <button type="button" data-quick-model="trueskill">Gaussian</button>
+      <button type="button" data-quick-model="robust">Robust</button>
+      <button type="button" data-quick-model="ensemble">Ensemble</button>
       </div>
       <button type="button" class="rating-lab-quick-model-trigger" id="rating-quick-model-trigger" aria-expanded="false" aria-controls="rating-quick-model-menu">
-        <span>Model</span><strong id="rating-quick-model-label">Elo</strong><span aria-hidden="true">⌃</span>
+        <span>Model</span><strong id="rating-quick-model-label">{{ site.data.rating_lab_default.model_label }}</strong><span aria-hidden="true">⌃</span>
       </button>
     </div>
 
@@ -154,7 +161,14 @@ description: Live alternative ratings for tennis, club and national-team footbal
               <td class="rating-lab-rank">{{ row.rank }}</td>
               <th scope="row">
                 <span class="rating-lab-entity rating-lab-static-entity">
-                  <span class="rating-lab-identity" aria-hidden="true">{{ row.name | slice: 0, 1 }}{{ row.name | split: ' ' | last | slice: 0, 1 }}</span>
+                  <span class="rating-lab-identity{% if row.media.url %} is-media is-{{ row.media.kind }}{% endif %}" aria-hidden="true">
+                    {% if row.media.url %}
+                    <span class="rating-lab-identity-fallback">{{ row.name | slice: 0, 1 }}{{ row.name | split: ' ' | last | slice: 0, 1 }}</span>
+                    <img src="{{ row.media.url | escape }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-entity-image>
+                    {% else %}
+                    {{ row.name | slice: 0, 1 }}{{ row.name | split: ' ' | last | slice: 0, 1 }}
+                    {% endif %}
+                  </span>
                   <span class="rating-lab-identity-copy">
                     <span class="rating-lab-entity-name"><span class="rating-lab-entity-name-text">{{ row.name }}</span></span>
                     <small>{{ row.competition }}{% if row.country != '' %} · {{ row.country }}{% endif %}</small>
@@ -181,7 +195,24 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
     <details class="rating-lab-metrics-disclosure" open>
       <summary>Model accuracy</summary>
-      <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
+      <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy">
+        <div class="rating-lab-table-wrap">
+          <table class="rating-lab-table rating-lab-evidence-table">
+            <caption>Lowest published log loss within each untouched cohort evaluation; sports are not pooled</caption>
+            <thead><tr><th scope="col">Cohort</th><th scope="col">Lowest model</th><th scope="col">Log loss</th><th scope="col">Predictions</th></tr></thead>
+            <tbody>
+              {% for cohort in site.data.rating_lab_default.cohort_evidence %}
+              <tr>
+                <th scope="row">{{ cohort.label }}</th>
+                <td data-label="Lowest model">{{ cohort.winner_label }}</td>
+                <td data-label="Log loss">{{ cohort.log_loss }}</td>
+                <td data-label="Predictions">{{ cohort.predictions }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </details>
     <details class="rating-lab-movers-disclosure">
       <summary>30-day movers</summary>
@@ -215,12 +246,13 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <button type="button" data-matchup-model="glicko2" aria-pressed="false">Glicko-2</button>
           <button type="button" data-matchup-model="trueskill" aria-pressed="false">Gaussian</button>
           <button type="button" data-matchup-model="robust" aria-pressed="false">Robust</button>
+          <button type="button" data-matchup-model="ensemble" aria-pressed="false">Ensemble</button>
         </div>
       </div>
     </div>
 
     <div class="rating-lab-matchup-result" id="matchup-result" aria-live="polite">
-      <p>Loading current rating state…</p>
+      <p>Choose two published competitors. The browser computes the selected surface, venue, or color context from the versioned ratings.</p>
     </div>
   </section>
 
@@ -304,10 +336,10 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
       <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/tree/main/rating_lab">Model source</a>
     </div>
-    <p class="rating-lab-explainer"><strong>On-demand loading:</strong> the browser first fetches small per-sport core files and then only the ranking lists you actually open, from <code>assets/data/rating-lab/split/</code>. Every split file is derived deterministically from the full per-sport JSON published above, which remains the canonical download and carries the source snapshot hashes.</p>
+    <p class="rating-lab-explainer"><strong>On-demand loading:</strong> the browser first fetches small per-sport core files and then only the ranking lists you actually open, from <code>assets/data/rating-lab/split/</code>. Every split file is derived deterministically from the full per-sport JSON published above. The canonical file declares both its SHA-256 value and hash scope: raw upstream bytes where one stable artifact exists, otherwise the normalized, deduplicated replay input assembled from the recorded upstream responses. Retained snapshots created before this policy are explicitly marked “hash not recorded” rather than receiving an invented value.</p>
 
   <details class="rating-lab-disclosure">
-    <summary><span>Protocol overview</span><strong>How the four rating models differ</strong></summary>
+    <summary><span>Protocol overview</span><strong>How the four component models and ensemble differ</strong></summary>
   <section class="rating-lab-method" id="methodology">
     <p class="rating-lab-kicker">Methodology</p>
     <h2>What changes—and what does not</h2>
@@ -328,7 +360,25 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <h3>Robust TrueSkill</h3>
         <p>The same uncertain-skill framework uses Student-t performance noise. Its heavy tails expect more upsets, so one surprising result moves the ranking less.</p>
       </article>
+      <article>
+        <h3>Validation-weighted ensemble</h3>
+        <p>A log-opinion pool combines the four one-step-ahead probabilities. Its weights are selected only on the validation year from a published quarter-step simplex; the latest year remains untouched evaluation evidence.</p>
+      </article>
     </div>
+    <div class="rating-lab-table-wrap">
+      <table class="rating-lab-factorial">
+        <caption>Pre-declared model comparison: uncertainty treatment and performance-noise tail</caption>
+        <thead><tr><th>Protocol</th><th>Dynamic uncertainty</th><th>Performance noise</th><th>Publication score</th></tr></thead>
+        <tbody>
+          <tr><th>Elo</th><td>No</td><td>Logistic expected score</td><td>Raw rating</td></tr>
+          <tr><th>Glicko-2</th><td>RD and volatility</td><td>Logistic expected score</td><td>Rating − 2RD</td></tr>
+          <tr><th>Gaussian TrueSkill</th><td>Gaussian belief</td><td>Gaussian</td><td>μ − 3σ</td></tr>
+          <tr><th>Robust TrueSkill</th><td>Gaussian belief</td><td>Student-t, ν=1</td><td>μ − 3σ</td></tr>
+          <tr><th>Ensemble</th><td>Inherited from components</td><td>Validation-weighted log-opinion pool</td><td>Weighted standardized index</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="rating-lab-explainer"><strong>Tested question:</strong> on an untouched latest-year evaluation window, does explicit uncertainty help, and does heavy-tailed performance noise improve robustness? The ensemble is judged on that same window, but its weights are selected only in the preceding validation year.</p>
     <p class="rating-lab-explainer"><strong>Why this is not labelled TrueSkill 2:</strong> TrueSkill 2’s published Halo improvement uses experience, squads, kills, quitting, and cross-mode skill. These sports sources do not contain equivalent observations. Calling a result-only replay “TrueSkill 2” would not be reproducible. Core TrueSkill does not need those features: given reliable lineups, it can infer player skill from team outcomes alone.</p>
     <p class="rating-lab-explainer">Turning a Gaussian rating into a log-normal or Pareto-looking published scale can change the histogram without changing anyone’s rank. A genuinely different ranking requires a different performance model or update rule.</p>
   </section>
@@ -419,6 +469,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <button type="button" data-protocol-model="glicko2" aria-pressed="false">Glicko-2</button>
           <button type="button" data-protocol-model="trueskill" aria-pressed="false">Gaussian</button>
           <button type="button" data-protocol-model="robust" aria-pressed="false">Robust</button>
+          <button type="button" data-protocol-model="ensemble" aria-pressed="false">Ensemble</button>
         </div>
       </div>
     </div>
@@ -486,18 +537,32 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <div class="rating-lab-audit-grid">
       <article>
         <h3>Selected parameters</h3>
-        <p id="rating-eligibility">Loading cohort rules…</p>
+        <p id="rating-eligibility">{{ site.data.rating_lab_default.eligibility_rule }}</p>
         <div class="rating-lab-table-wrap">
           <table class="rating-lab-parameter-table">
             <caption>Parameters selected for the current cohort</caption>
             <thead><tr><th scope="col">Model</th><th scope="col">Selected values</th><th scope="col">Candidates tested</th></tr></thead>
-            <tbody id="rating-parameter-body"></tbody>
+            <tbody id="rating-parameter-body">
+              {% for model in site.data.rating_lab_default.parameter_evidence %}
+              <tr>
+                <th scope="row">{{ model.label }}</th>
+                <td data-label="Selected values"><code>{{ model.selected }}</code></td>
+                <td data-label="Candidates tested"><code>{{ model.candidates | join: " · " }}</code></td>
+              </tr>
+              {% endfor %}
+            </tbody>
           </table>
         </div>
       </article>
       <article>
         <h3>Build audit record</h3>
-        <dl id="rating-audit-record"><div><dt>Status</dt><dd>Loading…</dd></div></dl>
+        <dl id="rating-audit-record">
+          <div><dt>Generated</dt><dd>{{ site.data.rating_lab_default.generated_at | date: "%b %-d, %Y" }}</dd></div>
+          <div><dt>Source state</dt><dd>{{ site.data.rating_lab_default.audit.source_status }}</dd></div>
+          <div><dt>Source</dt><dd>{{ site.data.rating_lab_default.audit.source }}</dd></div>
+          <div><dt>Snapshot SHA-256</dt><dd>{% if site.data.rating_lab_default.audit.snapshot_sha256 %}<code>{{ site.data.rating_lab_default.audit.snapshot_sha256 }}</code>{% else %}Not recorded for this retained pre-hash snapshot{% endif %}</dd></div>
+          <div><dt>Hash scope</dt><dd>{{ site.data.rating_lab_default.audit.snapshot_hash_scope | replace: "_", " " }}</dd></div>
+        </dl>
         <div class="rating-lab-downloads">
           <a id="rating-data-download" href="{{ '/assets/data/rating-lab/tennis.json' | relative_url }}" download>Current cohort JSON</a>
           <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>

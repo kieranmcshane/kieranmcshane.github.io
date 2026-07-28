@@ -85,6 +85,9 @@ jobs:
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
           python scripts/refresh_ratings.py --players-only
+      - name: Derive static delivery from the validated snapshot
+        run: |
+          python scripts/refresh_ratings.py --split-only
       - name: Preserve validated public snapshot
         if: github.event_name != 'push'
         run: |
@@ -107,3 +110,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - name: Verify the uncached public delivery
+        run: |
+          python scripts/check_rating_lab_delivery.py "${{ steps.deployment.outputs.page_url }}rating-lab/"

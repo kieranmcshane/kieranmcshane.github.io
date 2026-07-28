@@ -4,7 +4,8 @@
   var root = document.querySelector('.rating-lab');
   if (!root) return;
   var sports = ['tennis', 'football', 'national-football', 'chess'];
-  var modelKeys = ['elo', 'glicko2', 'trueskill', 'robust'];
+  var baseModelKeys = ['elo', 'glicko2', 'trueskill', 'robust'];
+  var modelKeys = baseModelKeys.concat(['ensemble']);
   var viewKeys = ['leaderboard', 'matchup', 'predictor', 'methods'];
   var viewTargets = {
     leaderboard: 'leaderboard-heading',
@@ -75,11 +76,13 @@
     matchupB: null,
     matchupVenue: 'neutral',
     predictorCompetition: null,
-    predictorModel: initialViewState.model,
+    predictorModel: baseModelKeys.indexOf(initialViewState.model) !== -1 ?
+      initialViewState.model : 'elo',
     predictorTeam: null,
     settledPerformanceTeam: null,
     manifest: null,
-    datasets: {}
+    datasets: {},
+    mediaIndex: {}
   };
 
   var elements = {
@@ -200,7 +203,8 @@
     state.sport = restored.sport;
     state.model = restored.model;
     state.view = restored.view;
-    state.predictorModel = restored.model;
+    state.predictorModel = baseModelKeys.indexOf(restored.model) !== -1 ?
+      restored.model : 'elo';
     state.selected = null;
     state.pinned = [];
     state.expanded = false;
@@ -249,15 +253,33 @@
   }
 
   function loadSportCore(sport) {
-    return fetchJson('split/' + sport + '-core.json').catch(function () {
+    return Promise.all([
+      fetchJson('split/' + sport + '-core.json').catch(function () {
       return fetchJson(sport + '.json');
-    }).then(function (payload) { state.datasets[sport] = payload; });
+      }),
+      loadMediaIndex()
+    ]).then(function (payloads) { state.datasets[sport] = payloads[0]; });
+  }
+
+  var mediaIndexRequest = null;
+
+  function loadMediaIndex() {
+    if (mediaIndexRequest) return mediaIndexRequest;
+    mediaIndexRequest = fetchJson('split/media-index.json').then(function (payload) {
+      state.mediaIndex = payload.entities || {};
+    }).catch(function () {
+      state.mediaIndex = {};
+    });
+    return mediaIndexRequest;
   }
 
   function ensureRankings(sport, model) {
     var dataset = state.datasets[sport];
     if (!dataset) return Promise.reject(new Error(sport + ' ratings are not loaded.'));
     var entry = dataset.models[model];
+    if (!entry) {
+      return Promise.reject(new Error(modelLabel(model) + ' is awaiting the next validated data refresh.'));
+    }
     if (entry.rankings) return Promise.resolve();
     if (entry.rankingsRequest) return entry.rankingsRequest;
     entry.rankingsRequest = fetchJson('split/' + sport + '-rankings-' + model + '.json').catch(function () {
@@ -292,7 +314,14 @@
   function syncData() {
     var token = ++syncToken;
     var wanted = [ensureRankings(state.sport, 'elo')];
-    if (state.model !== 'elo') wanted.push(ensureRankings(state.sport, state.model));
+    if (state.model === 'ensemble') {
+      wanted = baseModelKeys.map(function (model) {
+        return ensureRankings(state.sport, model);
+      });
+      wanted.push(ensureRankings(state.sport, 'ensemble'));
+    } else if (state.model !== 'elo') {
+      wanted.push(ensureRankings(state.sport, state.model));
+    }
     var loaded = state.datasets[state.sport].models[state.model].rankings &&
       state.datasets[state.sport].models.elo.rankings;
     if (!loaded) root.setAttribute('aria-busy', 'true');
@@ -598,6 +627,7 @@
 
   function entityMedia(row, sport) {
     if (row && row.media) return row.media;
+    if (row && row.id && state.mediaIndex[row.id]) return state.mediaIndex[row.id];
     var dataset = state.datasets[sport];
     if (!dataset || !row || !row.id) return null;
     if (!dataset.models.elo.rankings) {
@@ -704,14 +734,73 @@
       ['Log loss', 'log_loss', 4],
       ['Calibration gap', 'calibration', 4]
     ];
-    elements.metrics.innerHTML = definitions.map(function (definition) {
+    var cards = definitions.map(function (definition) {
       var values = modelKeys.map(function (key) { return models[key].metrics[definition[1]]; });
       var bestIndex = values.indexOf(Math.min.apply(null, values));
       return '<div class="rating-lab-metric"><span>' + definition[0] + '</span><div class="rating-lab-metric-value"><strong>' +
         number(selected[definition[1]], definition[2], definition[2]) + '</strong></div><small>Lower is better · best: ' +
         escapeHtml(models[modelKeys[bestIndex]].label) + ' ' + number(values[bestIndex], definition[2], definition[2]) + '</small></div>';
     }).concat(['<div class="rating-lab-metric"><span>Held-out predictions</span><div class="rating-lab-metric-value"><strong>' +
-      number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']).join('');
+      number(selected.predictions, 0) + '</strong></div><small>Scored before each result updates the model</small></div>']);
+    var bins = selected.reliability_bins || [];
+    var decomposition = selected.brier_decomposition;
+    var chart = '';
+    if (bins.length && decomposition) {
+      var width = 360, height = 220, left = 42, right = 12, top = 14, bottom = 42;
+      var plotWidth = width - left - right, plotHeight = height - top - bottom;
+      var points = bins.map(function (bin) {
+        return (left + bin.predicted * plotWidth).toFixed(1) + ',' +
+          (top + (1 - bin.observed) * plotHeight).toFixed(1);
+      }).join(' ');
+      var markers = bins.map(function (bin) {
+        var x = left + bin.predicted * plotWidth;
+        var y = top + (1 - bin.observed) * plotHeight;
+        var radius = Math.max(3, Math.min(8, 2.5 + Math.sqrt(bin.count) / 4));
+        return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' +
+          radius.toFixed(1) + '"><title>Predicted ' + percent(bin.predicted) +
+          ' · observed ' + percent(bin.observed) + ' · n=' + number(bin.count, 0) +
+          '</title></circle>';
+      }).join('');
+      var binRows = bins.map(function (bin) {
+        return '<tr><td>' + percent(bin.lower) + '–' + percent(bin.upper) + '</td><td>' +
+          percent(bin.predicted) + '</td><td>' + percent(bin.observed) + '</td><td>' +
+          number(bin.count, 0) + '</td></tr>';
+      }).join('');
+      chart = '<figure class="rating-lab-reliability"><figcaption><strong>Reliability · ' +
+        escapeHtml(models[state.model].label) + '</strong><span>Points on the diagonal are calibrated; circle size follows bin count.</span></figcaption>' +
+        '<div class="rating-lab-reliability-layout"><svg viewBox="0 0 ' + width + ' ' + height +
+        '" role="img" aria-label="Predicted probability against observed frequency"><line class="rating-lab-reliability-diagonal" x1="' +
+        left + '" y1="' + (height - bottom) + '" x2="' + (width - right) + '" y2="' + top +
+        '"></line><polyline points="' + points + '"></polyline>' + markers +
+        '<text x="' + (left + plotWidth / 2) + '" y="' + (height - 8) +
+        '" text-anchor="middle">Predicted probability</text><text transform="translate(12 ' +
+        (top + plotHeight / 2) + ') rotate(-90)" text-anchor="middle">Observed frequency</text></svg>' +
+        '<div><dl><div><dt>Reliability</dt><dd>' + number(decomposition.reliability, 6, 6) +
+        '</dd></div><div><dt>Resolution</dt><dd>' + number(decomposition.resolution, 6, 6) +
+        '</dd></div><div><dt>Uncertainty</dt><dd>' + number(decomposition.uncertainty, 6, 6) +
+        '</dd></div></dl><details><summary>Bin counts and values</summary><div class="rating-lab-table-wrap"><table><thead><tr><th>Bin</th><th>Predicted</th><th>Observed</th><th>n</th></tr></thead><tbody>' +
+        binRows + '</tbody></table></div></details></div></div><small>' +
+        escapeHtml(decomposition.method) + '</small></figure>';
+    }
+    var incumbent = '';
+    (state.datasets[state.sport].incumbent_benchmarks || []).forEach(function (benchmark) {
+      var selectedCommon = benchmark.metrics && benchmark.metrics[state.model];
+      var incumbentCommon = benchmark.metrics && benchmark.metrics.fide;
+      if (!selectedCommon || !incumbentCommon) return;
+      incumbent += '<article class="rating-lab-incumbent"><div><p class="rating-lab-kicker">External incumbent · identical fixture subset</p><h3>' +
+        escapeHtml(benchmark.label) + '</h3><p>' + escapeHtml(benchmark.probability_rule) +
+        '</p></div><div class="rating-lab-table-wrap"><table><thead><tr><th>Forecaster</th><th>n</th><th>Log loss</th><th>Brier</th></tr></thead><tbody><tr><th>' +
+        escapeHtml(models[state.model].label) + '</th><td>' + number(selectedCommon.predictions, 0) +
+        '</td><td>' + number(selectedCommon.log_loss, 4) + '</td><td>' +
+        number(selectedCommon.brier, 4) + '</td></tr><tr><th>' +
+        escapeHtml(benchmark.label) + '</th><td>' + number(incumbentCommon.predictions, 0) +
+        '</td><td>' + number(incumbentCommon.log_loss, 4) + '</td><td>' +
+        number(incumbentCommon.brier, 4) + '</td></tr></tbody></table></div><small>' +
+        escapeHtml(benchmark.fit + ' ' + benchmark.withheld_rule) + ' ' +
+        number(benchmark.withheld_predictions, 0) + ' evaluation games withheld. <a href="' +
+        escapeHtml(benchmark.source_url) + '">Official source</a>.</small></article>';
+    });
+    elements.metrics.innerHTML = cards.join('') + chart + incumbent;
     var hiddenProvisional = !state.includeProvisional ? provisionalCount() : 0;
     var provisionalNote = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
       (provisionalCount() ? ' · provisional included' : '');
@@ -805,7 +894,10 @@
     var hiddenProvisional = !state.includeProvisional ? provisionalCount() : 0;
     var provisionalCaption = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
       (provisionalCount() ? ' · provisional included' : '');
-    elements.rankingTable.classList.toggle('has-uncertainty', state.model !== 'elo');
+    elements.rankingTable.classList.toggle(
+      'has-uncertainty',
+      state.model !== 'elo' && state.model !== 'ensemble'
+    );
     elements.caption.textContent = model.label + ' · ' + rows.length + ' eligible · ' +
       (model.ranking_rule || 'Current model ranking rule') + provisionalCaption;
     elements.empty.hidden = rows.length > 0;
@@ -1076,7 +1168,7 @@
       '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
       (isPinned ? 'true' : 'false') + '">' + (isPinned ? 'Pinned for comparison' : 'Pin for comparison') + '</button>' +
       historyChart([{ name: row.name, points: row.history }], row.name + ' rating history', row.history_events) +
-      '<p class="rating-lab-inspector-label">Across all four models</p><table class="rating-lab-model-compare"><thead><tr><th>Model</th><th>Rank</th><th>Score</th><th>Uncertainty</th></tr></thead><tbody>' +
+      '<p class="rating-lab-inspector-label">Across all published protocols</p><table class="rating-lab-model-compare"><thead><tr><th>Model</th><th>Rank</th><th>Score</th><th>Uncertainty</th></tr></thead><tbody>' +
       crossModel + '</tbody></table>' + distribution(row, rows) +
       '<dl><div><dt>Last played</dt><dd>' + formatDate(row.last_played) + '</dd></div><div><dt>Recent matches</dt><dd>' + row.recent_matches + '</dd></div><div><dt>All matches</dt><dd>' + row.matches + '</dd></div>' +
       (row.sigma === null ? '' : '<div><dt>Uncertainty σ</dt><dd>' + number(row.sigma, 2) + '</dd></div>') + '</dl>' + compare +
@@ -1103,8 +1195,11 @@
         '<td data-label="Candidates tested"><code>' + escapeHtml(candidates) + '</code></td></tr>';
     }).join('');
     var revision = state.manifest.code_revision || 'unknown';
-    var snapshot = data.source.snapshot_sha256 || 'Published through source API/archive';
-    elements.auditRecord.innerHTML = [
+    var snapshot = data.source.snapshot_sha256 || 'Not recorded for this retained pre-hash snapshot';
+    var snapshotScope = data.source.snapshot_hash_scope || (
+      data.source.snapshot_sha256 ? 'upstream source bytes' : 'not recorded for pre-hash snapshot'
+    );
+    var auditItems = [
       ['Schema', data.schema_version],
       ['Method', state.manifest.methodology_version || '—'],
       ['Code revision', revision.substring(0, 12)],
@@ -1112,8 +1207,27 @@
       ['Data window', formatDate(data.data_window.first_result) + ' – ' + formatDate(data.data_window.last_result)],
       ['Input size', number(data.data_window.matches, 0) + ' results · ' + number(data.data_window.entities, 0) + ' entities'],
       ['Source state', status.status],
-      ['Snapshot SHA-256', snapshot]
-    ].map(function (item) {
+      ['Snapshot SHA-256', snapshot],
+      ['Hash scope', snapshotScope.replace(/_/g, ' ')]
+    ];
+    var bridge = data.source.bridge_coverage;
+    if (bridge) {
+      auditItems.push(
+        ['Bridge evidence', number(bridge.matches_added, 0) + ' CC0 results · ' +
+          number(bridge.existing_entities_linked, 0) + ' exact identity links'],
+        ['Result graph', number(bridge.largest_component_before, 0) + ' → ' +
+          number(bridge.largest_component_after, 0) + ' entities in the largest component']
+      );
+    }
+    if (data.coverage_evaluation) {
+      auditItems.push([
+        'Original-five accuracy gate',
+        data.coverage_evaluation.all_models_non_degraded ?
+          'Passed at declared tolerance' :
+          'Diagnostic warning: at least one protocol degraded'
+      ]);
+    }
+    elements.auditRecord.innerHTML = auditItems.map(function (item) {
       return '<div><dt>' + escapeHtml(item[0]) + '</dt><dd>' + escapeHtml(item[1]) + '</dd></div>';
     }).join('');
     elements.dataDownload.href = dataUrl(state.sport + '.json');
@@ -1160,6 +1274,17 @@
   }
 
   function protocolModelRules(model, parameters, sport) {
+    if (model === 'ensemble') {
+      return {
+        prediction: 'Compute all four component expected scores, transform each to log odds, take the selected weighted mean, then transform back to probability.',
+        update: 'The ensemble has no separate rating update. Each component learns by its own published rule; the ensemble weights remain fixed after validation selection.',
+        publication: 'Rank a common eligible field by the weighted mean of each component’s standardized published strength. Display 100 + 15 times that pooled z-score. It is a comparison index, not Elo, μ, or an uncertainty interval.',
+        constants: 'Candidate weights lie on the declared quarter-step simplex and sum to one. Pool=log opinion; weights: ' +
+          baseModelKeys.map(function (key) {
+            return modelLabel(key) + '=' + number(parameters['weight_' + key], 2);
+          }).join(', ') + '.'
+      };
+    }
     if (model === 'elo') {
       return {
         prediction: 'Compute expected score p = 1 / (1 + 10^−((Rₐ + advantage − Rᵦ) / scale)).',
@@ -1204,7 +1329,12 @@
       beta: 'Performance-noise scale; larger values expect more upsets',
       draw_margin: 'Skill-difference interval treated as a draw',
       advantage: 'Bayesian skill units added when home/White advantage is active',
-      robust: 'Whether performance noise uses Student-t ν=1 rather than Gaussian'
+      robust: 'Whether performance noise uses Student-t ν=1 rather than Gaussian',
+      pool: 'Probability pooling rule used after the component predictions',
+      weight_elo: 'Validation-selected Elo weight',
+      weight_glicko2: 'Validation-selected Glicko-2 weight',
+      weight_trueskill: 'Validation-selected Gaussian TrueSkill weight',
+      weight_robust: 'Validation-selected Robust TrueSkill weight'
     }[key] || key;
   }
 
@@ -1507,12 +1637,13 @@
     return Math.max(cdf((signed - parameters.draw_margin) / parameters.beta), 1e-12);
   }
 
-  function beliefOutcomes(rowA, rowB, dataset, advantage) {
-    var parameters = dataset.parameters[state.model];
+  function beliefOutcomes(rowA, rowB, dataset, advantage, modelKey) {
+    modelKey = modelKey || state.model;
+    var parameters = dataset.parameters[modelKey];
     var meanDifference = rowA.rating - rowB.rating + advantage;
-    if (state.model === 'elo' || state.model === 'glicko2') {
+    if (modelKey === 'elo' || modelKey === 'glicko2') {
       var expected;
-      if (state.model === 'elo') {
+      if (modelKey === 'elo') {
         expected = 1 / (1 + Math.pow(10, -meanDifference / parameters.scale));
       } else {
         var opponentPhi = rowB.sigma / 173.7178;
@@ -1536,9 +1667,9 @@
     var totals = [0, 0, 0];
     ghNodes.forEach(function (node, index) {
       var difference = meanDifference + Math.sqrt(2 * variance) * node;
-      totals[0] += ghWeights[index] * bayesianLikelihood(difference, 1, parameters, state.model === 'robust');
-      totals[1] += ghWeights[index] * bayesianLikelihood(difference, 0.5, parameters, state.model === 'robust');
-      totals[2] += ghWeights[index] * bayesianLikelihood(difference, 0, parameters, state.model === 'robust');
+      totals[0] += ghWeights[index] * bayesianLikelihood(difference, 1, parameters, modelKey === 'robust');
+      totals[1] += ghWeights[index] * bayesianLikelihood(difference, 0.5, parameters, modelKey === 'robust');
+      totals[2] += ghWeights[index] * bayesianLikelihood(difference, 0, parameters, modelKey === 'robust');
     });
     var total = Math.max((totals[0] + totals[1] + totals[2]) / Math.sqrt(Math.PI), 1e-12);
     return {
@@ -1552,13 +1683,13 @@
     };
   }
 
-  function matchupOutcomes(rowA, rowB, dataset) {
-    var parameters = dataset.parameters[state.model];
+  function componentMatchupOutcomes(rowA, rowB, dataset, modelKey) {
+    var parameters = dataset.parameters[modelKey];
     if (state.sport === 'tennis') {
       var surface = state.matchupVenue;
       var contextA = rowA.contexts && rowA.contexts[surface];
       var contextB = rowB.contexts && rowB.contexts[surface];
-      var globalOutcome = beliefOutcomes(rowA, rowB, dataset, 0);
+      var globalOutcome = beliefOutcomes(rowA, rowB, dataset, 0, modelKey);
       if (!contextA || !contextB) {
         globalOutcome.surface = surface;
         globalOutcome.surfaceWeight = 0;
@@ -1566,7 +1697,7 @@
         globalOutcome.surfaceExpected = null;
         return globalOutcome;
       }
-      var surfaceOutcome = beliefOutcomes(contextA, contextB, dataset, 0);
+      var surfaceOutcome = beliefOutcomes(contextA, contextB, dataset, 0, modelKey);
       var evidence = Math.min((contextA.matches + contextB.matches) / 20, 1);
       var weight = parameters.surface_weight * evidence;
       return {
@@ -1588,8 +1719,49 @@
       };
     }
     var advantageDirection = state.matchupVenue === 'a' ? 1 : state.matchupVenue === 'b' ? -1 : 0;
-    var advantage = advantageDirection * (state.model === 'elo' || state.model === 'glicko2' ? parameters.home : parameters.advantage);
-    return beliefOutcomes(rowA, rowB, dataset, advantage);
+    var advantage = advantageDirection * (modelKey === 'elo' || modelKey === 'glicko2' ? parameters.home : parameters.advantage);
+    return beliefOutcomes(rowA, rowB, dataset, advantage, modelKey);
+  }
+
+  function matchupOutcomes(rowA, rowB, dataset) {
+    if (state.model !== 'ensemble') {
+      return componentMatchupOutcomes(rowA, rowB, dataset, state.model);
+    }
+    var parameters = dataset.parameters.ensemble;
+    var componentOutcomes = {};
+    baseModelKeys.forEach(function (modelKey) {
+      var rankings = dataset.models[modelKey].rankings || [];
+      var componentA = rankings.find(function (row) { return row.id === rowA.id; });
+      var componentB = rankings.find(function (row) { return row.id === rowB.id; });
+      if (componentA && componentB) {
+        componentOutcomes[modelKey] = componentMatchupOutcomes(
+          componentA, componentB, dataset, modelKey
+        );
+      }
+    });
+    var available = baseModelKeys.filter(function (modelKey) {
+      return componentOutcomes[modelKey];
+    });
+    if (!available.length) throw new Error('No aligned ensemble components are available.');
+    var outcomes = ['win', 'draw', 'loss'];
+    var pooled = {};
+    outcomes.forEach(function (outcome) {
+      pooled[outcome] = Math.exp(available.reduce(function (sum, modelKey) {
+        var weight = Number(parameters['weight_' + modelKey] || 0);
+        return sum + weight * Math.log(
+          Math.max(componentOutcomes[modelKey][outcome], 1e-12)
+        );
+      }, 0));
+    });
+    var total = pooled.win + pooled.draw + pooled.loss;
+    outcomes.forEach(function (outcome) { pooled[outcome] /= total; });
+    pooled.expected = pooled.win + 0.5 * pooled.draw;
+    pooled.difference = null;
+    pooled.variance = null;
+    pooled.parameters = parameters;
+    pooled.components = componentOutcomes;
+    pooled.surface = state.sport === 'tennis' ? state.matchupVenue : null;
+    return pooled;
   }
 
   function matchupVenueOptions(rowA, rowB) {
@@ -1686,7 +1858,9 @@
       method: 'Legacy snapshot fallback; refresh to schema 1.4.0 for cohort draw context.'
     };
     var beliefLabel = function (row) {
-      return state.model === 'elo' ? number(row.rating, 1) : state.model === 'glicko2' ?
+      return state.model === 'ensemble' ?
+        'ensemble strength index ' + number(row.score, 2) :
+        state.model === 'elo' ? number(row.rating, 1) : state.model === 'glicko2' ?
         'rating ' + number(row.rating, 2) + ', RD ' + number(row.sigma, 2) + ', volatility ' + number(row.volatility, 5) :
         'μ ' + number(row.rating, 2) + ', σ ' + number(row.sigma, 2);
     };
@@ -1697,7 +1871,12 @@
       ratingB += '; ' + venue.label + ' ' + beliefLabel(outcome.contextB) + ' from ' + outcome.contextB.matches + ' matches';
     }
     var calculation;
-    if (state.model === 'elo') {
+    if (state.model === 'ensemble') {
+      calculation = 'Each component computes its own win, draw, and loss probabilities from its published state and the selected context. The displayed probabilities are their normalized log-opinion pool. Weights were chosen only on the validation year from the published quarter-step simplex: ' +
+        baseModelKeys.map(function (modelKey) {
+          return modelLabel(modelKey) + ' ' + number(parameters['weight_' + modelKey], 2);
+        }).join(', ') + '. The latest 12 months were not used to choose these weights.';
+    } else if (state.model === 'elo') {
       calculation = 'Expected score uses 1 / (1 + 10^(−Δ/' + number(parameters.scale, 0) + ')), where Δ includes ' +
         number(parameters.home, 2) + ' rating points when home advantage applies. The three-way split allocates draws as d = min(q × 4p(1−p), 2min(p,1−p)), using empirical q=' +
         number(outcome.empiricalDrawRate, 4) + ' from ' + number(context.draws, 0) + ' draws in ' +
@@ -1714,7 +1893,7 @@
         number(context.draw_rate * 100, 2) + '% (' + number(context.draws, 0) + ' of ' + number(context.matches, 0) +
         '); the Bayesian likelihood is not forced to equal that baseline.';
     }
-    if (state.sport === 'tennis') {
+    if (state.sport === 'tennis' && state.model !== 'ensemble') {
       var surfaceDetail = outcome.surfaceExpected === null ?
         'One or both players have no published belief for this surface, so this matchup uses the global belief only.' :
         'Global expected score ' + number(outcome.globalExpected, 4) + ' and surface expected score ' +
@@ -1736,7 +1915,8 @@
       number(outcome.expected, 4) + '</dd></div><div><dt>' + escapeHtml(rowB.name) + '</dt><dd>' + escapeHtml(ratingB) +
       '</dd></div></dl><details class="rating-lab-matchup-method"><summary>Exact calculation and assumptions</summary><p>' +
       escapeHtml(calculation) + '</p><p><strong>Published inputs:</strong> A ' + escapeHtml(ratingA) + '; B ' +
-      escapeHtml(ratingB) + '; adjusted difference ' + number(outcome.difference, 3) + '. ' + escapeHtml(context.method) +
+      escapeHtml(ratingB) + (Number.isFinite(outcome.difference) ?
+        '; adjusted difference ' + number(outcome.difference, 3) : '') + '. ' + escapeHtml(context.method) +
       '</p><p>This is a result-and-context probability for one event at the selected ' + eventContext + '. The published evaluation scores expected score, not a separately calibrated three-class forecast. ' + unusedContext + ', and it contains no betting margin. <a href="#protocol">Inspect the full protocol</a> or <a href="' +
       escapeHtml(dataset.source.source_url) + '">open the source data</a>.</p></details>';
   }
@@ -2331,7 +2511,13 @@
   var quickModelFrame = null;
 
   function modelLabel(model) {
-    return { elo: 'Elo', glicko2: 'Glicko-2', trueskill: 'Gaussian', robust: 'Robust' }[model] || model;
+    return {
+      elo: 'Elo',
+      glicko2: 'Glicko-2',
+      trueskill: 'Gaussian',
+      robust: 'Robust',
+      ensemble: 'Ensemble'
+    }[model] || model;
   }
 
   function closeQuickModel() {
@@ -2372,6 +2558,8 @@
     var activeModel = context.id === 'predictor' ? state.predictorModel : state.model;
     elements.quickModelLabel.textContent = modelLabel(activeModel);
     elements.quickModelMenu.querySelectorAll('[data-quick-model]').forEach(function (button) {
+      button.hidden = context.id === 'predictor' &&
+        baseModelKeys.indexOf(button.dataset.quickModel) === -1;
       button.setAttribute('aria-pressed', String(button.dataset.quickModel === activeModel));
     });
   }
@@ -2448,7 +2636,10 @@
     if (!link) return;
     event.preventDefault();
     var view = link.dataset.ratingView;
-    if (view === 'predictor') state.predictorModel = state.model;
+    if (view === 'predictor') {
+      state.predictorModel = baseModelKeys.indexOf(state.model) !== -1 ?
+        state.model : 'elo';
+    }
     replaceViewState(view);
     renderPredictor();
     scrollToView(view, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
@@ -2531,6 +2722,7 @@
     var button = event.target.closest('[data-quick-model]');
     if (!button) return;
     if (quickModelContext === 'predictor') {
+      if (baseModelKeys.indexOf(button.dataset.quickModel) === -1) return;
       state.predictorModel = button.dataset.quickModel;
       state.model = state.predictorModel;
       state.predictorTeam = null;
@@ -2939,9 +3131,17 @@
   fetchJson('manifest.json')
     .then(function (manifest) {
       state.manifest = manifest;
+      if (!manifest.models || manifest.models.indexOf('ensemble') === -1) {
+        modelKeys = baseModelKeys.slice();
+        root.querySelectorAll('[data-model="ensemble"], [data-mobile-model="ensemble"], [data-matchup-model="ensemble"], [data-protocol-model="ensemble"], [data-quick-model="ensemble"]').forEach(function (button) {
+          button.hidden = true;
+        });
+        if (state.model === 'ensemble') state.model = 'elo';
+      }
       return Promise.all(sports.map(loadSportCore));
     })
     .then(function () {
+      if (state.model === 'ensemble') return ensureModels(state.sport);
       return Promise.all([
         ensureRankings(state.sport, 'elo'),
         state.model === 'elo' ? null : ensureRankings(state.sport, state.model)

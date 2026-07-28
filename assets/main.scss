@@ -3284,6 +3284,110 @@ body:has(.rating-lab) .post-content {
   background: var(--lab-navy);
 }
 
+.rating-lab-reliability {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1.1rem 1.2rem;
+  border-top: 1px solid var(--lab-line);
+}
+
+.rating-lab-reliability figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #617084;
+  font-size: 0.8rem;
+}
+
+.rating-lab-reliability figcaption strong {
+  color: var(--lab-ink);
+  font-size: 0.95rem;
+}
+
+.rating-lab-reliability-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(13rem, 0.8fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.rating-lab-reliability svg {
+  width: 100%;
+  max-height: 250px;
+  overflow: visible;
+}
+
+.rating-lab-reliability svg polyline {
+  fill: none;
+  stroke: var(--lab-navy);
+  stroke-width: 2;
+}
+
+.rating-lab-reliability svg circle {
+  fill: var(--lab-navy);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.rating-lab-reliability svg text {
+  fill: #617084;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.rating-lab-reliability-diagonal {
+  stroke: #9aa5b1;
+  stroke-dasharray: 4 4;
+}
+
+.rating-lab-reliability dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 0 0.7rem;
+}
+
+.rating-lab-reliability dl div {
+  min-width: 0;
+}
+
+.rating-lab-reliability dt,
+.rating-lab-reliability dd {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.rating-lab-reliability dd {
+  color: var(--lab-ink);
+  font-weight: 700;
+}
+
+.rating-lab-reliability details summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.rating-lab-reliability table {
+  font-size: 0.72rem;
+}
+
+.rating-lab-incumbent {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(20rem, 1fr);
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-top: 1px solid var(--lab-line);
+}
+
+.rating-lab-incumbent h3,
+.rating-lab-incumbent p {
+  margin: 0.25rem 0;
+}
+
+.rating-lab-incumbent > small {
+  grid-column: 1 / -1;
+}
+
 .rating-lab-movers {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -8595,6 +8699,27 @@ body:has(.explain-lab) .post-header {
 
   .rating-lab-freshness-strip {
     gap: 0.35rem;
+  }
+
+  .rating-lab-reliability {
+    flex: 0 0 min(92vw, 28rem);
+  }
+
+  .rating-lab-reliability figcaption {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rating-lab-reliability-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rating-lab-incumbent {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rating-lab-incumbent > small {
+    grid-column: auto;
   }
 
   .rating-lab-freshness-chip {

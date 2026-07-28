@@ -29,10 +29,11 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.16.0"
+SCHEMA_VERSION = "1.17.0"
 METHODOLOGY_VERSION = "2026-07-23.4"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
+PUBLISHED_MODEL_NAMES = MODEL_NAMES + ("ensemble",)
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
 SCHEDULE_ENTITY_ALIASES = {
     "national-football": {
@@ -59,6 +60,14 @@ OPEN_FOOTBALL_CODES = {
     "de.1": "Bundesliga",
     "it.1": "Serie A",
     "fr.1": "Ligue 1",
+}
+OPEN_FOOTBALL_BRIDGE_CODES = {
+    "nl.1": "Eredivisie",
+    "pt.1": "Primeira Liga",
+    "be.1": "Belgian Pro League",
+    "tr.1": "Süper Lig",
+    "at.1": "Austrian Bundesliga",
+    "gr.1": "Super League Greece",
 }
 OPEN_FOOTBALL_FIXTURES = {
     "premier-league": (
@@ -357,31 +366,32 @@ def _wikimedia_portraits(sport: str, entity_ids: list[str]) -> dict[str, dict]:
     else:
         return {}
     filenames: dict[str, dict[str, str]] = {}
-    values = sorted(external_ids)
-    for offset in range(0, len(values), 80):
-        batch = values[offset:offset + 80]
-        literals = " ".join(json.dumps(value) for value in batch)
-        query = (
-            "SELECT ?external ?image WHERE { VALUES ?external { " + literals + " } "
-            f"?item wdt:{property_id} ?external; wdt:P18 ?image. }}"
-        )
-        url = "https://query.wikidata.org/sparql?" + urlencode({"query": query, "format": "json"})
-        try:
-            payload = json.loads(_get(url, cache_ttl=2_592_000))
-        except (RuntimeError, json.JSONDecodeError):
+    # Asking Wikidata for the complete identifier-to-image relation is faster
+    # and markedly more reliable than a long VALUES query. Filtering remains
+    # exact and local: names are never used to identify an athlete.
+    query = (
+        "SELECT ?external ?image WHERE { "
+        f"?item wdt:{property_id} ?external; wdt:P18 ?image. }}"
+    )
+    url = "https://query.wikidata.org/sparql?" + urlencode(
+        {"query": query, "format": "json"}
+    )
+    try:
+        payload = json.loads(_get(url, cache_ttl=2_592_000))
+    except (RuntimeError, json.JSONDecodeError):
+        payload = {}
+    for binding in payload.get("results", {}).get("bindings", []):
+        external = binding.get("external", {}).get("value")
+        image = binding.get("image", {}).get("value", "")
+        marker = "/wiki/Special:FilePath/"
+        if external not in external_ids or marker not in image:
             continue
-        for binding in payload.get("results", {}).get("bindings", []):
-            external = binding.get("external", {}).get("value")
-            image = binding.get("image", {}).get("value", "")
-            marker = "/wiki/Special:FilePath/"
-            if external not in external_ids or marker not in image:
-                continue
-            filename = unquote(urlparse(image).path.split(marker, 1)[1])
-            if filename:
-                filenames[_commons_key(filename)] = {
-                    "entity": external_ids[external],
-                    "filename": filename,
-                }
+        filename = unquote(urlparse(image).path.split(marker, 1)[1])
+        if filename:
+            filenames[_commons_key(filename)] = {
+                "entity": external_ids[external],
+                "filename": filename,
+            }
     portraits: dict[str, dict] = {}
     keys = sorted(filenames)
     for offset in range(0, len(keys), 40):
@@ -436,18 +446,27 @@ def _merge_schedule_media(entities: dict, schedules: list[dict] | None) -> None:
                 entities[entity]["media"] = team["media"]
 
 
-def _attach_verified_portraits(payload: dict) -> None:
-    """Add portraits to published rows only; a media outage never blocks ratings."""
+def _attach_verified_portraits(
+    payload: dict,
+    previous_payload: dict | None = None,
+) -> None:
+    """Add verified portraits while retaining the last licensed media record."""
     sport = payload.get("sport")
     if sport not in {"tennis", "chess"}:
         return
     candidates = []
-    for model_name in MODEL_NAMES:
+    for model_name in PUBLISHED_MODEL_NAMES:
         for row in payload["models"][model_name]["rankings"][:120]:
             if row["id"] not in candidates:
                 candidates.append(row["id"])
-    portraits = _wikimedia_portraits(sport, candidates)
-    for model_name in MODEL_NAMES:
+    portraits = {}
+    if previous_payload:
+        for model in previous_payload.get("models", {}).values():
+            for row in model.get("rankings", []):
+                if row.get("id") in candidates and row.get("media"):
+                    portraits[row["id"]] = row["media"]
+    portraits.update(_wikimedia_portraits(sport, candidates))
+    for model_name in PUBLISHED_MODEL_NAMES:
         for row in payload["models"][model_name]["rankings"]:
             if row["id"] in portraits:
                 row["media"] = portraits[row["id"]]
@@ -1172,28 +1191,181 @@ def _fetch_football_data(
     return matches, entities, meta
 
 
+def _result_components(matches: list[Match]) -> list[set[str]]:
+    adjacency: dict[str, set[str]] = defaultdict(set)
+    for match in matches:
+        adjacency[match.entity_a].add(match.entity_b)
+        adjacency[match.entity_b].add(match.entity_a)
+    components = []
+    remaining = set(adjacency)
+    while remaining:
+        seed = min(remaining)
+        component = {seed}
+        frontier = [seed]
+        remaining.remove(seed)
+        while frontier:
+            entity = frontier.pop()
+            for neighbor in adjacency[entity]:
+                if neighbor not in remaining:
+                    continue
+                remaining.remove(neighbor)
+                component.add(neighbor)
+                frontier.append(neighbor)
+        components.append(component)
+    return sorted(components, key=lambda component: (-len(component), min(component)))
+
+
+def _merge_open_football_bridge(
+    matches: list[Match],
+    entities: dict,
+    *,
+    start_year: int,
+) -> tuple[list[Match], dict, dict]:
+    """Add CC0 bridge leagues with conservative exact normalized-name identity links."""
+    current_year = datetime.now(timezone.utc).year
+    baseline_matches = list(matches)
+    baseline_entity_ids = set(entities)
+    name_index = {
+        _slug(info.get("name", "")): entity
+        for entity, info in entities.items()
+        if info.get("name")
+    }
+    bridge_matches = []
+    linked_existing = set()
+    new_entities = set()
+    source_counts: dict[str, dict[str, int]] = defaultdict(dict)
+    season_participants: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for year in range(start_year, current_year + 1):
+        season = _season_label(year)
+        for code, label in OPEN_FOOTBALL_BRIDGE_CODES.items():
+            url = (
+                "https://raw.githubusercontent.com/openfootball/football.json/"
+                f"master/{season}/{code}.json"
+            )
+            try:
+                ttl = 31_536_000 if year < current_year - 1 else 21_600
+                payload = json.loads(_get(url, cache_ttl=ttl))
+            except (RuntimeError, json.JSONDecodeError):
+                continue
+            accepted = 0
+            for row in payload.get("matches", []):
+                score = row.get("score", {})
+                full_time = score.get("ft") if isinstance(score, dict) else None
+                if not full_time or len(full_time) != 2 or None in full_time:
+                    continue
+                try:
+                    played = date.fromisoformat(row["date"][:10])
+                except (KeyError, ValueError):
+                    continue
+                names = (row.get("team1"), row.get("team2"))
+                if not all(names):
+                    continue
+                resolved = []
+                for name in names:
+                    normalized = _slug(name)
+                    entity = name_index.get(normalized)
+                    if entity and entity in baseline_entity_ids:
+                        linked_existing.add(entity)
+                    else:
+                        entity = f"football:name:{normalized}"
+                        name_index[normalized] = entity
+                        new_entities.add(entity)
+                    previous = entities.get(entity, {})
+                    entities[entity] = {
+                        **previous,
+                        "name": previous.get("name") or name,
+                        "country": previous.get("country", ""),
+                        "competition": previous.get("competition") or label,
+                        "active": previous.get("active", False),
+                    }
+                    resolved.append(entity)
+                    season_participants[(label, season)].add(entity)
+                result = (
+                    1.0 if full_time[0] > full_time[1]
+                    else 0.0 if full_time[0] < full_time[1]
+                    else 0.5
+                )
+                bridge_matches.append(
+                    Match(
+                        played,
+                        resolved[0],
+                        resolved[1],
+                        result,
+                        label,
+                        season,
+                        True,
+                        {"coverage_layer": "openfootball_bridge"},
+                    )
+                )
+                accepted += 1
+            if accepted:
+                source_counts[label][season] = accepted
+    for label, seasons in source_counts.items():
+        latest_season = max(seasons)
+        for entity in season_participants[(label, latest_season)]:
+            entities[entity]["active"] = True
+    expanded = _deduplicate(baseline_matches + bridge_matches)
+    before_components = _result_components(baseline_matches)
+    after_components = _result_components(expanded)
+    report = {
+        "status": "current" if bridge_matches else "unavailable",
+        "source": "OpenFootball football.json",
+        "source_url": "https://github.com/openfootball/football.json",
+        "license": "CC0 1.0",
+        "identity_rule": (
+            "Link a bridge-league club to an existing entity only when its "
+            "normalized full source name matches exactly. No fuzzy or crest-"
+            "based identity is inferred."
+        ),
+        "leagues_requested": list(OPEN_FOOTBALL_BRIDGE_CODES.values()),
+        "league_season_counts": dict(source_counts),
+        "matches_added": len(bridge_matches),
+        "existing_entities_linked": len(linked_existing),
+        "new_entities_added": len(new_entities),
+        "connected_components_before": len(before_components),
+        "connected_components_after": len(after_components),
+        "largest_component_before": len(before_components[0]) if before_components else 0,
+        "largest_component_after": len(after_components[0]) if after_components else 0,
+    }
+    return expanded, entities, report
+
+
 def fetch_football(
     token: str | None, start_year: int = 2020
 ) -> tuple[list[Match], dict, dict]:
     if not token:
-        return fetch_open_football(start_year)
-    try:
-        return _fetch_football_data(token, start_year)
-    except (RuntimeError, json.JSONDecodeError):
         matches, entities, meta = fetch_open_football(start_year)
+    else:
+        try:
+            matches, entities, meta = _fetch_football_data(token, start_year)
+        except (RuntimeError, json.JSONDecodeError):
+            matches, entities, meta = fetch_open_football(start_year)
+            meta.update(
+                {
+                    "source": "OpenFootball (automatic fallback)",
+                    "primary_source": "football-data.org",
+                    "source_status": "fallback",
+                    "fallback_reason": "primary_source_unavailable_or_incomplete",
+                    "fallback_policy": (
+                        "CC0 structured fixtures and results only. This fallback is "
+                        "never used to infer individual-player contribution."
+                    ),
+                }
+            )
+    matches, entities, bridge_report = _merge_open_football_bridge(
+        matches,
+        entities,
+        start_year=start_year,
+    )
+    meta["bridge_coverage"] = bridge_report
+    if bridge_report["matches_added"]:
         meta.update(
             {
-                "source": "OpenFootball (automatic fallback)",
-                "primary_source": "football-data.org",
-                "source_status": "fallback",
-                "fallback_reason": "primary_source_unavailable_or_incomplete",
-                "fallback_policy": (
-                    "CC0 structured fixtures and results only. This fallback is "
-                    "never used to infer individual-player contribution."
-                ),
+                "secondary_source": "OpenFootball bridge leagues",
+                "secondary_source_license": "CC0 1.0",
             }
         )
-        return matches, entities, meta
+    return matches, entities, meta
 
 
 def fetch_open_football(start_year: int = 2020) -> tuple[list[Match], dict, dict]:
@@ -1652,7 +1824,14 @@ def _merge_cup_results(schedules: list[dict], results: list[Match]) -> list[dict
         if merged_signatures:
             material = competition["snapshot_sha256"] + "|" + "|".join(sorted(merged_signatures))
             competition["snapshot_sha256"] = hashlib.sha256(material.encode()).hexdigest()
-            final = next((row for row in competition["knockout_fixtures"] if row["stage"] == "FINAL" and row["winner_id"]), None)
+            final = next(
+                (
+                    row
+                    for row in competition.get("knockout_fixtures", [])
+                    if row["stage"] == "FINAL" and row["winner_id"]
+                ),
+                None,
+            )
             if final:
                 competition["availability"] = "Final result merged from the ranking's declared result feed; the completed forecast resolves to the recorded champion."
     return schedules
@@ -2248,6 +2427,96 @@ def _deduplicate(matches: Iterable[Match]) -> list[Match]:
     return list(unique.values())
 
 
+def _normalized_ingest_snapshot_sha256(
+    matches: Iterable[Match],
+    entities: dict,
+) -> str:
+    """Hash the canonical replay input when no single raw snapshot exists.
+
+    Tennis, club football, and chess are assembled from multiple upstream
+    files or API responses. Calling one response a source snapshot would be
+    misleading, so hash the complete normalized input that actually enters
+    deterministic replay instead.
+    """
+    canonical_matches = []
+    for match in sorted(_deduplicate(matches), key=_match_sort_key):
+        canonical_matches.append(
+            {
+                "date": match.date.isoformat(),
+                "entity_a": match.entity_a,
+                "entity_b": match.entity_b,
+                "score_a": match.score_a,
+                "competition": match.competition,
+                "season": match.season,
+                "home_advantage": match.home_advantage,
+                "metadata": match.metadata,
+            }
+        )
+    canonical_entities = {
+        entity: {
+            key: info.get(key)
+            for key in ("name", "country", "competition", "active", "official_rating")
+            if key in info
+        }
+        for entity, info in sorted(entities.items())
+    }
+    material = json.dumps(
+        {"matches": canonical_matches, "entities": canonical_entities},
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode()
+    return hashlib.sha256(material).hexdigest()
+
+
+def _ensure_source_snapshot_hash(
+    source_meta: dict,
+    matches: Iterable[Match],
+    entities: dict,
+) -> None:
+    """Publish either an upstream byte hash or a qualified normalized hash."""
+    if source_meta.get("snapshot_sha256"):
+        source_meta.setdefault("snapshot_hash_scope", "upstream_source_bytes")
+        source_meta.setdefault(
+            "snapshot_hash_method",
+            "SHA-256 of the declared upstream response bytes.",
+        )
+        return
+    source_meta["snapshot_sha256"] = _normalized_ingest_snapshot_sha256(
+        matches,
+        entities,
+    )
+    source_meta["snapshot_hash_scope"] = "normalized_ingested_replay_input"
+    source_meta["snapshot_hash_method"] = (
+        "SHA-256 of canonical JSON containing every deduplicated result and "
+        "declared entity field that enters replay. The cohort combines multiple "
+        "upstream responses, so this is not represented as one raw-file hash."
+    )
+
+
+def _public_refresh_failure(sport: str, error: Exception) -> str:
+    """Return a stable reader-facing failure without leaking implementation text."""
+    labels = {
+        "tennis": "Tennis",
+        "football": "Club football",
+        "national-football": "National-team football",
+        "chess": "Chess",
+    }
+    label = labels.get(sport, "This cohort")
+    if isinstance(error, KeyError):
+        reason = "a source schedule was incomplete"
+    elif isinstance(error, (json.JSONDecodeError, ValueError)):
+        reason = "the refreshed data failed validation"
+    elif isinstance(error, RuntimeError):
+        reason = "an upstream source was unavailable or incomplete"
+    else:
+        reason = "the refresh could not be validated"
+    return (
+        f"{label} retained its last validated snapshot because {reason}. "
+        "Ratings may be stale until the next successful refresh."
+    )
+
+
 def _largest_result_component(matches: Iterable[Match]) -> set[str]:
     """Return the deterministic largest connected component of the result graph."""
     adjacency: dict[str, set[str]] = defaultdict(set)
@@ -2286,7 +2555,14 @@ def _match_sort_key(match: Match) -> tuple:
 def _metrics(predictions: list[dict], cutoff: date) -> dict:
     sample = [row for row in predictions if date.fromisoformat(row["date"]) >= cutoff]
     if not sample:
-        return {"log_loss": None, "brier": None, "calibration": None, "predictions": 0}
+        return {
+            "log_loss": None,
+            "brier": None,
+            "calibration": None,
+            "predictions": 0,
+            "brier_decomposition": None,
+            "reliability_bins": [],
+        }
     log_loss = brier = 0.0
     bins = defaultdict(lambda: [0.0, 0.0, 0])
     for row in sample:
@@ -2303,11 +2579,495 @@ def _metrics(predictions: list[dict], cutoff: date) -> dict:
         abs(total_p / size - total_y / size) * size / count
         for total_p, total_y, size in bins.values()
     )
+    observed_rate = sum(row["actual"] for row in sample) / count
+    reliability_bins = []
+    reliability = resolution = 0.0
+    for bucket in range(10):
+        total_p, total_y, size = bins.get(bucket, (0.0, 0.0, 0))
+        if not size:
+            continue
+        predicted_mean = total_p / size
+        observed_mean = total_y / size
+        weight = size / count
+        reliability += weight * (predicted_mean - observed_mean) ** 2
+        resolution += weight * (observed_mean - observed_rate) ** 2
+        reliability_bins.append(
+            {
+                "lower": bucket / 10,
+                "upper": (bucket + 1) / 10,
+                "predicted": round(predicted_mean, 6),
+                "observed": round(observed_mean, 6),
+                "count": size,
+            }
+        )
+    uncertainty = observed_rate * (1.0 - observed_rate)
     return {
         "log_loss": round(log_loss / count, 4),
         "brier": round(brier / count, 4),
         "calibration": round(calibration, 4),
         "predictions": count,
+        "brier_decomposition": {
+            "reliability": round(reliability, 6),
+            "resolution": round(resolution, 6),
+            "uncertainty": round(uncertainty, 6),
+            "method": (
+                "Murphy decomposition on the published 10 equal-width "
+                "probability bins. Reliability and resolution use bin means; "
+                "counts expose sparse bins."
+            ),
+        },
+        "reliability_bins": reliability_bins,
+    }
+
+
+def _log_opinion_probability(probabilities: dict[str, float], weights: dict[str, float]) -> float:
+    """Pool binary expected scores on the log-odds scale."""
+    pooled_logit = 0.0
+    for model_name in MODEL_NAMES:
+        probability = min(max(probabilities[model_name], 1e-9), 1 - 1e-9)
+        pooled_logit += weights[model_name] * math.log(
+            probability / (1.0 - probability)
+        )
+    return 1.0 / (1.0 + math.exp(-pooled_logit))
+
+
+def _ensemble_weight_candidates() -> list[dict[str, float]]:
+    """Return the declared deterministic quarter-step simplex."""
+    candidates = []
+    denominator = 4
+    for elo in range(denominator + 1):
+        for glicko2 in range(denominator - elo + 1):
+            for trueskill in range(denominator - elo - glicko2 + 1):
+                robust = denominator - elo - glicko2 - trueskill
+                candidates.append(
+                    {
+                        "elo": elo / denominator,
+                        "glicko2": glicko2 / denominator,
+                        "trueskill": trueskill / denominator,
+                        "robust": robust / denominator,
+                    }
+                )
+    return candidates
+
+
+def _aligned_model_predictions(
+    predictions_by_model: dict[str, list[dict]],
+) -> list[dict]:
+    lengths = {len(predictions_by_model[name]) for name in MODEL_NAMES}
+    if len(lengths) != 1:
+        raise ValueError("Ensemble members do not cover the same replay results")
+    aligned = []
+    for rows in zip(*(predictions_by_model[name] for name in MODEL_NAMES)):
+        signatures = {(row["date"], row["actual"]) for row in rows}
+        if len(signatures) != 1:
+            raise ValueError("Ensemble member predictions are not chronologically aligned")
+        aligned.append(
+            {
+                "date": rows[0]["date"],
+                "actual": rows[0]["actual"],
+                "probabilities": {
+                    model_name: row["predicted"]
+                    for model_name, row in zip(MODEL_NAMES, rows)
+                },
+            }
+        )
+    return aligned
+
+
+def _fit_log_opinion_pool(
+    predictions_by_model: dict[str, list[dict]],
+    validation_start: date,
+    evaluation_start: date,
+) -> tuple[dict[str, float], list[dict], list[dict[str, float]]]:
+    """Fit ensemble weights on validation only, then pool the full replay."""
+    aligned = _aligned_model_predictions(predictions_by_model)
+    validation = [
+        row
+        for row in aligned
+        if validation_start <= date.fromisoformat(row["date"]) < evaluation_start
+    ]
+    candidates = _ensemble_weight_candidates()
+    if not validation:
+        selected = {name: 1.0 / len(MODEL_NAMES) for name in MODEL_NAMES}
+    else:
+        def loss(weights: dict[str, float]) -> float:
+            total = 0.0
+            for row in validation:
+                probability = _log_opinion_probability(
+                    row["probabilities"],
+                    weights,
+                )
+                actual = row["actual"]
+                total -= actual * math.log(probability) + (
+                    1.0 - actual
+                ) * math.log(1.0 - probability)
+            return total / len(validation)
+
+        selected = min(
+            candidates,
+            key=lambda weights: (
+                loss(weights),
+                tuple(weights[name] for name in MODEL_NAMES),
+            ),
+        )
+    pooled = [
+        {
+            "date": row["date"],
+            "actual": row["actual"],
+            "predicted": _log_opinion_probability(
+                row["probabilities"],
+                selected,
+            ),
+        }
+        for row in aligned
+    ]
+    return selected, pooled, candidates
+
+
+def _paired_log_loss_block_bootstrap(
+    predictions_by_model: dict[str, list[dict]],
+    evaluation_start: date,
+    *,
+    resamples: int = 2000,
+) -> dict:
+    """Compare the two best models with a deterministic month-block bootstrap.
+
+    Calendar months, rather than individual matches, are resampled so the
+    interval does not pretend that repeated observations of the same
+    competitors are independent. The winner is still selected solely by the
+    untouched evaluation log loss.
+    """
+    evaluation = {
+        model_name: [
+            row
+            for row in predictions
+            if date.fromisoformat(row["date"]) >= evaluation_start
+        ]
+        for model_name, predictions in predictions_by_model.items()
+    }
+    eligible = {
+        model_name: rows
+        for model_name, rows in evaluation.items()
+        if rows
+    }
+    if len(eligible) < 2:
+        return {
+            "status": "unavailable",
+            "reason": "Fewer than two models cover the evaluation window.",
+        }
+    lengths = {len(rows) for rows in eligible.values()}
+    if len(lengths) != 1:
+        return {
+            "status": "unavailable",
+            "reason": "Published models do not cover the same evaluation results.",
+        }
+    signatures = {
+        model_name: [(row["date"], row["actual"]) for row in rows]
+        for model_name, rows in eligible.items()
+    }
+    first_signature = next(iter(signatures.values()))
+    if any(signature != first_signature for signature in signatures.values()):
+        return {
+            "status": "unavailable",
+            "reason": "Published model predictions are not chronologically aligned.",
+        }
+
+    metrics = {
+        model_name: _metrics(rows, evaluation_start)
+        for model_name, rows in eligible.items()
+    }
+    ordered = sorted(
+        eligible,
+        key=lambda model_name: (metrics[model_name]["log_loss"], model_name),
+    )
+    winner, runner_up = ordered[:2]
+
+    def observation_loss(row: dict) -> float:
+        probability = min(max(float(row["predicted"]), 1e-12), 1.0 - 1e-12)
+        actual = float(row["actual"])
+        return -(
+            actual * math.log(probability)
+            + (1.0 - actual) * math.log(1.0 - probability)
+        )
+
+    blocks: dict[str, list[float]] = defaultdict(list)
+    for winner_row, runner_row in zip(eligible[winner], eligible[runner_up]):
+        block = winner_row["date"][:7]
+        blocks[block].append(
+            observation_loss(runner_row) - observation_loss(winner_row)
+        )
+    block_rows = list(sorted(blocks.items()))
+    if len(block_rows) < 2:
+        return {
+            "status": "unavailable",
+            "reason": "At least two calendar-month blocks are required.",
+        }
+    seed_material = (
+        f"{METHODOLOGY_VERSION}|{winner}|{runner_up}|"
+        f"{evaluation_start.isoformat()}|{len(first_signature)}"
+    )
+    seed = int.from_bytes(
+        hashlib.sha256(seed_material.encode("utf-8")).digest()[:8],
+        "big",
+    )
+    generator = random.Random(seed)
+    samples = []
+    block_count = len(block_rows)
+    for _ in range(resamples):
+        selected = [
+            block_rows[generator.randrange(block_count)][1]
+            for _index in range(block_count)
+        ]
+        samples.append(
+            sum(sum(values) for values in selected)
+            / sum(len(values) for values in selected)
+        )
+    samples.sort()
+
+    def percentile(probability: float) -> float:
+        position = probability * (len(samples) - 1)
+        lower = math.floor(position)
+        upper = math.ceil(position)
+        if lower == upper:
+            return samples[lower]
+        weight = position - lower
+        return samples[lower] * (1.0 - weight) + samples[upper] * weight
+
+    low = percentile(0.025)
+    high = percentile(0.975)
+    improvement = (
+        metrics[runner_up]["log_loss"] - metrics[winner]["log_loss"]
+    )
+    return {
+        "status": "available",
+        "winner": winner,
+        "runner_up": runner_up,
+        "predictions": len(first_signature),
+        "winner_log_loss": metrics[winner]["log_loss"],
+        "runner_up_log_loss": metrics[runner_up]["log_loss"],
+        "improvement_log_loss": round(improvement, 6),
+        "ci95_low": round(low, 6),
+        "ci95_high": round(high, 6),
+        "interval_excludes_zero": low > 0,
+        "block_unit": "calendar_month",
+        "blocks": block_count,
+        "resamples": resamples,
+        "seed": seed,
+        "method": (
+            "Paired nonparametric bootstrap of calendar-month blocks on "
+            "one-step-ahead log-loss differences. Positive values favor the "
+            "reported winner; model selection uses the untouched evaluation "
+            "window. The interval is descriptive and does not adjust for "
+            "selecting the lowest observed score among the published models."
+        ),
+    }
+
+
+def _fide_incumbent_benchmark(
+    matches: list[Match],
+    predictions_by_model: dict[str, list[dict]],
+    ensemble_predictions: list[dict],
+    evaluation_start: date,
+) -> dict:
+    """Score the published FIDE expected-score curve on the identical fixture subset."""
+    ordered = sorted(matches, key=_match_sort_key)
+    aligned = {
+        **predictions_by_model,
+        "ensemble": ensemble_predictions,
+    }
+    eligible_indices = []
+    incumbent_predictions = []
+    evaluation_total = 0
+    for index, match in enumerate(ordered):
+        if match.date < evaluation_start:
+            continue
+        evaluation_total += 1
+        raw_a = str(match.metadata.get("rating_a", ""))
+        raw_b = str(match.metadata.get("rating_b", ""))
+        if not raw_a.isdigit() or not raw_b.isdigit():
+            continue
+        rating_a, rating_b = float(raw_a), float(raw_b)
+        if rating_a < 1000 or rating_b < 1000:
+            continue
+        eligible_indices.append(index)
+        incumbent_predictions.append(
+            {
+                "date": match.date.isoformat(),
+                "actual": match.score_a,
+                "predicted": 1.0 / (
+                    1.0 + 10.0 ** (-(rating_a - rating_b) / 400.0)
+                ),
+            }
+        )
+    compared = {
+        model_name: _metrics(
+            [rows[index] for index in eligible_indices],
+            evaluation_start,
+        )
+        for model_name, rows in aligned.items()
+    }
+    compared["fide"] = _metrics(incumbent_predictions, evaluation_start)
+    return {
+        "id": "fide_expected_score",
+        "label": "Published FIDE ratings",
+        "source": "FIDE Rating Regulations",
+        "source_url": "https://handbook.fide.com/chapter/B022024",
+        "fit": "No parameters fitted by Rating Lab.",
+        "probability_rule": (
+            "Expected score from the published pre-game White and Black Elo "
+            "ratings using 1 / (1 + 10^(-(Rwhite-Rblack)/400)). No separate "
+            "color correction is added to the incumbent."
+        ),
+        "common_evaluation_predictions": len(eligible_indices),
+        "withheld_predictions": evaluation_total - len(eligible_indices),
+        "withheld_rule": (
+            "Withhold any evaluation game whose broadcast PGN lacks a numeric "
+            "pre-game rating of at least 1000 for either player."
+        ),
+        "metrics": compared,
+    }
+
+
+def _ensemble_rankings(
+    model_payloads: dict[str, dict],
+    weights: dict[str, float],
+) -> list[dict]:
+    """Publish a transparent weighted standardized-strength leaderboard."""
+    rows_by_model = {
+        model_name: {
+            row["id"]: row
+            for row in model_payloads[model_name].get("rankings", [])
+        }
+        for model_name in MODEL_NAMES
+    }
+    common_ids = set.intersection(
+        *(set(rows) for rows in rows_by_model.values())
+    )
+    if not common_ids:
+        return []
+    moments = {}
+    for model_name, rows in rows_by_model.items():
+        values = [rows[entity]["score"] for entity in common_ids]
+        mean = sum(values) / len(values)
+        variance = sum((value - mean) ** 2 for value in values) / len(values)
+        moments[model_name] = (mean, math.sqrt(variance) or 1.0)
+    leader_model = max(MODEL_NAMES, key=lambda name: (weights[name], name))
+    rankings = []
+    for entity in common_ids:
+        base = rows_by_model[leader_model][entity]
+        standardized = {
+            model_name: (
+                rows_by_model[model_name][entity]["score"] - moments[model_name][0]
+            )
+            / moments[model_name][1]
+            for model_name in MODEL_NAMES
+        }
+        index = sum(
+            weights[model_name] * standardized[model_name]
+            for model_name in MODEL_NAMES
+        )
+        row = copy.deepcopy(base)
+        row.update(
+            {
+                "score": round(100.0 + 15.0 * index, 2),
+                "rating": round(100.0 + 15.0 * index, 2),
+                "sigma": None,
+                "volatility": None,
+                "change30": None,
+                "history": [],
+                "ensemble_components": {
+                    name: round(standardized[name], 6) for name in MODEL_NAMES
+                },
+            }
+        )
+        rankings.append(row)
+    rankings.sort(key=lambda row: (-row["score"], row["name"]))
+    for rank, row in enumerate(rankings, 1):
+        row["rank"] = rank
+    return rankings
+
+
+def _bridge_coverage_evaluation(
+    matches: list[Match],
+    sport: str,
+    selected_parameters: dict[str, dict],
+    expanded_predictions: dict[str, list[dict]],
+    expanded_ensemble_predictions: list[dict],
+    validation_start: date,
+    evaluation_start: date,
+) -> dict | None:
+    """Compare original-five evaluation accuracy before and after bridge evidence."""
+    if sport != "football":
+        return None
+    baseline_matches = [
+        match
+        for match in matches
+        if match.metadata.get("coverage_layer") != "openfootball_bridge"
+    ]
+    if len(baseline_matches) == len(matches):
+        return None
+    baseline_predictions = {}
+    for model_name in MODEL_NAMES:
+        model = _new_model(model_name, selected_parameters[model_name], sport)
+        _states, predictions, _histories = _run_model(
+            baseline_matches,
+            model,
+            sport,
+        )
+        baseline_predictions[model_name] = predictions
+    _baseline_weights, baseline_ensemble, _candidates = _fit_log_opinion_pool(
+        baseline_predictions,
+        validation_start,
+        evaluation_start,
+    )
+    expanded_indices = [
+        index
+        for index, match in enumerate(matches)
+        if match.metadata.get("coverage_layer") != "openfootball_bridge"
+    ]
+    expanded_aligned = {
+        **expanded_predictions,
+        "ensemble": expanded_ensemble_predictions,
+    }
+    baseline_aligned = {
+        **baseline_predictions,
+        "ensemble": baseline_ensemble,
+    }
+    models = {}
+    for model_name in PUBLISHED_MODEL_NAMES:
+        baseline_metrics = _metrics(
+            baseline_aligned[model_name],
+            evaluation_start,
+        )
+        expanded_metrics = _metrics(
+            [
+                expanded_aligned[model_name][index]
+                for index in expanded_indices
+            ],
+            evaluation_start,
+        )
+        delta = expanded_metrics["log_loss"] - baseline_metrics["log_loss"]
+        models[model_name] = {
+            "baseline": baseline_metrics,
+            "expanded": expanded_metrics,
+            "log_loss_delta": round(delta, 6),
+            "degraded": delta > 0.0005,
+        }
+    return {
+        "scope": (
+            "One-step-ahead predictions for the original five leagues plus "
+            "Champions League, latest untouched 12 months."
+        ),
+        "comparison": (
+            "Replay the same selected component parameters once without and "
+            "once with CC0 bridge-league results. Each ensemble selects weights "
+            "only on its corresponding validation replay."
+        ),
+        "tolerance": "Flag degradation when expanded log loss exceeds baseline by more than 0.0005.",
+        "all_models_non_degraded": not any(
+            result["degraded"] for result in models.values()
+        ),
+        "models": models,
     }
 
 
@@ -2723,8 +3483,16 @@ def _decisive_probability(model, entity_a: str, entity_b: str, draw_rate: float 
 
 def _resolved_knockout_ties(competition: dict) -> tuple[set[str], dict[tuple[int, tuple[str, str]], list[dict]]]:
     grouped: dict[tuple[int, tuple[str, str]], list[dict]] = defaultdict(list)
-    for fixture in competition["knockout_fixtures"]:
-        stage_rank = KNOCKOUT_STAGES[fixture["stage"]]
+    fixtures = competition.get("knockout_fixtures")
+    if fixtures is None and competition.get("format") == "two-legged qualifying round":
+        fixtures = competition.get("fixtures", [])
+    for fixture in fixtures or []:
+        stage = fixture.get("stage")
+        stage_rank = KNOCKOUT_STAGES.get(stage)
+        if stage_rank is None and stage in UCL_QUALIFYING_ORDER:
+            stage_rank = UCL_QUALIFYING_ORDER.index(stage) + 1
+        if stage_rank is None:
+            continue
         pair = tuple(sorted((fixture["home_id"], fixture["away_id"])))
         grouped[(stage_rank, pair)].append(fixture)
     eliminated: set[str] = set()
@@ -4492,6 +5260,10 @@ def build_sport_payload(
     ] or matches
     model_payloads = {}
     selected_parameters = {}
+    candidate_parameters = {
+        name: _model_candidates(sport, name) for name in MODEL_NAMES
+    }
+    predictions_by_model = {}
     fitted_models = {}
     pre_event_models = {}
     performance_snapshot_dates = {
@@ -4513,6 +5285,7 @@ def build_sport_payload(
             snapshot_dates=performance_snapshot_dates,
             snapshots=model_snapshots,
         )
+        predictions_by_model[model_name] = predictions
         pre_event_models[model_name] = model_snapshots
         if isinstance(fitted_model, Glicko2Model) or getattr(fitted_model, "uses_rating_period", False):
             fitted_model.age_to(latest)
@@ -4602,6 +5375,96 @@ def build_sport_payload(
             "metrics": _metrics(predictions, evaluation_start),
             "rankings": rows,
         }
+    ensemble_weights, ensemble_predictions, ensemble_candidates = (
+        _fit_log_opinion_pool(
+            predictions_by_model,
+            validation_start,
+            evaluation_start,
+        )
+    )
+    ensemble_parameters = {
+        "pool": "log_opinion",
+        **{
+            f"weight_{model_name}": ensemble_weights[model_name]
+            for model_name in MODEL_NAMES
+        },
+    }
+    selected_parameters["ensemble"] = ensemble_parameters
+    candidate_parameters["ensemble"] = [
+        {
+            "pool": "log_opinion",
+            **{
+                f"weight_{model_name}": candidate[model_name]
+                for model_name in MODEL_NAMES
+            },
+        }
+        for candidate in ensemble_candidates
+    ]
+    model_payloads["ensemble"] = {
+        "label": "Validation-weighted ensemble",
+        "ranking_rule": (
+            "Rank by a validation-selected weighted average of each component "
+            "model's standardized published strength. The displayed index is "
+            "100 + 15 times that pooled z-score; it is not an Elo rating."
+        ),
+        "metrics": _metrics(ensemble_predictions, evaluation_start),
+        "rankings": _ensemble_rankings(model_payloads, ensemble_weights),
+        "design": {
+            "question": (
+                "Does tracking uncertainty and using heavy-tailed performance "
+                "noise improve untouched evaluation accuracy?"
+            ),
+            "pool": (
+                "Binary expected scores are combined on the log-odds scale. "
+                "Weights are selected only on the 24-to-12-month validation "
+                "window from the declared quarter-step simplex."
+            ),
+            "components": {
+                "elo": {
+                    "uncertainty": "no",
+                    "performance_noise": "logistic",
+                },
+                "glicko2": {
+                    "uncertainty": "rating deviation plus volatility",
+                    "performance_noise": "logistic",
+                },
+                "trueskill": {
+                    "uncertainty": "dynamic Gaussian belief",
+                    "performance_noise": "Gaussian",
+                },
+                "robust": {
+                    "uncertainty": "dynamic Gaussian belief",
+                    "performance_noise": "Student-t, nu=1",
+                },
+            },
+        },
+    }
+    evaluation_comparison = _paired_log_loss_block_bootstrap(
+        {
+            **predictions_by_model,
+            "ensemble": ensemble_predictions,
+        },
+        evaluation_start,
+    )
+    incumbent_benchmarks = []
+    if sport == "chess":
+        incumbent_benchmarks.append(
+            _fide_incumbent_benchmark(
+                matches,
+                predictions_by_model,
+                ensemble_predictions,
+                evaluation_start,
+            )
+        )
+    coverage_evaluation = _bridge_coverage_evaluation(
+        matches,
+        sport,
+        selected_parameters,
+        predictions_by_model,
+        ensemble_predictions,
+        validation_start,
+        evaluation_start,
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "sport": sport,
@@ -4673,11 +5536,16 @@ def build_sport_payload(
                 for _pattern, label, short in _MAJOR_HISTORY_COMPETITIONS.get(sport, ())
             ],
         },
-        "candidate_parameters": {
-            name: _model_candidates(sport, name) for name in MODEL_NAMES
-        },
+        "candidate_parameters": candidate_parameters,
         "parameters": selected_parameters,
         "models": model_payloads,
+        "evaluation_comparison": evaluation_comparison,
+        "incumbent_benchmarks": incumbent_benchmarks,
+        **(
+            {"coverage_evaluation": coverage_evaluation}
+            if coverage_evaluation
+            else {}
+        ),
         "media": {
             "model_input": False,
             "policy": "Images are presentational only. Publish provider-supplied crests or identifier-linked portraits only when the public source and reuse terms are recorded; never match a player by name alone.",
@@ -4852,7 +5720,7 @@ def validate_payload(payload: dict, schema: dict) -> None:
                             raise ValueError(f"Invalid resolved {provider} forecast score")
             if benchmark.get("status") not in {"awaiting_resolutions", "scored"}:
                 raise ValueError(f"Invalid {provider} benchmark status")
-    for name in MODEL_NAMES:
+    for name in PUBLISHED_MODEL_NAMES:
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
         ranks = [row["rank"] for row in payload["models"][name]["rankings"]]
@@ -4862,6 +5730,16 @@ def validate_payload(payload: dict, schema: dict) -> None:
             required_row = {"id", "name", "rank", "score", "rating", "sigma", "matches", "recent_matches", "last_played", "history"}
             if not required_row.issubset(row):
                 raise ValueError(f"Incomplete {name} ranking row")
+    for benchmark in payload.get("incumbent_benchmarks", []):
+        common = benchmark.get("common_evaluation_predictions", 0)
+        metrics = benchmark.get("metrics", {})
+        if common <= 0 or not metrics:
+            raise ValueError("Incumbent benchmark has no common evaluation subset")
+        for name, values in metrics.items():
+            if values.get("predictions") != common:
+                raise ValueError(
+                    f"Incumbent benchmark {name} does not use the common fixture subset"
+                )
 
 
 def write_outputs(
@@ -4904,6 +5782,7 @@ def write_outputs(
                 existing = output_dir / f"{sport}.json"
                 previous_payload = json.loads(existing.read_text()) if existing.exists() else None
                 matches, entities, source_meta = loaders[sport]()
+                _ensure_source_snapshot_hash(source_meta, matches, entities)
                 predictor_schedules = None
                 if sport == "football":
                     league_schedules = fetch_league_schedules()
@@ -4924,7 +5803,7 @@ def write_outputs(
                     source_meta,
                     predictor_schedules=predictor_schedules,
                 )
-                _attach_verified_portraits(payload)
+                _attach_verified_portraits(payload, previous_payload)
                 _attach_polymarket_comparison(payload, previous_payload)
                 _attach_kalshi_comparison(payload, previous_payload)
                 validate_payload(payload, schema)
@@ -4953,7 +5832,10 @@ def write_outputs(
                     "source": previous.get("source", {}).get("source", "Unknown"),
                     "stale_after_hours": previous.get("source", {}).get("stale_after_hours", 0),
                     "checked_at": previous.get("generated_at"),
-                    "message": str(error)[:240],
+                    "attempted_at": datetime.now(timezone.utc)
+                    .replace(microsecond=0)
+                    .isoformat(),
+                    "message": _public_refresh_failure(sport, error),
                     "license": previous.get("source", {}).get("license", "Unknown"),
                     "source_url": previous.get("source", {}).get("source_url"),
                     "snapshot_sha256": previous.get("source", {}).get("snapshot_sha256"),
@@ -5022,7 +5904,10 @@ def write_outputs(
             "data_url": "/assets/data/rating-lab/player-football.json",
             "snapshot_sha256": hashlib.sha256(player_path.read_bytes()).hexdigest(),
             "source_statuses": previous_player.get("source", {}).get("statuses", {}),
-            "message": str(error)[:240],
+            "message": (
+                "Historical player cohorts retained their last validated weekly "
+                "snapshot because the refresh could not be validated."
+            ),
         }
     manifest = {
         "schema_version": SCHEMA_VERSION,
@@ -5030,7 +5915,7 @@ def write_outputs(
         "code_revision": os.environ.get("GITHUB_SHA") or _git_revision(),
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "sports": statuses,
-        "models": list(MODEL_NAMES),
+        "models": list(PUBLISHED_MODEL_NAMES),
         "replay": {
             "order": ["date", "entity_a", "entity_b", "competition", "score_a"],
             "validation_days": 365,
@@ -5106,6 +5991,43 @@ def write_split_assets(output_dir: Path) -> dict:
     split_dir = output_dir / "split"
     split_dir.mkdir(parents=True, exist_ok=True)
     written: dict[str, int] = {}
+    media_index_path = split_dir / "media-index.json"
+    if media_index_path.exists():
+        try:
+            media_index = json.loads(media_index_path.read_text()).get("entities", {})
+        except json.JSONDecodeError:
+            media_index = {}
+    else:
+        media_index = {}
+    media_generated_at = None
+
+    manifest_path = output_dir / "manifest.json"
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text())
+        manifest_changed = False
+        for sport, status in manifest.get("sports", {}).items():
+            if status.get("status") == "current":
+                continue
+            message = str(status.get("message") or "")
+            if "last validated snapshot" in message and len(message.split()) >= 8:
+                continue
+            label = {
+                "tennis": "Tennis",
+                "football": "Club football",
+                "national-football": "National-team football",
+                "chess": "Chess",
+            }.get(sport, "This cohort")
+            status["message"] = (
+                f"{label} is using its last validated snapshot because the "
+                "latest refresh did not pass all source and schema checks. "
+                "Ratings may be stale until the next successful refresh."
+            )
+            manifest_changed = True
+        if manifest_changed:
+            manifest_path.write_text(
+                json.dumps(manifest, separators=(",", ":"), ensure_ascii=False)
+                + "\n"
+            )
 
     def _write(name: str, payload: dict) -> None:
         serialized = json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n"
@@ -5119,10 +6041,17 @@ def write_split_assets(output_dir: Path) -> dict:
         if not source_path.exists():
             continue
         payload = json.loads(source_path.read_text())
+        media_generated_at = max(
+            filter(None, (media_generated_at, payload.get("generated_at"))),
+            default=None,
+        )
         core = {key: value for key, value in payload.items() if key != "models"}
         core["models"] = {}
         for model_name, model in payload.get("models", {}).items():
             rankings = model.get("rankings", [])
+            for row in rankings:
+                if row.get("id") and row.get("media"):
+                    media_index[row["id"]] = row["media"]
             rankings_name = f"{sport}-rankings-{model_name}.json"
             core_model = {key: value for key, value in model.items() if key != "rankings"}
             core_model["entity_count"] = len(rankings)
@@ -5139,6 +6068,19 @@ def write_split_assets(output_dir: Path) -> dict:
                 },
             )
         _write(f"{sport}-core.json", core)
+
+    _write(
+        "media-index.json",
+        {
+            "schema_version": "1.0.0",
+            "generated_at": media_generated_at,
+            "identity_rule": (
+                "Portraits use exact ATP or FIDE identifiers; crests use "
+                "source team identifiers. Name-only matching is forbidden."
+            ),
+            "entities": media_index,
+        },
+    )
 
     player_path = output_dir / "player-football.json"
     if player_path.exists():
@@ -5170,7 +6112,7 @@ def build_default_view(
     output_dir: Path,
     *,
     default_sport: str = "tennis",
-    default_model: str = "elo",
+    default_model: str | None = None,
     row_limit: int = 50,
 ) -> dict:
     """Derive the server-rendered landing view from canonical sport payloads.
@@ -5187,9 +6129,113 @@ def build_default_view(
     if default_sport not in payloads:
         raise FileNotFoundError(f"{default_sport}.json is required for the default view")
     default_payload = payloads[default_sport]
+    scored_default_models = []
+    for model_name, model in default_payload.get("models", {}).items():
+        metrics = model.get("metrics", {})
+        predictions = int(metrics.get("predictions") or 0)
+        log_loss = metrics.get("log_loss")
+        if predictions and isinstance(log_loss, (int, float)):
+            scored_default_models.append(
+                (
+                    float(log_loss),
+                    model_name,
+                    model.get("label", model_name),
+                    predictions,
+                )
+            )
+    if not scored_default_models:
+        raise ValueError(f"No evaluated models are published for {default_sport}")
+    scored_default_models.sort()
+    best_log_loss, best_model, best_label, matched_predictions = (
+        scored_default_models[0]
+    )
+    if default_model is None:
+        default_model = best_model
     default_entry = default_payload.get("models", {}).get(default_model)
     if not default_entry:
         raise ValueError(f"{default_model} is not published for {default_sport}")
+
+    manifest_path = output_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    manifest_generated_at = manifest.get("generated_at") or default_payload.get(
+        "generated_at"
+    )
+    reference_time = (
+        datetime.fromisoformat(manifest_generated_at)
+        if manifest_generated_at
+        else None
+    )
+    freshness = []
+    sport_labels = {
+        "tennis": "Tennis",
+        "football": "Clubs",
+        "national-football": "Nations",
+        "chess": "Chess",
+    }
+    freshness_subjects = {
+        "tennis": "Tennis",
+        "football": "Club football",
+        "national-football": "National-team football",
+        "chess": "Chess",
+    }
+    manifest_sports = manifest.get("sports", {})
+    for sport, payload in payloads.items():
+        status = manifest_sports.get(sport, {})
+        checked_at = status.get("checked_at") or payload.get("generated_at")
+        stale_after_hours = status.get("stale_after_hours") or payload.get(
+            "source", {}
+        ).get("stale_after_hours")
+        age_stale = False
+        if reference_time and checked_at and stale_after_hours:
+            checked_time = datetime.fromisoformat(checked_at)
+            age_stale = (
+                reference_time - checked_time
+            ).total_seconds() > float(stale_after_hours) * 3600
+        retained = status.get("status", "current") != "current"
+        delayed = retained or age_stale
+        freshness.append(
+            {
+                "sport": sport,
+                "label": sport_labels[sport],
+                "latest_result": status.get("latest_result")
+                or payload.get("latest_result"),
+                "status": status.get("status", "current"),
+                "delayed": delayed,
+                "message": (
+                    f"{freshness_subjects[sport]} is using its last validated snapshot; "
+                    "ratings may be stale until the next successful refresh."
+                    if retained
+                    else (
+                        f"{freshness_subjects[sport]}'s latest validated snapshot is older "
+                        "than its declared freshness threshold."
+                        if age_stale
+                        else "Validated source snapshot."
+                    )
+                ),
+            }
+        )
+
+    def parameter_text(parameters: dict) -> str:
+        return ", ".join(
+            f"{key}={value:g}" if isinstance(value, (int, float)) else f"{key}={value}"
+            for key, value in sorted(parameters.items())
+        )
+
+    parameter_evidence = []
+    candidate_parameters = default_payload.get("candidate_parameters", {})
+    selected_parameters = default_payload.get("parameters", {})
+    for model_name, model in default_payload.get("models", {}).items():
+        parameter_evidence.append(
+            {
+                "model": model_name,
+                "label": model.get("label", model_name),
+                "selected": parameter_text(selected_parameters.get(model_name, {})),
+                "candidates": [
+                    parameter_text(candidate)
+                    for candidate in candidate_parameters.get(model_name, [])
+                ],
+            }
+        )
 
     rows = []
     public_fields = (
@@ -5203,83 +6249,121 @@ def build_default_view(
         "change30",
         "recent_matches",
         "last_played",
+        "media",
     )
     for row in default_entry.get("rankings", [])[:row_limit]:
         rows.append({field: row.get(field) for field in public_fields})
 
-    aggregate = {}
-    for payload in payloads.values():
+    cohort_evidence = []
+    cohort_labels = {
+        "tennis": "ATP tennis",
+        "football": "Club football",
+        "national-football": "Men's national-team football",
+        "chess": "Elite over-the-board chess",
+    }
+    for sport in SPORTS:
+        payload = payloads.get(sport)
+        if not payload:
+            continue
+        scored = []
         for model_name, model in payload.get("models", {}).items():
             metrics = model.get("metrics", {})
             predictions = int(metrics.get("predictions") or 0)
             log_loss = metrics.get("log_loss")
             if not predictions or not isinstance(log_loss, (int, float)):
                 continue
-            entry = aggregate.setdefault(
-                model_name,
+            scored.append(
                 {
+                    "model": model_name,
                     "label": model.get("label", model_name),
-                    "predictions": 0,
-                    "weighted_log_loss": 0.0,
-                },
+                    "predictions": predictions,
+                    "log_loss": round(float(log_loss), 4),
+                }
             )
-            entry["predictions"] += predictions
-            entry["weighted_log_loss"] += predictions * float(log_loss)
-    scored = {
-        model_name: {
-            "label": entry["label"],
-            "predictions": entry["predictions"],
-            "log_loss": entry["weighted_log_loss"] / entry["predictions"],
-        }
-        for model_name, entry in aggregate.items()
-        if entry["predictions"]
-    }
-    if "elo" not in scored:
-        raise ValueError("Elo evaluation metrics are required for the headline verdict")
-    best_model, best = min(
-        scored.items(),
-        key=lambda item: (item[1]["log_loss"], item[0]),
-    )
-    matched_predictions = min(entry["predictions"] for entry in scored.values())
-    if any(entry["predictions"] != matched_predictions for entry in scored.values()):
-        raise ValueError("Headline models must be evaluated over the same held-out count")
-    best_log_loss = round(best["log_loss"], 4)
-    elo_delta = round(scored["elo"]["log_loss"] - best["log_loss"], 4)
+        scored.sort(key=lambda entry: (entry["log_loss"], entry["model"]))
+        if scored:
+            winner = scored[0]
+            cohort_evidence.append(
+                {
+                    "sport": sport,
+                    "label": cohort_labels[sport],
+                    "winner": winner["model"],
+                    "winner_label": winner["label"],
+                    "predictions": winner["predictions"],
+                    "log_loss": winner["log_loss"],
+                    "models": scored,
+                }
+            )
 
     # Market winner snapshots are categorical tournament forecasts, not the
-    # one-step-ahead match fixture set used above. They must never be mixed into
-    # this sentence. A future match-level frozen benchmark can populate this
-    # explicitly without changing the template.
-    market_weighted_log_loss = 0.0
-    market_predictions = 0
-    for payload in payloads.values():
-        benchmark = payload.get("held_out_match_market_benchmark") or {}
-        predictions = int(benchmark.get("predictions") or 0)
-        log_loss = benchmark.get("log_loss")
-        if predictions and isinstance(log_loss, (int, float)):
-            market_predictions += predictions
-            market_weighted_log_loss += predictions * float(log_loss)
-    market_log_loss = (
-        market_weighted_log_loss / market_predictions
-        if market_predictions
-        else None
-    )
+    # one-step-ahead match fixture set used here. Never pool either market or
+    # model scores across sports with incompatible outcome base rates.
+    benchmark = default_payload.get("held_out_match_market_benchmark") or {}
+    market_predictions = int(benchmark.get("predictions") or 0)
+    market_log_loss = benchmark.get("log_loss")
     market_comparable = (
-        market_log_loss is not None and market_predictions == matched_predictions
+        isinstance(market_log_loss, (int, float))
+        and market_predictions == matched_predictions
     )
-    if market_comparable:
-        market_delta = round(market_log_loss - best["log_loss"], 4)
+    comparison = default_payload.get("evaluation_comparison") or {}
+    runner_up = scored_default_models[1] if len(scored_default_models) > 1 else None
+    cohort_label = cohort_labels[default_sport]
+    best_log_loss = round(best_log_loss, 4)
+    if (
+        comparison.get("status") == "available"
+        and comparison.get("winner") == best_model
+        and runner_up
+    ):
+        improvement = round(float(comparison["improvement_log_loss"]), 4)
+        ci_low = round(float(comparison["ci95_low"]), 4)
+        ci_high = round(float(comparison["ci95_high"]), 4)
+        runner_label = default_payload["models"][comparison["runner_up"]].get(
+            "label",
+            comparison["runner_up"],
+        )
+        if comparison.get("interval_excludes_zero"):
+            sentence = (
+                f"Across {matched_predictions:,} one-step-ahead {cohort_label} "
+                f"results in the latest untouched 12 months, {best_label} "
+                f"recorded the lowest log loss, {best_log_loss:.4f}. Its observed "
+                f"difference from {runner_label} was {improvement:.4f} (descriptive "
+                f"95% calendar-month block-bootstrap interval {ci_low:.4f} to "
+                f"{ci_high:.4f}); that interval does not adjust for selecting "
+                "the lowest of the published models."
+            )
+        else:
+            sentence = (
+                f"Across {matched_predictions:,} one-step-ahead {cohort_label} "
+                f"results in the latest untouched 12 months, {best_label} had "
+                f"the lowest log loss, {best_log_loss:.4f}. The difference from "
+                f"{runner_label} was {improvement:.4f} (95% calendar-month "
+                f"block-bootstrap interval {ci_low:.4f} to {ci_high:.4f}); "
+                "the interval includes zero, so no superiority claim is made."
+            )
+        interval_status = "available"
+    else:
+        improvement = None
+        ci_low = None
+        ci_high = None
+        interval_status = "awaiting_refresh"
         sentence = (
-            f"Over {matched_predictions:,} held-out matches in the last 12 months, "
-            f"{best['label']} scored log loss {best_log_loss:.4f} — beating Elo by "
-            f"{elo_delta:.4f} and the frozen market consensus by {market_delta:.4f}."
+            f"For {cohort_label}'s latest untouched 12-month evaluation "
+            f"({matched_predictions:,} one-step-ahead results), {best_label} "
+            f"has the lowest published log loss, {best_log_loss:.4f}. This "
+            "retained snapshot predates the paired month-block interval, so no "
+            "superiority claim is made."
+        )
+    if market_comparable:
+        market_delta = round(float(market_log_loss) - best_log_loss, 4)
+        market_note = (
+            f"The same {matched_predictions:,}-result set has a frozen market "
+            f"benchmark (market minus model log loss {market_delta:.4f})."
         )
     else:
         market_delta = None
-        sentence = (
-            f"Over {matched_predictions:,} held-out matches in the last 12 months, "
-            f"{best['label']} scored log loss {best_log_loss:.4f} — beating Elo by "
-            f"{elo_delta:.4f}. No frozen market consensus covers the same fixture set yet."
+        market_note = (
+            "No eligible frozen market consensus covers this same match set; "
+            "tournament-winner quotes are reported separately."
         )
 
     return {
@@ -5289,18 +6373,64 @@ def build_default_view(
         "model": default_model,
         "model_label": default_entry.get("label", default_model),
         "ranking_rule": default_entry.get("ranking_rule"),
+        "eligibility_rule": default_payload.get("eligibility", {}).get(
+            "rule",
+            "Eligibility is published in the canonical cohort JSON.",
+        ),
         "row_limit": row_limit,
         "rows": rows,
+        "freshness": freshness,
+        "has_delayed_sources": any(item["delayed"] for item in freshness),
+        "published_rankings": sum(
+            len(payload.get("models", {}).get("elo", {}).get("rankings", []))
+            for payload in payloads.values()
+        ),
+        "manifest_generated_at": manifest_generated_at,
+        "parameter_evidence": parameter_evidence,
+        "cohort_evidence": cohort_evidence,
+        "audit": {
+            "source": default_payload.get("source", {}).get("source"),
+            "source_status": next(
+                (
+                    item["status"]
+                    for item in freshness
+                    if item["sport"] == default_sport
+                ),
+                "current",
+            ),
+            "snapshot_sha256": default_payload.get("source", {}).get(
+                "snapshot_sha256"
+            ),
+            "snapshot_hash_scope": default_payload.get("source", {}).get(
+                "snapshot_hash_scope",
+                (
+                    "upstream_source_bytes"
+                    if default_payload.get("source", {}).get("snapshot_sha256")
+                    else "not_recorded_for_pre_hash_snapshot"
+                ),
+            ),
+            "data_window": default_payload.get("data_window", {}),
+        },
         "verdict": {
             "sentence": sentence,
             "best_model": best_model,
-            "best_model_label": best["label"],
+            "best_model_label": best_label,
             "predictions": matched_predictions,
             "log_loss": best_log_loss,
-            "elo_delta": elo_delta,
+            "comparison_model": (
+                comparison.get("runner_up")
+                if comparison.get("status") == "available"
+                else (runner_up[1] if runner_up else None)
+            ),
+            "improvement_log_loss": improvement,
+            "ci95_low": ci_low,
+            "ci95_high": ci_high,
+            "interval_status": interval_status,
             "market_comparable": market_comparable,
             "market_delta": market_delta,
-            "scope": "Weighted across published cohorts; each cohort uses its latest untouched 365-day evaluation window.",
+            "scope": (
+                f"{cohort_label} only; sports are never pooled. {market_note}"
+            ),
         },
     }
 
@@ -5310,7 +6440,7 @@ def write_default_view(
     destination: Path,
     *,
     default_sport: str = "tennis",
-    default_model: str = "elo",
+    default_model: str | None = None,
 ) -> dict:
     """Write the deterministic Jekyll data file transactionally."""
     payload = build_default_view(

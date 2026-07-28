@@ -184,10 +184,12 @@
     "candidate_parameters",
     "parameters",
     "models",
+    "evaluation_comparison",
+    "incumbent_benchmarks",
     "media"
   ],
   "properties": {
-    "schema_version": { "const": "1.16.0" },
+    "schema_version": { "const": "1.17.0" },
     "sport": { "enum": ["tennis", "football", "national-football", "chess"] },
     "generated_at": { "type": "string" },
     "latest_result": { "type": "string", "format": "date" },
@@ -266,7 +268,86 @@
     "parameters": { "type": "object" },
     "models": {
       "type": "object",
-      "required": ["elo", "glicko2", "trueskill", "robust"]
+      "required": ["elo", "glicko2", "trueskill", "robust", "ensemble"]
+    },
+    "evaluation_comparison": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["status", "reason"],
+          "properties": {
+            "status": { "const": "unavailable" },
+            "reason": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "winner",
+            "runner_up",
+            "predictions",
+            "winner_log_loss",
+            "runner_up_log_loss",
+            "improvement_log_loss",
+            "ci95_low",
+            "ci95_high",
+            "interval_excludes_zero",
+            "block_unit",
+            "blocks",
+            "resamples",
+            "seed",
+            "method"
+          ],
+          "properties": {
+            "status": { "const": "available" },
+            "winner": { "enum": ["elo", "glicko2", "trueskill", "robust", "ensemble"] },
+            "runner_up": { "enum": ["elo", "glicko2", "trueskill", "robust", "ensemble"] },
+            "predictions": { "type": "integer", "minimum": 1 },
+            "winner_log_loss": { "type": "number", "minimum": 0 },
+            "runner_up_log_loss": { "type": "number", "minimum": 0 },
+            "improvement_log_loss": { "type": "number" },
+            "ci95_low": { "type": "number" },
+            "ci95_high": { "type": "number" },
+            "interval_excludes_zero": { "type": "boolean" },
+            "block_unit": { "const": "calendar_month" },
+            "blocks": { "type": "integer", "minimum": 2 },
+            "resamples": { "type": "integer", "minimum": 100 },
+            "seed": { "type": "integer", "minimum": 0 },
+            "method": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "incumbent_benchmarks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "source",
+          "source_url",
+          "fit",
+          "probability_rule",
+          "common_evaluation_predictions",
+          "withheld_predictions",
+          "withheld_rule",
+          "metrics"
+        ]
+      }
+    },
+    "coverage_evaluation": {
+      "type": "object",
+      "required": [
+        "scope",
+        "comparison",
+        "tolerance",
+        "all_models_non_degraded",
+        "models"
+      ]
     },
     "media": {
       "type": "object",

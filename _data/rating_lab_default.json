@@ -1,7 +1,261 @@
 {
+  "audit": {
+    "data_window": {
+      "entities": 4106,
+      "first_result": "2017-12-31",
+      "last_result": "2026-07-20",
+      "matches": 103769
+    },
+    "snapshot_hash_scope": "not_recorded_for_pre_hash_snapshot",
+    "snapshot_sha256": null,
+    "source": "ManTennisData (ATP-derived)",
+    "source_status": "current"
+  },
+  "cohort_evidence": [
+    {
+      "label": "ATP tennis",
+      "log_loss": 0.6326,
+      "models": [
+        {
+          "label": "Elo",
+          "log_loss": 0.6326,
+          "model": "elo",
+          "predictions": 15532
+        },
+        {
+          "label": "Robust TrueSkill",
+          "log_loss": 0.6371,
+          "model": "robust",
+          "predictions": 15532
+        },
+        {
+          "label": "Gaussian TrueSkill",
+          "log_loss": 0.6378,
+          "model": "trueskill",
+          "predictions": 15532
+        },
+        {
+          "label": "Glicko-2",
+          "log_loss": 0.6396,
+          "model": "glicko2",
+          "predictions": 15532
+        }
+      ],
+      "predictions": 15532,
+      "sport": "tennis",
+      "winner": "elo",
+      "winner_label": "Elo"
+    },
+    {
+      "label": "Club football",
+      "log_loss": 0.6294,
+      "models": [
+        {
+          "label": "Robust TrueSkill",
+          "log_loss": 0.6294,
+          "model": "robust",
+          "predictions": 1761
+        },
+        {
+          "label": "Gaussian TrueSkill",
+          "log_loss": 0.6308,
+          "model": "trueskill",
+          "predictions": 1761
+        },
+        {
+          "label": "Elo",
+          "log_loss": 0.6327,
+          "model": "elo",
+          "predictions": 1761
+        },
+        {
+          "label": "Glicko-2",
+          "log_loss": 0.636,
+          "model": "glicko2",
+          "predictions": 1761
+        }
+      ],
+      "predictions": 1761,
+      "sport": "football",
+      "winner": "robust",
+      "winner_label": "Robust TrueSkill"
+    },
+    {
+      "label": "Men's national-team football",
+      "log_loss": 0.5288,
+      "models": [
+        {
+          "label": "Gaussian TrueSkill",
+          "log_loss": 0.5288,
+          "model": "trueskill",
+          "predictions": 996
+        },
+        {
+          "label": "Glicko-2",
+          "log_loss": 0.5305,
+          "model": "glicko2",
+          "predictions": 996
+        },
+        {
+          "label": "Robust TrueSkill",
+          "log_loss": 0.5408,
+          "model": "robust",
+          "predictions": 996
+        },
+        {
+          "label": "Elo",
+          "log_loss": 0.5474,
+          "model": "elo",
+          "predictions": 996
+        }
+      ],
+      "predictions": 996,
+      "sport": "national-football",
+      "winner": "trueskill",
+      "winner_label": "Gaussian TrueSkill"
+    },
+    {
+      "label": "Elite over-the-board chess",
+      "log_loss": 0.6002,
+      "models": [
+        {
+          "label": "Glicko-2",
+          "log_loss": 0.6002,
+          "model": "glicko2",
+          "predictions": 264410
+        },
+        {
+          "label": "Elo",
+          "log_loss": 0.6062,
+          "model": "elo",
+          "predictions": 264410
+        },
+        {
+          "label": "Gaussian TrueSkill",
+          "log_loss": 0.6081,
+          "model": "trueskill",
+          "predictions": 264410
+        },
+        {
+          "label": "Robust TrueSkill",
+          "log_loss": 0.609,
+          "model": "robust",
+          "predictions": 264410
+        }
+      ],
+      "predictions": 264410,
+      "sport": "chess",
+      "winner": "glicko2",
+      "winner_label": "Glicko-2"
+    }
+  ],
+  "eligibility_rule": "At least 10 ATP matches in the latest 52 weeks.",
+  "freshness": [
+    {
+      "delayed": false,
+      "label": "Tennis",
+      "latest_result": "2026-07-20",
+      "message": "Validated source snapshot.",
+      "sport": "tennis",
+      "status": "current"
+    },
+    {
+      "delayed": true,
+      "label": "Clubs",
+      "latest_result": "2026-05-24",
+      "message": "Club football's latest validated snapshot is older than its declared freshness threshold.",
+      "sport": "football",
+      "status": "current"
+    },
+    {
+      "delayed": false,
+      "label": "Nations",
+      "latest_result": "2026-07-19",
+      "message": "Validated source snapshot.",
+      "sport": "national-football",
+      "status": "current"
+    },
+    {
+      "delayed": false,
+      "label": "Chess",
+      "latest_result": "2026-07-20",
+      "message": "Validated source snapshot.",
+      "sport": "chess",
+      "status": "current"
+    }
+  ],
   "generated_at": "2026-07-20T07:48:35+00:00",
+  "has_delayed_sources": true,
+  "manifest_generated_at": "2026-07-23T22:01:36+00:00",
   "model": "elo",
   "model_label": "Elo",
+  "parameter_evidence": [
+    {
+      "candidates": [
+        "home=0, k=16, scale=400, surface_weight=0.4",
+        "home=0, k=16, scale=400, surface_weight=0.7",
+        "home=0, k=16, scale=400, surface_weight=0.9",
+        "home=0, k=24, scale=400, surface_weight=0.4",
+        "home=0, k=24, scale=400, surface_weight=0.7",
+        "home=0, k=24, scale=400, surface_weight=0.9",
+        "home=0, k=32, scale=400, surface_weight=0.4",
+        "home=0, k=32, scale=400, surface_weight=0.7",
+        "home=0, k=32, scale=400, surface_weight=0.9"
+      ],
+      "label": "Elo",
+      "model": "elo",
+      "selected": "home=0, k=32, scale=400, surface_weight=0.4"
+    },
+    {
+      "candidates": [
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.4, tau=0.3",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.7, tau=0.3",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.9, tau=0.3",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.4, tau=0.5",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.7, tau=0.5",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.9, tau=0.5",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.4, tau=0.8",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.7, tau=0.8",
+        "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.9, tau=0.8"
+      ],
+      "label": "Glicko-2",
+      "model": "glicko2",
+      "selected": "home=0, initial_rating=1500, initial_rd=350, initial_volatility=0.06, period_days=7, surface_weight=0.4, tau=0.3"
+    },
+    {
+      "candidates": [
+        "advantage=0, beta=3.5, draw_margin=0, robust=0, surface_weight=0.4",
+        "advantage=0, beta=3.5, draw_margin=0, robust=0, surface_weight=0.7",
+        "advantage=0, beta=3.5, draw_margin=0, robust=0, surface_weight=0.9",
+        "advantage=0, beta=4.16667, draw_margin=0, robust=0, surface_weight=0.4",
+        "advantage=0, beta=4.16667, draw_margin=0, robust=0, surface_weight=0.7",
+        "advantage=0, beta=4.16667, draw_margin=0, robust=0, surface_weight=0.9",
+        "advantage=0, beta=5, draw_margin=0, robust=0, surface_weight=0.4",
+        "advantage=0, beta=5, draw_margin=0, robust=0, surface_weight=0.7",
+        "advantage=0, beta=5, draw_margin=0, robust=0, surface_weight=0.9"
+      ],
+      "label": "Gaussian TrueSkill",
+      "model": "trueskill",
+      "selected": "advantage=0, beta=5, draw_margin=0, robust=0, surface_weight=0.4"
+    },
+    {
+      "candidates": [
+        "advantage=0, beta=3.5, draw_margin=0, robust=1, surface_weight=0.4",
+        "advantage=0, beta=3.5, draw_margin=0, robust=1, surface_weight=0.7",
+        "advantage=0, beta=3.5, draw_margin=0, robust=1, surface_weight=0.9",
+        "advantage=0, beta=4.16667, draw_margin=0, robust=1, surface_weight=0.4",
+        "advantage=0, beta=4.16667, draw_margin=0, robust=1, surface_weight=0.7",
+        "advantage=0, beta=4.16667, draw_margin=0, robust=1, surface_weight=0.9",
+        "advantage=0, beta=5, draw_margin=0, robust=1, surface_weight=0.4",
+        "advantage=0, beta=5, draw_margin=0, robust=1, surface_weight=0.7",
+        "advantage=0, beta=5, draw_margin=0, robust=1, surface_weight=0.9"
+      ],
+      "label": "Robust TrueSkill",
+      "model": "robust",
+      "selected": "advantage=0, beta=3.5, draw_margin=0, robust=1, surface_weight=0.4"
+    }
+  ],
+  "published_rankings": 1300,
   "ranking_rule": null,
   "row_limit": 50,
   "rows": [
@@ -11,6 +265,7 @@
       "country": "ITA",
       "id": "atp:s0ag",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Jannik Sinner",
       "rank": 1,
       "recent_matches": 82,
@@ -23,6 +278,7 @@
       "country": "ESP",
       "id": "atp:a0e2",
       "last_played": "2026-04-13",
+      "media": null,
       "name": "Carlos Alcaraz",
       "rank": 2,
       "recent_matches": 52,
@@ -35,6 +291,7 @@
       "country": "GER",
       "id": "atp:z355",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Alexander Zverev",
       "rank": 3,
       "recent_matches": 87,
@@ -47,6 +304,7 @@
       "country": "SRB",
       "id": "atp:d643",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Novak Djokovic",
       "rank": 4,
       "recent_matches": 35,
@@ -59,6 +317,7 @@
       "country": "FRA",
       "id": "atp:f0f1",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Arthur Fils",
       "rank": 5,
       "recent_matches": 33,
@@ -71,6 +330,7 @@
       "country": "USA",
       "id": "atp:pl56",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Tommy Paul",
       "rank": 6,
       "recent_matches": 49,
@@ -83,6 +343,7 @@
       "country": "USA",
       "id": "atp:fb98",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Taylor Fritz",
       "rank": 7,
       "recent_matches": 68,
@@ -95,6 +356,7 @@
       "country": "CAN",
       "id": "atp:ag37",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Felix Auger-Aliassime",
       "rank": 8,
       "recent_matches": 76,
@@ -107,6 +369,7 @@
       "country": "RUS",
       "id": "atp:mm58",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Daniil Medvedev",
       "rank": 9,
       "recent_matches": 72,
@@ -119,6 +382,7 @@
       "country": "NOR",
       "id": "atp:rh16",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Casper Ruud",
       "rank": 10,
       "recent_matches": 58,
@@ -131,6 +395,7 @@
       "country": "ITA",
       "id": "atp:m0ej",
       "last_played": "2026-05-06",
+      "media": null,
       "name": "Lorenzo Musetti",
       "rank": 11,
       "recent_matches": 53,
@@ -143,6 +408,7 @@
       "country": "USA",
       "id": "atp:td51",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Frances Tiafoe",
       "rank": 12,
       "recent_matches": 58,
@@ -155,6 +421,7 @@
       "country": "ESP",
       "id": "atp:j0dz",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Rafael Jodar",
       "rank": 13,
       "recent_matches": 92,
@@ -167,6 +434,7 @@
       "country": "GBR",
       "id": "atp:d0co",
       "last_played": "2026-06-22",
+      "media": null,
       "name": "Jack Draper",
       "rank": 14,
       "recent_matches": 14,
@@ -179,6 +447,7 @@
       "country": "AUS",
       "id": "atp:dh58",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Alex de Minaur",
       "rank": 15,
       "recent_matches": 78,
@@ -191,6 +460,7 @@
       "country": "CZE",
       "id": "atp:l0bv",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Jiri Lehecka",
       "rank": 16,
       "recent_matches": 57,
@@ -203,6 +473,7 @@
       "country": "USA",
       "id": "atp:s0s1",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Ben Shelton",
       "rank": 17,
       "recent_matches": 62,
@@ -215,6 +486,7 @@
       "country": "USA",
       "id": "atp:k0ah",
       "last_played": "2026-03-18",
+      "media": null,
       "name": "Sebastian Korda",
       "rank": 18,
       "recent_matches": 45,
@@ -227,6 +499,7 @@
       "country": "USA",
       "id": "atp:t0ha",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Learner Tien",
       "rank": 19,
       "recent_matches": 67,
@@ -239,6 +512,7 @@
       "country": "RUS",
       "id": "atp:re44",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Andrey Rublev",
       "rank": 20,
       "recent_matches": 57,
@@ -251,6 +525,7 @@
       "country": "BEL",
       "id": "atp:c0jp",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Raphael Collignon",
       "rank": 21,
       "recent_matches": 72,
@@ -263,6 +538,7 @@
       "country": "ARG",
       "id": "atp:c0au",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Francisco Cerundolo",
       "rank": 22,
       "recent_matches": 56,
@@ -275,6 +551,7 @@
       "country": "BRA",
       "id": "atp:f0fv",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Joao Fonseca",
       "rank": 23,
       "recent_matches": 44,
@@ -287,6 +564,7 @@
       "country": "CZE",
       "id": "atp:m0ni",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Jakub Mensik",
       "rank": 24,
       "recent_matches": 51,
@@ -299,6 +577,7 @@
       "country": "ITA",
       "id": "atp:c0e9",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Flavio Cobolli",
       "rank": 25,
       "recent_matches": 64,
@@ -311,6 +590,7 @@
       "country": "DEN",
       "id": "atp:r0dg",
       "last_played": "2025-10-13",
+      "media": null,
       "name": "Holger Vitus Nodskov Rune",
       "rank": 26,
       "recent_matches": 20,
@@ -323,6 +603,7 @@
       "country": "ESP",
       "id": "atp:dh50",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Alejandro Davidovich Fokina",
       "rank": 27,
       "recent_matches": 63,
@@ -335,6 +616,7 @@
       "country": "MON",
       "id": "atp:va25",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Valentin Vacherot",
       "rank": 28,
       "recent_matches": 55,
@@ -347,6 +629,7 @@
       "country": "KAZ",
       "id": "atp:bk92",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Alexander Bublik",
       "rank": 29,
       "recent_matches": 60,
@@ -359,6 +642,7 @@
       "country": "CZE",
       "id": "atp:m0fh",
       "last_played": "2026-05-24",
+      "media": null,
       "name": "Tomas Machac",
       "rank": 30,
       "recent_matches": 37,
@@ -371,6 +655,7 @@
       "country": "ITA",
       "id": "atp:d0fj",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Luciano Darderi",
       "rank": 31,
       "recent_matches": 65,
@@ -383,6 +668,7 @@
       "country": "BEL",
       "id": "atp:b0pg",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Alexander Blockx",
       "rank": 32,
       "recent_matches": 72,
@@ -395,6 +681,7 @@
       "country": "FRA",
       "id": "atp:hh26",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Ugo Humbert",
       "rank": 33,
       "recent_matches": 56,
@@ -407,6 +694,7 @@
       "country": "GRE",
       "id": "atp:te51",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Stefanos Tsitsipas",
       "rank": 34,
       "recent_matches": 40,
@@ -419,6 +707,7 @@
       "country": "RUS",
       "id": "atp:sx50",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Roman Safiullin",
       "rank": 35,
       "recent_matches": 48,
@@ -431,6 +720,7 @@
       "country": "POL",
       "id": "atp:hb71",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Hubert Hurkacz",
       "rank": 36,
       "recent_matches": 33,
@@ -443,6 +733,7 @@
       "country": "CRO",
       "id": "atp:p0hw",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Dino Prizmic",
       "rank": 37,
       "recent_matches": 58,
@@ -455,6 +746,7 @@
       "country": "ITA",
       "id": "atp:bk40",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Matteo Berrettini",
       "rank": 38,
       "recent_matches": 42,
@@ -467,6 +759,7 @@
       "country": "CHI",
       "id": "atp:te30",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Alejandro Tabilo",
       "rank": 39,
       "recent_matches": 81,
@@ -479,6 +772,7 @@
       "country": "ARG",
       "id": "atp:c0c8",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Juan Manuel Cerundolo",
       "rank": 40,
       "recent_matches": 65,
@@ -491,6 +785,7 @@
       "country": "SRB",
       "id": "atp:m0jf",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Hamad Medjedovic",
       "rank": 41,
       "recent_matches": 47,
@@ -503,6 +798,7 @@
       "country": "USA",
       "id": "atp:n0ae",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Brandon Nakashima",
       "rank": 42,
       "recent_matches": 55,
@@ -515,6 +811,7 @@
       "country": "ESP",
       "id": "atp:cd85",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Pablo Carreno Busta",
       "rank": 43,
       "recent_matches": 66,
@@ -527,6 +824,7 @@
       "country": "BEL",
       "id": "atp:bu13",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Zizou Bergs",
       "rank": 44,
       "recent_matches": 56,
@@ -539,6 +837,7 @@
       "country": "ESP",
       "id": "atp:m0n7",
       "last_played": "2026-07-13",
+      "media": null,
       "name": "Daniel Merida Aguilar",
       "rank": 45,
       "recent_matches": 76,
@@ -551,6 +850,7 @@
       "country": "POL",
       "id": "atp:mq75",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Kamil Majchrzak",
       "rank": 46,
       "recent_matches": 53,
@@ -563,6 +863,7 @@
       "country": "GBR",
       "id": "atp:f0dm",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Arthur Fery",
       "rank": 47,
       "recent_matches": 71,
@@ -575,6 +876,7 @@
       "country": "USA",
       "id": "atp:s0ja",
       "last_played": "2026-05-24",
+      "media": null,
       "name": "Eliot Spizzirri",
       "rank": 48,
       "recent_matches": 49,
@@ -587,6 +889,7 @@
       "country": "RUS",
       "id": "atp:ke29",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Karen Khachanov",
       "rank": 49,
       "recent_matches": 49,
@@ -599,6 +902,7 @@
       "country": "HUN",
       "id": "atp:m0ci",
       "last_played": "2026-06-29",
+      "media": null,
       "name": "Fabian Marozsan",
       "rank": 50,
       "recent_matches": 50,
@@ -609,14 +913,18 @@
   "schema_version": "1.8.0",
   "sport": "tennis",
   "verdict": {
-    "best_model": "glicko2",
-    "best_model_label": "Glicko-2",
-    "elo_delta": 0.0053,
-    "log_loss": 0.6023,
+    "best_model": "elo",
+    "best_model_label": "Elo",
+    "ci95_high": null,
+    "ci95_low": null,
+    "comparison_model": "robust",
+    "improvement_log_loss": null,
+    "interval_status": "awaiting_refresh",
+    "log_loss": 0.6326,
     "market_comparable": false,
     "market_delta": null,
-    "predictions": 282699,
-    "scope": "Weighted across published cohorts; each cohort uses its latest untouched 365-day evaluation window.",
-    "sentence": "Over 282,699 held-out matches in the last 12 months, Glicko-2 scored log loss 0.6023 — beating Elo by 0.0053. No frozen market consensus covers the same fixture set yet."
+    "predictions": 15532,
+    "scope": "ATP tennis only; sports are never pooled. No eligible frozen market consensus covers this same match set; tournament-winner quotes are reported separately.",
+    "sentence": "For ATP tennis's latest untouched 12-month evaluation (15,532 one-step-ahead results), Elo has the lowest published log loss, 0.6326. This retained snapshot predates the paired month-block interval, so no superiority claim is made."
   }
 }

@@ -36,12 +36,14 @@ from rating_lab.player_pipeline import (
 )
 from rating_lab.pipeline import (
     FOOTBALL_COMPETITIONS,
+    _attach_verified_portraits,
     _deduplicate,
     _competition_performance,
     _competition_matches,
     _competition_state,
     _categorical_forecast_score,
     _build_tournament_predictor,
+    _bridge_coverage_evaluation,
     _finalize_market_comparison,
     _football_data_crest_media,
     fetch_football,
@@ -52,7 +54,14 @@ from rating_lab.pipeline import (
     _metrics,
     _merge_schedule_media,
     _merge_schedule_results,
+    _merge_cup_results,
     _merge_tennis_schedule_results,
+    _merge_open_football_bridge,
+    _ensure_source_snapshot_hash,
+    _ensemble_weight_candidates,
+    _fit_log_opinion_pool,
+    _fide_incumbent_benchmark,
+    _paired_log_loss_block_bootstrap,
     _parse_atp_draw_pages,
     _parse_atp_player_catalog,
     _parse_broadcast_pgn,
@@ -64,6 +73,7 @@ from rating_lab.pipeline import (
     _polymarket_event_snapshot,
     _polymarket_search_query,
     _required_football_seasons,
+    _public_refresh_failure,
     _simulate_league,
     _simulate_knockout,
     _simulate_qualifying_round,
@@ -71,6 +81,8 @@ from rating_lab.pipeline import (
     _settled_competition_participants,
     _validate_football_coverage,
     _model_candidates,
+    _new_model,
+    _run_model,
     build_default_view,
     build_sport_payload,
     individual_contribution_protocol,
@@ -254,7 +266,19 @@ class PipelineTests(unittest.TestCase):
         with patch(
             "rating_lab.pipeline._fetch_football_data",
             side_effect=RuntimeError("quota"),
-        ), patch("rating_lab.pipeline.fetch_open_football", return_value=fallback):
+        ), patch(
+            "rating_lab.pipeline.fetch_open_football", return_value=fallback
+        ), patch(
+            "rating_lab.pipeline._merge_open_football_bridge",
+            return_value=(
+                fallback[0],
+                fallback[1],
+                {
+                    "matches_added": 0,
+                    "status": "unavailable",
+                },
+            ),
+        ):
             matches, entities, meta = fetch_football("secret", 2023)
         self.assertEqual(matches, fallback[0])
         self.assertEqual(entities, fallback[1])
@@ -1389,6 +1413,69 @@ h001,Hana,Theta,CZE
         self.assertFalse(between_rounds["forecast_available"])
         self.assertIn("waiting for UEFA", between_rounds["availability"])
 
+    def test_qualifying_result_merge_does_not_require_knockout_alias(self):
+        schedule = {
+            "id": "football-ucl-qualifying",
+            "format": "two-legged qualifying round",
+            "snapshot_sha256": "a" * 64,
+            "fixtures": [
+                {
+                    "date": "2026-07-21",
+                    "stage": "SECOND_QUALIFYING",
+                    "status": "SCHEDULED",
+                    "home_id": "football:name:alpha",
+                    "away_id": "football:name:beta",
+                    "home_goals": None,
+                    "away_goals": None,
+                    "winner_id": None,
+                }
+            ],
+        }
+        result = Match(
+            date(2026, 7, 21),
+            "football:name:alpha",
+            "football:name:beta",
+            1.0,
+            "UEFA Champions League qualifying",
+            "2026",
+            True,
+        )
+        merged = _merge_cup_results([schedule], [result])
+        self.assertEqual(merged[0]["fixtures"][0]["status"], "FINISHED")
+        self.assertEqual(
+            merged[0]["fixtures"][0]["winner_id"],
+            "football:name:alpha",
+        )
+        self.assertEqual(_settled_competition_participants(merged[0]), set())
+
+    def test_normalized_source_hash_is_stable_and_explicitly_scoped(self):
+        matches = [
+            Match(date(2026, 1, 2), "b", "a", 0.0, "League", "2025", True),
+            Match(date(2026, 1, 1), "a", "b", 1.0, "League", "2025", True),
+        ]
+        entities = {
+            "b": {"name": "Beta", "competition": "League", "active": True},
+            "a": {"name": "Alpha", "competition": "League", "active": True},
+        }
+        first = {"source": "multi-file source"}
+        second = {"source": "multi-file source"}
+        _ensure_source_snapshot_hash(first, matches, entities)
+        _ensure_source_snapshot_hash(second, reversed(matches), dict(reversed(list(entities.items()))))
+        self.assertEqual(first["snapshot_sha256"], second["snapshot_sha256"])
+        self.assertEqual(len(first["snapshot_sha256"]), 64)
+        self.assertEqual(
+            first["snapshot_hash_scope"],
+            "normalized_ingested_replay_input",
+        )
+        self.assertIn("canonical JSON", first["snapshot_hash_method"])
+
+    def test_reader_facing_refresh_failure_never_leaks_key_error(self):
+        message = _public_refresh_failure("football", KeyError("knockout_fixtures"))
+        self.assertNotIn("knockout_fixtures", message)
+        self.assertNotIn("KeyError", message)
+        self.assertIn("last validated snapshot", message)
+        self.assertIn("may be stale", message)
+
     def test_cup_parser_withholds_title_forecast_before_knockout_field(self):
         payload = {"matches": [{
             "utcDate": "2026-09-01T18:00:00Z",
@@ -1457,6 +1544,10 @@ h001,Hana,Theta,CZE
         self.assertIn(".rating-lab-market-provider", styles)
         self.assertIn('class="rating-lab-hero-actions"', page)
         self.assertIn('class="rating-lab-trust-bar"', page)
+        self.assertIn("site.data.rating_lab_default.freshness", page)
+        self.assertIn("site.data.rating_lab_default.parameter_evidence", page)
+        self.assertNotIn(">Loading the latest ratings…<", page)
+        self.assertNotIn("<dd>Loading…</dd>", page)
         self.assertIn('aria-label="Competition forecasts"', page)
         self.assertIn("Rating Lab mobile-first interaction pass", styles)
         self.assertNotIn("Colors only identify the outcomes", script)
@@ -1620,6 +1711,22 @@ h001,Hana,Theta,CZE
         result = _metrics(rows, date(2025, 1, 1))
         self.assertEqual(result["predictions"], 2)
         self.assertGreater(result["log_loss"], 0)
+        self.assertEqual(
+            sum(bin_["count"] for bin_ in result["reliability_bins"]),
+            result["predictions"],
+        )
+        self.assertEqual(
+            set(result["brier_decomposition"]),
+            {"reliability", "resolution", "uncertainty", "method"},
+        )
+        self.assertGreaterEqual(
+            result["brier_decomposition"]["reliability"],
+            0,
+        )
+        self.assertGreaterEqual(
+            result["brier_decomposition"]["resolution"],
+            0,
+        )
 
     def test_synthetic_payload_matches_public_contract(self):
         start = date(2023, 1, 1)
@@ -1634,13 +1741,204 @@ h001,Hana,Theta,CZE
         payload = build_sport_payload("tennis", matches, entities, source)
         schema = json.loads((Path(__file__).parents[1] / "rating_lab/schema.json").read_text())
         validate_payload(payload, schema)
-        self.assertEqual(set(payload["models"]), {"elo", "glicko2", "trueskill", "robust"})
+        self.assertEqual(
+            set(payload["models"]),
+            {"elo", "glicko2", "trueskill", "robust", "ensemble"},
+        )
+        self.assertAlmostEqual(
+            sum(
+                payload["parameters"]["ensemble"][f"weight_{model}"]
+                for model in ("elo", "glicko2", "trueskill", "robust")
+            ),
+            1.0,
+        )
+        self.assertEqual(len(payload["candidate_parameters"]["ensemble"]), 35)
         self.assertIn("candidate_parameters", payload)
         self.assertFalse(payload["media"]["model_input"])
         self.assertEqual(payload["data_window"]["matches"], len(matches))
         self.assertEqual(payload["outcome_context"]["matches"], len(matches))
         self.assertEqual(payload["outcome_context"]["draw_rate"], 0.0)
         self.assertIn("publication eligibility", payload["outcome_context"]["method"])
+
+    def test_ensemble_weights_use_validation_only(self):
+        validation_start = date(2024, 1, 1)
+        evaluation_start = date(2025, 1, 1)
+        base = {}
+        for model_index, model in enumerate(
+            ("elo", "glicko2", "trueskill", "robust")
+        ):
+            base[model] = [
+                {
+                    "date": "2024-06-01",
+                    "predicted": (0.8, 0.7, 0.6, 0.55)[model_index],
+                    "actual": 1.0,
+                },
+                {
+                    "date": "2025-06-01",
+                    "predicted": (0.9, 0.2, 0.8, 0.3)[model_index],
+                    "actual": 1.0,
+                },
+            ]
+        selected, _pooled, candidates = _fit_log_opinion_pool(
+            base, validation_start, evaluation_start
+        )
+        changed_evaluation = json.loads(json.dumps(base))
+        for rows in changed_evaluation.values():
+            rows[-1]["actual"] = 0.0
+        selected_after, _pooled_after, _candidates_after = _fit_log_opinion_pool(
+            changed_evaluation, validation_start, evaluation_start
+        )
+        self.assertEqual(selected, selected_after)
+        self.assertEqual(len(candidates), 35)
+        self.assertAlmostEqual(sum(selected.values()), 1.0)
+        self.assertEqual(len(_ensemble_weight_candidates()), 35)
+
+    def test_fide_incumbent_uses_the_identical_published_rating_subset(self):
+        matches = [
+            Match(
+                date(2026, 1, 1),
+                "white",
+                "black",
+                1.0,
+                metadata={"rating_a": "2400", "rating_b": "2200"},
+            ),
+            Match(
+                date(2026, 1, 2),
+                "white",
+                "black",
+                0.5,
+                metadata={"rating_a": "0", "rating_b": "2200"},
+            ),
+        ]
+        rows = [
+            {"date": match.date.isoformat(), "predicted": 0.6, "actual": match.score_a}
+            for match in matches
+        ]
+        benchmark = _fide_incumbent_benchmark(
+            matches,
+            {
+                model: rows
+                for model in ("elo", "glicko2", "trueskill", "robust")
+            },
+            rows,
+            date(2025, 1, 1),
+        )
+        self.assertEqual(benchmark["common_evaluation_predictions"], 1)
+        self.assertEqual(benchmark["withheld_predictions"], 1)
+        self.assertEqual(benchmark["metrics"]["fide"]["predictions"], 1)
+        self.assertEqual(benchmark["metrics"]["ensemble"]["predictions"], 1)
+
+    def test_bridge_leagues_link_only_exact_normalized_existing_names(self):
+        baseline = [
+            Match(date(2026, 1, 1), "club:ajax", "club:arsenal", 0.5)
+        ]
+        entities = {
+            "club:ajax": {
+                "name": "Ajax",
+                "country": "",
+                "competition": "Champions League",
+                "active": True,
+            },
+            "club:arsenal": {
+                "name": "Arsenal",
+                "country": "",
+                "competition": "Premier League",
+                "active": True,
+            },
+        }
+        payload = {
+            "matches": [
+                {
+                    "date": "2026-02-01",
+                    "team1": "Ajax",
+                    "team2": "FC Utrecht",
+                    "score": {"ft": [2, 0]},
+                }
+            ]
+        }
+
+        def source(url, **_kwargs):
+            if url.endswith("/nl.1.json"):
+                return json.dumps(payload).encode()
+            raise RuntimeError("fixture absent")
+
+        with patch("rating_lab.pipeline._get", side_effect=source):
+            merged, merged_entities, report = _merge_open_football_bridge(
+                baseline,
+                entities,
+                start_year=2026,
+            )
+        self.assertEqual(report["matches_added"], 1)
+        self.assertEqual(report["existing_entities_linked"], 1)
+        self.assertIn("football:name:fc-utrecht", merged_entities)
+        bridge = next(
+            match
+            for match in merged
+            if match.metadata.get("coverage_layer") == "openfootball_bridge"
+        )
+        self.assertEqual(bridge.entity_a, "club:ajax")
+        self.assertEqual(bridge.entity_b, "football:name:fc-utrecht")
+
+    def test_disjoint_bridge_evidence_does_not_degrade_original_fixture_scores(self):
+        baseline = [
+            Match(
+                date(2024, 1, 1) + timedelta(days=index * 20),
+                "a",
+                "b",
+                float(index % 2),
+                "Premier League",
+                "2024",
+                True,
+            )
+            for index in range(30)
+        ]
+        bridge = [
+            Match(
+                date(2024, 1, 2) + timedelta(days=index * 20),
+                "c",
+                "d",
+                float((index + 1) % 2),
+                "Eredivisie",
+                "2024",
+                True,
+                {"coverage_layer": "openfootball_bridge"},
+            )
+            for index in range(30)
+        ]
+        matches = sorted(baseline + bridge, key=lambda match: match.date)
+        parameters = {
+            model: _model_candidates("football", model)[0]
+            for model in ("elo", "glicko2", "trueskill", "robust")
+        }
+        predictions = {}
+        for model, model_parameters in parameters.items():
+            _states, rows, _histories = _run_model(
+                matches,
+                _new_model(model, model_parameters, "football"),
+                "football",
+            )
+            predictions[model] = rows
+        _weights, ensemble, _candidates = _fit_log_opinion_pool(
+            predictions,
+            date(2024, 1, 1),
+            date(2025, 1, 1),
+        )
+        report = _bridge_coverage_evaluation(
+            matches,
+            "football",
+            parameters,
+            predictions,
+            ensemble,
+            date(2024, 1, 1),
+            date(2025, 1, 1),
+        )
+        self.assertTrue(report["all_models_non_degraded"])
+        self.assertTrue(
+            all(
+                abs(values["log_loss_delta"]) <= 0.0005
+                for values in report["models"].values()
+            )
+        )
 
     def test_football_elo_separates_small_disconnected_components(self):
         start = date(2026, 1, 1)
@@ -1723,7 +2021,7 @@ class SplitAssetTests(unittest.TestCase):
     @staticmethod
     def _sport_payload(sport: str) -> dict:
         return {
-            "schema_version": "1.16.0",
+            "schema_version": "1.17.0",
             "sport": sport,
             "generated_at": "2026-07-23T22:01:36+00:00",
             "models": {
@@ -1740,6 +2038,30 @@ class SplitAssetTests(unittest.TestCase):
             },
             "competitions": [{"id": "league"}],
         }
+
+    def test_split_delivery_replaces_cached_raw_manifest_exception(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "sports": {
+                            "football": {
+                                "status": "retained",
+                                "message": "'knockout_fixtures'",
+                            }
+                        }
+                    }
+                )
+            )
+            from rating_lab.pipeline import write_split_assets
+
+            write_split_assets(root)
+            manifest = json.loads((root / "manifest.json").read_text())
+        message = manifest["sports"]["football"]["message"]
+        self.assertIn("last validated snapshot", message)
+        self.assertIn("may be stale", message)
+        self.assertNotIn("knockout_fixtures", message)
 
     @staticmethod
     def _player_payload(cohort_ids: list[str]) -> dict:
@@ -1816,6 +2138,58 @@ class SplitAssetTests(unittest.TestCase):
             self.assertTrue((output / "split/player-cohort-euro-2024.json").exists())
             self.assertTrue((output / "split/tennis-rankings-elo.json").exists())
 
+    def test_split_assets_preserve_verified_media_registry_across_old_fallback(self):
+        from rating_lab.pipeline import write_split_assets
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            split = output / "split"
+            split.mkdir()
+            media = {
+                "kind": "portrait",
+                "url": "https://upload.wikimedia.org/example.jpg",
+                "source": "Wikimedia Commons via Wikidata identifier match",
+                "source_url": "https://commons.wikimedia.org/wiki/File:Example.jpg",
+                "license": "CC BY-SA 4.0",
+                "attribution": "Example",
+            }
+            (split / "media-index.json").write_text(
+                json.dumps({"entities": {"atp:abc": media}})
+            )
+            (output / "tennis.json").write_text(
+                json.dumps(self._sport_payload("tennis"))
+            )
+            write_split_assets(output)
+            registry = json.loads((split / "media-index.json").read_text())
+            self.assertEqual(registry["entities"]["atp:abc"], media)
+
+    def test_verified_portraits_retain_previous_licensed_records_on_outage(self):
+        media = {
+            "kind": "portrait",
+            "url": "https://upload.wikimedia.org/example.jpg",
+            "source": "Wikimedia Commons via Wikidata identifier match",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Example.jpg",
+            "license": "CC BY-SA 4.0",
+            "attribution": "Example",
+        }
+        payload = {
+            "sport": "tennis",
+            "models": {
+                model: {"rankings": [{"id": "atp:abc"}]}
+                for model in ("elo", "glicko2", "trueskill", "robust", "ensemble")
+            },
+            "media": {"entities_with_media": 0},
+        }
+        previous = {
+            "models": {
+                "elo": {"rankings": [{"id": "atp:abc", "media": media}]}
+            }
+        }
+        with patch("rating_lab.pipeline._wikimedia_portraits", return_value={}):
+            _attach_verified_portraits(payload, previous)
+        self.assertEqual(payload["models"]["elo"]["rankings"][0]["media"], media)
+        self.assertEqual(payload["media"]["entities_with_media"], 1)
+
     @staticmethod
     def _default_view_payload(
         sport: str,
@@ -1842,9 +2216,29 @@ class SplitAssetTests(unittest.TestCase):
             for index in range(65)
         ]
         payload = {
-            "schema_version": "1.16.0",
+            "schema_version": "1.17.0",
             "sport": sport,
             "generated_at": "2026-07-23T22:01:36+00:00",
+            "latest_result": "2026-07-01",
+            "source": {
+                "source": "Test source",
+                "snapshot_sha256": "a" * 64,
+                "snapshot_hash_scope": "normalized_ingested_replay_input",
+            },
+            "data_window": {
+                "first_result": "2020-01-01",
+                "last_result": "2026-07-01",
+                "matches": 100,
+                "entities": 65,
+            },
+            "parameters": {
+                "elo": {"k": 24.0},
+                "glicko2": {"tau": 0.3},
+            },
+            "candidate_parameters": {
+                "elo": [{"k": 16.0}, {"k": 24.0}, {"k": 32.0}],
+                "glicko2": [{"tau": 0.3}, {"tau": 0.5}],
+            },
             "models": {
                 "elo": {
                     "label": "Elo",
@@ -1894,22 +2288,37 @@ class SplitAssetTests(unittest.TestCase):
             self.assertEqual(first_bytes, destination.read_bytes())
             self.assertEqual(first, second)
             self.assertEqual(len(first["rows"]), 50)
-            self.assertEqual(first["rows"][0]["name"], "Tennis Competitor 1")
+            self.assertEqual(first["model"], "glicko2")
+            self.assertEqual(first["rows"][0]["name"], "Tennis Competitor 65")
             self.assertNotIn("private_field", first["rows"][0])
-            self.assertEqual(first["verdict"]["predictions"], 400)
+            self.assertEqual(first["verdict"]["predictions"], 100)
             self.assertEqual(first["verdict"]["best_model"], "glicko2")
             self.assertIn("0.5900", first["verdict"]["sentence"])
-            self.assertIn("beating Elo by 0.0300", first["verdict"]["sentence"])
+            self.assertIn("no superiority claim", first["verdict"]["sentence"])
+            self.assertIn("sports are never pooled", first["verdict"]["scope"])
+            self.assertEqual(len(first["cohort_evidence"]), 4)
+            self.assertEqual(len(first["freshness"]), 4)
+            self.assertFalse(first["has_delayed_sources"])
+            self.assertEqual(first["audit"]["snapshot_sha256"], "a" * 64)
+            self.assertEqual(
+                first["parameter_evidence"][0]["candidates"],
+                ["k=16", "k=24", "k=32"],
+            )
 
             changed = json.loads((output / "chess.json").read_text())
             changed["models"]["glicko2"]["metrics"]["log_loss"] = 0.55
             (output / "chess.json").write_text(json.dumps(changed))
             updated = build_default_view(output)
-            self.assertNotEqual(
+            self.assertEqual(
                 first["verdict"]["sentence"],
                 updated["verdict"]["sentence"],
             )
-            self.assertIn("0.5800", updated["verdict"]["sentence"])
+            chess = next(
+                cohort
+                for cohort in updated["cohort_evidence"]
+                if cohort["sport"] == "chess"
+            )
+            self.assertEqual(chess["log_loss"], 0.55)
 
     def test_default_view_never_mixes_tournament_markets_into_match_verdict(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -1933,8 +2342,8 @@ class SplitAssetTests(unittest.TestCase):
             self.assertFalse(view["verdict"]["market_comparable"])
             self.assertIsNone(view["verdict"]["market_delta"])
             self.assertIn(
-                "No frozen market consensus covers the same fixture set yet.",
-                view["verdict"]["sentence"],
+                "No eligible frozen market consensus covers this same match set",
+                view["verdict"]["scope"],
             )
 
             for sport in ("tennis", "football", "national-football", "chess"):
@@ -1948,9 +2357,106 @@ class SplitAssetTests(unittest.TestCase):
             self.assertTrue(comparable["verdict"]["market_comparable"])
             self.assertEqual(comparable["verdict"]["market_delta"], 0.05)
             self.assertIn(
-                "frozen market consensus by 0.0500",
-                comparable["verdict"]["sentence"],
+                "market minus model log loss 0.0500",
+                comparable["verdict"]["scope"],
             )
+
+    def test_default_view_only_claims_superiority_with_block_interval(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            for sport in ("tennis", "football", "national-football", "chess"):
+                payload = self._default_view_payload(
+                    sport,
+                    elo_log_loss=0.62,
+                    glicko_log_loss=0.59,
+                )
+                if sport == "tennis":
+                    payload["evaluation_comparison"] = {
+                        "status": "available",
+                        "winner": "glicko2",
+                        "runner_up": "elo",
+                        "predictions": 100,
+                        "winner_log_loss": 0.59,
+                        "runner_up_log_loss": 0.62,
+                        "improvement_log_loss": 0.03,
+                        "ci95_low": 0.01,
+                        "ci95_high": 0.05,
+                        "interval_excludes_zero": True,
+                        "block_unit": "calendar_month",
+                        "blocks": 12,
+                        "resamples": 2000,
+                        "seed": 7,
+                        "method": "Test fixture.",
+                    }
+                (output / f"{sport}.json").write_text(json.dumps(payload))
+            view = build_default_view(output)
+            self.assertIn("observed difference from Elo was 0.0300", view["verdict"]["sentence"])
+            self.assertIn("0.0100 to 0.0500", view["verdict"]["sentence"])
+            self.assertIn("does not adjust for selecting", view["verdict"]["sentence"])
+
+    def test_paired_log_loss_interval_is_deterministic_and_blocked(self):
+        predictions = {}
+        for model_name, probability in (("elo", 0.75), ("glicko2", 0.60)):
+            predictions[model_name] = [
+                {
+                    "date": f"2026-{month:02d}-{day:02d}",
+                    "actual": 1.0,
+                    "predicted": probability,
+                }
+                for month in range(1, 7)
+                for day in range(1, 4)
+            ]
+        first = _paired_log_loss_block_bootstrap(
+            predictions,
+            date(2026, 1, 1),
+            resamples=500,
+        )
+        second = _paired_log_loss_block_bootstrap(
+            predictions,
+            date(2026, 1, 1),
+            resamples=500,
+        )
+        self.assertEqual(first, second)
+        self.assertEqual(first["winner"], "elo")
+        self.assertEqual(first["runner_up"], "glicko2")
+        self.assertEqual(first["blocks"], 6)
+        self.assertTrue(first["interval_excludes_zero"])
+        self.assertGreater(first["ci95_low"], 0)
+
+    def test_default_view_server_renders_retained_source_state(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            for sport in ("tennis", "football", "national-football", "chess"):
+                (output / f"{sport}.json").write_text(
+                    json.dumps(
+                        self._default_view_payload(
+                            sport,
+                            elo_log_loss=0.62,
+                            glicko_log_loss=0.59,
+                        )
+                    )
+                )
+            manifest = {
+                "generated_at": "2026-07-28T04:00:00+00:00",
+                "sports": {
+                    sport: {
+                        "status": "retained" if sport == "football" else "current",
+                        "latest_result": "2026-07-01",
+                        "checked_at": "2026-07-23T04:00:00+00:00",
+                        "stale_after_hours": 48,
+                        "message": "'private_key_name'",
+                    }
+                    for sport in ("tennis", "football", "national-football", "chess")
+                },
+            }
+            (output / "manifest.json").write_text(json.dumps(manifest))
+            view = build_default_view(output)
+            football = next(
+                item for item in view["freshness"] if item["sport"] == "football"
+            )
+            self.assertTrue(football["delayed"])
+            self.assertIn("last validated snapshot", football["message"])
+            self.assertNotIn("private_key_name", json.dumps(view))
 
     def test_player_default_ranking_is_rapm_with_honest_lineup_framing(self):
         root = Path(__file__).resolve().parents[1]
