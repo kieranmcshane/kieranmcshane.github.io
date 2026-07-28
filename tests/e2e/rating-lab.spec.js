@@ -79,6 +79,17 @@ test.describe("page load", () => {
     );
   });
 
+  test("the first useful ranking is visible in the initial viewport", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page);
+    const firstRow = page.locator("#ranking-body tr").first();
+    const box = await firstRow.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box.y).toBeLessThan(page.viewportSize().height);
+    await expect(firstRow.locator(".rating-lab-entity-name-text")).toBeVisible();
+  });
+
   test("opening the inspector preserves the full first identity", async ({
     page,
   }) => {
@@ -174,6 +185,30 @@ test.describe("A vs B state synchronization", () => {
 });
 
 test.describe("chart selection", () => {
+  test("ranking rows build a shared comparison and synchronize A vs B", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page);
+    const compareButtons = page.locator("#ranking-body [data-pin-row]");
+    await compareButtons.nth(0).click();
+    await compareButtons.nth(1).click();
+
+    const panel = page.locator("#rating-comparison-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("[data-unpin-comparison]")).toHaveCount(2);
+    await expect(panel.locator(".rating-lab-chart-legend span")).toHaveCount(2);
+
+    const selectedIds = await compareButtons
+      .evaluateAll((buttons) =>
+        buttons
+          .filter((button) => button.getAttribute("aria-pressed") === "true")
+          .map((button) => button.getAttribute("data-pin-row"))
+      );
+    await page.locator("#rating-comparison-matchup").click();
+    await expect(page.locator("#matchup-a")).toHaveValue(selectedIds[0]);
+    await expect(page.locator("#matchup-b")).toHaveValue(selectedIds[1]);
+  });
+
   test("major competitions appear on the rating-history x-axis", async ({
     page,
   }) => {
@@ -591,16 +626,19 @@ test.describe("sticky controls", () => {
     expect(pinnedTop || pinnedBottom).toBe(true);
   });
 
-  test("desktop detail panel is sticky", async ({ page }) => {
-    test.skip(
-      page.viewportSize().width <= 920,
-      "detail panel becomes static at 920px and below"
-    );
+  test("competitor detail opens as an independent drawer", async ({ page }) => {
     await gotoRatingLab(page);
+    await page
+      .locator("#ranking-body button.rating-lab-entity")
+      .first()
+      .click();
     const position = await page
       .locator("#rating-detail")
       .evaluate((el) => getComputedStyle(el).position);
-    expect(position).toBe("sticky");
+    expect(position).toBe("fixed");
+    await expect(page.locator("#rating-detail [data-close-detail]")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#rating-detail")).toBeHidden();
   });
 });
 

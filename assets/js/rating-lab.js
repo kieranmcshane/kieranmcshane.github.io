@@ -80,6 +80,11 @@
     empty: document.getElementById('ranking-empty'),
     more: document.getElementById('ranking-more'),
     caption: document.getElementById('ranking-caption'),
+    comparisonPanel: document.getElementById('rating-comparison-panel'),
+    comparisonChips: document.getElementById('rating-comparison-chips'),
+    comparisonChart: document.getElementById('rating-comparison-chart'),
+    comparisonClear: document.getElementById('rating-comparison-clear'),
+    comparisonMatchup: document.getElementById('rating-comparison-matchup'),
     provisionalControl: document.getElementById('rating-provisional-control'),
     includeProvisional: document.getElementById('rating-include-provisional'),
     provisionalCount: document.getElementById('rating-provisional-count'),
@@ -639,6 +644,47 @@
       coordinates + '"></polyline><title>Last ' + recent.length + ' updates · ' + number(min, 1) + ' to ' + number(max, 1) + '</title></svg>';
   }
 
+  function comparisonRows() {
+    var rankings = state.datasets[state.sport].models[state.model].rankings || [];
+    return state.pinned.map(function (id) {
+      return rankings.find(function (row) { return row.id === id; });
+    }).filter(Boolean);
+  }
+
+  function toggleComparison(id) {
+    var index = state.pinned.indexOf(id);
+    if (index === -1) {
+      if (state.pinned.length === 4) state.pinned.shift();
+      state.pinned.push(id);
+    } else {
+      state.pinned.splice(index, 1);
+    }
+    renderTable();
+    renderComparison();
+    renderDetail();
+  }
+
+  function renderComparison() {
+    var rows = comparisonRows();
+    elements.comparisonPanel.hidden = rows.length === 0;
+    elements.comparisonMatchup.hidden = rows.length !== 2;
+    if (!rows.length) {
+      elements.comparisonChips.innerHTML = '';
+      elements.comparisonChart.innerHTML = '';
+      return;
+    }
+    elements.comparisonChips.innerHTML = rows.map(function (row) {
+      return '<button type="button" data-unpin-comparison="' + escapeHtml(row.id) +
+        '" aria-label="Remove ' + escapeHtml(row.name) + ' from comparison">' +
+        entityBadge(row, state.sport) + '<span>' + escapeHtml(row.name) + '</span><strong aria-hidden="true">×</strong></button>';
+    }).join('');
+    elements.comparisonChart.innerHTML = rows.length > 1 ?
+      historyChart(rows.map(function (row) {
+        return { name: row.name, points: row.history };
+      }), rows.map(function (row) { return row.name; }).join(', ') + ' rating comparison') :
+      '<p class="rating-lab-comparison-prompt">Select one more competitor to compare rating histories. Up to four can be shown together.</p>';
+  }
+
   function renderTable() {
     var rows = currentRows();
     var mobile = window.matchMedia('(max-width: 650px)').matches;
@@ -678,11 +724,17 @@
         (row.id === state.selected ? 'true' : 'false') + '"' +
         (rowClasses.length ? ' class="' + rowClasses.join(' ') + '"' : '') + '>' +
         '<td class="rating-lab-rank">' + row.rank + '</td>' +
-        '<th scope="row"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '" aria-expanded="' + selected + '">' +
+        '<th scope="row"><div class="rating-lab-entity-cell"><button type="button" class="rating-lab-entity" data-select="' + escapeHtml(row.id) + '" aria-expanded="' + selected + '">' +
         entityBadge(row, state.sport) + '<span class="rating-lab-identity-copy">' + entityName(row, state.sport) +
         '<small' + (row.provisional ? ' class="rating-lab-provisional-label" title="' +
           escapeHtml(row.provisional_reason) + '"' : '') + '>' + escapeHtml(identityContext) + '</small>' +
-        '<small class="rating-lab-mobile-change ' + deltaClass + '">' + escapeHtml(movement) + '</small></span><span class="rating-lab-mobile-row-chevron" aria-hidden="true">›</span></button></th>' +
+        '<small class="rating-lab-mobile-change ' + deltaClass + '">' + escapeHtml(movement) + '</small></span><span class="rating-lab-mobile-row-chevron" aria-hidden="true">›</span></button>' +
+        '<button type="button" class="rating-lab-row-compare" data-pin-row="' + escapeHtml(row.id) +
+        '" aria-pressed="' + String(state.pinned.indexOf(row.id) !== -1) + '" aria-label="' +
+        (state.pinned.indexOf(row.id) !== -1 ? 'Remove ' : 'Add ') + escapeHtml(row.name) +
+        (state.pinned.indexOf(row.id) !== -1 ? ' from comparison' : ' to comparison') +
+        '"><span aria-hidden="true">' + (state.pinned.indexOf(row.id) !== -1 ? '✓' : '+') +
+        '</span><small>Compare</small></button></div></th>' +
         '<td class="rating-lab-trend-column">' + miniSparkline(row.history, row.name) + '</td>' +
         '<td class="rating-lab-rating-column"><strong>' + ratingNumber(row.score) + '</strong></td>' +
         '<td class="rating-lab-uncertainty-column' + (row.sigma === null ? ' is-empty' : '') + '">' + (row.sigma === null ? '—' : '±' + number(row.sigma, 1, 1)) + '</td>' +
@@ -881,6 +933,7 @@
     var rows = dataset.models[state.model].rankings;
     var row = rows.find(function (candidate) { return candidate.id === state.selected; });
     elements.detail.hidden = !row;
+    root.classList.toggle('has-open-detail', Boolean(row));
     elements.detail.closest('.rating-lab-grid').classList.toggle('has-detail', Boolean(row));
     if (!row) {
       elements.detail.innerHTML = '';
@@ -902,18 +955,12 @@
     var pinnedRows = state.pinned.map(function (id) {
       return rows.find(function (candidate) { return candidate.id === id; });
     }).filter(Boolean);
-    var compare = '';
-    if (pinnedRows.length) {
-      compare = '<div class="rating-lab-compare"><div class="rating-lab-compare-heading"><p class="rating-lab-inspector-label">Pinned comparison</p><div>' +
-        pinnedRows.map(function (item) { return '<button type="button" data-unpin="' + escapeHtml(item.id) + '">' +
-          entityBadge(item, state.sport) + '<span>' + escapeHtml(item.name) + ' ×</span></button>'; }).join('') + '</div></div>' +
-        (pinnedRows.length === 2 ? historyChart(pinnedRows.map(function (item) { return { name: item.name, points: item.history }; }),
-          pinnedRows[0].name + ' and ' + pinnedRows[1].name + ' rating comparison') :
-          '<p class="rating-lab-detail-placeholder">Pin one more competitor to overlay both histories.</p>') + '</div>';
-    }
+    var compare = pinnedRows.length ? '<p class="rating-lab-detail-comparison-note">' +
+      pinnedRows.length + ' selected for the shared comparison above the ranking.</p>' : '';
     var provisional = row.provisional ? '<p class="rating-lab-provisional-note"><strong>Provisional Elo.</strong> ' +
       escapeHtml(row.provisional_reason) + '. The raw rating remains available for A-vs-B and competition forecasts, but it is ordered after established clubs because Elo has no uncertainty estimate.</p>' : '';
-    elements.detail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank +
+    elements.detail.innerHTML = '<button type="button" class="rating-lab-detail-close" data-close-detail aria-label="Close competitor details">×</button>' +
+      '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">Rank ' + row.rank +
       '</p><h3>' + entityTitle(row, state.sport) + '</h3></div><strong>' + ratingNumber(row.score) + '</strong></div>' +
       provisional +
       '<button type="button" class="rating-lab-pin" data-pin="' + escapeHtml(row.id) + '" aria-pressed="' +
@@ -2160,6 +2207,7 @@
     renderMetrics();
     renderMovers();
     renderTable();
+    renderComparison();
     renderDetail();
     renderMatchup();
     renderProtocol();
@@ -2229,10 +2277,8 @@
   function revealDetailOnMobile() {
     if (!window.matchMedia('(max-width: 650px)').matches || elements.detail.hidden) return;
     window.setTimeout(function () {
-      elements.detail.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'start'
-      });
+      var close = elements.detail.querySelector('[data-close-detail]');
+      if (close) close.focus();
     }, 0);
   }
 
@@ -2387,7 +2433,14 @@
     if (!elements.quickModel.contains(event.target)) closeQuickModel();
   });
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') closeQuickModel();
+    if (event.key === 'Escape') {
+      closeQuickModel();
+      if (!elements.detail.hidden) {
+        state.selected = null;
+        renderTable();
+        renderDetail();
+      }
+    }
   });
   window.addEventListener('scroll', queueQuickModelUpdate, { passive: true });
   window.addEventListener('resize', queueQuickModelUpdate);
@@ -2496,6 +2549,11 @@
   });
 
   elements.body.addEventListener('click', function (event) {
+    var compareButton = event.target.closest('[data-pin-row]');
+    if (compareButton) {
+      toggleComparison(compareButton.dataset.pinRow);
+      return;
+    }
     var profile = event.target.closest('[data-open-profile]');
     if (profile) {
       state.selected = profile.dataset.openProfile;
@@ -2525,20 +2583,45 @@
     var historyEvent = event.target.closest('[data-history-event]');
     var pin = event.target.closest('[data-pin]');
     var unpin = event.target.closest('[data-unpin]');
-    if (historyEvent) {
+    var close = event.target.closest('[data-close-detail]');
+    if (close) {
+      state.selected = null;
+      renderTable();
+      renderDetail();
+    } else if (historyEvent) {
       var chartWrap = historyEvent.closest('.rating-lab-chart-wrap');
       selectChartDate(chartWrap, historyEvent.dataset.date);
       chartWrap.querySelector('.rating-lab-chart-readout').textContent = historyEvent.getAttribute('aria-label');
     } else if (pin) {
-      var index = state.pinned.indexOf(pin.dataset.pin);
-      if (index === -1) {
-        if (state.pinned.length === 2) state.pinned.shift();
-        state.pinned.push(pin.dataset.pin);
-      } else state.pinned.splice(index, 1);
-      renderDetail();
+      toggleComparison(pin.dataset.pin);
     } else if (unpin) {
-      state.pinned = state.pinned.filter(function (id) { return id !== unpin.dataset.unpin; });
+      toggleComparison(unpin.dataset.unpin);
+    }
+  });
+
+  elements.comparisonPanel.addEventListener('click', function (event) {
+    var unpin = event.target.closest('[data-unpin-comparison]');
+    if (unpin) {
+      toggleComparison(unpin.dataset.unpinComparison);
+      return;
+    }
+    if (event.target.closest('#rating-comparison-clear')) {
+      state.pinned = [];
+      renderTable();
+      renderComparison();
       renderDetail();
+      return;
+    }
+    if (event.target.closest('#rating-comparison-matchup')) {
+      var rows = comparisonRows();
+      if (rows.length !== 2) return;
+      state.matchupA = rows[0].id;
+      state.matchupB = rows[1].id;
+      renderMatchup();
+      document.getElementById('matchup').scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start'
+      });
     }
   });
 
@@ -2593,6 +2676,47 @@
         return Math.abs(new Date(date).getTime() - activeTime) < Math.abs(new Date(dates[nearest]).getTime() - activeTime) ? index : nearest;
       }, 0);
     }
+    if (event.key === 'Home') current = 0;
+    else if (event.key === 'End') current = dates.length - 1;
+    else if (event.key === 'ArrowLeft') current = current < 0 ? dates.length - 1 : Math.max(0, current - 1);
+    else current = current < 0 ? 0 : Math.min(dates.length - 1, current + 1);
+    selectChartDate(chartWrap, dates[current]);
+  });
+
+  elements.comparisonPanel.addEventListener('pointerdown', function (event) {
+    var surface = event.target.closest('[data-chart-surface]');
+    if (!surface) return;
+    surface.dataset.scrubbing = 'true';
+    if (surface.setPointerCapture) surface.setPointerCapture(event.pointerId);
+    surface.focus();
+    scrubChart(event);
+  });
+
+  elements.comparisonPanel.addEventListener('pointermove', function (event) {
+    var surface = event.target.closest('[data-chart-surface]');
+    if (!surface) return;
+    if (event.pointerType === 'mouse' || surface.dataset.scrubbing === 'true') scrubChart(event);
+  });
+
+  elements.comparisonPanel.addEventListener('pointerup', function (event) {
+    var surface = event.target.closest('[data-chart-surface]');
+    if (surface) delete surface.dataset.scrubbing;
+  });
+
+  elements.comparisonPanel.addEventListener('pointercancel', function (event) {
+    var surface = event.target.closest('[data-chart-surface]');
+    if (surface) delete surface.dataset.scrubbing;
+  });
+
+  elements.comparisonPanel.addEventListener('keydown', function (event) {
+    var surface = event.target.closest('[data-chart-surface]');
+    if (!surface || ['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(event.key) === -1) return;
+    event.preventDefault();
+    var chartWrap = surface.closest('.rating-lab-chart-wrap');
+    var dates = chartEntries(chartWrap).map(function (entry) { return entry.date; }).filter(function (date, index, items) {
+      return items.indexOf(date) === index;
+    }).sort();
+    var current = dates.indexOf(surface.dataset.activeDate);
     if (event.key === 'Home') current = 0;
     else if (event.key === 'End') current = dates.length - 1;
     else if (event.key === 'ArrowLeft') current = current < 0 ? dates.length - 1 : Math.max(0, current - 1);

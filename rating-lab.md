@@ -7,12 +7,20 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
   <header class="rating-lab-hero">
-    <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
-    <h1><span class="rating-lab-title-desktop">Across sports. Four ways to measure strength.</span><span class="rating-lab-title-mobile">Live ratings across sports.</span></h1>
-    <p class="rating-lab-deck"><span class="rating-lab-deck-desktop">Compare Elo, Glicko-2, Gaussian, and robust ratings across tennis, football, and chess. Every forecast is scored before its result updates the model.</span><span class="rating-lab-deck-mobile">Four outcome-tested models for tennis, football, and chess.</span></p>
-    <p class="rating-lab-hero-link"><a href="#predictor">Forecast current competitions ↓</a></p>
-    <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
-    <p class="rating-lab-generation" id="rating-lab-generation"></p>
+    <div class="rating-lab-hero-copy">
+      <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
+      <h1>Rating Lab</h1>
+      <p class="rating-lab-deck">Current strength, forecasts, and model evidence across tennis, football, and chess.</p>
+    </div>
+    <div class="rating-lab-hero-actions" aria-label="Rating Lab shortcuts">
+      <a href="#leaderboard-heading">Explore rankings</a>
+      <a href="#predictor">Forecast competitions</a>
+    </div>
+    <div class="rating-lab-trust-bar">
+      <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
+      <p class="rating-lab-generation" id="rating-lab-generation"></p>
+      <a href="#research">Data, code, and methods</a>
+    </div>
   </header>
 
   <nav class="rating-lab-local-nav" aria-label="Rating Lab sections">
@@ -102,11 +110,26 @@ description: Live alternative ratings for tennis, club and national-team footbal
       </button>
     </div>
 
-    <details class="rating-lab-metrics-disclosure" open>
+    <section class="rating-lab-comparison-panel" id="rating-comparison-panel" aria-labelledby="rating-comparison-title" hidden>
+      <div class="rating-lab-comparison-heading">
+        <div>
+          <p class="rating-lab-kicker">Direct history comparison</p>
+          <h3 id="rating-comparison-title">Select competitors from the ranking</h3>
+        </div>
+        <div class="rating-lab-comparison-actions">
+          <button type="button" id="rating-comparison-matchup" hidden>Open A vs B</button>
+          <button type="button" id="rating-comparison-clear">Clear</button>
+        </div>
+      </div>
+      <div class="rating-lab-comparison-chips" id="rating-comparison-chips" aria-label="Selected competitors"></div>
+      <div class="rating-lab-comparison-chart" id="rating-comparison-chart" aria-live="polite"></div>
+    </section>
+
+    <details class="rating-lab-metrics-disclosure">
       <summary>Model accuracy</summary>
       <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
     </details>
-    <details class="rating-lab-movers-disclosure" open>
+    <details class="rating-lab-movers-disclosure">
       <summary>30-day movers</summary>
       <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
     </details>
