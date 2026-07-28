@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Build the site-native MAT101 exercise and solution data.
 
-Statements are extracted as real, selectable text from the credited source PDF.
-The source PDF remains available as the archival reference, but raster crops are
-not used as the primary web content. Solution HTML is generated from the
-credited standalone LaTeX correction with Pandoc and remains MathJax-ready.
+Every statement comes from a reviewed semantic transcription. The credited
+source PDF remains available as an archival reference, but neither its text
+layer nor raster crops are used as primary web content. Solution HTML is
+generated from the credited standalone LaTeX correction with Pandoc and remains
+MathJax-ready.
 """
 
 from __future__ import annotations
@@ -16,6 +17,8 @@ import subprocess
 import tempfile
 from collections import defaultdict
 from pathlib import Path
+
+from mat101_curated_statements import CURATED_STATEMENTS
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -206,6 +209,7 @@ SOURCE_TEXT_REPLACEMENTS = {
 # Keeping these overrides beside the extractor prevents a future regeneration
 # from silently restoring flattened fractions or delimiter glyphs.
 STATEMENT_OVERRIDES = {
+    **CURATED_STATEMENTS,
     "1.19": {
         "html": r"""<div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
 <p>On va démontrer le théorème de Napoléon.<sup class="mat101-note-reference"><a href="#mat101-note-1-19-history" aria-label="Lire la note historique sur l’attribution du théorème">1</a></sup></p>
@@ -403,6 +407,21 @@ def format_statement_text(text: str) -> tuple[str, str]:
     return statement_html, search_text
 
 
+def semantic_search_text(statement_html: str) -> str:
+    """Derive searchable text from a reviewed semantic transcription."""
+
+    text = html.unescape(re.sub(r"<[^>]+>", " ", statement_html))
+    text = text.replace(r"\(", " ").replace(r"\)", " ")
+    text = text.replace(r"\[", " ").replace(r"\]", " ")
+    text = re.sub(
+        r"\\(?:text|mathrm|mathbf|mathbb|operatorname)\{([^{}]*)\}",
+        r"\1",
+        text,
+    )
+    text = text.replace("\\", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def build_statement_text() -> dict[str, dict[str, str | int]]:
     chapters = json.loads(EXERCISE_DATA.read_text())
     expected_ids = [
@@ -423,48 +442,26 @@ def build_statement_text() -> dict[str, dict[str, str | int]]:
         for exercise_id in page["exercises"]
     }
 
-    with tempfile.TemporaryDirectory(prefix="mat101-statements-") as directory:
-        work = Path(directory)
-        source_parts = []
-        for first_page, last_page in SOURCE_PAGE_RANGES:
-            text_path = work / f"statements-{first_page}-{last_page}.txt"
-            run(
-                "pdftotext",
-                "-f",
-                str(first_page),
-                "-l",
-                str(last_page),
-                "-raw",
-                str(SOURCE_PDF),
-                str(text_path),
-            )
-            source_parts.append(text_path.read_text())
-        source_text = normalize_source_text("\n".join(source_parts))
+    if set(STATEMENT_OVERRIDES) != set(expected_ids):
+        missing = sorted(set(expected_ids) - set(STATEMENT_OVERRIDES))
+        unexpected = sorted(set(STATEMENT_OVERRIDES) - set(expected_ids))
+        raise RuntimeError(
+            "Reviewed statement catalogue is incomplete or inconsistent: "
+            f"missing={missing}, unexpected={unexpected}"
+        )
 
-    matches = list(STATEMENT_HEADING.finditer(source_text))
     statements: dict[str, dict[str, str | int]] = {}
-    for index, match in enumerate(matches):
-        exercise_id = match.group(1)
-        if exercise_id not in page_by_exercise:
-            continue
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(source_text)
-        statement_html, search_text = format_statement_text(
-            source_text[match.end():end]
+    for exercise_id in expected_ids:
+        override = dict(STATEMENT_OVERRIDES[exercise_id])
+        override.setdefault(
+            "searchText",
+            semantic_search_text(str(override["html"])),
         )
         statements[exercise_id] = {
-            "html": statement_html,
-            "searchText": search_text,
             "sourcePage": page_by_exercise[exercise_id],
             "recueilPage": recueil_page_by_exercise[exercise_id],
+            **override,
         }
-
-    missing = [exercise_id for exercise_id in expected_ids if exercise_id not in statements]
-    if missing:
-        raise RuntimeError(f"Exercises without semantic statements: {missing}")
-    for exercise_id, override in STATEMENT_OVERRIDES.items():
-        if exercise_id not in statements:
-            raise RuntimeError(f"Statement override targets unknown exercise {exercise_id}")
-        statements[exercise_id].update(override)
     return statements
 
 

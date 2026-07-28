@@ -84,13 +84,32 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             self.assertGreater(len(item["statementHtml"]), 100)
             self.assertGreater(len(item["statementSearchText"]), 30)
             self.assertIn("mat101-statement-transcription", item["statementHtml"])
+            self.assertIn("mat101-statement-curated", item["statementHtml"])
             self.assertNotIn("<img", item["statementHtml"])
             self.assertGreaterEqual(item["statementSourcePage"], 30)
             self.assertGreaterEqual(item["statementPdfPage"], 3)
-            self.assertIn(item["transcriptionStatus"], {"extracted", "curated"})
-            self.assertIn(
-                item["mathematicalReviewStatus"], {"pending", "reviewed"}
-            )
+            self.assertEqual(item["transcriptionStatus"], "curated")
+            self.assertEqual(item["mathematicalReviewStatus"], "reviewed")
+
+        mathjax_statements = [
+            item for item in NATIVE
+            if r"\(" in item["statementHtml"] or r"\[" in item["statementHtml"]
+        ]
+        self.assertEqual(len(mathjax_statements), 101)
+        self.assertEqual(
+            [item["id"] for item in NATIVE if item not in mathjax_statements],
+            ["3.23", "4.12"],
+        )
+        rendered_statements = " ".join(item["statementHtml"] for item in NATIVE)
+        for extraction_artifact in (
+            "centre deux doigts",
+            "repla e",
+            "d’in onnue",
+            "coeffi ients",
+            " onje ture",
+            ") face vers le haut [",
+        ):
+            self.assertNotIn(extraction_artifact, rendered_statements)
 
         sets_statement = next(item for item in NATIVE if item["id"] == "3.3")
         self.assertEqual(sets_statement["transcriptionStatus"], "curated")
@@ -241,7 +260,11 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Corpus complet — relecture en cours", PAGE)
         self.assertIn("103 solutions · niveau L1", PAGE)
         self.assertNotIn("103 solutions · 59 pages", PAGE)
-        self.assertIn("la vérification indépendante exercice par exercice n’est pas achevée", PAGE)
+        self.assertIn(
+            "la vérification indépendante des corrigés exercice par exercice "
+            "n’est pas achevée",
+            PAGE,
+        )
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
@@ -256,6 +279,11 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("exercise.statementSearchText", PAGE)
         self.assertIn("Consulter la page source", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
+        self.assertIn(
+            "Les 103 énoncés ont été retranscrits en HTML sémantique",
+            PAGE,
+        )
+        self.assertNotIn("Transcription textuelle extraite", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
         self.assertIn("mat101-exercises.md", CONFIG)
 

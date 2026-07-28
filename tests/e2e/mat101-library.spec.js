@@ -59,7 +59,7 @@ test.describe("MAT101 native library", () => {
     await exercise.locator(":scope > summary").click();
     await expect(exercise).toHaveAttribute("open", "");
     await expect(exercise.locator(".mat101-statement-transcription")).toContainText(
-      "relation d'équivalence"
+      "relation d’équivalence"
     );
 
     const solution = exercise.locator(".mat101-native-solution");
@@ -93,7 +93,7 @@ test.describe("MAT101 native library", () => {
     await gotoLibrary(page);
     await page
       .locator("#mat101-search-input")
-      .fill("suite de nombre réels est périodique");
+      .fill("suite de nombres réels est périodique");
 
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(1);
     await expect(page.locator("#exercice-4-12")).toBeVisible();
@@ -218,7 +218,10 @@ test.describe("MAT101 native library", () => {
     await exercise.locator(":scope > summary").click();
 
     await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
-      "Transcription textuelle extraite"
+      "Transcription mathématique relue"
+    );
+    await expect(exercise.locator(".mat101-statement mjx-container")).toHaveCount(
+      20
     );
     await expect(
       exercise.getByRole("link", { name: "Consulter la page source" })
