@@ -80,10 +80,18 @@ class RepertoireRaisonneTests(unittest.TestCase):
         self.assertIn("data-repertoire-problem", PAGE)
         self.assertIn("data-repertoire-part", PAGE)
         self.assertIn("data-repertoire-preset", PAGE)
-        self.assertIn("Le bilan des 17 derniers problèmes", PAGE)
+        self.assertIn("Relecture détaillée des 17 derniers problèmes", PAGE)
         self.assertIn("Problèmes 111–121", PAGE)
         self.assertIn("Problèmes 122–125", PAGE)
         self.assertIn("Problèmes 126–127", PAGE)
+        self.assertEqual(PAGE.count("data-repertoire-audit-problem="), 17)
+        for number in range(111, 128):
+            self.assertIn(
+                f'data-repertoire-audit-problem="{number}"',
+                PAGE,
+            )
+        self.assertIn("L’itération", PAGE)
+        self.assertIn("Les formules de Taylor aux points", PAGE)
         self.assertIn("Une correction, quatre précisions", PAGE)
         self.assertIn("Correction mathématique", PAGE)
         self.assertIn(r"\overline f\,P_k", PAGE)
@@ -97,6 +105,7 @@ class RepertoireRaisonneTests(unittest.TestCase):
     def test_interaction_and_styling_are_scoped_to_the_page(self):
         self.assertIn("repertoire-library", STYLES)
         self.assertIn("repertoire-problem-list", STYLES)
+        self.assertIn("repertoire-audit-list", STYLES)
         self.assertIn("repertoire-search-input", SCRIPT)
         self.assertIn("normalize", SCRIPT)
         self.assertIn("data-repertoire-section", SCRIPT)
