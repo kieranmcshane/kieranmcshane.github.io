@@ -5166,6 +5166,171 @@ def write_split_assets(output_dir: Path) -> dict:
     return written
 
 
+def build_default_view(
+    output_dir: Path,
+    *,
+    default_sport: str = "tennis",
+    default_model: str = "elo",
+    row_limit: int = 50,
+) -> dict:
+    """Derive the server-rendered landing view from canonical sport payloads.
+
+    This file is intentionally small: Jekyll needs enough data to render a
+    useful no-JavaScript leaderboard and the measured headline, while the
+    canonical per-sport JSON remains the only source of truth.
+    """
+    payloads = {}
+    for sport in SPORTS:
+        source = output_dir / f"{sport}.json"
+        if source.exists():
+            payloads[sport] = json.loads(source.read_text())
+    if default_sport not in payloads:
+        raise FileNotFoundError(f"{default_sport}.json is required for the default view")
+    default_payload = payloads[default_sport]
+    default_entry = default_payload.get("models", {}).get(default_model)
+    if not default_entry:
+        raise ValueError(f"{default_model} is not published for {default_sport}")
+
+    rows = []
+    public_fields = (
+        "rank",
+        "id",
+        "name",
+        "country",
+        "competition",
+        "score",
+        "sigma",
+        "change30",
+        "recent_matches",
+        "last_played",
+    )
+    for row in default_entry.get("rankings", [])[:row_limit]:
+        rows.append({field: row.get(field) for field in public_fields})
+
+    aggregate = {}
+    for payload in payloads.values():
+        for model_name, model in payload.get("models", {}).items():
+            metrics = model.get("metrics", {})
+            predictions = int(metrics.get("predictions") or 0)
+            log_loss = metrics.get("log_loss")
+            if not predictions or not isinstance(log_loss, (int, float)):
+                continue
+            entry = aggregate.setdefault(
+                model_name,
+                {
+                    "label": model.get("label", model_name),
+                    "predictions": 0,
+                    "weighted_log_loss": 0.0,
+                },
+            )
+            entry["predictions"] += predictions
+            entry["weighted_log_loss"] += predictions * float(log_loss)
+    scored = {
+        model_name: {
+            "label": entry["label"],
+            "predictions": entry["predictions"],
+            "log_loss": entry["weighted_log_loss"] / entry["predictions"],
+        }
+        for model_name, entry in aggregate.items()
+        if entry["predictions"]
+    }
+    if "elo" not in scored:
+        raise ValueError("Elo evaluation metrics are required for the headline verdict")
+    best_model, best = min(
+        scored.items(),
+        key=lambda item: (item[1]["log_loss"], item[0]),
+    )
+    matched_predictions = min(entry["predictions"] for entry in scored.values())
+    if any(entry["predictions"] != matched_predictions for entry in scored.values()):
+        raise ValueError("Headline models must be evaluated over the same held-out count")
+    best_log_loss = round(best["log_loss"], 4)
+    elo_delta = round(scored["elo"]["log_loss"] - best["log_loss"], 4)
+
+    # Market winner snapshots are categorical tournament forecasts, not the
+    # one-step-ahead match fixture set used above. They must never be mixed into
+    # this sentence. A future match-level frozen benchmark can populate this
+    # explicitly without changing the template.
+    market_weighted_log_loss = 0.0
+    market_predictions = 0
+    for payload in payloads.values():
+        benchmark = payload.get("held_out_match_market_benchmark") or {}
+        predictions = int(benchmark.get("predictions") or 0)
+        log_loss = benchmark.get("log_loss")
+        if predictions and isinstance(log_loss, (int, float)):
+            market_predictions += predictions
+            market_weighted_log_loss += predictions * float(log_loss)
+    market_log_loss = (
+        market_weighted_log_loss / market_predictions
+        if market_predictions
+        else None
+    )
+    market_comparable = (
+        market_log_loss is not None and market_predictions == matched_predictions
+    )
+    if market_comparable:
+        market_delta = round(market_log_loss - best["log_loss"], 4)
+        sentence = (
+            f"Over {matched_predictions:,} held-out matches in the last 12 months, "
+            f"{best['label']} scored log loss {best_log_loss:.4f} — beating Elo by "
+            f"{elo_delta:.4f} and the frozen market consensus by {market_delta:.4f}."
+        )
+    else:
+        market_delta = None
+        sentence = (
+            f"Over {matched_predictions:,} held-out matches in the last 12 months, "
+            f"{best['label']} scored log loss {best_log_loss:.4f} — beating Elo by "
+            f"{elo_delta:.4f}. No frozen market consensus covers the same fixture set yet."
+        )
+
+    return {
+        "schema_version": default_payload.get("schema_version"),
+        "generated_at": default_payload.get("generated_at"),
+        "sport": default_sport,
+        "model": default_model,
+        "model_label": default_entry.get("label", default_model),
+        "ranking_rule": default_entry.get("ranking_rule"),
+        "row_limit": row_limit,
+        "rows": rows,
+        "verdict": {
+            "sentence": sentence,
+            "best_model": best_model,
+            "best_model_label": best["label"],
+            "predictions": matched_predictions,
+            "log_loss": best_log_loss,
+            "elo_delta": elo_delta,
+            "market_comparable": market_comparable,
+            "market_delta": market_delta,
+            "scope": "Weighted across published cohorts; each cohort uses its latest untouched 365-day evaluation window.",
+        },
+    }
+
+
+def write_default_view(
+    output_dir: Path,
+    destination: Path,
+    *,
+    default_sport: str = "tennis",
+    default_model: str = "elo",
+) -> dict:
+    """Write the deterministic Jekyll data file transactionally."""
+    payload = build_default_view(
+        output_dir,
+        default_sport=default_sport,
+        default_model=default_model,
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    serialized = json.dumps(
+        payload,
+        indent=2,
+        ensure_ascii=False,
+        sort_keys=True,
+    ) + "\n"
+    staged = destination.with_name(f".{destination.name}.tmp")
+    staged.write_text(serialized)
+    staged.replace(destination)
+    return payload
+
+
 def _git_revision() -> str:
     try:
         return subprocess.run(

@@ -5,33 +5,33 @@ permalink: /rating-lab/
 description: Live alternative ratings for tennis, club and national-team football, and chess, tested against real match outcomes.
 ---
 
-<div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">
+<div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}" data-default-sport="{{ site.data.rating_lab_default.sport }}" data-default-model="{{ site.data.rating_lab_default.model }}">
   <header class="rating-lab-hero">
     <div class="rating-lab-hero-copy">
       <p class="rating-lab-kicker">Live · reproducible · scored out-of-sample</p>
       <h1>Rating Lab</h1>
-      <p class="rating-lab-deck">Current strength, forecasts, and model evidence across tennis, football, and chess.</p>
+      <p class="rating-lab-verdict">{{ site.data.rating_lab_default.verdict.sentence }}</p>
+      <p class="rating-lab-verdict-scope">{{ site.data.rating_lab_default.verdict.scope }}</p>
     </div>
     <div class="rating-lab-hero-actions" aria-label="Rating Lab shortcuts">
-      <a href="#leaderboard-heading">Explore rankings</a>
-      <a href="#predictor">Forecast competitions</a>
+      <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=leaderboard" data-rating-view="leaderboard">Explore rankings</a>
+      <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=predictor" data-rating-view="predictor">Forecast competitions</a>
     </div>
     <div class="rating-lab-trust-bar">
       <div class="rating-lab-freshness-strip" id="rating-lab-freshness" role="status" aria-live="polite">Loading the latest ratings…</div>
       <p class="rating-lab-generation" id="rating-lab-generation"></p>
-      <a href="#research">Data, code, and methods</a>
+      <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=methods" data-rating-view="methods">Data, code, and methods</a>
     </div>
   </header>
 
   <nav class="rating-lab-local-nav" aria-label="Rating Lab sections">
-    <a href="#leaderboard-heading" aria-current="location" aria-label="Rankings"><strong>01</strong><span data-mobile-label="Rankings">Rankings</span></a>
-    <a href="#matchup" aria-label="A vs B"><strong>02</strong><span data-mobile-label="A vs B">A vs B</span></a>
-    <a href="#predictor" aria-label="Competition forecasts"><strong>03</strong><span data-mobile-label="Forecasts">Competitions</span></a>
+    <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=leaderboard" data-rating-view="leaderboard" aria-current="location" aria-label="Rankings"><strong>01</strong><span data-mobile-label="Rankings">Rankings</span></a>
+    <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=matchup" data-rating-view="matchup" aria-label="A vs B"><strong>02</strong><span data-mobile-label="A vs B">A vs B</span></a>
+    <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=predictor" data-rating-view="predictor" aria-label="Competition forecasts"><strong>03</strong><span data-mobile-label="Forecasts">Competitions</span></a>
     <a class="is-external" href="{{ '/rating-lab/players/' | relative_url }}" aria-label="Player ratings"><strong>04</strong><span data-mobile-label="Players">Players ↗</span></a>
-    <a href="#research" aria-label="Methods and data"><strong>05</strong><span data-mobile-label="Methods">Methods & data</span></a>
+    <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=methods" data-rating-view="methods" aria-label="Methods and data"><strong>05</strong><span data-mobile-label="Methods">Methods & data</span></a>
   </nav>
 
-  <noscript>This interactive leaderboard requires JavaScript.</noscript>
   <div id="rating-lab-error" class="rating-lab-notice rating-lab-notice-error" role="alert" hidden></div>
 
   <section class="rating-lab-explorer" aria-labelledby="leaderboard-heading">
@@ -125,15 +125,6 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <div class="rating-lab-comparison-chart" id="rating-comparison-chart" aria-live="polite"></div>
     </section>
 
-    <details class="rating-lab-metrics-disclosure">
-      <summary>Model accuracy</summary>
-      <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
-    </details>
-    <details class="rating-lab-movers-disclosure">
-      <summary>30-day movers</summary>
-      <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
-    </details>
-
     <div class="rating-lab-provisional-control" id="rating-provisional-control" hidden>
       <label>
         <input id="rating-include-provisional" type="checkbox" aria-describedby="rating-provisional-note">
@@ -157,14 +148,45 @@ description: Live alternative ratings for tennis, club and national-team footbal
               <th scope="col" class="rating-lab-recent-column"><button type="button" data-sort="recent_matches">Recent</button></th>
             </tr>
           </thead>
-          <tbody id="ranking-body"></tbody>
+          <tbody id="ranking-body">
+            {% for row in site.data.rating_lab_default.rows %}
+            <tr data-static-default="true">
+              <td class="rating-lab-rank">{{ row.rank }}</td>
+              <th scope="row">
+                <span class="rating-lab-entity rating-lab-static-entity">
+                  <span class="rating-lab-identity" aria-hidden="true">{{ row.name | slice: 0, 1 }}{{ row.name | split: ' ' | last | slice: 0, 1 }}</span>
+                  <span class="rating-lab-identity-copy">
+                    <span class="rating-lab-entity-name"><span class="rating-lab-entity-name-text">{{ row.name }}</span></span>
+                    <small>{{ row.competition }}{% if row.country != '' %} · {{ row.country }}{% endif %}</small>
+                    <small class="rating-lab-mobile-change{% if row.change30 > 0 %} is-positive{% elsif row.change30 < 0 %} is-negative{% endif %}">{{ row.change30 | round: 1 }} · 30d</small>
+                  </span>
+                </span>
+              </th>
+              <td class="rating-lab-trend-column">—</td>
+              <td class="rating-lab-rating-column"><strong>{{ row.score | round: 1 }}</strong></td>
+              <td class="rating-lab-uncertainty-column">—</td>
+              <td class="rating-lab-change-column{% if row.change30 > 0 %} is-positive{% elsif row.change30 < 0 %} is-negative{% endif %}">{{ row.change30 | round: 1 }}</td>
+              <td class="rating-lab-recent-column">{{ row.recent_matches }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
         </table>
+        <noscript><p class="rating-lab-notice">The default leaderboard remains available above. Enable JavaScript for filters, comparisons, forecasts, and model switching.</p></noscript>
         <p id="ranking-empty" class="rating-lab-empty" hidden>No eligible competitors match these filters.</p>
         <button type="button" id="ranking-more" class="rating-lab-more" hidden>Show all competitors</button>
       </div>
 
       <aside class="rating-lab-detail" id="rating-detail" aria-live="polite" hidden></aside>
     </div>
+
+    <details class="rating-lab-metrics-disclosure" open>
+      <summary>Model accuracy</summary>
+      <div class="rating-lab-metrics" id="rating-metrics" aria-label="Out-of-sample model accuracy"></div>
+    </details>
+    <details class="rating-lab-movers-disclosure">
+      <summary>30-day movers</summary>
+      <div class="rating-lab-movers" id="rating-movers" aria-label="Biggest 30-day rating movers"></div>
+    </details>
   </section>
 
   <section class="rating-lab-matchup" id="matchup" aria-labelledby="matchup-heading">

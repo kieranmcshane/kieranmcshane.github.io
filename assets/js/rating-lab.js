@@ -5,6 +5,22 @@
   if (!root) return;
   var sports = ['tennis', 'football', 'national-football', 'chess'];
   var modelKeys = ['elo', 'glicko2', 'trueskill', 'robust'];
+  var viewKeys = ['leaderboard', 'matchup', 'predictor', 'methods'];
+  var viewTargets = {
+    leaderboard: 'leaderboard-heading',
+    matchup: 'matchup',
+    predictor: 'predictor',
+    methods: 'research'
+  };
+  var legacyViews = {
+    'leaderboard-heading': 'leaderboard',
+    matchup: 'matchup',
+    predictor: 'predictor',
+    research: 'methods',
+    protocol: 'methods',
+    reproducibility: 'methods',
+    methodology: 'methods'
+  };
   var ghNodes = [
     -5.387480890011233, -4.603682449550744, -3.944764040115625, -3.347854567383216,
     -2.788806058428130, -2.254974002089276, -1.738537712116586, -1.234076215395323,
@@ -21,9 +37,31 @@
     1.086069370769281e-7, 4.399340992273181e-10, 2.229393645534151e-13
   ];
 
+  function locationViewState() {
+    var parameters = new URLSearchParams(window.location.search);
+    var hashTarget = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+    var defaultSport = root.dataset.defaultSport || 'tennis';
+    var defaultModel = root.dataset.defaultModel || 'elo';
+    var sport = sports.indexOf(parameters.get('sport')) !== -1 ?
+      parameters.get('sport') : defaultSport;
+    var model = modelKeys.indexOf(parameters.get('model')) !== -1 ?
+      parameters.get('model') : defaultModel;
+    var view = viewKeys.indexOf(parameters.get('view')) !== -1 ?
+      parameters.get('view') : 'leaderboard';
+    if (legacyViews[hashTarget]) view = legacyViews[hashTarget];
+    return {
+      sport: sport,
+      model: model,
+      view: view,
+      legacyTarget: legacyViews[hashTarget] ? hashTarget : null
+    };
+  }
+
+  var initialViewState = locationViewState();
   var state = {
-    sport: 'tennis',
-    model: 'elo',
+    sport: initialViewState.sport,
+    model: initialViewState.model,
+    view: initialViewState.view,
     competition: '',
     query: '',
     sort: 'rank',
@@ -37,7 +75,7 @@
     matchupB: null,
     matchupVenue: 'neutral',
     predictorCompetition: null,
-    predictorModel: 'elo',
+    predictorModel: initialViewState.model,
     predictorTeam: null,
     settledPerformanceTeam: null,
     manifest: null,
@@ -122,8 +160,80 @@
     }
   };
 
+  function setCurrentNav(view) {
+    elements.localNav.querySelectorAll('a[aria-current]').forEach(function (item) {
+      item.removeAttribute('aria-current');
+    });
+    var active = elements.localNav.querySelector('[data-rating-view="' + view + '"]');
+    if (active) active.setAttribute('aria-current', 'location');
+  }
+
+  function replaceViewState(view) {
+    if (viewKeys.indexOf(view) !== -1) state.view = view;
+    var url = new URL(window.location.href);
+    url.searchParams.set('sport', state.sport);
+    url.searchParams.set('model', state.model);
+    url.searchParams.set('view', state.view);
+    url.hash = '';
+    window.history.replaceState(
+      {
+        ratingLab: true,
+        sport: state.sport,
+        model: state.model,
+        view: state.view
+      },
+      '',
+      url.pathname + '?' + url.searchParams.toString()
+    );
+    setCurrentNav(state.view);
+  }
+
+  function scrollToView(view, behavior) {
+    var target = document.getElementById(viewTargets[view] || viewTargets.leaderboard);
+    if (!target || view === 'leaderboard') return;
+    target.scrollIntoView({ behavior: behavior || 'auto', block: 'start' });
+  }
+
+  function restoreViewState(options) {
+    var restored = locationViewState();
+    var legacyTarget = restored.legacyTarget;
+    state.sport = restored.sport;
+    state.model = restored.model;
+    state.view = restored.view;
+    state.predictorModel = restored.model;
+    state.selected = null;
+    state.pinned = [];
+    state.expanded = false;
+    state.visibleRows = 0;
+    state.includeProvisional = false;
+    state.matchupA = null;
+    state.matchupB = null;
+    state.matchupVenue = 'neutral';
+    setPressed(elements.sportTabs, 'sport', state.sport);
+    setPressed(elements.modelTabs, 'model', state.model);
+    setCurrentNav(state.view);
+    if (legacyTarget) replaceViewState(state.view);
+    if (!state.manifest || !state.datasets[state.sport]) return Promise.resolve();
+    populateCompetitions();
+    return syncData().then(function () {
+      if (legacyTarget) revealMethodSection(legacyTarget);
+      if (!options || options.scroll !== false) {
+        var target = legacyTarget && document.getElementById(legacyTarget);
+        if (target) target.scrollIntoView({ behavior: 'auto', block: 'start' });
+        else scrollToView(state.view, 'auto');
+      }
+    });
+  }
+
+  if (initialViewState.legacyTarget || !window.location.search) {
+    replaceViewState(initialViewState.view);
+  } else {
+    setCurrentNav(state.view);
+  }
+  setPressed(elements.sportTabs, 'sport', state.sport);
+  setPressed(elements.modelTabs, 'model', state.model);
+
   if (window.matchMedia('(max-width: 650px)').matches) {
-    elements.metricsDisclosure.open = false;
     elements.moversDisclosure.open = false;
   }
 
@@ -2289,6 +2399,7 @@
     state.visibleRows = 0;
     state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
+    replaceViewState(state.view);
     syncData();
   }
 
@@ -2328,16 +2439,19 @@
     state.matchupVenue = 'neutral';
     setPressed(elements.sportTabs, 'sport', state.sport);
     populateCompetitions();
+    replaceViewState(state.view);
     syncData();
   });
 
-  elements.localNav.addEventListener('click', function (event) {
-    var link = event.target.closest('a[href^="#"]');
+  root.addEventListener('click', function (event) {
+    var link = event.target.closest('[data-rating-view]');
     if (!link) return;
-    elements.localNav.querySelectorAll('a[aria-current]').forEach(function (item) {
-      item.removeAttribute('aria-current');
-    });
-    link.setAttribute('aria-current', 'location');
+    event.preventDefault();
+    var view = link.dataset.ratingView;
+    if (view === 'predictor') state.predictorModel = state.model;
+    replaceViewState(view);
+    renderPredictor();
+    scrollToView(view, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
   });
 
   if ('IntersectionObserver' in window) {
@@ -2355,8 +2469,8 @@
         elements.localNav.querySelectorAll('a[aria-current]').forEach(function (item) {
           item.removeAttribute('aria-current');
         });
-        var active = elements.localNav.querySelector('a[href="' + mapping[1] + '"]');
-        if (active) active.setAttribute('aria-current', 'location');
+        setCurrentNav(mapping[0] === 'leaderboard-heading' ? 'leaderboard' :
+          mapping[0] === 'research' ? 'methods' : mapping[0]);
       });
     }, { rootMargin: '-20% 0px -68% 0px', threshold: 0 });
     navSections.forEach(function (mapping) {
@@ -2418,8 +2532,10 @@
     if (!button) return;
     if (quickModelContext === 'predictor') {
       state.predictorModel = button.dataset.quickModel;
+      state.model = state.predictorModel;
       state.predictorTeam = null;
       setPressed(elements.predictorModelTabs, 'predictorModel', state.predictorModel);
+      replaceViewState('predictor');
       renderPredictor();
     } else {
       selectLeaderboardModel(button.dataset.quickModel);
@@ -2452,6 +2568,7 @@
     state.expanded = false;
     state.visibleRows = 0;
     setPressed(elements.modelTabs, 'model', state.model);
+    replaceViewState(state.view);
     syncData();
   });
 
@@ -2501,6 +2618,7 @@
     state.matchupVenue = 'neutral';
     setPressed(elements.sportTabs, 'sport', state.sport);
     populateCompetitions();
+    replaceViewState(state.view);
     syncData();
   });
 
@@ -2512,6 +2630,7 @@
     state.visibleRows = 0;
     state.includeProvisional = false;
     setPressed(elements.modelTabs, 'model', state.model);
+    replaceViewState(state.view);
     syncData();
   });
 
@@ -2618,6 +2737,7 @@
       state.matchupA = rows[0].id;
       state.matchupB = rows[1].id;
       renderMatchup();
+      replaceViewState('matchup');
       document.getElementById('matchup').scrollIntoView({
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
         block: 'start'
@@ -2740,9 +2860,11 @@
     var button = event.target.closest('[data-predictor-model]');
     if (!button || button.dataset.predictorModel === state.predictorModel) return;
     state.predictorModel = button.dataset.predictorModel;
+    state.model = state.predictorModel;
     state.predictorTeam = null;
     state.settledPerformanceTeam = null;
     setPressed(elements.predictorModelTabs, 'predictorModel', state.predictorModel);
+    replaceViewState('predictor');
     renderPredictor();
   });
 
@@ -2794,15 +2916,19 @@
     renderTable();
   });
 
-  function revealLinkedMethod() {
-    if (!window.location.hash) return;
-    var target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+  function revealMethodSection(targetId) {
+    if (!targetId) return;
+    var target = document.getElementById(targetId);
     var disclosure = target && target.closest('.rating-lab-disclosure');
     if (disclosure) disclosure.open = true;
   }
 
-  window.addEventListener('hashchange', revealLinkedMethod);
-  revealLinkedMethod();
+  window.addEventListener('hashchange', function () {
+    restoreViewState();
+  });
+  window.addEventListener('popstate', function () {
+    restoreViewState();
+  });
 
   root.addEventListener('error', function (event) {
     if (event.target && event.target.matches && event.target.matches('[data-entity-image], [data-flag-image]')) {
@@ -2831,6 +2957,13 @@
       state.predictorCompetition = competitions[0].competition.id;
       populateCompetitions();
       render();
+      if (initialViewState.legacyTarget) {
+        revealMethodSection(initialViewState.legacyTarget);
+        var legacyTarget = document.getElementById(initialViewState.legacyTarget);
+        if (legacyTarget) legacyTarget.scrollIntoView({ behavior: 'auto', block: 'start' });
+      } else {
+        scrollToView(state.view, 'auto');
+      }
     })
     .catch(function (error) {
       elements.freshness.hidden = true;

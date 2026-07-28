@@ -12087,10 +12087,29 @@ body:has(.rating-lab.has-open-detail)::after {
   font-size: clamp(2rem, 4vw, 3rem);
 }
 
-.rating-lab-hero .rating-lab-deck {
+.rating-lab-hero .rating-lab-deck,
+.rating-lab-hero .rating-lab-verdict {
   max-width: 54rem;
   margin: 0.45rem 0 0;
   font-size: 1rem;
+}
+
+.rating-lab-hero .rating-lab-verdict {
+  color: var(--lab-navy);
+  font-size: clamp(1rem, 1.7vw, 1.22rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.rating-lab-verdict-scope {
+  max-width: 54rem;
+  margin: 0.3rem 0 0;
+  color: #64717d;
+  font-size: 0.72rem;
+}
+
+.rating-lab-static-entity {
+  cursor: default;
 }
 
 .rating-lab-hero-actions {
@@ -12403,7 +12422,8 @@ body:has(.rating-lab.has-open-detail)::after {
     font-size: 2rem;
   }
 
-  .rating-lab-hero .rating-lab-deck {
+  .rating-lab-hero .rating-lab-deck,
+  .rating-lab-hero .rating-lab-verdict {
     font-size: 0.9rem;
   }
 

@@ -20,9 +20,9 @@ function isMobile(page) {
   return page.viewportSize().width <= 650;
 }
 
-async function gotoRatingLab(page) {
+async function gotoRatingLab(page, path = "/rating-lab/") {
   await freezeClock(page);
-  await page.goto("/rating-lab/");
+  await page.goto(path);
   // Data has loaded once the leaderboard has rows and no error is shown.
   // Several megabytes of JSON load in parallel across workers, so give the
   // first render a generous window, and surface the page's own error notice
@@ -45,7 +45,7 @@ test.describe("page load", () => {
     page,
   }) => {
     const pageErrors = [];
-    page.on("pageerror", (error) => pageErrors.push(error.message));
+    page.on("pageerror", (error) => pageErrors.push(error.stack || error.message));
     await gotoRatingLab(page);
     await expect(page.locator("#rating-lab-freshness")).toBeVisible();
     expect(pageErrors).toEqual([]);
@@ -120,6 +120,90 @@ test.describe("page load", () => {
     const error = page.locator("#rating-lab-error");
     await expect(error).toBeVisible();
     await expect(error).toContainText("Please try again later.");
+  });
+});
+
+test.describe("static delivery", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("ships 50 useful leaderboard rows before JavaScript", async ({ page }) => {
+    await page.goto("/rating-lab/");
+    await expect(page.locator("#ranking-body tr")).toHaveCount(50);
+    await expect(
+      page.locator("#ranking-body .rating-lab-entity-name-text").first()
+    ).toHaveText("Jannik Sinner");
+    await expect(page.locator("body")).not.toContainText(
+      "This interactive leaderboard requires JavaScript"
+    );
+    await expect(page.locator(".rating-lab-metrics-disclosure")).toHaveAttribute(
+      "open",
+      ""
+    );
+  });
+});
+
+test.describe("shareable view state", () => {
+  test("restores chess Glicko-2 leaderboard from a pasted URL", async ({
+    page,
+  }) => {
+    await gotoRatingLab(
+      page,
+      "/rating-lab/?sport=chess&model=glicko2&view=leaderboard"
+    );
+    await expect(
+      page.locator('#sport-tabs button[data-sport="chess"]')
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('#model-tabs button[data-model="glicko2"]')
+    ).toHaveAttribute("aria-pressed", "true");
+    const expectedLeader = readDataFile(
+      "split/chess-rankings-glicko2.json"
+    ).rankings[0].name;
+    await expect(
+      page.locator("#ranking-body .rating-lab-entity-name-text").first()
+    ).toHaveText(expectedLeader);
+    await expect(page).toHaveURL(
+      /sport=chess&model=glicko2&view=leaderboard/
+    );
+  });
+
+  test("redirects legacy fragments without breaking their destination", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page, "/rating-lab/#predictor");
+    await expect(page).toHaveURL(
+      /\/rating-lab\/\?sport=tennis&model=elo&view=predictor$/
+    );
+    await expect(page.locator("#predictor-heading")).toBeVisible();
+  });
+
+  test("restores state when browser history fires popstate", async ({ page }) => {
+    await gotoRatingLab(
+      page,
+      "/rating-lab/?sport=chess&model=glicko2&view=leaderboard"
+    );
+    await page.evaluate(() => {
+      history.pushState(
+        { ratingLab: true },
+        "",
+        "?sport=tennis&model=elo&view=leaderboard"
+      );
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await expect(
+      page.locator('#sport-tabs button[data-sport="tennis"]')
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('#model-tabs button[data-model="elo"]')
+    ).toHaveAttribute("aria-pressed", "true");
+
+    await page.goBack();
+    await expect(
+      page.locator('#sport-tabs button[data-sport="chess"]')
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('#model-tabs button[data-model="glicko2"]')
+    ).toHaveAttribute("aria-pressed", "true");
   });
 });
 

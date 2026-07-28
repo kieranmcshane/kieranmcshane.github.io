@@ -10,7 +10,11 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from rating_lab.pipeline import write_outputs, write_split_assets  # noqa: E402
+from rating_lab.pipeline import (  # noqa: E402
+    write_default_view,
+    write_outputs,
+    write_split_assets,
+)
 
 
 def main() -> int:
@@ -22,6 +26,12 @@ def main() -> int:
         default=["tennis", "football", "national-football", "chess"],
     )
     parser.add_argument("--output", type=Path, default=ROOT / "assets/data/rating-lab")
+    parser.add_argument(
+        "--jekyll-data",
+        type=Path,
+        default=ROOT / "_data" / "rating_lab_default.json",
+        help="Generated static default view consumed by the Jekyll template",
+    )
     parser.add_argument("--chess-months", type=int, default=36)
     player_scope = parser.add_mutually_exclusive_group()
     player_scope.add_argument(
@@ -42,10 +52,12 @@ def main() -> int:
     args = parser.parse_args()
     if args.split_only:
         written = write_split_assets(args.output)
+        write_default_view(args.output, args.jekyll_data)
         print(f"split: {len(written)} files, {sum(written.values()) / 1e6:.2f} MB total")
         return 0
     if args.players_only:
         manifest = write_outputs(args.output, [], chess_months=args.chess_months)
+        write_default_view(args.output, args.jekyll_data)
         player = manifest["player_football"]
         print(
             "player-football: current ("
@@ -59,6 +71,7 @@ def main() -> int:
         chess_months=args.chess_months,
         refresh_players=not args.skip_players,
     )
+    write_default_view(args.output, args.jekyll_data)
     for sport, status in manifest["sports"].items():
         print(f"{sport}: {status['status']} ({status['latest_result']})")
     return 0

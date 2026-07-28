@@ -71,9 +71,11 @@ from rating_lab.pipeline import (
     _settled_competition_participants,
     _validate_football_coverage,
     _model_candidates,
+    build_default_view,
     build_sport_payload,
     individual_contribution_protocol,
     validate_payload,
+    write_default_view,
     write_outputs,
 )
 
@@ -1444,7 +1446,8 @@ h001,Hana,Theta,CZE
         self.assertIn("spread reflects starting ratings and schedule priors", script)
         self.assertIn('id="rating-include-provisional"', page)
         self.assertIn("var pageSize = mobile ? 6 : 20;", script)
-        self.assertIn("elements.metricsDisclosure.open = false;", script)
+        self.assertIn('<details class="rating-lab-metrics-disclosure" open>', page)
+        self.assertNotIn("elements.metricsDisclosure.open = false;", script)
         self.assertIn('class="rating-lab-market-detail"', script)
         self.assertIn("view.predictor.kalshi_comparison", script)
         self.assertIn("No eligible market found", script)
@@ -1467,9 +1470,12 @@ h001,Hana,Theta,CZE
         player_script = (root / "assets/js/player-lab.js").read_text()
         styles = (root / "assets/main.scss").read_text()
 
-        self.assertIn("<noscript>This interactive leaderboard requires JavaScript.</noscript>", page)
+        self.assertNotIn("This interactive leaderboard requires JavaScript", page)
+        self.assertIn('data-static-default="true"', page)
+        self.assertIn("site.data.rating_lab_default.rows", page)
+        self.assertIn("The default leaderboard remains available above.", page)
         self.assertIn("<noscript>This player leaderboard requires JavaScript.</noscript>", player_page)
-        self.assertNotIn('<noscript><p class="rating-lab-notice">', page + player_page)
+        self.assertNotIn('<noscript><p class="rating-lab-notice">', player_page)
         self.assertIn("Rating Lab mobile audit corrections", styles)
         self.assertIn("overflow-wrap: anywhere", styles)
         self.assertIn(".rating-lab-predictor-table.is-league:not(.is-preseason) .rating-lab-optional", styles)
@@ -1809,6 +1815,142 @@ class SplitAssetTests(unittest.TestCase):
             self.assertFalse((output / "split/player-cohort-wsl-2023-24.json").exists())
             self.assertTrue((output / "split/player-cohort-euro-2024.json").exists())
             self.assertTrue((output / "split/tennis-rankings-elo.json").exists())
+
+    @staticmethod
+    def _default_view_payload(
+        sport: str,
+        *,
+        elo_log_loss: float,
+        glicko_log_loss: float,
+        predictions: int = 100,
+        market_log_loss: float | None = None,
+    ) -> dict:
+        rankings = [
+            {
+                "id": f"{sport}-{index}",
+                "rank": index + 1,
+                "name": f"{sport.title()} Competitor {index + 1}",
+                "country": "Testland",
+                "competition": "Test competition",
+                "score": 2000 - index,
+                "sigma": None,
+                "change30": index / 10,
+                "recent_matches": 10,
+                "last_played": "2026-07-01",
+                "private_field": "must not ship",
+            }
+            for index in range(65)
+        ]
+        payload = {
+            "schema_version": "1.16.0",
+            "sport": sport,
+            "generated_at": "2026-07-23T22:01:36+00:00",
+            "models": {
+                "elo": {
+                    "label": "Elo",
+                    "ranking_rule": "rating",
+                    "metrics": {
+                        "predictions": predictions,
+                        "log_loss": elo_log_loss,
+                    },
+                    "rankings": rankings,
+                },
+                "glicko2": {
+                    "label": "Glicko-2",
+                    "ranking_rule": "conservative",
+                    "metrics": {
+                        "predictions": predictions,
+                        "log_loss": glicko_log_loss,
+                    },
+                    "rankings": list(reversed(rankings)),
+                },
+            },
+        }
+        if market_log_loss is not None:
+            payload["held_out_match_market_benchmark"] = {
+                "predictions": predictions,
+                "log_loss": market_log_loss,
+            }
+        return payload
+
+    def test_default_view_is_trimmed_deterministic_and_score_derived(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "canonical"
+            output.mkdir()
+            for sport in ("tennis", "football", "national-football", "chess"):
+                (output / f"{sport}.json").write_text(
+                    json.dumps(
+                        self._default_view_payload(
+                            sport,
+                            elo_log_loss=0.62,
+                            glicko_log_loss=0.59,
+                        )
+                    )
+                )
+            destination = Path(temporary) / "_data/rating_lab_default.json"
+            first = write_default_view(output, destination)
+            first_bytes = destination.read_bytes()
+            second = write_default_view(output, destination)
+            self.assertEqual(first_bytes, destination.read_bytes())
+            self.assertEqual(first, second)
+            self.assertEqual(len(first["rows"]), 50)
+            self.assertEqual(first["rows"][0]["name"], "Tennis Competitor 1")
+            self.assertNotIn("private_field", first["rows"][0])
+            self.assertEqual(first["verdict"]["predictions"], 400)
+            self.assertEqual(first["verdict"]["best_model"], "glicko2")
+            self.assertIn("0.5900", first["verdict"]["sentence"])
+            self.assertIn("beating Elo by 0.0300", first["verdict"]["sentence"])
+
+            changed = json.loads((output / "chess.json").read_text())
+            changed["models"]["glicko2"]["metrics"]["log_loss"] = 0.55
+            (output / "chess.json").write_text(json.dumps(changed))
+            updated = build_default_view(output)
+            self.assertNotEqual(
+                first["verdict"]["sentence"],
+                updated["verdict"]["sentence"],
+            )
+            self.assertIn("0.5800", updated["verdict"]["sentence"])
+
+    def test_default_view_never_mixes_tournament_markets_into_match_verdict(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            for sport in ("tennis", "football", "national-football", "chess"):
+                payload = self._default_view_payload(
+                    sport,
+                    elo_log_loss=0.62,
+                    glicko_log_loss=0.59,
+                )
+                payload["tournament_predictor"] = {
+                    "market_comparison": {
+                        "benchmark": {
+                            "log_loss": 0.40,
+                            "predictions": 999,
+                        }
+                    }
+                }
+                (output / f"{sport}.json").write_text(json.dumps(payload))
+            view = build_default_view(output)
+            self.assertFalse(view["verdict"]["market_comparable"])
+            self.assertIsNone(view["verdict"]["market_delta"])
+            self.assertIn(
+                "No frozen market consensus covers the same fixture set yet.",
+                view["verdict"]["sentence"],
+            )
+
+            for sport in ("tennis", "football", "national-football", "chess"):
+                payload = json.loads((output / f"{sport}.json").read_text())
+                payload["held_out_match_market_benchmark"] = {
+                    "predictions": 100,
+                    "log_loss": 0.64,
+                }
+                (output / f"{sport}.json").write_text(json.dumps(payload))
+            comparable = build_default_view(output)
+            self.assertTrue(comparable["verdict"]["market_comparable"])
+            self.assertEqual(comparable["verdict"]["market_delta"], 0.05)
+            self.assertIn(
+                "frozen market consensus by 0.0500",
+                comparable["verdict"]["sentence"],
+            )
 
     def test_player_default_ranking_is_rapm_with_honest_lineup_framing(self):
         root = Path(__file__).resolve().parents[1]
