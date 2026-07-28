@@ -1,0 +1,262 @@
+[
+  {
+    "id": "structures-algebriques",
+    "number": "I",
+    "title": "Structures algébriques",
+    "chapters": [
+      {
+        "id": "corps-extensions",
+        "number": 1,
+        "title": "Corps finis, extensions et corps de nombres",
+        "problems": [
+          [1, "Un corps fini peut-il être algébriquement clos ?", 5],
+          [2, "Pourquoi ℂ n’est-elle pas la clôture algébrique de ℚ ?", 5],
+          [3, "Le polynôme d’Artin-Schreier Xᵖ - X - 1", 5],
+          [4, "X⁴ + 1 : irréductible sur ℤ, réductible modulo tout nombre premier", 6],
+          [5, "Racines primitives de l’unité en caractéristique p", 6],
+          [6, "Factorisation après extension du corps de constantes", 6],
+          [7, "Racines de l’unité dans un corps de nombres", 7],
+          [8, "Extension dont tous les éléments non triviaux sont quadratiques", 7],
+          [9, "Intersection de deux corps cyclotomiques premiers entre eux", 7],
+          [10, "Description linéaire d’un compositum", 8]
+        ]
+      },
+      {
+        "id": "anneaux-arithmetique",
+        "number": 2,
+        "title": "Anneaux et arithmétique",
+        "problems": [
+          [24, "Si A[X] est principal, alors A est un corps", 14],
+          [25, "L’anneau des nombres décimaux", 14],
+          [69, "Le rationnel de dénominateur fixé le plus proche", 32],
+          [70, "Théorème d’approximation de Dirichlet", 32],
+          [71, "Le nombre de Liouville", 33],
+          [72, "Une minoration uniforme de l’indicatrice d’Euler", 34],
+          [73, "Valeurs extrêmes de φ(n)/n", 34]
+        ]
+      },
+      {
+        "id": "groupes-representations",
+        "number": 3,
+        "title": "Groupes, actions et représentations",
+        "problems": [
+          [26, "Classification des groupes d’ordre au plus 7", 15],
+          [27, "Résolubilité de S₄", 15],
+          [28, "Une classe de conjugaison de cardinal puissance d’un premier", 16],
+          [29, "Nombre de sous-groupes de Sylow", 16],
+          [30, "Valeurs des caractères d’un groupe fini", 16],
+          [31, "Endomorphismes continus du cercle", 16],
+          [32, "Le quotient S₄/V₄", 17],
+          [33, "Sous-groupes de Sylow de S₄", 17],
+          [34, "Le produit direct Aₙ × C₂", 18],
+          [35, "Un sous-groupe d’ordre 72 dans A₆ ?", 18],
+          [36, "Surjections Sₙ → Sₙ₋₁", 18],
+          [37, "Peut-on plonger S₃ dans A₄ ?", 18]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "algebre-lineaire",
+    "number": "II",
+    "title": "Algèbre linéaire et opérateurs",
+    "chapters": [
+      {
+        "id": "formes-quadratiques",
+        "number": 4,
+        "title": "Formes quadratiques et matrices symétriques",
+        "problems": [
+          [11, "Norme opérateur d’une matrice symétrique", 9],
+          [12, "Réduction simultanée de deux formes quadratiques", 9],
+          [13, "Non-dégénérescence et isotropie sur Fₚⁿ", 9],
+          [14, "Une forme quadratique positive définit une norme", 10],
+          [15, "Réalité du spectre d’une matrice symétrique réelle", 10],
+          [16, "Une matrice complexe symétrique non diagonalisable", 10],
+          [17, "Orbites de congruence des matrices symétriques réelles", 11],
+          [18, "Oₙ(ℝ) est maximal parmi les sous-groupes compacts", 11],
+          [19, "Racine carrée positive d’une matrice définie positive", 11],
+          [20, "Signature du produit de deux formes linéaires", 12],
+          [21, "Norme spectrale d’une matrice et de sa transposée", 12],
+          [22, "Irréductibilité de x² + y² + z²", 12],
+          [23, "Matrice orthogonale la plus proche", 13]
+        ]
+      },
+      {
+        "id": "rang-dualite",
+        "number": 5,
+        "title": "Rang, dualité et méthodes linéaires",
+        "problems": [
+          [38, "Les matrices AB et BA ont même polynôme caractéristique", 19],
+          [39, "Rang de u lorsque rg(u²) = 4 en dimension 8", 19],
+          [40, "Existence d’un hyperplan stable", 20],
+          [41, "Puissances et fonctions d’un bloc de Jordan", 20],
+          [42, "Ouverture de l’ensemble des endomorphismes cycliques", 20],
+          [43, "L’algèbre engendrée par un bloc de Jordan", 21],
+          [44, "Commutant d’un bloc de Jordan", 21],
+          [45, "Une réunion finie de sous-espaces vectoriels", 21],
+          [46, "Matrice d’évaluation inversible", 22],
+          [47, "Inclusion de noyaux et combinaison linéaire", 22],
+          [48, "Produit nul de deux formes linéaires", 22],
+          [49, "Déterminant sous une contrainte de somme des lignes", 22],
+          [50, "Traces des puissances et nilpotence", 23]
+        ]
+      },
+      {
+        "id": "reduction-calcul-matriciel",
+        "number": 6,
+        "title": "Réduction, polynôme minimal et calcul matriciel",
+        "problems": [
+          [51, "À quoi sert la forme de Jordan ?", 24],
+          [52, "Une fonction multiplicative détecte l’inversibilité", 24],
+          [53, "Caractérisation de la diagonalisabilité par l’algèbre K[u]", 25],
+          [54, "Toute matrice complexe est semblable à sa transposée", 25],
+          [55, "Diagonalisabilité de M et de exp(M)", 25],
+          [56, "Supplémentaire stable pour un endomorphisme diagonalisable", 26],
+          [57, "Fermeture d’une classe de similitude", 26],
+          [58, "Même polynôme caractéristique et même polynôme minimal", 26],
+          [59, "Une matrice triangulaire 3 × 3", 27],
+          [60, "Quand le commutant est-il égal à ℂ[u] ?", 27],
+          [61, "Drapeaux stables", 27],
+          [62, "Sous-espaces stables d’un nilpotent d’indice n - 1", 28],
+          [63, "Sous-multiplicativité de la norme de Frobenius", 28],
+          [64, "Polynômes nilpotents en un endomorphisme", 29],
+          [65, "Dimension maximale d’un espace de matrices nilpotentes", 29],
+          [66, "Formule de Gelfand en dimension finie", 30],
+          [67, "Diagonaliser numériquement une grande matrice symétrique", 30],
+          [68, "Résoudre M⁵ = I₂ sur ℚ", 31]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "analyse-reelle",
+    "number": "III",
+    "title": "Analyse réelle",
+    "chapters": [
+      {
+        "id": "suites-fonctions-reelles",
+        "number": 7,
+        "title": "Suites et fonctions d’une variable réelle",
+        "problems": [
+          [108, "La réciproque du théorème de Cesàro", 55],
+          [109, "Lemme de Fekete", 55],
+          [110, "La suite 1/(n sin n)", 55],
+          [126, "Toutes les dérivées dominées par un polynôme de degré impair", 64],
+          [127, "Bornitude des dérivées intermédiaires", 64]
+        ]
+      },
+      {
+        "id": "calcul-differentiel",
+        "number": 8,
+        "title": "Calcul différentiel et applications globales",
+        "problems": [
+          [74, "Un critère global de difféomorphisme", 37],
+          [75, "Une application propre est fermée", 37],
+          [76, "Théorème fondamental de l’algèbre par inversion locale", 38],
+          [77, "Extrema de x⁴ + y⁴ - 4xy", 38],
+          [78, "Théorème fondamental de l’algèbre et nombre d’enroulement", 39]
+        ]
+      },
+      {
+        "id": "integration-lp",
+        "number": 9,
+        "title": "Intégration et espaces Lᵖ",
+        "problems": [
+          [79, "Interpolation élémentaire entre espaces Lᵖ", 40],
+          [80, "Des moments nuls déterminent une fonction continue", 40],
+          [81, "Contrôler f′ par f et f″ sur la demi-droite", 41],
+          [82, "Inégalité de Young pour la convolution", 41],
+          [83, "Une fonction et sa dérivée dans L¹", 42],
+          [84, "Extraire une sous-suite convergeant presque partout", 42],
+          [85, "Convergence presque partout et convergence des normes", 42]
+        ]
+      },
+      {
+        "id": "convexite-variation",
+        "number": 10,
+        "title": "Convexité et variation bornée",
+        "problems": [
+          [96, "Une application croissante possède un point fixe", 49],
+          [97, "Limite ponctuelle de fonctions convexes", 49],
+          [98, "Les fonctions à variation bornée forment une algèbre de Banach", 50]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "analyse-complexe-harmonique",
+    "number": "IV",
+    "title": "Analyse complexe et harmonique",
+    "chapters": [
+      {
+        "id": "analyse-complexe",
+        "number": 11,
+        "title": "Analyse complexe",
+        "problems": [
+          [86, "Une interpolation holomorphe impossible", 44],
+          [87, "Théorème de Hurwitz", 44],
+          [88, "Automorphismes holomorphes du plan", 45],
+          [89, "Une fonction entière coercive est un polynôme", 45],
+          [90, "Théorème fondamental de l’algèbre par Liouville", 45],
+          [91, "Complétude de la famille (x¹ᐟᵏ)", 46],
+          [92, "Calcul de ∫₀∞ dx/(1 + xⁿ)", 46],
+          [93, "Décomposition en éléments simples de la cotangente", 47],
+          [94, "Stabilité des racines d’un polynôme", 47],
+          [95, "Intégrale dépendant holomorphiquement d’un paramètre", 48]
+        ]
+      },
+      {
+        "id": "fourier-convolution",
+        "number": 12,
+        "title": "Analyse de Fourier et convolution",
+        "problems": [
+          [99, "Une fonction dont l’auto-convolution est nulle", 51],
+          [100, "La transformée de Fourier de L¹ n’épuise pas C₀", 51],
+          [101, "Lemme de Riemann-Lebesgue", 52],
+          [102, "Support compact simultané d’une fonction et de sa transformée", 52],
+          [103, "Densité de l’espace de Schwartz", 53],
+          [104, "Absence de diviseurs de zéro à support dans une demi-droite", 53],
+          [105, "Idéal de convolution dense sur le tore", 53],
+          [106, "Densité des translatées d’une gaussienne", 54],
+          [107, "Transformée de Fourier de l’indicatrice d’un intervalle", 54]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "topologie-probabilites",
+    "number": "V",
+    "title": "Topologie, analyse fonctionnelle et probabilités",
+    "chapters": [
+      {
+        "id": "topologie-baire",
+        "number": 13,
+        "title": "Compacité, complétude et théorème de Baire",
+        "problems": [
+          [111, "Point fixe d’une application non expansive sur un compact convexe", 57],
+          [112, "Projection sur le cône positif de L²", 57],
+          [113, "Une isométrie d’un compact dans lui-même", 58],
+          [114, "Compacité de la boule unité et dimension finie", 58],
+          [115, "Noyau d’une forme linéaire discontinue", 58],
+          [116, "Connexité de la sphère unité", 59],
+          [117, "Peut-on rendre ℚ complet ?", 59],
+          [118, "Un espace vectoriel topologique complet non normable", 59],
+          [119, "Deux métriques équivalentes, une seule complète", 60],
+          [120, "Compacité séquentielle dans les espaces métriques", 60],
+          [121, "Une fonction lisse dont un jet s’annule en chaque point", 61]
+        ]
+      },
+      {
+        "id": "probabilites-moments",
+        "number": 14,
+        "title": "Probabilités et problème des moments",
+        "problems": [
+          [122, "Convergence en probabilité sans convergence presque sûre", 62],
+          [123, "La convergence en loi n’implique pas la convergence en probabilité", 62],
+          [124, "Continuité de la fonction caractéristique", 62],
+          [125, "La loi log-normale n’est pas déterminée par ses moments", 63]
+        ]
+      }
+    ]
+  }
+]

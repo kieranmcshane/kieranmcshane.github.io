@@ -10,6 +10,7 @@ permalink: /:year/:month/:day/:title/
 show_excerpts: true
 header_pages:
   - mat101-exercises.md
+  - repertoire-raisonne.md
   - rating-lab.md
   - about.md
 plugins:
