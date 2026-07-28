@@ -23,7 +23,7 @@ math: true
   <section class="repertoire-stats" aria-label="Contenu du répertoire">
     <div><strong>127</strong><span>problèmes corrigés</span></div>
     <div><strong>66</strong><span>pages composées</span></div>
-    <div><strong>14</strong><span>chapitres de lecture</span></div>
+    <div><strong>14</strong><span>chapitres dans l’index</span></div>
     <div><strong>5</strong><span>grandes parties</span></div>
   </section>
 
@@ -33,7 +33,7 @@ math: true
       <strong>Corpus intégralement relu</strong>
       <span>127 problèmes · 66 pages</span>
     </div>
-    <p>La relecture n’a relevé aucun énoncé faux, aucun contre-exemple incorrect et aucune démonstration circulaire. Deux corrections de formulation restent consignées ci-dessous ; elles n’affectent pas les résultats.</p>
+    <p>La relecture confirme les 127 énoncés et leurs résultats. Une preuve demande une conjugaison au problème 80 ; deux formulations et deux conventions sont précisées dans le registre ci-dessous.</p>
   </aside>
 
   <section class="repertoire-introduction" aria-labelledby="repertoire-intro-title">
@@ -176,14 +176,57 @@ math: true
     </div>
   </section>
 
+  <section class="repertoire-audit" id="bilan-relecture" aria-labelledby="repertoire-audit-title">
+    <div class="repertoire-section-heading">
+      <div>
+        <p class="repertoire-kicker">Clôture de la relecture</p>
+        <h2 id="repertoire-audit-title">Le bilan des 17 derniers problèmes</h2>
+      </div>
+      <p>Chapitres 14 à 16 du PDF</p>
+    </div>
+    <p class="repertoire-audit-intro">La numérotation des chapitres ci-dessous est celle du livre ; l’index interactif les regroupe dans son architecture éditoriale en quatorze chapitres.</p>
+    <div class="repertoire-audit-grid">
+      <article>
+        <span>14</span>
+        <div>
+          <h3>Topologie et analyse fonctionnelle</h3>
+          <p><a href="{{ repertoire_pdf }}#page=57">Problèmes 111–121</a> · Les onze preuves sont exactes. Les arguments de point fixe, de dimension finie et de complétude sont complets ; la preuve par Baire du problème 121 traite correctement les jets, les composantes et le recollement final.</p>
+        </div>
+      </article>
+      <article>
+        <span>15</span>
+        <div>
+          <h3>Probabilités</h3>
+          <p><a href="{{ repertoire_pdf }}#page=62">Problèmes 122–125</a> · Borel–Cantelli, convergence en loi et fonction caractéristique sont correctement employés. Le calcul de la famille de Stieltjes log-normale conserve bien tous les moments entiers.</p>
+        </div>
+      </article>
+      <article>
+        <span>16</span>
+        <div>
+          <h3>Variable réelle</h3>
+          <p><a href="{{ repertoire_pdf }}#page=64">Problèmes 126–127</a> · Le passage à la limite dans la formule de Taylor est uniforme au point fixé, et la matrice qui contrôle les dérivées intermédiaires se réduit bien à une matrice de Vandermonde inversible.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <section class="repertoire-errata" id="errata" aria-labelledby="repertoire-errata-title">
     <div class="repertoire-section-heading">
       <div>
         <p class="repertoire-kicker">Registre de relecture</p>
-        <h2 id="repertoire-errata-title">Deux corrections de formulation</h2>
+        <h2 id="repertoire-errata-title">Une correction, quatre précisions</h2>
       </div>
-      <p>Aucun résultat mathématique n’est remis en cause.</p>
+      <p>Les 127 résultats restent valides.</p>
     </div>
+    <article class="repertoire-erratum-major">
+      <header><a href="{{ repertoire_pdf }}#page=40">Problème 80 · page 37 du livre</a><span>Correction mathématique</span></header>
+      <p>Pour une fonction complexe, la limite de \(\int fP_k\) avec \(P_k\to f\) est \(\int f^2\), et non \(\int |f|^2\). Il faut conjuguer l’hypothèse et, pour \(P_k\to f\) uniformément, écrire
+      \[
+        0=\lim_{k\to\infty}\int_0^1 \overline f\,P_k
+        =\int_0^1 |f|^2.
+      \]
+      Cette retouche d’une ligne rétablit la preuve sans modifier l’énoncé.</p>
+    </article>
     <article>
       <header><a href="{{ repertoire_pdf }}#page=6">Problème 4 · page 3 du livre</a><span>Titre</span></header>
       <p><strong>À lire :</strong> « réductible dans \(\mathbb F_p[X]\) pour tout nombre premier \(p\) », ou plus brièvement « réductible modulo tout nombre premier ». L’expression « sur tout corps premier » inclurait improprement \(\mathbb Q\).</p>
@@ -191,6 +234,14 @@ math: true
     <article>
       <header><a href="{{ repertoire_pdf }}#page=6">Problème 6 · page 3 du livre</a><span>Quantification</span></header>
       <p><strong>À lire :</strong> « Pour \(s\in\{0,\ldots,r-1\}\), l’orbite de \(\alpha^{q^s}\) sous \(x\mapsto x^{q^r}\) a longueur \(d/r\). » Le calcul et la conclusion restent inchangés.</p>
+    </article>
+    <article>
+      <header><a href="{{ repertoire_pdf }}#page=46">Problème 91 · page 43 du livre</a><span>Convention complexe</span></header>
+      <p>Le crochet bilinéaire employé est licite parce que les fonctions test \(x^{1/k}\) sont réelles : les conditions bilinéaire et hermitienne se déduisent l’une de l’autre par conjugaison. Une demi-phrase suffit à lever l’ambiguïté.</p>
+    </article>
+    <article>
+      <header><a href="{{ repertoire_pdf }}#page=54">Problème 106 · page 51 du livre</a><span>Convention complexe</span></header>
+      <p>La même précision vaut pour les translatées de la gaussienne, qui sont réelles. On peut aussi déclarer explicitement que l’espace \(L^2\) considéré est réel.</p>
     </article>
   </section>
 
