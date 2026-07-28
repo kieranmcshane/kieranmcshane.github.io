@@ -18,9 +18,28 @@ test.describe("Répertoire raisonné", () => {
       page.locator("[data-repertoire-audit-problem]")
     ).toHaveCount(17);
     await expect(
-      page.locator('[data-repertoire-audit-problem="121"]')
-    ).toContainText("Les points de X y étant d’accumulation");
+      page.locator("[data-repertoire-native-problem]")
+    ).toHaveCount(17);
+    await expect(
+      page.locator('[data-repertoire-native-problem="121"]')
+    ).toContainText("Chaque point de X∩I est un point d’accumulation");
     expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("reads a complete native statement and reveals its solution", async ({
+    page,
+  }) => {
+    await gotoRepertoire(page);
+    const problem = page.locator('[data-repertoire-native-problem="125"]');
+    await expect(problem).toContainText(
+      "Construire une famille de lois distinctes"
+    );
+    const solution = problem.locator(".repertoire-native-solution");
+    await expect(solution).not.toHaveAttribute("open", "");
+    await solution.locator("summary").click();
+    await expect(solution).toHaveAttribute("open", "");
+    await expect(solution).toContainText("Famille de Stieltjes log-normale");
+    await expect(solution).toContainText("rend cette espérance réelle");
   });
 
   test("searches titles and updates the result count", async ({ page }) => {
