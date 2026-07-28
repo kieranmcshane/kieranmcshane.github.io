@@ -14,7 +14,9 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  # A newer publication contains every earlier commit. Do not let an obsolete
+  # sports refresh hold the Pages queue for the current site revision.
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -22,6 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        if: github.event_name != 'push'
         with:
           python-version: "3.12"
       - name: Set cache date
@@ -43,16 +46,17 @@ jobs:
             rating-lab-valid-output-v1-${{ runner.os }}-
       - name: Seed fallback from last validated snapshot
         run: |
-          for file in manifest.json tennis.json football.json national-football.json chess.json player-football.json player-schema.json; do
-            if [ -f ".cache/rating-lab-output/$file" ]; then
-              cp ".cache/rating-lab-output/$file" "assets/data/rating-lab/$file"
-            fi
-          done
+          if [ -d ".cache/rating-lab-output" ]; then
+            cp -R ".cache/rating-lab-output/." "assets/data/rating-lab/"
+          fi
       - name: Install archive reader
+        if: github.event_name != 'push'
         run: sudo apt-get update && sudo apt-get install --yes zstd
       - name: Install rating pipeline dependencies
+        if: github.event_name != 'push'
         run: python -m pip install --requirement requirements-rating-lab.txt
       - name: Refresh public ratings
+        if: github.event_name != 'push'
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -62,7 +66,7 @@ jobs:
       - name: Preserve validated public snapshot
         run: |
           mkdir -p .cache/rating-lab-output
-          cp assets/data/rating-lab/{manifest,tennis,football,national-football,chess,player-football,player-schema}.json .cache/rating-lab-output/
+          cp -R assets/data/rating-lab/. .cache/rating-lab-output/
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:
