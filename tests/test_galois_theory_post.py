@@ -60,6 +60,15 @@ class GaloisTheoryPostTests(unittest.TestCase):
         )
         self.assertEqual(self.text.count(r"| $\lbrace 1\rbrace$ |"), 3)
 
+    def test_inline_math_outside_tables_uses_latex_absolute_value_bars(self) -> None:
+        for line in self.text.splitlines():
+            if line.startswith("|") or line.strip() == "$$":
+                continue
+            inline_expressions = re.findall(r"(?<!\$)\$([^$]+)\$(?!\$)", line)
+            for expression in inline_expressions:
+                with self.subTest(line=line, expression=expression):
+                    self.assertNotIn("|", expression)
+
     def test_interactive_table_of_contents_is_wired_for_long_reading(self) -> None:
         links = re.findall(r'<a href="#([^"]+)">', self.text)
         self.assertGreaterEqual(len(links), 16)
