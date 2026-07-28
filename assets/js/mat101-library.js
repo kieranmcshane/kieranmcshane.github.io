@@ -9,18 +9,6 @@
       .trim();
   }
 
-  function openHashTarget() {
-    if (!window.location.hash.startsWith('#exercice-')) return;
-
-    var exercise = document.querySelector(window.location.hash);
-    if (!exercise) return;
-
-    exercise.hidden = false;
-    exercise.open = true;
-    var chapter = exercise.closest('[data-mat101-chapter]');
-    if (chapter) chapter.hidden = false;
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
     var input = document.getElementById('mat101-search-input');
     var counter = document.getElementById('mat101-result-count');
@@ -56,7 +44,7 @@
 
       exercises.forEach(function (exercise) {
         var matchesSearch =
-          !query || normalize(exercise.dataset.search || '').includes(query);
+          !query || normalize(exercise.textContent || '').includes(query);
         var tags = (exercise.dataset.tags || '').split(',');
         var matchesTag = !activeTag || tags.includes(activeTag);
         var matches = matchesSearch && matchesTag;
@@ -71,6 +59,26 @@
       counter.textContent =
         visibleCount + (visibleCount > 1 ? ' exercices affichés' : ' exercice affiché');
       noResults.hidden = visibleCount !== 0;
+    }
+
+    function openHashTarget() {
+      if (!window.location.hash.startsWith('#exercice-')) return;
+
+      var targetId = window.location.hash.slice(1);
+      var exercise = document.getElementById(targetId);
+      if (!exercise || !exercise.matches('[data-mat101-exercise]')) return;
+
+      if (exercise.hidden) {
+        input.value = '';
+        activeTag = '';
+        updateTagButtons();
+        updateTagUrl();
+        filterExercises();
+      }
+
+      exercise.open = true;
+      var chapter = exercise.closest('[data-mat101-chapter]');
+      if (chapter) chapter.hidden = false;
     }
 
     input.addEventListener('input', filterExercises);
@@ -96,7 +104,10 @@
     }
 
     updateTagButtons();
-    window.addEventListener('hashchange', openHashTarget);
+    window.addEventListener('hashchange', function () {
+      openHashTarget();
+      filterExercises();
+    });
     filterExercises();
     openHashTarget();
   });

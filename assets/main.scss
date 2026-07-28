@@ -10805,7 +10805,7 @@ body:has(.explain-lab) .post-header {
 .mat101-library {
   --mat101-ink: #172033;
   --mat101-muted: #5d6778;
-  --mat101-accent: #087f8c;
+  --mat101-accent: #06717c;
   --mat101-accent-dark: #075c66;
   --mat101-solution: #8b4a1e;
   --mat101-solution-soft: #fff4eb;
@@ -10953,8 +10953,8 @@ body:has(.mat101-library) {
   height: 0.65rem;
   grid-row: 1 / 3;
   border-radius: 50%;
-  background: #2d8a58;
-  box-shadow: 0 0 0 4px rgba(45, 138, 88, 0.12);
+  background: #b56f16;
+  box-shadow: 0 0 0 4px rgba(181, 111, 22, 0.14);
 }
 
 .mat101-verification span:last-child {
@@ -11294,7 +11294,7 @@ body:has(.mat101-library) {
   border: 1px solid transparent;
   border-radius: 999px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1;
@@ -11340,7 +11340,7 @@ body:has(.mat101-library) {
   border-radius: 999px;
   color: #4d626a;
   background: #edf3f4;
-  font-size: 0.63rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -11348,6 +11348,11 @@ body:has(.mat101-library) {
 .mat101-exercise-tags .mat101-more-tags {
   color: var(--mat101-accent-dark);
   background: transparent;
+}
+
+.mat101-exercise-tags .mat101-erratum-badge {
+  color: #8b421b;
+  background: #fff0e6;
 }
 
 .mat101-open-label {
@@ -11469,7 +11474,7 @@ body:has(.mat101-library) {
 
 .mat101-native-solution > summary small {
   color: #76553e;
-  font-size: 0.67rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -11623,12 +11628,72 @@ body:has(.mat101-library) {
   align-items: center;
   margin-top: 0.85rem;
   color: var(--mat101-muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .mat101-exercise-footer a {
   flex: 0 0 auto;
   font-weight: 750;
+}
+
+.mat101-account-note {
+  font-weight: 600;
+}
+
+.mat101-errata {
+  margin: 2rem 0;
+  padding: clamp(1rem, 3vw, 1.4rem);
+  border: 1px solid #d9c2af;
+  border-radius: 7px;
+  background: #fffaf6;
+  scroll-margin-top: 1rem;
+}
+
+.mat101-errata h2 {
+  margin: 0;
+}
+
+.mat101-errata > p:not(.mat101-kicker) {
+  max-width: 72ch;
+  color: #5e4a3c;
+}
+
+.mat101-errata-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.mat101-errata-list article {
+  padding: 0.9rem;
+  border: 1px solid #e3d4c8;
+  border-radius: 6px;
+  background: #fff;
+  scroll-margin-top: 1rem;
+}
+
+.mat101-errata-list header {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.mat101-errata-list header a {
+  color: #8b421b;
+  font-weight: 850;
+}
+
+.mat101-errata-list header span,
+.mat101-errata-list small {
+  color: var(--mat101-muted);
+  font-size: 0.75rem;
+}
+
+.mat101-errata-list p {
+  margin: 0.6rem 0;
+  font-size: 0.82rem;
 }
 
 .mat101-community-review {
@@ -11841,6 +11906,10 @@ body:has(.mat101-library) {
     grid-column: 1 / -1;
   }
 
+  .mat101-errata-list {
+    grid-template-columns: 1fr;
+  }
+
   .mat101-exercise-footer {
     align-items: flex-start;
     flex-direction: column;
@@ -11883,7 +11952,7 @@ body:has(.mat101-library) {
   }
 
   .mat101-exercise-tags > span {
-    font-size: 0.59rem;
+    font-size: 0.7rem;
   }
 
   .mat101-open-label {

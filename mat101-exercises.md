@@ -18,7 +18,7 @@ math: true
   <header class="mat101-hero">
     <p class="mat101-kicker">MAT101 · bibliothèque L1</p>
     <h1>103 exercices à travailler ici</h1>
-    <p>Chaque énoncé est lisible directement dans la page. Ouvrez ensuite son corrigé détaillé, sans quitter le site et sans chercher la bonne page dans un PDF.</p>
+    <p>Les 103 énoncés et leurs corrigés sont réunis dans une bibliothèque unique. Ouvrez un exercice, tentez-le, puis révélez la solution sans chercher la bonne page dans un PDF.</p>
     <div class="mat101-actions">
       <a class="mat101-primary-action" href="#bibliotheque">Explorer les exercices <span aria-hidden="true">↓</span></a>
       <a href="#telechargements">Télécharger les recueils</a>
@@ -35,11 +35,11 @@ math: true
 
   <aside class="mat101-verification" aria-label="Statut du corrigé">
     <div>
-      <span class="mat101-status-dot" aria-hidden="true"></span>
-      <strong>Couverture complète</strong>
-      <span>103 solutions sur 103</span>
+      <span class="mat101-status-dot is-reviewing" aria-hidden="true"></span>
+      <strong>Corpus complet — relecture en cours</strong>
+      <span>103 énoncés et 103 corrections présents</span>
     </div>
-    <p><strong>Corrigé non officiel.</strong> Les énoncés sont des reproductions fidèles du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; aucune relecture mathématique humaine intégrale n’est encore attestée.</p>
+    <p><strong>Corrigé non officiel.</strong> La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante exercice par exercice n’est pas achevée. Les énoncés sont encore affichés comme reproductions du document source : leur transcription sémantique HTML reste à réaliser et à contrôler.</p>
   </aside>
 
   <nav class="mat101-chapter-nav" aria-label="Chapitres du recueil">
@@ -54,7 +54,7 @@ math: true
 
   <aside class="mat101-reading-note">
     <strong>Mode d’emploi.</strong>
-    Cherchez un numéro ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Dans le polycopié, (*) vérifie les notions essentielles, (**) correspond en général au niveau attendu à l’examen et (***) propose un approfondissement.
+    Cherchez un numéro ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Dans le polycopié, (*) vérifie les notions essentielles, (**) correspond en général au niveau attendu à l’examen, (***) propose un approfondissement et (*/**) indique un niveau intermédiaire entre les deux premiers repères.
   </aside>
 
   <section class="mat101-browser" id="bibliotheque" aria-labelledby="mat101-browser-title">
@@ -66,7 +66,7 @@ math: true
       <p id="mat101-result-count" aria-live="polite">103 exercices affichés</p>
     </div>
     <label class="mat101-search">
-      <span>Rechercher par numéro, chapitre ou notion</span>
+      <span>Rechercher par numéro, chapitre, notion ou texte du corrigé</span>
       <input id="mat101-search-input" type="search" inputmode="search" placeholder="Par exemple : 2.14, injectivité, récurrence…" autocomplete="off">
     </label>
 
@@ -111,7 +111,6 @@ math: true
             id="exercice-{{ exercise.id | replace: '.', '-' }}"
             data-mat101-exercise
             data-tags="{% for tag in exercise.tags %}{{ tag.slug }}{% unless forloop.last %},{% endunless %}{% endfor %}"
-            data-search="{{ exercise.id }} {{ exercise.chapterTitle | downcase }}{% for tag in exercise.tags %} {{ tag.label | downcase }}{% endfor %}"
           >
             <summary>
               <span class="mat101-exercise-summary-main">
@@ -140,11 +139,12 @@ math: true
                   {% endif %}
                 </span>
                 <span class="mat101-exercise-tags" aria-label="Notions abordées">
-                  {% for tag in exercise.tags limit:3 %}
+                  {% for tag in exercise.tags %}
                     <span>{{ tag.label }}</span>
                   {% endfor %}
-                  {% if exercise.tags.size > 3 %}
-                    <span class="mat101-more-tags">+{{ exercise.tags.size | minus: 3 }}</span>
+                  {% assign exercise_errata = site.data.mat101_errata | where: "exercise", exercise.id %}
+                  {% if exercise_errata.size > 0 %}
+                    <span class="mat101-erratum-badge" aria-label="Un erratum du document source est signalé pour l’exercice {{ exercise.id }}">Erratum source</span>
                   {% endif %}
                 </span>
               </span>
@@ -155,7 +155,6 @@ math: true
               <section class="mat101-statement" aria-labelledby="statement-{{ exercise.id | replace: '.', '-' }}">
                 <div class="mat101-content-heading">
                   <h3 id="statement-{{ exercise.id | replace: '.', '-' }}">Énoncé</h3>
-                  <span>Reproduction fidèle du document source</span>
                 </div>
                 {% for statement_image in exercise.statementImages %}
                   <img
@@ -180,7 +179,7 @@ math: true
               {% capture issue_title %}[MAT101 {{ exercise.id }}] Correction proposée{% endcapture %}
               <footer class="mat101-exercise-footer">
                 <span>Énoncé : Collectif MAT101, UGA (2022) · Corrigé : K. McShane, assistance ChatGPT/Codex (2026)</span>
-                <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml&amp;title={{ issue_title | url_encode }}">Signaler une erreur ou proposer une amélioration</a>
+                <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml&amp;title={{ issue_title | url_encode }}">Signaler une erreur <span class="mat101-account-note">(compte GitHub requis)</span></a>
               </footer>
             </div>
           </details>
@@ -189,11 +188,30 @@ math: true
     </section>
   {% endfor %}
 
+  <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
+    <p class="mat101-kicker">Registre versionné</p>
+    <h2 id="mat101-errata-title">Errata du polycopié source</h2>
+    <p>Le corrigé signale actuellement {{ site.data.mat101_errata.size }} exercices dont la formulation imprimée comporte une anomalie identifiable. Le diagnostic est conservé au lieu de corriger silencieusement l’énoncé.</p>
+    <div class="mat101-errata-list">
+      {% for erratum in site.data.mat101_errata %}
+        <article id="errata-{{ erratum.exercise | replace: '.', '-' }}">
+          <header>
+            <a href="#exercice-{{ erratum.exercise | replace: '.', '-' }}">Exercice {{ erratum.exercise }}</a>
+            <span>{{ erratum.kind }}</span>
+          </header>
+          <p>{{ erratum.diagnosis }}</p>
+          <p><strong>Traitement retenu :</strong> {{ erratum.correction }}</p>
+          <small>Registre vérifié le 28 juillet 2026 · corrigé non officiel</small>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
   <section class="mat101-community-review" aria-labelledby="mat101-review-title">
     <p class="mat101-kicker">Relecture ouverte</p>
     <h2 id="mat101-review-title">Un ticket précis pour chaque correction</h2>
-    <p>Les remarques sont traitées publiquement dans GitHub : exercice concerné, passage exact, justification et proposition. Ce registre simple est mieux adapté ici qu’un système de votes de type Community Notes : une correction mathématique doit être vérifiable, attribuée et reliée à une version précise.</p>
-    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction</a>
+    <p>Les remarques sont traitées publiquement dans GitHub : exercice concerné, passage exact, justification et proposition. Ce registre simple est mieux adapté ici qu’un système de votes de type Community Notes : une correction mathématique doit être vérifiable, attribuée et reliée à une version précise. Le dépôt accepte les tickets publics ; GitHub demande toutefois de se connecter à un compte.</p>
+    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction (compte GitHub requis)</a>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les tickets MAT101</a>
   </section>
 

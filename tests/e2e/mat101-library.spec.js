@@ -7,6 +7,24 @@ async function gotoLibrary(page) {
 }
 
 test.describe("MAT101 native library", () => {
+  test("renders the mathematical corpus without MathJax or console errors", async ({
+    page,
+  }) => {
+    const consoleErrors = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+
+    await gotoLibrary(page);
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+    await expect(page.locator("mjx-merror")).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
+  });
+
   test("renders every statement and solution container without page overflow", async ({
     page,
   }) => {
@@ -67,6 +85,53 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
   });
 
+  test("clears an incompatible notion filter when opening a deep link", async ({
+    page,
+  }) => {
+    await page.goto(
+      "/mat101/exercices/?notion=invariants#exercice-1-1"
+    );
+    await expect(page.locator("#exercice-1-1")).toBeVisible();
+    await expect(page.locator("#exercice-1-1")).toHaveAttribute("open", "");
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
+    await expect(page.locator("#mat101-result-count")).toHaveText(
+      "103 exercices affichés"
+    );
+    expect(new URL(page.url()).searchParams.has("notion")).toBe(false);
+  });
+
+  test("shows every assigned tag and the source-erratum marker", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("1.18");
+    await expect(
+      page.locator("#exercice-1-18 .mat101-exercise-tags > span")
+    ).toHaveCount(6);
+
+    await page.locator("#mat101-search-input").fill("3.16");
+    await expect(
+      page.locator("#exercice-3-16 .mat101-erratum-badge")
+    ).toHaveText("Erratum source");
+  });
+
+  test("keeps the exercise and correction disclosures usable without JavaScript", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const noScriptPage = await context.newPage();
+    await noScriptPage.goto("/mat101/exercices/#exercice-1-1");
+
+    const exercise = noScriptPage.locator("#exercice-1-1");
+    await exercise.locator(":scope > summary").click();
+    await expect(exercise.locator(".mat101-statement img")).toBeVisible();
+
+    const solution = exercise.locator(".mat101-native-solution");
+    await solution.locator(":scope > summary").click();
+    await expect(solution.locator(".mat101-solution-body")).toBeVisible();
+    await context.close();
+  });
+
   test("renders the complex-number results table with useful row numbers", async ({
     page,
   }) => {
@@ -100,7 +165,7 @@ test.describe("MAT101 native library", () => {
     );
     await expect(
       exercise.getByRole("link", {
-        name: "Signaler une erreur ou proposer une amélioration",
+        name: /Signaler une erreur/,
       })
     ).toHaveAttribute(
       "href",

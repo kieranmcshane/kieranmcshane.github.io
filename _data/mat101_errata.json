@@ -1,0 +1,56 @@
+[
+  {
+    "exercise": "1.7",
+    "kind": "Paramètre non défini",
+    "diagnosis": "Le symbole b apparaît dans la seconde équation sans avoir été introduit.",
+    "correction": "La question est résolue avec deux paramètres complexes a et b."
+  },
+  {
+    "exercise": "2.29",
+    "kind": "Inégalité stricte fausse",
+    "diagnosis": "La conclusion « strictement inférieur à 1/n » est contredite lorsque tous les termes valent 1/n.",
+    "correction": "Remplacer la conclusion par « inférieur ou égal à 1/n »."
+  },
+  {
+    "exercise": "2.31",
+    "kind": "Récurrence incomplète",
+    "diagnosis": "Avec la condition imprimée n ≥ 2, les termes u₂ et u₃ ne sont pas déterminés.",
+    "correction": "Imposer la relation de récurrence pour tout n ≥ 0."
+  },
+  {
+    "exercise": "3.16",
+    "kind": "Conclusion incompatible avec la formule",
+    "diagnosis": "L’application imprimée n’a aucun point fixe et ne peut donc pas être la symétrie orthogonale annoncée.",
+    "correction": "Le corrigé démontre l’incompatibilité sans inventer une formule de remplacement non attestée."
+  },
+  {
+    "exercise": "3.17",
+    "kind": "Hypothèse manquante",
+    "diagnosis": "Pour a = 0, toutes les images coïncident et les angles considérés ne sont pas définis.",
+    "correction": "Ajouter l’hypothèse a ≠ 0."
+  },
+  {
+    "exercise": "3.27",
+    "kind": "Domaine de validité",
+    "diagnosis": "Deux identités binomiales données dans l’exercice échouent au rang n = 0.",
+    "correction": "Dans les questions concernées, supposer n ≥ 1."
+  },
+  {
+    "exercise": "3.31",
+    "kind": "Condition de compatibilité trop forte",
+    "diagnosis": "L’égalité des résultats obtenus à partir de représentants équivalents est en général fausse.",
+    "correction": "Exiger que les résultats soient équivalents, ce qui est la condition correcte de passage au quotient."
+  },
+  {
+    "exercise": "4.15",
+    "kind": "Indice initial incorrect",
+    "diagnosis": "Avec n ∈ ℕ*, la relation ne définit pas le terme u₁.",
+    "correction": "Imposer la relation uₙ₊₁ = 1 + 1/uₙ dès n = 0."
+  },
+  {
+    "exercise": "4.17",
+    "kind": "Mauvaise variable de parité",
+    "diagnosis": "La formule imprimée teste la parité de l’indice n et rend la conclusion fausse.",
+    "correction": "Faire dépendre la récurrence de la parité de la valeur uₙ."
+  }
+]

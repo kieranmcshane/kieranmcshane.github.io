@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Build the site-native MAT101 exercise and solution data.
+"""Build the MAT101 exercise and solution data used by the site.
 
-The statement images are lossless crops of the credited source PDF, preserving
-the mathematical typography exactly. The solution HTML is generated from the
-credited standalone LaTeX correction with Pandoc and remains MathJax-ready.
+The statements are 144-dpi raster renderings cropped from the credited source
+PDF, then encoded as lossless WebP.  That last encoding is pixel-lossless, but
+the images do not retain the PDF's vector geometry or text semantics.  The
+solution HTML is generated from the credited standalone LaTeX correction with
+Pandoc and remains MathJax-ready.
 """
 
 from __future__ import annotations

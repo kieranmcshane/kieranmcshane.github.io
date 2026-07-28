@@ -9,10 +9,12 @@ DATA = json.loads((ROOT / "_data/mat101_exercises.json").read_text())
 SOLUTIONS = json.loads((ROOT / "_data/mat101_solutions.json").read_text())
 NATIVE = json.loads((ROOT / "_data/mat101_native.json").read_text())
 TAGS = json.loads((ROOT / "_data/mat101_tags.json").read_text())["tags"]
+ERRATA = json.loads((ROOT / "_data/mat101_errata.json").read_text())
 PAGE = (ROOT / "mat101-exercises.md").read_text()
 CONFIG = (ROOT / "_config.yml").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
 SCRIPT = (ROOT / "assets/js/mat101-library.js").read_text()
+BUILDER = (ROOT / "scripts/build_mat101_native.py").read_text()
 ISSUE_FORM = (ROOT / ".github/ISSUE_TEMPLATE/mat101-correction.yml").read_text()
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
@@ -86,6 +88,12 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 image = ROOT / image_url.lstrip("/")
                 self.assertTrue(image.exists(), image)
                 self.assertGreater(image.stat().st_size, 1_000)
+
+        self.assertIn("144-dpi raster renderings", BUILDER)
+        self.assertIn(
+            "do not retain the PDF's vector geometry or text semantics",
+            BUILDER,
+        )
 
     def test_solution_tables_are_accessible_and_keep_row_numbers(self):
         tables = [
@@ -174,8 +182,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
         self.assertIn("math: true", PAGE)
         self.assertIn("103 exercices à travailler ici", PAGE)
-        self.assertIn("Couverture complète", PAGE)
-        self.assertIn("aucune relecture mathématique humaine intégrale", PAGE)
+        self.assertIn("Corpus complet — relecture en cours", PAGE)
+        self.assertIn("vérification indépendante exercice par exercice", PAGE)
+        self.assertIn("(*/**) indique un niveau intermédiaire", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
@@ -188,6 +197,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         )
         self.assertIn("exercise.statementImages", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
+        self.assertNotIn("Reproduction fidèle du document source", PAGE)
+        self.assertNotIn("limit:3", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
         self.assertIn("mat101-exercises.md", CONFIG)
 
@@ -211,6 +222,17 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("@misc{mcshane_recueil_mat101_2026", bib)
         self.assertIn("@misc{mcshane_corrige_mat101_2026", bib)
         self.assertIn("@book{polya_how_to_solve_it_1945", bib)
+
+    def test_public_errata_register_is_complete_and_linked(self):
+        exercises = [item["exercise"] for item in ERRATA]
+        self.assertEqual(
+            exercises,
+            ["1.7", "2.29", "2.31", "3.16", "3.17", "3.27", "3.31", "4.15", "4.17"],
+        )
+        self.assertEqual(len(exercises), len(set(exercises)))
+        self.assertIn("Errata du polycopié source", PAGE)
+        self.assertIn("site.data.mat101_errata", PAGE)
+        self.assertIn("Erratum source", PAGE)
 
     def test_pdf_metadata_credits_original_collective(self):
         tex = TEX.read_text()
@@ -248,6 +270,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             r"f(x)\geq\frac32\iff x\in",
             tex,
         )
+        self.assertIn(r"\sum_{k=0}^{n}a^{n-k}b^k", tex)
+        self.assertNotIn(r"\sum_{k=0}na^{n-k}b^k", tex)
 
         with zipfile.ZipFile(SOLUTION_ARCHIVE) as archive:
             autonomous = archive.read(
@@ -265,6 +289,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-exercise-tags", STYLES)
         self.assertIn(".mat101-table-scroll", STYLES)
         self.assertIn(".mat101-math-table", STYLES)
+        self.assertIn(".mat101-errata-list", STYLES)
         self.assertIn(".mat101-statement img", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
@@ -277,7 +302,15 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("activeTag", SCRIPT)
         self.assertIn("searchParams.set('notion'", SCRIPT)
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
+        self.assertIn("document.getElementById(targetId)", SCRIPT)
+        self.assertIn("normalize(exercise.textContent || '')", SCRIPT)
         self.assertIn("mat101-library.js", (ROOT / "_includes/head-custom.html").read_text())
+
+    def test_mathjax_is_pinned_with_subresource_integrity(self):
+        head = (ROOT / "_includes/head-custom.html").read_text()
+        self.assertIn("mathjax@3.2.2", head)
+        self.assertIn('integrity="sha384-', head)
+        self.assertIn('crossorigin="anonymous"', head)
 
     def test_correction_ticket_collects_verifiable_evidence(self):
         self.assertIn("Exercice concerné", ISSUE_FORM)
