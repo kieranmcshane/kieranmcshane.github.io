@@ -51,10 +51,14 @@ test.describe("MAT101 native library", () => {
     );
 
     const exercise = page.locator("#exercice-3-31");
-    await expect(exercise.locator(".mat101-difficulty")).toHaveText("***");
+    await expect(exercise.locator(".mat101-difficulty")).toContainText("N3");
+    await expect(exercise.locator(".mat101-difficulty")).toContainText(
+      "Approfondissement"
+    );
+    await expect(exercise.locator(".mat101-difficulty")).not.toContainText("*");
     await expect(exercise.locator(".mat101-difficulty")).toHaveAttribute(
       "aria-label",
-      "Difficulté : approfondissement"
+      "Difficulté : niveau 3, approfondissement"
     );
     await exercise.locator(":scope > summary").click();
     await expect(exercise).toHaveAttribute("open", "");
@@ -120,6 +124,29 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator("#mat101-toc-current")).toHaveText(
       "1 exercice disponible"
     );
+  });
+
+  test("keeps the mini table of contents floating and dismissible", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+
+    const toc = page.locator("[data-mat101-toc]");
+    await expect(toc).not.toHaveAttribute("open", "");
+    await page.locator("#exercice-4-17").scrollIntoViewIfNeeded();
+    await expect(toc.locator(":scope > summary")).toBeVisible();
+
+    await toc.locator(":scope > summary").click();
+    await expect(toc).toHaveAttribute("open", "");
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
+    await expect(
+      toc.locator('[data-mat101-toc-link][data-exercise-id="3.31"]')
+    ).toContainText("N3");
+
+    await page.keyboard.press("Escape");
+    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(toc.locator(":scope > summary")).toBeFocused();
+    expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
   test("searches the full wording of a statement", async ({ page }) => {

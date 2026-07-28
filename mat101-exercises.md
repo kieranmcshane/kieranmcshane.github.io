@@ -42,11 +42,11 @@ math: true
     <p><strong>Corrigé non officiel.</strong> Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante des corrigés exercice par exercice n’est pas achevée.</p>
   </aside>
 
-  <nav class="mat101-toc" aria-label="Sommaire des exercices">
+  <nav class="mat101-toc" aria-label="Mini table des matières des exercices">
     <details data-mat101-toc>
       <summary>
         <span>
-          <small>Sommaire interactif</small>
+          <small>Mini table des matières</small>
           <strong id="mat101-toc-current" aria-live="polite">4 chapitres · 103 exercices</strong>
         </span>
         <span class="mat101-toc-action">Parcourir</span>
@@ -65,16 +65,43 @@ math: true
             </header>
             <div class="mat101-toc-exercises">
               {% for exercise in toc_chapter_exercises %}
+                {% if exercise.difficulty %}
+                  {% case exercise.difficulty %}
+                    {% when "*" %}
+                      {% assign difficulty_short = "N1" %}
+                      {% assign difficulty_name = "Essentiel" %}
+                      {% assign difficulty_description = "niveau 1, notions essentielles" %}
+                      {% assign difficulty_class = "essential" %}
+                    {% when "**" %}
+                      {% assign difficulty_short = "N2" %}
+                      {% assign difficulty_name = "Examen" %}
+                      {% assign difficulty_description = "niveau 2, généralement attendu à l’examen" %}
+                      {% assign difficulty_class = "exam" %}
+                    {% when "***" %}
+                      {% assign difficulty_short = "N3" %}
+                      {% assign difficulty_name = "Approfondissement" %}
+                      {% assign difficulty_description = "niveau 3, approfondissement" %}
+                      {% assign difficulty_class = "advanced" %}
+                    {% else %}
+                      {% assign difficulty_short = "N1–2" %}
+                      {% assign difficulty_name = "Transition" %}
+                      {% assign difficulty_description = "transition entre les niveaux 1 et 2" %}
+                      {% assign difficulty_class = "mixed" %}
+                  {% endcase %}
+                {% endif %}
                 <a
                   href="#exercice-{{ exercise.id | replace: '.', '-' }}"
                   data-mat101-toc-link
                   data-exercise-id="{{ exercise.id }}"
                   data-chapter-title="{{ chapter.title | escape }}"
-                  aria-label="Exercice {{ exercise.id }} — {{ chapter.title }}{% if exercise.difficulty %} — difficulté {{ exercise.difficulty }}{% endif %}"
+                  aria-label="Exercice {{ exercise.id }} — {{ chapter.title }}{% if exercise.difficulty %} — {{ difficulty_description }}{% endif %}"
                 >
                   <span>{{ exercise.id }}</span>
                   {% if exercise.difficulty %}
-                    <small aria-hidden="true">{{ exercise.difficulty }}</small>
+                    <small
+                      class="mat101-toc-level mat101-toc-level-{{ difficulty_class }}"
+                      title="{{ difficulty_name }}"
+                    >{{ difficulty_short }}</small>
                   {% endif %}
                 </a>
               {% endfor %}
@@ -87,7 +114,7 @@ math: true
 
   <aside class="mat101-reading-note">
     <strong>Mode d’emploi.</strong>
-    Cherchez un numéro, un mot de l’énoncé ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Dans le polycopié, (*) vérifie les notions essentielles, (**) correspond en général au niveau attendu à l’examen et (***) propose un approfondissement. Le repère (*/**) signale un exercice à la frontière entre notions essentielles et niveau examen.
+    Cherchez un numéro, un mot de l’énoncé ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Le niveau <strong class="mat101-level-word mat101-difficulty-essential">N1 · Essentiel</strong> vérifie les notions de base ; <strong class="mat101-level-word mat101-difficulty-exam">N2 · Examen</strong> correspond généralement au niveau attendu à l’examen ; <strong class="mat101-level-word mat101-difficulty-advanced">N3 · Approfondissement</strong> va plus loin. <strong class="mat101-level-word mat101-difficulty-mixed">N1–2 · Transition</strong> signale un exercice à la frontière des deux premiers niveaux.
   </aside>
 
   <section class="mat101-browser" id="bibliotheque" aria-labelledby="mat101-browser-title">
@@ -154,23 +181,31 @@ math: true
                   {% if exercise.difficulty %}
                     {% case exercise.difficulty %}
                       {% when "*" %}
-                        {% assign difficulty_label = "notions essentielles" %}
+                        {% assign difficulty_short = "N1" %}
+                        {% assign difficulty_name = "Essentiel" %}
+                        {% assign difficulty_description = "niveau 1, notions essentielles" %}
                         {% assign difficulty_class = "essential" %}
                       {% when "**" %}
-                        {% assign difficulty_label = "niveau généralement attendu à l’examen" %}
+                        {% assign difficulty_short = "N2" %}
+                        {% assign difficulty_name = "Examen" %}
+                        {% assign difficulty_description = "niveau 2, généralement attendu à l’examen" %}
                         {% assign difficulty_class = "exam" %}
                       {% when "***" %}
-                        {% assign difficulty_label = "approfondissement" %}
+                        {% assign difficulty_short = "N3" %}
+                        {% assign difficulty_name = "Approfondissement" %}
+                        {% assign difficulty_description = "niveau 3, approfondissement" %}
                         {% assign difficulty_class = "advanced" %}
                       {% else %}
-                        {% assign difficulty_label = "niveau intermédiaire" %}
+                        {% assign difficulty_short = "N1–2" %}
+                        {% assign difficulty_name = "Transition" %}
+                        {% assign difficulty_description = "transition entre les niveaux 1 et 2" %}
                         {% assign difficulty_class = "mixed" %}
                     {% endcase %}
                     <span
                       class="mat101-difficulty mat101-difficulty-{{ difficulty_class }}"
-                      aria-label="Difficulté : {{ difficulty_label }}"
-                      title="Difficulté : {{ difficulty_label }}"
-                    >{{ exercise.difficulty }}</span>
+                      aria-label="Difficulté : {{ difficulty_description }}"
+                      title="Difficulté : {{ difficulty_description }}"
+                    ><span>{{ difficulty_short }}</span><span>{{ difficulty_name }}</span></span>
                   {% endif %}
                 </span>
                 <span class="mat101-exercise-tags" aria-label="Notions abordées">

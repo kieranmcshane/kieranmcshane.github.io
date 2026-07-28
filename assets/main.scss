@@ -11859,25 +11859,29 @@ body:has(.mat101-library) {
 }
 
 .mat101-toc {
+  position: sticky;
+  z-index: 30;
+  top: max(0.5rem, env(safe-area-inset-top));
   margin: 2rem 0;
 }
 
 .mat101-toc > details {
-  overflow: hidden;
+  position: relative;
   border: 1px solid var(--mat101-line);
   border-radius: 7px;
-  background: #fff;
-  box-shadow: 0 8px 28px rgba(22, 48, 58, 0.06);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 30px rgba(22, 48, 58, 0.11);
+  backdrop-filter: blur(14px);
 }
 
 .mat101-toc > details > summary {
   display: flex;
-  min-height: 66px;
+  min-height: 54px;
   box-sizing: border-box;
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1rem;
+  padding: 0.65rem 0.8rem;
   color: var(--mat101-ink);
   cursor: pointer;
   list-style: none;
@@ -11894,12 +11898,12 @@ body:has(.mat101-library) {
 }
 
 .mat101-toc > details[open] > summary {
-  border-bottom: 1px solid var(--mat101-line);
   background: #f7fbfb;
 }
 
 .mat101-toc > details > summary > span:first-child {
   display: grid;
+  min-width: 0;
   gap: 0.1rem;
 }
 
@@ -11912,12 +11916,15 @@ body:has(.mat101-library) {
 }
 
 .mat101-toc > details > summary strong {
+  overflow: hidden;
   font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mat101-toc-action {
   display: inline-flex;
-  min-height: 38px;
+  min-height: 36px;
   box-sizing: border-box;
   gap: 0.55rem;
   align-items: center;
@@ -11941,13 +11948,20 @@ body:has(.mat101-library) {
 }
 
 .mat101-toc-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  left: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   max-height: min(70vh, 42rem);
   padding: 1rem;
   overflow-y: auto;
+  border: 1px solid var(--mat101-line);
+  border-radius: 7px;
   background: #fbfdfd;
+  box-shadow: 0 18px 50px rgba(22, 48, 58, 0.18);
   overscroll-behavior: contain;
 }
 
@@ -12034,10 +12048,46 @@ body:has(.mat101-library) {
   text-decoration: none;
 }
 
-.mat101-toc-exercises a small {
-  color: #7a5b1c;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.6rem;
+.mat101-toc-level {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 1.55rem;
+  min-height: 1.1rem;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0.08rem 0.22rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.mat101-toc-level-essential {
+  border-color: #b9d7d5;
+  color: #176d70;
+  background: #eaf7f6;
+}
+
+.mat101-toc-level-exam {
+  border-color: #e5c789;
+  color: #805a12;
+  background: #fff7df;
+}
+
+.mat101-toc-level-advanced {
+  border-color: #cdbbd9;
+  color: #68427d;
+  background: #f6effa;
+}
+
+.mat101-toc-level-mixed {
+  border-color: #c6ccd4;
+  color: #4d5b69;
+  background: #f2f5f7;
 }
 
 .mat101-toc-exercises a:hover,
@@ -12068,7 +12118,7 @@ body:has(.mat101-library) {
 .mat101-chapter {
   padding: 1.2rem 0 2.1rem;
   border-top: 1px solid var(--mat101-line);
-  scroll-margin-top: 1rem;
+  scroll-margin-top: 4.75rem;
 }
 
 .mat101-chapter > header {
@@ -12265,7 +12315,7 @@ body:has(.mat101-library) {
   border: 1px solid var(--mat101-line);
   border-radius: 7px;
   background: #fff;
-  scroll-margin-top: 1rem;
+  scroll-margin-top: 4.75rem;
 }
 
 .mat101-native-card[hidden] {
@@ -12313,6 +12363,7 @@ body:has(.mat101-library) {
 
 .mat101-exercise-number {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.55rem;
   align-items: center;
   font-size: 0.82rem;
@@ -12327,19 +12378,35 @@ body:has(.mat101-library) {
 
 .mat101-difficulty {
   display: inline-flex;
-  min-width: 1.8rem;
+  min-width: 2.2rem;
   min-height: 1.45rem;
   box-sizing: border-box;
+  gap: 0.3rem;
   align-items: center;
   justify-content: center;
-  padding: 0.12rem 0.42rem;
+  padding: 0.16rem 0.48rem;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   line-height: 1;
+}
+
+.mat101-difficulty > span:first-child {
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.025em;
+}
+
+.mat101-level-word {
+  display: inline-flex;
+  margin: 0.12rem 0.08rem;
+  padding: 0.18rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .mat101-difficulty-essential {
@@ -13084,8 +13151,8 @@ body:has(.mat101-library) {
   }
 
   .mat101-toc > details > summary {
-    min-height: 60px;
-    padding: 0.75rem;
+    min-height: 54px;
+    padding: 0.6rem 0.65rem;
   }
 
   .mat101-toc-action {
