@@ -17,7 +17,8 @@ class ContactPageTests(unittest.TestCase):
         self.assertIn('id="contact"', ABOUT)
         self.assertIn("mat101-correction.yml", ABOUT)
         self.assertIn("site-contact.yml", ABOUT)
-        self.assertIn("publicly on GitHub", ABOUT)
+        self.assertIn("publicly readable on GitHub", ABOUT)
+        self.assertIn("requires a free GitHub account", ABOUT)
         self.assertNotIn("quantum theory and related mathematics", ABOUT)
 
     def test_general_contact_form_is_public_and_actionable(self):

@@ -852,11 +852,30 @@ Comme le triangle $ABC$ est parcouru dans le sens trigonométrique, les triangle
   &z_R&=\frac{z_C+z_A}{2}-\frac{\sqrt3}{6}\ii(z_A-z_C).
   \end{align*}
 
-  \item Un calcul direct à partir des expressions précédentes donne
-  \[
-  z_R-z_P=\e^{\ii\pi/3}(z_Q-z_P).
-  \]
-  En effet, les coefficients de $z_A,z_B,z_C$ coïncident après multiplication de $z_Q-z_P$ par $\e^{\ii\pi/3}$. Ainsi $\overrightarrow{PR}$ est l'image de $\overrightarrow{PQ}$ par une rotation de $\pi/3$. Les deux vecteurs ont même norme et forment un angle de $\pi/3$ ; le triangle $PQR$ est donc équilatéral.
+  \item Écrivons d'abord les deux différences :
+  \begin{align*}
+  z_Q-z_P
+  &=\frac{z_C-z_A}{2}
+    -\frac{\sqrt3}{6}\ii\,(z_A-2z_B+z_C),\\
+  z_R-z_P
+  &=\frac{z_C-z_B}{2}
+    -\frac{\sqrt3}{6}\ii\,(2z_A-z_B-z_C).
+  \end{align*}
+  En multipliant la première par $\e^{\ii\pi/3}
+  =\frac12+\frac{\sqrt3}{2}\ii$, puis en regroupant les coefficients
+  de $z_A,z_B,z_C$, on obtient
+  \begin{align*}
+  \e^{\ii\pi/3}(z_Q-z_P)
+  &=\left(\frac12+\frac{\sqrt3}{2}\ii\right)
+    \left[
+      \frac{z_C-z_A}{2}
+      -\frac{\sqrt3}{6}\ii\,(z_A-2z_B+z_C)
+    \right]\\
+  &=\frac{z_C-z_B}{2}
+    -\frac{\sqrt3}{6}\ii\,(2z_A-z_B-z_C)\\
+  &=z_R-z_P.
+  \end{align*}
+  Ainsi $\overrightarrow{PR}$ est l'image de $\overrightarrow{PQ}$ par une rotation de $\pi/3$. Les deux vecteurs ont même norme et forment un angle de $\pi/3$ ; le triangle $PQR$ est donc équilatéral.
 \end{enumerate}
 \textbf{Examen de la solution.} La relation finale fournit simultanément l'égalité $PQ=PR$ et l'angle $\widehat{QPR}=\pi/3$, qui sont bien les deux informations nécessaires.
 \end{corrige}
@@ -1676,7 +1695,20 @@ Autrement dit, l'hérédité n'a pas été démontrée au rang initial : $P(1)$ 
 L'intersection de plusieurs intervalles est gouvernée par deux nombres : la plus grande extrémité gauche et la plus petite extrémité droite. La condition « intersections deux à deux non vides » doit précisément permettre de comparer ces deux extrêmes. Cette reformulation remplace le dessin par un argument valable pour toute famille finie.
 \end{methode}
 \begin{enumerate}
-  \item Pour trois intervalles fermés qui se coupent deux à deux, le dessin montre que l'extrémité gauche la plus à droite ne dépasse pas l'extrémité droite la plus à gauche ; la zone comprise entre ces deux points appartient aux trois intervalles.
+  \item Écrivons $I_k=[a_k,b_k]$ pour $k\in\{1,2,3\}$, puis posons
+  \[
+  \alpha=\max(a_1,a_2,a_3),
+  \qquad
+  \beta=\min(b_1,b_2,b_3).
+  \]
+  Choisissons $i_0,j_0\in\{1,2,3\}$ tels que
+  $\alpha=a_{i_0}$ et $\beta=b_{j_0}$. Puisque
+  $I_{i_0}\cap I_{j_0}\neq\varnothing$, on a
+  $a_{i_0}\leq b_{j_0}$, donc $\alpha\leq\beta$. Par conséquent,
+  \[
+  I_1\cap I_2\cap I_3=[\alpha,\beta]\neq\varnothing.
+  \]
+  Le dessin permet d'anticiper ce résultat, mais l'argument ci-dessus le démontre.
 
   \item Le résultat devient faux pour des sous-ensembles quelconques. Prenons
   \[
@@ -2310,7 +2342,9 @@ Les trois jetons sont tirés simultanément : l'ordre ne compte pas. Il faut cho
   =\boxed{\frac{4^{2n+1}-1}{6}}.
   \]
 
-  \item Par l'identité $a^{n+1}-b^{n+1}=(a-b)\sum_{k=0}na^{n-k}b^k$ avec $a=3$, $b=2$,
+  \item Par l'identité
+  $a^{n+1}-b^{n+1}=(a-b)\sum_{k=0}^{n}a^{n-k}b^k$
+  avec $a=3$, $b=2$,
   \[
   \sum_{k=0}^n2^k3^{n-k}=\boxed{3^{n+1}-2^{n+1}}.
   \]

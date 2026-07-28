@@ -14,6 +14,7 @@ CONFIG = (ROOT / "_config.yml").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
 SCRIPT = (ROOT / "assets/js/mat101-library.js").read_text()
 ISSUE_FORM = (ROOT / ".github/ISSUE_TEMPLATE/mat101-correction.yml").read_text()
+ERRATA = json.loads((ROOT / "_data/mat101_errata.json").read_text())
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
 ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
@@ -76,16 +77,24 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         native_ids = [exercise["id"] for exercise in NATIVE]
         self.assertEqual(native_ids, expected_ids)
         self.assertEqual(len(NATIVE), 103)
-        self.assertEqual(sum(len(item["statementImages"]) for item in NATIVE), 122)
 
         for item in NATIVE:
             self.assertGreater(len(item["solutionHtml"]), 100)
             self.assertNotIn("TODO", item["solutionHtml"])
-            self.assertTrue(item["statementImages"])
-            for image_url in item["statementImages"]:
-                image = ROOT / image_url.lstrip("/")
-                self.assertTrue(image.exists(), image)
-                self.assertGreater(image.stat().st_size, 1_000)
+            self.assertGreater(len(item["statementHtml"]), 100)
+            self.assertGreater(len(item["statementSearchText"]), 30)
+            self.assertIn("mat101-statement-transcription", item["statementHtml"])
+            self.assertNotIn("<img", item["statementHtml"])
+            self.assertGreaterEqual(item["statementSourcePage"], 30)
+            self.assertGreaterEqual(item["statementPdfPage"], 3)
+            self.assertEqual(item["transcriptionStatus"], "extracted")
+            self.assertEqual(item["mathematicalReviewStatus"], "pending")
+
+    def test_statement_images_are_not_primary_content(self):
+        self.assertNotIn("statementImages", PAGE)
+        self.assertNotIn("mat101-statement img", STYLES)
+        statement_directory = ROOT / "assets/images/mat101/statements"
+        self.assertFalse(statement_directory.exists())
 
     def test_solution_tables_are_accessible_and_keep_row_numbers(self):
         tables = [
@@ -190,10 +199,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
         self.assertIn("math: true", PAGE)
         self.assertIn("103 exercices à travailler ici", PAGE)
-        self.assertIn("Couverture complète", PAGE)
+        self.assertIn("Corpus complet — relecture en cours", PAGE)
         self.assertIn("103 solutions · niveau L1", PAGE)
         self.assertNotIn("103 solutions · 59 pages", PAGE)
-        self.assertIn("aucune relecture mathématique humaine intégrale", PAGE)
+        self.assertIn("la vérification indépendante exercice par exercice n’est pas achevée", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
@@ -204,10 +213,23 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             "{{ chapter.count }} exercices · pages originales",
             PAGE,
         )
-        self.assertIn("exercise.statementImages", PAGE)
+        self.assertIn("exercise.statementHtml", PAGE)
+        self.assertIn("exercise.statementSearchText", PAGE)
+        self.assertIn("Consulter la page source", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
         self.assertIn("mat101-exercises.md", CONFIG)
+
+    def test_errata_register_is_versioned_and_linked(self):
+        exercises = [entry["exercise"] for entry in ERRATA]
+        self.assertEqual(len(ERRATA), 10)
+        self.assertEqual(len(exercises), len(set(exercises)))
+        self.assertIn("1.7", exercises)
+        self.assertIn("3.31", exercises)
+        self.assertIn("4.17", exercises)
+        self.assertTrue(all(entry["version"] == "2026-07-28" for entry in ERRATA))
+        self.assertIn("Errata du polycopié source", PAGE)
+        self.assertIn("site.data.mat101_errata", PAGE)
 
     def test_credits_distinguish_original_adaptation_and_solution(self):
         self.assertIn("Énoncés originaux", PAGE)
@@ -317,6 +339,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             "L'identité de la somme géométrique donne",
             tex,
         )
+        self.assertNotIn(r"\sum_{k=0}na^{n-k}b^k", tex)
+        self.assertIn(r"\sum_{k=0}^{n}a^{n-k}b^k", tex)
+        self.assertIn("Écrivons d'abord les deux différences", tex)
+        self.assertIn("Le dessin permet d'anticiper ce résultat", tex)
 
         with zipfile.ZipFile(SOLUTION_ARCHIVE) as archive:
             autonomous = archive.read(
@@ -336,7 +362,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-math-table", STYLES)
         self.assertIn(".mat101-root-geometry", STYLES)
         self.assertIn(".mat101-root-diagram", STYLES)
-        self.assertIn(".mat101-statement img", STYLES)
+        self.assertIn(".mat101-statement-transcription", STYLES)
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
         self.assertIn("min-height: 44px", STYLES)

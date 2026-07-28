@@ -14,12 +14,13 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator("[data-mat101-exercise]")).toHaveCount(103);
     await expect(page.locator(".mat101-difficulty")).toHaveCount(102);
     await expect(page.locator(".mat101-exercise-tags")).toHaveCount(103);
-    await expect(page.locator(".mat101-statement img")).toHaveCount(122);
+    await expect(page.locator(".mat101-statement img")).toHaveCount(0);
+    await expect(page.locator(".mat101-statement-transcription")).toHaveCount(103);
     await expect(page.locator(".mat101-solution-body")).toHaveCount(103);
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
-  test("searches, opens a multipage statement, then reveals its solution", async ({
+  test("searches, opens a semantic statement, then reveals its solution", async ({
     page,
   }) => {
     await gotoLibrary(page);
@@ -38,7 +39,9 @@ test.describe("MAT101 native library", () => {
     );
     await exercise.locator(":scope > summary").click();
     await expect(exercise).toHaveAttribute("open", "");
-    await expect(exercise.locator(".mat101-statement img")).toHaveCount(2);
+    await expect(exercise.locator(".mat101-statement-transcription")).toContainText(
+      "relation d'équivalence"
+    );
 
     const solution = exercise.locator(".mat101-native-solution");
     await solution.locator(":scope > summary").click();
@@ -65,6 +68,30 @@ test.describe("MAT101 native library", () => {
 
     await page.locator('[data-mat101-tag=""]').click();
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
+  });
+
+  test("searches the full wording of a statement", async ({ page }) => {
+    await gotoLibrary(page);
+    await page
+      .locator("#mat101-search-input")
+      .fill("suite de nombre réels est périodique");
+
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(1);
+    await expect(page.locator("#exercice-4-12")).toBeVisible();
+  });
+
+  test("a deep link clears incompatible filters and keeps the count accurate", async ({
+    page,
+  }) => {
+    await page.goto("/mat101/exercices/?notion=invariants#exercice-1-1");
+    await expect(page.locator(".mat101-library")).toBeVisible({ timeout: 12000 });
+
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
+    await expect(page.locator("#mat101-result-count")).toHaveText(
+      "103 exercices affichés"
+    );
+    await expect(page.locator("#exercice-1-1")).toHaveAttribute("open", "");
+    await expect(page).not.toHaveURL(/notion=invariants/);
   });
 
   test("renders the complex-number results table with useful row numbers", async ({
@@ -138,8 +165,11 @@ test.describe("MAT101 native library", () => {
     await exercise.locator(":scope > summary").click();
 
     await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
-      "Collectif MAT101, UGA (2022)"
+      "Transcription textuelle extraite"
     );
+    await expect(
+      exercise.getByRole("link", { name: "Consulter la page source" })
+    ).toHaveAttribute("href", /recueil-exercices-mat101\.pdf#page=3/);
     await expect(
       exercise.getByRole("link", {
         name: "Signaler une erreur ou proposer une amélioration",

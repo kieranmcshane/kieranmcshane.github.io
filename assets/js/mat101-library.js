@@ -9,16 +9,10 @@
       .trim();
   }
 
-  function openHashTarget() {
+  function hashTarget() {
     if (!window.location.hash.startsWith('#exercice-')) return;
 
-    var exercise = document.querySelector(window.location.hash);
-    if (!exercise) return;
-
-    exercise.hidden = false;
-    exercise.open = true;
-    var chapter = exercise.closest('[data-mat101-chapter]');
-    if (chapter) chapter.hidden = false;
+    return document.getElementById(window.location.hash.slice(1)) || undefined;
   }
 
   function drawRootDiagram(canvas) {
@@ -188,6 +182,18 @@
       noResults.hidden = visibleCount !== 0;
     }
 
+    function openHashTarget() {
+      var exercise = hashTarget();
+      if (!exercise) return;
+
+      input.value = '';
+      activeTag = '';
+      updateTagButtons();
+      updateTagUrl();
+      filterExercises();
+      exercise.open = true;
+    }
+
     input.addEventListener('input', filterExercises);
     tagButtons.forEach(function (button) {
       button.addEventListener('click', function () {
@@ -200,6 +206,7 @@
 
     var requestedTag = new URL(window.location.href).searchParams.get('notion');
     if (
+      !hashTarget() &&
       requestedTag &&
       tagButtons.some(function (button) {
         return button.dataset.mat101Tag === requestedTag;
