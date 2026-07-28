@@ -11452,17 +11452,17 @@ body:has(.mat101-library) {
 .mat101-statement-note {
   margin-top: 1.4rem;
   padding: 0.85rem 1rem;
-  border-left: 3px solid rgba($mat101-teal, 0.58);
+  border-left: 3px solid #4f8790;
   border-radius: 0 6px 6px 0;
-  background: rgba($mat101-teal, 0.055);
-  color: $mat101-muted;
+  background: #f2f9f9;
+  color: var(--mat101-muted);
   font-family: $base-font-family;
   font-size: 0.86rem;
   line-height: 1.55;
 }
 
 .mat101-statement-note:target {
-  outline: 2px solid rgba($mat101-teal, 0.35);
+  outline: 2px solid rgba(0, 111, 123, 0.35);
   outline-offset: 3px;
 }
 

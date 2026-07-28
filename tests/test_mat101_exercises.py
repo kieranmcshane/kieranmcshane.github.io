@@ -133,6 +133,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-erratum-badge", PAGE)
         self.assertIn(".mat101-erratum-badge", STYLES)
         self.assertIn(".mat101-statement-note", STYLES)
+        self.assertNotIn("$mat101-", STYLES)
 
     def test_solution_tables_are_accessible_and_keep_row_numbers(self):
         tables = [
