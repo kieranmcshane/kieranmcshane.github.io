@@ -89,6 +89,39 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
   });
 
+  test("navigates and filters from the interactive table of contents", async ({
+    page,
+  }) => {
+    test.setTimeout(120000);
+    await gotoLibrary(page);
+
+    const toc = page.locator("[data-mat101-toc]");
+    if ((await toc.getAttribute("open")) === null) {
+      await toc.locator(":scope > summary").click();
+    }
+
+    await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
+    await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
+
+    await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
+    await expect(
+      toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(page.locator("#mat101-toc-current")).toContainText(
+      "Exercice 3.16"
+    );
+
+    await page
+      .locator("#mat101-search-input")
+      .fill("suite de nombres réels est périodique");
+    await expect(
+      toc.locator("[data-mat101-toc-link]:not([hidden])")
+    ).toHaveCount(1);
+    await expect(page.locator("#mat101-toc-current")).toHaveText(
+      "1 exercice disponible"
+    );
+  });
+
   test("searches the full wording of a statement", async ({ page }) => {
     await gotoLibrary(page);
     await page

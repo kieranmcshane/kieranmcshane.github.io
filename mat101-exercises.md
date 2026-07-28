@@ -42,14 +42,47 @@ math: true
     <p><strong>Corrigé non officiel.</strong> Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante des corrigés exercice par exercice n’est pas achevée.</p>
   </aside>
 
-  <nav class="mat101-chapter-nav" aria-label="Chapitres du recueil">
-    {% for chapter in site.data.mat101_exercises %}
-      <a href="#{{ chapter.id }}">
-        <span>{{ chapter.number }}</span>
-        <strong>{{ chapter.title }}</strong>
-        <small>{{ chapter.count }} exercices corrigés</small>
-      </a>
-    {% endfor %}
+  <nav class="mat101-toc" aria-label="Sommaire des exercices">
+    <details data-mat101-toc>
+      <summary>
+        <span>
+          <small>Sommaire interactif</small>
+          <strong id="mat101-toc-current" aria-live="polite">4 chapitres · 103 exercices</strong>
+        </span>
+        <span class="mat101-toc-action">Parcourir</span>
+      </summary>
+
+      <div class="mat101-toc-panel">
+        {% for chapter in site.data.mat101_exercises %}
+          {% assign toc_chapter_exercises = site.data.mat101_native | where: "chapterId", chapter.id %}
+          <section class="mat101-toc-chapter" data-mat101-toc-chapter>
+            <header>
+              <a href="#{{ chapter.id }}" data-mat101-toc-chapter-link>
+                <span>{{ chapter.number }}</span>
+                <strong>{{ chapter.title }}</strong>
+              </a>
+              <small>{{ chapter.count }} exercices</small>
+            </header>
+            <div class="mat101-toc-exercises">
+              {% for exercise in toc_chapter_exercises %}
+                <a
+                  href="#exercice-{{ exercise.id | replace: '.', '-' }}"
+                  data-mat101-toc-link
+                  data-exercise-id="{{ exercise.id }}"
+                  data-chapter-title="{{ chapter.title | escape }}"
+                  aria-label="Exercice {{ exercise.id }} — {{ chapter.title }}{% if exercise.difficulty %} — difficulté {{ exercise.difficulty }}{% endif %}"
+                >
+                  <span>{{ exercise.id }}</span>
+                  {% if exercise.difficulty %}
+                    <small aria-hidden="true">{{ exercise.difficulty }}</small>
+                  {% endif %}
+                </a>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+    </details>
   </nav>
 
   <aside class="mat101-reading-note">
@@ -110,6 +143,7 @@ math: true
             class="mat101-native-card"
             id="exercice-{{ exercise.id | replace: '.', '-' }}"
             data-mat101-exercise
+            data-exercise-id="{{ exercise.id }}"
             data-tags="{% for tag in exercise.tags %}{{ tag.slug }}{% unless forloop.last %},{% endunless %}{% endfor %}"
             data-search="{{ exercise.id }} {{ exercise.chapterTitle | downcase }} {{ exercise.statementSearchText | escape }}{% for tag in exercise.tags %} {{ tag.label | downcase }}{% endfor %}"
           >

@@ -449,6 +449,20 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
         self.assertIn("mat101-library.js", (ROOT / "_includes/head-custom.html").read_text())
 
+    def test_interactive_table_of_contents_covers_and_tracks_exercises(self):
+        self.assertIn("Sommaire interactif", PAGE)
+        self.assertIn("data-mat101-toc", PAGE)
+        self.assertIn("data-mat101-toc-chapter", PAGE)
+        self.assertIn("data-mat101-toc-link", PAGE)
+        self.assertIn('data-exercise-id="{{ exercise.id }}"', PAGE)
+        self.assertIn("mat101-toc-current", PAGE)
+        self.assertIn("setCurrentExercise", SCRIPT)
+        self.assertIn("aria-current", SCRIPT)
+        self.assertIn("window.matchMedia('(min-width: 701px)')", SCRIPT)
+        self.assertIn("window.matchMedia('(max-width: 700px)')", SCRIPT)
+        self.assertIn(".mat101-toc-panel", STYLES)
+        self.assertIn('.mat101-toc-exercises a[aria-current="location"]', STYLES)
+
     def test_correction_ticket_collects_verifiable_evidence(self):
         self.assertIn("Exercice concerné", ISSUE_FORM)
         self.assertIn("Passage exact", ISSUE_FORM)
