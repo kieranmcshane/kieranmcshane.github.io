@@ -216,7 +216,7 @@ STATEMENT_OVERRIDES = {
 <li>Montrer que le triangle \(PQR\) est équilatéral.</li>
 </ol>
 <aside class="mat101-statement-note" id="mat101-note-1-19-history" role="note">
-<p><strong>1. Note historique.</strong> L’appellation est traditionnelle, mais l’attribution de ce théorème à Napoléon Bonaparte n’est étayée par aucune preuve documentaire connue. La propriété a été publiée pour la première fois en 1825. <a href="https://www.treccani.it/enciclopedia/teorema-di-napoleone_%28Enciclopedia-della-Matematica%29/" target="_blank" rel="noopener noreferrer">Notice historique de l’Enciclopedia della Matematica</a>.</p>
+<p><strong>1. Note historique.</strong> L’appellation est traditionnelle, mais aucun élément tangible n’établit que Napoléon Bonaparte soit l’auteur du théorème. L’énoncé paraît en 1825, quatre ans après sa mort&nbsp;; l’association du nom de Napoléon au théorème n’apparaît qu’en 1911 et pourrait venir d’une confusion avec le «&nbsp;problème de Napoléon&nbsp;». <a href="https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_de_Napol%C3%A9on#%C3%89tymologie" target="_blank" rel="noopener noreferrer">Lire la section «&nbsp;Étymologie&nbsp;» sur Wikipédia</a>.</p>
 </aside>
 </div>""",
         "searchText": (
@@ -229,8 +229,11 @@ STATEMENT_OVERRIDES = {
             "fonction de z_A et z_B. 2. Donner de même les affixes des points J, "
             "K, Q, R en fonction de z_A, z_B et z_C. 3. Montrer que le triangle "
             "PQR est équilatéral. Note historique : l’appellation est "
-            "traditionnelle, mais l’attribution à Napoléon Bonaparte n’est pas "
-            "étayée par une preuve documentaire connue."
+            "traditionnelle, mais aucun élément tangible n’établit que Napoléon "
+            "Bonaparte soit l’auteur du théorème. L’énoncé paraît en 1825, "
+            "quatre ans après sa mort ; le nom de Napoléon n’est associé au "
+            "théorème qu’en 1911 et pourrait venir d’une confusion avec le "
+            "problème de Napoléon."
         ),
         "transcriptionStatus": "curated",
         "mathematicalReviewStatus": "reviewed",

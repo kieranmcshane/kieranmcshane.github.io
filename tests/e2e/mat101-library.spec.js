@@ -267,13 +267,17 @@ test.describe("MAT101 native library", () => {
     await expect(statement).not.toContainText("node19.html");
     await expect(statement.locator('a[href*="node19.html"]')).toHaveCount(0);
     await expect(note).toContainText("L’appellation est traditionnelle");
-    await expect(note).toContainText("aucune preuve documentaire connue");
+    await expect(note).toContainText("n’apparaît qu’en 1911");
+    await expect(note).toContainText("problème de Napoléon");
     await expect(
       statement.getByRole("link", {
         name: "Lire la note historique sur l’attribution du théorème",
       })
     ).toHaveAttribute("href", "#mat101-note-1-19-history");
-    await expect(note.getByRole("link")).toHaveAttribute("href", /treccani\.it/);
+    await expect(note.getByRole("link")).toHaveAttribute(
+      "href",
+      /fr\.wikipedia\.org.*%C3%89tymologie/
+    );
     await expect(statement.locator("mjx-container")).toHaveCount(26);
   });
 
