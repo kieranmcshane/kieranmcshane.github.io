@@ -115,6 +115,16 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             invariant_statement["statementSearchText"],
         )
 
+        napoleon_statement = next(item for item in NATIVE if item["id"] == "1.19")
+        self.assertEqual(napoleon_statement["transcriptionStatus"], "curated")
+        self.assertEqual(napoleon_statement["mathematicalReviewStatus"], "reviewed")
+        self.assertIn(r"\(z_A\)", napoleon_statement["statementHtml"])
+        self.assertIn("mat101-statement-note", napoleon_statement["statementHtml"])
+        self.assertIn("Note historique", napoleon_statement["statementHtml"])
+        self.assertIn("treccani.it", napoleon_statement["statementHtml"])
+        self.assertNotIn("Bernard.Y", napoleon_statement["statementHtml"])
+        self.assertNotIn("node19.html", napoleon_statement["statementHtml"])
+
     def test_statement_images_are_not_primary_content(self):
         self.assertNotIn("statementImages", PAGE)
         self.assertNotIn("mat101-statement img", STYLES)
@@ -122,6 +132,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertFalse(statement_directory.exists())
         self.assertIn("mat101-erratum-badge", PAGE)
         self.assertIn(".mat101-erratum-badge", STYLES)
+        self.assertIn(".mat101-statement-note", STYLES)
 
     def test_solution_tables_are_accessible_and_keep_row_numbers(self):
         tables = [
