@@ -206,6 +206,35 @@ SOURCE_TEXT_REPLACEMENTS = {
 # Keeping these overrides beside the extractor prevents a future regeneration
 # from silently restoring flattened fractions or delimiter glyphs.
 STATEMENT_OVERRIDES = {
+    "2.23": {
+        "html": r"""<div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
+<p>On dispose d’un jeu de \(2n\) cartes rangées en un tas où toutes les cartes sont initialement face vers le bas. On considère deux types d’opérations sur ce jeu&nbsp;:</p>
+<ol class="mat101-statement-list" type="A">
+<li>on prend les deux cartes du dessus entre deux doigts, on retourne cet ensemble de deux cartes sans les séparer, puis on replace les deux cartes sur le dessus du paquet (la première carte devient ainsi la deuxième carte, mais retournée, et la deuxième carte devient la première carte, retournée)&nbsp;;</li>
+<li>on coupe le jeu (c’est-à-dire qu’on prend le paquet des \(k\) cartes du dessus, pour un \(k\in\{1,\ldots,2n-1\}\), et on le met en dessous du reste du paquet, sans retourner les cartes).</li>
+</ol>
+<p>Montrer qu’après n’importe quel nombre d’opérations comme ci-dessus, le jeu vérifie la propriété suivante&nbsp;:</p>
+<p><strong>(P)</strong> Le nombre de cartes de position paire tournées «&nbsp;face vers le haut&nbsp;» est égal au nombre de cartes de position impaire tournées «&nbsp;face vers le haut&nbsp;».</p>
+</div>""",
+        "searchText": (
+            "On dispose d’un jeu de 2n cartes rangées en un tas où toutes les "
+            "cartes sont initialement face vers le bas. On considère deux types "
+            "d’opérations sur ce jeu : A) on prend les deux cartes du dessus "
+            "entre deux doigts, on retourne cet ensemble de deux cartes sans les "
+            "séparer, puis on replace les deux cartes sur le dessus du paquet "
+            "(la première carte devient ainsi la deuxième carte, mais retournée, "
+            "et la deuxième carte devient la première carte, retournée) ; B) on "
+            "coupe le jeu (c’est-à-dire qu’on prend le paquet des k cartes du "
+            "dessus, pour un k∈{1,…,2n−1}, et on le met en dessous du reste du "
+            "paquet, sans retourner les cartes). Montrer qu’après n’importe quel "
+            "nombre d’opérations comme ci-dessus, le jeu vérifie la propriété "
+            "suivante : (P) Le nombre de cartes de position paire tournées "
+            "« face vers le haut » est égal au nombre de cartes de position "
+            "impaire tournées « face vers le haut »."
+        ),
+        "transcriptionStatus": "curated",
+        "mathematicalReviewStatus": "reviewed",
+    },
     "3.3": {
         "html": r"""<div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
 <p>Écrire le plus simplement possible les ensembles suivants (aucune justification n’est attendue).</p>
