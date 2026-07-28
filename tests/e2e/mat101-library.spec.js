@@ -7,6 +7,25 @@ async function gotoLibrary(page) {
 }
 
 test.describe("MAT101 native library", () => {
+  test("renders the mathematical corpus without MathJax or console errors", async ({
+    page,
+  }) => {
+    const consoleErrors = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+
+    await gotoLibrary(page);
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+
+    await expect(page.locator("mjx-merror")).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
+  });
+
   test("renders every statement and solution container without page overflow", async ({
     page,
   }) => {
@@ -92,6 +111,40 @@ test.describe("MAT101 native library", () => {
     );
     await expect(page.locator("#exercice-1-1")).toHaveAttribute("open", "");
     await expect(page).not.toHaveURL(/notion=invariants/);
+  });
+
+  test("shows every assigned tag and marks exercises with source errata", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("1.18");
+    await expect(
+      page.locator("#exercice-1-18 .mat101-exercise-tags > span")
+    ).toHaveCount(6);
+
+    await page.locator("#mat101-search-input").fill("3.16");
+    await expect(
+      page.locator("#exercice-3-16 .mat101-erratum-badge")
+    ).toHaveText("Erratum source");
+  });
+
+  test("keeps statements and corrections usable without JavaScript", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const noScriptPage = await context.newPage();
+    await noScriptPage.goto("/mat101/exercices/");
+
+    const exercise = noScriptPage.locator("#exercice-1-1");
+    await exercise.locator(":scope > summary").click();
+    await expect(
+      exercise.locator(".mat101-statement-transcription")
+    ).toBeVisible();
+
+    const solution = exercise.locator(".mat101-native-solution");
+    await solution.locator(":scope > summary").click();
+    await expect(solution.locator(".mat101-solution-body")).toBeVisible();
+    await context.close();
   });
 
   test("renders the complex-number results table with useful row numbers", async ({

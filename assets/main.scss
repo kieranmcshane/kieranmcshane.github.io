@@ -11345,6 +11345,11 @@ body:has(.mat101-library) {
   line-height: 1.1;
 }
 
+.mat101-exercise-tags .mat101-erratum-badge {
+  color: #8b421b;
+  background: #fff0e6;
+}
+
 .mat101-open-label {
   display: flex;
   gap: 0.5rem;
@@ -11475,7 +11480,7 @@ body:has(.mat101-library) {
 
 .mat101-native-solution > summary small {
   color: #76553e;
-  font-size: 0.67rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -11702,7 +11707,7 @@ body:has(.mat101-library) {
   align-items: center;
   margin-top: 0.85rem;
   color: var(--mat101-muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .mat101-exercise-footer a {

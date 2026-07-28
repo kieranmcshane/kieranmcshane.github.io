@@ -143,6 +143,13 @@ math: true
                   {% for tag in exercise.tags %}
                     <span>{{ tag.label }}</span>
                   {% endfor %}
+                  {% assign exercise_errata = site.data.mat101_errata | where: "exercise", exercise.id %}
+                  {% if exercise_errata.size > 0 %}
+                    <span
+                      class="mat101-erratum-badge"
+                      aria-label="Un erratum du document source est signalé pour l’exercice {{ exercise.id }}"
+                    >Erratum source</span>
+                  {% endif %}
                 </span>
               </span>
               <span class="mat101-open-label">Lire l’énoncé</span>

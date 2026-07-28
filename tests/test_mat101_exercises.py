@@ -95,6 +95,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn("mat101-statement img", STYLES)
         statement_directory = ROOT / "assets/images/mat101/statements"
         self.assertFalse(statement_directory.exists())
+        self.assertIn("mat101-erratum-badge", PAGE)
+        self.assertIn(".mat101-erratum-badge", STYLES)
 
     def test_solution_tables_are_accessible_and_keep_row_numbers(self):
         tables = [
