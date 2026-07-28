@@ -121,7 +121,11 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(r"\(z_A\)", napoleon_statement["statementHtml"])
         self.assertIn("mat101-statement-note", napoleon_statement["statementHtml"])
         self.assertIn("Note historique", napoleon_statement["statementHtml"])
-        self.assertIn("treccani.it", napoleon_statement["statementHtml"])
+        self.assertIn("fr.wikipedia.org", napoleon_statement["statementHtml"])
+        self.assertIn("%C3%89tymologie", napoleon_statement["statementHtml"])
+        self.assertIn("n’apparaît qu’en 1911", napoleon_statement["statementHtml"])
+        self.assertIn("problème de Napoléon", napoleon_statement["statementHtml"])
+        self.assertNotIn("treccani.it", napoleon_statement["statementHtml"])
         self.assertNotIn("Bernard.Y", napoleon_statement["statementHtml"])
         self.assertNotIn("node19.html", napoleon_statement["statementHtml"])
 
