@@ -201,7 +201,7 @@ math: true
   <section class="mat101-community-review" aria-labelledby="mat101-review-title">
     <p class="mat101-kicker">Relecture ouverte</p>
     <h2 id="mat101-review-title">Un ticket précis pour chaque correction</h2>
-    <p>Les remarques sont traitées publiquement dans GitHub : exercice concerné, passage exact, justification et proposition. Ce registre simple est mieux adapté ici qu’un système de votes de type Community Notes : une correction mathématique doit être vérifiable, attribuée et reliée à une version précise. Un compte GitHub gratuit est nécessaire pour déposer un ticket ; leur lecture reste publique.</p>
+    <p>Les corrections sont publiques sur GitHub. Un compte gratuit est nécessaire pour en proposer une.</p>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction</a>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les tickets MAT101</a>
   </section>

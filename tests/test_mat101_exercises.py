@@ -427,6 +427,12 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Analyse et correction proposée", ISSUE_FORM)
         self.assertIn("Crédit, citation ou attribution", ISSUE_FORM)
         self.assertIn("mat101-correction.yml", PAGE)
+        self.assertIn(
+            "Les corrections sont publiques sur GitHub. "
+            "Un compte gratuit est nécessaire pour en proposer une.",
+            PAGE,
+        )
+        self.assertNotIn("Community Notes", PAGE)
 
 
 if __name__ == "__main__":
