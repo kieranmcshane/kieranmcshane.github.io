@@ -111,6 +111,32 @@ class GaloisTheoryPostTests(unittest.TestCase):
         self.assertIn("| $C_3$ | $4$ | $3$ | $4$ |", self.text)
         self.assertIn(r"A_4/V", self.text)
 
+    def test_a4_svg_has_exactly_the_hasse_cover_relations(self) -> None:
+        diagram = ET.parse(IMAGES[1]).getroot()
+        namespace = {"svg": "http://www.w3.org/2000/svg"}
+        covers = {
+            line.attrib["data-cover"]
+            for line in diagram.findall(".//svg:line[@data-cover]", namespace)
+        }
+        expected = {
+            *(f"1-c2-{index}" for index in range(1, 4)),
+            *(f"1-c3-{index}" for index in range(1, 5)),
+            *(f"c2-{index}-v4" for index in range(1, 4)),
+            *(f"c3-{index}-a4" for index in range(1, 5)),
+            "v4-a4",
+        }
+        self.assertEqual(covers, expected)
+        self.assertEqual(len(covers), 15)
+
+    def test_markdown_headings_use_mathjax_safe_delimiters(self) -> None:
+        headings = (
+            line for line in self.text.splitlines() if line.startswith("#")
+        )
+        for heading in headings:
+            with self.subTest(heading=heading):
+                self.assertNotIn(r"\(", heading)
+                self.assertNotIn(r"\)", heading)
+
     def test_erroneous_polynomial_is_corrected(self) -> None:
         self.assertIn(r"X^4+8X^2+12", self.text)
         self.assertIn(r"(X^2+2)(X^2+6)", self.text)

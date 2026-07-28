@@ -15,41 +15,41 @@
   <text class="heading" x="290" y="38">Subgroups of A₄</text>
   <text class="heading" x="910" y="38">Fixed fields</text>
 
-  <!-- subgroup edges -->
-  <line class="edge" x1="290" y1="88" x2="110" y2="235"/>
-  <line class="edge" x1="290" y1="88" x2="230" y2="235"/>
-  <line class="edge" x1="290" y1="88" x2="350" y2="235"/>
-  <line class="edge" x1="290" y1="88" x2="470" y2="235"/>
-  <line class="edge" x1="290" y1="88" x2="290" y2="402"/>
-  <line class="edge" x1="290" y1="442" x2="170" y2="575"/>
-  <line class="edge" x1="290" y1="442" x2="290" y2="575"/>
-  <line class="edge" x1="290" y1="442" x2="410" y2="575"/>
-  <line class="edge" x1="110" y1="275" x2="290" y2="650"/>
-  <line class="edge" x1="230" y1="275" x2="290" y2="650"/>
-  <line class="edge" x1="350" y1="275" x2="290" y2="650"/>
-  <line class="edge" x1="470" y1="275" x2="290" y2="650"/>
-  <line class="edge" x1="170" y1="615" x2="290" y2="650"/>
-  <line class="edge" x1="290" y1="615" x2="290" y2="650"/>
-  <line class="edge" x1="410" y1="615" x2="290" y2="650"/>
+  <!-- subgroup cover relations -->
+  <line class="edge" data-cover="1-c2-1" x1="290" y1="88" x2="55" y2="225"/>
+  <line class="edge" data-cover="1-c2-2" x1="290" y1="88" x2="135" y2="225"/>
+  <line class="edge" data-cover="1-c2-3" x1="290" y1="88" x2="215" y2="225"/>
+  <line class="edge" data-cover="1-c3-1" x1="290" y1="88" x2="315" y2="225"/>
+  <line class="edge" data-cover="1-c3-2" x1="290" y1="88" x2="395" y2="225"/>
+  <line class="edge" data-cover="1-c3-3" x1="290" y1="88" x2="475" y2="225"/>
+  <line class="edge" data-cover="1-c3-4" x1="290" y1="88" x2="555" y2="225"/>
+  <line class="edge" data-cover="c2-1-v4" x1="55" y1="277" x2="135" y2="445"/>
+  <line class="edge" data-cover="c2-2-v4" x1="135" y1="277" x2="135" y2="445"/>
+  <line class="edge" data-cover="c2-3-v4" x1="215" y1="277" x2="135" y2="445"/>
+  <line class="edge" data-cover="c3-1-a4" x1="315" y1="277" x2="290" y2="650"/>
+  <line class="edge" data-cover="c3-2-a4" x1="395" y1="277" x2="290" y2="650"/>
+  <line class="edge" data-cover="c3-3-a4" x1="475" y1="277" x2="290" y2="650"/>
+  <line class="edge" data-cover="c3-4-a4" x1="555" y1="277" x2="290" y2="650"/>
+  <line class="edge" data-cover="v4-a4" x1="135" y1="497" x2="290" y2="650"/>
 
   <rect class="node" x="245" y="64" width="90" height="46"/>
   <text class="label" x="290" y="87">{1}</text>
-  <rect class="node" x="65" y="225" width="90" height="52"/>
-  <text class="label" x="110" y="251">C₃¹</text>
-  <rect class="node" x="185" y="225" width="90" height="52"/>
-  <text class="label" x="230" y="251">C₃²</text>
-  <rect class="node" x="305" y="225" width="90" height="52"/>
-  <text class="label" x="350" y="251">C₃³</text>
-  <rect class="node" x="425" y="225" width="90" height="52"/>
-  <text class="label" x="470" y="251">C₃⁴</text>
-  <rect class="node" x="235" y="395" width="110" height="52"/>
-  <text class="label" x="290" y="421">V₄</text>
-  <rect class="node" x="125" y="568" width="90" height="52"/>
-  <text class="label" x="170" y="594">C₂¹</text>
-  <rect class="node" x="245" y="568" width="90" height="52"/>
-  <text class="label" x="290" y="594">C₂²</text>
-  <rect class="node" x="365" y="568" width="90" height="52"/>
-  <text class="label" x="410" y="594">C₂³</text>
+  <rect class="node" x="20" y="225" width="70" height="52"/>
+  <text class="label" x="55" y="251">C₂¹</text>
+  <rect class="node" x="100" y="225" width="70" height="52"/>
+  <text class="label" x="135" y="251">C₂²</text>
+  <rect class="node" x="180" y="225" width="70" height="52"/>
+  <text class="label" x="215" y="251">C₂³</text>
+  <rect class="node" x="280" y="225" width="70" height="52"/>
+  <text class="label" x="315" y="251">C₃¹</text>
+  <rect class="node" x="360" y="225" width="70" height="52"/>
+  <text class="label" x="395" y="251">C₃²</text>
+  <rect class="node" x="440" y="225" width="70" height="52"/>
+  <text class="label" x="475" y="251">C₃³</text>
+  <rect class="node" x="520" y="225" width="70" height="52"/>
+  <text class="label" x="555" y="251">C₃⁴</text>
+  <rect class="node" x="80" y="445" width="110" height="52"/>
+  <text class="label" x="135" y="471">V₄</text>
   <rect class="node" x="235" y="642" width="110" height="46"/>
   <text class="label" x="290" y="665">A₄</text>
 
