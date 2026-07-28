@@ -92,13 +92,28 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 item["mathematicalReviewStatus"], {"pending", "reviewed"}
             )
 
-        curated = next(item for item in NATIVE if item["id"] == "3.3")
-        self.assertEqual(curated["transcriptionStatus"], "curated")
-        self.assertEqual(curated["mathematicalReviewStatus"], "reviewed")
-        self.assertIn(r"\dfrac{p}{q}", curated["statementHtml"])
-        self.assertIn(r"[\![2,5]\!]", curated["statementHtml"])
-        self.assertNotIn("∞ p q", curated["statementSearchText"])
-        self.assertNotIn("justifi ation", curated["statementSearchText"])
+        sets_statement = next(item for item in NATIVE if item["id"] == "3.3")
+        self.assertEqual(sets_statement["transcriptionStatus"], "curated")
+        self.assertEqual(sets_statement["mathematicalReviewStatus"], "reviewed")
+        self.assertIn(r"\dfrac{p}{q}", sets_statement["statementHtml"])
+        self.assertIn(r"[\![2,5]\!]", sets_statement["statementHtml"])
+        self.assertNotIn("∞ p q", sets_statement["statementSearchText"])
+        self.assertNotIn("justifi ation", sets_statement["statementSearchText"])
+
+        invariant_statement = next(item for item in NATIVE if item["id"] == "2.23")
+        self.assertEqual(invariant_statement["transcriptionStatus"], "curated")
+        self.assertEqual(invariant_statement["mathematicalReviewStatus"], "reviewed")
+        self.assertIn(r"\(2n\)", invariant_statement["statementHtml"])
+        self.assertIn(
+            r"\(k\in\{1,\ldots,2n-1\}\)",
+            invariant_statement["statementHtml"],
+        )
+        self.assertNotIn("centre deux doigts", invariant_statement["statementHtml"])
+        self.assertNotIn("repla e", invariant_statement["statementHtml"])
+        self.assertNotIn(
+            ") face vers le haut [",
+            invariant_statement["statementSearchText"],
+        )
 
     def test_statement_images_are_not_primary_content(self):
         self.assertNotIn("statementImages", PAGE)

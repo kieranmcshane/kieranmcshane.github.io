@@ -279,4 +279,27 @@ test.describe("MAT101 native library", () => {
       .click();
     await expect(routineExercise.locator(".mat101-method")).toHaveCount(0);
   });
+
+  test("renders the reviewed MathJax statement for exercise 2.23", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    await page.locator("#mat101-search-input").fill("2.23");
+
+    const exercise = page.locator("#exercice-2-23");
+    await exercise.locator(":scope > summary").click();
+    const statement = exercise.locator(".mat101-statement");
+
+    await expect(statement).toContainText("entre deux doigts");
+    await expect(statement).toContainText("c’est-à-dire");
+    await expect(statement).not.toContainText("centre deux doigts");
+    await expect(statement).not.toContainText("repla e");
+    await expect(statement.locator("mjx-container")).toHaveCount(3);
+    await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
+      "Transcription mathématique relue"
+    );
+    await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
+      "Vérification effectuée sur le document source"
+    );
+  });
 });
