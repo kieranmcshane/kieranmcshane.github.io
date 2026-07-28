@@ -1163,7 +1163,7 @@ We use two facts:
 
 1. If $K\subseteq E\subseteq L$, then $L/E$ is finite Galois.
 2. If $M/N$ is finite Galois, then
-   $|\operatorname{Gal}(M/N)|=[M:N]$.
+   $\lvert\operatorname{Gal}(M/N)\rvert=[M:N]$.
 
 For the first fact, write $L$ as the splitting field over $K$ of a separable polynomial $f\in K[X]$. The same $f$ lies in $E[X]$, and $L$ is still generated over $E$ by all of its roots. Thus $L/E$ is again a splitting field of a separable polynomial.
 
@@ -2336,7 +2336,7 @@ At the end of the route, the essential facts are these:
 1. A finite extension has at most its degree many automorphisms.
 2. A finite Galois extension has exactly its degree many automorphisms.
 3. A subgroup $H$ fixes a field $L^H$.
-4. Artin's theorem gives $[L:L^H]=|H|$.
+4. Artin's theorem gives $[L:L^H]=\lvert H\rvert$.
 5. Intermediate fields and subgroups are therefore mutually recoverable.
 6. The correspondence reverses inclusion.
 7. Subgroup order becomes upper field degree; subgroup index becomes lower field degree.
@@ -2476,7 +2476,7 @@ $$
 
 Suppose $\operatorname{Gal}(L/K)\cong A_4$, and let $V\cong V_4$ be its normal Klein four-subgroup. Determine the degree and Galois group of $L^V/K$.
 
-**Solution.** Since $|A_4|=12$ and $|V|=4$,
+**Solution.** Since $\lvert A_4\rvert=12$ and $\lvert V\rvert=4$,
 
 $$
 [L^V:K]=[A_4:V]=3.
