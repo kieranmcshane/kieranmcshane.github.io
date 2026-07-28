@@ -8,6 +8,9 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 POST = ROOT / "_posts" / "2026-07-27-galois-theory-without-detours.md"
+HEAD = ROOT / "_includes" / "head-custom.html"
+NAVIGATION = ROOT / "assets" / "js" / "correction-navigation.js"
+STYLES = ROOT / "assets" / "main.scss"
 IMAGES = (
     ROOT / "assets" / "images" / "galois-v4-correspondence.svg",
     ROOT / "assets" / "images" / "galois-a4-correspondence.svg",
@@ -41,6 +44,62 @@ class GaloisTheoryPostTests(unittest.TestCase):
             with self.subTest(expression=expression):
                 self.assertIn(expression, self.text)
 
+    def test_markdown_tables_do_not_use_raw_absolute_value_bars(self) -> None:
+        table_lines = (
+            line for line in self.text.splitlines() if line.startswith("|")
+        )
+        for line in table_lines:
+            with self.subTest(line=line):
+                self.assertNotIn("$|", line)
+                self.assertNotIn("|$", line)
+                self.assertNotIn(r"$\{", line)
+        self.assertIn(
+            r"| Subgroup $H\leq G$ | Order $\lvert H\rvert$ "
+            r"| Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |",
+            self.text,
+        )
+        self.assertEqual(self.text.count(r"| $\lbrace 1\rbrace$ |"), 3)
+
+    def test_inline_math_outside_tables_uses_latex_absolute_value_bars(self) -> None:
+        for line in self.text.splitlines():
+            if line.startswith("|") or line.strip() == "$$":
+                continue
+            inline_expressions = re.findall(r"(?<!\$)\$([^$]+)\$(?!\$)", line)
+            for expression in inline_expressions:
+                with self.subTest(line=line, expression=expression):
+                    self.assertNotIn("|", expression)
+
+    def test_interactive_table_of_contents_is_wired_for_long_reading(self) -> None:
+        links = re.findall(r'<a href="#([^"]+)">', self.text)
+        self.assertGreaterEqual(len(links), 16)
+        self.assertEqual(len(links), len(set(links)))
+        for target in (
+            "the-destination",
+            "proof-core-i-independence-of-homomorphisms",
+            "decoding-an-a4-lattice",
+            "comprehension-checks-with-solutions",
+            "further-reading",
+        ):
+            with self.subTest(target=target):
+                self.assertIn(target, links)
+
+        self.assertIn('data-section-navigation', self.text)
+        self.assertIn("longform-toc-details", self.text)
+        self.assertIn(
+            "page.url == '/2026/07/27/galois-theory-without-detours/'",
+            HEAD.read_text(encoding="utf-8"),
+        )
+        navigation = NAVIGATION.read_text(encoding="utf-8")
+        self.assertIn("configureResponsiveLongformIndex", navigation)
+        self.assertIn("initializeSectionHighlighting(article, navigation)", navigation)
+        self.assertIn(
+            "document.getElementById(link.getAttribute('href').slice(1))",
+            navigation,
+        )
+        styles = STYLES.read_text(encoding="utf-8")
+        self.assertIn(".longform-reading-layout", styles)
+        self.assertIn(".longform-toc a[aria-current=\"location\"]", styles)
+
     def test_proof_core_contains_required_lemmas(self) -> None:
         self.assertIn("Dedekind independence lemma", self.text)
         self.assertIn("Artin's fixed-field theorem", self.text)
@@ -60,6 +119,32 @@ class GaloisTheoryPostTests(unittest.TestCase):
         self.assertIn("| $C_2$ | $3$ | $2$ | $6$ |", self.text)
         self.assertIn("| $C_3$ | $4$ | $3$ | $4$ |", self.text)
         self.assertIn(r"A_4/V", self.text)
+
+    def test_a4_svg_has_exactly_the_hasse_cover_relations(self) -> None:
+        diagram = ET.parse(IMAGES[1]).getroot()
+        namespace = {"svg": "http://www.w3.org/2000/svg"}
+        covers = {
+            line.attrib["data-cover"]
+            for line in diagram.findall(".//svg:line[@data-cover]", namespace)
+        }
+        expected = {
+            *(f"1-c2-{index}" for index in range(1, 4)),
+            *(f"1-c3-{index}" for index in range(1, 5)),
+            *(f"c2-{index}-v4" for index in range(1, 4)),
+            *(f"c3-{index}-a4" for index in range(1, 5)),
+            "v4-a4",
+        }
+        self.assertEqual(covers, expected)
+        self.assertEqual(len(covers), 15)
+
+    def test_markdown_headings_use_mathjax_safe_delimiters(self) -> None:
+        headings = (
+            line for line in self.text.splitlines() if line.startswith("#")
+        )
+        for heading in headings:
+            with self.subTest(heading=heading):
+                self.assertNotIn(r"\(", heading)
+                self.assertNotIn(r"\)", heading)
 
     def test_erroneous_polynomial_is_corrected(self) -> None:
         self.assertIn(r"X^4+8X^2+12", self.text)

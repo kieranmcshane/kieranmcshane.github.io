@@ -52,6 +52,8 @@ class ShaSignaturePostTests(unittest.TestCase):
             "rfc5280.html#section-4.1",
             "rfc2104.html#section-2",
             "developer.bitcoin.org/reference/block_chain.html#block-headers",
+            "secg.org/sec1-v2.pdf#page=51",
+            "secg.org/sec2-v2.pdf#page=13",
             "bips.dev/340",
             "shattered.io/static/shattered.pdf",
             "support.apple.com/en-gb/103769",
@@ -108,6 +110,63 @@ class ShaSignaturePostTests(unittest.TestCase):
     def test_self_signed_certificate_is_not_equated_with_trust(self) -> None:
         self.assertIn("does **not** independently prove", self.text)
         self.assertIn("trust decision", self.text)
+
+    def test_ecdsa_is_defined_before_bitcoin_uses_it(self) -> None:
+        definition = self.text.index("### ECDSA in one calculation")
+        bitcoin_use = self.text.index("Bitcoin historically—and still for many outputs—uses")
+        self.assertLess(definition, bitcoin_use)
+        self.assertIn("Q=dG", self.text)
+        self.assertIn(r"s=k^{-1}(z+rd)\bmod n", self.text)
+        self.assertIn(r"u_1G+u_2Q", self.text)
+        self.assertIn(
+            "**ECDSA is the signature scheme; `secp256k1` is the domain-parameter choice",
+            self.text,
+        )
+
+    def test_acronyms_and_jargon_are_defined_contextually(self) -> None:
+        required_expansions = (
+            "SHA means **Secure Hash Algorithm**",
+            "National Institute of Standards and Technology",
+            "Federal Information Processing Standard",
+            "RSA—named after Ron Rivest, Adi Shamir and Leonard Adleman",
+            "**ASN.1** `DigestInfo`",
+            "**Abstract Syntax Notation One**",
+            "**PKCS #1**",
+            "**Request for Comments**",
+            "**Distinguished Encoding Rules**",
+            "**Transport Layer Security**",
+            "**Internet Printing Protocol**",
+            "**Hash-based Message Authentication Code**",
+            "**Elliptic Curve Digital Signature Algorithm**",
+            "**Standards for Efficient Cryptography**",
+            "**Bitcoin Improvement Proposal**",
+        )
+        for expansion in required_expansions:
+            with self.subTest(expansion=expansion):
+                self.assertIn(expansion, self.text)
+
+    def test_interactive_definitions_have_valid_separate_targets(self) -> None:
+        targets = set(re.findall(r'id="(definition-[^"]+)"', self.text))
+        references = re.findall(
+            r'<a class="(?:notation|concept)-ref" '
+            r'href="#([^"]+)" data-definition="([^"]+)"',
+            self.text,
+        )
+
+        self.assertGreaterEqual(len(references), 20)
+        for target, definition in references:
+            with self.subTest(target=target):
+                self.assertIn(target, targets)
+                self.assertGreaterEqual(len(definition.split()), 4)
+
+        for match in re.finditer(
+            r'<span id="(definition-[^"]+)" class="definition-target">(.*?)</span>',
+            self.text,
+            flags=re.DOTALL,
+        ):
+            target, body = match.groups()
+            with self.subTest(self_link=target):
+                self.assertNotIn(f'href="#{target}"', body)
 
     def test_math_and_code_delimiters_are_balanced(self) -> None:
         self.assertEqual(self.text.count("$$") % 2, 0)

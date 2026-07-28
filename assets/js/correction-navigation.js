@@ -58,9 +58,28 @@
     }
   }
 
-  function initializeSectionHighlighting(article) {
+  function configureResponsiveLongformIndex() {
+    var details = document.querySelector('.longform-toc-details');
+    if (!details || !window.matchMedia) {
+      return;
+    }
+
+    var compactLayout = window.matchMedia('(max-width: 1179px)');
+    var synchronize = function (event) {
+      details.open = !event.matches;
+    };
+
+    synchronize(compactLayout);
+    if (compactLayout.addEventListener) {
+      compactLayout.addEventListener('change', synchronize);
+    } else {
+      compactLayout.addListener(synchronize);
+    }
+  }
+
+  function initializeSectionHighlighting(article, navigation) {
     var links = Array.prototype.slice.call(
-      document.querySelectorAll('.correction-toc a[href^="#"]')
+      navigation.querySelectorAll('a[href^="#"]')
     );
 
     if (!links.length || !('IntersectionObserver' in window)) {
@@ -71,7 +90,7 @@
       .map(function (link) {
         return {
           link: link,
-          section: article.querySelector(link.getAttribute('href'))
+          section: document.getElementById(link.getAttribute('href').slice(1))
         };
       })
       .filter(function (item) {
@@ -87,6 +106,12 @@
         }
       });
     }
+
+    links.forEach(function (link) {
+      link.addEventListener('click', function () {
+        select(link);
+      });
+    });
 
     var observer = new IntersectionObserver(
       function (entries) {
@@ -117,14 +142,22 @@
 
   function initializeCorrectionNavigation() {
     var article = document.querySelector('.correction-post');
-    if (!article) {
-      return;
+    var navigation = document.querySelector('.correction-toc');
+
+    if (article && navigation) {
+      populateQuestionIndex(article);
+      addQuestionPermalinks(article);
+      configureResponsiveQuestionIndex();
+      initializeSectionHighlighting(article, navigation);
     }
 
-    populateQuestionIndex(article);
-    addQuestionPermalinks(article);
-    configureResponsiveQuestionIndex();
-    initializeSectionHighlighting(article);
+    article = document.querySelector('.longform-post');
+    navigation = document.querySelector('[data-section-navigation]');
+
+    if (article && navigation) {
+      configureResponsiveLongformIndex();
+      initializeSectionHighlighting(article, navigation);
+    }
   }
 
   if (document.readyState === 'loading') {

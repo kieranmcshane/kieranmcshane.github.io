@@ -4,10 +4,13 @@ math: true
 title: "Galois Theory Without Detours"
 subtitle: "Fields, symmetries, fixed points, and the fundamental correspondence"
 date: 2026-07-27 11:00:00 +0200
+last_modified_at: 2026-07-28 02:15:00 +0200
 categories: [mathematics]
 tags: [algebra, field-theory, group-theory, Galois-theory]
 excerpt: "A self-contained route from undergraduate algebra to the fundamental theorem of Galois theory, with a rigorous proof and complete V4 and A4 correspondence diagrams."
 ---
+
+<div class="longform-post galois-post" markdown="1">
 
 Galois theory is often summarized by a picture: a lattice of fields beside an upside-down lattice of groups. The slogan is that intermediate fields correspond to subgroups. That summary is correct, but compressed enough to hide almost every reason it is true.
 
@@ -28,6 +31,34 @@ $$
 Only after that concrete calculation will we introduce the general definitions needed to state and prove the theorem. The proof is complete: it includes the linear independence of distinct field homomorphisms, Artin's fixed-field theorem, the degree formulas, and the normal-subgroup quotient statement. The final section uses the subgroup structure of $A_4$ to reconstruct a much larger field lattice.
 
 The intended reader knows undergraduate linear algebra, basic polynomial algebra, and the definitions of a group and a subgroup. Nothing from ring theory beyond polynomial division is assumed.
+
+<div class="longform-reading-layout" markdown="1">
+
+<nav class="longform-toc" aria-label="Article navigation" data-section-navigation>
+  <details class="longform-toc-details" open>
+    <summary>Contents</summary>
+    <div class="toc-section-links">
+      <a href="#the-destination">The destination</a>
+      <a href="#start-with-the-diamond">1. The diamond</a>
+      <a href="#field-extensions-and-degree">2. Extensions and degree</a>
+      <a href="#why-automorphisms-permute-roots">3. Automorphisms and roots</a>
+      <a href="#splitting-fields-separability-and-normality">4. Splitting fields</a>
+      <a href="#fixed-fields-and-inclusion-reversal">5. Fixed fields</a>
+      <a href="#the-fundamental-theorem">6. Fundamental theorem</a>
+      <a href="#proof-core-i-independence-of-homomorphisms">7–10. Proof core</a>
+      <a href="#re-reading-the-biquadratic-example">11–13. Worked examples</a>
+      <a href="#decoding-an-a4-lattice">The \(A_4\) lattice</a>
+      <a href="#how-to-use-the-theorem-in-practice">14. Using the theorem</a>
+      <a href="#common-mistakes">15. Common mistakes</a>
+      <a href="#what-the-theorem-is-really-saying">16. The big picture</a>
+      <a href="#a-compact-checklist">Checklist</a>
+      <a href="#comprehension-checks-with-solutions">Exercises</a>
+      <a href="#further-reading">Further reading</a>
+    </div>
+  </details>
+</nav>
+
+<div class="longform-main" markdown="1">
 
 ## The destination
 
@@ -241,9 +272,9 @@ $$
 
 The identity fixes all of $L$, while the whole group fixes only $\mathbb Q$. We have already found the entire correspondence:
 
-| Subgroup $H\leq G$ | Order $|H|$ | Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |
+| Subgroup $H\leq G$ | Order $\lvert H\rvert$ | Fixed field $L^H$ | Degree $[L^H:\mathbb Q]$ |
 |---|---:|---|---:|
-| $\{1\}$ | $1$ | $\mathbb Q(\sqrt2,\sqrt3)$ | $4$ |
+| $\lbrace 1\rbrace$ | $1$ | $\mathbb Q(\sqrt2,\sqrt3)$ | $4$ |
 | $\langle\sigma\rangle$ | $2$ | $\mathbb Q(\sqrt3)$ | $2$ |
 | $\langle\tau\rangle$ | $2$ | $\mathbb Q(\sqrt2)$ | $2$ |
 | $\langle\sigma\tau\rangle$ | $2$ | $\mathbb Q(\sqrt6)$ | $2$ |
@@ -1132,7 +1163,7 @@ We use two facts:
 
 1. If $K\subseteq E\subseteq L$, then $L/E$ is finite Galois.
 2. If $M/N$ is finite Galois, then
-   $|\operatorname{Gal}(M/N)|=[M:N]$.
+   $\lvert\operatorname{Gal}(M/N)\rvert=[M:N]$.
 
 For the first fact, write $L$ as the splitting field over $K$ of a separable polynomial $f\in K[X]$. The same $f$ lies in $E[X]$, and $L$ is still generated over $E$ by all of its roots. Thus $L/E$ is again a splitting field of a separable polynomial.
 
@@ -1413,7 +1444,7 @@ $$
 
 The third field is not an accident of $2$ and $3$. It is forced by the third order-$2$ subgroup.
 
-## 12. A nonabelian checkpoint: the splitting field of \(X^3-2\)
+## 12. A nonabelian checkpoint: the splitting field of $X^3-2$
 
 Before approaching $A_4$, it helps to see what changes when the Galois group is nonabelian.
 
@@ -1620,7 +1651,7 @@ Without a normality or linear-disjointness hypothesis, one should not use that p
 
 These operations clarify why the theorem is an anti-isomorphism of lattices, not merely a bijection of sets.
 
-## 13. Decoding an \(A_4\)-lattice
+## 13. Decoding an $A_4$-lattice
 
 Now suppose $L/K$ is a finite Galois extension with
 
@@ -1695,7 +1726,7 @@ Thus the complete list is:
 
 | Subgroup type | Number | Order |
 |---|---:|---:|
-| $\{1\}$ | $1$ | $1$ |
+| $\lbrace 1\rbrace$ | $1$ | $1$ |
 | $C_2$ | $3$ | $2$ |
 | $C_3$ | $4$ | $3$ |
 | $V_4$ | $1$ | $4$ |
@@ -1719,7 +1750,7 @@ Therefore:
 
 | Subgroup $H$ | Number of such fields | $[L:L^H]$ | $[L^H:K]$ |
 |---|---:|---:|---:|
-| $\{1\}$ | $1$ | $1$ | $12$ |
+| $\lbrace 1\rbrace$ | $1$ | $1$ | $12$ |
 | $C_2$ | $3$ | $2$ | $6$ |
 | $C_3$ | $4$ | $3$ | $4$ |
 | $V_4$ | $1$ | $4$ | $3$ |
@@ -1744,7 +1775,7 @@ None of the order-$3$ subgroups is contained in $V$, and no $C_3$ contains a non
   <figcaption>An abstract $A_4$-extension. The three $C_2$ subgroups sit inside $V_4$, so the cubic fixed field of $V_4$ sits inside the three degree-$6$ fixed fields.</figcaption>
 </figure>
 
-### Which intermediate fields are Galois over \(K\)?
+### Which intermediate fields are Galois over $K$?
 
 The normal subgroups of $A_4$ are
 
@@ -2093,7 +2124,7 @@ $$
 
 This formula is often introduced before the correspondence as an observation about conjugates. The theorem reveals its group-theoretic content: the degree of an element is the index of its stabilizer.
 
-### Example: \(\sqrt2+\sqrt3\)
+### Example: $\sqrt2+\sqrt3$
 
 Take
 
@@ -2143,7 +2174,7 @@ $$
 
 The apparent irrationalities cancel because the coefficients are fixed by all of $G$ and therefore lie in $\mathbb Q$.
 
-### Example: one cube root inside the \(S_3\)-extension
+### Example: one cube root inside the $S_3$-extension
 
 In the splitting field of $X^3-2$, the element
 
@@ -2305,7 +2336,7 @@ At the end of the route, the essential facts are these:
 1. A finite extension has at most its degree many automorphisms.
 2. A finite Galois extension has exactly its degree many automorphisms.
 3. A subgroup $H$ fixes a field $L^H$.
-4. Artin's theorem gives $[L:L^H]=|H|$.
+4. Artin's theorem gives $[L:L^H]=\lvert H\rvert$.
 5. Intermediate fields and subgroups are therefore mutually recoverable.
 6. The correspondence reverses inclusion.
 7. Subgroup order becomes upper field degree; subgroup index becomes lower field degree.
@@ -2441,11 +2472,11 @@ L^G
 \mathbb Q.
 $$
 
-### 6. The cubic field in an \(A_4\)-extension
+### 6. The cubic field in an $A_4$-extension
 
 Suppose $\operatorname{Gal}(L/K)\cong A_4$, and let $V\cong V_4$ be its normal Klein four-subgroup. Determine the degree and Galois group of $L^V/K$.
 
-**Solution.** Since $|A_4|=12$ and $|V|=4$,
+**Solution.** Since $\lvert A_4\rvert=12$ and $\lvert V\rvert=4$,
 
 $$
 [L^V:K]=[A_4:V]=3.
@@ -2465,7 +2496,7 @@ $$
 \operatorname{Gal}(L^V/K)\cong C_3.
 $$
 
-### 7. Why the degree-\(4\) fields in the \(A_4\) lattice are not Galois
+### 7. Why the degree-$4$ fields in the $A_4$ lattice are not Galois
 
 Each degree-$4$ field is fixed by an order-$3$ subgroup $C_i$. Explain why it is not Galois over $K$.
 
@@ -2505,3 +2536,9 @@ $$
 - The Stacks Project, [Section 9.21: Galois theory](https://stacks.math.columbia.edu/tag/09DU), including the [fundamental theorem](https://stacks.math.columbia.edu/tag/09DW) and its finite fixed-field lemma.
 - Emil Artin, *Galois Theory*, for the automorphism-first route that motivates the proof used here.
 - Ian Stewart, *Galois Theory*, for further worked examples and applications to polynomial equations.
+
+</div>
+
+</div>
+
+</div>
