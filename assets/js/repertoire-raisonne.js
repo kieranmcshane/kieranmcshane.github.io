@@ -34,6 +34,21 @@
 
     if (!library || !input || !problems.length) return;
 
+    problems.forEach(function (problem) {
+      var number = problem.id.replace('probleme-', '');
+      var nativeProblem = document.getElementById('probleme-natif-' + number);
+      if (!nativeProblem) return;
+      var nativeReading = nativeProblem.querySelectorAll(
+        '.repertoire-native-statement, .repertoire-native-solution'
+      );
+      var nativeText = Array.from(nativeReading)
+        .map(function (section) {
+          return section.textContent;
+        })
+        .join(' ');
+      problem.dataset.nativeSearch = normalize(nativeText);
+    });
+
     function updateButtons() {
       filters.forEach(function (button) {
         var selected = button.dataset.repertoirePart === activePart;
@@ -51,7 +66,12 @@
           !activePart ||
           problem.closest('[data-repertoire-section]').dataset.part === activePart;
         var matchesSearch =
-          !query || normalize(problem.dataset.search || '').includes(query);
+          !query ||
+          normalize(
+            (problem.dataset.search || '') +
+              ' ' +
+              (problem.dataset.nativeSearch || '')
+          ).includes(query);
         var visible = belongsToPart && matchesSearch;
         problem.hidden = !visible;
         if (visible) visibleCount += 1;

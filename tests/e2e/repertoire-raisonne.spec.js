@@ -19,11 +19,27 @@ test.describe("Répertoire raisonné", () => {
     ).toHaveCount(17);
     await expect(
       page.locator("[data-repertoire-native-problem]")
-    ).toHaveCount(17);
+    ).toHaveCount(127);
+    await expect(
+      page.locator('[data-repertoire-native-problem="1"]')
+    ).toContainText("Un corps fini peut-il être algébriquement clos");
     await expect(
       page.locator('[data-repertoire-native-problem="121"]')
     ).toContainText("Chaque point de X∩I est un point d’accumulation");
     expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("opens a transcribed problem from the catalogue and reveals its solution", async ({
+    page,
+  }) => {
+    await gotoRepertoire(page);
+    await page.locator("#probleme-1 a").click();
+    await expect(page).toHaveURL(/#probleme-natif-1$/);
+    const problem = page.locator('[data-repertoire-native-problem="1"]');
+    const solution = problem.locator(".repertoire-native-solution");
+    await solution.locator("summary").click();
+    await expect(solution).toContainText("Pour tout");
+    await expect(solution).toContainText("n’est pas algébriquement clos");
   });
 
   test("reads a complete native statement and reveals its solution", async ({
@@ -57,6 +73,20 @@ test.describe("Répertoire raisonné", () => {
     );
   });
 
+  test("searches inside a transcribed solution from problems 1–110", async ({
+    page,
+  }) => {
+    await gotoRepertoire(page);
+    await page.locator("#repertoire-search-input").fill("conjuguée de f");
+    await expect(
+      page.locator("[data-repertoire-problem]:visible")
+    ).toHaveCount(1);
+    await expect(page.locator("#probleme-80")).toBeVisible();
+    await expect(page.locator("#repertoire-result-count")).toHaveText(
+      "1 problème affiché"
+    );
+  });
+
   test("filters by editorial part and restores the full catalogue", async ({
     page,
   }) => {
@@ -85,6 +115,9 @@ test.describe("Répertoire raisonné", () => {
     await noScriptPage.goto("/repertoire-raisonne/");
     await expect(
       noScriptPage.locator("[data-repertoire-problem]")
+    ).toHaveCount(127);
+    await expect(
+      noScriptPage.locator("[data-repertoire-native-problem]")
     ).toHaveCount(127);
     await context.close();
   });

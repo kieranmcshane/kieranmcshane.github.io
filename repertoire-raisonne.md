@@ -12,9 +12,9 @@ math: true
   <header class="repertoire-hero">
     <p class="repertoire-kicker">Répertoire avancé · algèbre et analyse</p>
     <h1>127 problèmes, un outil décisif à chaque fois</h1>
-    <p>Questions courtes, preuves denses et contre-exemples : le recueil se lit comme un répertoire de méthodes. Les 17 derniers problèmes sont désormais proposés avec leur énoncé et leur solution directement dans la page.</p>
+    <p>Questions courtes, preuves denses et contre-exemples : le recueil se lit comme un répertoire de méthodes. Les 127 énoncés et solutions sont désormais consultables directement dans la page.</p>
     <div class="repertoire-actions">
-      <a class="repertoire-primary-action" href="#bilan-relecture">Lire les 17 problèmes en ligne <span aria-hidden="true">↓</span></a>
+      <a class="repertoire-primary-action" href="#bilan-relecture">Lire les 127 problèmes en ligne <span aria-hidden="true">↓</span></a>
       <a href="#problemes">Explorer l’index</a>
       <a href="{{ repertoire_pdf }}">Lire le PDF</a>
       <a href="{{ repertoire_pdf }}" download>Télécharger</a>
@@ -23,7 +23,7 @@ math: true
 
   <section class="repertoire-stats" aria-label="Contenu du répertoire">
     <div><strong>127</strong><span>problèmes corrigés</span></div>
-    <div><strong>17</strong><span>fiches natives complètes</span></div>
+    <div><strong>127</strong><span>fiches natives complètes</span></div>
     <div><strong>14</strong><span>chapitres dans l’index</span></div>
     <div><strong>5</strong><span>grandes parties</span></div>
   </section>
@@ -42,8 +42,16 @@ math: true
       <p class="repertoire-kicker">Principe éditorial</p>
       <h2 id="repertoire-intro-title">Chercher une méthode, pas seulement un chapitre</h2>
     </div>
-    <p>Le PDF conserve l’ordre original et la solution immédiatement après l’énoncé. Cette page ajoute cinq parties cohérentes, une recherche plein texte sur les titres et des parcours transversaux. Pour les problèmes 111 à 127, l’énoncé et la preuve sont composés nativement avec MathJax et se lisent sans quitter le site.</p>
+    <p>Le PDF conserve l’ordre original et la solution immédiatement après l’énoncé. Cette page ajoute cinq parties cohérentes, une recherche plein texte sur les titres et des parcours transversaux. Les 127 problèmes se lisent sans quitter le site ; le PDF reste disponible comme fac-similé de contrôle.</p>
   </section>
+
+  <aside class="repertoire-sources" aria-labelledby="repertoire-sources-title">
+    <div>
+      <p class="repertoire-kicker">Sources et prolongements</p>
+      <h2 id="repertoire-sources-title">Une source primaire, des repères externes</h2>
+    </div>
+    <p>Les énoncés et solutions sont transcrits depuis le PDF revu. Les liens ajoutés dans les fiches conduisent vers des développements et références thématiques recensés par <a href="https://agreg-maths.fr/">agreg-maths.fr</a>. La page des <a href="https://agreg-maths.fr/ressources/retours">retours d’oraux</a> permet en complément de repérer les questions effectivement posées par des jurys ; ces témoignages ne sont pas traités comme des corrigés canoniques.</p>
+  </aside>
 
   <section class="repertoire-paths" aria-labelledby="repertoire-paths-title">
     <div class="repertoire-section-heading">
@@ -69,7 +77,7 @@ math: true
         <span>03</span>
         <h3>Contre-exemples</h3>
         <p>Matrices symétriques complexes, réciproque de Cesàro, métriques équivalentes et loi log-normale.</p>
-        <a href="{{ repertoire_pdf }}#page=10">Lire un premier contre-exemple</a>
+        <a href="#probleme-natif-16">Lire un premier contre-exemple</a>
       </article>
       <article>
         <span>04</span>
@@ -144,19 +152,11 @@ math: true
                   data-repertoire-problem
                   data-search="{{ problem[0] }} {{ problem[1] | downcase | escape }} {{ chapter.title | downcase | escape }} {{ part.title | downcase | escape }}"
                 >
-                  {% if problem[0] >= 111 %}
                   <a href="#probleme-natif-{{ problem[0] }}" aria-label="Problème {{ problem[0] }} — {{ problem[1] }} — lire l’énoncé et la solution sur cette page">
                     <span class="repertoire-problem-number">{{ problem[0] }}</span>
                     <span class="repertoire-problem-title">{{ problem[1] }}</span>
                     <span class="repertoire-problem-page">Lire ici <span aria-hidden="true">↓</span></span>
                   </a>
-                  {% else %}
-                  <a href="{{ repertoire_pdf }}#page={{ problem[2] }}" aria-label="Problème {{ problem[0] }} — {{ problem[1] }} — ouvrir la page {{ problem[2] }} du PDF">
-                    <span class="repertoire-problem-number">{{ problem[0] }}</span>
-                    <span class="repertoire-problem-title">{{ problem[1] }}</span>
-                    <span class="repertoire-problem-page">p. {{ problem[2] }} <span aria-hidden="true">↗</span></span>
-                  </a>
-                  {% endif %}
                 </li>
               {% endfor %}
             </ol>
@@ -174,12 +174,12 @@ math: true
       </div>
     </div>
     <div class="repertoire-highlight-grid">
-      <a href="{{ repertoire_pdf }}#page=7"><span>8</span>Extension quadratique et indépendance de \(1,\gamma,\gamma^2/2\)</a>
-      <a href="{{ repertoire_pdf }}#page=11"><span>18</span>Maximalité compacte de \(O_n(\mathbb R)\)</a>
-      <a href="{{ repertoire_pdf }}#page=26"><span>57</span>Fermeture d’une classe de similitude</a>
-      <a href="{{ repertoire_pdf }}#page=29"><span>65</span>Dimension d’un espace de matrices nilpotentes</a>
-      <a href="{{ repertoire_pdf }}#page=41"><span>82</span>Inégalité de Young et existence presque partout</a>
-      <a href="{{ repertoire_pdf }}#page=51"><span>100</span>Non-surjectivité de \(L^1\) vers \(C_0\)</a>
+      <a href="#probleme-natif-8"><span>8</span>Extension quadratique et indépendance de \(1,\gamma,\gamma^2/2\)</a>
+      <a href="#probleme-natif-18"><span>18</span>Maximalité compacte de \(O_n(\mathbb R)\)</a>
+      <a href="#probleme-natif-57"><span>57</span>Fermeture d’une classe de similitude</a>
+      <a href="#probleme-natif-65"><span>65</span>Dimension d’un espace de matrices nilpotentes</a>
+      <a href="#probleme-natif-82"><span>82</span>Inégalité de Young et existence presque partout</a>
+      <a href="#probleme-natif-100"><span>100</span>Non-surjectivité de \(L^1\) vers \(C_0\)</a>
       <a href="#probleme-natif-121"><span>121</span>Argument de Baire sur les jets · lire ici</a>
       <a href="#probleme-natif-125"><span>125</span>Famille de Stieltjes log-normale · lire ici</a>
     </div>
@@ -188,12 +188,55 @@ math: true
   <section class="repertoire-native" id="bilan-relecture" aria-labelledby="repertoire-native-title">
     <div class="repertoire-section-heading">
       <div>
-        <p class="repertoire-kicker">Lecture intégrée · chapitres 14 à 16</p>
-        <h2 id="repertoire-native-title">17 problèmes à travailler directement ici</h2>
+        <p class="repertoire-kicker">Lecture intégrée · corpus complet</p>
+        <h2 id="repertoire-native-title">127 problèmes à travailler directement ici</h2>
       </div>
-      <p>Énoncés complets · solutions repliables · notes de relecture</p>
+      <p>Énoncés complets · solutions repliables · références · notes de relecture</p>
     </div>
-    <p class="repertoire-native-intro">Cette section ne renvoie plus le lecteur au livre pour comprendre le problème. Chaque fiche contient l’énoncé, la démonstration complète et le point précis contrôlé pendant la relecture. Le fac-similé PDF n’apparaît qu’en source secondaire.</p>
+    <p class="repertoire-native-intro">Cette section ne renvoie plus le lecteur au livre pour comprendre le problème. Chaque fiche contient l’énoncé, la solution et des prolongements documentaires lorsqu’ils sont pertinents. Le fac-similé PDF n’apparaît qu’en source primaire de contrôle et en version téléchargeable.</p>
+
+    {% for part in site.data.repertoire_raisonne %}
+      {% for chapter in part.chapters %}
+        {% assign native_transcriptions = site.data.repertoire_native_transcriptions | where: "chapterId", chapter.id %}
+        {% if native_transcriptions.size > 0 %}
+          <section class="repertoire-native-chapter" aria-labelledby="native-chapter-{{ chapter.id }}">
+            <header>
+              <span>{{ chapter.number }}</span>
+              <div>
+                <h3 id="native-chapter-{{ chapter.id }}">{{ chapter.title }}</h3>
+                <p>{{ native_transcriptions.size }} énoncés et solutions</p>
+              </div>
+            </header>
+            {% include repertoire-native-references.html chapter_id=chapter.id %}
+            <div class="repertoire-native-list">
+              {% for item in native_transcriptions %}
+                <article id="probleme-natif-{{ item.number }}" data-repertoire-native-problem="{{ item.number }}">
+                  <header>
+                    <div>
+                      <span>Problème {{ item.number }}</span>
+                      <h4>{{ item.title }}</h4>
+                    </div>
+                    <strong>Transcription native</strong>
+                  </header>
+                  <section class="repertoire-native-statement" aria-labelledby="enonce-{{ item.number }}">
+                    <h5 id="enonce-{{ item.number }}">Énoncé</h5>
+                    <div class="repertoire-native-transcription">{{ item.statement | escape }}</div>
+                  </section>
+                  <details class="repertoire-native-solution">
+                    <summary><span>Afficher la solution</span><small>Solution du recueil</small></summary>
+                    <div class="repertoire-native-transcription">{{ item.solution | escape }}</div>
+                  </details>
+                  <footer>
+                    <span>{{ item.transcription }}</span>
+                    <a href="{{ repertoire_pdf }}#page={{ item.pdfPage }}">Comparer au fac-similé · p. {{ item.pdfPage }}</a>
+                  </footer>
+                </article>
+              {% endfor %}
+            </div>
+          </section>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
 
     <section class="repertoire-native-chapter" aria-labelledby="native-chapter-14">
       <header>
@@ -203,6 +246,7 @@ math: true
           <p>Problèmes 111–121 · onze énoncés et solutions</p>
         </div>
       </header>
+      {% include repertoire-native-references.html chapter_id="topologie-baire" %}
       <div class="repertoire-native-list">
         <article id="probleme-natif-111" data-repertoire-native-problem="111" data-repertoire-audit-problem="111">
           <header><div><span>Problème 111</span><h4>Point fixe d’une application non expansive sur un compact convexe</h4></div><strong>Correct</strong></header>
@@ -499,6 +543,7 @@ math: true
           <p>Problèmes 122–125 · quatre énoncés et solutions</p>
         </div>
       </header>
+      {% include repertoire-native-references.html chapter_id="probabilites-moments" %}
       <div class="repertoire-native-list">
         <article id="probleme-natif-122" data-repertoire-native-problem="122" data-repertoire-audit-problem="122">
           <header><div><span>Problème 122</span><h4>Convergence en probabilité sans convergence presque sûre</h4></div><strong>Correct</strong></header>
@@ -639,6 +684,7 @@ math: true
           <p>Problèmes 126–127 · deux énoncés et solutions</p>
         </div>
       </header>
+      {% include repertoire-native-references.html chapter_id="suites-fonctions-reelles" %}
       <div class="repertoire-native-list">
         <article id="probleme-natif-126" data-repertoire-native-problem="126" data-repertoire-audit-problem="126">
           <header><div><span>Problème 126</span><h4>Toutes les dérivées dominées par un polynôme de degré impair</h4></div><strong>Correct</strong></header>
@@ -754,7 +800,7 @@ math: true
       <h2 id="repertoire-notes-title">Ce que la page prépare</h2>
     </div>
     <ul>
-      <li>étendre les fiches natives aux problèmes 1 à 110 ;</li>
+      <li>reprendre progressivement les formules extraites en MathJax éditorial ;</li>
       <li>ajouter niveau, nature et outil décisif à chaque problème ;</li>
       <li>construire un index des théorèmes et un index des méthodes ;</li>
       <li>déplacer les problèmes 126-127 auprès des suites et fonctions réelles.</li>
