@@ -42,6 +42,20 @@ test.describe("Répertoire raisonné", () => {
     await expect(solution).toContainText("n’est pas algébriquement clos");
   });
 
+  test("renders the corrected finite-field formulas with MathJax", async ({
+    page,
+  }) => {
+    await gotoRepertoire(page);
+    const problem = page.locator('[data-repertoire-native-problem="6"]');
+    const solution = problem.locator(".repertoire-native-solution");
+    await solution.locator("summary").click();
+    expect(await solution.locator("mjx-container").count()).toBeGreaterThan(12);
+    await expect(solution).toContainText(
+      "Chaque facteur irréductible a donc degré"
+    );
+    await expect(problem).toContainText("Formules recomposées et contrôlées");
+  });
+
   test("reads a complete native statement and reveals its solution", async ({
     page,
   }) => {

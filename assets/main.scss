@@ -11631,7 +11631,18 @@ body:has(.repertoire-library) {
   font-size: 0.86rem;
   line-height: 1.58;
   overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  // Poppler inserts visual line breaks around superscripts, fractions, and
+  // page-width prose. Let HTML reflow those extracted lines; reviewed
+  // MathJax overrides retain their own paragraph and display structure.
+  white-space: normal;
+}
+
+.repertoire-native-transcription > :first-child {
+  margin-top: 0;
+}
+
+.repertoire-native-transcription > :last-child {
+  margin-bottom: 0;
 }
 
 .repertoire-native-statement mjx-container[display="true"],

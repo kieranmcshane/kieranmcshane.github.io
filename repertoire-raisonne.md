@@ -220,11 +220,23 @@ math: true
                   </header>
                   <section class="repertoire-native-statement" aria-labelledby="enonce-{{ item.number }}">
                     <h5 id="enonce-{{ item.number }}">Énoncé</h5>
-                    <div class="repertoire-native-transcription">{{ item.statement | escape }}</div>
+                    <div class="repertoire-native-transcription">
+                      {% if item.statementMathjax %}
+                        {{ item.statementMathjax }}
+                      {% else %}
+                        {{ item.statement | escape }}
+                      {% endif %}
+                    </div>
                   </section>
                   <details class="repertoire-native-solution">
                     <summary><span>Afficher la solution</span><small>Solution du recueil</small></summary>
-                    <div class="repertoire-native-transcription">{{ item.solution | escape }}</div>
+                    <div class="repertoire-native-transcription">
+                      {% if item.solutionMathjax %}
+                        {{ item.solutionMathjax }}
+                      {% else %}
+                        {{ item.solution | escape }}
+                      {% endif %}
+                    </div>
                   </details>
                   <footer>
                     <span>{{ item.transcription }}</span>
