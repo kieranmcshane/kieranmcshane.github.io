@@ -1778,6 +1778,11 @@ h001,Hana,Theta,CZE
         self.assertIn('class="rating-lab-trust-bar"', page)
         self.assertIn("site.data.rating_lab_default.freshness", page)
         self.assertIn("site.data.rating_lab_default.parameter_evidence", page)
+        self.assertIn("site.data.rating_lab_default.audit_summary", page)
+        self.assertIn('id="audit-summary"', page)
+        self.assertIn("audit_summary.model.checks_label", page)
+        self.assertIn("Full replay required", page)
+        self.assertIn(".rating-lab-audit-metrics", styles)
         self.assertNotIn(">Loading the latest ratings…<", page)
         self.assertNotIn("<dd>Loading…</dd>", page)
         self.assertIn('aria-label="Competition forecasts"', page)
@@ -2628,6 +2633,7 @@ class SplitAssetTests(unittest.TestCase):
                 first["parameter_evidence"][0]["candidates"],
                 ["k=16", "k=24", "k=32"],
             )
+            self.assertFalse(first["audit_summary"]["available"])
 
             changed = json.loads((output / "chess.json").read_text())
             changed["models"]["glicko2"]["metrics"]["log_loss"] = 0.55
@@ -2643,6 +2649,161 @@ class SplitAssetTests(unittest.TestCase):
                 if cohort["sport"] == "chess"
             )
             self.assertEqual(chess["log_loss"], 0.55)
+
+    def test_default_view_publishes_readable_model_and_market_audit_verdicts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            for sport in ("tennis", "football", "national-football", "chess"):
+                (output / f"{sport}.json").write_text(
+                    json.dumps(
+                        self._default_view_payload(
+                            sport,
+                            elo_log_loss=0.62,
+                            glicko_log_loss=0.59,
+                        )
+                    )
+                )
+            audit_dir = output / "audit"
+            audit_dir.mkdir()
+            model_sports = []
+            for sport in ("tennis", "football", "national-football", "chess"):
+                model_sports.append(
+                    {
+                        "sport": sport,
+                        "status": "pass",
+                        "verification_level": "full_replay",
+                        "checks": [
+                            {
+                                "id": "audit_packet_hash",
+                                "passed": True,
+                                "evidence": sport[0] * 64,
+                            },
+                            {
+                                "id": "stable_replay_order",
+                                "passed": True,
+                                "evidence": "100 normalized matches",
+                            },
+                            {
+                                "id": "chronological_split_counts",
+                                "passed": True,
+                                "evidence": json.dumps(
+                                    {
+                                        "warmup_matches": 60,
+                                        "validation_matches": 20,
+                                        "evaluation_matches": 20,
+                                    }
+                                ),
+                            },
+                        ],
+                    }
+                )
+            (audit_dir / "report.json").write_text(
+                json.dumps(
+                    {
+                        "audit_schema_version": "1.0.0",
+                        "generated_at": "2026-07-29T11:44:36+00:00",
+                        "status": "pass",
+                        "verification_level": "full_replay",
+                        "code": {
+                            "matches": True,
+                            "expected_revision": "a" * 40,
+                            "auditor_revision": "a" * 40,
+                        },
+                        "sports": model_sports,
+                    }
+                )
+            )
+            market_audits = []
+            for provider in ("Polymarket", "Kalshi"):
+                market_audits.append(
+                    {
+                        "sport": "football",
+                        "provider": provider,
+                        "status": "pass",
+                        "audit": {
+                            "status": "collecting_executable_history",
+                            "history_snapshots": 1,
+                            "decisions": [
+                                {
+                                    "action": "no_bet",
+                                    "reason": "no_overlapping_execution_quote",
+                                },
+                                {
+                                    "action": "no_bet",
+                                    "reason": "no_overlapping_execution_quote",
+                                },
+                            ],
+                            "positions": [],
+                            "audit_sha256": provider[0].lower() * 64,
+                        },
+                    }
+                )
+            (audit_dir / "market-strategy-report.json").write_text(
+                json.dumps(
+                    {
+                        "audit_schema_version": "1.0.0",
+                        "status": "pass",
+                        "audit_sha256": "a" * 64,
+                        "audits": market_audits,
+                    }
+                )
+            )
+
+            summary = build_default_view(output)["audit_summary"]
+            self.assertTrue(summary["available"])
+            self.assertEqual(summary["status"], "pass")
+            self.assertEqual(summary["model"]["sports_passed"], 4)
+            self.assertEqual(summary["model"]["checks_passed"], 12)
+            self.assertEqual(summary["model"]["checks_total"], 12)
+            self.assertTrue(summary["model"]["code_matches"])
+            self.assertTrue(summary["model"]["full_replay_verified"])
+            self.assertFalse(summary["model"]["revision_mismatch"])
+            self.assertEqual(summary["market"]["audits_passed"], 2)
+            self.assertEqual(summary["market"]["decisions"], 4)
+            self.assertEqual(summary["market"]["positions"], 0)
+            self.assertEqual(
+                summary["market"]["reason_summary"],
+                [
+                    {
+                        "reason": "no_overlapping_execution_quote",
+                        "label": (
+                            "No matching executable quote at the decision timestamp"
+                        ),
+                        "count": 4,
+                    }
+                ],
+            )
+
+            model_report = json.loads((audit_dir / "report.json").read_text())
+            model_report.update(
+                {
+                    "status": "fail",
+                    "verification_level": "artifact_integrity",
+                    "code": {
+                        "matches": False,
+                        "expected_revision": "d49c618" + "0" * 33,
+                        "auditor_revision": "03269ed" + "0" * 33,
+                    },
+                }
+            )
+            for result in model_report["sports"]:
+                result["verification_level"] = "artifact_integrity"
+            (audit_dir / "report.json").write_text(json.dumps(model_report))
+
+            mismatch = build_default_view(output)["audit_summary"]
+            self.assertEqual(mismatch["status"], "fail")
+            self.assertEqual(
+                mismatch["status_label"],
+                "Packet integrity passed; code revision changed",
+            )
+            self.assertTrue(mismatch["model"]["packet_integrity_verified"])
+            self.assertFalse(mismatch["model"]["full_replay_verified"])
+            self.assertTrue(mismatch["model"]["revision_mismatch"])
+            self.assertEqual(
+                mismatch["model"]["expected_revision_short"],
+                "d49c6180",
+            )
+            self.assertIn("full replay is required", mismatch["status_detail"])
 
     def test_default_view_never_mixes_tournament_markets_into_match_verdict(self):
         with tempfile.TemporaryDirectory() as temporary:
