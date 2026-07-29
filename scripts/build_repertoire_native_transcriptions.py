@@ -124,6 +124,31 @@ def split_problems(raw_text: str) -> dict[int, tuple[str, str]]:
 
 def reviewed_overrides() -> dict[int, dict[str, str]]:
     return {
+        6: {
+            "statementMathjax": (
+                "<p>Soit \\(P\\in\\mathbb F_q[X]\\) irréductible de degré \\(d\\), "
+                "et soit \\(r\\mid d\\). Décrire sa factorisation dans "
+                "\\(\\mathbb F_{q^r}[X]\\).</p>"
+            ),
+            "solutionMathjax": (
+                "<p>Soit \\(\\alpha\\) une racine de \\(P\\) dans "
+                "\\(\\mathbb F_{q^d}\\). Sur \\(\\mathbb F_q\\), ses conjugués sont</p>"
+                "\\[\\alpha,\\ \\alpha^q,\\ \\ldots,\\ \\alpha^{q^{d-1}}.\\]"
+                "<p>Sur \\(\\mathbb F_{q^r}\\), le Frobenius pertinent est "
+                "\\(x\\mapsto x^{q^r}\\). Pour "
+                "\\(s\\in\\{0,\\ldots,r-1\\}\\), l’orbite de "
+                "\\(\\alpha^{q^s}\\) sous ce Frobenius a longueur</p>"
+                "\\[\\frac{d}{\\gcd(d,r)}=\\frac{d}{r},\\]"
+                "<p>car \\(r\\mid d\\). Chaque facteur irréductible a donc degré "
+                "\\(d/r\\). Les \\(d\\) racines se répartissent en \\(r\\) "
+                "orbites : \\(P\\) est le produit de \\(r\\) facteurs "
+                "irréductibles distincts, tous de degré \\(d/r\\).</p>"
+                "<p><strong>Remarque.</strong> Sans l’hypothèse \\(r\\mid d\\), "
+                "le nombre de facteurs est \\(\\gcd(d,r)\\) et leur degré commun "
+                "vaut \\(d/\\gcd(d,r)\\).</p>"
+            ),
+            "transcription": "Formules recomposées et contrôlées",
+        },
         80: {
             "statement": (
                 "Soit f ∈ C([0,1], ℂ) telle que\n\n"

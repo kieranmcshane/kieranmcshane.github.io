@@ -92,11 +92,18 @@ class RepertoireRaisonneTests(unittest.TestCase):
             self.assertGreater(len(item["solution"]), 40)
             self.assertIn(item["chapterId"], REFERENCES)
             self.assertGreaterEqual(len(REFERENCES[item["chapterId"]]), 1)
-            self.assertEqual(
-                item["transcription"],
-                "Transcription textuelle issue du fac-similé",
-            )
+            if item["number"] != 6:
+                self.assertEqual(
+                    item["transcription"],
+                    "Transcription textuelle issue du fac-similé",
+                )
         self.assertIn("pdftotext", EXTRACTOR)
+        self.assertIn(r"\alpha^{q^{d-1}}", NATIVE[5]["solutionMathjax"])
+        self.assertIn(r"\frac{d}{\gcd(d,r)}", NATIVE[5]["solutionMathjax"])
+        self.assertEqual(
+            NATIVE[5]["transcription"],
+            "Formules recomposées et contrôlées",
+        )
         self.assertIn("conjuguée de f", NATIVE[79]["solution"])
 
     def test_references_are_curated_for_every_editorial_chapter(self):
@@ -166,6 +173,7 @@ class RepertoireRaisonneTests(unittest.TestCase):
         self.assertIn("repertoire-native-list", STYLES)
         self.assertIn("repertoire-native-solution", STYLES)
         self.assertIn("repertoire-native-transcription", STYLES)
+        self.assertIn("white-space: normal", STYLES)
         self.assertIn("repertoire-native-references", STYLES)
         self.assertIn("repertoire-search-input", SCRIPT)
         self.assertIn("nativeSearch", SCRIPT)

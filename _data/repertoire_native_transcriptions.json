@@ -69,7 +69,9 @@
     "partId": "structures-algebriques",
     "statement": "Soit 𝑃 ∈ F𝑞[𝑋] irréductible de degré 𝑑, et soit 𝑟 | 𝑑. Décrire sa factorisation dans F𝑞𝑟 [𝑋].",
     "solution": "Soit 𝛼 une racine de 𝑃 dans F𝑞𝑑. Sur F𝑞, ses conjugués sont\n𝛼, 𝛼𝑞\n, .. . , 𝛼𝑞𝑑−1\n.\nSur F𝑞𝑟 , le Frobenius pertinent est 𝑥 ↦→ 𝑥𝑞𝑟\n. L’orbite de 𝛼𝑞𝑠\nsous ce Frobenius a longueur\n𝑑\ngcd(𝑑, 𝑟)\n=\n𝑑\n𝑟\n,\ncar 𝑟 | 𝑑. Chaque facteur irréductible a donc degré 𝑑/𝑟. Les 𝑑 racines se répartissent en 𝑟\norbites : 𝑃 est le produit de 𝑟 facteurs irréductibles distincts, tous de degré 𝑑/𝑟. □\nRemarque. Sans l’hypothèse 𝑟 | 𝑑, le nombre de facteurs est gcd(𝑑, 𝑟) et leur degré commun\nvaut 𝑑/gcd(𝑑, 𝑟).",
-    "transcription": "Transcription textuelle issue du fac-similé"
+    "transcription": "Formules recomposées et contrôlées",
+    "statementMathjax": "<p>Soit \\(P\\in\\mathbb F_q[X]\\) irréductible de degré \\(d\\), et soit \\(r\\mid d\\). Décrire sa factorisation dans \\(\\mathbb F_{q^r}[X]\\).</p>",
+    "solutionMathjax": "<p>Soit \\(\\alpha\\) une racine de \\(P\\) dans \\(\\mathbb F_{q^d}\\). Sur \\(\\mathbb F_q\\), ses conjugués sont</p>\\[\\alpha,\\ \\alpha^q,\\ \\ldots,\\ \\alpha^{q^{d-1}}.\\]<p>Sur \\(\\mathbb F_{q^r}\\), le Frobenius pertinent est \\(x\\mapsto x^{q^r}\\). Pour \\(s\\in\\{0,\\ldots,r-1\\}\\), l’orbite de \\(\\alpha^{q^s}\\) sous ce Frobenius a longueur</p>\\[\\frac{d}{\\gcd(d,r)}=\\frac{d}{r},\\]<p>car \\(r\\mid d\\). Chaque facteur irréductible a donc degré \\(d/r\\). Les \\(d\\) racines se répartissent en \\(r\\) orbites : \\(P\\) est le produit de \\(r\\) facteurs irréductibles distincts, tous de degré \\(d/r\\).</p><p><strong>Remarque.</strong> Sans l’hypothèse \\(r\\mid d\\), le nombre de facteurs est \\(\\gcd(d,r)\\) et leur degré commun vaut \\(d/\\gcd(d,r)\\).</p>"
   },
   {
     "number": 7,
