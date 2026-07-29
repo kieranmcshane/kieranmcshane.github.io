@@ -51,7 +51,9 @@ test.describe("MAT101 native library", () => {
     );
 
     const exercise = page.locator("#exercice-3-31");
-    await expect(exercise.locator(".mat101-difficulty")).toHaveText("***");
+    await expect(
+      exercise.locator(".mat101-difficulty .mat101-level-advanced")
+    ).toHaveCount(1);
     await expect(exercise.locator(".mat101-difficulty")).toHaveAttribute(
       "aria-label",
       "Difficulté : approfondissement"
@@ -96,11 +98,15 @@ test.describe("MAT101 native library", () => {
     await gotoLibrary(page);
 
     const toc = page.locator("[data-mat101-toc]");
+    await expect(toc).not.toHaveAttribute("open", "");
     if ((await toc.getAttribute("open")) === null) {
       await toc.locator(":scope > summary").click();
     }
 
     await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
+    await expect(toc.locator(".mat101-difficulty-legend")).toContainText(
+      "Niveau examen"
+    );
     await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
 
     await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
