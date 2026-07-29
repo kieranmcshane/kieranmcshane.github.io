@@ -13,6 +13,15 @@ from unittest.mock import patch
 from urllib.error import HTTPError
 
 from rating_lab.models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
+from rating_lab.audit import (
+    audit_packet as audit_model_packet,
+    encode_packet,
+    packet_sha256,
+)
+from rating_lab.market_audit import (
+    build_market_strategy_report,
+    build_provider_paper_audit,
+)
 from rating_lab.player_models import LineupTrueSkill
 from rating_lab.player_pipeline import (
     API_FOOTBALL_LEAGUE_COHORTS,
@@ -1001,8 +1010,8 @@ h001,Hana,Theta,CZE
         current = {
             "status": "current",
             "source": "Polymarket Gamma API",
-            "fetched_at": "2026-08-01T12:00:00+00:00",
-            "checked_at": "2026-08-01T12:00:00+00:00",
+            "fetched_at": "2026-08-01T12:01:00+00:00",
+            "checked_at": "2026-08-01T12:01:00+00:00",
             "competitions": [{
                 "competition_id": "premier-league",
                 "event_id": "99",
@@ -1014,8 +1023,48 @@ h001,Hana,Theta,CZE
                 "coverage": 1.0,
                 "raw_yes_price_sum": 1.0,
                 "outcomes": [
-                    {"entity_id": "arsenal", "normalized_probability": 0.6},
-                    {"entity_id": "chelsea", "normalized_probability": 0.4},
+                    {
+                        "entity_id": "arsenal",
+                        "name": "Arsenal",
+                        "market_id": "arsenal-yes",
+                        "normalized_probability": 0.6,
+                        "raw_yes_price": 0.6,
+                        "best_bid": 0.39,
+                        "best_ask": 0.4,
+                        "top_ask_size": 100.0,
+                        "book_captured_at": "2026-08-01T12:00:30+00:00",
+                        "request_started_at": "2026-08-01T12:00:29+00:00",
+                        "response_received_at": "2026-08-01T12:00:30+00:00",
+                        "response_sha256": "1" * 64,
+                        "book_hash": "b" * 64,
+                        "liquidity_usd": 10000.0,
+                        "fee_type": "sports_quadratic",
+                        "taker_fee_rate": 0.0,
+                        "fee_request_started_at": "2026-08-01T12:00:30+00:00",
+                        "fee_response_received_at": "2026-08-01T12:00:31+00:00",
+                        "fee_response_sha256": "2" * 64,
+                    },
+                    {
+                        "entity_id": "chelsea",
+                        "name": "Chelsea",
+                        "market_id": "chelsea-yes",
+                        "normalized_probability": 0.4,
+                        "raw_yes_price": 0.4,
+                        "best_bid": 0.59,
+                        "best_ask": 0.6,
+                        "top_ask_size": 100.0,
+                        "book_captured_at": "2026-08-01T12:00:30+00:00",
+                        "request_started_at": "2026-08-01T12:00:29+00:00",
+                        "response_received_at": "2026-08-01T12:00:30+00:00",
+                        "response_sha256": "3" * 64,
+                        "book_hash": "c" * 64,
+                        "liquidity_usd": 10000.0,
+                        "fee_type": "sports_quadratic",
+                        "taker_fee_rate": 0.0,
+                        "fee_request_started_at": "2026-08-01T12:00:30+00:00",
+                        "fee_response_received_at": "2026-08-01T12:00:31+00:00",
+                        "fee_response_sha256": "4" * 64,
+                    },
                 ],
             }],
             "searches": [{"competition_id": "premier-league", "status": "matched"}],
@@ -1046,6 +1095,16 @@ h001,Hana,Theta,CZE
             {row["id"] for row in benchmark["benchmark"]["forecasters"]},
             {"market", "elo", "glicko2", "trueskill", "robust"},
         )
+        self.assertEqual(benchmark["paper_trading"]["status"], "scored")
+        self.assertEqual(len(benchmark["paper_trading"]["positions"]), 4)
+        self.assertTrue(all(
+            row["status"] == "resolved"
+            for row in benchmark["paper_trading"]["positions"]
+        ))
+        self.assertTrue(all(
+            len(row["decision_id"]) == 20
+            for row in benchmark["paper_trading"]["decisions"]
+        ))
         next_season = json.loads(json.dumps(competition))
         next_season["season"] = "2027-28"
         next_season["state"] = "upcoming"
@@ -1065,7 +1124,180 @@ h001,Hana,Theta,CZE
         self.assertEqual(retained["benchmark"]["status"], "scored")
         self.assertEqual(retained["benchmark"]["resolved_competitions"], 1)
 
-    def test_market_history_keeps_one_latest_snapshot_per_utc_day(self):
+    def test_paper_trading_withholds_fill_without_depth_and_fee_evidence(self):
+        history = [{
+            "captured_at": "2026-08-01T12:01:00+00:00",
+            "competition_id": "premier-league",
+            "competition_label": "Premier League",
+            "competition_season": "2026-27",
+            "event_id": "epl-27",
+            "event_title": "Premier League Champion",
+            "event_url": "https://example.test/epl",
+            "snapshot_sha256": "a" * 64,
+            "model_forecasts": {
+                model: {
+                    "probabilities": {"arsenal": 0.8, "chelsea": 0.2},
+                    "other_probability": 0.0,
+                }
+                for model in ("elo", "glicko2", "trueskill", "robust")
+            },
+            "execution_quotes": [{
+                "entity_id": "arsenal",
+                "name": "Arsenal",
+                "market_id": "arsenal-yes",
+                "best_ask": 0.4,
+            }],
+        }]
+        audit = build_provider_paper_audit(history, "Polymarket")
+        self.assertEqual(audit["status"], "collecting_executable_history")
+        self.assertEqual(audit["positions"], [])
+        self.assertEqual(len(audit["decisions"]), 4)
+        self.assertTrue(all(
+            row["action"] == "no_bet"
+            and row["reason"] == "missing_top_of_book_depth"
+            for row in audit["decisions"]
+        ))
+
+    def test_kalshi_paper_trade_applies_published_base_rate_and_multiplier(self):
+        history = [{
+            "captured_at": "2026-08-01T12:01:00+00:00",
+            "competition_id": "premier-league",
+            "competition_label": "Premier League",
+            "competition_season": "2026-27",
+            "event_id": "KXEPL-27",
+            "event_title": "Premier League Champion",
+            "event_url": "https://kalshi.com/markets/epl",
+            "snapshot_sha256": "a" * 64,
+            "model_forecasts": {
+                model: {
+                    "probabilities": {"arsenal": 0.8},
+                    "other_probability": 0.2,
+                }
+                for model in ("elo", "glicko2", "trueskill", "robust")
+            },
+            "execution_quotes": [{
+                "entity_id": "arsenal",
+                "name": "Arsenal",
+                "market_id": "KXEPL-27-ARS",
+                "best_bid": 0.49,
+                "best_ask": 0.5,
+                "top_ask_size": 100.0,
+                "book_captured_at": "2026-08-01T12:00:30+00:00",
+                "request_started_at": "2026-08-01T12:00:29+00:00",
+                "response_received_at": "2026-08-01T12:00:30+00:00",
+                "response_sha256": "c" * 64,
+                "book_hash": "b" * 64,
+                "fee_type": "quadratic",
+                "fee_multiplier": 1.0,
+                "taker_fee_base_rate": 0.07,
+                "fee_schedule_effective_at": "2026-07-07",
+                "fee_schedule_url": "https://kalshi.com/docs/kalshi-fee-schedule.pdf",
+                "fee_request_started_at": "2026-08-01T11:59:58+00:00",
+                "fee_response_received_at": "2026-08-01T11:59:59+00:00",
+                "fee_response_sha256": "d" * 64,
+            }],
+            "resolution": {
+                "winner_id": "arsenal",
+                "winner_name": "Arsenal",
+                "resolved_at": "2027-05-20T18:00:00+00:00",
+            },
+        }]
+        audit = build_provider_paper_audit(history, "Kalshi")
+        self.assertEqual(audit["status"], "scored")
+        self.assertEqual(len(audit["positions"]), 4)
+        position = audit["positions"][0]
+        expected_fee = math.ceil(
+            0.07 * position["contracts"] * 0.5 * 0.5 * 10000 - 1e-12
+        ) / 10000
+        self.assertAlmostEqual(position["fee_usd"], expected_fee, places=4)
+        self.assertLess(position["fee_usd"], 1.0)
+        self.assertEqual(
+            audit["decisions"][0]["candidate"]["fee_schedule_effective_at"],
+            "2026-07-07",
+        )
+
+    def test_paper_trading_rejects_non_monotonic_quote_timestamps(self):
+        history = [{
+            "captured_at": "2026-08-01T12:00:00+00:00",
+            "competition_id": "premier-league",
+            "competition_label": "Premier League",
+            "competition_season": "2026-27",
+            "snapshot_sha256": "a" * 64,
+            "model_forecasts": {
+                model: {
+                    "probabilities": {"arsenal": 0.8},
+                    "other_probability": 0.2,
+                }
+                for model in ("elo", "glicko2", "trueskill", "robust")
+            },
+            "execution_quotes": [{
+                "entity_id": "arsenal",
+                "name": "Arsenal",
+                "market_id": "arsenal-yes",
+                "best_ask": 0.4,
+                "top_ask_size": 100.0,
+                "request_started_at": "2026-08-01T12:00:29+00:00",
+                "response_received_at": "2026-08-01T12:00:30+00:00",
+                "book_captured_at": "2026-08-01T12:00:30+00:00",
+                "response_sha256": "b" * 64,
+                "fee_type": "sports_quadratic",
+                "taker_fee_rate": 0.0,
+                "fee_request_started_at": "2026-08-01T12:00:30+00:00",
+                "fee_response_received_at": "2026-08-01T12:00:31+00:00",
+                "fee_response_sha256": "c" * 64,
+            }],
+        }]
+        audit = build_provider_paper_audit(history, "Polymarket")
+        self.assertEqual(audit["positions"], [])
+        self.assertTrue(all(
+            row["reason"] == "non_monotonic_quote_timestamp"
+            for row in audit["decisions"]
+        ))
+
+    def test_market_strategy_report_recomputes_embedded_hash(self):
+        history = [{
+            "captured_at": "2026-08-01T12:00:00+00:00",
+            "competition_id": "premier-league",
+            "competition_label": "Premier League",
+            "competition_season": "2026-27",
+            "event_id": "epl-27",
+            "event_title": "Premier League Champion",
+            "event_url": "https://example.test/epl",
+            "snapshot_sha256": "a" * 64,
+            "model_forecasts": {
+                model: {
+                    "probabilities": {"arsenal": 0.8},
+                    "other_probability": 0.2,
+                }
+                for model in ("elo", "glicko2", "trueskill", "robust")
+            },
+            "execution_quotes": [],
+        }]
+        embedded = build_provider_paper_audit(history, "Polymarket")
+        with tempfile.TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            payload = {
+                "tournament_predictor": {
+                    "market_comparison": {
+                        "history": history,
+                        "paper_trading": embedded,
+                    }
+                }
+            }
+            (data_dir / "tennis.json").write_text(json.dumps(payload))
+            report = build_market_strategy_report(data_dir)
+            self.assertEqual(report["status"], "pass")
+            self.assertEqual(
+                report["audits"][0]["embedded_audit_sha256"],
+                report["audits"][0]["recomputed_audit_sha256"],
+            )
+            payload["tournament_predictor"]["market_comparison"]["paper_trading"][
+                "audit_sha256"
+            ] = "0" * 64
+            (data_dir / "tennis.json").write_text(json.dumps(payload))
+            self.assertEqual(build_market_strategy_report(data_dir)["status"], "fail")
+
+    def test_market_history_keeps_first_snapshot_per_utc_day_immutable(self):
         competition = {
             "id": "premier-league",
             "label": "Premier League",
@@ -1123,7 +1355,7 @@ h001,Hana,Theta,CZE
             "Kalshi",
         )
         self.assertEqual(len(replacement["history"]), 1)
-        self.assertEqual(replacement["history"][0]["snapshot_sha256"], "b" * 64)
+        self.assertEqual(replacement["history"][0]["snapshot_sha256"], "a" * 64)
         self.assertEqual(len(second_day["history"]), 2)
         self.assertEqual(second_day["benchmark"]["status"], "awaiting_resolutions")
 
@@ -1760,6 +1992,98 @@ h001,Hana,Theta,CZE
         self.assertEqual(payload["outcome_context"]["draw_rate"], 0.0)
         self.assertIn("publication eligibility", payload["outcome_context"]["method"])
 
+    def test_reproducible_audit_packet_replays_every_candidate(self):
+        start = date(2023, 1, 1)
+        matches = [
+            Match(
+                start + timedelta(days=index * 35),
+                "p1",
+                "p2",
+                1.0 if index % 3 else 0.0,
+                "ATP singles",
+                "2025",
+            )
+            for index in range(36)
+        ]
+        entities = {
+            "p1": {
+                "name": "Player One",
+                "country": "FRA",
+                "competition": "ATP singles",
+            },
+            "p2": {
+                "name": "Player Two",
+                "country": "GBR",
+                "competition": "ATP singles",
+            },
+        }
+        source = {
+            "source": "Fixture",
+            "source_url": "https://example.test",
+            "license": "CC0",
+            "snapshot_sha256": "a" * 64,
+            "snapshot_hash_scope": "normalized_ingested_replay_input",
+            "stale_after_hours": 240,
+        }
+        packet = {}
+        payload = build_sport_payload(
+            "tennis",
+            matches,
+            entities,
+            source,
+            audit_packet=packet,
+        )
+        first = encode_packet(packet)
+        second = encode_packet(json.loads(json.dumps(packet)))
+        self.assertEqual(first, second)
+        self.assertEqual(packet_sha256(first), hashlib.sha256(first).hexdigest())
+        result = audit_model_packet(packet, payload, full_replay=True)
+        self.assertEqual(result["status"], "pass")
+        self.assertTrue(all(check["passed"] for check in result["checks"]))
+        self.assertIn(
+            "full_replay_prediction_hash",
+            {check["id"] for check in result["checks"]},
+        )
+
+    def test_reproducible_audit_detects_published_metric_tampering(self):
+        start = date(2023, 1, 1)
+        matches = [
+            Match(
+                start + timedelta(days=index * 40),
+                "p1",
+                "p2",
+                float(index % 2),
+                "ATP singles",
+                "2025",
+            )
+            for index in range(32)
+        ]
+        entities = {
+            "p1": {"name": "One", "competition": "ATP singles"},
+            "p2": {"name": "Two", "competition": "ATP singles"},
+        }
+        source = {
+            "source": "Fixture",
+            "source_url": "https://example.test",
+            "license": "CC0",
+            "snapshot_sha256": "b" * 64,
+            "snapshot_hash_scope": "normalized_ingested_replay_input",
+            "stale_after_hours": 240,
+        }
+        packet = {}
+        payload = build_sport_payload(
+            "tennis",
+            matches,
+            entities,
+            source,
+            audit_packet=packet,
+        )
+        payload["models"]["elo"]["metrics"]["log_loss"] = 0.0001
+        result = audit_model_packet(packet, payload, full_replay=False)
+        failed = {check["id"] for check in result["checks"] if not check["passed"]}
+        self.assertEqual(result["status"], "fail")
+        self.assertIn("published_metrics:elo", failed)
+
     def test_ensemble_weights_use_validation_only(self):
         validation_start = date(2024, 1, 1)
         evaluation_start = date(2025, 1, 1)
@@ -2021,7 +2345,7 @@ class SplitAssetTests(unittest.TestCase):
     @staticmethod
     def _sport_payload(sport: str) -> dict:
         return {
-            "schema_version": "1.17.0",
+            "schema_version": "1.19.0",
             "sport": sport,
             "generated_at": "2026-07-23T22:01:36+00:00",
             "models": {
@@ -2216,7 +2540,7 @@ class SplitAssetTests(unittest.TestCase):
             for index in range(65)
         ]
         payload = {
-            "schema_version": "1.17.0",
+            "schema_version": "1.19.0",
             "sport": sport,
             "generated_at": "2026-07-23T22:01:36+00:00",
             "latest_result": "2026-07-01",

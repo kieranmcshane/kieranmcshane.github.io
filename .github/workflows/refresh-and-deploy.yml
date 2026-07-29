@@ -62,6 +62,10 @@ jobs:
               cp ".cache/rating-lab-output/$file" "assets/data/rating-lab/$file"
             fi
           done
+          if [ -d ".cache/rating-lab-output/audit" ]; then
+            mkdir -p assets/data/rating-lab/audit
+            cp -R .cache/rating-lab-output/audit/. assets/data/rating-lab/audit/
+          fi
       - name: Install archive reader
         if: github.event_name != 'push'
         run: sudo apt-get update && sudo apt-get install --yes zstd
@@ -87,6 +91,30 @@ jobs:
           RATING_LAB_CACHE_DIR: .cache/rating-lab
         run: |
           python scripts/refresh_ratings.py --players-only
+      - name: Reproduce the model audit from frozen inputs
+        if: github.event_name != 'push'
+        run: |
+          python scripts/audit_rating_models.py --data-dir assets/data/rating-lab --strict
+      - name: Reproduce the market strategy audit
+        if: github.event_name != 'push'
+        run: |
+          python scripts/audit_market_strategies.py --data-dir assets/data/rating-lab --strict
+      - name: Verify retained audit artifacts
+        if: github.event_name == 'push'
+        run: |
+          if [ -f assets/data/rating-lab/audit/tennis-replay.json.gz ] &&
+             [ -f assets/data/rating-lab/audit/football-replay.json.gz ] &&
+             [ -f assets/data/rating-lab/audit/national-football-replay.json.gz ] &&
+             [ -f assets/data/rating-lab/audit/chess-replay.json.gz ]; then
+            python scripts/audit_rating_models.py --data-dir assets/data/rating-lab --artifact-only
+          else
+            echo "No complete retained audit set yet; the next sports refresh will create it."
+          fi
+          if [ -f assets/data/rating-lab/audit/market-strategy-report.json ]; then
+            python scripts/audit_market_strategies.py --data-dir assets/data/rating-lab --strict
+          else
+            echo "No retained market-strategy ledger yet; the next sports refresh will create it."
+          fi
       - name: Derive static delivery from the validated snapshot
         run: |
           python scripts/refresh_ratings.py --split-only
@@ -95,6 +123,10 @@ jobs:
         run: |
           mkdir -p .cache/rating-lab-output
           cp assets/data/rating-lab/{manifest,tennis,football,national-football,chess,player-football,player-schema}.json .cache/rating-lab-output/
+          if [ -d assets/data/rating-lab/audit ]; then
+            rm -rf .cache/rating-lab-output/audit
+            cp -R assets/data/rating-lab/audit .cache/rating-lab-output/audit
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:

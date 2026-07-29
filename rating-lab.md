@@ -499,9 +499,14 @@ description: Live alternative ratings for tennis, club and national-team footbal
   <details class="rating-lab-disclosure">
     <summary><span>Reproducibility</span><strong>Equations, parameters, and build audit</strong></summary>
   <section class="rating-lab-audit" id="reproducibility" aria-labelledby="audit-heading">
+      {% assign model_audit = site.data.rating_lab_default.audit.model_audit %}
       <p class="rating-lab-kicker">Full details</p>
     <h2 id="audit-heading">Inspect every assumption. Reproduce every table.</h2>
-    <p class="rating-lab-audit-intro">The browser only reads static JSON. All ratings are rebuilt from public results by deterministic, chronological Python replay; there is no private ranking service or hidden model.</p>
+    {% if model_audit.packet_sha256 %}
+      <p class="rating-lab-audit-intro">The browser only reads static JSON. Each cohort publishes a frozen, normalized replay packet: an independent command can re-run every parameter candidate, rebuild every one-step-ahead prediction, recompute the evaluation metrics, and compare the resulting hashes with the public record. There is no private ranking service or hidden model.</p>
+    {% else %}
+      <p class="rating-lab-audit-intro">The model-audit contract is installed, but this retained cohort predates its first frozen replay packet. The next validated sports refresh will publish the packet and executable pass/fail report; until then, the source and build hashes below remain provenance evidence, not a claim of full replay reproducibility.</p>
+    {% endif %}
 
     <div class="rating-lab-equations">
       <article>
@@ -562,22 +567,49 @@ description: Live alternative ratings for tennis, club and national-team footbal
           <div><dt>Source</dt><dd>{{ site.data.rating_lab_default.audit.source }}</dd></div>
           <div><dt>Snapshot SHA-256</dt><dd>{% if site.data.rating_lab_default.audit.snapshot_sha256 %}<code>{{ site.data.rating_lab_default.audit.snapshot_sha256 }}</code>{% else %}Not recorded for this retained pre-hash snapshot{% endif %}</dd></div>
           <div><dt>Hash scope</dt><dd>{{ site.data.rating_lab_default.audit.snapshot_hash_scope | replace: "_", " " }}</dd></div>
+          <div><dt>Model audit</dt><dd>{% if model_audit.status %}{{ model_audit.status | replace: "_", " " }}{% else %}Awaiting the first audited refresh{% endif %}</dd></div>
+          <div><dt>Audit level</dt><dd>{% if model_audit.verification_level %}{{ model_audit.verification_level | replace: "_", " " }}{% else %}Not yet recorded{% endif %}</dd></div>
+          <div><dt>Normalized replay SHA-256</dt><dd>{% if model_audit.normalized_replay_input_sha256 %}<code>{{ model_audit.normalized_replay_input_sha256 }}</code>{% else %}Awaiting the first audited refresh{% endif %}</dd></div>
         </dl>
         <div class="rating-lab-downloads">
           <a id="rating-data-download" href="{{ '/assets/data/rating-lab/tennis.json' | relative_url }}" download>Current cohort JSON</a>
           <a href="{{ '/assets/data/rating-lab/manifest.json' | relative_url }}" download>Build manifest</a>
           <a href="{{ '/assets/data/rating-lab/schema.json' | relative_url }}" download>JSON schema</a>
+          {% if model_audit.packet_sha256 %}
+            <a href="{{ '/assets/data/rating-lab/audit/report.json' | relative_url }}" download>Audit report</a>
+            <a id="rating-audit-packet-download" href="{{ '/assets/data/rating-lab/audit/tennis-replay.json.gz' | relative_url }}" download>Frozen replay packet</a>
+          {% endif %}
+          <a href="{{ '/assets/data/rating-lab/audit/market-strategy-report.json' | relative_url }}" download>Market strategy ledger</a>
           <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/tree/main/rating_lab">Model source</a>
         </div>
       </article>
     </div>
 
-    <h3>Exact local reproduction</h3>
+    <h3>{% if model_audit.packet_sha256 %}Independent offline audit{% else %}Independent audit command{% endif %}</h3>
     <pre class="rating-lab-code"><code>git clone https://github.com/kieranmcshane/kieranmcshane.github.io.git
 cd kieranmcshane.github.io
-RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
+python3 scripts/audit_rating_models.py \
+  --public-base https://kieranmcshane.github.io/assets/data/rating-lab \
+  --report model-audit-report.json \
+  --strict</code></pre>
+    {% if model_audit.packet_sha256 %}
+      <p class="rating-lab-audit-note">This audit does not fetch a newer source snapshot. It uses the exact normalized matches that generated the published ratings, checks their SHA-256 digest and stable order, verifies the warm-up/validation/evaluation boundary counts, replays every declared candidate, confirms the validation winner, rebuilds the ensemble, and recomputes log loss, Brier score, calibration, the paired calendar-month bootstrap, and the complete evaluation-ledger hash. The compact audit report is readable in the browser; the compressed replay packet is the executable evidence.</p>
+    {% else %}
+      <p class="rating-lab-audit-note">The command will become executable against the public URL as soon as the next validated sports refresh publishes all four frozen packets. A missing packet is reported as an incomplete audit, never silently treated as a pass.</p>
+    {% endif %}
+    <h3>Reproducible market strategy audit</h3>
+    <p class="rating-lab-audit-note">This is paper trading, never a real order or a profitability claim. Each model receives an independent virtual $1,000 bankroll. The frozen rule buys Yes once per provider, model, competition, and season: the first admissible snapshot with at least a five-percentage-point edge after fees, sized at quarter Kelly and capped at 2% of cash, 10% of initial bankroll per event, 1% of reported liquidity, and the quantity displayed at the best ask. Execution and fee requests bypass the refresh cache; the ledger retains request-start time, response-receipt time, latency, raw-response SHA-256, provider book hash when available, and decision time in UTC. The first successful daily checkpoint is immutable. A midpoint, last trade, missing fee, missing depth, incomplete provenance, or non-monotonic timestamp produces a published no-bet decision. Old evidence is never filled in later.</p>
+    <pre class="rating-lab-code"><code>python3 scripts/audit_market_strategies.py \
+  --public-base https://kieranmcshane.github.io/assets/data/rating-lab \
+  --output market-strategy-report.json \
+  --strict</code></pre>
+    <p class="rating-lab-audit-note">The command rebuilds every Polymarket and Kalshi decision from the frozen public histories and checks the resulting SHA-256 against the embedded ledger. For a Yes contract bought at fee-adjusted cost \(c\) with model probability \(p\), full Kelly is \((p-c)/(1-c)\); Rating Lab applies one quarter of that fraction before all exposure caps. For Polymarket, the public CLOB freezes the executable ask, displayed size, book timestamp/hash, and fee-enabled token response; the applicable published sports fee formula and rate are recorded separately. For Kalshi, the series fee type/multiplier, published base rate and schedule date, and reciprocal Yes ask inferred from the public bid-only order book are frozen together. A paper fill still assumes the displayed quote survived network latency; the ledger proves the rule and evidence, not an actual execution.</p>
+    <details class="rating-lab-audit-note">
+      <summary>Rebuild from current upstream data instead</summary>
+      <pre class="rating-lab-code"><code>RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
 python3 -m unittest discover -s tests -v</code></pre>
-    <p class="rating-lab-audit-note">A <code>FOOTBALL_DATA_TOKEN</code> enables the primary club feed. If it is absent, rate-limited, unavailable, or fails the coverage gate, the build automatically uses the documented CC0 OpenFootball fixtures/results fallback and labels that state in the manifest. Player-impact cohorts never use that weaker fallback: finished API-Football responses are cached after validation, and publication remains withheld until complete lineups, substitutions, minutes, stable IDs, and score reproduction pass. Results are deduplicated and sorted deterministically. Generated files contain no credentials.</p>
+      <p>A <code>FOOTBALL_DATA_TOKEN</code> enables the primary club feed. If it is absent, rate-limited, unavailable, or fails the coverage gate, the build automatically uses the documented CC0 OpenFootball fixtures/results fallback and labels that state in the manifest. Player-impact cohorts never use that weaker fallback. Results are deduplicated and sorted deterministically. Generated files contain no credentials.</p>
+    </details>
   </section>
   </details>
 
@@ -597,8 +629,8 @@ python3 -m unittest discover -s tests -v</code></pre>
       <li><a href="https://github.com/lipis/flag-icons/tree/v7.5.0">flag-icons 7.5.0</a> — vendored SVG country and home-nation flags, MIT; selected only from source codes.</li>
       <li><a href="https://www.glicko.net/glicko/glicko2.pdf">Glicko-2 specification and worked example</a> — public-domain head-to-head rating protocol.</li>
       <li><a href="https://www.microsoft.com/en-us/research/publication/trueskill-2-improved-bayesian-skill-rating-system/">Microsoft Research TrueSkill 2 paper</a> — used to delimit features this result-only site does not claim.</li>
-      <li><a href="https://docs.polymarket.com/market-data/overview">Polymarket Gamma API</a> — dated public outcome-price snapshots, frozen beside simultaneous model forecasts and scored after resolution; external benchmark only.</li>
-      <li><a href="https://docs.kalshi.com/getting_started/quick_start_market_data">Kalshi Trade API</a> — dated unauthenticated bid, ask, and last-trade snapshots, frozen and scored by the same benchmark protocol.</li>
+      <li><a href="https://docs.polymarket.com/api-reference/introduction">Polymarket public APIs</a> — Gamma identity matching plus CLOB order-book depth and token fee rates, frozen beside simultaneous model forecasts; external benchmark only.</li>
+      <li><a href="https://docs.kalshi.com/getting_started/quick_start_market_data">Kalshi Trade API</a> — dated unauthenticated event, series-fee, and top-of-book evidence, frozen and scored by the same benchmark protocol.</li>
     </ul>
     <p>Rankings are independent statistical estimates, not official tour, league, federation, or Lichess ratings. They are informational and are not betting advice.</p>
   </section>
