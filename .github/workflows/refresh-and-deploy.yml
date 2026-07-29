@@ -23,7 +23,9 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # A sports refresh can take more than ten minutes. Let it finish when an
+  # unrelated content push arrives so the validated snapshot is not stranded.
+  cancel-in-progress: false
 
 jobs:
   build:

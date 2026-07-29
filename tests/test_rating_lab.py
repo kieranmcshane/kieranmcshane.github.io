@@ -707,7 +707,7 @@ h001,Hana,Theta,CZE
         self.assertLess(workflow.index(daily_refresh), workflow.index("actions/jekyll-build-pages"))
         self.assertLess(workflow.index(player_refresh), workflow.index("actions/jekyll-build-pages"))
         self.assertIn("if: github.event_name != 'push'", workflow)
-        self.assertIn("cancel-in-progress: true", workflow)
+        self.assertIn("cancel-in-progress: false", workflow)
         self.assertIn('cron: "47 2 * * 0"', workflow)
         self.assertIn("rating-lab-public-data-v4-", workflow)
         refresh_script = (
