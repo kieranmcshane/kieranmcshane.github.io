@@ -474,8 +474,8 @@
       var elo = state.datasets[sport].models.elo;
       return sum + (elo.rankings ? elo.rankings.length : elo.entity_count || 0);
     }, 0);
-    elements.generation.textContent = number(total, 0) + ' published rankings · generated ' +
-      formatDate(state.manifest.generated_at) + (stale.length ? ' · delayed sources retain their last valid snapshot' : '');
+    elements.generation.textContent = number(total, 0) + ' rankings · generated ' +
+      formatDate(state.manifest.generated_at) + (stale.length ? ' · delayed sources use their last valid snapshot' : '');
   }
 
   function setPressed(container, key, value) {
@@ -804,8 +804,10 @@
     var hiddenProvisional = !state.includeProvisional ? provisionalCount() : 0;
     var provisionalNote = hiddenProvisional ? ' · ' + hiddenProvisional + ' provisional hidden' :
       (provisionalCount() ? ' · provisional included' : '');
+    var compactContext = window.matchMedia('(max-width: 650px)').matches;
     elements.context.textContent = models[state.model].label + ' · ' +
-      (state.competition || 'all competitions') + ' · ' + currentRows().length + ' eligible competitors' + provisionalNote;
+      (state.competition || (compactContext ? 'all' : 'all competitions')) + ' · ' +
+      currentRows().length + (compactContext ? ' eligible' : ' eligible competitors') + provisionalNote;
   }
 
   function renderMovers() {
@@ -1786,7 +1788,9 @@
   }
 
   function populateMatchupControls() {
-    var rows = state.datasets[state.sport].models[state.model].rankings;
+    var dataset = state.datasets[state.sport];
+    var model = dataset && dataset.models && dataset.models[state.model];
+    var rows = model && Array.isArray(model.rankings) ? model.rankings : [];
     if (!rows.some(function (row) { return row.id === state.matchupA; })) state.matchupA = rows[0] ? rows[0].id : null;
     if (!rows.some(function (row) { return row.id === state.matchupB; }) || state.matchupB === state.matchupA) {
       state.matchupB = rows.find(function (row) { return row.id !== state.matchupA; });
@@ -1816,7 +1820,7 @@
     elements.matchupVenueLabel.textContent = state.sport === 'chess' ? 'Who plays White?' : state.sport === 'tennis' ? 'Surface' : 'Venue';
     setPressed(elements.matchupModelTabs, 'matchupModel', state.model);
     return {
-      dataset: state.datasets[state.sport],
+      dataset: dataset,
       rows: rows,
       rowA: rowA,
       rowB: rowB,

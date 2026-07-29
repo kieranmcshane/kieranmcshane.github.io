@@ -52,6 +52,47 @@ test.describe("page load", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("keeps the matchup stable while split rankings are pending", async ({
+    page,
+  }) => {
+    const pageErrors = [];
+    let releaseRankings;
+    let markRequestStarted;
+    const rankingsReleased = new Promise((resolve) => {
+      releaseRankings = resolve;
+    });
+    const requestStarted = new Promise((resolve) => {
+      markRequestStarted = resolve;
+    });
+
+    page.on("pageerror", (error) => pageErrors.push(error.stack || error.message));
+    await freezeClock(page);
+    await page.route(
+      "**/assets/data/rating-lab/split/tennis-rankings-elo.json",
+      async (route) => {
+        markRequestStarted();
+        await rankingsReleased;
+        await route.continue();
+      }
+    );
+
+    await page.goto("/rating-lab/");
+    await requestStarted;
+    await page.evaluate(() => {
+      window.dispatchEvent(new PageTransitionEvent("pageshow"));
+    });
+    await expect(page.locator("#matchup-result")).toContainText(
+      "Two published competitors are required"
+    );
+    expect(pageErrors).toEqual([]);
+
+    releaseRankings();
+    await expect(
+      page.locator("#matchup-result .rating-lab-outcome-strip")
+    ).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  });
+
   test("the sticky header never covers the first ranking row", async ({
     page,
   }) => {
@@ -87,7 +128,15 @@ test.describe("page load", () => {
     const box = await firstRow.boundingBox();
     expect(box).not.toBeNull();
     expect(box.y).toBeLessThan(page.viewportSize().height);
+    const identity = firstRow.locator(".rating-lab-identity");
     await expect(firstRow.locator(".rating-lab-entity-name-text")).toBeVisible();
+    if (isMobile(page)) {
+      const identityBox = await identity.boundingBox();
+      const navBox = await page.locator(".rating-lab-local-nav").boundingBox();
+      expect(identityBox).not.toBeNull();
+      expect(navBox).not.toBeNull();
+      expect(identityBox.y + identityBox.height).toBeLessThan(navBox.y);
+    }
   });
 
   test("opening the inspector preserves the full first identity", async ({
