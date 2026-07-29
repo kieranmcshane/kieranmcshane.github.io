@@ -44,7 +44,8 @@
         "coverage",
         "raw_yes_price_sum",
         "market_forecast",
-        "model_forecasts"
+        "model_forecasts",
+        "execution_quotes"
       ],
       "properties": {
         "captured_at": { "type": "string" },
@@ -71,6 +72,52 @@
             "robust": { "$ref": "#/$defs/probabilityField" }
           },
           "additionalProperties": false
+        },
+        "execution_quotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["entity_id", "market_id"],
+            "properties": {
+              "entity_id": { "type": "string" },
+              "name": { "type": ["string", "null"] },
+              "market_id": { "type": ["string", "null"] },
+              "token_id": { "type": ["string", "null"] },
+              "raw_yes_price": { "type": "number", "minimum": 0, "maximum": 1 },
+              "best_bid": { "type": "number", "minimum": 0, "maximum": 1 },
+              "best_ask": { "type": "number", "minimum": 0, "maximum": 1 },
+              "top_ask_size": { "type": "number", "minimum": 0 },
+              "execution_quote_status": { "type": "string" },
+              "book_captured_at": { "type": "string" },
+              "request_started_at": { "type": "string" },
+              "response_received_at": { "type": "string" },
+              "retrieval_latency_ms": { "type": "number", "minimum": 0 },
+              "retrieval_url": { "type": "string" },
+              "response_sha256": { "type": "string", "minLength": 64, "maxLength": 64 },
+              "provider_book_timestamp": { "type": "string" },
+              "book_hash": { "type": "string" },
+              "updated_at": { "type": ["string", "null"] },
+              "liquidity_usd": { "type": "number", "minimum": 0 },
+              "volume_usd": { "type": "number", "minimum": 0 },
+              "volume_contracts": { "type": "number", "minimum": 0 },
+              "fee_type": { "type": ["string", "null"] },
+              "fee_multiplier": { "type": ["number", "null"], "minimum": 0 },
+              "provider_base_fee_bps": { "type": ["number", "null"], "minimum": 0 },
+              "taker_fee_base_rate": { "type": ["number", "null"], "minimum": 0 },
+              "fee_schedule_effective_at": { "type": ["string", "null"] },
+              "fee_schedule_checked_at": { "type": ["string", "null"] },
+              "fee_schedule_url": { "type": ["string", "null"] },
+              "fee_request_started_at": { "type": ["string", "null"] },
+              "fee_response_received_at": { "type": ["string", "null"] },
+              "fee_response_sha256": {
+                "type": ["string", "null"],
+                "minLength": 64,
+                "maxLength": 64
+              },
+              "taker_fee_rate": { "type": ["number", "null"], "minimum": 0 }
+            },
+            "additionalProperties": false
+          }
         },
         "resolution": {
           "type": "object",
@@ -133,6 +180,34 @@
       },
       "additionalProperties": false
     },
+    "paperTradingAudit": {
+      "type": "object",
+      "required": [
+        "audit_schema_version",
+        "provider",
+        "status",
+        "strategy",
+        "history_snapshots",
+        "decisions",
+        "positions",
+        "portfolios",
+        "limitations",
+        "audit_sha256"
+      ],
+      "properties": {
+        "audit_schema_version": { "type": "string" },
+        "provider": { "type": "string" },
+        "status": { "enum": ["collecting_executable_history", "scored"] },
+        "strategy": { "type": "object" },
+        "history_snapshots": { "type": "integer", "minimum": 0 },
+        "decisions": { "type": "array", "items": { "type": "object" } },
+        "positions": { "type": "array", "items": { "type": "object" } },
+        "portfolios": { "type": "array", "items": { "type": "object" } },
+        "limitations": { "type": "array", "items": { "type": "string" } },
+        "audit_sha256": { "type": "string", "minLength": 64, "maxLength": 64 }
+      },
+      "additionalProperties": false
+    },
     "marketComparison": {
       "type": "object",
       "required": [
@@ -148,6 +223,7 @@
         "searches",
         "history",
         "benchmark",
+        "paper_trading",
         "retention_policy"
       ],
       "properties": {
@@ -163,6 +239,7 @@
         "searches": { "type": "array", "items": { "type": "object" } },
         "history": { "type": "array", "items": { "$ref": "#/$defs/marketHistory" } },
         "benchmark": { "$ref": "#/$defs/marketBenchmark" },
+        "paper_trading": { "$ref": "#/$defs/paperTradingAudit" },
         "retention_policy": { "type": "string" },
         "message": { "type": "string" }
       },
@@ -183,13 +260,14 @@
     "history_event_policy",
     "candidate_parameters",
     "parameters",
+    "model_audit",
     "models",
     "evaluation_comparison",
     "incumbent_benchmarks",
     "media"
   ],
   "properties": {
-    "schema_version": { "const": "1.17.0" },
+    "schema_version": { "const": "1.19.0" },
     "sport": { "enum": ["tennis", "football", "national-football", "chess"] },
     "generated_at": { "type": "string" },
     "latest_result": { "type": "string", "format": "date" },
@@ -266,6 +344,48 @@
     },
     "candidate_parameters": { "type": "object" },
     "parameters": { "type": "object" },
+    "model_audit": {
+      "type": "object",
+      "required": [
+        "audit_schema_version",
+        "status",
+        "verification_level",
+        "packet_url",
+        "packet_sha256",
+        "report_url",
+        "normalized_replay_input_sha256",
+        "validation_start",
+        "evaluation_start",
+        "selection_evidence",
+        "command"
+      ],
+      "properties": {
+        "audit_schema_version": { "const": "1.0.0" },
+        "status": {
+          "enum": ["packet_pending", "ready", "pass", "fail", "incomplete"]
+        },
+        "verification_level": {
+          "enum": ["full_replay", "artifact_integrity"]
+        },
+        "packet_url": { "type": "string" },
+        "packet_sha256": {
+          "type": ["string", "null"],
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "report_url": { "type": "string" },
+        "normalized_replay_input_sha256": {
+          "type": ["string", "null"],
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "validation_start": { "type": "string", "format": "date" },
+        "evaluation_start": { "type": "string", "format": "date" },
+        "selection_evidence": { "type": "object" },
+        "command": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
     "models": {
       "type": "object",
       "required": ["elo", "glicko2", "trueskill", "robust", "ensemble"]

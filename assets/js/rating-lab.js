@@ -135,6 +135,7 @@
     parameterBody: document.getElementById('rating-parameter-body'),
     auditRecord: document.getElementById('rating-audit-record'),
     dataDownload: document.getElementById('rating-data-download'),
+    auditPacketDownload: document.getElementById('rating-audit-packet-download'),
     matchupA: document.getElementById('matchup-a'),
     matchupB: document.getElementById('matchup-b'),
     matchupSwap: document.getElementById('matchup-swap'),
@@ -1229,10 +1230,23 @@
           'Diagnostic warning: at least one protocol degraded'
       ]);
     }
+    if (data.model_audit) {
+      auditItems.push(
+        ['Model audit', String(data.model_audit.status || 'incomplete').replace(/_/g, ' ')],
+        ['Audit level', String(data.model_audit.verification_level || 'none').replace(/_/g, ' ')],
+        ['Normalized replay SHA-256', data.model_audit.normalized_replay_input_sha256 || 'Awaiting the first audited refresh'],
+        ['Validation boundary', data.model_audit.validation_start],
+        ['Evaluation boundary', data.model_audit.evaluation_start]
+      );
+    }
     elements.auditRecord.innerHTML = auditItems.map(function (item) {
       return '<div><dt>' + escapeHtml(item[0]) + '</dt><dd>' + escapeHtml(item[1]) + '</dd></div>';
     }).join('');
     elements.dataDownload.href = dataUrl(state.sport + '.json');
+    if (elements.auditPacketDownload) {
+      elements.auditPacketDownload.href =
+        dataUrl('audit/' + state.sport + '-replay.json.gz');
+    }
   }
 
   function dateBefore(value, days) {
@@ -1424,6 +1438,72 @@
       ' Our forecast remains independent; no market is guessed or attached by title alone.</p></section>';
   }
 
+  function paperTradingAudit(view, benchmark, providerName) {
+    var audit = benchmark && benchmark.paper_trading;
+    if (!audit) return '';
+    var decisions = (audit.decisions || []).filter(function (row) {
+      return row.competition_id === view.competition.id;
+    });
+    var positions = (audit.positions || []).filter(function (row) {
+      return row.competition_id === view.competition.id;
+    });
+    var resolved = positions.filter(function (row) { return row.status === 'resolved'; });
+    var pnl = resolved.reduce(function (sum, row) { return sum + (row.pnl_usd || 0); }, 0);
+    var status = positions.length ?
+      positions.length + ' paper bet' + (positions.length === 1 ? '' : 's') :
+      'No admissible paper bet yet';
+    var detail = positions.length ?
+      '<div class="rating-lab-market-table-wrap"><table><caption>Mechanical paper positions</caption>' +
+      '<thead><tr><th scope="col">Model</th><th scope="col">Selection</th><th scope="col">UTC entry</th>' +
+      '<th scope="col">Ask</th><th scope="col">Cost incl. fee</th><th scope="col">Status / P&amp;L</th></tr></thead><tbody>' +
+      positions.map(function (row) {
+        var result = row.status === 'resolved' ?
+          signedNumber(row.pnl_usd, 2) + ' USD' : 'Open';
+        return '<tr><th scope="row">' + escapeHtml(row.model) + '</th><td>' +
+          escapeHtml(row.entity_name) + '</td><td>' + escapeHtml(row.captured_at) +
+          '</td><td>' + percent(row.execution_price) + '</td><td>$' +
+          number(row.total_cost_usd, 2) + '</td><td>' + escapeHtml(result) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' :
+      '<p>No trade is invented: ' + number(decisions.length, 0) +
+      ' dated model decisions are retained with their no-bet reasons.</p>';
+    var decisionLedger = '<details class="rating-lab-market-detail"><summary>Every dated decision · ' +
+      number(decisions.length, 0) + '</summary><div class="rating-lab-market-table-wrap"><table>' +
+      '<caption>Complete mechanical decision ledger, including abstentions</caption><thead><tr>' +
+      '<th scope="col">Quote received UTC</th><th scope="col">Decision UTC</th>' +
+      '<th scope="col">Model</th><th scope="col">Action</th>' +
+      '<th scope="col">Candidate</th><th scope="col">Edge</th><th scope="col">Reason</th>' +
+      '<th scope="col">Evidence</th></tr></thead><tbody>' +
+      decisions.map(function (row) {
+        var candidate = row.candidate || {};
+        var evidence = candidate.response_sha256 || candidate.book_hash || row.snapshot_sha256 || '';
+        var quoteTime = candidate.response_received_at || candidate.book_captured_at || '—';
+        if (typeof candidate.retrieval_latency_ms === 'number') {
+          quoteTime += ' · ' + number(candidate.retrieval_latency_ms, 0) + ' ms';
+        }
+        return '<tr><td>' + escapeHtml(quoteTime) + '</td><td>' +
+          escapeHtml(row.captured_at || '—') + '</td><th scope="row">' +
+          escapeHtml(row.model_label || row.model) + '</th><td>' +
+          escapeHtml(row.action === 'paper_buy_yes' ? 'Paper buy Yes' : 'No bet') +
+          '</td><td>' + escapeHtml(candidate.entity_name || '—') + '</td><td>' +
+          (typeof candidate.edge === 'number' ? signedNumber(candidate.edge * 100, 2) + ' pp' : '—') +
+          '</td><td><code>' + escapeHtml(row.reason || '—') + '</code></td><td><code>' +
+          escapeHtml(evidence.slice(0, 12) || '—') + '</code></td></tr>';
+      }).join('') + '</tbody></table></div></details>';
+    return '<details class="rating-lab-market-detail rating-lab-paper-audit"><summary>Mechanical Kelly paper audit · ' +
+      escapeHtml(status) + '</summary><div class="rating-lab-market-metrics"><div><span>Resolved</span><strong>' +
+      number(resolved.length, 0) + '</strong></div><div><span>Realized P&amp;L</span><strong>' +
+      (resolved.length ? signedNumber(pnl, 2) + ' USD' : 'Awaiting resolution') +
+      '</strong></div><div><span>Audit hash</span><strong><code>' +
+      escapeHtml((audit.audit_sha256 || '').slice(0, 12)) + '</code></strong></div></div><p>' +
+      'Hypothetical only: first eligible long-Yes entry, quarter Kelly, 5-point minimum edge, ' +
+      '2% bankroll cap, and no fill without a timestamped best ask, displayed size, and frozen fee rule. ' +
+      'Every bet and abstention can be rebuilt from the public history.</p>' + detail + decisionLedger +
+      '<p><a href="' + escapeHtml(dataUrl('audit/market-strategy-report.json')) +
+      '" download>Download the reproducible strategy ledger</a> · ' +
+      '<a href="https://github.com/kieranmcshane/kieranmcshane.github.io/blob/main/scripts/audit_market_strategies.py">' +
+      'Reproduction code</a></p></details>';
+  }
+
   function resolvedMarketProviderCard(view, provider) {
     var benchmark = provider.data;
     if (!benchmark) {
@@ -1497,7 +1577,9 @@
         return '<tr' + (row.id === 'market' ? ' class="is-market"' : '') + '><th scope="row">' +
           escapeHtml(row.label) + '</th><td>' + number(row.predictions, 0) + '</td><td>' +
           number(row.logLoss, 4) + '</td><td>' + number(row.brier, 4) + '</td></tr>';
-      }).join('') + '</tbody></table></div><details class="rating-lab-market-detail"><summary>Scoring protocol and audit trail</summary>' +
+      }).join('') + '</tbody></table></div>' +
+      paperTradingAudit(view, benchmark, provider.name) +
+      '<details class="rating-lab-market-detail"><summary>Scoring protocol and audit trail</summary>' +
       '<p class="rating-lab-market-note">' + escapeHtml(benchmark.benchmark && benchmark.benchmark.method ?
         benchmark.benchmark.method :
         'Every dated market and model forecast is frozen before the winner is known, then scored without revision.') +
@@ -1592,7 +1674,8 @@
       escapeHtml(benchmark.fetched_at ? formatDate(benchmark.fetched_at) : 'unavailable') + freshness + '. ' +
       number(datedSnapshots, 0) + ' dated snapshot' + (datedSnapshots === 1 ? '' : 's') + ' retained. ' +
       escapeHtml(snapshot.normalization || benchmark.probability_definition) +
-      ' The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Once the competition resolves, this frozen quote and the simultaneous forecasts from all four protocols receive log-loss and Brier scores. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details></section>';
+      ' The raw total and quote remain visible. Positive gap means our selected protocol gives a higher title probability. Once the competition resolves, this frozen quote and the simultaneous forecasts from all four protocols receive log-loss and Brier scores. Market prices are an external benchmark only—never a rating or simulation input.</p>' + table + '</details>' +
+      paperTradingAudit(view, benchmark, provider.name) + '</section>';
   }
 
   function renderMarketComparison(view, modelRows, options) {

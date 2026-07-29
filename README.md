@@ -57,6 +57,52 @@ RATING_LAB_CACHE_DIR=.cache/rating-lab python3 scripts/refresh_ratings.py
 python3 -m unittest discover -s tests -v
 ```
 
+Every validated sports refresh also emits deterministic compressed replay
+packets under `assets/data/rating-lab/audit/`. They contain the normalized
+model input, split boundaries, every candidate's validation evidence, and the
+aligned one-step-ahead evaluation ledger. An independent audit replays every
+candidate, verifies that evaluation results never enter selection, rebuilds
+the ensemble and paired calendar-month bootstrap, and compares all hashes and
+metrics with the public JSON:
+
+```sh
+python3 scripts/audit_rating_models.py \
+  --public-base https://kieranmcshane.github.io/assets/data/rating-lab \
+  --report model-audit-report.json \
+  --strict
+```
+
+The command uses the deployed frozen inputs rather than fetching a newer
+upstream snapshot. It also checks that the local Git revision is the revision
+recorded in the deployed manifest. A missing packet, revision mismatch, altered
+candidate score, or changed prediction is a failure—not a warning or an
+implicit pass.
+
+The prediction-market audit is separate from model accuracy. It is a
+hypothetical, deterministic paper strategy: one first-eligible long-Yes entry
+per provider/model/competition, quarter Kelly, a five-percentage-point minimum
+fee-adjusted edge, and strict bankroll, event, liquidity, and displayed-depth
+caps. It never uses a midpoint as an execution price and never backfills an old
+snapshot that lacks a contemporaneous ask, top-of-book size, fee rule, or UTC
+capture time. Execution and fee requests bypass the refresh cache and retain
+request-start time, response-receipt time, latency, raw-response SHA-256, and
+provider book hash when supplied. The first successful daily checkpoint is
+immutable: a later refresh cannot erase a published decision. Every bet and
+every no-bet decision is published:
+
+```sh
+python3 scripts/audit_market_strategies.py \
+  --public-base https://kieranmcshane.github.io/assets/data/rating-lab \
+  --output market-strategy-report.json \
+  --strict
+```
+
+The output recomputes each embedded ledger from the frozen public histories and
+fails if its SHA-256 differs. A paper fill is still a counterfactual assumption:
+it proves what the mechanical rule would have requested against the displayed
+book, not that a real order was sent or that the quote survived network latency.
+The results are descriptive audit evidence, not betting advice.
+
 Install `requirements-rating-lab.txt` first so the refresh can extract the
 public ATP ProTennisLive draw PDFs. The draw PDF is the bracket authority;
 ManTennisData supplies stable ATP identifiers and the result cross-check.

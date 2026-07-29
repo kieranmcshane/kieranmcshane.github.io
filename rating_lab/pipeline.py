@@ -29,8 +29,8 @@ from urllib.request import Request, urlopen
 from .models import EloModel, GaussianSkillModel, Glicko2Model, Match, SurfaceBlendModel
 
 
-SCHEMA_VERSION = "1.17.0"
-METHODOLOGY_VERSION = "2026-07-23.4"
+SCHEMA_VERSION = "1.19.0"
+METHODOLOGY_VERSION = "2026-07-29.2"
 SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 PUBLISHED_MODEL_NAMES = MODEL_NAMES + ("ensemble",)
@@ -123,6 +123,9 @@ KNOCKOUT_STAGES = {
 }
 PREDICTOR_SIMULATIONS = 5_000
 MARKET_SCORE_EPSILON = 1e-12
+POLYMARKET_SPORTS_TAKER_FEE_RATE = 0.05
+KALSHI_TAKER_FEE_BASE_RATE = 0.07
+KALSHI_FEE_SCHEDULE_EFFECTIVE_AT = "2026-07-07"
 ATP_DRAW_LOOKBACK_DAYS = 42
 ATP_DRAW_LOOKAHEAD_DAYS = 10
 ATP_TOUR_SERIES = {"atp", "1000", "gs"}
@@ -3203,13 +3206,19 @@ def _run_model(
     return model.states, predictions, histories
 
 
-def _choose_parameters(matches: list[Match], sport: str, model_name: str, validation_start: date, evaluation_start: date) -> dict:
-    best_params = None
-    best_loss = float("inf")
+def _parameter_selection(
+    matches: list[Match],
+    sport: str,
+    model_name: str,
+    validation_start: date,
+    evaluation_start: date,
+) -> tuple[dict, dict]:
+    candidates = _model_candidates(sport, model_name)
+    candidate_evidence = []
     # Ratings are warmed up on all older results, then parameters are chosen
     # strictly on the 24-to-12-month validation interval.
     tuning_matches = [match for match in matches if match.date < evaluation_start]
-    for params in _model_candidates(sport, model_name):
+    for params in candidates:
         _, predictions, _ = _run_model(
             tuning_matches,
             _new_model(model_name, params, sport),
@@ -3220,11 +3229,52 @@ def _choose_parameters(matches: list[Match], sport: str, model_name: str, valida
             row for row in predictions
             if validation_start <= date.fromisoformat(row["date"]) < evaluation_start
         ]
-        score = _metrics(validation, validation_start)["log_loss"] if validation else None
-        if score is not None and score < best_loss:
-            best_loss = score
-            best_params = params
-    return best_params or _model_candidates(sport, model_name)[1]
+        metrics = _metrics(validation, validation_start)
+        candidate_evidence.append(
+            {
+                "parameters": params,
+                "metrics": metrics,
+            }
+        )
+    selectable = [
+        index
+        for index, candidate in enumerate(candidate_evidence)
+        if candidate["metrics"]["log_loss"] is not None
+    ]
+    selected_index = (
+        min(
+            selectable,
+            key=lambda index: (
+                candidate_evidence[index]["metrics"]["log_loss"],
+                index,
+            ),
+        )
+        if selectable
+        else min(1, len(candidates) - 1)
+    )
+    return candidates[selected_index], {
+        "criterion": "minimum chronological validation log loss",
+        "selected_index": selected_index,
+        "candidates": candidate_evidence,
+    }
+
+
+def _choose_parameters(
+    matches: list[Match],
+    sport: str,
+    model_name: str,
+    validation_start: date,
+    evaluation_start: date,
+) -> dict:
+    """Compatibility wrapper for callers that only need selected values."""
+    selected, _evidence = _parameter_selection(
+        matches,
+        sport,
+        model_name,
+        validation_start,
+        evaluation_start,
+    )
+    return selected
 
 
 def _compress_history(points: list[list], limit: int = 24) -> list[list]:
@@ -4381,6 +4431,63 @@ def _competition_participants(competition: dict) -> list[dict]:
     return model.get("teams") or model.get("participants") or []
 
 
+def _market_snapshot_hash(snapshot: dict) -> str:
+    """Hash the probability field and any contemporaneous execution evidence."""
+    material = [
+        {
+            "entity_id": row.get("entity_id"),
+            "market_id": row.get("market_id"),
+            "token_id": row.get("token_id"),
+            "raw_yes_price": row.get("raw_yes_price"),
+            "best_bid": row.get("best_bid"),
+            "best_ask": row.get("best_ask"),
+            "top_ask_size": row.get("top_ask_size"),
+            "updated_at": row.get("updated_at"),
+            "book_captured_at": row.get("book_captured_at"),
+            "request_started_at": row.get("request_started_at"),
+            "response_received_at": row.get("response_received_at"),
+            "retrieval_latency_ms": row.get("retrieval_latency_ms"),
+            "retrieval_url": row.get("retrieval_url"),
+            "response_sha256": row.get("response_sha256"),
+            "provider_book_timestamp": row.get("provider_book_timestamp"),
+            "book_hash": row.get("book_hash"),
+            "fee_type": row.get("fee_type"),
+            "fee_multiplier": row.get("fee_multiplier"),
+            "provider_base_fee_bps": row.get("provider_base_fee_bps"),
+            "taker_fee_base_rate": row.get("taker_fee_base_rate"),
+            "fee_schedule_effective_at": row.get("fee_schedule_effective_at"),
+            "fee_schedule_checked_at": row.get("fee_schedule_checked_at"),
+            "fee_schedule_url": row.get("fee_schedule_url"),
+            "fee_request_started_at": row.get("fee_request_started_at"),
+            "fee_response_received_at": row.get("fee_response_received_at"),
+            "fee_response_sha256": row.get("fee_response_sha256"),
+            "taker_fee_rate": row.get("taker_fee_rate"),
+        }
+        for row in snapshot.get("outcomes", [])
+    ]
+    return hashlib.sha256(
+        json.dumps(
+            {
+                "execution_captured_at": snapshot.get("execution_captured_at"),
+                "outcomes": material,
+            },
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode()
+    ).hexdigest()
+
+
+def _execution_candidate_ids(snapshot: dict, competition: dict) -> set[str]:
+    """Request depth for the full participant field to avoid selection bias."""
+    outcomes = snapshot.get("outcomes", [])
+    entity_ids = {row.get("entity_id") for row in outcomes}
+    forecasts = _market_model_forecasts(competition, entity_ids)
+    covered = set()
+    for model in forecasts.values():
+        covered.update(model.get("probabilities", {}))
+    return entity_ids & covered
+
+
 def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
     participants = _competition_participants(competition)
     if len(participants) < 2 or not event.get("markets"):
@@ -4390,6 +4497,7 @@ def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
     for market in event["markets"]:
         outcomes = _json_array(market.get("outcomes"))
         prices = _json_array(market.get("outcomePrices"))
+        token_ids = _json_array(market.get("clobTokenIds"))
         yes_index = next((index for index, outcome in enumerate(outcomes) if str(outcome).casefold() == "yes"), None)
         if yes_index is None or yes_index >= len(prices) or market.get("closed") is True or market.get("active") is False:
             continue
@@ -4404,13 +4512,14 @@ def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
         tokens = _market_identity_tokens(title)
         if not tokens:
             continue
-        valid_markets.append((market, title, tokens, price, liquidity, volume))
+        yes_token_id = str(token_ids[yes_index]) if yes_index < len(token_ids) else None
+        valid_markets.append((market, title, tokens, price, liquidity, volume, yes_token_id))
     raw_sum = sum(item[3] for item in valid_markets)
     if raw_sum <= 0:
         return None
     matched = []
     used_entities = set()
-    for market, market_title, tokens, price, liquidity, volume in valid_markets:
+    for market, market_title, tokens, price, liquidity, volume, yes_token_id in valid_markets:
         exact = [row for candidate, row in participant_tokens if candidate == tokens]
         candidates = exact or [
             row for candidate, row in participant_tokens
@@ -4426,6 +4535,7 @@ def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
                 "entity_id": participant["id"],
                 "name": participant["name"],
                 "market_id": str(market.get("id", "")),
+                "token_id": yes_token_id,
                 "market_slug": market.get("slug"),
                 "market_label": market_title,
                 "raw_yes_price": round(price, 6),
@@ -4441,11 +4551,7 @@ def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
     if len(matched) < 2 or coverage < 0.5:
         return None
     matched.sort(key=lambda row: (-row["normalized_probability"], row["name"]))
-    snapshot_material = json.dumps(
-        [(row["market_id"], row["raw_yes_price"], row["updated_at"]) for row in matched],
-        separators=(",", ":"),
-    )
-    return {
+    snapshot = {
         "competition_id": competition["id"],
         "event_id": str(event.get("id", "")),
         "event_title": event.get("title"),
@@ -4460,9 +4566,110 @@ def _polymarket_event_snapshot(competition: dict, event: dict) -> dict | None:
         "model_participants": len(participants),
         "market_outcomes": len(valid_markets),
         "coverage": round(coverage, 4),
-        "snapshot_sha256": hashlib.sha256(snapshot_material.encode()).hexdigest(),
         "outcomes": matched,
     }
+    snapshot["snapshot_sha256"] = _market_snapshot_hash(snapshot)
+    return snapshot
+
+
+def _enrich_polymarket_execution(snapshot: dict, competition: dict) -> dict:
+    """Freeze public CLOB top-of-book depth and the token fee rate."""
+    candidates = _execution_candidate_ids(snapshot, competition)
+    for outcome in snapshot.get("outcomes", []):
+        if outcome.get("entity_id") not in candidates:
+            outcome["execution_quote_status"] = "not_strategy_candidate"
+            continue
+        token_id = outcome.get("token_id")
+        if not token_id:
+            outcome["execution_quote_status"] = "missing_token_id"
+            continue
+        book_url = "https://clob.polymarket.com/book?" + urlencode({"token_id": token_id})
+        request_started = datetime.now(timezone.utc)
+        request_monotonic = time.monotonic()
+        outcome["request_started_at"] = request_started.replace(microsecond=0).isoformat()
+        outcome["retrieval_url"] = book_url
+        try:
+            book_body = _get(book_url, attempts=3, cache_ttl=0)
+            response_received = datetime.now(timezone.utc)
+            outcome["response_received_at"] = (
+                response_received.replace(microsecond=0).isoformat()
+            )
+            outcome["retrieval_latency_ms"] = round(
+                (time.monotonic() - request_monotonic) * 1000,
+                3,
+            )
+            outcome["response_sha256"] = hashlib.sha256(book_body).hexdigest()
+            book = json.loads(book_body.decode("utf-8"))
+        except (RuntimeError, json.JSONDecodeError):
+            outcome["response_received_at"] = (
+                datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            )
+            outcome["retrieval_latency_ms"] = round(
+                (time.monotonic() - request_monotonic) * 1000,
+                3,
+            )
+            outcome["execution_quote_status"] = "orderbook_unavailable"
+            continue
+        bids = [
+            (_as_float(row.get("price"), -1), _as_float(row.get("size"), -1))
+            for row in book.get("bids") or []
+        ]
+        asks = [
+            (_as_float(row.get("price"), -1), _as_float(row.get("size"), -1))
+            for row in book.get("asks") or []
+        ]
+        bids = [row for row in bids if 0 < row[0] < 1 and row[1] > 0]
+        asks = [row for row in asks if 0 < row[0] < 1 and row[1] > 0]
+        if not asks:
+            outcome["execution_quote_status"] = "no_executable_ask"
+            continue
+        best_ask, ask_size = min(asks)
+        outcome["best_ask"] = round(best_ask, 6)
+        outcome["top_ask_size"] = round(ask_size, 6)
+        if bids:
+            outcome["best_bid"] = round(max(bids)[0], 6)
+        outcome["book_captured_at"] = outcome["response_received_at"]
+        outcome["provider_book_timestamp"] = str(book.get("timestamp") or "")
+        outcome["book_hash"] = book.get("hash") or hashlib.sha256(
+            json.dumps(book, separators=(",", ":"), sort_keys=True).encode()
+        ).hexdigest()
+        fee_url = (
+            "https://clob.polymarket.com/fee-rate?"
+            + urlencode({"token_id": token_id})
+        )
+        fee_started = datetime.now(timezone.utc)
+        outcome["fee_request_started_at"] = fee_started.replace(microsecond=0).isoformat()
+        try:
+            fee_body = _get(fee_url, attempts=3, cache_ttl=0)
+            outcome["fee_response_received_at"] = (
+                datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            )
+            outcome["fee_response_sha256"] = hashlib.sha256(fee_body).hexdigest()
+            fee = json.loads(fee_body.decode("utf-8"))
+            base_fee = _as_float(fee.get("base_fee"), -1)
+            if base_fee >= 0:
+                outcome["fee_type"] = "sports_quadratic"
+                outcome["provider_base_fee_bps"] = round(base_fee, 6)
+                outcome["taker_fee_rate"] = (
+                    POLYMARKET_SPORTS_TAKER_FEE_RATE if base_fee > 0 else 0.0
+                )
+                outcome["fee_schedule_url"] = "https://docs.polymarket.com/trading/fees"
+                outcome["fee_schedule_checked_at"] = outcome["fee_response_received_at"]
+        except (RuntimeError, json.JSONDecodeError):
+            outcome["fee_response_received_at"] = (
+                datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            )
+            pass
+        outcome["execution_quote_status"] = (
+            "top_of_book"
+            if isinstance(outcome.get("taker_fee_rate"), (int, float))
+            else "fee_unavailable"
+        )
+    snapshot["execution_captured_at"] = (
+        datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    )
+    snapshot["snapshot_sha256"] = _market_snapshot_hash(snapshot)
+    return snapshot
 
 
 def _polymarket_search_query(competition: dict) -> str:
@@ -4528,9 +4735,51 @@ def _market_history_entry(
         for row in snapshot.get("outcomes", [])
     }
     entity_ids = set(market_probabilities)
+    execution_quotes = [
+        {
+            key: row.get(key)
+            for key in (
+                "entity_id",
+                "name",
+                "market_id",
+                "token_id",
+                "raw_yes_price",
+                "best_bid",
+                "best_ask",
+                "top_ask_size",
+                "execution_quote_status",
+                "book_captured_at",
+                "request_started_at",
+                "response_received_at",
+                "retrieval_latency_ms",
+                "retrieval_url",
+                "response_sha256",
+                "provider_book_timestamp",
+                "book_hash",
+                "updated_at",
+                "liquidity_usd",
+                "volume_usd",
+                "volume_contracts",
+                "fee_type",
+                "fee_multiplier",
+                "provider_base_fee_bps",
+                "taker_fee_base_rate",
+                "fee_schedule_effective_at",
+                "fee_schedule_checked_at",
+                "fee_schedule_url",
+                "fee_request_started_at",
+                "fee_response_received_at",
+                "fee_response_sha256",
+                "taker_fee_rate",
+            )
+            if row.get(key) is not None
+        }
+        for row in snapshot.get("outcomes", [])
+    ]
+    quote_captured_at = snapshot.get("execution_captured_at") or captured_at
     return {
-        "captured_at": captured_at,
-        "snapshot_date": captured_at[:10],
+        "captured_at": quote_captured_at,
+        "snapshot_date": quote_captured_at[:10],
         "competition_id": competition["id"],
         "competition_label": competition["label"],
         "competition_season": competition.get("season"),
@@ -4545,6 +4794,7 @@ def _market_history_entry(
         "raw_yes_price_sum": snapshot.get("raw_yes_price_sum", 0),
         "market_forecast": _market_forecast_bins(market_probabilities),
         "model_forecasts": _market_model_forecasts(competition, entity_ids),
+        "execution_quotes": execution_quotes,
     }
 
 
@@ -4697,13 +4947,14 @@ def _finalize_market_comparison(
             if not competition:
                 continue
             entry = _market_history_entry(snapshot, competition, captured_at)
-            by_day[
+            by_day.setdefault(
                 (
                     entry["competition_id"],
                     entry.get("competition_season"),
                     entry["snapshot_date"],
-                )
-            ] = entry
+                ),
+                entry,
+            )
         history = sorted(
             by_day.values(),
             key=lambda entry: (
@@ -4711,13 +4962,18 @@ def _finalize_market_comparison(
                 entry.get("competition_id", ""),
             ),
         )
+    for entry in history:
+        entry.setdefault("execution_quotes", [])
     history, benchmark = _market_benchmark_summary(history, competitions, provider_name)
     current["history"] = history
     current["benchmark"] = benchmark
+    from .market_audit import build_provider_paper_audit
+
+    current["paper_trading"] = build_provider_paper_audit(history, provider_name)
     current["retention_policy"] = (
-        "Keep the final successful provider quote per UTC date, competition, and season "
-        "in the published sport JSON. Once that UTC date has passed, its probabilities "
-        "are not revised; resolution appends scores without changing the forecast."
+        "Keep the first successful provider quote per UTC date, competition, and season "
+        "in the published sport JSON. A later refresh cannot replace that checkpoint; "
+        "resolution appends scores without changing its forecast or execution evidence."
     )
     return current
 
@@ -4743,7 +4999,7 @@ def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
             }
         )
         try:
-            payload = json.loads(_get(api_url, attempts=3, cache_ttl=1800).decode("utf-8"))
+            payload = json.loads(_get(api_url, attempts=3, cache_ttl=0).decode("utf-8"))
         except (RuntimeError, json.JSONDecodeError):
             failures += 1
             searches.append({"competition_id": competition["id"], "query": query, "status": "source_error"})
@@ -4757,8 +5013,9 @@ def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
                 candidates.append(snapshot)
         if candidates:
             candidates.sort(key=lambda row: (-row["matched_participants"], -row["coverage"], -row["event_liquidity_usd"]))
-            snapshots.append(candidates[0])
-            searches.append({"competition_id": competition["id"], "query": query, "status": "matched", "event_id": candidates[0]["event_id"]})
+            selected = _enrich_polymarket_execution(candidates[0], competition)
+            snapshots.append(selected)
+            searches.append({"competition_id": competition["id"], "query": query, "status": "matched", "event_id": selected["event_id"]})
         else:
             searches.append({"competition_id": competition["id"], "query": query, "status": "no_confident_match"})
     if eligible and failures == len(eligible):
@@ -4777,7 +5034,12 @@ def fetch_polymarket_comparison(competitions: list[dict]) -> dict:
     }
 
 
-def _kalshi_event_snapshot(competition: dict, event: dict, series_slug: str) -> dict | None:
+def _kalshi_event_snapshot(
+    competition: dict,
+    event: dict,
+    series_slug: str,
+    series_fee: dict | None = None,
+) -> dict | None:
     """Convert one mutually exclusive Kalshi winner event into our benchmark contract."""
     participants = _competition_participants(competition)
     markets = event.get("markets") or []
@@ -4815,6 +5077,10 @@ def _kalshi_event_snapshot(competition: dict, event: dict, series_slug: str) -> 
         return None
     matched = []
     used_entities = set()
+    fee_type = event.get("fee_type_override") or (series_fee or {}).get("fee_type")
+    fee_multiplier = event.get("fee_multiplier_override")
+    if fee_multiplier is None:
+        fee_multiplier = (series_fee or {}).get("fee_multiplier")
     for market, market_label, tokens, price, bid, ask, quote_method in valid_markets:
         exact = [row for candidate, row in participant_tokens if candidate == tokens]
         candidates = exact or [
@@ -4840,20 +5106,28 @@ def _kalshi_event_snapshot(competition: dict, event: dict, series_slug: str) -> 
                 "liquidity_usd": round(_as_float(market.get("liquidity_dollars")), 2),
                 "volume_contracts": round(_as_float(market.get("volume_fp")), 2),
                 "updated_at": market.get("updated_time"),
+                "fee_type": fee_type,
+                "fee_multiplier": (
+                    round(_as_float(fee_multiplier), 6)
+                    if fee_multiplier is not None
+                    else None
+                ),
+                "taker_fee_base_rate": KALSHI_TAKER_FEE_BASE_RATE,
+                "fee_schedule_effective_at": KALSHI_FEE_SCHEDULE_EFFECTIVE_AT,
+                "fee_schedule_url": "https://kalshi.com/docs/kalshi-fee-schedule.pdf",
+                "fee_request_started_at": (series_fee or {}).get("request_started_at"),
+                "fee_response_received_at": (series_fee or {}).get("response_received_at"),
+                "fee_response_sha256": (series_fee or {}).get("response_sha256"),
             }
         )
     coverage = len(matched) / len(participants)
     if len(matched) < 2 or coverage < 0.5:
         return None
     matched.sort(key=lambda row: (-row["normalized_probability"], row["name"]))
-    snapshot_material = json.dumps(
-        [(row["market_id"], row["raw_yes_price"], row["updated_at"]) for row in matched],
-        separators=(",", ":"),
-    )
     event_ticker = str(event.get("event_ticker", ""))
     series_ticker = str(event.get("series_ticker", ""))
     updated_values = [row["updated_at"] for row in matched if row.get("updated_at")]
-    return {
+    snapshot = {
         "competition_id": competition["id"],
         "event_id": event_ticker,
         "event_title": event.get("title"),
@@ -4866,9 +5140,89 @@ def _kalshi_event_snapshot(competition: dict, event: dict, series_slug: str) -> 
         "model_participants": len(participants),
         "market_outcomes": len(valid_markets),
         "coverage": round(coverage, 4),
-        "snapshot_sha256": hashlib.sha256(snapshot_material.encode()).hexdigest(),
         "outcomes": matched,
     }
+    snapshot["snapshot_sha256"] = _market_snapshot_hash(snapshot)
+    return snapshot
+
+
+def _enrich_kalshi_execution(snapshot: dict, competition: dict, api_base: str) -> dict:
+    """Freeze Kalshi top-of-book depth; a Yes ask is one minus the best No bid."""
+    candidates = _execution_candidate_ids(snapshot, competition)
+    for outcome in snapshot.get("outcomes", []):
+        if outcome.get("entity_id") not in candidates:
+            outcome["execution_quote_status"] = "not_strategy_candidate"
+            continue
+        market_id = outcome.get("market_id")
+        if not market_id:
+            outcome["execution_quote_status"] = "missing_market_id"
+            continue
+        book_url = f"{api_base}/markets/{market_id}/orderbook?depth=1"
+        request_started = datetime.now(timezone.utc)
+        request_monotonic = time.monotonic()
+        outcome["request_started_at"] = request_started.replace(microsecond=0).isoformat()
+        outcome["retrieval_url"] = book_url
+        try:
+            book_body = _get(book_url, attempts=3, cache_ttl=0)
+            response_received = datetime.now(timezone.utc)
+            outcome["response_received_at"] = (
+                response_received.replace(microsecond=0).isoformat()
+            )
+            outcome["retrieval_latency_ms"] = round(
+                (time.monotonic() - request_monotonic) * 1000,
+                3,
+            )
+            outcome["response_sha256"] = hashlib.sha256(book_body).hexdigest()
+            book = json.loads(book_body.decode("utf-8"))
+        except (RuntimeError, json.JSONDecodeError):
+            outcome["response_received_at"] = (
+                datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+            )
+            outcome["retrieval_latency_ms"] = round(
+                (time.monotonic() - request_monotonic) * 1000,
+                3,
+            )
+            outcome["execution_quote_status"] = "orderbook_unavailable"
+            continue
+        levels = book.get("orderbook_fp") or {}
+        yes_bids = [
+            (_as_float(row[0], -1), _as_float(row[1], -1))
+            for row in levels.get("yes_dollars") or []
+            if isinstance(row, list) and len(row) >= 2
+        ]
+        no_bids = [
+            (_as_float(row[0], -1), _as_float(row[1], -1))
+            for row in levels.get("no_dollars") or []
+            if isinstance(row, list) and len(row) >= 2
+        ]
+        yes_bids = [row for row in yes_bids if 0 < row[0] < 1 and row[1] > 0]
+        no_bids = [row for row in no_bids if 0 < row[0] < 1 and row[1] > 0]
+        if not no_bids:
+            outcome["execution_quote_status"] = "no_executable_ask"
+            continue
+        best_no_bid, ask_size = max(no_bids)
+        outcome["best_ask"] = round(1.0 - best_no_bid, 6)
+        outcome["top_ask_size"] = round(ask_size, 6)
+        if yes_bids:
+            outcome["best_bid"] = round(max(yes_bids)[0], 6)
+        outcome["book_captured_at"] = outcome["response_received_at"]
+        outcome["fee_schedule_checked_at"] = (
+            outcome.get("fee_response_received_at") or outcome["book_captured_at"]
+        )
+        outcome["book_hash"] = hashlib.sha256(
+            json.dumps(book, separators=(",", ":"), sort_keys=True).encode()
+        ).hexdigest()
+        outcome["execution_quote_status"] = (
+            "top_of_book"
+            if outcome.get("fee_type") in {"quadratic", "quadratic_with_maker_fees"}
+            and isinstance(outcome.get("fee_multiplier"), (int, float))
+            else "fee_unavailable"
+        )
+    snapshot["execution_captured_at"] = (
+        datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    )
+    snapshot["snapshot_sha256"] = _market_snapshot_hash(snapshot)
+    return snapshot
 
 
 def fetch_kalshi_comparison(competitions: list[dict]) -> dict:
@@ -4885,6 +5239,28 @@ def fetch_kalshi_comparison(competitions: list[dict]) -> dict:
     api_base = "https://external-api.kalshi.com/trade-api/v2"
     for competition in eligible:
         series_ticker, series_slug = KALSHI_COMPETITION_SERIES[competition["id"]]
+        series_fee = {}
+        series_url = f"{api_base}/series/{series_ticker}"
+        series_request_started = datetime.now(timezone.utc)
+        try:
+            series_body = _get(series_url, attempts=3, cache_ttl=0)
+            series_response_received = datetime.now(timezone.utc)
+            series_payload = json.loads(series_body.decode("utf-8"))
+            series = series_payload.get("series") or {}
+            series_fee = {
+                "fee_type": series.get("fee_type"),
+                "fee_multiplier": series.get("fee_multiplier"),
+                "last_updated_ts": series.get("last_updated_ts"),
+                "request_started_at": (
+                    series_request_started.replace(microsecond=0).isoformat()
+                ),
+                "response_received_at": (
+                    series_response_received.replace(microsecond=0).isoformat()
+                ),
+                "response_sha256": hashlib.sha256(series_body).hexdigest(),
+            }
+        except (RuntimeError, json.JSONDecodeError):
+            series_fee = {}
         api_url = api_base + "/events?" + urlencode(
             {
                 "series_ticker": series_ticker,
@@ -4894,7 +5270,7 @@ def fetch_kalshi_comparison(competitions: list[dict]) -> dict:
             }
         )
         try:
-            payload = json.loads(_get(api_url, attempts=3, cache_ttl=1800).decode("utf-8"))
+            payload = json.loads(_get(api_url, attempts=3, cache_ttl=0).decode("utf-8"))
         except (RuntimeError, json.JSONDecodeError):
             failures += 1
             searches.append({"competition_id": competition["id"], "series_ticker": series_ticker, "status": "source_error"})
@@ -4906,18 +5282,24 @@ def fetch_kalshi_comparison(competitions: list[dict]) -> dict:
             ticker = str(event.get("event_ticker", ""))
             if expected_suffix and not ticker.endswith(expected_suffix):
                 continue
-            snapshot = _kalshi_event_snapshot(competition, event, series_slug)
+            snapshot = _kalshi_event_snapshot(
+                competition,
+                event,
+                series_slug,
+                series_fee,
+            )
             if snapshot:
                 candidates.append(snapshot)
         if candidates:
             candidates.sort(key=lambda row: (-row["matched_participants"], -row["coverage"], row["event_id"]))
-            snapshots.append(candidates[0])
+            selected = _enrich_kalshi_execution(candidates[0], competition, api_base)
+            snapshots.append(selected)
             searches.append(
                 {
                     "competition_id": competition["id"],
                     "series_ticker": series_ticker,
                     "status": "matched",
-                    "event_id": candidates[0]["event_id"],
+                    "event_id": selected["event_id"],
                 }
             )
         else:
@@ -5222,6 +5604,7 @@ def build_sport_payload(
     entities: dict,
     source_meta: dict,
     predictor_schedules: list[dict] | None = None,
+    audit_packet: dict | None = None,
 ) -> dict:
     matches = sorted(_deduplicate(matches), key=_match_sort_key)
     latest = max(match.date for match in matches)
@@ -5260,6 +5643,7 @@ def build_sport_payload(
     ] or matches
     model_payloads = {}
     selected_parameters = {}
+    parameter_selection = {}
     candidate_parameters = {
         name: _model_candidates(sport, name) for name in MODEL_NAMES
     }
@@ -5273,8 +5657,15 @@ def build_sport_payload(
     }
     history_events = _major_history_events(matches, sport, history_entities)
     for model_name in MODEL_NAMES:
-        params = _choose_parameters(matches, sport, model_name, validation_start, evaluation_start)
+        params, selection = _parameter_selection(
+            matches,
+            sport,
+            model_name,
+            validation_start,
+            evaluation_start,
+        )
         selected_parameters[model_name] = params
+        parameter_selection[model_name] = selection
         fitted_model = _new_model(model_name, params, sport)
         model_snapshots = {}
         states, predictions, histories = _run_model(
@@ -5439,6 +5830,47 @@ def build_sport_payload(
             },
         },
     }
+    aligned_for_ensemble_audit = _aligned_model_predictions(predictions_by_model)
+    ensemble_validation = [
+        row
+        for row in aligned_for_ensemble_audit
+        if validation_start <= date.fromisoformat(row["date"]) < evaluation_start
+    ]
+    ensemble_candidate_evidence = []
+    for candidate in ensemble_candidates:
+        candidate_predictions = [
+            {
+                "date": row["date"],
+                "actual": row["actual"],
+                "predicted": _log_opinion_probability(
+                    row["probabilities"],
+                    candidate,
+                ),
+            }
+            for row in ensemble_validation
+        ]
+        ensemble_candidate_evidence.append(
+            {
+                "parameters": {
+                    "pool": "log_opinion",
+                    **{
+                        f"weight_{model_name}": candidate[model_name]
+                        for model_name in MODEL_NAMES
+                    },
+                },
+                "metrics": _metrics(candidate_predictions, validation_start),
+            }
+        )
+    selected_ensemble_index = next(
+        index
+        for index, candidate in enumerate(ensemble_candidates)
+        if candidate == ensemble_weights
+    )
+    parameter_selection["ensemble"] = {
+        "criterion": "minimum chronological validation log loss",
+        "selected_index": selected_ensemble_index,
+        "candidates": ensemble_candidate_evidence,
+    }
     evaluation_comparison = _paired_log_loss_block_bootstrap(
         {
             **predictions_by_model,
@@ -5538,6 +5970,31 @@ def build_sport_payload(
         },
         "candidate_parameters": candidate_parameters,
         "parameters": selected_parameters,
+        "model_audit": {
+            "audit_schema_version": "1.0.0",
+            "status": "packet_pending",
+            "verification_level": "full_replay",
+            "packet_url": f"/assets/data/rating-lab/audit/{sport}-replay.json.gz",
+            "packet_sha256": None,
+            "report_url": "/assets/data/rating-lab/audit/report.json",
+            "normalized_replay_input_sha256": None,
+            "validation_start": validation_start.isoformat(),
+            "evaluation_start": evaluation_start.isoformat(),
+            "selection_evidence": {
+                name: {
+                    "selected_index": evidence["selected_index"],
+                    "candidate_count": len(evidence["candidates"]),
+                    "selected_validation_metrics": evidence["candidates"][
+                        evidence["selected_index"]
+                    ]["metrics"],
+                }
+                for name, evidence in parameter_selection.items()
+            },
+            "command": (
+                "python3 scripts/audit_rating_models.py "
+                "--data-dir assets/data/rating-lab --strict"
+            ),
+        },
         "models": model_payloads,
         "evaluation_comparison": evaluation_comparison,
         "incumbent_benchmarks": incumbent_benchmarks,
@@ -5588,6 +6045,32 @@ def build_sport_payload(
             matches,
             pre_event_models=pre_event_models,
         )
+    if audit_packet is not None:
+        from .audit import build_packet
+
+        audit_packet.update(
+            build_packet(
+                sport=sport,
+                methodology_version=METHODOLOGY_VERSION,
+                source=source_meta,
+                matches=matches,
+                validation_start=validation_start,
+                evaluation_start=evaluation_start,
+                selection_evidence=parameter_selection,
+                selected_parameters=selected_parameters,
+                predictions_by_model={
+                    **predictions_by_model,
+                    "ensemble": ensemble_predictions,
+                },
+                published_metrics={
+                    model_name: model_payloads[model_name]["metrics"]
+                    for model_name in PUBLISHED_MODEL_NAMES
+                },
+            )
+        )
+        payload["model_audit"]["normalized_replay_input_sha256"] = audit_packet[
+            "normalized_replay_input"
+        ]["sha256"]
     return payload
 
 
@@ -5609,6 +6092,18 @@ def validate_payload(payload: dict, schema: dict) -> None:
         raise ValueError("Invalid data window match count")
     if not isinstance(window.get("entities"), int) or window["entities"] < 2:
         raise ValueError("Invalid data window entity count")
+    model_audit = payload.get("model_audit", {})
+    if set(model_audit.get("selection_evidence", {})) != set(PUBLISHED_MODEL_NAMES):
+        raise ValueError("Model audit is missing candidate-selection evidence")
+    if model_audit.get("status") in {"ready", "pass"}:
+        packet_hash = model_audit.get("packet_sha256")
+        if not isinstance(packet_hash, str) or len(packet_hash) != 64:
+            raise ValueError("Ready model audit is missing its packet hash")
+    replay_hash = model_audit.get("normalized_replay_input_sha256")
+    if replay_hash is not None and (
+        not isinstance(replay_hash, str) or len(replay_hash) != 64
+    ):
+        raise ValueError("Invalid normalized replay input hash")
     context = payload["outcome_context"]
     if not isinstance(context.get("matches"), int) or not 1 <= context["matches"] <= window["matches"]:
         raise ValueError("Outcome context sample is outside the data window")
@@ -5697,6 +6192,8 @@ def validate_payload(payload: dict, schema: dict) -> None:
                 seen_days.add(key)
                 if not snapshot.get("captured_at") or not snapshot.get("snapshot_sha256"):
                     raise ValueError(f"Incomplete dated {provider} snapshot")
+                if not isinstance(snapshot.get("execution_quotes"), list):
+                    raise ValueError(f"Missing dated {provider} execution evidence")
                 forecasts = {
                     "market": snapshot.get("market_forecast"),
                     **snapshot.get("model_forecasts", {}),
@@ -5720,6 +6217,18 @@ def validate_payload(payload: dict, schema: dict) -> None:
                             raise ValueError(f"Invalid resolved {provider} forecast score")
             if benchmark.get("status") not in {"awaiting_resolutions", "scored"}:
                 raise ValueError(f"Invalid {provider} benchmark status")
+            paper_trading = market.get("paper_trading")
+            if not isinstance(paper_trading, dict):
+                raise ValueError(f"Missing {provider} paper-trading audit")
+            from .market_audit import build_provider_paper_audit
+
+            rebuilt = build_provider_paper_audit(
+                history,
+                provider,
+                strategy=paper_trading.get("strategy"),
+            )
+            if rebuilt["audit_sha256"] != paper_trading.get("audit_sha256"):
+                raise ValueError(f"{provider} paper-trading audit hash mismatch")
     for name in PUBLISHED_MODEL_NAMES:
         if name not in payload["models"]:
             raise ValueError(f"Missing model {name}")
@@ -5750,6 +6259,8 @@ def write_outputs(
     refresh_players: bool = True,
 ) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
+    audit_dir = output_dir / "audit"
+    audit_dir.mkdir(parents=True, exist_ok=True)
     schema = json.loads((Path(__file__).with_name("schema.json")).read_text())
     token = os.environ.get("FOOTBALL_DATA_TOKEN")
     loaders = {
@@ -5796,19 +6307,29 @@ def write_outputs(
                 elif sport == "chess":
                     predictor_schedules = fetch_chess_tournament_schedules()
                 _merge_schedule_media(entities, predictor_schedules)
+                replay_packet = {}
                 payload = build_sport_payload(
                     sport,
                     matches,
                     entities,
                     source_meta,
                     predictor_schedules=predictor_schedules,
+                    audit_packet=replay_packet,
                 )
                 _attach_verified_portraits(payload, previous_payload)
                 _attach_polymarket_comparison(payload, previous_payload)
                 _attach_kalshi_comparison(payload, previous_payload)
+                from .audit import encode_packet, packet_sha256
+
+                packet_bytes = encode_packet(replay_packet)
+                payload["model_audit"]["status"] = "ready"
+                payload["model_audit"]["packet_sha256"] = packet_sha256(packet_bytes)
                 validate_payload(payload, schema)
                 staged = temporary_path / f"{sport}.json"
                 staged.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + "\n")
+                staged_packet = temporary_path / f"{sport}-replay.json.gz"
+                staged_packet.write_bytes(packet_bytes)
+                staged_packet.replace(audit_dir / staged_packet.name)
                 staged.replace(output_dir / staged.name)
                 statuses[sport] = {
                     "status": "current",
@@ -5932,6 +6453,23 @@ def write_outputs(
                 "chess": "PGN entity A is White and receives the declared White offset before every prediction and update.",
             },
         },
+        "model_audit": {
+            "schema_version": "1.0.0",
+            "report_url": "/assets/data/rating-lab/audit/report.json",
+            "packet_url_pattern": (
+                "/assets/data/rating-lab/audit/{sport}-replay.json.gz"
+            ),
+            "verification": (
+                "Frozen normalized replay inputs; all declared validation "
+                "candidates; aligned one-step-ahead evaluation ledger; "
+                "deterministic full replay; metric, reliability, ensemble, "
+                "calendar-month bootstrap, code-revision, and hash checks."
+            ),
+            "failure_rule": (
+                "A missing packet, mismatched code revision, altered candidate "
+                "score, changed prediction, or metric mismatch cannot pass."
+            ),
+        },
         "tournament_predictor": {
             "simulations_per_competition_model": PREDICTOR_SIMULATIONS,
             "seed": "SHA-256(methodology version, competition, season, model), first 64 bits as hexadecimal",
@@ -5945,8 +6483,10 @@ def write_outputs(
             "qualifying_scoreline_bridge": "Fit an independent-Poisson scoreline distribution to each protocol's home/draw/away probabilities for unplayed legs; use actual aggregate scores and a neutral decisive probability only when still level.",
             "completed_competitions": "Replace retrospective title odds with an exact rating anchored to fixed pre-event opponent beliefs, a neutral-prior event-only reset rank, and chronological actual-versus-expected surprise. In live knockout events, publish the same closed-record view immediately for source-confirmed eliminated participants; never grade active participants on incomplete evidence.",
             "market_benchmark": "Polymarket and Kalshi winner quotes are frozen beside all four protocol forecasts at the same dated snapshot. Once the official winner resolves, every forecaster is scored on the unchanged common field using categorical log loss and multiclass Brier score; market data remain comparison-only and never enter a model.",
-            "market_snapshot_retention": "The latest successful quote per provider, competition, and UTC date is retained in the published sport JSON with its source hash and simultaneous model probabilities.",
-            "market_quality_fields": ["captured_at", "snapshot_sha256", "raw_yes_price_sum", "coverage", "best_bid", "best_ask", "liquidity_usd", "volume_usd", "updated_at", "other_probability", "resolution.scores.*.log_loss", "resolution.scores.*.brier"],
+            "market_snapshot_retention": "The first successful quote per provider, competition, and UTC date is retained immutably in the published sport JSON with its source hash and simultaneous model probabilities. Later same-day refreshes cannot replace it.",
+            "market_paper_strategy": "Independent USD 1,000 paper bankrolls; first eligible long-Yes entry per provider/model/competition/season; quarter Kelly after fee; five-point minimum edge; 2% trade, 10% event, 1% reported-liquidity, and frozen top-of-book-size caps. Missing execution evidence is a published no-bet.",
+            "market_fill_boundary": "No order is sent. The counterfactual fill uses only a contemporaneous best ask and displayed quantity frozen within 15 minutes of the model snapshot. It does not prove the quote survived network latency.",
+            "market_quality_fields": ["captured_at", "snapshot_sha256", "raw_yes_price_sum", "coverage", "best_bid", "best_ask", "top_ask_size", "request_started_at", "response_received_at", "retrieval_latency_ms", "response_sha256", "book_captured_at", "book_hash", "fee_type", "fee_multiplier", "taker_fee_rate", "fee_request_started_at", "fee_response_received_at", "fee_response_sha256", "other_probability", "paper_trading.decisions", "paper_trading.positions", "paper_trading.audit_sha256", "resolution.scores.*.log_loss", "resolution.scores.*.brier"],
             "refresh": "daily",
         },
         "individual_contribution": individual_contribution_protocol(),
@@ -6410,6 +6950,7 @@ def build_default_view(
                 ),
             ),
             "data_window": default_payload.get("data_window", {}),
+            "model_audit": default_payload.get("model_audit", {}),
         },
         "verdict": {
             "sentence": sentence,
