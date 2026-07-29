@@ -487,6 +487,9 @@ test.describe("competition switching", () => {
     const leaderboardModel = await page
       .locator('#model-tabs button[aria-pressed="true"]')
       .getAttribute("data-model");
+    await page
+      .locator('#predictor-sport-tabs [data-predictor-sport="football"]')
+      .click();
     const select = page.locator("#predictor-competition");
     const options = await select.locator("option").all();
     expect(options.length).toBeGreaterThan(1);
@@ -497,6 +500,44 @@ test.describe("competition switching", () => {
     await expect(
       page.locator('#model-tabs button[aria-pressed="true"]')
     ).toHaveAttribute("data-model", leaderboardModel);
+  });
+
+  test("competition forecasts separate sports before listing events", async ({
+    page,
+  }) => {
+    await gotoRatingLab(page);
+    const sportTabs = page.locator("#predictor-sport-tabs");
+    await expect(sportTabs.locator("button")).toHaveCount(4);
+    await expect(
+      sportTabs.locator('[data-predictor-sport="tennis"]')
+    ).toHaveAttribute("aria-pressed", "true");
+
+    const select = page.locator("#predictor-competition");
+    const tennisValues = await select
+      .locator("option")
+      .evaluateAll((options) =>
+        options.map((option) => option.value).filter(Boolean)
+      );
+
+    await sportTabs.locator('[data-predictor-sport="football"]').click();
+    await expect(
+      sportTabs.locator('[data-predictor-sport="football"]')
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.locator('#sport-tabs [data-sport="football"]')
+    ).toHaveAttribute("aria-pressed", "true");
+
+    const footballValues = await select
+      .locator("option")
+      .evaluateAll((options) =>
+        options.map((option) => option.value).filter(Boolean)
+      );
+    expect(footballValues.length).toBeGreaterThan(0);
+    expect(
+      footballValues.filter((value) => tennisValues.includes(value))
+    ).toEqual([]);
+    await expect(page).toHaveURL(/sport=football/);
+    await expect(page.locator("#predictor-state")).toBeVisible();
   });
 
   test("a live knockout shows forecasts and closed-record performance together", async ({
@@ -890,6 +931,9 @@ test.describe("empty-market states", () => {
       predictor.kalshi_comparison = emptyBenchmark(predictor.kalshi_comparison);
     });
     await gotoRatingLab(page);
+    await page
+      .locator('#predictor-sport-tabs [data-predictor-sport="football"]')
+      .click();
 
     const footballIds = new Set(
       (football.tournament_predictor?.competitions || []).map((c) => c.id)

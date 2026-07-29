@@ -270,6 +270,16 @@ description: Live alternative ratings for tennis, club and national-team footbal
       <p class="rating-lab-audit-note">Coverage is format-based, not limited to championships: official ATP main draws, five club leagues, published UEFA qualifying rounds, public club and national cup fields, and elite Lichess round-robin events use the same three-state contract. Tennis locks the public ProTennisLive bracket and declared surface. Qualifying probabilities stop at the next published stage; they are not mislabeled as title odds. A forecast remains withheld when the public draw or field is not yet sufficient to reproduce it.</p>
     </details>
 
+    <div class="rating-lab-control-group rating-lab-predictor-sport-nav" aria-label="Competition sport">
+      <span class="rating-lab-control-label">Choose a sport</span>
+      <div class="rating-lab-segmented" id="predictor-sport-tabs">
+        <button type="button" data-predictor-sport="tennis" aria-pressed="true">Tennis</button>
+        <button type="button" data-predictor-sport="football" aria-pressed="false">Club football</button>
+        <button type="button" data-predictor-sport="national-football" aria-pressed="false">National teams</button>
+        <button type="button" data-predictor-sport="chess" aria-pressed="false">Chess</button>
+      </div>
+    </div>
+
     <div class="rating-lab-predictor-toolbar">
       <label class="rating-lab-field">
         <span>Competition</span>
