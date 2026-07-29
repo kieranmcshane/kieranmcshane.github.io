@@ -111,6 +111,7 @@
     quickModelMenu: document.getElementById('rating-quick-model-menu'),
     quickModelTrigger: document.getElementById('rating-quick-model-trigger'),
     quickModelLabel: document.getElementById('rating-quick-model-label'),
+    predictorSportTabs: document.getElementById('predictor-sport-tabs'),
     metricsDisclosure: document.querySelector('.rating-lab-metrics-disclosure'),
     metrics: document.getElementById('rating-metrics'),
     movers: document.getElementById('rating-movers'),
@@ -215,10 +216,12 @@
     state.matchupB = null;
     state.matchupVenue = 'neutral';
     setPressed(elements.sportTabs, 'sport', state.sport);
+    setPressed(elements.predictorSportTabs, 'predictorSport', state.sport);
     setPressed(elements.modelTabs, 'model', state.model);
     setCurrentNav(state.view);
     if (legacyTarget) replaceViewState(state.view);
     if (!state.manifest || !state.datasets[state.sport]) return Promise.resolve();
+    populatePredictorCompetitions();
     populateCompetitions();
     return syncData().then(function () {
       if (legacyTarget) revealMethodSection(legacyTarget);
@@ -236,6 +239,7 @@
     setCurrentNav(state.view);
   }
   setPressed(elements.sportTabs, 'sport', state.sport);
+  setPressed(elements.predictorSportTabs, 'predictorSport', state.sport);
   setPressed(elements.modelTabs, 'model', state.model);
 
   if (window.matchMedia('(max-width: 650px)').matches) {
@@ -1397,7 +1401,7 @@
   }
 
   function predictorCompetitions() {
-    var rows = ['tennis', 'football', 'national-football', 'chess'].reduce(function (items, sport) {
+    var rows = [state.sport].reduce(function (items, sport) {
       var predictor = state.datasets[sport].tournament_predictor;
       if (!predictor) return items;
       predictor.competitions.forEach(function (competition) {
@@ -1414,6 +1418,29 @@
       return priorityA - priorityB ||
         a.competition.label.localeCompare(b.competition.label);
     });
+  }
+
+  function populatePredictorCompetitions() {
+    var competitions = predictorCompetitions();
+    if (!competitions.length) {
+      state.predictorCompetition = null;
+      elements.predictorCompetition.innerHTML = '<option value="">No published competition</option>';
+      elements.predictorCompetition.disabled = true;
+      return;
+    }
+    if (!competitions.some(function (view) {
+      return view.competition.id === state.predictorCompetition;
+    })) {
+      state.predictorCompetition = competitions[0].competition.id;
+    }
+    elements.predictorCompetition.disabled = false;
+    elements.predictorCompetition.innerHTML = competitions.map(function (view) {
+      var competition = view.competition;
+      return '<option value="' + escapeHtml(competition.id) + '"' +
+        (competition.id === state.predictorCompetition ? ' selected' : '') + '>' +
+        escapeHtml(stateLabel(competitionState(competition)) + ' · ' + competitionTitle(competition)) + '</option>';
+    }).join('');
+    elements.predictorCompetition.value = state.predictorCompetition;
   }
 
   function predictorData() {
@@ -2376,7 +2403,27 @@
 
   function renderPredictor() {
     var view = predictorData();
-    if (!view) return;
+    if (!view) {
+      var sportLabel = {
+        tennis: 'Tennis',
+        football: 'Club football',
+        'national-football': 'National teams',
+        chess: 'Chess'
+      }[state.sport] || state.sport;
+      elements.predictorPerformanceChart.hidden = true;
+      elements.predictorPerformanceChart.innerHTML = '';
+      elements.predictorState.className = 'rating-lab-predictor-state';
+      elements.predictorState.innerHTML = '<strong>No events</strong><span>No published competition for ' +
+        escapeHtml(sportLabel) + '</span>';
+      elements.predictorMetrics.innerHTML = '';
+      elements.predictorMarket.hidden = true;
+      elements.predictorMarket.innerHTML = '';
+      elements.predictorCaption.textContent = sportLabel + ' · no published competition';
+      elements.predictorBody.innerHTML = '<tr><td colspan="7"><strong>No reproducible competition is published for this sport in the current snapshot.</strong></td></tr>';
+      elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose another sport to inspect its competitions.</p>';
+      elements.predictorMethod.textContent = 'Competition forecasts appear only when the public field, draw, or schedule is sufficient to reproduce them.';
+      return;
+    }
     elements.predictorPerformanceChart.hidden = true;
     elements.predictorPerformanceChart.innerHTML = '';
     var competition = view.competition;
@@ -2713,8 +2760,32 @@
     state.matchupB = null;
     state.matchupVenue = 'neutral';
     setPressed(elements.sportTabs, 'sport', state.sport);
+    setPressed(elements.predictorSportTabs, 'predictorSport', state.sport);
+    populatePredictorCompetitions();
     populateCompetitions();
     replaceViewState(state.view);
+    syncData();
+  });
+
+  elements.predictorSportTabs.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-predictor-sport]');
+    if (!button || button.dataset.predictorSport === state.sport) return;
+    state.sport = button.dataset.predictorSport;
+    state.selected = null;
+    state.pinned = [];
+    state.expanded = false;
+    state.visibleRows = 0;
+    state.includeProvisional = false;
+    state.matchupA = null;
+    state.matchupB = null;
+    state.matchupVenue = 'neutral';
+    state.predictorTeam = null;
+    state.settledPerformanceTeam = null;
+    setPressed(elements.sportTabs, 'sport', state.sport);
+    setPressed(elements.predictorSportTabs, 'predictorSport', state.sport);
+    populatePredictorCompetitions();
+    populateCompetitions();
+    replaceViewState('predictor');
     syncData();
   });
 
@@ -3235,13 +3306,7 @@
       ]);
     })
     .then(function () {
-      var competitions = predictorCompetitions();
-      elements.predictorCompetition.innerHTML = competitions.map(function (view) {
-        var competition = view.competition;
-        return '<option value="' + escapeHtml(competition.id) + '"' + (competition.id === competitions[0].competition.id ? ' selected' : '') + '>' +
-          escapeHtml(stateLabel(competitionState(competition)) + ' · ' + competitionTitle(competition)) + '</option>';
-      }).join('');
-      state.predictorCompetition = competitions[0].competition.id;
+      populatePredictorCompetitions();
       populateCompetitions();
       render();
       if (initialViewState.legacyTarget) {
