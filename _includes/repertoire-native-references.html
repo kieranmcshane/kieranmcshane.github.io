@@ -1,0 +1,12 @@
+{% assign repertoire_chapter_references = site.data.repertoire_references[include.chapter_id] %}
+{% if repertoire_chapter_references %}
+  <details class="repertoire-native-references">
+    <summary>Références et prolongements du chapitre</summary>
+    <ul>
+      {% for reference in repertoire_chapter_references %}
+        <li><a href="{{ reference.url }}">{{ reference.title }}</a><span>{{ reference.source }}</span></li>
+      {% endfor %}
+    </ul>
+    <p>Ces liens donnent des développements ou des repères voisins ; ils ne remplacent pas les solutions du recueil.</p>
+  </details>
+{% endif %}

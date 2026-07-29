@@ -1,0 +1,190 @@
+{
+  "corps-extensions": [
+    {
+      "title": "Polynômes cyclotomiques sur les corps finis",
+      "url": "https://agreg-maths.fr/developpements/906",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Automorphismes d’un corps cyclotomique",
+      "url": "https://agreg-maths.fr/developpements/995",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Construction des corps finis",
+      "url": "https://agreg-maths.fr/developpements/173",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "anneaux-arithmetique": [
+    {
+      "title": "Cours d’algèbre de Perrin : usages recensés",
+      "url": "https://agreg-maths.fr/ressources/references/287",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Approximation diophantienne",
+      "url": "https://agreg-maths.fr/developpements/1252",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "groupes-representations": [
+    {
+      "title": "Mathématiques pour l’agrégation : algèbre et géométrie",
+      "url": "https://agreg-maths.fr/ressources/references/287",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Retours d’oraux d’algèbre",
+      "url": "https://agreg-maths.fr/ressources/retours",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "formes-quadratiques": [
+    {
+      "title": "Mathématiques pour l’agrégation : algèbre et géométrie",
+      "url": "https://agreg-maths.fr/ressources/references/287",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Théorème spectral et extrema",
+      "url": "https://agreg-maths.fr/developpements/792",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Décomposition polaire",
+      "url": "https://agreg-maths.fr/developpements/11",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "rang-dualite": [
+    {
+      "title": "Algèbre linéaire, réduction des endomorphismes",
+      "url": "https://agreg-maths.fr/ressources/references/267",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Mathématiques pour l’agrégation : algèbre et géométrie",
+      "url": "https://agreg-maths.fr/ressources/references/287",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "reduction-calcul-matriciel": [
+    {
+      "title": "Décomposition de Dunford",
+      "url": "https://agreg-maths.fr/developpements/1",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Réduction de Jordan d’un endomorphisme nilpotent",
+      "url": "https://agreg-maths.fr/developpements/56",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Algèbre linéaire, réduction des endomorphismes",
+      "url": "https://agreg-maths.fr/ressources/references/267",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "suites-fonctions-reelles": [
+    {
+      "title": "Approximation diophantienne",
+      "url": "https://agreg-maths.fr/developpements/1252",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Retours d’oraux d’analyse",
+      "url": "https://agreg-maths.fr/ressources/retours",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "calcul-differentiel": [
+    {
+      "title": "Théorème d’inversion locale",
+      "url": "https://agreg-maths.fr/developpements/96",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Théorème de Hadamard-Lévy",
+      "url": "https://agreg-maths.fr/developpements/53",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "integration-lp": [
+    {
+      "title": "Inégalités dans les espaces Lᵖ",
+      "url": "https://agreg-maths.fr/developpements/1069",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Convergence monotone, Fatou et convergence dominée",
+      "url": "https://agreg-maths.fr/developpements/1455",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "convexite-variation": [
+    {
+      "title": "Étude des fonctions à variations bornées",
+      "url": "https://agreg-maths.fr/developpements/765",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Leçon : fonctions monotones et fonctions convexes",
+      "url": "https://agreg-maths.fr/lecons/1116",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "analyse-complexe": [
+    {
+      "title": "Théorème de Montel",
+      "url": "https://agreg-maths.fr/developpements/257",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Prolongement analytique et zéros isolés",
+      "url": "https://agreg-maths.fr/developpements/1503",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "fourier-convolution": [
+    {
+      "title": "Formules de Poisson et de Shannon",
+      "url": "https://agreg-maths.fr/developpements/486",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Fonctions caractéristiques et moments",
+      "url": "https://agreg-maths.fr/developpements/85",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "topologie-baire": [
+    {
+      "title": "Théorème de la limite simple de Baire",
+      "url": "https://agreg-maths.fr/developpements/760",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Théorème d’Ascoli",
+      "url": "https://agreg-maths.fr/developpements/310",
+      "source": "agreg-maths.fr"
+    }
+  ],
+  "probabilites-moments": [
+    {
+      "title": "Théorème des moments",
+      "url": "https://agreg-maths.fr/developpements/833",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Fonctions caractéristiques et moments",
+      "url": "https://agreg-maths.fr/developpements/85",
+      "source": "agreg-maths.fr"
+    },
+    {
+      "title": "Problème des moments",
+      "url": "https://agreg-maths.fr/developpements/1621",
+      "source": "agreg-maths.fr"
+    }
+  ]
+}
