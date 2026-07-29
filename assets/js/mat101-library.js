@@ -151,10 +151,6 @@
 
     if (!input || !exercises.length) return;
 
-    if (tocDetails && window.matchMedia('(min-width: 701px)').matches) {
-      tocDetails.open = true;
-    }
-
     function updateToc(visibleCount) {
       tocLinks.forEach(function (link) {
         var exercise = exercises.find(function (candidate) {

@@ -53,6 +53,12 @@ math: true
       </summary>
 
       <div class="mat101-toc-panel">
+        <div class="mat101-difficulty-legend" aria-label="Légende des niveaux de difficulté">
+          <span><i class="mat101-level-dot mat101-level-essential" aria-hidden="true"></i>Essentiel</span>
+          <span><i class="mat101-level-dot mat101-level-exam" aria-hidden="true"></i>Niveau examen</span>
+          <span><i class="mat101-level-dot mat101-level-advanced" aria-hidden="true"></i>Approfondissement</span>
+          <span><i class="mat101-level-dot mat101-level-mixed" aria-hidden="true"></i>Intermédiaire</span>
+        </div>
         {% for chapter in site.data.mat101_exercises %}
           {% assign toc_chapter_exercises = site.data.mat101_native | where: "chapterId", chapter.id %}
           <section class="mat101-toc-chapter" data-mat101-toc-chapter>
@@ -65,16 +71,34 @@ math: true
             </header>
             <div class="mat101-toc-exercises">
               {% for exercise in toc_chapter_exercises %}
+                {% case exercise.difficulty %}
+                  {% when "*" %}
+                    {% assign difficulty_label = "notions essentielles" %}
+                    {% assign difficulty_class = "essential" %}
+                  {% when "**" %}
+                    {% assign difficulty_label = "niveau généralement attendu à l’examen" %}
+                    {% assign difficulty_class = "exam" %}
+                  {% when "***" %}
+                    {% assign difficulty_label = "approfondissement" %}
+                    {% assign difficulty_class = "advanced" %}
+                  {% else %}
+                    {% assign difficulty_label = "niveau intermédiaire" %}
+                    {% assign difficulty_class = "mixed" %}
+                {% endcase %}
                 <a
                   href="#exercice-{{ exercise.id | replace: '.', '-' }}"
                   data-mat101-toc-link
                   data-exercise-id="{{ exercise.id }}"
                   data-chapter-title="{{ chapter.title | escape }}"
-                  aria-label="Exercice {{ exercise.id }} — {{ chapter.title }}{% if exercise.difficulty %} — difficulté {{ exercise.difficulty }}{% endif %}"
+                  aria-label="Exercice {{ exercise.id }} — {{ chapter.title }}{% if exercise.difficulty %} — {{ difficulty_label }}{% endif %}"
                 >
                   <span>{{ exercise.id }}</span>
                   {% if exercise.difficulty %}
-                    <small aria-hidden="true">{{ exercise.difficulty }}</small>
+                    <i
+                      class="mat101-level-dot mat101-level-{{ difficulty_class }}"
+                      aria-hidden="true"
+                      title="{{ difficulty_label }}"
+                    ></i>
                   {% endif %}
                 </a>
               {% endfor %}
@@ -87,7 +111,11 @@ math: true
 
   <aside class="mat101-reading-note">
     <strong>Mode d’emploi.</strong>
-    Cherchez un numéro, un mot de l’énoncé ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Dans le polycopié, (*) vérifie les notions essentielles, (**) correspond en général au niveau attendu à l’examen et (***) propose un approfondissement. Le repère (*/**) signale un exercice à la frontière entre notions essentielles et niveau examen.
+    Cherchez un numéro, un mot de l’énoncé ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Les couleurs indiquent le niveau :
+    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-essential" aria-hidden="true"></i>notions essentielles</span>,
+    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-exam" aria-hidden="true"></i>niveau généralement attendu à l’examen</span>,
+    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-advanced" aria-hidden="true"></i>approfondissement</span> et
+    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-mixed" aria-hidden="true"></i>niveau intermédiaire</span>.
   </aside>
 
   <section class="mat101-browser" id="bibliotheque" aria-labelledby="mat101-browser-title">
@@ -170,7 +198,7 @@ math: true
                       class="mat101-difficulty mat101-difficulty-{{ difficulty_class }}"
                       aria-label="Difficulté : {{ difficulty_label }}"
                       title="Difficulté : {{ difficulty_label }}"
-                    >{{ exercise.difficulty }}</span>
+                    ><i class="mat101-level-dot mat101-level-{{ difficulty_class }}" aria-hidden="true"></i></span>
                   {% endif %}
                 </span>
                 <span class="mat101-exercise-tags" aria-label="Notions abordées">
