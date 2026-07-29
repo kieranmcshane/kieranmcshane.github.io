@@ -335,8 +335,124 @@ description: Live alternative ratings for tennis, club and national-team footbal
 
   <section class="rating-lab-research" id="research" aria-labelledby="research-heading">
     <p class="rating-lab-kicker">How it works</p>
-    <h2 id="research-heading">The details, when you want them.</h2>
-    <p class="rating-lab-research-intro">Rating Lab is a side project, but its forecasts should still be inspectable. Open a panel to see the assumptions, parameters, data sources, licences, and exact reproduction steps.</p>
+    <h2 id="research-heading">Methods, data, and the latest audit.</h2>
+    <p class="rating-lab-research-intro">Rating Lab is a side project, but its forecasts should still be inspectable. The daily verdict is readable first; the assumptions, parameters, data sources, licences, and exact reproduction steps remain available below.</p>
+    {% assign audit_summary = site.data.rating_lab_default.audit_summary %}
+    <section class="rating-lab-audit-summary" id="audit-summary" aria-labelledby="audit-summary-heading">
+      <header class="rating-lab-audit-summary-heading">
+        <div>
+          <p class="rating-lab-kicker">Latest validated build · daily</p>
+          <h3 id="audit-summary-heading">Reproducibility audit</h3>
+          {% if audit_summary.available %}
+            <p><strong>{{ audit_summary.status_label }}.</strong> {{ audit_summary.status_detail }}{% if audit_summary.generated_at %} Last generated {{ audit_summary.generated_at | date: "%b %-d, %Y at %H:%M UTC" }}.{% endif %}</p>
+          {% else %}
+            <p>The readable verdict will appear after the next validated sports refresh. The public reports and replay packets remain the authoritative evidence.</p>
+          {% endif %}
+        </div>
+        <span class="rating-lab-audit-status is-{{ audit_summary.status | default: 'incomplete' }}">
+          {{ audit_summary.status | default: "incomplete" | upcase }}
+        </span>
+      </header>
+
+      {% if audit_summary.available %}
+      {% if audit_summary.model.revision_mismatch %}
+      <div class="rating-lab-audit-revision" role="status">
+        <div>
+          <strong>Full replay required</strong>
+          <span>The published packets remain intact, but they predate the current site code.</span>
+        </div>
+        <dl>
+          <div>
+            <dt>Packet revision</dt>
+            <dd><code title="{{ audit_summary.model.expected_revision }}">{{ audit_summary.model.expected_revision_short }}</code></dd>
+          </div>
+          <div>
+            <dt>Current revision</dt>
+            <dd><code title="{{ audit_summary.model.auditor_revision }}">{{ audit_summary.model.auditor_revision_short }}</code></dd>
+          </div>
+        </dl>
+      </div>
+      {% endif %}
+      <div class="rating-lab-audit-metrics" aria-label="Audit headline results">
+        <div>
+          <span>{{ audit_summary.model.metric_label }}</span>
+          <strong>{{ audit_summary.model.sports_passed }}/{{ audit_summary.model.sports_total }}</strong>
+          <small>sports passed</small>
+        </div>
+        <div>
+          <span>{{ audit_summary.model.checks_label }}</span>
+          <strong>{{ audit_summary.model.checks_passed }}/{{ audit_summary.model.checks_total }}</strong>
+          <small>{% if audit_summary.model.full_replay_verified %}hash, replay, split, and metric checks{% else %}published hashes and frozen evidence{% endif %}</small>
+        </div>
+        <div>
+          <span>Market ledgers</span>
+          <strong>{{ audit_summary.market.audits_passed }}/{{ audit_summary.market.audits_total }}</strong>
+          <small>Polymarket and Kalshi ledgers verified</small>
+        </div>
+        <div>
+          <span>Paper positions</span>
+          <strong>{{ audit_summary.market.positions }}</strong>
+          <small>{{ audit_summary.market.decisions }} timestamped decisions retained</small>
+        </div>
+      </div>
+
+      <div class="rating-lab-audit-results">
+        <article>
+          <div class="rating-lab-audit-result-heading">
+            <div>
+              <p class="rating-lab-method-tag">Model evidence</p>
+              <h4>Every published sport</h4>
+            </div>
+            <span>{{ audit_summary.model.verification_label }}</span>
+          </div>
+          <ul class="rating-lab-audit-sport-list">
+            {% for result in audit_summary.model.rows %}
+            <li>
+              <div>
+                <strong>{{ result.label }}</strong>
+                <span>{{ result.evaluation_matches }} untouched evaluation results</span>
+              </div>
+              <div>
+                <span class="rating-lab-audit-row-status is-{{ result.status }}">{{ result.status | upcase }}</span>
+                <small>{{ result.checks_passed }}/{{ result.checks_total }} checks</small>
+              </div>
+              {% if result.packet_url %}<a href="{{ result.packet_url | relative_url }}" download aria-label="Download {{ result.label }} frozen replay packet">Replay packet</a>{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </article>
+
+        <article>
+          <div class="rating-lab-audit-result-heading">
+            <div>
+              <p class="rating-lab-method-tag">Mechanical paper trading</p>
+              <h4>Polymarket and Kalshi</h4>
+            </div>
+            <span>{{ audit_summary.market.audits_passed }}/{{ audit_summary.market.audits_total }} verified</span>
+          </div>
+          {% if audit_summary.market.positions > 0 %}
+            <p class="rating-lab-audit-market-verdict"><strong>{{ audit_summary.market.positions }} paper position{% if audit_summary.market.positions != 1 %}s{% endif %}</strong> · {{ audit_summary.market.resolved }} resolved · realized P&amp;L {{ audit_summary.market.realized_pnl_usd }} USD.</p>
+          {% else %}
+            <p class="rating-lab-audit-market-verdict"><strong>No admissible paper position yet.</strong> The ledger retained {{ audit_summary.market.decisions }} decisions and did not invent a fill.</p>
+          {% endif %}
+          {% if audit_summary.market.reason_summary.size > 0 %}
+          <ul class="rating-lab-audit-reasons" aria-label="Paper-trading decision reasons">
+            {% for reason in audit_summary.market.reason_summary %}
+            <li><strong>{{ reason.count }}</strong><span>{{ reason.label }}</span></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <p class="rating-lab-audit-note">A market audit can pass with zero positions: “pass” means the timestamped ledger reproduces exactly, not that the strategy was forced to trade or made money.</p>
+        </article>
+      </div>
+      {% endif %}
+
+      <div class="rating-lab-audit-summary-actions">
+        <a href="{{ '/assets/data/rating-lab/audit/report.json' | relative_url }}">Read model audit</a>
+        <a href="{{ '/assets/data/rating-lab/audit/market-strategy-report.json' | relative_url }}">Read market ledger</a>
+        <a href="#reproducibility">Reproduce it yourself</a>
+      </div>
+    </section>
     <details class="rating-lab-media-policy">
       <summary>Identity image and flag policy</summary>
       <p class="rating-lab-explainer"><strong>Identity images are data, too:</strong> club and federation crests are used only when football-data.org supplies them. Tennis and chess portraits are linked through exact ATP or FIDE identifiers to Wikimedia Commons—never guessed from a name—and appear only with a recorded file page, licence, and attribution. Small flags are pinned MIT-licensed SVG assets selected only from the source country or federation code—never operating-system emoji. Unknown codes remain blank rather than being inferred from a name. The inspector exposes image details. Images and flags never enter a rating or forecast; initials remain the final fallback.</p>

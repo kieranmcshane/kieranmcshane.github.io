@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 import copy
 import csv
 from dataclasses import asdict
@@ -6648,6 +6648,336 @@ def write_split_assets(output_dir: Path) -> dict:
     return written
 
 
+def _build_readable_audit_summary(output_dir: Path) -> dict:
+    """Condense machine audit reports into a server-renderable public verdict."""
+
+    sport_labels = {
+        "tennis": "ATP tennis",
+        "football": "Club football",
+        "national-football": "National teams",
+        "chess": "Elite OTB chess",
+    }
+    reason_labels = {
+        "no_overlapping_execution_quote": (
+            "No matching executable quote at the decision timestamp"
+        ),
+        "edge_below_threshold": "Net model edge below the five-point threshold",
+        "missing_quote_timestamp": "Executable quote timestamp missing",
+        "non_monotonic_quote_timestamp": "Quote timestamps are not monotonic",
+        "capture_time_differs_from_response_time": (
+            "Recorded quote time differs from the response time"
+        ),
+        "quote_outside_15_minute_capture_window": (
+            "Quote falls outside the 15-minute capture window"
+        ),
+        "missing_orderbook_response_hash": "Order-book response hash missing",
+        "missing_fee_response_provenance": "Fee-response provenance missing",
+        "non_monotonic_fee_timestamp": "Fee timestamps are not monotonic",
+        "stake_not_fundable": "Calculated stake is not fundable",
+        "first_eligible_edge": "First execution-eligible edge",
+    }
+
+    def read_report(filename: str) -> dict | None:
+        path = output_dir / "audit" / filename
+        if not path.exists():
+            return None
+        try:
+            report = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            return None
+        return report if isinstance(report, dict) else None
+
+    model_report = read_report("report.json")
+    model_rows = []
+    model_checks_passed = 0
+    model_checks_total = 0
+    if model_report:
+        for result in model_report.get("sports", []):
+            checks = [
+                check
+                for check in result.get("checks", [])
+                if isinstance(check, dict)
+            ]
+            passed = sum(check.get("passed") is True for check in checks)
+            model_checks_passed += passed
+            model_checks_total += len(checks)
+            evidence = {
+                check.get("id"): check.get("evidence")
+                for check in checks
+                if check.get("id")
+            }
+            split_counts = {}
+            try:
+                split_counts = json.loads(
+                    evidence.get("chronological_split_counts") or "{}"
+                )
+            except (TypeError, json.JSONDecodeError):
+                pass
+            sport = result.get("sport")
+            model_rows.append(
+                {
+                    "sport": sport,
+                    "label": sport_labels.get(sport, str(sport or "Unknown")),
+                    "status": result.get("status", "incomplete"),
+                    "checks_passed": passed,
+                    "checks_total": len(checks),
+                    "verification_level": result.get(
+                        "verification_level",
+                        model_report.get("verification_level", "unknown"),
+                    ),
+                    "evaluation_matches": int(
+                        split_counts.get("evaluation_matches") or 0
+                    ),
+                    "normalized_matches": evidence.get(
+                        "stable_replay_order",
+                        "Not recorded",
+                    ),
+                    "packet_sha256": evidence.get("audit_packet_hash"),
+                    "input_sha256": evidence.get("normalized_input_hash"),
+                    "ledger_sha256": evidence.get("evaluation_ledger_hash"),
+                    "packet_url": (
+                        f"/assets/data/rating-lab/audit/{sport}-replay.json.gz"
+                        if sport
+                        else None
+                    ),
+                }
+            )
+
+    market_report = read_report("market-strategy-report.json")
+    market_rows = []
+    reason_counts: Counter[str] = Counter()
+    market_decisions = 0
+    market_no_bets = 0
+    market_positions = 0
+    market_resolved = 0
+    market_open = 0
+    market_realized_pnl = 0.0
+    if market_report:
+        for result in market_report.get("audits", []):
+            audit = result.get("audit") or {}
+            decisions = [
+                row for row in audit.get("decisions", []) if isinstance(row, dict)
+            ]
+            positions = [
+                row for row in audit.get("positions", []) if isinstance(row, dict)
+            ]
+            resolved = [
+                row for row in positions if row.get("status") == "resolved"
+            ]
+            open_positions = [
+                row for row in positions if row.get("status") == "open"
+            ]
+            no_bets = [
+                row for row in decisions if row.get("action") == "no_bet"
+            ]
+            reason_counts.update(
+                str(row.get("reason") or "reason_not_recorded")
+                for row in no_bets
+            )
+            market_decisions += len(decisions)
+            market_no_bets += len(no_bets)
+            market_positions += len(positions)
+            market_resolved += len(resolved)
+            market_open += len(open_positions)
+            market_realized_pnl += sum(
+                float(row.get("pnl_usd") or 0.0) for row in resolved
+            )
+            sport = result.get("sport")
+            market_rows.append(
+                {
+                    "provider": result.get("provider", "Unknown provider"),
+                    "sport": sport,
+                    "sport_label": sport_labels.get(
+                        sport,
+                        str(sport or "Unknown"),
+                    ),
+                    "status": result.get("status", "incomplete"),
+                    "ledger_status": audit.get("status", "incomplete"),
+                    "history_snapshots": int(
+                        audit.get("history_snapshots") or 0
+                    ),
+                    "decisions": len(decisions),
+                    "no_bets": len(no_bets),
+                    "positions": len(positions),
+                    "resolved": len(resolved),
+                    "realized_pnl_usd": round(
+                        sum(
+                            float(row.get("pnl_usd") or 0.0)
+                            for row in resolved
+                        ),
+                        2,
+                    ),
+                    "audit_sha256": audit.get("audit_sha256"),
+                }
+            )
+
+    reason_summary = [
+        {
+            "reason": reason,
+            "label": reason_labels.get(
+                reason,
+                reason.replace("_", " ").capitalize(),
+            ),
+            "count": count,
+        }
+        for reason, count in reason_counts.most_common()
+    ]
+    model_status = (
+        model_report.get("status", "incomplete")
+        if model_report
+        else "incomplete"
+    )
+    model_verification_level = (
+        model_report.get("verification_level") if model_report else None
+    )
+    model_code = model_report.get("code", {}) if model_report else {}
+    code_matches = model_code.get("matches")
+    expected_revision = model_code.get("expected_revision")
+    auditor_revision = model_code.get("auditor_revision")
+    model_sports_passed = sum(
+        row["status"] == "pass" for row in model_rows
+    )
+    packet_integrity_verified = bool(model_rows) and (
+        model_sports_passed == len(model_rows)
+        and model_checks_passed == model_checks_total
+    )
+    full_replay_verified = bool(
+        model_status == "pass"
+        and model_verification_level == "full_replay"
+        and code_matches is not False
+        and packet_integrity_verified
+    )
+    revision_mismatch = bool(
+        code_matches is False and expected_revision and auditor_revision
+    )
+    market_status = (
+        market_report.get("status", "incomplete")
+        if market_report
+        else "incomplete"
+    )
+    statuses = {model_status, market_status}
+    overall_status = (
+        "fail"
+        if "fail" in statuses
+        else "pass"
+        if statuses == {"pass"}
+        else "incomplete"
+    )
+    if revision_mismatch and packet_integrity_verified:
+        status_label = "Packet integrity passed; code revision changed"
+        status_detail = (
+            "The frozen packets were produced by revision "
+            f"{str(expected_revision)[:8]}, while the current auditor uses "
+            f"{str(auditor_revision)[:8]}. A full replay is required before "
+            "the model audit can return to pass."
+        )
+    elif model_status == "fail":
+        status_label = "A model reproducibility check failed"
+        status_detail = (
+            "At least one published model check did not reproduce. The "
+            "per-sport results below identify the affected packet."
+        )
+    elif market_status == "fail":
+        status_label = "A market-ledger audit failed"
+        status_detail = (
+            "At least one timestamped paper-trading ledger did not reproduce "
+            "exactly."
+        )
+    elif overall_status == "pass":
+        status_label = "All published audits passed"
+        status_detail = (
+            "The model evidence and timestamped market ledgers reproduce from "
+            "the published artifacts."
+        )
+    else:
+        status_label = "Audit evidence is incomplete"
+        status_detail = (
+            "One or more public audit artifacts are not yet available for "
+            "this build."
+        )
+    generated_values = []
+    if (model_report or {}).get("generated_at"):
+        generated_values.append(model_report["generated_at"])
+    for item in (market_report or {}).get("input_payloads", []):
+        filename = item.get("filename") if isinstance(item, dict) else None
+        source = output_dir / filename if filename else None
+        if not source or not source.exists():
+            continue
+        try:
+            generated_at = json.loads(source.read_text()).get("generated_at")
+        except (OSError, json.JSONDecodeError, AttributeError):
+            continue
+        if generated_at:
+            generated_values.append(generated_at)
+    return {
+        "available": bool(model_report or market_report),
+        "status": overall_status,
+        "status_label": status_label,
+        "status_detail": status_detail,
+        "generated_at": max(generated_values, default=None),
+        "model": {
+            "available": bool(model_report),
+            "status": model_status,
+            "verification_level": model_verification_level,
+            "verification_label": (
+                "Full chronological replay"
+                if model_verification_level == "full_replay"
+                else "Frozen-packet integrity"
+                if model_verification_level == "artifact_integrity"
+                else "Verification pending"
+            ),
+            "metric_label": (
+                "Full model replays"
+                if model_verification_level == "full_replay"
+                else "Frozen sport packets"
+            ),
+            "checks_label": (
+                "Replay and integrity checks"
+                if model_verification_level == "full_replay"
+                else "Artifact integrity checks"
+            ),
+            "sports_passed": model_sports_passed,
+            "sports_total": len(model_rows),
+            "checks_passed": model_checks_passed,
+            "checks_total": model_checks_total,
+            "packet_integrity_verified": packet_integrity_verified,
+            "full_replay_verified": full_replay_verified,
+            "revision_mismatch": revision_mismatch,
+            "code_matches": code_matches,
+            "expected_revision": expected_revision,
+            "auditor_revision": auditor_revision,
+            "expected_revision_short": (
+                str(expected_revision)[:8] if expected_revision else None
+            ),
+            "auditor_revision_short": (
+                str(auditor_revision)[:8] if auditor_revision else None
+            ),
+            "rows": model_rows,
+        },
+        "market": {
+            "available": bool(market_report),
+            "status": market_status,
+            "audits_passed": sum(
+                row["status"] == "pass" for row in market_rows
+            ),
+            "audits_total": len(market_rows),
+            "decisions": market_decisions,
+            "no_bets": market_no_bets,
+            "positions": market_positions,
+            "resolved": market_resolved,
+            "open": market_open,
+            "realized_pnl_usd": round(market_realized_pnl, 2),
+            "audit_sha256": (
+                market_report.get("audit_sha256")
+                if market_report
+                else None
+            ),
+            "reason_summary": reason_summary,
+            "rows": market_rows,
+        },
+    }
+
+
 def build_default_view(
     output_dir: Path,
     *,
@@ -6952,6 +7282,7 @@ def build_default_view(
             "data_window": default_payload.get("data_window", {}),
             "model_audit": default_payload.get("model_audit", {}),
         },
+        "audit_summary": _build_readable_audit_summary(output_dir),
         "verdict": {
             "sentence": sentence,
             "best_model": best_model,
