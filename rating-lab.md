@@ -23,7 +23,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <span class="rating-lab-freshness-chip{% if source.delayed %} is-stale{% endif %}" title="{{ source.message | escape }}"><i aria-hidden="true"></i>{{ source.label }} · {{ source.latest_result | date: "%b %-d, %Y" }}</span>
         {% endfor %}
       </div>
-      <p class="rating-lab-generation" id="rating-lab-generation">{{ site.data.rating_lab_default.published_rankings }} published rankings · generated {{ site.data.rating_lab_default.manifest_generated_at | date: "%b %-d, %Y" }}{% if site.data.rating_lab_default.has_delayed_sources %} · delayed sources retain their last valid snapshot{% endif %}</p>
+      <p class="rating-lab-generation" id="rating-lab-generation">{{ site.data.rating_lab_default.published_rankings }} rankings · generated {{ site.data.rating_lab_default.manifest_generated_at | date: "%b %-d, %Y" }}{% if site.data.rating_lab_default.has_delayed_sources %} · delayed sources use their last valid snapshot{% endif %}</p>
       <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=methods" data-rating-view="methods">Data, code, and methods</a>
     </div>
   </header>
