@@ -1,8 +1,8 @@
 ---
 layout: page
-title: Problèmes corrigés
+title: Questions-réponses
 permalink: /repertoire-raisonne/
-description: "Une bibliothèque interactive de 127 problèmes corrigés d’algèbre, d’analyse, de topologie et de probabilités."
+description: "127 questions de mathématiques avec leurs réponses, en algèbre, analyse, topologie et probabilités."
 math: true
 ---
 
@@ -10,8 +10,8 @@ math: true
 
 <div class="repertoire-library">
   <header class="repertoire-hero">
-    <p class="repertoire-kicker">Algèbre · analyse · topologie · probabilités</p>
-    <h1>127 problèmes corrigés de mathématiques</h1>
+    <p class="repertoire-kicker">127 questions et leurs réponses</p>
+    <h1>Questions-réponses</h1>
     <p>Questions courtes, preuves denses et contre-exemples : le recueil se lit comme un répertoire de méthodes. Les 127 énoncés et solutions sont désormais consultables directement dans la page.</p>
     <div class="repertoire-actions">
       <a class="repertoire-primary-action" href="#bilan-relecture">Lire les 127 problèmes en ligne <span aria-hidden="true">↓</span></a>
