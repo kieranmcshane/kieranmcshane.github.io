@@ -116,7 +116,7 @@ test.describe("Répertoire raisonné", () => {
     const solution = problem.locator(".repertoire-native-solution");
     await solution.locator("summary").click();
     await expect(solution).toContainText("Pour tout");
-    await expect(solution).toContainText("n’est pas algébriquement clos");
+    await expect(solution).toContainText("pas algébriquement clos");
   });
 
   test("renders the corrected finite-field formulas with MathJax", async ({
@@ -220,7 +220,9 @@ test.describe("Répertoire raisonné", () => {
     page,
   }) => {
     await gotoRepertoire(page);
-    await page.locator("#repertoire-search-input").fill("conjuguée de f");
+    await page
+      .locator("#repertoire-search-input")
+      .fill("Weierstrass fournit une suite de polynômes");
     await expect(
       page.locator("[data-repertoire-problem]:visible")
     ).toHaveCount(1);
