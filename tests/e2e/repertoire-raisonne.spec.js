@@ -8,18 +8,18 @@ async function gotoRepertoire(page) {
   });
 }
 
-test.describe("Répertoire raisonné", () => {
+test.describe("Problèmes corrigés", () => {
   test("renders all 127 indexed problems without overflow", async ({ page }) => {
     await gotoRepertoire(page);
     await expect(page).toHaveTitle(
-      "Répertoire raisonné | Kieran McShane: Notes"
+      "Problèmes corrigés | Kieran McShane: Notes"
     );
     await expect(page.locator(".repertoire-hero h1")).toHaveText(
-      "Répertoire raisonné"
+      "127 problèmes corrigés de mathématiques"
     );
     await expect(
       page.locator('.site-nav a[href="/repertoire-raisonne/"]')
-    ).toHaveText("Répertoire raisonné");
+    ).toHaveText("Problèmes corrigés");
     await expect(page.locator(".post-title")).toBeHidden();
     await expect(page.locator("[data-repertoire-problem]")).toHaveCount(127);
     await expect(page.locator("[data-repertoire-section]")).toHaveCount(5);

@@ -241,14 +241,14 @@ class RepertoireRaisonneTests(unittest.TestCase):
 
     def test_page_exposes_navigation_review_and_download(self):
         self.assertIn(
-            "title: Répertoire raisonné",
+            "title: Problèmes corrigés",
             PAGE,
         )
         self.assertIn(
-            "127 problèmes corrigés · algèbre et analyse",
+            "Algèbre · analyse · topologie · probabilités",
             PAGE,
         )
-        self.assertIn("<h1>Répertoire raisonné</h1>", PAGE)
+        self.assertIn("<h1>127 problèmes corrigés de mathématiques</h1>", PAGE)
         self.assertNotIn("127 problèmes, un outil décisif à chaque fois", PAGE)
         self.assertIn("Corpus complet en ligne", PAGE)
         self.assertIn("transcription mathématique structurée", PAGE)
