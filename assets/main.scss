@@ -11631,10 +11631,56 @@ body:has(.repertoire-library) {
   font-size: 0.86rem;
   line-height: 1.58;
   overflow-wrap: anywhere;
-  // Poppler inserts visual line breaks around superscripts, fractions, and
-  // page-width prose. Let HTML reflow those extracted lines; reviewed
-  // MathJax overrides retain their own paragraph and display structure.
   white-space: normal;
+}
+
+.repertoire-native-transcription p + p {
+  margin-top: 0.75rem;
+}
+
+.repertoire-native-equation {
+  max-width: 100%;
+  margin: 0.8rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.repertoire-native-transcription ul,
+.repertoire-native-transcription ol {
+  margin: 0.7rem 0;
+  padding-left: 1.4rem;
+}
+
+.repertoire-native-transcription li + li {
+  margin-top: 0.35rem;
+}
+
+.repertoire-native-table-wrap {
+  max-width: 100%;
+  margin: 0.8rem 0;
+  overflow-x: auto;
+}
+
+.repertoire-native-table-wrap table {
+  width: 100%;
+  min-width: 24rem;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.repertoire-native-table-wrap th,
+.repertoire-native-table-wrap td {
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #d8dce4;
+  text-align: left;
+  vertical-align: top;
+}
+
+.repertoire-native-table-wrap th {
+  color: var(--repertoire-accent-dark);
+  background: #f1f5f3;
+  font-weight: 800;
 }
 
 .repertoire-native-transcription > :first-child {
@@ -11723,17 +11769,18 @@ body:has(.repertoire-library) {
 
 .repertoire-native-references {
   margin: 0 1rem 1rem;
-  padding: 0.65rem 0.8rem;
-  border: 1px solid #d8dce4;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #cbd9cf;
+  border-left: 3px solid #63806c;
   border-radius: 6px;
   color: #4b5362;
-  background: #f7f9fb;
+  background: #f5f9f6;
   font-size: 0.72rem;
 }
 
-.repertoire-native-references > summary {
+.repertoire-native-references > strong {
+  display: block;
   color: var(--repertoire-accent-dark);
-  cursor: pointer;
   font-weight: 800;
 }
 
@@ -11746,10 +11793,9 @@ body:has(.repertoire-library) {
 }
 
 .repertoire-native-references li {
-  display: flex;
-  gap: 0.6rem;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem 0.6rem;
 }
 
 .repertoire-native-references a {
@@ -11758,14 +11804,26 @@ body:has(.repertoire-library) {
   text-underline-offset: 0.15em;
 }
 
-.repertoire-native-references li span,
-.repertoire-native-references p {
+.repertoire-native-references li span {
   color: var(--repertoire-muted);
   font-size: 0.65rem;
 }
 
 .repertoire-native-references p {
-  margin: 0.6rem 0 0;
+  margin: 0;
+  color: var(--repertoire-muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+@media (min-width: 650px) {
+  .repertoire-native-references li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .repertoire-native-references p {
+    grid-column: 1 / -1;
+  }
 }
 
 .repertoire-native-solution > div > :first-child {
@@ -11802,6 +11860,7 @@ body:has(.repertoire-library) {
 }
 
 .repertoire-native-list > article > footer a {
+  margin-left: auto;
   color: var(--repertoire-muted);
   font-size: 0.68rem;
   font-weight: 700;

@@ -11,6 +11,16 @@ async function gotoRepertoire(page) {
 test.describe("Répertoire raisonné", () => {
   test("renders all 127 indexed problems without overflow", async ({ page }) => {
     await gotoRepertoire(page);
+    await expect(page).toHaveTitle(
+      "Répertoire raisonné | Kieran McShane: Notes"
+    );
+    await expect(page.locator(".repertoire-hero h1")).toHaveText(
+      "Répertoire raisonné"
+    );
+    await expect(
+      page.locator('.site-nav a[href="/repertoire-raisonne/"]')
+    ).toHaveText("Répertoire raisonné");
+    await expect(page.locator(".post-title")).toBeHidden();
     await expect(page.locator("[data-repertoire-problem]")).toHaveCount(127);
     await expect(page.locator("[data-repertoire-section]")).toHaveCount(5);
     await expect(page.locator("[data-repertoire-chapter]")).toHaveCount(14);
@@ -26,6 +36,73 @@ test.describe("Répertoire raisonné", () => {
     await expect(
       page.locator('[data-repertoire-native-problem="121"]')
     ).toContainText("Chaque point de X∩I est un point d’accumulation");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("compiles every formula in all 127 statements and solutions", async ({
+    page,
+  }) => {
+    const consoleErrors = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+
+    await gotoRepertoire(page);
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+
+    const audit = await page.evaluate(() => {
+      const cards = [
+        ...document.querySelectorAll("[data-repertoire-native-problem]"),
+      ];
+      const rawMath = [];
+
+      for (const card of cards) {
+        const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) {
+          if (node.parentElement?.closest("mjx-container")) continue;
+          if (/\$|\\\(|\\\)|\\\[|\\\]/.test(node.textContent || "")) {
+            rawMath.push({
+              number: Number(card.dataset.repertoireNativeProblem),
+              text: (node.textContent || "").trim().slice(0, 120),
+            });
+          }
+        }
+      }
+
+      return {
+        cardCount: cards.length,
+        formulaCount: document.querySelectorAll(
+          "[data-repertoire-native-problem] mjx-container"
+        ).length,
+        mathErrors: document.querySelectorAll(
+          "mjx-merror, [data-mjx-error]"
+        ).length,
+        problemsWithoutMath: cards
+          .filter((card) => !card.querySelector("mjx-container"))
+          .map((card) => Number(card.dataset.repertoireNativeProblem)),
+        rawMath,
+      };
+    });
+
+    expect(audit).toEqual({
+      cardCount: 127,
+      formulaCount: 2065,
+      mathErrors: 0,
+      problemsWithoutMath: [],
+      rawMath: [],
+    });
+    expect(consoleErrors).toEqual([]);
+
+    await page
+      .locator(".repertoire-native-solution")
+      .evaluateAll((solutions) => {
+        for (const solution of solutions) solution.open = true;
+      });
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
@@ -53,7 +130,59 @@ test.describe("Répertoire raisonné", () => {
     await expect(solution).toContainText(
       "Chaque facteur irréductible a donc degré"
     );
-    await expect(problem).toContainText("Formules recomposées et contrôlées");
+    await expect(problem.locator("header > strong")).toHaveText(
+      "Transcription mathématique"
+    );
+    await expect(problem.locator("footer a")).toContainText(
+      "Comparer au fac-similé"
+    );
+  });
+
+  test("renders the complete Dirichlet proof and structured transcriptions", async ({
+    page,
+  }) => {
+    await gotoRepertoire(page);
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+
+    const dirichlet = page.locator(
+      '[data-repertoire-native-problem="70"]'
+    );
+    await expect(dirichlet.locator(".repertoire-native-statement")).toContainText(
+      "il existe une infinité de fractions"
+    );
+    await dirichlet.locator("summary").click();
+    await expect(dirichlet.locator(".repertoire-native-solution")).toContainText(
+      "Pour chacun de ces couples"
+    );
+    await expect(dirichlet.locator(".repertoire-native-solution")).toContainText(
+      "une infinité de fractions distinctes"
+    );
+    expect(await dirichlet.locator("mjx-container").count()).toBeGreaterThan(20);
+
+    await expect(
+      page.locator('[data-repertoire-native-problem="26"] table')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('[data-repertoire-native-problem="39"] table')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('[data-repertoire-native-problem="13"] ul > li')
+    ).toHaveCount(4);
+    await expect(
+      page.locator(
+        '[data-repertoire-native-problem="61"] .repertoire-native-statement ol > li'
+      )
+    ).toHaveCount(2);
+    await expect(page.locator('[id^="page-"]')).toHaveCount(0);
+    await expect(
+      page.locator(
+        '[data-repertoire-native-problem="25"] .repertoire-native-solution'
+      )
+    ).not.toContainText("Groupes et représentations");
   });
 
   test("reads a complete native statement and reveals its solution", async ({

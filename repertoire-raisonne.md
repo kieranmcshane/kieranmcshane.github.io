@@ -10,8 +10,8 @@ math: true
 
 <div class="repertoire-library">
   <header class="repertoire-hero">
-    <p class="repertoire-kicker">Répertoire avancé · algèbre et analyse</p>
-    <h1>127 problèmes, un outil décisif à chaque fois</h1>
+    <p class="repertoire-kicker">127 problèmes corrigés · algèbre et analyse</p>
+    <h1>Répertoire raisonné</h1>
     <p>Questions courtes, preuves denses et contre-exemples : le recueil se lit comme un répertoire de méthodes. Les 127 énoncés et solutions sont désormais consultables directement dans la page.</p>
     <div class="repertoire-actions">
       <a class="repertoire-primary-action" href="#bilan-relecture">Lire les 127 problèmes en ligne <span aria-hidden="true">↓</span></a>
@@ -28,13 +28,13 @@ math: true
     <div><strong>5</strong><span>grandes parties</span></div>
   </section>
 
-  <aside class="repertoire-verification" aria-label="Statut de la relecture">
+  <aside class="repertoire-verification" aria-label="Statut du corpus">
     <div>
       <span class="repertoire-status-dot" aria-hidden="true"></span>
-      <strong>Corpus intégralement relu</strong>
-      <span>127 problèmes · 66 pages</span>
+      <strong>Corpus complet en ligne</strong>
+      <span>127 problèmes · 66 pages · fac-similé lié</span>
     </div>
-    <p>La relecture confirme les 127 énoncés et leurs résultats. Une preuve demande une conjugaison au problème 80 ; deux formulations et deux conventions sont précisées dans le registre ci-dessous.</p>
+    <p>Les 127 énoncés et solutions sont présents. Les problèmes 1 à 110 utilisent une transcription mathématique structurée ; chaque fiche conserve un lien direct vers la page correspondante du fac-similé.</p>
   </aside>
 
   <section class="repertoire-introduction" aria-labelledby="repertoire-intro-title">
@@ -50,7 +50,7 @@ math: true
       <p class="repertoire-kicker">Sources et prolongements</p>
       <h2 id="repertoire-sources-title">Une source primaire, des repères externes</h2>
     </div>
-    <p>Les énoncés et solutions sont transcrits depuis le PDF revu. Les liens ajoutés dans les fiches conduisent vers des développements et références thématiques recensés par <a href="https://agreg-maths.fr/">agreg-maths.fr</a>. La page des <a href="https://agreg-maths.fr/ressources/retours">retours d’oraux</a> permet en complément de repérer les questions effectivement posées par des jurys ; ces témoignages ne sont pas traités comme des corrigés canoniques.</p>
+    <p>Les énoncés et solutions sont transcrits depuis le PDF revu. Une fiche ne renvoie vers <span lang="fr">agreg-maths.fr</span> que lorsqu’un retour d’oral contient effectivement la question correspondante. Les rapprochements seulement thématiques sont volontairement écartés ; ces témoignages signalent un usage en oral et ne sont pas traités comme des corrigés canoniques.</p>
   </aside>
 
   <section class="repertoire-paths" aria-labelledby="repertoire-paths-title">
@@ -207,7 +207,6 @@ math: true
                 <p>{{ native_transcriptions.size }} énoncés et solutions</p>
               </div>
             </header>
-            {% include repertoire-native-references.html chapter_id=chapter.id %}
             <div class="repertoire-native-list">
               {% for item in native_transcriptions %}
                 <article id="probleme-natif-{{ item.number }}" data-repertoire-native-problem="{{ item.number }}">
@@ -216,7 +215,7 @@ math: true
                       <span>Problème {{ item.number }}</span>
                       <h4>{{ item.title }}</h4>
                     </div>
-                    <strong>Transcription native</strong>
+                    <strong>Transcription mathématique</strong>
                   </header>
                   <section class="repertoire-native-statement" aria-labelledby="enonce-{{ item.number }}">
                     <h5 id="enonce-{{ item.number }}">Énoncé</h5>
@@ -238,8 +237,8 @@ math: true
                       {% endif %}
                     </div>
                   </details>
+                  {% include repertoire-native-references.html problem_number=item.number %}
                   <footer>
-                    <span>{{ item.transcription }}</span>
                     <a href="{{ repertoire_pdf }}#page={{ item.pdfPage }}">Comparer au fac-similé · p. {{ item.pdfPage }}</a>
                   </footer>
                 </article>
@@ -258,7 +257,6 @@ math: true
           <p>Problèmes 111–121 · onze énoncés et solutions</p>
         </div>
       </header>
-      {% include repertoire-native-references.html chapter_id="topologie-baire" %}
       <div class="repertoire-native-list">
         <article id="probleme-natif-111" data-repertoire-native-problem="111" data-repertoire-audit-problem="111">
           <header><div><span>Problème 111</span><h4>Point fixe d’une application non expansive sur un compact convexe</h4></div><strong>Correct</strong></header>
@@ -555,7 +553,6 @@ math: true
           <p>Problèmes 122–125 · quatre énoncés et solutions</p>
         </div>
       </header>
-      {% include repertoire-native-references.html chapter_id="probabilites-moments" %}
       <div class="repertoire-native-list">
         <article id="probleme-natif-122" data-repertoire-native-problem="122" data-repertoire-audit-problem="122">
           <header><div><span>Problème 122</span><h4>Convergence en probabilité sans convergence presque sûre</h4></div><strong>Correct</strong></header>
@@ -696,7 +693,6 @@ math: true
           <p>Problèmes 126–127 · deux énoncés et solutions</p>
         </div>
       </header>
-      {% include repertoire-native-references.html chapter_id="suites-fonctions-reelles" %}
       <div class="repertoire-native-list">
         <article id="probleme-natif-126" data-repertoire-native-problem="126" data-repertoire-audit-problem="126">
           <header><div><span>Problème 126</span><h4>Toutes les dérivées dominées par un polynôme de degré impair</h4></div><strong>Correct</strong></header>
@@ -812,7 +808,7 @@ math: true
       <h2 id="repertoire-notes-title">Ce que la page prépare</h2>
     </div>
     <ul>
-      <li>reprendre progressivement les formules extraites en MathJax éditorial ;</li>
+      <li>poursuivre la relecture éditoriale des transcriptions MathJax ;</li>
       <li>ajouter niveau, nature et outil décisif à chaque problème ;</li>
       <li>construire un index des théorèmes et un index des méthodes ;</li>
       <li>déplacer les problèmes 126-127 auprès des suites et fonctions réelles.</li>

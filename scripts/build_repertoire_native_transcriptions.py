@@ -1,27 +1,49 @@
 #!/usr/bin/env python3
-"""Extract the first 110 Répertoire problems into reviewable native data.
+"""Build the native Répertoire cards from a geometry-aware PDF transcription.
 
-The PDF remains the primary source.  This script uses Poppler's reading-order
-extraction, keeps mathematical Unicode glyphs, and emits deterministic JSON
-consumed by Jekyll.  Problems 111-127 retain their hand-composed MathJax
-versions in ``repertoire-raisonne.md``.
+The checked-in Markdown source is produced from the reviewed PDF with equation
+recognition enabled.  Unlike ``pdftotext``, it preserves the two-dimensional
+structure of fractions, roots, indices, exponents, matrices, and integrals.
+This script converts that reviewable source into deterministic JSON consumed by
+Jekyll.  Problems 111-127 retain their hand-composed versions in
+``repertoire-raisonne.md``.
 """
 
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
-import subprocess
-import tempfile
-import unicodedata
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PDF = ROOT / "assets/documents/repertoire-raisonne-algebre-analyse.pdf"
+DEFAULT_SOURCE = ROOT / "scripts/data/repertoire_raisonne_mathjax.md"
 DEFAULT_CATALOGUE = ROOT / "_data/repertoire_raisonne.json"
 DEFAULT_OUTPUT = ROOT / "_data/repertoire_native_transcriptions.json"
+PROBLEM_HEADING = re.compile(
+    r"(?m)^(?P<hash>#{2,3}) Problème (?P<hash_number>\d+) [^\n]+$"
+    r"|(?P<bold>\*\*Problème\s+(?P<bold_number>\d+))"
+)
+SOLUTION_MARKER = re.compile(r"\*\*Solution\.\*\*\s*")
+PAGE_SEPARATOR = re.compile(r"(?m)^-{20,}\s*$")
+PAGE_ANCHOR = re.compile(r'<span id="page-\d+-\d+"></span>')
+STRUCTURAL_LINE = re.compile(
+    r"(?m)^(?:#{1,6}\s+(?!Problème\b).+"
+    r"|\*\*(?:Première|Deuxième) partie\b.*\*\*)\s*$"
+)
+MATH_SPAN = re.compile(r"\$\$.*?\$\$|\$(?!\$).*?\$", re.DOTALL)
+DISPLAY_MATH = re.compile(r"\$\$(.*?)\$\$", re.DOTALL)
+UNORDERED_ITEM = re.compile(r"^[-*+]\s+(.+)$")
+ORDERED_ITEM = re.compile(r"^\d+[.)]\s+(.+)$")
+TABLE_DELIMITER = re.compile(r"^:?-{3,}:?$")
+STATEMENT_START = re.compile(
+    r"(?:Montrer|Soit|Soient|Calculer|Déterminer|Décrire|Donner|Construire|"
+    r"Établir|Prouver|Trouver|Existe-t-il|Combien|Caractériser|Étudier|"
+    r"On considère|On pose|Pour tout|Pour quelles|Que peut-on|À quelle|Quand)"
+    r"\b"
+)
 
 
 def catalogue_entries(path: Path) -> dict[int, dict[str, object]]:
@@ -42,183 +64,216 @@ def catalogue_entries(path: Path) -> dict[int, dict[str, object]]:
     return entries
 
 
-def extract_raw_text(pdf: Path) -> str:
-    with tempfile.TemporaryDirectory(prefix="repertoire-native-") as temp_dir:
-        output = Path(temp_dir) / "repertoire.txt"
-        subprocess.run(
-            ["pdftotext", "-raw", str(pdf), str(output)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return output.read_text(encoding="utf-8")
-
-
-def clean_text(text: str) -> str:
-    text = text.replace("\r\n", "\n")
-    # Page numbers immediately precede Poppler's form-feed marker.  Remove
-    # only those numbers, never standalone digits that belong to a displayed
-    # fraction or exponent.
-    text = re.sub(r"\n\s*\d+\s*\f", "\n\f", text)
-    text = re.sub(r"\f[^\n]*\n", "\n", text)
-    text = text.translate(
-        {
-            ord("\x01"): "",
-            ord("\x02"): "[",
-            ord("\x03"): "]",
-            ord("\x08"): "{",
-            ord("\x12"): "(",
-            ord("\x13"): ")",
-            ord("\x14"): "[",
-            ord("\x15"): "]",
-            ord("Ö"): "∏",
-            ord("Õ"): "∑",
-            ord("Í"): "∑",
-            ord("Ø"): "∪",
-            ord("\x9a"): "^",
-        }
-    )
-    # Poppler can expose delimiter glyphs as PDF control codes.  Keep line
-    # breaks and tabs, but never let an unhandled control character reach
-    # Jekyll's YAML-backed JSON reader.
-    text = "".join(
-        character
-        for character in text
-        if character in "\n\t" or not unicodedata.category(character).startswith("C")
-    )
-    text = re.sub(r"(?m)^\s*\d+\s+[^\n]+\s+\d+\s*$", "", text)
-    text = re.sub(r"(?m)^CHAPITRE\s+\d+\s*$", "", text)
-    text = re.sub(r"(?m)^(Première|Deuxième) partie.*$", "", text)
-    text = re.sub(r"(?<=\w)-\n(?=\w)", "", text)
-    text = re.sub(r"[ \t]{2,}", " ", text)
-    text = re.sub(r"[ \t]+\n", "\n", text)
+def clean_markdown(text: str) -> str:
+    text = PAGE_SEPARATOR.sub("", text.replace("\r\n", "\n"))
+    text = PAGE_ANCHOR.sub("", text)
+    text = STRUCTURAL_LINE.sub("", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = re.sub(r"\s*□\s*$", "", text.strip())
     return text.strip()
 
 
-def split_problems(raw_text: str) -> dict[int, tuple[str, str]]:
-    corpus = raw_text[raw_text.index("Problème 1 ") :]
-    parts = re.split(r"(?m)^Problème (\d+) ", corpus)
+def statement_start(heading: re.Match[str], chunk: str, number: int) -> int:
+    if heading.group("hash"):
+        return 0
+
+    leading_offset = len(chunk) - len(chunk.lstrip())
+    leading = chunk.lstrip()
+    if not leading.startswith("**"):
+        closing = leading.find("**")
+        if closing < 0:
+            raise ValueError(f"Problem {number} has no closing title marker")
+        return leading_offset + closing + 2
+
+    # Some pages style only the “Problème N” label in bold, leaving the title
+    # and statement concatenated in the PDF layout.  The statement itself
+    # always starts with one of the exercise verbs below.
+    leading = leading[2:].lstrip()
+    leading_offset = len(chunk) - len(leading)
+    start = STATEMENT_START.search(leading)
+    if start is None:
+        raise ValueError(f"Problem {number} has no detectable statement start")
+    return leading_offset + start.start()
+
+
+def split_problems(source: str) -> dict[int, tuple[str, str]]:
+    headings = list(PROBLEM_HEADING.finditer(source))
     extracted: dict[int, tuple[str, str]] = {}
-    for index in range(1, len(parts), 2):
-        number = int(parts[index])
-        chunk = parts[index + 1]
-        heading_and_statement, separator, solution = chunk.partition("Solution.")
-        if not separator:
+    for index, heading in enumerate(headings):
+        number = int(heading.group("hash_number") or heading.group("bold_number"))
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(source)
+        chunk = source[heading.end() : end]
+        solution_marker = SOLUTION_MARKER.search(chunk)
+        if solution_marker is None:
             raise ValueError(f"Problem {number} has no Solution marker")
-
-        heading_lines = heading_and_statement.splitlines()
-        if len(heading_lines) < 2:
-            raise ValueError(f"Problem {number} has no extracted statement")
-        statement = "\n".join(heading_lines[1:])
-
-        solution = re.split(
-            r"\fCHAPITRE|\nCHAPITRE|\f(?:Première|Deuxième) partie",
-            solution,
-            maxsplit=1,
-        )[0]
-        extracted[number] = (clean_text(statement), clean_text(solution))
+        start = statement_start(heading, chunk, number)
+        statement = clean_markdown(chunk[start : solution_marker.start()])
+        solution = clean_markdown(chunk[solution_marker.end() :])
+        extracted[number] = (statement, solution)
     return extracted
 
 
-def reviewed_overrides() -> dict[int, dict[str, str]]:
-    return {
-        6: {
-            "statementMathjax": (
-                "<p>Soit \\(P\\in\\mathbb F_q[X]\\) irréductible de degré \\(d\\), "
-                "et soit \\(r\\mid d\\). Décrire sa factorisation dans "
-                "\\(\\mathbb F_{q^r}[X]\\).</p>"
-            ),
-            "solutionMathjax": (
-                "<p>Soit \\(\\alpha\\) une racine de \\(P\\) dans "
-                "\\(\\mathbb F_{q^d}\\). Sur \\(\\mathbb F_q\\), ses conjugués sont</p>"
-                "\\[\\alpha,\\ \\alpha^q,\\ \\ldots,\\ \\alpha^{q^{d-1}}.\\]"
-                "<p>Sur \\(\\mathbb F_{q^r}\\), le Frobenius pertinent est "
-                "\\(x\\mapsto x^{q^r}\\). Pour "
-                "\\(s\\in\\{0,\\ldots,r-1\\}\\), l’orbite de "
-                "\\(\\alpha^{q^s}\\) sous ce Frobenius a longueur</p>"
-                "\\[\\frac{d}{\\gcd(d,r)}=\\frac{d}{r},\\]"
-                "<p>car \\(r\\mid d\\). Chaque facteur irréductible a donc degré "
-                "\\(d/r\\). Les \\(d\\) racines se répartissent en \\(r\\) "
-                "orbites : \\(P\\) est le produit de \\(r\\) facteurs "
-                "irréductibles distincts, tous de degré \\(d/r\\).</p>"
-                "<p><strong>Remarque.</strong> Sans l’hypothèse \\(r\\mid d\\), "
-                "le nombre de facteurs est \\(\\gcd(d,r)\\) et leur degré commun "
-                "vaut \\(d/\\gcd(d,r)\\).</p>"
-            ),
-            "transcription": "Formules recomposées et contrôlées",
-        },
-        80: {
-            "statement": (
-                "Soit f ∈ C([0,1], ℂ) telle que\n\n"
-                "∫₀¹ xⁿ f(x) dx = 0  pour tout n ∈ ℕ.\n\n"
-                "Montrer que f = 0."
-            ),
-            "solution": (
-                "Par linéarité, l’intégrale de fP est nulle pour tout polynôme "
-                "complexe P. Le théorème de Weierstrass fournit une suite de "
-                "polynômes Pₖ convergeant uniformément vers la fonction conjuguée "
-                "de f sur [0,1]. Dès lors,\n\n"
-                "0 = limₖ ∫₀¹ f(x)Pₖ(x) dx = ∫₀¹ |f(x)|² dx.\n\n"
-                "La continuité de f entraîne f = 0 sur tout l’intervalle."
+def prose_markup(text: str) -> str:
+    """Escape prose and render the small Markdown emphasis subset."""
+    escaped = html.escape(text, quote=False)
+    escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
+    escaped = re.sub(r"(?<!\*)\*([^*\n]+?)\*(?!\*)", r"<em>\1</em>", escaped)
+    return escaped
+
+
+def inline_markup(text: str) -> str:
+    """Render prose without interpreting TeX asterisks as Markdown.
+
+    Marker uses dollar delimiters for both inline and display mathematics.
+    Expressions such as ``$A^*$`` and ``$f * g$`` must therefore be isolated
+    before applying Markdown emphasis rules to the surrounding prose.
+    """
+    rendered: list[str] = []
+    cursor = 0
+    for match in MATH_SPAN.finditer(text):
+        rendered.append(prose_markup(text[cursor : match.start()]))
+        rendered.append(html.escape(match.group(0), quote=False))
+        cursor = match.end()
+    rendered.append(prose_markup(text[cursor:]))
+    return "".join(rendered)
+
+
+def table_row(line: str) -> list[str]:
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def is_markdown_table(lines: list[str]) -> bool:
+    if len(lines) < 2 or not all(line.startswith("|") for line in lines):
+        return False
+    delimiter = table_row(lines[1])
+    return bool(delimiter) and all(
+        TABLE_DELIMITER.fullmatch(cell.replace(" ", "")) for cell in delimiter
+    )
+
+
+def table_markup(lines: list[str]) -> str:
+    header = table_row(lines[0])
+    delimiter = table_row(lines[1])
+    rows = [table_row(line) for line in lines[2:]]
+    if len(delimiter) != len(header) or any(
+        len(row) != len(header) for row in rows
+    ):
+        raise ValueError("Markdown table has inconsistent column counts")
+
+    head = "".join(
+        f'<th scope="col">{inline_markup(cell)}</th>' for cell in header
+    )
+    body = "".join(
+        "<tr>"
+        + "".join(f"<td>{inline_markup(cell)}</td>" for cell in row)
+        + "</tr>"
+        for row in rows
+    )
+    return (
+        '<div class="repertoire-native-table-wrap"><table>'
+        f"<thead><tr>{head}</tr></thead><tbody>{body}</tbody>"
+        "</table></div>"
+    )
+
+
+def list_markup(lines: list[str]) -> str | None:
+    unordered = [UNORDERED_ITEM.fullmatch(line) for line in lines]
+    ordered = [ORDERED_ITEM.fullmatch(line) for line in lines]
+    if all(unordered):
+        tag = "ul"
+        matches = unordered
+    elif all(ordered):
+        tag = "ol"
+        matches = ordered
+    else:
+        return None
+
+    items = "".join(
+        f"<li>{inline_markup(match.group(1))}</li>"
+        for match in matches
+        if match is not None
+    )
+    return f"<{tag}>{items}</{tag}>"
+
+
+def markdown_to_mathjax_html(markdown: str) -> str:
+    """Render the small, controlled Markdown subset emitted by Marker."""
+    rendered: list[str] = []
+    blocks = re.split(r"\n\s*\n", markdown.strip())
+    for block in blocks:
+        block = block.strip()
+        if not block:
+            continue
+        lines = [line.strip() for line in block.splitlines() if line.strip()]
+        if is_markdown_table(lines):
+            rendered.append(table_markup(lines))
+            continue
+        rendered_list = list_markup(lines)
+        if rendered_list is not None:
+            rendered.append(rendered_list)
+            continue
+        compact = " ".join(lines)
+        cursor = 0
+        for match in DISPLAY_MATH.finditer(compact):
+            prose = compact[cursor : match.start()].strip()
+            if prose:
+                rendered.append(f"<p>{inline_markup(prose)}</p>")
+            equation = html.escape(match.group(1).strip(), quote=False)
+            rendered.append(
+                f'<div class="repertoire-native-equation">\\[{equation}\\]</div>'
             )
-        }
-    }
+            cursor = match.end()
+        prose = compact[cursor:].strip()
+        if prose:
+            rendered.append(f"<p>{inline_markup(prose)}</p>")
+    return "".join(rendered)
 
 
-def repair_pdf_word_spacing(text: str) -> str:
-    """Repair the few words whose spaces are absent from the PDF text layer."""
-    replacements = {
-        "Sil’égalitéestatteinte,touteslesinégalitéssontdeségalités.Leslignessontdoncorthonormées,":
-            "Si l’égalité est atteinte, toutes les inégalités sont des égalités. "
-            "Les lignes sont donc orthonormées,",
-        "lesracinesdistinctesde𝑃,demultiplicités𝑚1,":
-            "les racines distinctes de 𝑃, de multiplicités 𝑚1,",
-        "Notons𝜆1,": "Notons 𝜆1,",
-        "𝑚𝑟.Choisissons": "𝑚𝑟. Choisissons",
-        "convergencedescoefficientsentraînelaconvergenceuniformedespolynômessurtoutcompact.":
-            "convergence des coefficients entraîne la convergence uniforme des polynômes sur tout compact.",
-        "Cesfonctionssontholomorphesdansledemi-planinférieur:surtoutcompactdecedemi-plan,":
-            "Ces fonctions sont holomorphes dans le demi-plan inférieur : sur tout compact de ce demi-plan,",
-        "Réciproquement,sitouslescoefficientsdeFourierde":
-            "Réciproquement, si tous les coefficients de Fourier de",
-        "Comme1/(2𝜋)estirrationnel,lethéorèmedesrotationsirrationnellesaffirmequelesclasses":
-            "Comme 1/(2𝜋) est irrationnel, le théorème des rotations irrationnelles affirme que les classes",
-    }
-    for compact, spaced in replacements.items():
-        text = text.replace(compact, spaced)
-    return text
+def validate_math(number: int, field: str, markdown: str) -> None:
+    if "$" in MATH_SPAN.sub("", markdown):
+        raise ValueError(f"Problem {number} has unbalanced math delimiters in {field}")
 
 
-def build(pdf: Path, catalogue: Path) -> list[dict[str, object]]:
+def validate_transcription(
+    number: int, field: str, markdown: str, rendered: str
+) -> None:
+    validate_math(number, field, markdown)
+    if PAGE_ANCHOR.search(markdown) or re.search(r"(?m)^#{1,6}\s+", markdown):
+        raise ValueError(f"Problem {number} contains page debris in {field}")
+    if re.search(r"<p>\s*(?:\||[-*+]\s+|\d+[.)]\s+)", rendered):
+        raise ValueError(f"Problem {number} contains unrendered Markdown in {field}")
+
+
+def build(source: Path, catalogue: Path) -> list[dict[str, object]]:
     entries = catalogue_entries(catalogue)
-    extracted = split_problems(extract_raw_text(pdf))
-    overrides = reviewed_overrides()
+    extracted = split_problems(source.read_text(encoding="utf-8"))
 
     expected = set(range(1, 128))
     if set(extracted) != expected:
         missing = sorted(expected - set(extracted))
         extra = sorted(set(extracted) - expected)
-        raise ValueError(f"Extraction mismatch: missing={missing}, extra={extra}")
+        raise ValueError(f"Transcription mismatch: missing={missing}, extra={extra}")
 
     output: list[dict[str, object]] = []
     for number in range(1, 111):
         statement, solution = extracted[number]
-        statement = repair_pdf_word_spacing(statement)
-        solution = repair_pdf_word_spacing(solution)
+        statement_html = markdown_to_mathjax_html(statement)
+        solution_html = markdown_to_mathjax_html(solution)
+        validate_transcription(number, "statement", statement, statement_html)
+        validate_transcription(number, "solution", solution, solution_html)
         item = dict(entries[number])
         item.update(
             {
                 "statement": statement,
                 "solution": solution,
-                "transcription": "Transcription textuelle issue du fac-similé",
+                "statementMathjax": statement_html,
+                "solutionMathjax": solution_html,
+                "transcription": "Transcription mathématique issue du fac-similé",
             }
         )
-        item.update(overrides.get(number, {}))
-        if len(str(item["statement"])) < 8:
+        if len(statement) < 8:
             raise ValueError(f"Problem {number} has a suspiciously short statement")
-        if len(str(item["solution"])) < 40:
+        if len(solution) < 40:
             raise ValueError(f"Problem {number} has a suspiciously short solution")
         output.append(item)
     return output
@@ -226,16 +281,27 @@ def build(pdf: Path, catalogue: Path) -> list[dict[str, object]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pdf", type=Path, default=DEFAULT_PDF)
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--catalogue", type=Path, default=DEFAULT_CATALOGUE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if the checked-in JSON is not the deterministic build output.",
+    )
     args = parser.parse_args()
 
-    payload = build(args.pdf, args.catalogue)
-    args.output.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    payload = build(args.source, args.catalogue)
+    serialized = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    if args.check:
+        if not args.output.is_file() or args.output.read_text(encoding="utf-8") != serialized:
+            raise SystemExit(
+                f"{args.output} is stale; run {Path(__file__).name} to regenerate it"
+            )
+        print(f"Verified {len(payload)} native transcriptions in {args.output}")
+        return
+
+    args.output.write_text(serialized, encoding="utf-8")
     print(f"Wrote {len(payload)} native transcriptions to {args.output}")
 
 
