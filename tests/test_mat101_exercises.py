@@ -451,17 +451,31 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_interactive_table_of_contents_covers_and_tracks_exercises(self):
         self.assertIn("Sommaire interactif", PAGE)
+        self.assertEqual(PAGE.count('<nav class="mat101-toc"'), 1)
+        self.assertIn("data-mat101-study-area", PAGE)
+        self.assertIn('class="mat101-study-content"', PAGE)
         self.assertIn("data-mat101-toc", PAGE)
         self.assertIn("data-mat101-toc-chapter", PAGE)
+        self.assertIn('data-chapter-id="{{ chapter.id }}"', PAGE)
         self.assertIn("data-mat101-toc-link", PAGE)
         self.assertIn('data-exercise-id="{{ exercise.id }}"', PAGE)
         self.assertIn("mat101-toc-current", PAGE)
         self.assertIn("setCurrentExercise", SCRIPT)
+        self.assertIn("nearestReadingExercise", SCRIPT)
+        self.assertIn("closeCompactToc", SCRIPT)
+        self.assertIn("event.key === 'Escape'", SCRIPT)
         self.assertIn("aria-current", SCRIPT)
-        self.assertNotIn("window.matchMedia('(min-width: 701px)')", SCRIPT)
-        self.assertIn("window.matchMedia('(max-width: 700px)')", SCRIPT)
+        self.assertIn("window.matchMedia('(min-width: 1240px)')", SCRIPT)
+        self.assertIn("data-mat101-toc-locked", SCRIPT)
         self.assertIn(".mat101-toc-panel", STYLES)
         self.assertIn("position: sticky", STYLES)
+        self.assertIn("@media screen and (min-width: 1240px)", STYLES)
+        self.assertIn("grid-template-columns: var(--mat101-rail-width)", STYLES)
+        self.assertIn(
+            "margin-left: calc(0px - var(--mat101-rail-width) - 1.5rem)",
+            STYLES,
+        )
+        self.assertIn("calc(50vw - 410px - 2.5rem)", STYLES)
         self.assertIn("mat101-difficulty-legend", PAGE)
         self.assertIn("mat101-level-essential", PAGE)
         self.assertIn("mat101-level-exam", PAGE)

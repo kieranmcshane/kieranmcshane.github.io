@@ -136,6 +136,9 @@
     var chapters = Array.from(document.querySelectorAll('[data-mat101-chapter]'));
     var tagButtons = Array.from(document.querySelectorAll('[data-mat101-tag]'));
     var tocDetails = document.querySelector('[data-mat101-toc]');
+    var tocSummary = tocDetails
+      ? tocDetails.querySelector(':scope > summary')
+      : undefined;
     var tocCurrent = document.getElementById('mat101-toc-current');
     var tocLinks = Array.from(document.querySelectorAll('[data-mat101-toc-link]'));
     var tocChapters = Array.from(
@@ -144,18 +147,62 @@
     var tocChapterLinks = Array.from(
       document.querySelectorAll('[data-mat101-toc-chapter-link]')
     );
+    var wideToc = window.matchMedia('(min-width: 1240px)');
     var activeTag = '';
+    var activeChapter;
     var currentExercise;
+    var visibleExerciseCount = exercises.length;
+    var scrollFrame;
+    var wasWide = wideToc.matches;
 
     initializeRootDiagrams();
 
-    if (!input || !exercises.length) return;
+    if (!input || !counter || !noResults || !exercises.length) return;
+
+    function exerciseForLink(link) {
+      return exercises.find(function (candidate) {
+        return candidate.dataset.exerciseId === link.dataset.exerciseId;
+      });
+    }
+
+    function chapterForExercise(exercise) {
+      return exercise ? exercise.closest('[data-mat101-chapter]') : undefined;
+    }
+
+    function chapterForLink(link) {
+      var chapterId = link.getAttribute('href').replace(/^#/, '');
+      return document.getElementById(chapterId) || undefined;
+    }
+
+    function selectChapter(chapter) {
+      activeChapter = chapter;
+      tocChapters.forEach(function (tocChapter) {
+        tocChapter.classList.toggle(
+          'is-active',
+          Boolean(chapter && tocChapter.dataset.chapterId === chapter.id)
+        );
+      });
+      tocChapterLinks.forEach(function (link) {
+        var selected = chapter && link.getAttribute('href') === '#' + chapter.id;
+        if (selected) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    }
+
+    function selectExercise(exercise) {
+      currentExercise = exercise;
+      tocLinks.forEach(function (link) {
+        var selected =
+          exercise && link.dataset.exerciseId === exercise.dataset.exerciseId;
+        if (selected) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      if (exercise) selectChapter(chapterForExercise(exercise));
+    }
 
     function updateToc(visibleCount) {
       tocLinks.forEach(function (link) {
-        var exercise = exercises.find(function (candidate) {
-          return candidate.dataset.exerciseId === link.dataset.exerciseId;
-        });
+        var exercise = exerciseForLink(link);
         link.hidden = !exercise || exercise.hidden;
       });
 
@@ -170,7 +217,9 @@
       if (normalize(input.value) || activeTag) {
         tocCurrent.textContent =
           visibleCount +
-          (visibleCount > 1 ? ' exercices disponibles' : ' exercice disponible');
+          (visibleCount === 1
+            ? ' exercice disponible'
+            : ' exercices disponibles');
       } else if (currentExercise) {
         var currentLink = tocLinks.find(function (link) {
           return link.dataset.exerciseId === currentExercise.dataset.exerciseId;
@@ -187,16 +236,8 @@
     }
 
     function setCurrentExercise(exercise) {
-      currentExercise = exercise;
-      tocLinks.forEach(function (link) {
-        var selected =
-          exercise && link.dataset.exerciseId === exercise.dataset.exerciseId;
-        if (selected) link.setAttribute('aria-current', 'location');
-        else link.removeAttribute('aria-current');
-      });
-      updateToc(exercises.filter(function (candidate) {
-        return !candidate.hidden;
-      }).length);
+      selectExercise(exercise);
+      updateToc(visibleExerciseCount);
     }
 
     function updateTagButtons() {
@@ -235,15 +276,67 @@
         chapter.hidden = !chapter.querySelector('[data-mat101-exercise]:not([hidden])');
       });
 
+      visibleExerciseCount = visibleCount;
+      if (currentExercise && currentExercise.hidden) selectExercise(undefined);
+
+      var availableChapter = chapters.find(function (chapter) {
+        return !chapter.hidden;
+      });
+      if (!availableChapter) {
+        selectChapter(undefined);
+      } else if (!activeChapter || activeChapter.hidden) {
+        selectChapter(availableChapter);
+      }
+
       counter.textContent =
-        visibleCount + (visibleCount > 1 ? ' exercices affichés' : ' exercice affiché');
+        visibleCount +
+        (visibleCount === 1 ? ' exercice affiché' : ' exercices affichés');
       noResults.hidden = visibleCount !== 0;
       updateToc(visibleCount);
     }
 
-    function openHashTarget() {
+    function focusWithoutScrolling(target) {
+      if (!target) return;
+      try {
+        target.focus({ preventScroll: true });
+      } catch (error) {
+        target.focus();
+      }
+    }
+
+    function closeCompactToc(destination) {
+      if (!tocDetails || wideToc.matches) return;
+      tocDetails.open = false;
+      if (destination) {
+        window.requestAnimationFrame(function () {
+          focusWithoutScrolling(destination);
+        });
+      }
+    }
+
+    function syncTocMode() {
+      if (!tocDetails) return;
+      if (wideToc.matches) {
+        tocDetails.open = true;
+        tocDetails.setAttribute('data-mat101-toc-locked', '');
+        if (tocSummary) {
+          tocSummary.setAttribute('aria-disabled', 'true');
+          tocSummary.setAttribute('tabindex', '-1');
+        }
+      } else {
+        tocDetails.removeAttribute('data-mat101-toc-locked');
+        if (tocSummary) {
+          tocSummary.removeAttribute('aria-disabled');
+          tocSummary.removeAttribute('tabindex');
+        }
+        if (wasWide) tocDetails.open = false;
+      }
+      wasWide = wideToc.matches;
+    }
+
+    function openHashTarget(shouldScroll) {
       var exercise = hashTarget();
-      if (!exercise) return;
+      if (!exercise) return false;
 
       input.value = '';
       activeTag = '';
@@ -252,6 +345,73 @@
       filterExercises();
       exercise.open = true;
       setCurrentExercise(exercise);
+      if (shouldScroll) {
+        window.requestAnimationFrame(function () {
+          exercise.scrollIntoView({ behavior: 'auto', block: 'start' });
+        });
+      }
+      return true;
+    }
+
+    function nearestReadingExercise() {
+      var visibleExercises = exercises.filter(function (exercise) {
+        return !exercise.hidden;
+      });
+      if (!visibleExercises.length) return;
+
+      var firstRectangle = visibleExercises[0].getBoundingClientRect();
+      var lastRectangle =
+        visibleExercises[visibleExercises.length - 1].getBoundingClientRect();
+      if (firstRectangle.top >= window.innerHeight) return;
+      if (lastRectangle.bottom <= 0) {
+        return visibleExercises[visibleExercises.length - 1];
+      }
+
+      var readingLine = wideToc.matches ? 28 : 82;
+      var inViewport = visibleExercises.filter(function (exercise) {
+        var rectangle = exercise.getBoundingClientRect();
+        return rectangle.bottom > 0 && rectangle.top < window.innerHeight;
+      });
+      if (!inViewport.length) return;
+
+      var containingLine = inViewport.find(function (exercise) {
+        var rectangle = exercise.getBoundingClientRect();
+        return rectangle.top <= readingLine && rectangle.bottom > readingLine;
+      });
+      if (containingLine) return containingLine;
+
+      return inViewport.reduce(function (nearest, exercise) {
+        var distance = Math.abs(exercise.getBoundingClientRect().top - readingLine);
+        var nearestDistance = Math.abs(
+          nearest.getBoundingClientRect().top - readingLine
+        );
+        return distance < nearestDistance ? exercise : nearest;
+      });
+    }
+
+    function syncCurrentFromScroll() {
+      scrollFrame = undefined;
+      var nearestExercise = nearestReadingExercise();
+      if (nearestExercise && nearestExercise !== currentExercise) {
+        setCurrentExercise(nearestExercise);
+      } else if (!nearestExercise && currentExercise) {
+        var firstVisibleExercise = exercises.find(function (exercise) {
+          return !exercise.hidden;
+        });
+        if (
+          firstVisibleExercise &&
+          firstVisibleExercise.getBoundingClientRect().top >= window.innerHeight
+        ) {
+          selectExercise(undefined);
+          selectChapter(chapterForExercise(firstVisibleExercise));
+          updateToc(visibleExerciseCount);
+        }
+      }
+    }
+
+    function requestScrollSync() {
+      if (scrollFrame !== undefined) return;
+      scrollFrame = window.requestAnimationFrame(syncCurrentFromScroll);
     }
 
     input.addEventListener('input', filterExercises);
@@ -265,9 +425,7 @@
     });
     tocLinks.forEach(function (link) {
       link.addEventListener('click', function () {
-        var exercise = exercises.find(function (candidate) {
-          return candidate.dataset.exerciseId === link.dataset.exerciseId;
-        });
+        var exercise = exerciseForLink(link);
         if (!exercise) return;
 
         input.value = '';
@@ -277,22 +435,57 @@
         filterExercises();
         exercise.open = true;
         setCurrentExercise(exercise);
-        if (tocDetails && window.matchMedia('(max-width: 700px)').matches) {
-          tocDetails.open = false;
-        }
+        closeCompactToc(exercise.querySelector(':scope > summary'));
       });
     });
     tocChapterLinks.forEach(function (link) {
       link.addEventListener('click', function () {
-        if (tocDetails && window.matchMedia('(max-width: 700px)').matches) {
-          tocDetails.open = false;
-        }
+        var chapter = chapterForLink(link);
+        if (!chapter) return;
+        selectExercise(undefined);
+        selectChapter(chapter);
+        updateToc(visibleExerciseCount);
+        closeCompactToc(chapter);
       });
     });
     exercises.forEach(function (exercise) {
       exercise.addEventListener('toggle', function () {
         if (exercise.open) setCurrentExercise(exercise);
       });
+    });
+
+    if (tocSummary) {
+      tocSummary.addEventListener('click', function (event) {
+        if (wideToc.matches) event.preventDefault();
+      });
+    }
+    if (tocDetails) {
+      tocDetails.addEventListener('toggle', function () {
+        if (wideToc.matches && !tocDetails.open) tocDetails.open = true;
+      });
+    }
+    document.addEventListener('keydown', function (event) {
+      if (
+        event.key === 'Escape' &&
+        tocDetails &&
+        tocDetails.open &&
+        !wideToc.matches
+      ) {
+        event.preventDefault();
+        tocDetails.open = false;
+        focusWithoutScrolling(tocSummary);
+      }
+    });
+
+    if (typeof wideToc.addEventListener === 'function') {
+      wideToc.addEventListener('change', syncTocMode);
+    } else {
+      wideToc.addListener(syncTocMode);
+    }
+    window.addEventListener('scroll', requestScrollSync, { passive: true });
+    window.addEventListener('resize', requestScrollSync);
+    window.addEventListener('hashchange', function () {
+      if (!openHashTarget(true)) requestScrollSync();
     });
 
     var requestedTag = new URL(window.location.href).searchParams.get('notion');
@@ -308,9 +501,15 @@
       if (tagIndex) tagIndex.open = true;
     }
 
+    syncTocMode();
     updateTagButtons();
-    window.addEventListener('hashchange', openHashTarget);
     filterExercises();
-    openHashTarget();
+    if (!openHashTarget(true)) {
+      var openExercise = exercises.find(function (exercise) {
+        return exercise.open && !exercise.hidden;
+      });
+      if (openExercise) setCurrentExercise(openExercise);
+      else requestScrollSync();
+    }
   });
 })();

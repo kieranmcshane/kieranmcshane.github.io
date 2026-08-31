@@ -85,6 +85,17 @@ test.describe("MAT101 native library", () => {
     await expect(invariantTag).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(1);
     await expect(page.locator("#exercice-2-23")).toBeVisible();
+    await expect(
+      page.locator("[data-mat101-toc-link]:not([hidden])")
+    ).toHaveCount(1);
+    await expect(
+      page.locator("[data-mat101-toc-chapter]:not([hidden])")
+    ).toHaveCount(1);
+    await expect(
+      page.locator(
+        '[data-mat101-toc-chapter][data-chapter-id="ensembles"]'
+      )
+    ).toHaveClass(/is-active/);
     await expect(page).toHaveURL(/notion=invariants/);
 
     await page.locator('[data-mat101-tag=""]').click();
@@ -98,8 +109,12 @@ test.describe("MAT101 native library", () => {
     await gotoLibrary(page);
 
     const toc = page.locator("[data-mat101-toc]");
-    await expect(toc).not.toHaveAttribute("open", "");
-    if ((await toc.getAttribute("open")) === null) {
+    const wide = page.viewportSize().width >= 1240;
+    if (wide) {
+      await expect(toc).toHaveAttribute("open", "");
+      await expect(toc).toHaveAttribute("data-mat101-toc-locked", "");
+    } else {
+      await expect(toc).not.toHaveAttribute("open", "");
       await toc.locator(":scope > summary").click();
     }
 
@@ -110,8 +125,13 @@ test.describe("MAT101 native library", () => {
     await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
 
     await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
+    if (wide) await expect(toc).toHaveAttribute("open", "");
+    else await expect(toc).not.toHaveAttribute("open", "");
     await expect(
       toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(
+      toc.locator('[data-mat101-toc-chapter-link][href="#fonctions"]')
     ).toHaveAttribute("aria-current", "location");
     await expect(page.locator("#mat101-toc-current")).toContainText(
       "Exercice 3.16"
@@ -123,9 +143,186 @@ test.describe("MAT101 native library", () => {
     await expect(
       toc.locator("[data-mat101-toc-link]:not([hidden])")
     ).toHaveCount(1);
+    await expect(
+      toc.locator('[data-mat101-toc-chapter][data-chapter-id="limites"]')
+    ).toHaveClass(/is-active/);
     await expect(page.locator("#mat101-toc-current")).toHaveText(
       "1 exercice disponible"
     );
+  });
+
+  test("uses a bounded, non-overlapping left rail on wide screens", async ({
+    page,
+  }) => {
+    test.skip(page.viewportSize().width < 1240, "wide-screen rail only");
+    await gotoLibrary(page);
+
+    const toc = page.locator("[data-mat101-toc]");
+    const rail = page.locator(".mat101-toc");
+    const content = page.locator(".mat101-study-content");
+    await expect(toc).toHaveAttribute("open", "");
+    await expect(toc.locator(":scope > summary")).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    await expect(toc.locator(":scope > summary")).toHaveAttribute(
+      "tabindex",
+      "-1"
+    );
+    await expect(toc.locator("[data-mat101-toc-chapter-link]")).toHaveCount(4);
+    await expect(toc.locator("[data-mat101-toc-chapter-link]:visible")).toHaveCount(4);
+    await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
+    await expect(toc.locator("[data-mat101-toc-link]:visible")).toHaveCount(20);
+    await expect(
+      toc.locator('[data-mat101-toc-chapter][data-chapter-id="complexes"]')
+    ).toHaveClass(/is-active/);
+
+    await page.locator(".mat101-reading-note").evaluate((element) =>
+      element.scrollIntoView({ block: "start" })
+    );
+    await expect(rail).toBeVisible();
+    const initialRail = await rail.boundingBox();
+    const contentBox = await content.boundingBox();
+    expect(await rail.evaluate((element) => getComputedStyle(element).position)).toBe(
+      "sticky"
+    );
+    expect(contentBox.width).toBeGreaterThanOrEqual(819);
+    expect(contentBox.width).toBeLessThanOrEqual(821);
+    expect(initialRail.x + initialRail.width).toBeLessThanOrEqual(contentBox.x - 12);
+
+    await toc.locator('[data-mat101-toc-chapter-link][href="#ensembles"]').click();
+    await expect(page).toHaveURL(/#ensembles$/);
+    await expect(
+      toc.locator('[data-mat101-toc-chapter][data-chapter-id="ensembles"]')
+    ).toHaveClass(/is-active/);
+    const stickyRail = await rail.boundingBox();
+    expect(Math.abs(stickyRail.y - initialRail.y)).toBeLessThanOrEqual(1);
+
+    await toc.locator(":scope > summary").click();
+    await expect(toc).toHaveAttribute("open", "");
+
+    await page.locator("#telechargements").evaluate((element) =>
+      element.scrollIntoView({ block: "start" })
+    );
+    const stopped = await rail.evaluate((element) => {
+      const railBox = element.getBoundingClientRect();
+      const downloadsBox = document
+        .getElementById("telechargements")
+        .getBoundingClientRect();
+      return {
+        railBottom: railBox.bottom,
+        downloadsTop: downloadsBox.top,
+      };
+    });
+    expect(stopped.railBottom).toBeLessThanOrEqual(stopped.downloadsTop + 1);
+  });
+
+  test("keeps the compact disclosure keyboard-safe below the rail breakpoint", async ({
+    page,
+  }) => {
+    test.skip(page.viewportSize().width >= 1240, "compact disclosure only");
+    await gotoLibrary(page);
+
+    const toc = page.locator("[data-mat101-toc]");
+    const summary = toc.locator(":scope > summary");
+    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(summary).not.toHaveAttribute("aria-disabled", "true");
+    await expect(summary).not.toHaveAttribute("tabindex", "-1");
+    await summary.click();
+    await expect(toc).toHaveAttribute("open", "");
+    await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
+
+    const panelBox = await toc.locator(".mat101-toc-panel").boundingBox();
+    expect(panelBox.x).toBeGreaterThanOrEqual(0);
+    expect(panelBox.x + panelBox.width).toBeLessThanOrEqual(
+      page.viewportSize().width
+    );
+
+    await page.keyboard.press("Escape");
+    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(summary).toBeFocused();
+
+    await summary.click();
+    await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
+    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
+    await expect(page.locator("#exercice-3-16 > summary")).toBeFocused();
+
+    await summary.click();
+    await toc.locator('[data-mat101-toc-chapter-link][href="#limites"]').click();
+    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(page.locator("#limites")).toBeFocused();
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("tracks the reading position without rewriting the URL", async ({ page }) => {
+    await gotoLibrary(page);
+    await expect(page).toHaveURL(/\/mat101\/exercices\/$/);
+
+    await page.locator("#exercice-3-16").evaluate((element) =>
+      element.scrollIntoView({ block: "start" })
+    );
+    await expect(
+      page.locator('[data-mat101-toc-link][data-exercise-id="3.16"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(
+      page.locator('[data-mat101-toc-chapter-link][href="#fonctions"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(page).toHaveURL(/\/mat101\/exercices\/$/);
+
+    await page.locator("#exercice-2-5").evaluate((element) =>
+      element.scrollIntoView({ block: "start" })
+    );
+    await expect(
+      page.locator('[data-mat101-toc-link][data-exercise-id="2.5"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(
+      page.locator('[data-mat101-toc-chapter-link][href="#ensembles"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(page).toHaveURL(/\/mat101\/exercices\/$/);
+
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "auto" }));
+    await expect(
+      page.locator('[data-mat101-toc-link][aria-current="location"]')
+    ).toHaveCount(0);
+    await expect(
+      page.locator('[data-mat101-toc-chapter-link][href="#complexes"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(page).toHaveURL(/\/mat101\/exercices\/$/);
+  });
+
+  test("synchronizes search, zero results, and the active rail chapter", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+    const toc = page.locator("[data-mat101-toc]");
+    const input = page.locator("#mat101-search-input");
+
+    await input.fill("suite de nombres réels est périodique");
+    await expect(toc.locator("[data-mat101-toc-link]:not([hidden])")).toHaveCount(1);
+    await expect(toc.locator("[data-mat101-toc-chapter]:not([hidden])")).toHaveCount(1);
+    await expect(
+      toc.locator('[data-mat101-toc-chapter][data-chapter-id="limites"]')
+    ).toHaveClass(/is-active/);
+
+    await input.fill("aucun exercice ne contient cette recherche xyz");
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(0);
+    await expect(page.locator("#mat101-no-results")).toBeVisible();
+    await expect(page.locator("#mat101-result-count")).toHaveText(
+      "0 exercices affichés"
+    );
+    await expect(page.locator("#mat101-toc-current")).toHaveText(
+      "0 exercices disponibles"
+    );
+    await expect(toc.locator("[data-mat101-toc-link]:not([hidden])")).toHaveCount(0);
+    await expect(toc.locator("[data-mat101-toc-chapter]:not([hidden])")).toHaveCount(0);
+    await expect(toc.locator("[data-mat101-toc-chapter].is-active")).toHaveCount(0);
+
+    await input.fill("");
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
+    await expect(
+      toc.locator('[data-mat101-toc-chapter][data-chapter-id="complexes"]')
+    ).toHaveClass(/is-active/);
   });
 
   test("searches the full wording of a statement", async ({ page }) => {
@@ -141,15 +338,22 @@ test.describe("MAT101 native library", () => {
   test("a deep link clears incompatible filters and keeps the count accurate", async ({
     page,
   }) => {
-    await page.goto("/mat101/exercices/?notion=invariants#exercice-1-1");
+    await page.goto("/mat101/exercices/?notion=invariants#exercice-3-16");
     await expect(page.locator(".mat101-library")).toBeVisible({ timeout: 12000 });
 
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
     await expect(page.locator("#mat101-result-count")).toHaveText(
       "103 exercices affichés"
     );
-    await expect(page.locator("#exercice-1-1")).toHaveAttribute("open", "");
+    await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
+    await expect(
+      page.locator('[data-mat101-toc-link][data-exercise-id="3.16"]')
+    ).toHaveAttribute("aria-current", "location");
+    await expect(
+      page.locator('[data-mat101-toc-chapter-link][href="#fonctions"]')
+    ).toHaveAttribute("aria-current", "location");
     await expect(page).not.toHaveURL(/notion=invariants/);
+    await expect(page).toHaveURL(/#exercice-3-16$/);
   });
 
   test("shows every assigned tag and marks exercises with source errata", async ({
@@ -173,6 +377,13 @@ test.describe("MAT101 native library", () => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const noScriptPage = await context.newPage();
     await noScriptPage.goto("/mat101/exercices/");
+
+    const toc = noScriptPage.locator("[data-mat101-toc]");
+    await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
+    if ((await toc.getAttribute("open")) === null) {
+      await toc.locator(":scope > summary").click();
+    }
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
 
     const exercise = noScriptPage.locator("#exercice-1-1");
     await exercise.locator(":scope > summary").click();
@@ -371,5 +582,15 @@ test.describe("MAT101 native library", () => {
     await expect(exercise.locator(".mat101-exercise-footer")).toContainText(
       "Vérification effectuée sur le document source"
     );
+  });
+});
+
+test.describe("MAT101 visual baselines", () => {
+  test("navigation layout @visual", async ({ page }) => {
+    await gotoLibrary(page);
+    await page.locator(".mat101-reading-note").evaluate((element) =>
+      element.scrollIntoView({ block: "start" })
+    );
+    await expect(page).toHaveScreenshot("mat101-navigation.png");
   });
 });

@@ -42,8 +42,9 @@ math: true
     <p><strong>Corrigé non officiel.</strong> Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante des corrigés exercice par exercice n’est pas achevée.</p>
   </aside>
 
-  <nav class="mat101-toc" aria-label="Sommaire des exercices">
-    <details data-mat101-toc>
+  <div class="mat101-study-area" data-mat101-study-area>
+    <nav class="mat101-toc" aria-label="Sommaire des exercices">
+      <details data-mat101-toc>
       <summary>
         <span>
           <small>Sommaire interactif</small>
@@ -61,7 +62,11 @@ math: true
         </div>
         {% for chapter in site.data.mat101_exercises %}
           {% assign toc_chapter_exercises = site.data.mat101_native | where: "chapterId", chapter.id %}
-          <section class="mat101-toc-chapter" data-mat101-toc-chapter>
+          <section
+            class="mat101-toc-chapter"
+            data-mat101-toc-chapter
+            data-chapter-id="{{ chapter.id }}"
+          >
             <header>
               <a href="#{{ chapter.id }}" data-mat101-toc-chapter-link>
                 <span>{{ chapter.number }}</span>
@@ -105,9 +110,11 @@ math: true
             </div>
           </section>
         {% endfor %}
-      </div>
-    </details>
-  </nav>
+        </div>
+      </details>
+    </nav>
+
+    <div class="mat101-study-content">
 
   <aside class="mat101-reading-note">
     <strong>Mode d’emploi.</strong>
@@ -156,7 +163,12 @@ math: true
 
   {% for chapter in site.data.mat101_exercises %}
     {% assign chapter_exercises = site.data.mat101_native | where: "chapterId", chapter.id %}
-    <section class="mat101-chapter" id="{{ chapter.id }}" data-mat101-chapter>
+    <section
+      class="mat101-chapter"
+      id="{{ chapter.id }}"
+      data-mat101-chapter
+      tabindex="-1"
+    >
       <header>
         <span class="mat101-chapter-number">{{ chapter.number }}</span>
         <div>
@@ -277,6 +289,8 @@ math: true
       {% endfor %}
     </div>
   </section>
+    </div>
+  </div>
 
   <section class="mat101-downloads" id="telechargements">
     <div class="mat101-download-intro">
