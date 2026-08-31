@@ -45,10 +45,12 @@ from rating_lab.player_pipeline import (
 )
 from rating_lab.pipeline import (
     FOOTBALL_COMPETITIONS,
+    _apply_competition_publication_gate,
     _attach_verified_portraits,
     _deduplicate,
     _competition_performance,
     _competition_matches,
+    _competition_source_health,
     _competition_state,
     _categorical_forecast_score,
     _build_tournament_predictor,
@@ -56,6 +58,7 @@ from rating_lab.pipeline import (
     _finalize_market_comparison,
     _football_data_crest_media,
     fetch_football,
+    fetch_tennis_tournament_schedules,
     _get,
     _kalshi_event_snapshot,
     _market_identity_tokens,
@@ -344,6 +347,86 @@ h001,Hana,Theta,CZE
         self.assertEqual(draw["recorded_winners"][0][:2], ["atp:a001", "atp:c001"])
         self.assertIsNone(draw["recorded_winners"][0][2])
         self.assertEqual(draw["recorded_winners"][1][0], "atp:a001")
+
+    def test_completed_tennis_results_override_a_stale_draw_final(self):
+        tournaments = b"""id,name,start_dtm,finish_dtm,series_id,series_category_id,surface,sgl_pdf_url,location,url
+999,Test Open,202608200000,202608250000,atp,250,hard,https://example.test/draw.pdf,Paris,https://example.test/event
+"""
+        players = b"""code,first_name,last_name,citizenship
+a001,Alice,Alpha,FRA
+b001,Beth,Beta,GBR
+c001,Carla,Gamma,ESP
+d001,Dana,Delta,USA
+e001,Elena,Epsilon,ITA
+f001,Farah,Zeta,TUN
+g001,Greta,Eta,GER
+h001,Hana,Theta,CZE
+"""
+        matches = b"""id,tournament_id,stadie_id,winner_code,loser_code,winner_name,loser_name
+final-999,999,F,e001,a001,Elena Epsilon,Alice Alpha
+"""
+        catalog = _parse_atp_player_catalog(players.decode())
+        draw = {
+            "slots": [f"atp:{code}" for code in ("a001", "b001", "c001", "d001", "e001", "f001", "g001", "h001")],
+            "recorded_winners": [
+                ["atp:a001", "atp:c001", "atp:e001", "atp:g001"],
+                ["atp:a001", "atp:e001"],
+                ["atp:a001"],
+            ],
+            "identities": catalog,
+        }
+
+        def response(url: str, **_kwargs) -> bytes:
+            if url.endswith("tournaments.csv"):
+                return tournaments
+            if url.endswith("players.csv"):
+                return players
+            if url.endswith("matches_2026.csv"):
+                return matches
+            if url == "https://example.test/draw.pdf":
+                return b"%PDF stale draw"
+            raise AssertionError(f"unexpected URL: {url}")
+
+        with (
+            patch("rating_lab.pipeline._get", side_effect=response),
+            patch("rating_lab.pipeline._extract_atp_draw_pdf", return_value=["draw"]),
+            patch("rating_lab.pipeline._parse_atp_draw_pages", return_value=draw),
+        ):
+            schedules = fetch_tennis_tournament_schedules(
+                {}, today=date(2026, 8, 31), limit=1
+            )
+
+        matches_with_unrelated_result = matches + (
+            b"other-final,other,F,b001,c001,Beth Beta,Carla Gamma\n"
+        )
+
+        def response_with_unrelated_result(url: str, **kwargs) -> bytes:
+            if url.endswith("matches_2026.csv"):
+                return matches_with_unrelated_result
+            return response(url, **kwargs)
+
+        with (
+            patch("rating_lab.pipeline._get", side_effect=response_with_unrelated_result),
+            patch("rating_lab.pipeline._extract_atp_draw_pdf", return_value=["draw"]),
+            patch("rating_lab.pipeline._parse_atp_draw_pages", return_value=draw),
+        ):
+            schedules_with_unrelated_result = fetch_tennis_tournament_schedules(
+                {}, today=date(2026, 8, 31), limit=1
+            )
+
+        self.assertEqual(len(schedules), 1)
+        schedule = schedules[0]
+        self.assertTrue(schedule["complete"])
+        self.assertEqual(schedule["complete_winner_id"], "atp:e001")
+        self.assertEqual(schedule["source_reconciliation"]["status"], "result_fallback")
+        self.assertEqual(schedule["source_reconciliation"]["draw_final_winner_id"], "atp:a001")
+        self.assertEqual(schedule["source_reconciliation"]["result_final_winner_id"], "atp:e001")
+        self.assertEqual(schedule["draw_slots"], [])
+        self.assertEqual(schedule["fixtures"][0]["winner_id"], "atp:e001")
+        self.assertEqual(
+            schedule["snapshot_sha256"],
+            schedules_with_unrelated_result[0]["snapshot_sha256"],
+        )
 
     def test_tennis_draw_simulation_uses_surface_probability_and_locked_path(self):
         model = SurfaceBlendModel(lambda: EloModel(k=28), surface_weight=0.9)
@@ -1451,6 +1534,87 @@ h001,Hana,Theta,CZE
             "upcoming",
         )
 
+    def test_overdue_live_competition_fails_closed(self):
+        competition = {
+            "id": "overdue-draw",
+            "format": "tennis knockout draw",
+            "state": "live",
+            "status": "live",
+            "state_view": "conditional_forecast",
+            "completed_matches": 44,
+            "remaining_matches": 5,
+            "total_matches": 49,
+            "last_fixture": "2026-08-23",
+            "next_fixture": "2026-08-21",
+            "forecast_available": True,
+            "models": {"elo": {"participants": [{"champion": 0.5}]}},
+            "settled_performance": {"models": {"elo": {"participants": []}}},
+        }
+
+        health = _apply_competition_publication_gate(
+            competition,
+            as_of=date(2026, 8, 31),
+            checked_at="2026-08-31T08:00:00+00:00",
+        )
+
+        self.assertEqual(health, "delayed")
+        self.assertEqual(competition["source_health"], "delayed")
+        self.assertFalse(competition["forecast_available"])
+        self.assertEqual(competition["models"], {})
+        self.assertNotIn("settled_performance", competition)
+        self.assertEqual(competition["state_view"], "forecast_withheld")
+        self.assertIn("5 unresolved matches", competition["source_health_reason"])
+
+    def test_current_and_finished_competitions_keep_distinct_lifecycle_states(self):
+        current = {
+            "format": "tennis knockout draw",
+            "state": "live",
+            "status": "live",
+            "state_view": "conditional_forecast",
+            "completed_matches": 2,
+            "remaining_matches": 1,
+            "total_matches": 3,
+            "last_fixture": "2026-09-06",
+            "next_fixture": "2026-09-01",
+            "forecast_available": True,
+            "forecast_grace_days": 2,
+            "models": {"elo": {"participants": []}},
+        }
+        finished = {
+            "format": "tennis knockout draw",
+            "state": "finished",
+            "status": "finished",
+            "state_view": "performance",
+            "completed_matches": 3,
+            "remaining_matches": 0,
+            "total_matches": 3,
+            "last_fixture": "2026-08-30",
+            "next_fixture": "2026-08-30",
+            "forecast_available": True,
+            "models": {"elo": {"participants": []}},
+        }
+
+        current_health = _apply_competition_publication_gate(
+            current,
+            as_of=date(2026, 8, 31),
+            checked_at="2026-08-31T08:00:00+00:00",
+        )
+        finished_health = _apply_competition_publication_gate(
+            finished,
+            as_of=date(2026, 8, 31),
+            checked_at="2026-08-31T08:00:00+00:00",
+        )
+
+        self.assertEqual(current_health, "current")
+        self.assertEqual(current["forecast_grace_days"], 2)
+        self.assertTrue(current["forecast_available"])
+        self.assertEqual(finished_health, "current")
+        self.assertIsNone(finished["next_fixture"])
+        self.assertEqual(
+            _competition_source_health(current, as_of=date(2026, 8, 31))[0],
+            "current",
+        )
+
     def test_completed_competition_performance_replays_from_pre_event_state(self):
         entities = {
             "football:name:alpha": {"name": "Alpha"},
@@ -1789,6 +1953,28 @@ h001,Hana,Theta,CZE
         self.assertIn("Rating Lab mobile-first interaction pass", styles)
         self.assertNotIn("Colors only identify the outcomes", script)
         self.assertIn('autocomplete="off"', page)
+        self.assertIn("function competitionSourceHealth(competition, sport)", script)
+        self.assertIn("function renderWithheldCompetition", script)
+        self.assertIn(".rating-lab-predictor-state.is-delayed strong", styles)
+        self.assertIn("Competition lifecycle and source health are checked separately", page)
+
+    def test_schema_declares_forecast_source_health_contract(self):
+        root = Path(__file__).parents[1]
+        source_schema = json.loads((root / "rating_lab/schema.json").read_text())
+        public_schema = json.loads(
+            (root / "assets/data/rating-lab/schema.json").read_text()
+        )
+        for schema in (source_schema, public_schema):
+            predictor = schema["properties"]["tournament_predictor"]
+            competition = predictor["properties"]["competitions"]["items"]
+            self.assertEqual(
+                competition["properties"]["source_health"]["enum"],
+                ["current", "delayed", "incomplete"],
+            )
+            self.assertIn(
+                "forecast_withheld",
+                competition["properties"]["state_view"]["enum"],
+            )
 
     def test_mobile_audit_guards_keep_core_data_visible(self):
         root = Path(__file__).resolve().parents[1]
@@ -1996,6 +2182,31 @@ h001,Hana,Theta,CZE
         self.assertEqual(payload["outcome_context"]["matches"], len(matches))
         self.assertEqual(payload["outcome_context"]["draw_rate"], 0.0)
         self.assertIn("publication eligibility", payload["outcome_context"]["method"])
+        payload["tournament_predictor"] = {
+            "state_machine": {"order": ["upcoming", "live", "finished"]},
+            "competitions": [
+                {
+                    "state": "live",
+                    "status": "live",
+                    "state_view": "conditional_forecast",
+                    "source_health": "current",
+                    "source_health_reason": "Claimed current.",
+                    "forecast_as_of": "2026-08-31",
+                    "forecast_checked_at": "2026-08-31T08:00:00+00:00",
+                    "forecast_available": True,
+                    "forecast_grace_days": 1,
+                    "format": "tennis knockout draw",
+                    "completed_matches": 44,
+                    "remaining_matches": 5,
+                    "total_matches": 49,
+                    "last_fixture": "2026-08-23",
+                    "next_fixture": "2026-08-21",
+                    "models": {},
+                }
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "source health contradicts"):
+            validate_payload(payload, schema)
 
     def test_reproducible_audit_packet_replays_every_candidate(self):
         start = date(2023, 1, 1)
@@ -2391,6 +2602,52 @@ class SplitAssetTests(unittest.TestCase):
         self.assertIn("last validated snapshot", message)
         self.assertIn("may be stale", message)
         self.assertNotIn("knockout_fixtures", message)
+
+    def test_split_delivery_rechecks_cached_competition_freshness(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            payload = self._sport_payload("tennis")
+            payload["tournament_predictor"] = {
+                "competitions": [
+                    {
+                        "id": "cached-live-draw",
+                        "format": "tennis knockout draw",
+                        "status": "scheduled",
+                        "total_matches": 2,
+                        "last_fixture": "2020-01-05",
+                        "next_fixture": "2020-01-04",
+                        "forecast_available": True,
+                        "models": {
+                            "elo": {
+                                "completed_matches": 1,
+                                "remaining_matches": 1,
+                                "participants": [{"champion": 0.5}],
+                            }
+                        },
+                    }
+                ]
+            }
+            source_path = root / "tennis.json"
+            source_path.write_text(json.dumps(payload))
+
+            from rating_lab.pipeline import write_split_assets
+
+            write_split_assets(root)
+            source = json.loads(source_path.read_text())
+            core = json.loads((root / "split/tennis-core.json").read_text())
+
+        self.assertTrue(
+            source["tournament_predictor"]["competitions"][0]["forecast_available"]
+        )
+        competition = core["tournament_predictor"]["competitions"][0]
+        self.assertEqual(competition["state"], "live")
+        self.assertEqual(competition["status"], "live")
+        self.assertEqual(competition["completed_matches"], 1)
+        self.assertEqual(competition["remaining_matches"], 1)
+        self.assertEqual(competition["source_health"], "delayed")
+        self.assertFalse(competition["forecast_available"])
+        self.assertEqual(competition["models"], {})
+        self.assertEqual(competition["state_view"], "forecast_withheld")
 
     @staticmethod
     def _player_payload(cohort_ids: list[str]) -> dict:

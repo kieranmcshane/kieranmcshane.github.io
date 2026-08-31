@@ -6,10 +6,54 @@
       "last_result": "2026-07-20",
       "matches": 103769
     },
+    "model_audit": {},
     "snapshot_hash_scope": "not_recorded_for_pre_hash_snapshot",
     "snapshot_sha256": null,
     "source": "ManTennisData (ATP-derived)",
     "source_status": "current"
+  },
+  "audit_summary": {
+    "available": false,
+    "generated_at": null,
+    "market": {
+      "audit_sha256": null,
+      "audits_passed": 0,
+      "audits_total": 0,
+      "available": false,
+      "decisions": 0,
+      "no_bets": 0,
+      "open": 0,
+      "positions": 0,
+      "realized_pnl_usd": 0.0,
+      "reason_summary": [],
+      "resolved": 0,
+      "rows": [],
+      "status": "incomplete"
+    },
+    "model": {
+      "auditor_revision": null,
+      "auditor_revision_short": null,
+      "available": false,
+      "checks_label": "Artifact integrity checks",
+      "checks_passed": 0,
+      "checks_total": 0,
+      "code_matches": null,
+      "expected_revision": null,
+      "expected_revision_short": null,
+      "full_replay_verified": false,
+      "metric_label": "Frozen sport packets",
+      "packet_integrity_verified": false,
+      "revision_mismatch": false,
+      "rows": [],
+      "sports_passed": 0,
+      "sports_total": 0,
+      "status": "incomplete",
+      "verification_label": "Verification pending",
+      "verification_level": null
+    },
+    "status": "incomplete",
+    "status_detail": "One or more public audit artifacts are not yet available for this build.",
+    "status_label": "Audit evidence is incomplete"
   },
   "cohort_evidence": [
     {

@@ -1,2 +1,2 @@
 # PDF extraction is required for the official ATP ProTennisLive draw feed.
-pypdf==6.1.1
+pypdf==6.16.2

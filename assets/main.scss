@@ -5322,6 +5322,38 @@ body:has(.rating-lab) .post-content {
   background: #38435a;
 }
 
+.rating-lab-predictor-state.is-delayed strong {
+  background: #9b4b00;
+}
+
+.rating-lab-predictor-state.is-incomplete strong {
+  background: #6f5c18;
+}
+
+.rating-lab-predictor-table.is-withheld tbody td {
+  padding: 1.1rem;
+  color: #536176;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.rating-lab-predictor-table.is-withheld tbody strong {
+  color: #783d08;
+}
+
+.rating-lab-predictor-detail .rating-lab-detail-heading > div {
+  min-width: 0;
+}
+
+.rating-lab-predictor-detail .rating-lab-detail-heading h3 {
+  overflow-wrap: anywhere;
+}
+
+.rating-lab-predictor-detail .rating-lab-detail-heading > strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .rating-lab-predictor-state span {
   font-weight: 650;
 }
@@ -14129,6 +14161,21 @@ body:has(.rating-lab.has-open-detail)::after {
   background: #edf3f5;
   border-radius: 5px;
   font-size: 0.78rem;
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  .rating-lab-trust-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rating-lab-trust-bar .rating-lab-freshness-strip {
+    grid-column: 1 / -1;
+  }
+
+  .rating-lab-trust-bar .rating-lab-generation {
+    min-width: 0;
+  }
 }
 
 @media (max-width: 760px) {

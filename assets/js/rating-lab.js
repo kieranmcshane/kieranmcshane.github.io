@@ -432,20 +432,115 @@
 
   function competitionState(competition) {
     var value = competition.state || competition.status || '';
+    var completed = Number(competition.completed_matches);
+    if (!Number.isFinite(completed)) {
+      var models = competition.models || {};
+      var primaryModel = models.elo || models[Object.keys(models)[0]] || {};
+      completed = Number(primaryModel.completed_matches);
+    }
+    if (!Number.isFinite(completed)) completed = 0;
     if (value === 'complete') return 'finished';
-    if (value === 'scheduled') return 'upcoming';
+    if (value === 'scheduled') return completed > 0 ? 'live' : 'upcoming';
     if (value === 'waiting for draw') {
-      return competition.completed_matches > 0 ? 'live' : 'upcoming';
+      return completed > 0 ? 'live' : 'upcoming';
     }
     return ['upcoming', 'live', 'finished'].indexOf(value) >= 0 ? value : 'upcoming';
+  }
+
+  function dateStamp(value) {
+    if (!value) return null;
+    var parsed = Date.parse(String(value).slice(0, 10) + 'T00:00:00Z');
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function todayStamp() {
+    var now = new Date();
+    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  }
+
+  function competitionSourceHealth(competition, sport) {
+    var lifecycle = competitionState(competition);
+    var declared = competition.source_health;
+    var remaining = Number(competition.remaining_matches);
+    if (!Number.isFinite(remaining) || remaining < 0) {
+      var competitionModels = competition.models || {};
+      var primaryModel = competitionModels.elo || competitionModels[Object.keys(competitionModels)[0]] || {};
+      remaining = Number(primaryModel.remaining_matches);
+    }
+    if (!Number.isFinite(remaining) || remaining < 0) {
+      remaining = lifecycle === 'finished' ? 0 : Number(competition.total_matches) || 0;
+    }
+    var graceDays = Number(competition.forecast_grace_days);
+    if (!Number.isFinite(graceDays) || graceDays < 0) graceDays = 1;
+    var grace = graceDays * 86400000;
+    var today = todayStamp();
+    var lastFixture = dateStamp(competition.last_fixture);
+    var nextFixture = dateStamp(competition.next_fixture);
+    var blockingFormats = [
+      'tennis knockout draw',
+      'knockout cup',
+      'two-legged qualifying round',
+      'round-robin league',
+      'round-robin tournament'
+    ];
+    var checkedAt = competition.forecast_checked_at ||
+      (state.datasets[sport] && state.datasets[sport].generated_at) ||
+      (state.manifest && state.manifest.generated_at) || null;
+    var declaredReason = competition.source_health_reason;
+
+    if (lifecycle !== 'finished' && remaining > 0) {
+      if (lastFixture !== null && today > lastFixture + grace) {
+        var eventWindowReason = 'Forecast withheld: the published event window ended on ' +
+          formatDate(competition.last_fixture) + ' with ' + number(remaining, 0) + ' unresolved ' +
+          (remaining === 1 ? 'match' : 'matches') + '.';
+        return { status: 'delayed', reason: eventWindowReason, checkedAt: checkedAt };
+      }
+      if (blockingFormats.indexOf(competition.format) !== -1 &&
+          nextFixture !== null && today > nextFixture + grace) {
+        var nextFixtureReason = 'Forecast withheld: the next unresolved fixture was expected on ' +
+          formatDate(competition.next_fixture) + ', but no newer competition state is available.';
+        return { status: 'delayed', reason: nextFixtureReason, checkedAt: checkedAt };
+      }
+    }
+    if (declared === 'delayed' && lifecycle !== 'finished') {
+      return {
+        status: 'delayed',
+        reason: declaredReason || 'The competition source is delayed; forecast probabilities are withheld.',
+        checkedAt: checkedAt
+      };
+    }
+    if (declared === 'incomplete' || competition.forecast_available === false) {
+      return {
+        status: 'incomplete',
+        reason: declaredReason || competition.availability ||
+          'The public field, draw, or schedule is not complete enough to reproduce a forecast.',
+        checkedAt: checkedAt
+      };
+    }
+    return {
+      status: 'current',
+      reason: declared === 'current' && declaredReason ? declaredReason :
+        'Competition timing and sourced results are current.',
+      checkedAt: checkedAt
+    };
   }
 
   function stateLabel(value) {
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
-  function renderCompetitionState(competition, competitionFormat) {
+  function renderCompetitionState(competition, competitionFormat, sourceHealth) {
     var value = competitionState(competition);
+    sourceHealth = sourceHealth || competitionSourceHealth(competition, state.sport);
+    if (sourceHealth.status !== 'current') {
+      var checked = sourceHealth.checkedAt ? ' · source checked ' + formatDate(sourceHealth.checkedAt) : '';
+      elements.predictorState.className = 'rating-lab-predictor-state is-' + sourceHealth.status;
+      elements.predictorState.innerHTML = '<strong>' +
+        escapeHtml(sourceHealth.status === 'delayed' ? 'Source delayed' : 'Source incomplete') +
+        '</strong><span>' + escapeHtml(sourceHealth.reason) + '</span><small>' +
+        escapeHtml(competitionFormat) + checked + '</small>';
+      return;
+    }
     var fallback = {
       upcoming: 'Prior-heavy forecast from the published schedule or draw.',
       live: 'Current results are locked; every probability is conditional on the current state.',
@@ -469,18 +564,45 @@
     var stale = sports.filter(function (sport) {
       return statuses[sport].status !== 'current' || isStale(statuses[sport]);
     });
-    elements.freshness.classList.toggle('is-stale', stale.length > 0);
-    elements.freshness.innerHTML = sports.map(function (sport) {
+    var forecastViews = predictorCompetitions();
+    var delayedForecasts = forecastViews.filter(function (view) {
+      return view.sourceHealth.status === 'delayed';
+    });
+    var incompleteForecasts = forecastViews.filter(function (view) {
+      return view.sourceHealth.status === 'incomplete';
+    });
+    elements.freshness.classList.toggle(
+      'is-stale',
+      stale.length > 0 || delayedForecasts.length > 0 || incompleteForecasts.length > 0
+    );
+    var resultChips = sports.map(function (sport) {
       var delayed = statuses[sport].status !== 'current' || isStale(statuses[sport]);
       return '<span class="rating-lab-freshness-chip' + (delayed ? ' is-stale' : '') + '"><i aria-hidden="true"></i>' +
         escapeHtml(labels[sport]) + ' · ' + escapeHtml(formatDate(statuses[sport].latest_result)) + '</span>';
     }).join('');
+    var forecastLabel = delayedForecasts.length ?
+      labels[state.sport] + ' forecasts · ' + delayedForecasts.length + ' delayed' :
+      incompleteForecasts.length ?
+        labels[state.sport] + ' forecasts · ' + incompleteForecasts.length + ' incomplete' :
+        forecastViews.length ? labels[state.sport] + ' forecasts · checked' :
+          labels[state.sport] + ' forecasts · none published';
+    var forecastTitle = delayedForecasts.length ? delayedForecasts[0].sourceHealth.reason :
+      incompleteForecasts.length ? incompleteForecasts[0].sourceHealth.reason :
+        forecastViews.length ? 'Competition timing is checked separately from ranking-result freshness.' :
+          'No reproducible competition forecast is published for this sport in the current snapshot.';
+    elements.freshness.innerHTML = resultChips +
+      '<span class="rating-lab-freshness-chip rating-lab-forecast-freshness' +
+      (delayedForecasts.length || incompleteForecasts.length ? ' is-stale' : '') +
+      '" title="' + escapeHtml(forecastTitle) +
+      '"><i aria-hidden="true"></i>' + escapeHtml(forecastLabel) + '</span>';
     var total = sports.reduce(function (sum, sport) {
       var elo = state.datasets[sport].models.elo;
       return sum + (elo.rankings ? elo.rankings.length : elo.entity_count || 0);
     }, 0);
-    elements.generation.textContent = number(total, 0) + ' rankings · generated ' +
-      formatDate(state.manifest.generated_at) + (stale.length ? ' · delayed sources use their last valid snapshot' : '');
+      elements.generation.textContent = number(total, 0) + ' rankings · generated ' +
+      formatDate(state.manifest.generated_at) +
+      (stale.length ? ' · rankings use last valid snapshots' : '') +
+      (delayedForecasts.length || incompleteForecasts.length ? ' · forecasts withheld' : '');
   }
 
   function setPressed(container, key, value) {
@@ -1405,17 +1527,26 @@
       var predictor = state.datasets[sport].tournament_predictor;
       if (!predictor) return items;
       predictor.competitions.forEach(function (competition) {
-        items.push({ sport: sport, predictor: predictor, competition: competition });
+        items.push({
+          sport: sport,
+          predictor: predictor,
+          competition: competition,
+          sourceHealth: competitionSourceHealth(competition, sport)
+        });
       });
       return items;
     }, []);
-    var priority = { live: 0, upcoming: 1, finished: 2 };
+    var statePriority = { live: 0, upcoming: 1, finished: 2 };
+    var healthPriority = { current: 0, incomplete: 3, delayed: 4 };
     return rows.sort(function (a, b) {
       var stateA = competitionState(a.competition);
       var stateB = competitionState(b.competition);
-      var priorityA = Object.prototype.hasOwnProperty.call(priority, stateA) ? priority[stateA] : 9;
-      var priorityB = Object.prototype.hasOwnProperty.call(priority, stateB) ? priority[stateB] : 9;
-      return priorityA - priorityB ||
+      var priorityA = a.sourceHealth.status === 'current' ? statePriority[stateA] : healthPriority[a.sourceHealth.status];
+      var priorityB = b.sourceHealth.status === 'current' ? statePriority[stateB] : healthPriority[b.sourceHealth.status];
+      var dateA = dateStamp(a.competition.next_fixture || a.competition.last_fixture || a.competition.first_fixture) || 0;
+      var dateB = dateStamp(b.competition.next_fixture || b.competition.last_fixture || b.competition.first_fixture) || 0;
+      var dateOrder = stateA === 'finished' && stateB === 'finished' ? dateB - dateA : dateA - dateB;
+      return priorityA - priorityB || dateOrder ||
         a.competition.label.localeCompare(b.competition.label);
     });
   }
@@ -1436,9 +1567,12 @@
     elements.predictorCompetition.disabled = false;
     elements.predictorCompetition.innerHTML = competitions.map(function (view) {
       var competition = view.competition;
+      var optionState = view.sourceHealth.status === 'delayed' ? 'Source delayed' :
+        view.sourceHealth.status === 'incomplete' ? 'Source incomplete' :
+        stateLabel(competitionState(competition));
       return '<option value="' + escapeHtml(competition.id) + '"' +
         (competition.id === state.predictorCompetition ? ' selected' : '') + '>' +
-        escapeHtml(stateLabel(competitionState(competition)) + ' · ' + competitionTitle(competition)) + '</option>';
+        escapeHtml(optionState + ' · ' + competitionTitle(competition)) + '</option>';
     }).join('');
     elements.predictorCompetition.value = state.predictorCompetition;
   }
@@ -1448,7 +1582,7 @@
       return item.competition.id === state.predictorCompetition;
     });
     if (!view) return null;
-    view.model = view.competition.models[state.predictorModel] || null;
+    view.model = (view.competition.models || {})[state.predictorModel] || null;
     return view;
   }
 
@@ -2266,6 +2400,16 @@
     elements.predictorColumns.tertiary.hidden = false;
   }
 
+  function setWithheldColumns() {
+    elements.predictorColumns.rank.textContent = 'Source';
+    elements.predictorColumns.team.textContent = 'Forecast availability';
+    elements.predictorColumns.now.hidden = true;
+    elements.predictorColumns.value.hidden = true;
+    elements.predictorColumns.title.hidden = true;
+    elements.predictorColumns.secondary.hidden = true;
+    elements.predictorColumns.tertiary.hidden = true;
+  }
+
   function renderPerformanceDetail(team, model, sport) {
     if (!team) {
       elements.predictorDetail.innerHTML = '<p class="rating-lab-detail-placeholder">Choose a participant to inspect its completed-event performance.</p>';
@@ -2369,7 +2513,7 @@
       state.predictorTeam = rows[0].id;
     }
     setPerformanceColumns();
-    renderCompetitionState(competition, competition.format || 'competition');
+    renderCompetitionState(competition, competition.format || 'competition', view.sourceHealth);
     elements.predictorMetrics.innerHTML = [
       ['Recorded results', number(model.results, 0)],
       ['Participants', number(rows.length, 0)],
@@ -2401,6 +2545,39 @@
       escapeHtml(competition.source_url) + '">Open completed competition source</a>.';
   }
 
+  function renderWithheldCompetition(view, competitionFormat, predictorTable) {
+    var competition = view.competition;
+    var sourceHealth = view.sourceHealth;
+    var healthLabel = sourceHealth.status === 'delayed' ? 'Source delayed' : 'Source incomplete';
+    var lifecycle = stateLabel(competitionState(competition));
+    var checked = sourceHealth.checkedAt ? formatDate(sourceHealth.checkedAt) : 'Not recorded';
+    predictorTable.classList.add('is-withheld');
+    setWithheldColumns();
+    renderCompetitionState(competition, competitionFormat, sourceHealth);
+    elements.predictorMarket.hidden = true;
+    elements.predictorMarket.innerHTML = '';
+    elements.predictorPerformanceChart.hidden = true;
+    elements.predictorPerformanceChart.innerHTML = '';
+    elements.predictorMetrics.innerHTML = [
+      ['Source health', healthLabel],
+      ['Competition lifecycle', lifecycle],
+      ['Results locked', number(competition.completed_matches || 0, 0) + ' of ' + number(competition.total_matches || 0, 0)],
+      ['Forecast', 'Withheld'],
+      ['Source checked', checked]
+    ].map(function (item) {
+      return '<div><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+    }).join('');
+    elements.predictorCaption.textContent = competitionTitle(competition) + ' · forecast withheld pending a current source';
+    elements.predictorBody.innerHTML = '<tr><td colspan="2"><strong>Forecast withheld: a current competition source is required.</strong><br>' +
+      escapeHtml(sourceHealth.reason) + '</td></tr>';
+    elements.predictorDetail.innerHTML = '<div class="rating-lab-detail-heading"><div><p class="rating-lab-kicker">' +
+      escapeHtml(healthLabel) + '</p><h3>No probabilities published</h3></div><strong>Withheld</strong></div>' +
+      '<p>' + escapeHtml(sourceHealth.reason) + '</p><p>The event remains labelled <strong>' +
+      escapeHtml(lifecycle.toLowerCase()) + '</strong> for chronology, but that lifecycle label is not evidence that the draw or schedule is current.</p>';
+    elements.predictorMethod.innerHTML = 'The freshness gate suppresses every model probability when the sourced event window or next unresolved fixture is overdue, or when the published structure is incomplete. Source checked: ' +
+      escapeHtml(checked) + '. <a href="' + escapeHtml(competition.source_url) + '">Open competition source</a>.';
+  }
+
   function renderPredictor() {
     var view = predictorData();
     if (!view) {
@@ -2429,10 +2606,14 @@
     var competition = view.competition;
     var model = view.model;
     var predictorTable = elements.predictorBody.closest('.rating-lab-predictor-table');
-    predictorTable.classList.remove('is-league', 'is-preseason', 'is-knockout', 'is-completed');
+    predictorTable.classList.remove('is-league', 'is-preseason', 'is-knockout', 'is-completed', 'is-withheld');
     var competitionFormat = competition.format || (model && model.teams ? 'round-robin league' : 'knockout cup');
     var currentState = competitionState(competition);
-    renderCompetitionState(competition, competitionFormat);
+    if (view.sourceHealth.status !== 'current') {
+      renderWithheldCompetition(view, competitionFormat, predictorTable);
+      return;
+    }
+    renderCompetitionState(competition, competitionFormat, view.sourceHealth);
     if (currentState === 'finished' && competition.performance && competition.performance.models[state.predictorModel]) {
       predictorTable.classList.add('is-completed');
       renderCompletedPerformance(view);

@@ -598,11 +598,42 @@
         "knockout_draw": {
           "type": "string"
         },
+        "tennis_draw": {
+          "type": "string"
+        },
         "availability_rule": {
           "type": "string"
         },
         "performance_method": {
           "type": "string"
+        },
+        "state_machine": {
+          "type": "object",
+          "required": [
+            "order",
+            "upcoming",
+            "live",
+            "finished"
+          ],
+          "properties": {
+            "order": {
+              "const": [
+                "upcoming",
+                "live",
+                "finished"
+              ]
+            },
+            "upcoming": {
+              "type": "string"
+            },
+            "live": {
+              "type": "string"
+            },
+            "finished": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
         },
         "market_comparison": {
           "$ref": "#/$defs/marketComparison"
@@ -612,7 +643,108 @@
         },
         "competitions": {
           "type": "array",
-          "minItems": 1
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "enum": [
+                  "upcoming",
+                  "live",
+                  "finished"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "upcoming",
+                  "live",
+                  "finished"
+                ]
+              },
+              "state_view": {
+                "enum": [
+                  "prior_forecast",
+                  "conditional_forecast",
+                  "performance",
+                  "forecast_withheld"
+                ]
+              },
+              "forecast_available": {
+                "type": "boolean"
+              },
+              "forecast_grace_days": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "forecast_as_of": {
+                "type": "string",
+                "format": "date"
+              },
+              "forecast_checked_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "source_health": {
+                "enum": [
+                  "current",
+                  "delayed",
+                  "incomplete"
+                ]
+              },
+              "source_health_reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "completed_matches": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "remaining_matches": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total_matches": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "source_reconciliation": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "draw_final_winner_id",
+                  "result_final_winner_id",
+                  "result_rows"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "draw_progress",
+                      "consistent",
+                      "result_fallback",
+                      "results_only"
+                    ]
+                  },
+                  "draw_final_winner_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result_final_winner_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "result_rows": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
         }
       },
       "additionalProperties": false

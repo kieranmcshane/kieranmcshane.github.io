@@ -23,7 +23,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
         <span class="rating-lab-freshness-chip{% if source.delayed %} is-stale{% endif %}" title="{{ source.message | escape }}"><i aria-hidden="true"></i>{{ source.label }} · {{ source.latest_result | date: "%b %-d, %Y" }}</span>
         {% endfor %}
       </div>
-      <p class="rating-lab-generation" id="rating-lab-generation">{{ site.data.rating_lab_default.published_rankings }} rankings · generated {{ site.data.rating_lab_default.manifest_generated_at | date: "%b %-d, %Y" }}{% if site.data.rating_lab_default.has_delayed_sources %} · delayed sources use their last valid snapshot{% endif %}</p>
+      <p class="rating-lab-generation" id="rating-lab-generation">{{ site.data.rating_lab_default.published_rankings }} rankings · generated {{ site.data.rating_lab_default.manifest_generated_at | date: "%b %-d, %Y" }}{% if site.data.rating_lab_default.has_delayed_sources %} · rankings use last valid snapshots{% endif %}</p>
       <a href="{{ '/rating-lab/' | relative_url }}?sport={{ site.data.rating_lab_default.sport }}&model={{ site.data.rating_lab_default.model }}&view=methods" data-rating-view="methods">Data, code, and methods</a>
     </div>
   </header>
@@ -328,7 +328,7 @@ description: Live alternative ratings for tennis, club and national-team footbal
     <details class="rating-lab-predictor-method">
       <summary>How this competition view is calculated</summary>
       <p id="predictor-method-copy"></p>
-      <p>Every forecast uses the leaderboard’s chronological rating state. Tennis locks the official ATP bracket, results, and byes, then samples each unplayed match from the selected global-plus-surface belief. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Football cups lock every published result and tie; when a later draw is not yet public, survivors are uniformly re-drawn and the interface states that assumption. If no knockout field is public, the title forecast is withheld.</p>
+      <p>Every forecast uses the leaderboard’s chronological rating state. Tennis locks the official ATP bracket, results, and byes, then samples each unplayed match from the selected global-plus-surface belief. Leagues lock actual points and goal difference, then sample future win/draw/loss outcomes. Football cups lock every published result and tie; when a later draw is not yet public, survivors are uniformly re-drawn and the interface states that assumption. Competition lifecycle and source health are checked separately: if an event window or next unresolved fixture is overdue, every forecast probability is withheld until a current source is published. If no knockout field is public, the title forecast is also withheld.</p>
       <p>For a completed competition, the anchored Performance Rating varies one participant’s rating while every opponent stays fixed at the selected protocol’s pre-event belief, then solves <span class="rating-lab-formula">Σp<sub>m</sub>(R<sub>perf</sub>) = Σs<sub>m</sub></span>. A separate reset rank starts everybody from the neutral prior and replays only the event. Chronological surprise remains <span class="rating-lab-formula">Z = Σ(s<sub>m</sub> − p<sub>m</sub>) / √Σp<sub>m</sub>(1−p<sub>m</sub>)</span>, where a win scores 1, a draw 0.5, and a loss 0.</p>
     </details>
   </section>

@@ -35,6 +35,14 @@ SPORTS = ("tennis", "football", "national-football", "chess")
 MODEL_NAMES = ("elo", "glicko2", "trueskill", "robust")
 PUBLISHED_MODEL_NAMES = MODEL_NAMES + ("ensemble",)
 FOOTBALL_ELO_ESTABLISHED_MATCHES = 10
+FORECAST_GRACE_DAYS = 1
+BLOCKING_FORECAST_FORMATS = {
+    "tennis knockout draw",
+    "knockout cup",
+    "two-legged qualifying round",
+    "round-robin league",
+    "round-robin tournament",
+}
 SCHEDULE_ENTITY_ALIASES = {
     "national-football": {
         "usa": "united-states",
@@ -1011,6 +1019,9 @@ def fetch_tennis_tournament_schedules(
     for tournament in candidates:
         result_rows = results_by_tournament[tournament["id"]]
         final_row = next((row for row in result_rows if row.get("stadie_id") == "F"), None)
+        result_final_winner = (
+            f"atp:{final_row['winner_code']}" if final_row else None
+        )
         draw = None
         pdf_body = b""
         pdf_url = (tournament.get("sgl_pdf_url") or "").replace("http://", "https://")
@@ -1024,13 +1035,31 @@ def fetch_tennis_tournament_schedules(
                     draw = _parse_atp_draw_pages(_extract_atp_draw_pdf(pdf_body), catalog)
             except (RuntimeError, ValueError):
                 draw = None
+        publication_draw = draw
+        draw_final_winner = None
+        reconciliation_status = "draw_progress"
         if draw:
             _fill_atp_recorded_winners(draw, result_rows)
-            identities = draw["identities"]
-            fixtures = _tennis_bracket_fixtures(tournament, draw, identities)
+            draw_final_winner = draw["recorded_winners"][-1][0]
+            if result_final_winner and draw_final_winner != result_final_winner:
+                # A completed result feed is stronger completion evidence than
+                # a bracket PDF whose extracted columns have stopped advancing.
+                # Fall back to the result rows instead of splicing a guessed
+                # winner into an internally inconsistent bracket.
+                publication_draw = None
+                identities = dict(catalog)
+                fixtures = _tennis_result_fixtures(tournament, result_rows, catalog)
+                reconciliation_status = "result_fallback"
+            else:
+                identities = draw["identities"]
+                fixtures = _tennis_bracket_fixtures(tournament, draw, identities)
+                reconciliation_status = (
+                    "consistent" if result_final_winner else "draw_progress"
+                )
         elif final_row:
             identities = dict(catalog)
             fixtures = _tennis_result_fixtures(tournament, result_rows, catalog)
+            reconciliation_status = "results_only"
         else:
             continue
         participants = sorted(
@@ -1052,15 +1081,30 @@ def fetch_tennis_tournament_schedules(
                 "country": info.get("country", ""),
                 "competition": "ATP singles",
             }
-        complete_winner = f"atp:{final_row['winner_code']}" if final_row else None
-        if draw and draw["recorded_winners"][-1][0]:
-            complete_winner = draw["recorded_winners"][-1][0]
+        complete_winner = result_final_winner or draw_final_winner
         complete = bool(
             complete_winner
-            and tournament["finish"] <= today
             and any(fixture["round_id"] == "F" and fixture["status"] == "FINISHED" for fixture in fixtures)
         )
-        snapshot = hashlib.sha256(pdf_body or matches_body).hexdigest()
+        result_snapshot = json.dumps(
+            sorted(
+                result_rows,
+                key=lambda row: (
+                    row.get("id", ""),
+                    row.get("stadie_id", ""),
+                    row.get("winner_code", ""),
+                    row.get("loser_code", ""),
+                ),
+            ),
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+        snapshot_material = (
+            pdf_body + b"\0" + result_snapshot
+            if publication_draw and pdf_body
+            else result_snapshot
+        )
+        snapshot = hashlib.sha256(snapshot_material).hexdigest()
         schedules.append(
             {
                 "id": f"tennis-{tournament['id']}",
@@ -1080,21 +1124,34 @@ def fetch_tennis_tournament_schedules(
                     for entity in participants
                 ],
                 "fixtures": fixtures,
-                "draw_slots": draw["slots"] if draw else [],
-                "recorded_winners": draw["recorded_winners"] if draw else [],
+                "draw_slots": publication_draw["slots"] if publication_draw else [],
+                "recorded_winners": publication_draw["recorded_winners"] if publication_draw else [],
                 "round_labels": (
-                    [_tennis_round_label(round_id) for round_id in _tennis_round_ids(len(draw["slots"]))]
-                    if draw else []
+                    [
+                        _tennis_round_label(round_id)
+                        for round_id in _tennis_round_ids(len(publication_draw["slots"]))
+                    ]
+                    if publication_draw else []
                 ),
                 "complete": complete,
                 "complete_winner_id": complete_winner,
+                "source_reconciliation": {
+                    "status": reconciliation_status,
+                    "draw_final_winner_id": draw_final_winner,
+                    "result_final_winner_id": result_final_winner,
+                    "result_rows": len(result_rows),
+                },
                 "first_fixture": tournament["date"].isoformat(),
                 "last_fixture": tournament["finish"].isoformat(),
                 "source_url": pdf_url or tournament.get("url") or "https://www.atptour.com/en/scores",
                 "license": "ATP Tour website terms (official draw); ManTennisData MIT (stable ATP identities and result cross-check)",
                 "snapshot_sha256": snapshot,
-                "forecast_available": bool(draw) or complete,
-                "availability": "The official main-draw bracket is locked. Every unplayed match follows that published path; no opponent or re-draw is invented.",
+                "forecast_available": bool(publication_draw) or complete,
+                "availability": (
+                    "The official main-draw bracket is locked. Every unplayed match follows that published path; no opponent or re-draw is invented."
+                    if publication_draw
+                    else "The completed result feed supersedes a stale or unavailable draw extraction; probabilities are replaced by completed-event performance."
+                ),
                 "tie_break": None,
                 "home_advantage": False,
                 "date_method": "The public draw supplies bracket order but not match timestamps. Replay dates are deterministic round-order positions between the official event start and finish dates.",
@@ -5396,12 +5453,201 @@ def _attach_kalshi_comparison(payload: dict, previous: dict | None) -> None:
     )
 
 
+def _date_value(value) -> date | None:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str) and len(value) >= 10:
+        try:
+            return date.fromisoformat(value[:10])
+        except ValueError:
+            return None
+    return None
+
+
+def _competition_source_health(
+    competition: dict,
+    *,
+    as_of: date,
+) -> tuple[str, str]:
+    """Classify forecast-source health independently from event lifecycle."""
+    state = competition.get("state") or competition.get("status") or "upcoming"
+    if state == "complete":
+        state = "finished"
+    elif state == "scheduled":
+        state = "upcoming"
+    declared = competition.get("source_health")
+    declared_reason = competition.get("source_health_reason")
+    grace_days = competition.get("forecast_grace_days", FORECAST_GRACE_DAYS)
+    try:
+        grace_days = max(int(grace_days), 0)
+    except (TypeError, ValueError):
+        grace_days = FORECAST_GRACE_DAYS
+    remaining = competition.get("remaining_matches", 0)
+    try:
+        remaining = max(int(remaining), 0)
+    except (TypeError, ValueError):
+        remaining = 0
+    last_fixture = _date_value(competition.get("last_fixture"))
+    next_fixture = _date_value(competition.get("next_fixture"))
+    format_name = competition.get("format", "")
+
+    if declared == "delayed" and state != "finished":
+        return "delayed", declared_reason or "The competition source is delayed; forecast probabilities are withheld."
+
+    if state != "finished" and remaining:
+        if last_fixture and as_of > last_fixture + timedelta(days=grace_days):
+            return (
+                "delayed",
+                "Forecast withheld: the published event window ended on "
+                f"{last_fixture.isoformat()} with {remaining} unresolved "
+                f"match{'es' if remaining != 1 else ''} as of {as_of.isoformat()}.",
+            )
+        if (
+            format_name in BLOCKING_FORECAST_FORMATS
+            and next_fixture
+            and as_of > next_fixture + timedelta(days=grace_days)
+        ):
+            return (
+                "delayed",
+                "Forecast withheld: the next unresolved fixture was expected on "
+                f"{next_fixture.isoformat()}, but no newer competition state was "
+                f"published by {as_of.isoformat()}.",
+            )
+
+    if declared == "incomplete" or competition.get("forecast_available") is False:
+        return (
+            "incomplete",
+            declared_reason
+            or competition.get("availability")
+            or "The public field, draw, or schedule is not complete enough to reproduce a forecast.",
+        )
+    return (
+        "current",
+        declared_reason
+        if declared == "current" and declared_reason
+        else f"Competition timing and sourced results are coherent as of {as_of.isoformat()}.",
+    )
+
+
+def _normalize_competition_publication_state(competition: dict) -> None:
+    """Upgrade cached predictor rows to the canonical lifecycle/count contract."""
+    models = competition.get("models") or {}
+    primary_model = models.get("elo") or next(
+        (model for model in models.values() if isinstance(model, dict)),
+        {},
+    )
+    total = competition.get("total_matches")
+    completed = competition.get("completed_matches")
+    remaining = competition.get("remaining_matches")
+    if not isinstance(completed, int):
+        completed = primary_model.get("completed_matches")
+    if not isinstance(remaining, int):
+        remaining = primary_model.get("remaining_matches")
+    if not isinstance(total, int):
+        total = (
+            completed + remaining
+            if isinstance(completed, int) and isinstance(remaining, int)
+            else 0
+        )
+
+    raw_state = competition.get("state") or competition.get("status") or "upcoming"
+    if raw_state in {"finished", "complete"} or primary_model.get("current_stage") == "Complete":
+        state = "finished"
+        completed = total if not isinstance(completed, int) else completed
+        remaining = 0
+    else:
+        completed = completed if isinstance(completed, int) else 0
+        remaining = (
+            remaining
+            if isinstance(remaining, int)
+            else max(total - completed, 0)
+        )
+        state = "live" if raw_state == "live" or completed > 0 else "upcoming"
+    completed = max(completed, 0)
+    remaining = max(remaining, 0)
+    if total < completed + remaining:
+        total = completed + remaining
+
+    competition["state"] = state
+    competition["status"] = state
+    competition["completed_matches"] = completed
+    competition["remaining_matches"] = remaining
+    competition["total_matches"] = total
+    competition["state_view"] = {
+        "upcoming": "prior_forecast",
+        "live": "conditional_forecast",
+        "finished": "performance",
+    }[state]
+    if not competition.get("state_message"):
+        competition["state_message"] = {
+            "upcoming": "No sourced competition result is locked yet; probabilities use the published field, draw, or schedule.",
+            "live": f"{completed} sourced result{'s' if completed != 1 else ''} are locked; probabilities are conditional on that state.",
+            "finished": "All sourced competition results are locked; the event is shown as completed performance.",
+        }[state]
+
+
+def _apply_competition_publication_gate(
+    competition: dict,
+    *,
+    as_of: date,
+    checked_at: str,
+) -> str:
+    """Annotate source health and remove probabilities that are unsafe to show."""
+    _normalize_competition_publication_state(competition)
+    try:
+        grace_days = max(
+            int(competition.get("forecast_grace_days", FORECAST_GRACE_DAYS)),
+            0,
+        )
+    except (TypeError, ValueError):
+        grace_days = FORECAST_GRACE_DAYS
+    competition["forecast_grace_days"] = grace_days
+    health, reason = _competition_source_health(competition, as_of=as_of)
+    competition["forecast_as_of"] = as_of.isoformat()
+    competition["forecast_checked_at"] = (
+        competition.get("forecast_checked_at") or checked_at
+    )
+    competition["source_health"] = health
+    competition["source_health_reason"] = reason
+    state = competition.get("state") or competition.get("status")
+    if state in {"finished", "complete"}:
+        competition["next_fixture"] = None
+    if health != "current":
+        competition["forecast_available"] = False
+        competition["models"] = {}
+        competition.pop("settled_performance", None)
+        competition.pop("performance", None)
+        competition["state_view"] = "forecast_withheld"
+        competition["state_message"] = reason
+    return health
+
+
+def _apply_predictor_publication_gates(
+    payload: dict,
+    *,
+    as_of: date,
+    checked_at: str,
+) -> None:
+    predictor = payload.get("tournament_predictor") or {}
+    for competition in predictor.get("competitions") or []:
+        _apply_competition_publication_gate(
+            competition,
+            as_of=as_of,
+            checked_at=checked_at,
+        )
+
+
 def _competition_state(
     schedule: dict,
     competition: dict,
     models: dict,
+    *,
+    as_of: date | None = None,
 ) -> tuple[str, int, int]:
     """Return the single public Upcoming → Live → Finished state."""
+    reference_date = as_of or date.today()
     fixtures = [row for row in schedule["fixtures"] if not row.get("is_bye")]
     completed = sum(
         row.get("home_goals") is not None and row.get("away_goals") is not None
@@ -5421,14 +5667,14 @@ def _competition_state(
         finished = (
             bool(fixtures)
             and completed == len(fixtures)
-            and date.today() >= date.fromisoformat(competition["last_fixture"])
+            and reference_date >= date.fromisoformat(competition["last_fixture"])
         )
     elif models:
         finished = models.get("elo", {}).get("current_stage") == "Complete"
     elif fixtures:
         finished = (
             completed == len(fixtures)
-            and date.today() >= date.fromisoformat(competition["last_fixture"])
+            and reference_date >= date.fromisoformat(competition["last_fixture"])
         )
     if finished:
         return "finished", completed, remaining
@@ -5443,13 +5689,20 @@ def _build_tournament_predictor(
     entities: dict,
     matches: list[Match],
     pre_event_models: dict[str, dict[date, object]] | None = None,
+    *,
+    as_of: date | None = None,
+    checked_at: str | None = None,
 ) -> dict:
+    reference_date = as_of or date.today()
+    reference_checked_at = checked_at or datetime.now(timezone.utc).replace(
+        microsecond=0
+    ).isoformat()
     draw_rate = sum(match.score_a == 0.5 for match in matches) / len(matches)
     competitions = []
     prior_model_cache = {}
     for schedule in schedules:
         competition = {key: schedule[key] for key in ("id", "label", "season", "source_url", "license", "snapshot_sha256")}
-        for key in ("surface", "location", "date_method"):
+        for key in ("surface", "location", "date_method", "source_reconciliation"):
             if schedule.get(key):
                 competition[key] = schedule[key]
         competition["format"] = schedule.get("format", "round-robin league")
@@ -5497,6 +5750,7 @@ def _build_tournament_predictor(
             schedule,
             competition,
             competition["models"],
+            as_of=reference_date,
         )
         competition["state"] = competition_state
         # Kept as a canonical alias for older clients. It no longer carries a
@@ -5528,7 +5782,12 @@ def _build_tournament_predictor(
                 "protocol performance ratings and actual-minus-expected analysis."
             ),
         }[competition_state]
-        if competition_state == "finished":
+        source_health = _apply_competition_publication_gate(
+            competition,
+            as_of=reference_date,
+            checked_at=reference_checked_at,
+        )
+        if source_health == "current" and competition_state == "finished":
             performance_models = {
                 model_name: _competition_performance(
                     schedule,
@@ -5548,7 +5807,7 @@ def _build_tournament_predictor(
                     "method": "Publish three complementary completed-event views: an exact performance rating anchored to fixed pre-event opponent beliefs, a neutral-prior reset rank based only on this event, and a chronological actual-minus-expected surprise score. The selected protocol and its tuned parameters are used throughout.",
                     "models": performance_models,
                 }
-        elif competition_state == "live":
+        elif source_health == "current" and competition_state == "live":
             settled_ids = _settled_competition_participants(schedule)
             if settled_ids:
                 settled_models = {
@@ -5586,7 +5845,10 @@ def _build_tournament_predictor(
         "strengths": "Fixed at the generation-time rating state; completed results change both the table and the next refresh's ratings.",
         "knockout_draw": "Published ties are preserved. If a later cup draw is not published, surviving teams are uniformly re-drawn in each simulation; known byes are preserved. Draw constraints are not invented. Qualifying-round forecasts stop at the next stage and never invent later entrants or pairings.",
         "tennis_draw": "Official ATP bracket paths and byes are locked. Completed matches are fixed; each unplayed match is sampled from the selected model's global-plus-surface probability. Round advancement is counted from the same deterministic simulations.",
-        "availability_rule": "Title probabilities are withheld until a public knockout field exists.",
+        "availability_rule": (
+            "Title probabilities are withheld until a public knockout field exists. "
+            "Every competition probability is withheld when the event window or next unresolved fixture is overdue beyond the declared grace period."
+        ),
         "state_machine": {
             "order": ["upcoming", "live", "finished"],
             "upcoming": "Prior-heavy forecast and expected outcomes from the published schedule or draw.",
@@ -5897,10 +6159,11 @@ def build_sport_payload(
         validation_start,
         evaluation_start,
     )
+    generated_at = datetime.now(timezone.utc).replace(microsecond=0)
     payload = {
         "schema_version": SCHEMA_VERSION,
         "sport": sport,
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "generated_at": generated_at.isoformat(),
         "latest_result": latest.isoformat(),
         "source": source_meta,
         "data_window": {
@@ -6044,6 +6307,8 @@ def build_sport_payload(
             entities,
             matches,
             pre_event_models=pre_event_models,
+            as_of=generated_at.date(),
+            checked_at=generated_at.isoformat(),
         )
     if audit_packet is not None:
         from .audit import build_packet
@@ -6129,11 +6394,29 @@ def validate_payload(payload: dict, schema: dict) -> None:
                 raise ValueError("Invalid competition state")
             if competition.get("status") != competition_state:
                 raise ValueError("Competition state aliases disagree")
-            expected_view = {
-                "upcoming": "prior_forecast",
-                "live": "conditional_forecast",
-                "finished": "performance",
-            }[competition_state]
+            source_health = competition.get("source_health")
+            if source_health not in {"current", "delayed", "incomplete"}:
+                raise ValueError("Invalid competition source health")
+            if not isinstance(competition.get("source_health_reason"), str) or not competition["source_health_reason"]:
+                raise ValueError("Competition source health lacks an explanation")
+            forecast_as_of = _date_value(competition.get("forecast_as_of"))
+            if not forecast_as_of or not competition.get("forecast_checked_at"):
+                raise ValueError("Competition forecast freshness metadata is incomplete")
+            derived_health, _reason = _competition_source_health(
+                competition,
+                as_of=forecast_as_of,
+            )
+            if derived_health != source_health:
+                raise ValueError("Competition source health contradicts its dates")
+            expected_view = (
+                "forecast_withheld"
+                if source_health != "current"
+                else {
+                    "upcoming": "prior_forecast",
+                    "live": "conditional_forecast",
+                    "finished": "performance",
+                }[competition_state]
+            )
             if competition.get("state_view") != expected_view:
                 raise ValueError("Competition state view disagrees with its state")
             completed = competition.get("completed_matches")
@@ -6142,15 +6425,24 @@ def validate_payload(payload: dict, schema: dict) -> None:
                 raise ValueError("Competition result counts must be integers")
             if completed < 0 or remaining < 0 or completed + remaining != competition.get("total_matches"):
                 raise ValueError("Competition result counts do not reconcile")
+            if source_health != "current" and (
+                competition.get("forecast_available")
+                or competition.get("models")
+                or competition.get("performance")
+                or competition.get("settled_performance")
+            ):
+                raise ValueError("Unsafe competition forecast or performance was not withheld")
             if competition.get("forecast_available") and set(competition.get("models", {})) != set(MODEL_NAMES):
                 raise ValueError("Incomplete tournament prediction models")
-            if competition_state == "finished":
+            if competition_state == "finished" and source_health == "current":
+                if competition.get("next_fixture") is not None:
+                    raise ValueError("Finished competition still publishes a next fixture")
                 performance = competition.get("performance", {}).get("models", {})
                 if set(performance) != set(MODEL_NAMES):
                     raise ValueError("Finished competition is missing protocol performance ratings")
             settled = competition.get("settled_performance")
             if settled:
-                if competition_state != "live":
+                if competition_state != "live" or source_health != "current":
                     raise ValueError("Settled-participant performance is only valid for live competitions")
                 if settled.get("status") != "provisional_until_competition_finishes":
                     raise ValueError("Invalid settled-participant performance status")
@@ -6540,6 +6832,7 @@ def write_split_assets(output_dir: Path) -> dict:
     else:
         media_index = {}
     media_generated_at = None
+    publication_now = datetime.now(timezone.utc).replace(microsecond=0)
 
     manifest_path = output_dir / "manifest.json"
     if manifest_path.exists():
@@ -6586,6 +6879,12 @@ def write_split_assets(output_dir: Path) -> dict:
             default=None,
         )
         core = {key: value for key, value in payload.items() if key != "models"}
+        _apply_predictor_publication_gates(
+            core,
+            as_of=publication_now.date(),
+            checked_at=payload.get("generated_at")
+            or publication_now.isoformat(),
+        )
         core["models"] = {}
         for model_name, model in payload.get("models", {}).items():
             rankings = model.get("rankings", [])

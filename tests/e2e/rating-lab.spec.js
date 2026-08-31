@@ -7,6 +7,7 @@
 
 const { test, expect } = require("@playwright/test");
 const {
+  FROZEN_TIME,
   freezeClock,
   readDataFile,
   routeDataFile,
@@ -18,6 +19,12 @@ const LONG_NAME =
 
 function isMobile(page) {
   return page.viewportSize().width <= 650;
+}
+
+function frozenDateOffset(days) {
+  const value = new Date(FROZEN_TIME);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
 }
 
 async function gotoRatingLab(page, path = "/rating-lab/") {
@@ -671,9 +678,9 @@ test.describe("competition switching", () => {
         completed_matches: 2,
         remaining_matches: 1,
         total_matches: 3,
-        first_fixture: "2026-07-20",
-        last_fixture: "2026-07-26",
-        next_fixture: "2020-07-26",
+        first_fixture: frozenDateOffset(-7),
+        last_fixture: frozenDateOffset(3),
+        next_fixture: frozenDateOffset(-1),
         surface: "Clay",
         models: {},
         settled_performance: {
@@ -732,7 +739,7 @@ test.describe("competition switching", () => {
     );
     await expect(page.locator("#predictor-detail time")).toHaveAttribute(
       "datetime",
-      "2020-07-26"
+      frozenDateOffset(-1)
     );
     await expect(
       page.locator("#predictor-performance-title")
@@ -761,6 +768,128 @@ test.describe("competition switching", () => {
     await expect(page.locator("#predictor-detail time")).toHaveAttribute(
       "datetime",
       "2099-07-26"
+    );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("an overdue competition is labelled and rendered fail closed", async ({
+    page,
+  }) => {
+    const participants = [
+      {
+        id: "atp:alpha",
+        name: "Alpha Player",
+        rating: 2010,
+        reach_next_stage: 0.63,
+        champion: 0.63,
+        next_match: null,
+        round_probabilities: [{ stage: "Champion", probability: 0.63 }],
+        surface_rating: 1995,
+        surface_matches: 20,
+      },
+      {
+        id: "atp:beta",
+        name: "Beta Player",
+        rating: 1940,
+        reach_next_stage: 0.37,
+        champion: 0.37,
+        next_match: null,
+        round_probabilities: [{ stage: "Champion", probability: 0.37 }],
+        surface_rating: 1925,
+        surface_matches: 18,
+      },
+    ];
+    const model = {
+      forecast_type: "tennis_draw",
+      completed_matches: 0,
+      current_stage: "Final",
+      surface: "Hard",
+      simulations: 1000,
+      seed: "test",
+      participants,
+    };
+    await routeDataFile(page, "split/tennis-core.json", (data) => {
+      const common = {
+        season: "2026",
+        source_url: "https://example.test/draw",
+        snapshot_sha256: "a".repeat(64),
+        format: "tennis knockout draw",
+        surface: "Hard",
+        forecast_available: true,
+        total_matches: 1,
+        models: {
+          elo: model,
+          glicko2: model,
+          trueskill: model,
+          robust: model,
+        },
+      };
+      const delayed = {
+        ...common,
+        id: "delayed-source-test",
+        label: "Delayed Source Test",
+        state: "live",
+        status: "live",
+        state_view: "conditional_forecast",
+        state_message: "A result is locked.",
+        completed_matches: 1,
+        remaining_matches: 1,
+        total_matches: 2,
+        first_fixture: "2020-07-20",
+        last_fixture: "2020-07-26",
+        next_fixture: "2020-07-25",
+      };
+      const current = {
+        ...common,
+        id: "current-source-test",
+        label: "Current Source Test",
+        state: "upcoming",
+        status: "upcoming",
+        state_view: "prior_forecast",
+        state_message: "The published draw is current.",
+        completed_matches: 0,
+        remaining_matches: 1,
+        first_fixture: frozenDateOffset(1),
+        last_fixture: frozenDateOffset(3),
+        next_fixture: frozenDateOffset(1),
+      };
+      data.tournament_predictor = {
+        simulations_per_model: 1000,
+        tennis_draw: "Published draw is locked.",
+        knockout_draw: "Published draw is locked.",
+        availability_rule: "Published fields only.",
+        competitions: [delayed, current],
+      };
+    });
+
+    await gotoRatingLab(
+      page,
+      "/rating-lab/?sport=tennis&model=ensemble&view=leaderboard"
+    );
+    const selector = page.locator("#predictor-competition");
+    await expect(selector).toHaveValue("current-source-test");
+    await expect(selector.locator("option").nth(1)).toContainText(
+      "Source delayed"
+    );
+    await selector.selectOption("delayed-source-test");
+
+    await expect(page.locator("#predictor-state")).toContainText(
+      "Source delayed"
+    );
+    await expect(page.locator("#predictor-metrics")).toContainText("Withheld");
+    await expect(page.locator("#predictor-body")).toContainText(
+      "Forecast withheld"
+    );
+    await expect(page.locator("#predictor-detail")).toContainText(
+      "No probabilities published"
+    );
+    await expect(page.locator("#predictor .rating-lab-probability")).toHaveCount(
+      0
+    );
+    await expect(page.locator("#predictor-market")).toBeHidden();
+    await expect(page.locator("#predictor-performance-chart")).toBeHidden();
+    await expect(page.locator("#rating-lab-freshness")).toContainText(
+      "Tennis forecasts · 1 delayed"
     );
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
