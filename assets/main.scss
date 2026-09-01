@@ -13872,10 +13872,13 @@ body:has(.mat101-library) {
     box-shadow: none;
   }
 
-  .mat101-browser,
+  .mat101-browser {
+    scroll-margin-top: 5.75rem;
+  }
+
   .mat101-chapter,
   .mat101-native-card {
-    scroll-margin-top: 5.75rem;
+    scroll-margin-top: 5rem;
   }
 }
 
