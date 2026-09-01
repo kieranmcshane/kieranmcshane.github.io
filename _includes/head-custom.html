@@ -1,4 +1,8 @@
 <script>
+  {% if page.url == '/mat101/exercices/' %}
+  document.documentElement.classList.add('mat101-has-js');
+  {% endif %}
+
   {% if page.math %}
   document.documentElement.classList.add('math-pending');
   window.setTimeout(function () {

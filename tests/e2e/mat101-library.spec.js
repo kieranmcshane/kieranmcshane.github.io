@@ -122,6 +122,14 @@ test.describe("MAT101 native library", () => {
     await expect(toc.locator(".mat101-difficulty-legend")).toContainText(
       "Niveau examen"
     );
+    if (wide) {
+      await toc
+        .locator('[data-mat101-toc-chapter-link][href="#fonctions"]')
+        .click();
+      await expect(
+        toc.locator('[data-mat101-toc-chapter][data-chapter-id="fonctions"]')
+      ).toHaveClass(/is-active/);
+    }
     await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
 
     await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
@@ -252,6 +260,30 @@ test.describe("MAT101 native library", () => {
     await toc.locator('[data-mat101-toc-chapter-link][href="#limites"]').click();
     await expect(toc).not.toHaveAttribute("open", "");
     await expect(page.locator("#limites")).toBeFocused();
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("keeps the exercise finder clear of the compact navigation", async ({
+    page,
+  }) => {
+    test.skip(page.viewportSize().width >= 1240, "compact navigation only");
+    await gotoLibrary(page);
+
+    await page.locator(".mat101-primary-action").click();
+    await expect(page).toHaveURL(/#bibliotheque$/);
+
+    const layout = await page.evaluate(() => {
+      const navigation = document.querySelector(".mat101-toc");
+      const finder = document.getElementById("bibliotheque");
+      const navigationBox = navigation.getBoundingClientRect();
+      const finderBox = finder.getBoundingClientRect();
+      return {
+        navigationBottom: navigationBox.bottom,
+        finderTop: finderBox.top,
+      };
+    });
+
+    expect(layout.finderTop).toBeGreaterThanOrEqual(layout.navigationBottom + 8);
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 

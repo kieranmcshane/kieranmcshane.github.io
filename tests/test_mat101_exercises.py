@@ -447,7 +447,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("initializeRootDiagrams", SCRIPT)
         self.assertIn("data-mat101-root-diagram", SCRIPT)
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
-        self.assertIn("mat101-library.js", (ROOT / "_includes/head-custom.html").read_text())
+        head = (ROOT / "_includes/head-custom.html").read_text()
+        self.assertIn("mat101-library.js", head)
+        self.assertIn("mat101-has-js", head)
+        self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
 
     def test_interactive_table_of_contents_covers_and_tracks_exercises(self):
         self.assertIn("Sommaire interactif", PAGE)

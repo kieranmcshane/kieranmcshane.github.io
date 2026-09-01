@@ -13862,9 +13862,20 @@ body:has(.mat101-library) {
 }
 
 @media screen and (max-width: 1239px) {
+  html:not(.mat101-has-js) .mat101-toc {
+    position: static;
+  }
+
+  html:not(.mat101-has-js) .mat101-toc-panel {
+    position: static;
+    max-height: none;
+    box-shadow: none;
+  }
+
+  .mat101-browser,
   .mat101-chapter,
   .mat101-native-card {
-    scroll-margin-top: 5rem;
+    scroll-margin-top: 5.75rem;
   }
 }
 
