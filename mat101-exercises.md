@@ -21,6 +21,7 @@ math: true
     <p>Chaque énoncé est lisible directement dans la page. Ouvrez ensuite son corrigé détaillé, sans quitter le site et sans chercher la bonne page dans un PDF.</p>
     <div class="mat101-actions">
       <a class="mat101-primary-action" href="#bibliotheque">Explorer les exercices <span aria-hidden="true">↓</span></a>
+      <a href="{{ '/mat101/seances/' | relative_url }}">Voir les 19 séances <span aria-hidden="true">→</span></a>
       <a href="#telechargements">Télécharger les recueils</a>
       <a href="#credits">Crédits et citations</a>
     </div>

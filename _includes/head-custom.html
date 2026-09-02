@@ -36,6 +36,9 @@
 {% if page.url == '/mat101/exercices/' %}
 <script defer src="{{ '/assets/js/mat101-library.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
 {% endif %}
+{% if page.url == '/mat101/seances/' %}
+<script defer src="{{ '/assets/js/mat101-sessions.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
+{% endif %}
 {% if page.url == '/repertoire-raisonne/' %}
 <script defer src="{{ '/assets/js/repertoire-raisonne.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
 {% endif %}

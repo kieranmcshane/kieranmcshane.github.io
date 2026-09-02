@@ -9,7 +9,7 @@ markdown: kramdown
 permalink: /:year/:month/:day/:title/
 show_excerpts: true
 header_pages:
-  - mat101-exercises.md
+  - mat101-sessions.md
   - repertoire-raisonne.md
   - rating-lab.md
   - about.md
@@ -17,3 +17,7 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
+collections:
+  mat101_sessions:
+    output: true
+    permalink: /mat101/seances/:name/

@@ -289,7 +289,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         )
         self.assertNotIn("Transcription textuelle extraite", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
-        self.assertIn("mat101-exercises.md", CONFIG)
+        self.assertIn("mat101-sessions.md", CONFIG)
+        self.assertIn("permalink: /mat101/exercices/", PAGE)
 
     def test_errata_register_is_versioned_and_linked(self):
         exercises = [entry["exercise"] for entry in ERRATA]
