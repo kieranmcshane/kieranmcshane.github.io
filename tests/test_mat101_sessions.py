@@ -134,8 +134,19 @@ class Mat101SessionsTests(unittest.TestCase):
                 if number in {18, 19}
             )
         )
-        self.assertIn("17 + 2", PAGE)
-        self.assertIn("La date et la salle des séances 18 et 19", PAGE)
+        self.assertIn("session.scheduleConfirmed", PAGE)
+        self.assertIn("mat101-session-date-state is-pending", PAGE)
+        self.assertEqual(
+            [item["number"] for item in DATA if not item["scheduleConfirmed"]],
+            [18, 19],
+        )
+        self.assertTrue(
+            all(
+                item["dateLabel"] == "Date et salle à confirmer"
+                for item in DATA
+                if item["number"] in {18, 19}
+            )
+        )
 
     def test_hub_exposes_fast_search_filters_and_student_cards(self):
         self.assertIn("data-mat101-course", PAGE)
@@ -158,6 +169,30 @@ class Mat101SessionsTests(unittest.TestCase):
         exercises = (ROOT / "mat101-exercises.md").read_text(encoding="utf-8")
         self.assertIn(">Séances</a>", exercises)
         self.assertIn("'/mat101/seances/' | relative_url", exercises)
+        self.assertIn("'/mat101/exercices/' | relative_url", PAGE)
+        self.assertIn(">Exercices</a>", PAGE)
+
+    def test_session_page_intro_is_compact(self):
+        self.assertIn("<h1>Séances MAT101</h1>", PAGE)
+        self.assertIn('class="mat101-page-heading"', PAGE)
+        self.assertIn('class="mat101-page-links"', PAGE)
+        self.assertIn(".mat101-page-heading", STYLES)
+        self.assertNotIn("19 séances pour progresser en MAT101", PAGE)
+        self.assertNotIn(
+            "Retrouvez pour chaque cours-TD les compétences à acquérir", PAGE
+        )
+        self.assertNotIn("Choisir une séance", PAGE)
+        self.assertNotIn("Feuille de route", PAGE)
+        self.assertNotIn("Télécharger le PDF étudiant", PAGE)
+        self.assertNotIn("La feuille de route des 19 séances", PAGE)
+        self.assertNotIn("Les 19 parcours étudiants sont disponibles", PAGE)
+        self.assertNotIn("17 + 2", PAGE)
+        self.assertNotIn('class="mat101-hero', PAGE)
+        self.assertNotIn('class="mat101-actions"', PAGE)
+        self.assertNotIn('class="mat101-stats"', PAGE)
+        self.assertNotIn('class="mat101-course-status"', PAGE)
+        self.assertNotIn('class="mat101-course-download"', PAGE)
+        self.assertNotIn("parcours-19-seances-mat101-ima02.pdf", PAGE)
 
     def test_student_pdf_and_stable_collection_routes_are_present(self):
         workbook = (
