@@ -333,11 +333,13 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_credits_distinguish_original_and_solution(self):
         self.assertIn("Énoncés originaux", PAGE)
+        self.assertIn("Polycopié du 13 septembre 2022.", PAGE)
+        self.assertNotIn("Bernard Ycart", PAGE)
         self.assertNotIn("Adaptation web et interface", PAGE)
         self.assertNotIn("Kieran McShane, avec l’assistance d’OpenAI Codex.", PAGE)
         self.assertIn("Rédaction du corrigé", PAGE)
         self.assertIn("méthode de George Pólya", PAGE)
-        self.assertIn("Raphaël Rossignol est indiqué comme responsable", PAGE)
+        self.assertIn("Responsable de l’édition citée : Raphaël Rossignol.", PAGE)
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", PAGE)
         self.assertIn("ni d’un corrigé officiel de l’UGA", PAGE)
         self.assertIn("'/about/#contact'", PAGE)
