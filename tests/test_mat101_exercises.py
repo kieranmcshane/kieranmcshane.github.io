@@ -291,6 +291,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
     def test_exercise_page_intro_is_compact(self):
         self.assertIn('<h1>Exercices MAT101</h1>', PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
+        self.assertIn('href="#errata">Errata</a>', PAGE)
+        self.assertIn('id="errata"', PAGE)
+        self.assertIn("Errata du polycopié source", PAGE)
+        self.assertIn("site.data.mat101_errata", PAGE)
         self.assertIn(".mat101-page-heading", STYLES)
         self.assertNotIn("103 exercices à travailler ici", PAGE)
         self.assertNotIn("Chaque énoncé est lisible directement dans la page", PAGE)
