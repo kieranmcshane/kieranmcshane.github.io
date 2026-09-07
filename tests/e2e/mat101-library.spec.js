@@ -447,7 +447,10 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator(".mat101-page-heading h1")).toHaveText(
       "Exercices MAT101"
     );
-    await expect(page.locator(".mat101-page-links a")).toHaveCount(3);
+    await expect(page.locator(".mat101-page-links a")).toHaveCount(4);
+    await expect(page.locator(".mat101-page-links a[href='#errata']")).toHaveText(
+      "Errata"
+    );
     await expect(page.locator(".mat101-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-stats")).toHaveCount(0);
     await expect(page.locator(".mat101-verification")).toHaveCount(0);
@@ -457,6 +460,23 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator("#bibliotheque")).toBeVisible();
     await expect(page.locator("#mat101-search-input")).toBeVisible();
     await expect(page.locator("[data-mat101-exercise]")).toHaveCount(103);
+  });
+
+  test("keeps the errata register visible without the corpus status aside", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+
+    const errata = page.locator("#errata");
+    await expect(errata).toBeVisible();
+    await expect(errata.locator("h2")).toHaveText("Errata du polycopié source");
+    await expect(errata.locator(".mat101-errata-list article")).toHaveCount(10);
+    await expect(errata.locator("#erratum-3-31")).toBeVisible();
+    await expect(page.locator(".mat101-verification")).toHaveCount(0);
+    await expect(page.getByText("Corpus des énoncés")).toHaveCount(0);
+    await expect(
+      page.getByText("Les corrigés ne sont pas publiés sur cette page.")
+    ).toHaveCount(0);
   });
 
   test("keeps the complex-number statement usable without a solution table", async ({

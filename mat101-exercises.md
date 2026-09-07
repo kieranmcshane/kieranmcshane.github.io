@@ -19,6 +19,7 @@ math: true
     <h1>Exercices MAT101</h1>
     <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
       <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
+      <a href="#errata">Errata</a>
       <a href="#telechargements">Téléchargements</a>
       <a href="#credits">Crédits</a>
     </nav>
