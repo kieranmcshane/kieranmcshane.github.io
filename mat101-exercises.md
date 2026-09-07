@@ -1,8 +1,8 @@
 ---
 layout: page
-title: Exercices et corrigés MAT101
+title: Exercices MAT101
 permalink: /mat101/exercices/
-description: "Bibliothèque de 103 exercices MAT101 de niveau L1 avec énoncés et corrigés détaillés lisibles directement en ligne."
+description: "Bibliothèque de 103 exercices MAT101 de niveau L1 avec énoncés lisibles directement en ligne."
 math: true
 ---
 
@@ -18,22 +18,35 @@ math: true
   <header class="mat101-hero">
     <p class="mat101-kicker">MAT101 · bibliothèque L1</p>
     <h1>103 exercices à travailler ici</h1>
+    {% if site.mat101_show_solutions %}
     <p>Chaque énoncé est lisible directement dans la page. Ouvrez ensuite son corrigé détaillé, sans quitter le site et sans chercher la bonne page dans un PDF.</p>
+    {% else %}
+    <p>Chaque énoncé est lisible directement dans la page, sans chercher la bonne page dans un PDF.</p>
+    {% endif %}
     <div class="mat101-actions">
       <a class="mat101-primary-action" href="#bibliotheque">Explorer les exercices <span aria-hidden="true">↓</span></a>
       <a href="{{ '/mat101/seances/' | relative_url }}">Voir les 19 séances <span aria-hidden="true">→</span></a>
+      {% if site.mat101_show_solutions %}
       <a href="#telechargements">Télécharger les recueils</a>
+      {% else %}
+      <a href="#telechargements">Télécharger les énoncés</a>
+      {% endif %}
       <a href="#credits">Crédits et citations</a>
     </div>
   </header>
 
   <section class="mat101-stats" aria-label="Contenu de la bibliothèque">
     <div><strong>103</strong><span>énoncés en ligne</span></div>
+    {% if site.mat101_show_solutions %}
     <div><strong>103</strong><span>corrigés rédigés</span></div>
+    {% else %}
+    <div><strong>19</strong><span>séances</span></div>
+    {% endif %}
     <div><strong>4</strong><span>chapitres</span></div>
     <div><strong>L1</strong><span>niveau</span></div>
   </section>
 
+  {% if site.mat101_show_solutions %}
   <aside class="mat101-verification" aria-label="Statut du corrigé">
     <div>
       <span class="mat101-status-dot" aria-hidden="true"></span>
@@ -42,6 +55,16 @@ math: true
     </div>
     <p><strong>Corrigé non officiel.</strong> Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante des corrigés exercice par exercice n’est pas achevée.</p>
   </aside>
+  {% else %}
+  <aside class="mat101-verification" aria-label="Statut des énoncés">
+    <div>
+      <span class="mat101-status-dot" aria-hidden="true"></span>
+      <strong>Corpus des énoncés — relecture en cours</strong>
+      <span>103 énoncés présents</span>
+    </div>
+    <p>Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. Les corrigés ne sont pas publiés sur cette page.</p>
+  </aside>
+  {% endif %}
 
   <div class="mat101-study-area" data-mat101-study-area>
     <nav class="mat101-toc" aria-label="Sommaire des exercices">
@@ -119,7 +142,11 @@ math: true
 
   <aside class="mat101-reading-note">
     <strong>Mode d’emploi.</strong>
+    {% if site.mat101_show_solutions %}
     Cherchez un numéro, un mot de l’énoncé ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Les couleurs indiquent le niveau :
+    {% else %}
+    Cherchez un numéro, un mot de l’énoncé ou un thème, puis ouvrez l’exercice pour le travailler. Les couleurs indiquent le niveau :
+    {% endif %}
     <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-essential" aria-hidden="true"></i>notions essentielles</span>,
     <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-exam" aria-hidden="true"></i>niveau généralement attendu à l’examen</span>,
     <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-advanced" aria-hidden="true"></i>approfondissement</span> et
@@ -178,7 +205,7 @@ math: true
         </div>
       </header>
 
-      <div class="mat101-native-list" aria-label="Exercices et solutions du chapitre {{ chapter.number }}">
+      <div class="mat101-native-list" aria-label="{% if site.mat101_show_solutions %}Exercices et solutions du chapitre {{ chapter.number }}{% else %}Exercices du chapitre {{ chapter.number }}{% endif %}">
         {% for exercise in chapter_exercises %}
           <details
             class="mat101-native-card"
@@ -239,6 +266,7 @@ math: true
                 {{ exercise.statementHtml }}
               </section>
 
+              {% if site.mat101_show_solutions %}
               <details class="mat101-native-solution">
                 <summary>
                   <span>Afficher le corrigé détaillé</span>
@@ -248,6 +276,7 @@ math: true
                   {{ exercise.solutionHtml }}
                 </div>
               </details>
+              {% endif %}
 
               {% capture issue_title %}[MAT101 {{ exercise.id }}] Correction proposée{% endcapture %}
               <footer class="mat101-exercise-footer">
@@ -275,7 +304,11 @@ math: true
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
     <p class="mat101-kicker">Registre versionné</p>
     <h2 id="mat101-errata-title">Errata du polycopié source</h2>
+    {% if site.mat101_show_solutions %}
     <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : le corrigé explique le problème, puis traite la formulation mathématiquement cohérente lorsqu’elle est identifiable.</p>
+    {% else %}
+    <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : chaque fiche indique le problème, puis la formulation mathématiquement cohérente retenue lorsqu’elle est identifiable.</p>
+    {% endif %}
     <div class="mat101-errata-list">
       {% for erratum in site.data.mat101_errata %}
         <article id="erratum-{{ erratum.exercise | replace: '.', '-' }}">
@@ -309,6 +342,7 @@ math: true
       </ul>
     </div>
 
+    {% if site.mat101_show_solutions %}
     <div class="mat101-file-group mat101-file-group-solution">
       <p class="mat101-file-label">Corrigé détaillé</p>
       <ul>
@@ -317,6 +351,7 @@ math: true
         <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
       </ul>
     </div>
+    {% endif %}
   </section>
 
   <section class="mat101-credits" id="credits" aria-labelledby="mat101-credits-title">
@@ -332,35 +367,53 @@ math: true
         <h3>Adaptation web et interface</h3>
         <p><strong>Kieran McShane, avec l’assistance d’OpenAI Codex.</strong></p>
       </article>
+      {% if site.mat101_show_solutions %}
       <article>
         <h3>Rédaction du corrigé</h3>
         <p><strong>Rédaction initiale assistée par OpenAI ChatGPT ; édition et publication par Kieran McShane, avec OpenAI Codex.</strong> Les encadrés « Idée et plan » s’inspirent de la méthode de George Pólya. Version du 27 juillet 2026. Il ne s’agit ni d’un corrigé officiel de l’UGA ni d’une validation institutionnelle.</p>
       </article>
+      {% endif %}
     </div>
 
     <div class="mat101-review-ledger">
       <strong>Contrôles effectués avant publication</strong>
       <ul>
         <li>103 énoncés structurés, sélectionnables et indexés pour la recherche ;</li>
+        {% if site.mat101_show_solutions %}
         <li>103 blocs de solutions distincts, de 1.1 à 4.17, rendus directement dans la page ;</li>
+        {% endif %}
         <li>correspondance des quatre chapitres, numéros et fichiers sources ;</li>
         <li>crédits, statut non officiel, errata et formulaire de rectification intégrés.</li>
       </ul>
+      {% if site.mat101_show_solutions %}
       <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance ; ils ne constituent pas une vérification indépendante de chaque démonstration.</p>
+      {% else %}
+      <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance des énoncés.</p>
+      {% endif %}
     </div>
 
     <details class="mat101-citation">
       <summary>Citations bibliographiques recommandées</summary>
       <p><cite>Collectif MAT101, <em>Langage mathématique, algèbre et géométrie élémentaires</em>, UE MAT101, Université Grenoble Alpes, édition du 13 septembre 2022. Responsable de l’édition citée : Raphaël Rossignol.</cite></p>
       <p><cite>Kieran McShane (éd.), <em>Recueil des exercices MAT101</em>, sélection, indexation et interface web, 2026, d’après le polycopié collectif MAT101 de l’Université Grenoble Alpes, avec l’assistance d’OpenAI Codex.</cite></p>
+      {% if site.mat101_show_solutions %}
       <p><cite>Kieran McShane (éd.), <em>Corrigé détaillé des exercices MAT101</em>, rédaction initiale assistée par OpenAI ChatGPT, édition et publication avec l’assistance d’OpenAI Codex, version du 27 juillet 2026, corrigé non officiel.</cite></p>
+      {% endif %}
       <p><cite>George Pólya, <em>How to Solve It: A New Aspect of Mathematical Method</em>, Princeton University Press, 1945.</cite></p>
+      {% if site.mat101_show_solutions %}
       <a href="{{ bib_url }}" download>Télécharger les quatre références BibTeX</a>
+      {% else %}
+      <a href="{{ bib_url }}" download>Télécharger les références BibTeX</a>
+      {% endif %}
     </details>
 
     <div class="mat101-rights-note">
       <p><strong>Source faisant autorité.</strong> Le recueil utilise l’édition fournie du 13 septembre 2022. Une <a href="https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/ens_files/mat_101_20221201.pdf">version institutionnelle datée du 1er décembre 2022</a> est hébergée par l’Institut Fourier.</p>
+      {% if site.mat101_show_solutions %}
       <p><strong>Droits et rectifications.</strong> Aucune licence de réutilisation explicite n’a été identifiée dans le PDF du 13 septembre 2022 ; les droits sur les pages originales restent attachés à leurs titulaires. Cette sélection éducative et son corrigé non officiel ne constituent pas une publication de l’UGA. Toute demande d’attribution, de rectification ou de retrait peut être déposée dans le registre public ci-dessus ou adressée via la <a href="{{ '/about/#contact' | relative_url }}">page de contact</a>.</p>
+      {% else %}
+      <p><strong>Droits et rectifications.</strong> Aucune licence de réutilisation explicite n’a été identifiée dans le PDF du 13 septembre 2022 ; les droits sur les pages originales restent attachés à leurs titulaires. Cette sélection éducative ne constitue pas une publication de l’UGA. Toute demande d’attribution, de rectification ou de retrait peut être déposée dans le registre public ci-dessus ou adressée via la <a href="{{ '/about/#contact' | relative_url }}">page de contact</a>.</p>
+      {% endif %}
     </div>
   </section>
 </div>

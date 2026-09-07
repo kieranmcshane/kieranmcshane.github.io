@@ -21,3 +21,8 @@ collections:
   mat101_sessions:
     output: true
     permalink: /mat101/seances/:name/
+
+# Public MAT101 corrigés. Set to true to restore inline solutions,
+# download links, and the copy that announces them. Solution data and
+# assets stay in the repository either way.
+mat101_show_solutions: false
