@@ -181,7 +181,7 @@ test.describe("MAT101 native library", () => {
       toc.locator('[data-mat101-toc-chapter][data-chapter-id="complexes"]')
     ).toHaveClass(/is-active/);
 
-    await page.locator("#bibliotheque").evaluate((element) =>
+    await page.locator("#complexes").evaluate((element) =>
       element.scrollIntoView({ block: "start" })
     );
     await expect(rail).toBeVisible();
@@ -310,8 +310,8 @@ test.describe("MAT101 native library", () => {
 
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "auto" }));
     await expect(
-      page.locator('[data-mat101-toc-link][aria-current="location"]')
-    ).toHaveCount(0);
+      page.locator('[data-mat101-toc-link][data-exercise-id="1.1"]')
+    ).toHaveAttribute("aria-current", "location");
     await expect(
       page.locator('[data-mat101-toc-chapter-link][href="#complexes"]')
     ).toHaveAttribute("aria-current", "location");
