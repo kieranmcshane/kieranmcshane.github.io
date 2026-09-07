@@ -46,7 +46,9 @@ test.describe("MAT101 nineteen-session student path", () => {
       "Séances MAT101"
     );
     await expect(page.locator(".mat101-page-links a")).toHaveCount(1);
-    await expect(page.getByRole("link", { name: "Exercices" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Exercices", exact: true })
+    ).toBeVisible();
     await expect(page.locator(".mat101-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-stats")).toHaveCount(0);
     await expect(page.locator(".mat101-course-status")).toHaveCount(0);
