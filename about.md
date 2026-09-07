@@ -15,8 +15,13 @@ This site collects research notes, mathematical writing, and interactive resourc
   <div class="contact-routes">
     <article>
       <span class="contact-route-label">MAT101</span>
+      {% if site.mat101_show_solutions %}
       <h3>Exercise or solution correction</h3>
       <p>Report a mathematical error, an ambiguous statement, a notation problem, or suggest an alternative solution.</p>
+      {% else %}
+      <h3>Exercise correction</h3>
+      <p>Report a mathematical error, an ambiguous statement, or a notation problem in a MAT101 exercise.</p>
+      {% endif %}
       <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Open the MAT101 correction form</a>
     </article>
 

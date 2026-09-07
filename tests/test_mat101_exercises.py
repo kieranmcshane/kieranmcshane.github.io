@@ -292,6 +292,20 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-sessions.md", CONFIG)
         self.assertIn("permalink: /mat101/exercices/", PAGE)
 
+    def test_public_solutions_are_gated_by_config_flag(self):
+        self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
+        self.assertIn("site.mat101_show_solutions", PAGE)
+        self.assertIn("{% if site.mat101_show_solutions %}", PAGE)
+        self.assertIn("exercise.solutionHtml", PAGE)
+        self.assertIn("Les corrigés ne sont pas publiés sur cette page.", PAGE)
+        self.assertIn("103 énoncés présents", PAGE)
+        self.assertIn("Télécharger les énoncés", PAGE)
+        self.assertIn("mat101-file-group-solution", PAGE)
+        self.assertIn("corrige-exercices-mat101.pdf", PAGE)
+        about = (ROOT / "about.md").read_text()
+        self.assertIn("site.mat101_show_solutions", about)
+        self.assertIn("Exercise correction", about)
+
     def test_errata_register_is_versioned_and_linked(self):
         exercises = [entry["exercise"] for entry in ERRATA]
         self.assertEqual(len(ERRATA), 10)
