@@ -309,10 +309,6 @@ math: true
         <h3>Énoncés originaux</h3>
         <p><strong>Collectif MAT101, Université Grenoble Alpes.</strong> Le polycopié cite notamment Bernard Ycart, Agnès Coquio, Éric Dumas, Emmanuel Peyre, Pierre Dehornoy et Raphaël Rossignol, « et d’autres ». Raphaël Rossignol est indiqué comme responsable de l’édition du 13 septembre 2022.</p>
       </article>
-      <article>
-        <h3>Adaptation web et interface</h3>
-        <p><strong>Kieran McShane, avec l’assistance d’OpenAI Codex.</strong></p>
-      </article>
       {% if site.mat101_show_solutions %}
       <article>
         <h3>Rédaction du corrigé</h3>
