@@ -301,7 +301,7 @@ math: true
   </section>
 
   <section class="mat101-credits" id="credits" aria-labelledby="mat101-credits-title">
-    <p class="mat101-kicker" id="mat101-credits-title">Crédits, citation et transparence</p>
+    <p class="mat101-kicker" id="mat101-credits-title">Crédits</p>
 
     <div class="mat101-credit-grid">
       <article>
