@@ -136,7 +136,6 @@ class Mat101SessionsTests(unittest.TestCase):
         )
         self.assertIn('class="mat101-session-date-state is-pending"', PAGE)
         self.assertIn("{{ session.dateLabel }}", PAGE)
-        self.assertIn("Les dates 18 et 19 y restent explicitement à confirmer.", PAGE)
         self.assertNotIn("17 + 2", PAGE)
         self.assertNotIn("La date et la salle des séances 18 et 19 restent à confirmer.", PAGE)
 
@@ -144,7 +143,13 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('<h1>Séances MAT101</h1>', PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
         self.assertIn("'/mat101/exercices/' | relative_url", PAGE)
+        self.assertNotIn("Feuille de route", PAGE)
+        self.assertNotIn("parcours-19-seances-mat101-ima02.pdf", PAGE)
         self.assertNotIn("19 séances pour progresser en MAT101", PAGE)
+        self.assertNotIn(
+            "Retrouvez pour chaque cours-TD les compétences à acquérir",
+            PAGE,
+        )
         self.assertNotIn(
             "Retrouvez pour chaque cours-TD les compétences à acquérir",
             PAGE,

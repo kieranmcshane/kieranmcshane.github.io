@@ -21,7 +21,7 @@ test.describe("MAT101 nineteen-session student path", () => {
     );
     await expect(
       page.locator('a[href$="parcours-19-seances-mat101-ima02.pdf"]')
-    ).toHaveCount(2);
+    ).toHaveCount(0);
     await expect(
       page.locator('[data-session-number="18"] .mat101-session-date-state.is-pending')
     ).toContainText("À confirmer");

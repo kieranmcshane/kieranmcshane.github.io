@@ -7,14 +7,12 @@ math: true
 ---
 
 {% assign sessions = site.data.mat101_sessions %}
-{% assign student_workbook_url = '/assets/documents/mat101/parcours-19-seances-mat101-ima02.pdf' | relative_url %}
 
 <div class="mat101-library mat101-course" data-mat101-course>
   <header class="mat101-page-heading">
     <h1>Séances MAT101</h1>
     <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
       <a href="{{ '/mat101/exercices/' | relative_url }}">Exercices</a>
-      <a href="{{ student_workbook_url }}">Feuille de route</a>
     </nav>
   </header>
 
@@ -81,13 +79,4 @@ math: true
       </li>
     {% endfor %}
   </ol>
-
-  <section class="mat101-course-download" aria-labelledby="mat101-course-download-title">
-    <div>
-      <p class="mat101-kicker">À garder sous la main</p>
-      <h2 id="mat101-course-download-title">La feuille de route des 19 séances</h2>
-      <p>Le PDF rassemble les compétences, le parcours d’exercices et le ticket de sortie de chaque séance. Les dates 18 et 19 y restent explicitement à confirmer.</p>
-    </div>
-    <a href="{{ student_workbook_url }}">Télécharger le PDF étudiant <span aria-hidden="true">↓</span></a>
-  </section>
 </div>
