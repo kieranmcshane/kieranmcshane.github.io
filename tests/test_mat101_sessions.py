@@ -156,7 +156,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertNotIn("- mat101-exercises.md", header_block)
         self.assertRegex(PAGE, r"(?m)^title: MAT101$")
         exercises = (ROOT / "mat101-exercises.md").read_text(encoding="utf-8")
-        self.assertIn("Voir les 19 séances", exercises)
+        self.assertIn(">Séances</a>", exercises)
         self.assertIn("'/mat101/seances/' | relative_url", exercises)
 
     def test_student_pdf_and_stable_collection_routes_are_present(self):
