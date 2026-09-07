@@ -12,7 +12,6 @@ math: true
 {% assign solution_pdf_url = '/assets/documents/mat101/corrige-exercices-mat101.pdf' | relative_url %}
 {% assign solution_tex_url = '/assets/documents/mat101/corrige-exercices-mat101.tex' | relative_url %}
 {% assign solution_archive_url = '/assets/documents/mat101/corrige-exercices-mat101-sources.zip' | relative_url %}
-{% assign bib_url = '/assets/documents/mat101/mat101-citations.bib' | relative_url %}
 
 <div class="mat101-library">
   <header class="mat101-page-heading">
@@ -301,17 +300,12 @@ math: true
   </section>
 
   <section class="mat101-credits" id="credits" aria-labelledby="mat101-credits-title">
-    <p class="mat101-kicker">Crédits, citation et transparence</p>
-    <h2 id="mat101-credits-title">Qui a produit quoi ?</h2>
+    <p class="mat101-kicker" id="mat101-credits-title">Crédits</p>
 
     <div class="mat101-credit-grid">
       <article>
         <h3>Énoncés originaux</h3>
-        <p><strong>Collectif MAT101, Université Grenoble Alpes.</strong> Le polycopié cite notamment Bernard Ycart, Agnès Coquio, Éric Dumas, Emmanuel Peyre, Pierre Dehornoy et Raphaël Rossignol, « et d’autres ». Raphaël Rossignol est indiqué comme responsable de l’édition du 13 septembre 2022.</p>
-      </article>
-      <article>
-        <h3>Adaptation web et interface</h3>
-        <p><strong>Kieran McShane, avec l’assistance d’OpenAI Codex.</strong></p>
+        <p><strong>Collectif MAT101, Université Grenoble Alpes.</strong> Polycopié du 13 septembre 2022.</p>
       </article>
       {% if site.mat101_show_solutions %}
       <article>
@@ -337,21 +331,6 @@ math: true
       <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance des énoncés.</p>
       {% endif %}
     </div>
-
-    <details class="mat101-citation">
-      <summary>Citations bibliographiques recommandées</summary>
-      <p><cite>Collectif MAT101, <em>Langage mathématique, algèbre et géométrie élémentaires</em>, UE MAT101, Université Grenoble Alpes, édition du 13 septembre 2022. Responsable de l’édition citée : Raphaël Rossignol.</cite></p>
-      <p><cite>Kieran McShane (éd.), <em>Recueil des exercices MAT101</em>, sélection, indexation et interface web, 2026, d’après le polycopié collectif MAT101 de l’Université Grenoble Alpes, avec l’assistance d’OpenAI Codex.</cite></p>
-      {% if site.mat101_show_solutions %}
-      <p><cite>Kieran McShane (éd.), <em>Corrigé détaillé des exercices MAT101</em>, rédaction initiale assistée par OpenAI ChatGPT, édition et publication avec l’assistance d’OpenAI Codex, version du 27 juillet 2026, corrigé non officiel.</cite></p>
-      {% endif %}
-      <p><cite>George Pólya, <em>How to Solve It: A New Aspect of Mathematical Method</em>, Princeton University Press, 1945.</cite></p>
-      {% if site.mat101_show_solutions %}
-      <a href="{{ bib_url }}" download>Télécharger les quatre références BibTeX</a>
-      {% else %}
-      <a href="{{ bib_url }}" download>Télécharger les références BibTeX</a>
-      {% endif %}
-    </details>
 
     <div class="mat101-rights-note">
       <p><strong>Source faisant autorité.</strong> Le recueil utilise l’édition fournie du 13 septembre 2022. Une <a href="https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/ens_files/mat_101_20221201.pdf">version institutionnelle datée du 1er décembre 2022</a> est hébergée par l’Institut Fourier.</p>
