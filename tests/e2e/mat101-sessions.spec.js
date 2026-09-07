@@ -23,8 +23,14 @@ test.describe("MAT101 nineteen-session student path", () => {
       page.locator('a[href$="parcours-19-seances-mat101-ima02.pdf"]')
     ).toHaveCount(2);
     await expect(
-      page.getByText("La date et la salle des séances 18 et 19 restent à confirmer.")
-    ).toBeVisible();
+      page.locator('[data-session-number="18"] .mat101-session-date-state.is-pending')
+    ).toContainText("À confirmer");
+    await expect(
+      page.locator('[data-session-number="19"] .mat101-session-date-state.is-pending')
+    ).toContainText("À confirmer");
+    await expect(page.locator(".mat101-course-hero")).toHaveCount(0);
+    await expect(page.locator(".mat101-course-status")).toHaveCount(0);
+    await expect(page.getByText("19 séances pour progresser en MAT101")).toHaveCount(0);
     await expect(
       page.locator('.site-nav a[href="/mat101/seances/"]')
     ).toHaveCount(1);

@@ -10,15 +10,12 @@ math: true
 {% assign student_workbook_url = '/assets/documents/mat101/parcours-19-seances-mat101-ima02.pdf' | relative_url %}
 
 <div class="mat101-library mat101-course" data-mat101-course>
-  <header class="mat101-hero mat101-course-hero">
-    <p class="mat101-kicker">MAT101 · IMA02 · automne 2026</p>
-    <h1>19 séances pour progresser en MAT101</h1>
-    <p>Retrouvez pour chaque cours-TD les compétences à acquérir, les pages du polycopié, les exercices à travailler et le ticket de sortie.</p>
-    <div class="mat101-actions">
-      <a class="mat101-primary-action" href="#seances">Choisir une séance <span aria-hidden="true">↓</span></a>
-      <a href="{{ '/mat101/exercices/' | relative_url }}">Les 103 exercices</a>
-      <a href="{{ student_workbook_url }}">Feuille de route · PDF</a>
-    </div>
+  <header class="mat101-page-heading">
+    <h1>Séances MAT101</h1>
+    <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
+      <a href="{{ '/mat101/exercices/' | relative_url }}">Exercices</a>
+      <a href="{{ student_workbook_url }}">Feuille de route</a>
+    </nav>
   </header>
 
   <section class="mat101-session-browser" id="seances" aria-labelledby="mat101-session-browser-title">
@@ -84,22 +81,6 @@ math: true
       </li>
     {% endfor %}
   </ol>
-
-  <section class="mat101-stats" aria-label="Structure du parcours MAT101">
-    <div><strong>19</strong><span>séances complètes</span></div>
-    <div><strong>90 min</strong><span>par cours-TD</span></div>
-    <div><strong>2</strong><span>chapitres préparés</span></div>
-    <div><strong>17 + 2</strong><span>créneaux fixés + à confirmer</span></div>
-  </section>
-
-  <aside class="mat101-course-status" aria-label="Statut du parcours">
-    <div>
-      <span class="mat101-status-dot" aria-hidden="true"></span>
-      <strong>Les 19 parcours étudiants sont disponibles</strong>
-      <span>La date et la salle des séances 18 et 19 restent à confirmer.</span>
-    </div>
-    <p><strong>Version étudiante.</strong> Chaque page va directement aux compétences, au travail proposé et au ticket de sortie.</p>
-  </aside>
 
   <section class="mat101-course-download" aria-labelledby="mat101-course-download-title">
     <div>
