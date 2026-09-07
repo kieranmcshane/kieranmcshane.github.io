@@ -339,14 +339,14 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn("Kieran McShane, avec l’assistance d’OpenAI Codex.", PAGE)
         self.assertIn("Rédaction du corrigé", PAGE)
         self.assertIn("méthode de George Pólya", PAGE)
-        self.assertIn("Responsable de l’édition citée : Raphaël Rossignol.", PAGE)
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", PAGE)
         self.assertIn("ni d’un corrigé officiel de l’UGA", PAGE)
         self.assertIn("'/about/#contact'", PAGE)
         self.assertNotIn("Découpe fidèle des énoncés", PAGE)
 
     def test_citation_and_rights_language_is_precise(self):
-        self.assertIn("Citations bibliographiques recommandées", PAGE)
+        self.assertNotIn("Citations bibliographiques recommandées", PAGE)
+        self.assertNotIn("Télécharger les références BibTeX", PAGE)
         self.assertIn("Aucune licence de réutilisation explicite", PAGE)
         self.assertIn("ne constituent pas une publication de l’UGA", PAGE)
         bib = BIB.read_text()
