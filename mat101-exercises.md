@@ -15,56 +15,14 @@ math: true
 {% assign bib_url = '/assets/documents/mat101/mat101-citations.bib' | relative_url %}
 
 <div class="mat101-library">
-  <header class="mat101-hero">
-    <p class="mat101-kicker">MAT101 · bibliothèque L1</p>
-    <h1>103 exercices à travailler ici</h1>
-    {% if site.mat101_show_solutions %}
-    <p>Chaque énoncé est lisible directement dans la page. Ouvrez ensuite son corrigé détaillé, sans quitter le site et sans chercher la bonne page dans un PDF.</p>
-    {% else %}
-    <p>Chaque énoncé est lisible directement dans la page, sans chercher la bonne page dans un PDF.</p>
-    {% endif %}
-    <div class="mat101-actions">
-      <a class="mat101-primary-action" href="#bibliotheque">Explorer les exercices <span aria-hidden="true">↓</span></a>
-      <a href="{{ '/mat101/seances/' | relative_url }}">Voir les 19 séances <span aria-hidden="true">→</span></a>
-      {% if site.mat101_show_solutions %}
-      <a href="#telechargements">Télécharger les recueils</a>
-      {% else %}
-      <a href="#telechargements">Télécharger les énoncés</a>
-      {% endif %}
-      <a href="#credits">Crédits et citations</a>
-    </div>
+  <header class="mat101-page-heading">
+    <h1>Exercices MAT101</h1>
+    <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
+      <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
+      <a href="#telechargements">Téléchargements</a>
+      <a href="#credits">Crédits</a>
+    </nav>
   </header>
-
-  <section class="mat101-stats" aria-label="Contenu de la bibliothèque">
-    <div><strong>103</strong><span>énoncés en ligne</span></div>
-    {% if site.mat101_show_solutions %}
-    <div><strong>103</strong><span>corrigés rédigés</span></div>
-    {% else %}
-    <div><strong>19</strong><span>séances</span></div>
-    {% endif %}
-    <div><strong>4</strong><span>chapitres</span></div>
-    <div><strong>L1</strong><span>niveau</span></div>
-  </section>
-
-  {% if site.mat101_show_solutions %}
-  <aside class="mat101-verification" aria-label="Statut du corrigé">
-    <div>
-      <span class="mat101-status-dot" aria-hidden="true"></span>
-      <strong>Corpus complet — relecture en cours</strong>
-      <span>103 énoncés et 103 corrections présents</span>
-    </div>
-    <p><strong>Corrigé non officiel.</strong> Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. La rédaction initiale des solutions a été assistée par OpenAI ChatGPT ; la vérification indépendante des corrigés exercice par exercice n’est pas achevée.</p>
-  </aside>
-  {% else %}
-  <aside class="mat101-verification" aria-label="Statut des énoncés">
-    <div>
-      <span class="mat101-status-dot" aria-hidden="true"></span>
-      <strong>Corpus des énoncés — relecture en cours</strong>
-      <span>103 énoncés présents</span>
-    </div>
-    <p>Les 103 énoncés ont été retranscrits en HTML sémantique, avec les expressions mathématiques composées par MathJax, puis comparés aux pages du polycopié MAT101 crédité ci-dessous. Les corrigés ne sont pas publiés sur cette page.</p>
-  </aside>
-  {% endif %}
 
   <div class="mat101-study-area" data-mat101-study-area>
     <nav class="mat101-toc" aria-label="Sommaire des exercices">
@@ -139,19 +97,6 @@ math: true
     </nav>
 
     <div class="mat101-study-content">
-
-  <aside class="mat101-reading-note">
-    <strong>Mode d’emploi.</strong>
-    {% if site.mat101_show_solutions %}
-    Cherchez un numéro, un mot de l’énoncé ou un thème, ouvrez l’exercice, puis tentez-le avant de révéler le corrigé. Les couleurs indiquent le niveau :
-    {% else %}
-    Cherchez un numéro, un mot de l’énoncé ou un thème, puis ouvrez l’exercice pour le travailler. Les couleurs indiquent le niveau :
-    {% endif %}
-    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-essential" aria-hidden="true"></i>notions essentielles</span>,
-    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-exam" aria-hidden="true"></i>niveau généralement attendu à l’examen</span>,
-    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-advanced" aria-hidden="true"></i>approfondissement</span> et
-    <span class="mat101-inline-level"><i class="mat101-level-dot mat101-level-mixed" aria-hidden="true"></i>niveau intermédiaire</span>.
-  </aside>
 
   <section class="mat101-browser" id="bibliotheque" aria-labelledby="mat101-browser-title">
     <div class="mat101-browser-heading">

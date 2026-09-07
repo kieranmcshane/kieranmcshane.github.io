@@ -181,7 +181,7 @@ test.describe("MAT101 native library", () => {
       toc.locator('[data-mat101-toc-chapter][data-chapter-id="complexes"]')
     ).toHaveClass(/is-active/);
 
-    await page.locator(".mat101-reading-note").evaluate((element) =>
+    await page.locator("#bibliotheque").evaluate((element) =>
       element.scrollIntoView({ block: "start" })
     );
     await expect(rail).toBeVisible();
@@ -265,8 +265,7 @@ test.describe("MAT101 native library", () => {
     test.skip(page.viewportSize().width >= 1240, "compact navigation only");
     await gotoLibrary(page);
 
-    await page.locator(".mat101-primary-action").click();
-    await expect(page).toHaveURL(/#bibliotheque$/);
+    await expect(page.locator("#bibliotheque")).toBeVisible();
 
     const layout = await page.evaluate(() => {
       const navigation = document.querySelector(".mat101-toc");
@@ -437,7 +436,27 @@ test.describe("MAT101 native library", () => {
     expect(html).not.toContain("corrige-exercices-mat101.pdf");
     expect(html).not.toContain("103 corrections présents");
     expect(html).not.toContain("Ouvrez ensuite son corrigé détaillé");
-    expect(html).toContain("Les corrigés ne sont pas publiés sur cette page.");
+    expect(html).not.toContain("Les corrigés ne sont pas publiés sur cette page.");
+  });
+
+  test("opens on a compact heading instead of the verbose intro", async ({
+    page,
+  }) => {
+    await gotoLibrary(page);
+
+    await expect(page.locator(".mat101-page-heading h1")).toHaveText(
+      "Exercices MAT101"
+    );
+    await expect(page.locator(".mat101-page-links a")).toHaveCount(3);
+    await expect(page.locator(".mat101-hero")).toHaveCount(0);
+    await expect(page.locator(".mat101-stats")).toHaveCount(0);
+    await expect(page.locator(".mat101-verification")).toHaveCount(0);
+    await expect(page.locator(".mat101-reading-note")).toHaveCount(0);
+    await expect(page.getByText("Mode d’emploi.")).toHaveCount(0);
+    await expect(page.getByText("Corpus des énoncés")).toHaveCount(0);
+    await expect(page.locator("#bibliotheque")).toBeVisible();
+    await expect(page.locator("#mat101-search-input")).toBeVisible();
+    await expect(page.locator("[data-mat101-exercise]")).toHaveCount(103);
   });
 
   test("keeps the complex-number statement usable without a solution table", async ({
@@ -599,7 +618,7 @@ test.describe("MAT101 native library", () => {
 test.describe("MAT101 visual baselines", () => {
   test("navigation layout @visual", async ({ page }) => {
     await gotoLibrary(page);
-    await page.locator(".mat101-reading-note").evaluate((element) =>
+    await page.locator("#bibliotheque").evaluate((element) =>
       element.scrollIntoView({ block: "start" })
     );
     await expect(page).toHaveScreenshot("mat101-navigation.png");

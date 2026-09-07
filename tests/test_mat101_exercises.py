@@ -257,16 +257,16 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(r"\begin{corrige}{4.17}", SOLUTION_TEX.read_text())
         self.assertGreater(SOLUTION_ARCHIVE.stat().st_size, 50_000)
 
-    def test_section_is_visible_and_explains_solution_status(self):
+    def test_section_is_visible_and_keeps_the_exercise_library(self):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
         self.assertIn("math: true", PAGE)
-        self.assertIn("103 exercices à travailler ici", PAGE)
-        self.assertIn("Corpus complet — relecture en cours", PAGE)
+        self.assertIn("Exercices MAT101", PAGE)
+        self.assertIn('class="mat101-page-heading"', PAGE)
         self.assertIn("103 solutions · niveau L1", PAGE)
         self.assertNotIn("103 solutions · 59 pages", PAGE)
         self.assertIn(
-            "la vérification indépendante des corrigés exercice par exercice "
-            "n’est pas achevée",
+            "ils ne constituent pas une vérification indépendante de chaque "
+            "démonstration",
             PAGE,
         )
         self.assertIn("Afficher le corrigé détaillé", PAGE)
@@ -283,25 +283,35 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("exercise.statementSearchText", PAGE)
         self.assertIn("Consulter la page source", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
-        self.assertIn(
-            "Les 103 énoncés ont été retranscrits en HTML sémantique",
-            PAGE,
-        )
         self.assertNotIn("Transcription textuelle extraite", PAGE)
         self.assertNotIn("#page={{ source_page.pdfPage }}", PAGE)
         self.assertIn("mat101-sessions.md", CONFIG)
         self.assertIn("permalink: /mat101/exercices/", PAGE)
+
+    def test_exercise_page_intro_is_compact(self):
+        self.assertIn('<h1>Exercices MAT101</h1>', PAGE)
+        self.assertIn('class="mat101-page-links"', PAGE)
+        self.assertIn(".mat101-page-heading", STYLES)
+        self.assertNotIn("103 exercices à travailler ici", PAGE)
+        self.assertNotIn("Chaque énoncé est lisible directement dans la page", PAGE)
+        self.assertNotIn("Explorer les exercices", PAGE)
+        self.assertNotIn("Mode d’emploi.", PAGE)
+        self.assertNotIn("Corpus des énoncés — relecture en cours", PAGE)
+        self.assertNotIn("Corpus complet — relecture en cours", PAGE)
+        self.assertNotIn("Les 103 énoncés ont été retranscrits en HTML sémantique", PAGE)
+        self.assertNotIn('class="mat101-hero"', PAGE)
+        self.assertNotIn('class="mat101-verification"', PAGE)
+        self.assertNotIn('class="mat101-reading-note"', PAGE)
+        self.assertNotIn(".mat101-reading-note", STYLES)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
         self.assertIn("site.mat101_show_solutions", PAGE)
         self.assertIn("{% if site.mat101_show_solutions %}", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
-        self.assertIn("Les corrigés ne sont pas publiés sur cette page.", PAGE)
-        self.assertIn("103 énoncés présents", PAGE)
-        self.assertIn("Télécharger les énoncés", PAGE)
         self.assertIn("mat101-file-group-solution", PAGE)
         self.assertIn("corrige-exercices-mat101.pdf", PAGE)
+        self.assertIn("Afficher le corrigé détaillé", PAGE)
         about = (ROOT / "about.md").read_text()
         self.assertIn("site.mat101_show_solutions", about)
         self.assertIn("Exercise correction", about)
