@@ -246,11 +246,6 @@ math: true
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
     <h2 id="mat101-errata-title">Errata du polycopié source</h2>
-    {% if site.mat101_show_solutions %}
-    <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : le corrigé explique le problème, puis traite la formulation mathématiquement cohérente lorsqu’elle est identifiable.</p>
-    {% else %}
-    <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : chaque fiche indique le problème, puis la formulation mathématiquement cohérente retenue lorsqu’elle est identifiable.</p>
-    {% endif %}
     <div class="mat101-errata-list">
       {% for erratum in site.data.mat101_errata %}
         <article id="erratum-{{ erratum.exercise | replace: '.', '-' }}">
