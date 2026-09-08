@@ -24,6 +24,8 @@ SOLUTION_ARCHIVE = ROOT / "assets/documents/mat101/corrige-exercices-mat101-sour
 OPTIONAL_REALS_PDF = (
     ROOT / "assets/documents/mat101/construction_reels_courte_histoire_v2.pdf"
 )
+ARCHIVES_DIR = ROOT / "assets/documents/mat101/archives"
+ARCHIVES = json.loads((ROOT / "_data/mat101_archives.json").read_text())
 BIB = ROOT / "assets/documents/mat101/mat101-citations.bib"
 
 
@@ -324,11 +326,49 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Construction de R par les suites de Cauchy", PAGE)
         self.assertIn("construction_reels_courte_histoire_v2.pdf", PAGE)
         self.assertIn('href="#facultatif">Facultatif</a>', PAGE)
+        self.assertIn('href="#annales">Annales</a>', PAGE)
+        self.assertIn("include mat101-archives.html", PAGE)
+        self.assertIn("mat101_archive_base", PAGE)
         self.assertIn("mat101-optional-resource", PAGE)
         self.assertIn('include mat101-optional-reals-problem.html', PAGE)
         self.assertIn("mat101-video-embed", PAGE)
         self.assertIn("youtube-nocookie.com/embed/5PcpBw5Hbwo", PAGE)
         self.assertIn("Fondamentaux des nombres complexes", PAGE)
+
+    def test_archive_pdfs_are_available(self):
+        for group in ARCHIVES["groups"]:
+            for item in group.get("items", []):
+                filename = item.get("file")
+                if not filename:
+                    continue
+                path = ARCHIVES_DIR / filename
+                self.assertTrue(path.is_file(), filename)
+                self.assertTrue(path.read_bytes().startswith(b"%PDF-"), filename)
+                self.assertGreater(path.stat().st_size, 10_000, filename)
+
+    def test_archive_catalog_lists_expected_documents(self):
+        include = (ROOT / "_includes/mat101-archives.html").read_text()
+        self.assertIn('id="annales"', include)
+        self.assertIn("Annales et sujets passés", include)
+        self.assertIn("site.data.mat101_archives", include)
+        files = [
+            item.get("file")
+            for group in ARCHIVES["groups"]
+            for item in group.get("items", [])
+            if item.get("file")
+        ]
+        self.assertEqual(
+            sorted(files),
+            sorted(
+                [
+                    "ds1_2021_correction.pdf",
+                    "partiel_2122_correction.pdf",
+                    "MAT101_2020_CC1.pdf",
+                    "MAT101_2020_CC1_corr.pdf",
+                ]
+            ),
+        )
+        self.assertEqual(len(ARCHIVES["groups"]), 2)
 
     def test_optional_reals_construction_pdf_is_available(self):
         self.assertTrue(OPTIONAL_REALS_PDF.is_file())

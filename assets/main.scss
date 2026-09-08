@@ -13705,6 +13705,18 @@ body.mat101-site .mat101-library.mat101-course {
   margin: 0;
 }
 
+.mat101-archives {
+  scroll-margin-top: 1rem;
+}
+
+.mat101-archives .mat101-download-intro p {
+  max-width: 62ch;
+  margin: 0.45rem 0 0;
+  color: var(--mat101-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .mat101-download-intro {
   grid-column: 1 / -1;
 }
@@ -14020,6 +14032,7 @@ body.mat101-site .mat101-library.mat101-course {
 @media screen and (max-width: 440px) {
   .mat101-credit-grid,
   .mat101-downloads,
+  .mat101-archives,
   .mat101-verification {
     grid-template-columns: 1fr 1fr;
   }
@@ -14030,6 +14043,7 @@ body.mat101-site .mat101-library.mat101-course {
 
   .mat101-credit-grid article,
   .mat101-downloads > *,
+  .mat101-archives > *,
   .mat101-verification > * {
     grid-column: 1 / -1;
   }
