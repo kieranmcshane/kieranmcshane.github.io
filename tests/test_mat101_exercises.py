@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import re
 import unittest
 import zipfile
 
@@ -15,6 +16,7 @@ STYLES = (ROOT / "assets/main.scss").read_text()
 SCRIPT = (ROOT / "assets/js/mat101-library.js").read_text()
 ISSUE_FORM = (ROOT / ".github/ISSUE_TEMPLATE/mat101-correction.yml").read_text()
 ERRATA = json.loads((ROOT / "_data/mat101_errata.json").read_text())
+VIDEOS = json.loads((ROOT / "_data/mat101_videos.json").read_text())
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
 ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
@@ -293,7 +295,11 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Exercices MAT101</h1>', PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
-        self.assertIn('href="#informations">Informations</a>', PAGE)
+        self.assertIn('href="#informations">Infos cours</a>', PAGE)
+        self.assertIn('href="#bibliotheque">103 exercices</a>', PAGE)
+        self.assertIn('href="#telechargements">PDFs</a>', PAGE)
+        self.assertNotIn('href="#credits">', PAGE)
+        self.assertNotIn("mat101/seances/", PAGE.split("mat101-page-links")[1].split("</nav>")[0])
         self.assertIn('href="#errata">Errata</a>', PAGE)
         self.assertIn("mat101-informations.html", PAGE)
         self.assertIn('id="errata"', PAGE)
@@ -332,8 +338,26 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-optional-resource", PAGE)
         self.assertIn('include mat101-optional-reals-problem.html', PAGE)
         self.assertIn("mat101-video-embed", PAGE)
-        self.assertIn("youtube-nocookie.com/embed/5PcpBw5Hbwo", PAGE)
-        self.assertIn("Fondamentaux des nombres complexes", PAGE)
+        self.assertIn("mat101-video-grid", PAGE)
+        self.assertIn("Vidéos complémentaires", PAGE)
+        self.assertIn("site.data.mat101_videos", PAGE)
+        self.assertIn("youtube-nocookie.com/embed/{{ video.id }}", PAGE)
+
+    def test_facultatif_videos_data_lists_six_complementary_embeds(self):
+        self.assertEqual(len(VIDEOS), 6)
+        self.assertEqual(
+            [video["id"] for video in VIDEOS],
+            [
+                "5PcpBw5Hbwo",
+                "ZxYOEwM6Wbk",
+                "v0YEaeIClKY",
+                "bOXCLR3Wric",
+                "6bDm5z5Z60c",
+                "L3LMbpZIKhQ",
+            ],
+        )
+        self.assertEqual(VIDEOS[0]["title"], "Fondamentaux des nombres complexes")
+        self.assertEqual(VIDEOS[3]["title"], "Dénombrement et fonctions génératrices")
 
     def test_archive_pdfs_are_available(self):
         for group in ARCHIVES["groups"]:
@@ -381,6 +405,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn('id="optional-reals-q12"', include)
         self.assertIn("mat101-optional-problem", include)
         self.assertIn("mat101-optional-question-star", include)
+        self.assertIn("mat101-optional-question-text", include)
+        self.assertNotIn("mat101-optional-question-body", include)
+        self.assertNotIn('<details class="mat101-optional-question"', include)
         self.assertIn("Note historique", include)
 
     def test_public_solutions_are_gated_by_config_flag(self):
@@ -441,6 +468,13 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("{{ erratum.beforeHtml }}", PAGE)
         self.assertIn("{{ erratum.afterHtml }}", PAGE)
         self.assertIn(".mat101-errata-mark", STYLES)
+        for entry in ERRATA:
+            for field in ("beforeHtml", "afterHtml"):
+                html = entry[field]
+                for match in re.finditer(r"\\\((.*?)\\\)", html, re.DOTALL):
+                    self.assertNotIn("<mark", match.group(1), field)
+                for match in re.finditer(r"\\\[(.*?)\\\]", html, re.DOTALL):
+                    self.assertNotIn("<mark", match.group(1), field)
         self.assertNotIn("Problème.", PAGE)
         self.assertNotIn("Formulation retenue.", PAGE)
 
@@ -612,7 +646,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-mobile.js", head)
         self.assertIn("mat101-has-js", head)
         self.assertIn("page.layout == 'mat101'", head)
-        self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
+        self.assertNotIn("max-height: min(70vh, 42rem)", STYLES)
         self.assertIn(".mat101-shell", STYLES)
         self.assertIn(".mat101-swipe-hint", STYLES)
         self.assertIn("body.mat101-site", STYLES)

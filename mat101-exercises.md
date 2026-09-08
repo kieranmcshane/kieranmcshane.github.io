@@ -19,14 +19,13 @@ math: true
 <div class="mat101-library">
   <header class="mat101-page-heading">
     <h1>Exercices MAT101</h1>
-    <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
-      <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
-      <a href="#informations">Informations</a>
+    <nav class="mat101-page-links" aria-label="Sections de la page exercices">
+      <a href="#informations">Infos cours</a>
+      <a href="#bibliotheque">103 exercices</a>
       <a href="#facultatif">Facultatif</a>
-      <a href="#annales">Annales</a>
       <a href="#errata">Errata</a>
-      <a href="#telechargements">Téléchargements</a>
-      <a href="#credits">Crédits</a>
+      <a href="#annales">Annales</a>
+      <a href="#telechargements">PDFs</a>
     </nav>
   </header>
 
@@ -276,23 +275,31 @@ math: true
       {% include mat101-optional-reals-problem.html %}
     </article>
 
-    <article class="mat101-video-resource" aria-labelledby="mat101-optional-video-title">
-      <div class="mat101-video-resource-copy">
-        <h3 id="mat101-optional-video-title">Fondamentaux des nombres complexes</h3>
-        <p>Conférence 3Blue1Brown sur la géométrie de <span class="math inline">$\mathbb C$</span> et la règle de multiplication. Complément au chapitre 1.</p>
-        <p><a href="https://www.youtube.com/watch?v=5PcpBw5Hbwo">Voir sur YouTube</a></p>
+    <section class="mat101-video-section" aria-labelledby="mat101-videos-title">
+      <h3 id="mat101-videos-title">Vidéos complémentaires</h3>
+      <div class="mat101-video-grid">
+        {% for video in site.data.mat101_videos %}
+          <article class="mat101-video-resource" aria-labelledby="mat101-video-{{ video.id }}-title">
+            <div class="mat101-video-resource-copy">
+              <h4 id="mat101-video-{{ video.id }}-title">{{ video.title }}</h4>
+              <p class="mat101-video-source">{{ video.source }}</p>
+              <p>{{ video.description }}</p>
+              <p><a href="https://www.youtube.com/watch?v={{ video.id }}">Voir sur YouTube</a></p>
+            </div>
+            <div class="mat101-video-embed">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/{{ video.id }}"
+                title="{{ video.iframeTitle | escape }}"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </article>
+        {% endfor %}
       </div>
-      <div class="mat101-video-embed">
-        <iframe
-          src="https://www.youtube-nocookie.com/embed/5PcpBw5Hbwo"
-          title="Complex number fundamentals · 3Blue1Brown"
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allowfullscreen
-        ></iframe>
-      </div>
-    </article>
+    </section>
   </section>
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
