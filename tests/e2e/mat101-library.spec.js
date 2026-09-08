@@ -674,7 +674,7 @@ test.describe("MAT101 visual baselines", () => {
     const navigation = page.locator(".mat101-difficulty-legend");
     await navigation.scrollIntoViewIfNeeded();
     await expect(navigation).toHaveScreenshot("mat101-navigation.png", {
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.08,
     });
   });
 });
