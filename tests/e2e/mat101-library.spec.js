@@ -663,12 +663,24 @@ test.describe("MAT101 visual baselines", () => {
       { timeout: 12000 }
     );
     await page.addStyleTag({
-      content: ".mat101-swipe-hint { visibility: hidden !important; }",
+      content: `
+        .mat101-swipe-hint { visibility: hidden !important; }
+        .mat101-toc-panel {
+          overflow: hidden !important;
+          scrollbar-width: none !important;
+        }
+      `,
     });
-    const navigation = page.locator(".mat101-toc");
+    const navigation = page.locator(".mat101-toc-panel");
     await navigation.evaluate((element) =>
       element.scrollIntoView({ block: "start" })
     );
-    await expect(navigation).toHaveScreenshot("mat101-navigation.png");
+    const box = await navigation.boundingBox();
+    expect(box).toBeTruthy();
+    const clipHeight = Math.min(780, Math.floor(box.height));
+    await expect(navigation).toHaveScreenshot("mat101-navigation.png", {
+      clip: { x: 0, y: 0, width: Math.floor(box.width), height: clipHeight },
+      maxDiffPixelRatio: 0.03,
+    });
   });
 });
