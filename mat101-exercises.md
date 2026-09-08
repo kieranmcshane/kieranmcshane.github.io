@@ -101,7 +101,6 @@ math: true
   <section class="mat101-browser" id="bibliotheque" aria-labelledby="mat101-browser-title">
     <div class="mat101-browser-heading">
       <div>
-        <p class="mat101-kicker">Bibliothèque interactive</p>
         <h2 id="mat101-browser-title">Trouver un exercice</h2>
       </div>
       <p id="mat101-result-count" aria-live="polite">103 exercices affichés</p>
@@ -239,15 +238,13 @@ math: true
   {% endfor %}
 
   <section class="mat101-community-review" aria-labelledby="mat101-review-title">
-    <p class="mat101-kicker">Relecture ouverte</p>
-    <h2 id="mat101-review-title">Un ticket précis pour chaque correction</h2>
+    <h2 id="mat101-review-title">Corrections</h2>
     <p>Les corrections sont publiques sur GitHub. Un compte gratuit est nécessaire pour en proposer une.</p>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction</a>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les tickets MAT101</a>
   </section>
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
-    <p class="mat101-kicker">Registre versionné</p>
     <h2 id="mat101-errata-title">Errata du polycopié source</h2>
     {% if site.mat101_show_solutions %}
     <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : le corrigé explique le problème, puis traite la formulation mathématiquement cohérente lorsqu’elle est identifiable.</p>
@@ -271,11 +268,9 @@ math: true
     </div>
   </div>
 
-  <section class="mat101-downloads" id="telechargements">
+  <section class="mat101-downloads" id="telechargements" aria-labelledby="mat101-downloads-title">
     <div class="mat101-download-intro">
-      <p class="mat101-kicker">Fichiers complémentaires</p>
-      <h2>Lire hors ligne ou recompiler</h2>
-      <p>La bibliothèque ci-dessus est la lecture principale. Les PDF et les sources LaTeX restent disponibles pour l’impression, l’archivage et la réutilisation personnelle.</p>
+      <h2 id="mat101-downloads-title">Téléchargements</h2>
     </div>
 
     <div class="mat101-file-group">
@@ -312,23 +307,6 @@ math: true
         <h3>Rédaction du corrigé</h3>
         <p><strong>Rédaction initiale assistée par OpenAI ChatGPT ; édition et publication par Kieran McShane, avec OpenAI Codex.</strong> Les encadrés « Idée et plan » s’inspirent de la méthode de George Pólya. Version du 27 juillet 2026. Il ne s’agit ni d’un corrigé officiel de l’UGA ni d’une validation institutionnelle.</p>
       </article>
-      {% endif %}
-    </div>
-
-    <div class="mat101-review-ledger">
-      <strong>Contrôles effectués avant publication</strong>
-      <ul>
-        <li>103 énoncés structurés, sélectionnables et indexés pour la recherche ;</li>
-        {% if site.mat101_show_solutions %}
-        <li>103 blocs de solutions distincts, de 1.1 à 4.17, rendus directement dans la page ;</li>
-        {% endif %}
-        <li>correspondance des quatre chapitres, numéros et fichiers sources ;</li>
-        <li>crédits, statut non officiel, errata et formulaire de rectification intégrés.</li>
-      </ul>
-      {% if site.mat101_show_solutions %}
-      <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance ; ils ne constituent pas une vérification indépendante de chaque démonstration.</p>
-      {% else %}
-      <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance des énoncés.</p>
       {% endif %}
     </div>
 

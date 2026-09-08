@@ -12,14 +12,12 @@ mat101_session_number: 10
 <div class="mat101-library mat101-session-page" data-mat101-session-number="10">
   <header class="mat101-session-detail-hero">
     <div>
-      <p class="mat101-kicker">MAT101 · IMA02 · parcours étudiant</p>
       <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Décrire un ensemble</h1>
       <p>mar. 29 sept. 2026</p>
     </div>
     <div class="mat101-session-detail-status">
       <span>Créneau planifié</span>
-      <strong>Parcours étudiant</strong>
       <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>
@@ -34,7 +32,6 @@ mat101_session_number: 10
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
     <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
-    <p><strong>Format.</strong> Une notion courte, une mise en pratique immédiate et un ticket de sortie.</p>
   </aside>
 
   <article class="mat101-session-content" markdown="1">

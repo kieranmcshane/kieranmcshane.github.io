@@ -264,11 +264,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn('class="mat101-page-heading"', PAGE)
         self.assertIn("103 solutions · niveau L1", PAGE)
         self.assertNotIn("103 solutions · 59 pages", PAGE)
-        self.assertIn(
-            "ils ne constituent pas une vérification indépendante de chaque "
-            "démonstration",
-            PAGE,
-        )
+        self.assertNotIn("Contrôles effectués avant publication", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
@@ -307,6 +303,14 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn('class="mat101-verification"', PAGE)
         self.assertNotIn('class="mat101-reading-note"', PAGE)
         self.assertNotIn(".mat101-reading-note", STYLES)
+        self.assertNotIn("Bibliothèque interactive", PAGE)
+        self.assertNotIn("Un ticket précis pour chaque correction", PAGE)
+        self.assertNotIn("Relecture ouverte", PAGE)
+        self.assertNotIn("Registre versionné", PAGE)
+        self.assertNotIn("Lire hors ligne ou recompiler", PAGE)
+        self.assertNotIn("Contrôles effectués avant publication", PAGE)
+        self.assertIn('<h2 id="mat101-review-title">Corrections</h2>', PAGE)
+        self.assertIn('<h2 id="mat101-downloads-title">Téléchargements</h2>', PAGE)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")

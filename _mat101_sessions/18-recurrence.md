@@ -12,14 +12,12 @@ mat101_session_number: 18
 <div class="mat101-library mat101-session-page" data-mat101-session-number="18">
   <header class="mat101-session-detail-hero">
     <div>
-      <p class="mat101-kicker">MAT101 · IMA02 · parcours étudiant</p>
       <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Récurrence</h1>
       <p>Date et salle à confirmer</p>
     </div>
     <div class="mat101-session-detail-status is-pending">
       <span>Date à confirmer</span>
-      <strong>Parcours étudiant</strong>
       <small>Date et salle à confirmer</small>
     </div>
   </header>
@@ -34,7 +32,6 @@ mat101_session_number: 18
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
     <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
-    <p><strong>Format.</strong> Une notion courte, une mise en pratique immédiate et un ticket de sortie.</p>
   </aside>
 
   <article class="mat101-session-content" markdown="1">
