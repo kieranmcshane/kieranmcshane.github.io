@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 11 — Calcul ensembliste"
 permalink: "/mat101/seances/11-operations-lois-ensemblistes/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 11 : compétences, références, exercices et ticket de sortie."

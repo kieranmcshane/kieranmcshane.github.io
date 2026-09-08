@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 8 — Racines n-ièmes"
 permalink: "/mat101/seances/08-racines-niemes-unite/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 8 : compétences, références, exercices et ticket de sortie."

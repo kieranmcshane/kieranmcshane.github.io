@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 4 — Puissances, Moivre et Euler"
 permalink: "/mat101/seances/04-produits-puissances-moivre-euler/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 4 : compétences, références, exercices et ticket de sortie."

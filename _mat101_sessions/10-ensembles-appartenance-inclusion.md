@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 10 — Décrire un ensemble"
 permalink: "/mat101/seances/10-ensembles-appartenance-inclusion/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 10 : compétences, références, exercices et ticket de sortie."

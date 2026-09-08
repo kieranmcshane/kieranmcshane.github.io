@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: Exercices MAT101
 permalink: /mat101/exercices/
 description: "Bibliothèque de 103 exercices MAT101 de niveau L1 avec énoncés lisibles directement en ligne."

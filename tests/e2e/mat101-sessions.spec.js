@@ -31,12 +31,14 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(page.locator(".mat101-course-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-course-status")).toHaveCount(0);
     await expect(page.getByText("19 séances pour progresser en MAT101")).toHaveCount(0);
-    await expect(
-      page.locator('.site-nav a[href="/mat101/seances/"]')
-    ).toHaveCount(1);
-    await expect(
-      page.locator('.site-nav a[href="/mat101/seances/"]')
-    ).toHaveText("MAT101");
+    await expect(page.locator(".mat101-shell")).toBeVisible();
+    await expect(page.locator(".mat101-shell-links a[href='/mat101/seances/']")).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    await expect(page.locator(".site-header")).toHaveCount(0);
+    await expect(page.locator(".site-footer")).toHaveCount(0);
+    await expect(page.locator('.site-nav a[href="/rating-lab/"]')).toHaveCount(0);
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 

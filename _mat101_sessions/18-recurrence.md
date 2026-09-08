@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 18 — Récurrence"
 permalink: "/mat101/seances/18-recurrence/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 18 : compétences, références, exercices et ticket de sortie."

@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 19 — Analyse-synthèse et révision"
 permalink: "/mat101/seances/19-analyse-synthese-revision/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 19 : compétences, références, exercices et ticket de sortie."

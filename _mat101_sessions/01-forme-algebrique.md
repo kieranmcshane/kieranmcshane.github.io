@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 1 — Forme algébrique"
 permalink: "/mat101/seances/01-forme-algebrique/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 1 : compétences, références, exercices et ticket de sortie."

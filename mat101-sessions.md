@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: MAT101
 permalink: /mat101/seances/
 description: "Les 19 séances MAT101 du groupe IMA02 : compétences, parcours dans le polycopié, exercices et tickets de sortie."

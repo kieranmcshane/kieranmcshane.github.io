@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 2 — Conjugué, module et quotient"
 permalink: "/mat101/seances/02-conjugue-module-quotient/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 2 : compétences, références, exercices et ticket de sortie."

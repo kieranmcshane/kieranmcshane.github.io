@@ -285,6 +285,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
 
     def test_exercise_page_intro_is_compact(self):
+        self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Exercices MAT101</h1>', PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
         self.assertIn('href="#errata">Errata</a>', PAGE)
@@ -494,7 +495,25 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         head = (ROOT / "_includes/head-custom.html").read_text()
         self.assertIn("mat101-library.js", head)
         self.assertIn("mat101-has-js", head)
+        self.assertIn("page.layout == 'mat101'", head)
         self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
+        self.assertIn(".mat101-shell", STYLES)
+        self.assertIn("body.mat101-site", STYLES)
+
+    def test_mat101_uses_a_dedicated_layout_without_main_site_chrome(self):
+        layout = (ROOT / "_layouts" / "mat101.html").read_text(encoding="utf-8")
+        shell = (ROOT / "_includes" / "mat101-shell.html").read_text(encoding="utf-8")
+        index = (ROOT / "mat101" / "index.md").read_text(encoding="utf-8")
+        self.assertIn("mat101-shell.html", layout)
+        self.assertNotIn("header.html", layout)
+        self.assertNotIn("footer.html", layout)
+        self.assertIn("body class=\"mat101-site\"", layout)
+        self.assertIn("'/mat101/seances/' | relative_url", shell)
+        self.assertIn("'/mat101/exercices/' | relative_url", shell)
+        self.assertNotIn("rating-lab", shell)
+        self.assertNotIn("repertoire", shell)
+        self.assertRegex(index, r"(?m)^layout: mat101$")
+        self.assertRegex(index, r"(?m)^permalink: /mat101/$")
 
     def test_interactive_table_of_contents_covers_and_tracks_exercises(self):
         self.assertIn("Sommaire interactif", PAGE)

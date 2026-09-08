@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 12 — Familles et produits"
 permalink: "/mat101/seances/12-familles-produits-traduction/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 12 : compétences, références, exercices et ticket de sortie."

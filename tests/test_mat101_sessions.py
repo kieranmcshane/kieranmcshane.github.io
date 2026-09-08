@@ -73,6 +73,7 @@ class Mat101SessionsTests(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             headings = set(re.findall(r"^## (.+?)\s*$", text, re.MULTILINE))
             self.assertIn(f"mat101_session_number: {number}", text)
+            self.assertRegex(text, r"(?m)^layout: mat101$")
             self.assertNotIn('class="mat101-kicker"', text)
             self.assertNotIn("<strong>Parcours étudiant</strong>", text)
             self.assertIn('class="mat101-session-content"', text)
@@ -141,6 +142,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertNotIn("La date et la salle des séances 18 et 19 restent à confirmer.", PAGE)
 
     def test_hub_intro_is_compact(self):
+        self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Séances MAT101</h1>', PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
         self.assertIn("'/mat101/exercices/' | relative_url", PAGE)
@@ -167,6 +169,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('data-mat101-session-filter="langage"', PAGE)
         self.assertIn('data-mat101-session-filter="synthese"', PAGE)
         self.assertIn("session.skillsPlain", PAGE)
+        self.assertIn("page.layout == 'mat101'", HEAD)
         self.assertIn("mat101-sessions.js", HEAD)
         self.assertIn("cards.length !== 19", SCRIPT)
         self.assertIn(".mat101-session-grid", STYLES)

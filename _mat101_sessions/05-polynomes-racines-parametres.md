@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 5 — Polynômes et paramètres"
 permalink: "/mat101/seances/05-polynomes-racines-parametres/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 5 : compétences, références, exercices et ticket de sortie."

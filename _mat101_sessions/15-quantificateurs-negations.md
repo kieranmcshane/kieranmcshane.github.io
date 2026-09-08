@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 15 — Quantificateurs"
 permalink: "/mat101/seances/15-quantificateurs-negations/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 15 : compétences, références, exercices et ticket de sortie."

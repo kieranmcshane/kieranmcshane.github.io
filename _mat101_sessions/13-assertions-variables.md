@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 13 — Assertions et variables"
 permalink: "/mat101/seances/13-assertions-variables/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 13 : compétences, références, exercices et ticket de sortie."

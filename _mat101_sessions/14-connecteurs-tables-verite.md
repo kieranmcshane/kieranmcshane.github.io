@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 14 — Tables de vérité"
 permalink: "/mat101/seances/14-connecteurs-tables-verite/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 14 : compétences, références, exercices et ticket de sortie."

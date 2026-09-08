@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 16 — Implication et preuve directe"
 permalink: "/mat101/seances/16-implication-preuve-directe/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 16 : compétences, références, exercices et ticket de sortie."

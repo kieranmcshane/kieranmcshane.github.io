@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 7 — Second degré dans C"
 permalink: "/mat101/seances/07-equations-second-degre/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 7 : compétences, références, exercices et ticket de sortie."

@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 17 — Contraposée, absurde et cas"
 permalink: "/mat101/seances/17-contraposee-absurde-cas/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 17 : compétences, références, exercices et ticket de sortie."

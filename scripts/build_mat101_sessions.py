@@ -242,7 +242,7 @@ def render_page(
     )
 
     page = f'''---
-layout: page
+layout: mat101
 title: {yaml_string(f"Séance {number} — {session['title']}")}
 permalink: {yaml_string(url)}
 description: {yaml_string(f"Parcours étudiant MAT101 IMA02 pour la séance {number} : compétences, références, exercices et ticket de sortie.")}

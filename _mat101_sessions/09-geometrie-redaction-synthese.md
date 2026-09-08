@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: "Séance 9 — Géométrie et rédaction"
 permalink: "/mat101/seances/09-geometrie-redaction-synthese/"
 description: "Parcours étudiant MAT101 IMA02 pour la séance 9 : compétences, références, exercices et ticket de sortie."

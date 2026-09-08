@@ -12307,6 +12307,54 @@ body:has(.mat101-library) {
   overflow-x: clip;
 }
 
+body.mat101-site .page-content {
+  max-width: none;
+  padding-top: 0;
+}
+
+.mat101-shell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.25rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 0.85rem 1rem 0.65rem;
+  border-bottom: 1px solid var(--mat101-line, #d9e3e5);
+}
+
+.mat101-shell-title {
+  color: var(--mat101-accent-dark, #006b78);
+  font-size: 0.95rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mat101-shell-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  font-size: 0.88rem;
+}
+
+.mat101-shell-links a {
+  color: var(--mat101-muted, #60757a);
+  text-decoration: none;
+}
+
+.mat101-shell-links a:hover,
+.mat101-shell-links a:focus-visible {
+  color: var(--mat101-accent-dark, #006b78);
+}
+
+.mat101-shell-links a[aria-current="page"] {
+  color: var(--mat101-accent-dark, #006b78);
+  font-weight: 700;
+}
+
 .mat101-library > :first-child {
   margin-top: 0;
 }
