@@ -251,6 +251,19 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("mat101-sessions.js", HEAD)
         self.assertIn("cards.length !== 19", SCRIPT)
         self.assertIn(".mat101-session-grid", STYLES)
+        self.assertIn(".mat101-library.mat101-course", STYLES)
+        self.assertRegex(
+            STYLES,
+            r"body\.mat101-site \.mat101-library\.mat101-course \{\s*max-width: 1180px;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"@media screen and \(min-width: 960px\)[\s\S]*?\.mat101-course \{\s*display: grid;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"@media screen and \(min-width: 1100px\)[\s\S]*?grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);",
+        )
         self.assertIn(".mat101-session-content", STYLES)
         self.assertRegex(
             STYLES,
