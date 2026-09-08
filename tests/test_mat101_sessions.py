@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = (ROOT / "mat101-sessions.md").read_text(encoding="utf-8")
+INFORMATIONS = (ROOT / "_includes" / "mat101-informations.html").read_text(encoding="utf-8")
 DATA_TEXT = (ROOT / "_data" / "mat101_sessions.json").read_text(encoding="utf-8")
 DATA = json.loads(DATA_TEXT)
 SESSION_DIR = ROOT / "_mat101_sessions"
@@ -167,7 +168,15 @@ class Mat101SessionsTests(unittest.TestCase):
     def test_hub_intro_is_compact(self):
         self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Séances MAT101</h1>', PAGE)
-        self.assertIn("Partiel prévu la semaine du 20 octobre.", PAGE)
+        self.assertIn('id="informations"', INFORMATIONS)
+        self.assertIn("Informations", INFORMATIONS)
+        self.assertIn("Partiel prévu la semaine du 20 octobre.", INFORMATIONS)
+        self.assertIn("mat101-informations.html", PAGE)
+        self.assertIn("Note UE", INFORMATIONS)
+        self.assertIn("Tutorat", INFORMATIONS)
+        self.assertIn("Contrôle continu", INFORMATIONS)
+        self.assertIn("12 h 30 à 13 h 30", INFORMATIONS)
+        self.assertIn(".mat101-informations", STYLES)
         self.assertNotIn('class="mat101-page-links"', PAGE)
         self.assertNotIn("Feuille de route", PAGE)
         self.assertNotIn("parcours-19-seances-mat101-ima02.pdf", PAGE)

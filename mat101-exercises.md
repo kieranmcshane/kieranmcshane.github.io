@@ -18,11 +18,14 @@ math: true
     <h1>Exercices MAT101</h1>
     <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
       <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
+      <a href="#informations">Informations</a>
       <a href="#errata">Errata</a>
       <a href="#telechargements">Téléchargements</a>
       <a href="#credits">Crédits</a>
     </nav>
   </header>
+
+  {% include mat101-informations.html %}
 
   <div class="mat101-study-area" data-mat101-study-area>
     <nav class="mat101-toc" aria-label="Sommaire des exercices">

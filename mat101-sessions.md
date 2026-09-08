@@ -13,7 +13,7 @@ math: true
     <h1>Séances MAT101</h1>
   </header>
 
-  <p class="mat101-session-notice">Partiel prévu la semaine du 20 octobre.</p>
+  {% include mat101-informations.html %}
 
   <section class="mat101-session-browser" id="seances" aria-labelledby="mat101-session-browser-title">
     <div class="mat101-session-browser-heading">
