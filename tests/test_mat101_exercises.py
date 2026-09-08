@@ -334,6 +334,11 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertTrue(all(entry["version"] == "2026-07-28" for entry in ERRATA))
         self.assertIn("Errata du polycopié source", PAGE)
         self.assertIn("site.data.mat101_errata", PAGE)
+        self.assertIn('class="mat101-errata-change"', PAGE)
+        self.assertIn("<span>Avant</span> {{ erratum.problem }}", PAGE)
+        self.assertIn("<span>Après</span> {{ erratum.correction }}", PAGE)
+        self.assertNotIn("Problème.", PAGE)
+        self.assertNotIn("Formulation retenue.", PAGE)
 
     def test_credits_distinguish_original_and_solution(self):
         self.assertIn("Énoncés originaux", PAGE)

@@ -253,9 +253,10 @@ math: true
             <a href="#exercice-{{ erratum.exercise | replace: '.', '-' }}">Exercice {{ erratum.exercise }}</a>
             <span>{{ erratum.kind }}</span>
           </header>
-          <p><strong>Problème.</strong> {{ erratum.problem }}</p>
-          <p><strong>Formulation retenue.</strong> {{ erratum.correction }}</p>
-          <small>Version {{ erratum.version }}</small>
+          <div class="mat101-errata-change">
+            <p><span>Avant</span> {{ erratum.problem }}</p>
+            <p><span>Après</span> {{ erratum.correction }}</p>
+          </div>
         </article>
       {% endfor %}
     </div>
