@@ -584,6 +584,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             "Un compte gratuit est nécessaire pour en proposer une.",
             PAGE,
         )
+        self.assertIn("Proposer une correction", PAGE)
+        self.assertIn("Consulter les corrections MAT101", PAGE)
+        self.assertNotIn("ticket", PAGE.casefold())
         self.assertNotIn("Community Notes", PAGE)
 
 

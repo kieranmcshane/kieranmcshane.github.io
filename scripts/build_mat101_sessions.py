@@ -41,6 +41,10 @@ SESSION_SLUGS = {
     19: "analyse-synthese-revision",
 }
 
+DISPLAY_HEADINGS = {
+    "Ticket": "Questions",
+}
+
 HEADING_IDS = {
     "À savoir faire": "competences",
     "Parcours": "parcours",
@@ -48,7 +52,7 @@ HEADING_IDS = {
     "Contrôle rapide": "controle",
     "Contrôle formatif": "controle",
     "Révision mixte": "revision",
-    "Ticket": "ticket",
+    "Ticket": "questions",
 }
 REQUIRED_HEADINGS = {"À savoir faire", "Parcours", "Ticket"}
 FORBIDDEN_PUBLIC_MARKERS = (
@@ -148,8 +152,9 @@ def parse_workbook(text: str) -> list[dict[str, object]]:
 
         body_parts = []
         for heading, content in sections:
+            display_heading = DISPLAY_HEADINGS.get(heading, heading)
             body_parts.append(
-                f"## {heading}\n{{: #{HEADING_IDS[heading]}}}\n\n{content}"
+                f"## {display_heading}\n{{: #{HEADING_IDS[heading]}}}\n\n{content}"
             )
         body = "\n\n".join(body_parts).rstrip() + "\n"
         assert_student_safe(title + "\n" + body, f"session {number}")
@@ -245,7 +250,7 @@ def render_page(
 layout: mat101
 title: {yaml_string(f"Séance {number} — {session['title']}")}
 permalink: {yaml_string(url)}
-description: {yaml_string(f"Parcours étudiant MAT101 IMA02 pour la séance {number} : compétences, références, exercices et ticket de sortie.")}
+description: {yaml_string(f"Parcours étudiant MAT101 IMA02 pour la séance {number} : compétences, références, exercices et questions de sortie.")}
 math: true
 mat101_session: true
 mat101_session_number: {number}
@@ -270,7 +275,7 @@ mat101_session_number: {number}
     <a href="{{{{ '/mat101/exercices/' | relative_url }}}}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">

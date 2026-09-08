@@ -77,7 +77,7 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(page.getByRole("heading", { name: "À savoir faire" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Parcours" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Contrôle rapide" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Ticket" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Questions" })).toBeVisible();
     await expect(page.locator(".mat101-session-content")).not.toContainText(
       "Déroulé minute par minute"
     );

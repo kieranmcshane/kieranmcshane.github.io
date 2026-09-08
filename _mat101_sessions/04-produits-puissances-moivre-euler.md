@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 4 — Puissances, Moivre et Euler"
 permalink: "/mat101/seances/04-produits-puissances-moivre-euler/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 4 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 4 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 4
@@ -27,7 +27,7 @@ mat101_session_number: 4
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -52,8 +52,8 @@ mat101_session_number: 4
 - Exercice 1.7.
 - Exercice 1.8 : questions 1 et 2.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 1. Calculer `(√3+i)^6`.
 2. Écrire `cos(3x)` en fonction de `cos x`.

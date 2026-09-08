@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 15 — Quantificateurs"
 permalink: "/mat101/seances/15-quantificateurs-negations/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 15 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 15 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 15
@@ -27,7 +27,7 @@ mat101_session_number: 15
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -52,8 +52,8 @@ mat101_session_number: 15
 - Exercice 2.14 : questions 1 à 4.
 - Exercice 2.16 : questions 3, 4, 6 et 7.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Nier `∀x∈R,∃n∈N,n>x`.
 {% endraw %}

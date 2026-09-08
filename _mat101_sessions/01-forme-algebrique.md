@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 1 — Forme algébrique"
 permalink: "/mat101/seances/01-forme-algebrique/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 1 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 1 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 1
@@ -27,7 +27,7 @@ mat101_session_number: 1
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -55,8 +55,8 @@ mat101_session_number: 1
 
 Calculer `(1+2i)(−4+6i)` et indiquer séparément partie réelle et partie imaginaire.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 1. `(3−2i)+(−5+7i)` ;
 2. `(1+i)²`.

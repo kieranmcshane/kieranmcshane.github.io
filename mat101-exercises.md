@@ -246,8 +246,8 @@ math: true
   <section class="mat101-community-review" aria-labelledby="mat101-review-title">
     <h2 id="mat101-review-title">Corrections</h2>
     <p>Les corrections sont publiques sur GitHub. Un compte gratuit est nécessaire pour en proposer une.</p>
-    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction</a>
-    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les tickets MAT101</a>
+    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Proposer une correction</a>
+    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les corrections MAT101</a>
   </section>
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">

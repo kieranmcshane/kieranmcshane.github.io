@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 6 — Racines carrées complexes"
 permalink: "/mat101/seances/06-logique-et-racines-carrees-complexes/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 6 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 6 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 6
@@ -27,7 +27,7 @@ mat101_session_number: 6
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -50,8 +50,8 @@ mat101_session_number: 6
 - Poly p. 21–24.
 - Exercice 1.10 : questions 1, 2, 6 et 7.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Trouver toutes les racines carrées de `5−12i`.
 {% endraw %}

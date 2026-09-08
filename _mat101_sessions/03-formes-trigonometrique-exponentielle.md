@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 3 — Argument et forme exponentielle"
 permalink: "/mat101/seances/03-formes-trigonometrique-exponentielle/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 3 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 3 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 3
@@ -27,7 +27,7 @@ mat101_session_number: 3
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -51,8 +51,8 @@ mat101_session_number: 3
 - Exercice 1.3 : questions 1 à 8, 11 et 12.
 - Exercice 1.4 : affirmations 2, 5, 7 et 8.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 1. Écrire `−√3−i` sous forme exponentielle avec un angle dans `[0,2π[`.
 2. Écrire `2e^{-iπ/3}` sous forme algébrique.

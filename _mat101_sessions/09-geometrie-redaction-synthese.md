@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 9 — Géométrie et rédaction"
 permalink: "/mat101/seances/09-geometrie-redaction-synthese/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 9 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 9 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 9
@@ -27,7 +27,7 @@ mat101_session_number: 9
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -58,8 +58,8 @@ mat101_session_number: 9
 2. Calculer `(1−i)^6` par forme exponentielle.
 3. Résoudre `z²+2z+2=0`.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Pour `z_A=2−i` et `z_B=−2+3i`, donner le milieu de `[AB]` et la distance `AB`.
 {% endraw %}

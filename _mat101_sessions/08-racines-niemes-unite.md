@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 8 — Racines n-ièmes"
 permalink: "/mat101/seances/08-racines-niemes-unite/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 8 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 8 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 8
@@ -27,7 +27,7 @@ mat101_session_number: 8
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -50,8 +50,8 @@ mat101_session_number: 8
 - Poly p. 25–27.
 - Exercice 1.14 : questions 3, 4, 5 et 6.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Résoudre `z³=−8` sous forme algébrique.
 {% endraw %}

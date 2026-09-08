@@ -62,7 +62,7 @@ class Mat101SessionsTests(unittest.TestCase):
         )
 
     def test_every_detail_page_contains_only_allowlisted_student_sections(self):
-        required = {"À savoir faire", "Parcours", "Ticket"}
+        required = {"À savoir faire", "Parcours", "Questions"}
         allowed = required | {
             "Activité",
             "Contrôle rapide",

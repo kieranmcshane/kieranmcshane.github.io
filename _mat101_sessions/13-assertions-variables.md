@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 13 — Assertions et variables"
 permalink: "/mat101/seances/13-assertions-variables/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 13 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 13 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 13
@@ -27,7 +27,7 @@ mat101_session_number: 13
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -50,8 +50,8 @@ mat101_session_number: 13
 - Poly p. 44–48.
 - Exercice 2.15 en entier.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Classer : `x²≥0`, `∀x∈R,x²≥0`, `∀x∈R,x²≥a`, `∃x∈R,x²=−1`.
 {% endraw %}
