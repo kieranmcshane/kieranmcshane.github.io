@@ -1,0 +1,37 @@
+<section class="mat101-archives mat101-downloads" id="annales" aria-labelledby="mat101-archives-title">
+  <div class="mat101-download-intro">
+    <h2 id="mat101-archives-title">Annales et sujets passés</h2>
+    <p>{{ site.data.mat101_archives.intro }}</p>
+  </div>
+
+  {% for group in site.data.mat101_archives.groups %}
+    <div class="mat101-file-group">
+      <p class="mat101-file-label">{{ group.title }}</p>
+      <ul>
+        {% for item in group.items %}
+          <li>
+            {% if item.file %}
+              <a href="{{ mat101_archive_base }}{{ item.file }}" download>
+                <strong>{{ item.label }}</strong>
+                <span>{{ item.meta }}</span>
+              </a>
+            {% else %}
+              <a href="{{ item.url }}">
+                <strong>{{ item.label }}</strong>
+                <span>{{ item.meta }}</span>
+              </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+        {% for link in group.links %}
+          <li>
+            <a href="{{ link.url }}">
+              <strong>{{ link.label }}</strong>
+              <span>{{ link.meta }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</section>

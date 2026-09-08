@@ -14,6 +14,7 @@ math: true
 {% assign solution_tex_url = '/assets/documents/mat101/corrige-exercices-mat101.tex' | relative_url %}
 {% assign solution_archive_url = '/assets/documents/mat101/corrige-exercices-mat101-sources.zip' | relative_url %}
 {% assign optional_reals_pdf_url = '/assets/documents/mat101/construction_reels_courte_histoire_v2.pdf' | relative_url %}
+{% assign mat101_archive_base = '/assets/documents/mat101/archives/' | relative_url %}
 
 <div class="mat101-library">
   <header class="mat101-page-heading">
@@ -22,6 +23,7 @@ math: true
       <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
       <a href="#informations">Informations</a>
       <a href="#facultatif">Facultatif</a>
+      <a href="#annales">Annales</a>
       <a href="#errata">Errata</a>
       <a href="#telechargements">Téléchargements</a>
       <a href="#credits">Crédits</a>
@@ -318,6 +320,8 @@ math: true
   </section>
     </div>
   </div>
+
+  {% include mat101-archives.html %}
 
   <section class="mat101-downloads" id="telechargements" aria-labelledby="mat101-downloads-title">
     <div class="mat101-download-intro">
