@@ -318,12 +318,35 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("site.mat101_show_solutions", PAGE)
         self.assertIn("{% if site.mat101_show_solutions %}", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
+        self.assertIn("exercise.publicSolutionHtml", PAGE)
+        self.assertIn("{% elsif exercise.publicSolutionHtml %}", PAGE)
         self.assertIn("mat101-file-group-solution", PAGE)
         self.assertIn("corrige-exercices-mat101.pdf", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         about = (ROOT / "about.md").read_text()
         self.assertIn("site.mat101_show_solutions", about)
         self.assertIn("Exercise correction", about)
+
+    def test_selective_public_solutions_are_revealed_in_native_data(self):
+        revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
+        self.assertEqual([item["id"] for item in revealed], ["1.1", "1.2"])
+
+        exercise_11 = next(item for item in NATIVE if item["id"] == "1.1")
+        exercise_12 = next(item for item in NATIVE if item["id"] == "1.2")
+        self.assertEqual(
+            exercise_11["publicSolutionHtml"],
+            exercise_11["solutionHtml"],
+        )
+        self.assertEqual(exercise_11["publicSolutionHtml"].count("<li>"), 15)
+        self.assertEqual(exercise_12["publicSolutionHtml"].count("<li>"), 2)
+        self.assertLess(
+            len(exercise_12["publicSolutionHtml"]),
+            len(exercise_12["solutionHtml"]),
+        )
+
+        for item in NATIVE:
+            if item["id"] not in {"1.1", "1.2"}:
+                self.assertIsNone(item.get("publicSolutionHtml"))
 
     def test_errata_register_is_versioned_and_linked(self):
         exercises = [entry["exercise"] for entry in ERRATA]
