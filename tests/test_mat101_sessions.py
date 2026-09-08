@@ -218,7 +218,15 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn(".mat101-session-content", STYLES)
         self.assertRegex(
             STYLES,
-            r"\.mat101-session-card mjx-container[\s\S]*?overflow-x: auto;",
+            r"@media screen and \(max-width: 700px\)[\s\S]*?\.mat101-session-card ul[\s\S]*?overflow-x: auto;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-session-card mjx-container \{\s*display: inline;",
+        )
+        self.assertNotRegex(
+            STYLES,
+            r"\.mat101-session-card mjx-container \{[^}]*overflow-x: auto;",
         )
         self.assertIn(".mat101-swipe-hint", STYLES)
 

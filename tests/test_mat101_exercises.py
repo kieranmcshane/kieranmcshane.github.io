@@ -503,15 +503,15 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-statement-transcription", STYLES)
         self.assertRegex(
             STYLES,
-            r"\.mat101-statement-transcription[\s\S]*?overflow-x: auto;",
+            r"@media screen and \(max-width: 700px\)[\s\S]*?\.mat101-statement-transcription[\s\S]*?overflow-x: auto;",
         )
         self.assertRegex(
             STYLES,
             r"\.mat101-statement-transcription mjx-container\[display=\"true\"\][\s\S]*?overflow-x: auto;",
         )
-        self.assertRegex(
+        self.assertNotRegex(
             STYLES,
-            r"\.mat101-statement-transcription mjx-container:not\(\[display=\"true\"\]\)[\s\S]*?overflow-x: auto;",
+            r"\.mat101-statement-transcription mjx-container:not\(\[display=\"true\"\]\)\s*\{[^}]*overflow-x: auto;",
         )
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)

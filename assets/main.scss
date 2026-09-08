@@ -13155,8 +13155,6 @@ body.mat101-site .mat101-library {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1rem, 1.5vw, 1.08rem);
   line-height: 1.62;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-statement-transcription p {
@@ -13253,13 +13251,11 @@ body.mat101-site .mat101-library {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  overflow-x: auto;
   padding: clamp(0.85rem, 3vw, 1.5rem);
   color: #2b2b30;
   background: #fffdfb;
   font-size: 0.91rem;
   line-height: 1.65;
-  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-statement-transcription mjx-container[display="true"],
@@ -13267,24 +13263,11 @@ body.mat101-site .mat101-library {
 .mat101-session-content mjx-container[display="true"] {
   display: block;
   box-sizing: border-box;
-  width: 100%;
   max-width: 100%;
   margin: 0.8rem 0 !important;
   padding: 0.15rem 0 0.25rem;
   overflow-x: auto;
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.mat101-statement-transcription mjx-container:not([display="true"]),
-.mat101-solution-body mjx-container:not([display="true"]),
-.mat101-session-content mjx-container:not([display="true"]) {
-  display: inline-block;
-  box-sizing: border-box;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  vertical-align: middle;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -13917,6 +13900,14 @@ body.mat101-site .mat101-library {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .mat101-statement-transcription,
+  .mat101-solution-body,
+  .mat101-session-content,
+  .mat101-session-card ul {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @media screen and (max-width: 440px) {
@@ -14291,8 +14282,6 @@ body:has(.mat101-session-page) {
   font-size: 0.76rem;
   line-height: 1.42;
   min-width: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-session-card li {
@@ -14300,14 +14289,9 @@ body:has(.mat101-session-page) {
 }
 
 .mat101-session-card mjx-container {
-  display: inline-block;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  display: inline;
   font-size: inherit;
   margin: 0;
-  vertical-align: middle;
-  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-session-card mjx-container[jax="CHTML"][display="true"] {
