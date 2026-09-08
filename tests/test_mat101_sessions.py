@@ -190,6 +190,11 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("Partiel prévu la semaine du 20 octobre.", INFORMATIONS)
         self.assertIn("mat101-informations.html", PAGE)
         self.assertIn("Note UE", INFORMATIONS)
+        self.assertIn(
+            r"\max\!\left(E,\ 0{,}4E + 0{,}3\,CC_1 + 0{,}3\,CC_2\right)",
+            INFORMATIONS,
+        )
+        self.assertNotIn(r"\text{Note UE}=", INFORMATIONS)
         self.assertIn("Tutorat", INFORMATIONS)
         self.assertIn("Contrôle continu", INFORMATIONS)
         self.assertIn("12 h 30 à 13 h 30", INFORMATIONS)

@@ -12447,11 +12447,20 @@ body.mat101-site .mat101-library.mat101-course {
 
 .mat101-informations-formula {
   margin: 0 0 0.65rem;
-  overflow-x: auto;
 }
 
 .mat101-informations-formula mjx-container {
   margin: 0 !important;
+}
+
+.mat101-informations-formula mjx-container[display="true"] {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-informations-card ul {
