@@ -368,13 +368,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 ]
             ),
         )
-        studocu = [
-            item
-            for group in ARCHIVES["groups"]
-            for item in group.get("items", [])
-            if item.get("url") and "studocu.com" in item["url"]
-        ]
-        self.assertEqual(len(studocu), 1)
+        self.assertEqual(len(ARCHIVES["groups"]), 2)
 
     def test_optional_reals_construction_pdf_is_available(self):
         self.assertTrue(OPTIONAL_REALS_PDF.is_file())

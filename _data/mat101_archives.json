@@ -1,5 +1,5 @@
 {
-  "intro": "Sujets et corrigés d’années précédentes. Les PDF institutionnels sont recopiés ici pour consultation hors ligne ; les liens Studocu renvoient vers la source d’origine.",
+  "intro": "Sujets et corrigés d’années précédentes. Les PDF institutionnels sont recopiés ici pour consultation hors ligne.",
   "groups": [
     {
       "title": "Rossigno · Institut Fourier",
@@ -15,13 +15,6 @@
           "meta": "Corrigé · PDF",
           "file": "partiel_2122_correction.pdf",
           "sourceUrl": "https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/ens_files/partiel_2122_correction.pdf"
-        }
-      ],
-      "links": [
-        {
-          "label": "Page du cours MAT101 2021–2022",
-          "meta": "Institut Fourier",
-          "url": "https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/pages_ens/mat101_2122.php"
         }
       ]
     },
@@ -39,16 +32,6 @@
           "meta": "Corrigé · PDF",
           "file": "MAT101_2020_CC1_corr.pdf",
           "sourceUrl": "https://www-fourier.univ-grenoble-alpes.fr/~eynardbh/MAT101_2020_CC1_corr.pdf"
-        }
-      ]
-    },
-    {
-      "title": "Autres sources",
-      "items": [
-        {
-          "label": "Partiel MAT101 — 10 novembre 2022",
-          "meta": "Complexes · énoncé sur Studocu",
-          "url": "https://www.studocu.com/fr/document/universite-grenoble-alpes/map101-l1-ima/partiel-mat-101-examen-de-mathematiques-complexes-10-nov-2022/150856831"
         }
       ]
     }
