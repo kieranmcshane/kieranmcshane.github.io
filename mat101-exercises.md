@@ -7,6 +7,7 @@ math: true
 ---
 
 {% assign statement_pdf_url = '/assets/documents/mat101/recueil-exercices-mat101.pdf' | relative_url %}
+{% assign source_pdf_url = '/assets/documents/mat101/mat_101_20251001.pdf' | relative_url %}
 {% assign statement_tex_url = '/assets/documents/mat101/recueil-exercices-mat101.tex' | relative_url %}
 {% assign statement_archive_url = '/assets/documents/mat101/recueil-exercices-mat101-sources.zip' | relative_url %}
 {% assign solution_pdf_url = '/assets/documents/mat101/corrige-exercices-mat101.pdf' | relative_url %}
@@ -285,6 +286,7 @@ math: true
       <p class="mat101-file-label">Énoncés originaux</p>
       <ul>
         <li><a href="{{ statement_pdf_url }}" download><strong>Recueil PDF</strong><span>103 exercices · 34 pages</span></a></li>
+        <li><a href="{{ source_pdf_url }}" download><strong>mat_101_20251001.pdf</strong><span>Polycopié source · 1er octobre 2025</span></a></li>
         <li><a href="{{ statement_tex_url }}" download><strong>Source LaTeX</strong><span>Sélection par <code>pdfpages</code></span></a></li>
         <li><a href="{{ statement_archive_url }}" download><strong>Archive complète</strong><span>LaTeX + PDF source</span></a></li>
       </ul>

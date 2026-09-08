@@ -312,6 +312,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn("Contrôles effectués avant publication", PAGE)
         self.assertIn('<h2 id="mat101-review-title">Corrections</h2>', PAGE)
         self.assertIn('<h2 id="mat101-downloads-title">Téléchargements</h2>', PAGE)
+        self.assertIn("mat_101_20251001.pdf", PAGE)
+        self.assertIn("source_pdf_url", PAGE)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
