@@ -1,0 +1,17 @@
+{
+  "1": {
+    "done": true,
+    "note": "Ensembles N, Z, D, Q, R, C. Partie réelle et imaginaire. Module. Plan complexe. Exercice 1.1 ; exercice 1.2 questions 1–2.",
+    "textReplacements": {
+      "N⊂Z⊂Q⊂R⊂C": "N⊂Z⊂D⊂Q⊂R⊂C"
+    }
+  },
+  "18": {
+    "dateLabel": "ven. 16 oct. 2026",
+    "scheduleConfirmed": true
+  },
+  "19": {
+    "dateLabel": "mar. 27 oct. 2026",
+    "scheduleConfirmed": true
+  }
+}

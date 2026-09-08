@@ -10,14 +10,15 @@ mat101_session_number: 11
 
 <!-- Generated from the public student workbook and provisional schedule. -->
 <div class="mat101-library mat101-session-page" data-mat101-session-number="11">
-  <header class="mat101-session-detail-hero">
+  <header class="mat101-session-detail-hero is-upcoming">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Calcul ensembliste</h1>
-      <p>jeu. 1 oct. 2026</p>
+      <p class="mat101-session-when">jeu. 1 oct. 2026</p>
+      <p class="mat101-session-room is-pending">Salle à confirmer</p>
     </div>
-    <div class="mat101-session-detail-status">
-      <span>Créneau planifié</span>
+    <div class="mat101-session-detail-status is-upcoming">
+      <span>À venir</span>
       <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>

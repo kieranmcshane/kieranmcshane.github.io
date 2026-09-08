@@ -12,12 +12,14 @@ import argparse
 import html
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 COLLECTION = ROOT / "_mat101_sessions"
 DATA_FILE = ROOT / "_data" / "mat101_sessions.json"
+OUTCOMES_FILE = ROOT / "_data" / "mat101_session_outcomes.json"
 
 SESSION_SLUGS = {
     1: "forme-algebrique",
@@ -51,6 +53,26 @@ HEADING_IDS = {
     "Ticket": "ticket",
 }
 REQUIRED_HEADINGS = {"À savoir faire", "Parcours", "Ticket"}
+EXAM_WEEK_START = date(2026, 10, 19)
+EXAM_WEEK_END = date(2026, 10, 25)
+DATE_LABEL_RE = re.compile(
+    r"^(lun|mar|mer|jeu|ven|sam|dim)\.\s+(\d{1,2})\s+"
+    r"(janv|févr|mars|avr|mai|juin|juil|août|sept|oct|nov|déc)\.\s+(\d{4})$"
+)
+MONTHS = {
+    "janv": 1,
+    "févr": 2,
+    "mars": 3,
+    "avr": 4,
+    "mai": 5,
+    "juin": 6,
+    "juil": 7,
+    "août": 8,
+    "sept": 9,
+    "oct": 10,
+    "nov": 11,
+    "déc": 12,
+}
 FORBIDDEN_PUBLIC_MARKERS = (
     "fiche enseignant",
     "réponses et corrections",
@@ -190,6 +212,91 @@ def parse_schedule(text: str) -> dict[int, dict[str, object]]:
     return rows
 
 
+def load_outcomes() -> dict[int, dict[str, object]]:
+    """Load optional post-séance records keyed by session number."""
+
+    if not OUTCOMES_FILE.is_file():
+        return {}
+    raw = json.loads(OUTCOMES_FILE.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("session outcomes must be an object keyed by session number")
+    outcomes: dict[int, dict[str, object]] = {}
+    for key, value in raw.items():
+        number = int(key)
+        if not isinstance(value, dict):
+            raise ValueError(f"session {number}: outcome must be an object")
+        outcomes[number] = value
+    return outcomes
+
+
+def apply_outcome(session: dict[str, object], outcome: dict[str, object]) -> None:
+    """Merge a post-séance record into a generated session (in place)."""
+
+    replacements = outcome.get("textReplacements") or {}
+    if replacements:
+        if not isinstance(replacements, dict):
+            raise ValueError("textReplacements must be an object")
+        body = str(session["body"])
+        skills = list(session["skillsPlain"])
+        search = str(session["search"])
+        for old, new in replacements.items():
+            old_text, new_text = str(old), str(new)
+            body = body.replace(old_text, new_text)
+            skills = [skill.replace(old_text, new_text) for skill in skills]
+            search = search.replace(old_text.lower(), new_text.lower())
+        session["body"] = body
+        session["skillsPlain"] = skills
+        session["search"] = search
+    if outcome.get("done"):
+        session["done"] = True
+    if "dateLabel" in outcome:
+        session["dateLabel"] = str(outcome["dateLabel"])
+    if "scheduleConfirmed" in outcome:
+        session["scheduleConfirmed"] = bool(outcome["scheduleConfirmed"])
+    if "room" in outcome:
+        session["room"] = outcome["room"]
+    note = outcome.get("note")
+    if note:
+        session["doneNote"] = str(note)
+        session["search"] = plain_text(f"{session['search']} fait {note}").lower()
+
+
+def parse_date_label(label: str) -> date | None:
+    """Parse a public French date label such as ``mar. 8 sept. 2026``."""
+
+    match = DATE_LABEL_RE.match(label.strip())
+    if not match:
+        return None
+    return date(int(match.group(4)), MONTHS[match.group(3)], int(match.group(2)))
+
+
+def assert_no_exam_week_sessions(sessions: list[dict[str, object]]) -> None:
+    """Refuse any créneau in the 19–25 October 2026 midterm week."""
+
+    for session in sessions:
+        parsed = parse_date_label(str(session.get("dateLabel") or ""))
+        if parsed and EXAM_WEEK_START <= parsed <= EXAM_WEEK_END:
+            raise ValueError(
+                f"session {session['number']}: {session['dateLabel']} "
+                "falls in the 20 Oct exam week"
+            )
+
+
+def room_markup(session: dict[str, object]) -> str:
+    """Return the hero room line, or empty if the date itself is still open."""
+
+    room = session.get("room")
+    if isinstance(room, str) and room.strip():
+        return (
+            '<p class="mat101-session-room">'
+            + html.escape(room.strip())
+            + "</p>\n      "
+        )
+    if session.get("scheduleConfirmed"):
+        return '<p class="mat101-session-room is-pending">Salle à confirmer</p>\n      '
+    return ""
+
+
 def block_for(number: int) -> tuple[str, str]:
     if number <= 9:
         return "complexes", "Chapitre 1 · Nombres complexes"
@@ -209,14 +316,26 @@ def render_page(
     date_label = html.escape(str(session["dateLabel"]))
     block_label = html.escape(str(session["blockLabel"]))
     body = str(session["body"])
-    schedule_badge = (
-        "Créneau planifié" if session["scheduleConfirmed"] else "Date à confirmer"
-    )
-    schedule_class = "" if session["scheduleConfirmed"] else " is-pending"
-    schedule_detail = (
-        "Cours-TD intégré · 90 min"
-        if session["scheduleConfirmed"]
-        else "Date et salle à confirmer"
+    done = bool(session.get("done"))
+    if done:
+        schedule_badge = "Séance faite"
+        schedule_class = " is-done"
+        schedule_detail = "Cours-TD intégré · 90 min"
+        hero_class = " is-done"
+    elif session["scheduleConfirmed"]:
+        schedule_badge = "À venir"
+        schedule_class = " is-upcoming"
+        schedule_detail = "Cours-TD intégré · 90 min"
+        hero_class = " is-upcoming"
+    else:
+        schedule_badge = "Date à confirmer"
+        schedule_class = " is-pending"
+        schedule_detail = "Date et salle à confirmer"
+        hero_class = " is-pending"
+    room_block = room_markup(session)
+    done_note = html.escape(str(session.get("doneNote") or "").strip())
+    fait_block = (
+        f"<p><strong>Fait.</strong> {done_note}</p>\n    " if done_note else ""
     )
 
     previous_link = ""
@@ -253,12 +372,12 @@ mat101_session_number: {number}
 
 <!-- Generated from the public student workbook and provisional schedule. -->
 <div class="mat101-library mat101-session-page" data-mat101-session-number="{number}">
-  <header class="mat101-session-detail-hero">
+  <header class="mat101-session-detail-hero{hero_class}">
     <div>
       <p class="mat101-session-eyebrow">{block_label}</p>
       <h1>{title}</h1>
-      <p>{date_label}</p>
-    </div>
+      <p class="mat101-session-when">{date_label}</p>
+      {room_block}</div>
     <div class="mat101-session-detail-status{schedule_class}">
       <span>{schedule_badge}</span>
       <small>{schedule_detail}</small>
@@ -274,7 +393,7 @@ mat101_session_number: {number}
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
-    <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
+    {fait_block}<p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
   </aside>
 
   <article class="mat101-session-content" markdown="1">
@@ -309,6 +428,7 @@ def main() -> None:
 
     workbook_sessions = parse_workbook(workbook.read_text(encoding="utf-8"))
     schedule = parse_schedule(schedule_file.read_text(encoding="utf-8"))
+    outcomes = load_outcomes()
 
     sessions: list[dict[str, object]] = []
     for workbook_session in workbook_sessions:
@@ -318,19 +438,22 @@ def main() -> None:
         title = str(workbook_session["title"])
         skills = list(workbook_session["skills"])
         body = str(workbook_session["body"])
-        sessions.append(
-            {
-                **workbook_session,
-                **schedule[number],
-                "slug": slug,
-                "url": f"/mat101/seances/{number:02d}-{slug}/",
-                "shortTitle": title,
-                "block": block_slug,
-                "blockLabel": block_label,
-                "skillsPlain": [plain_text(skill) for skill in skills],
-                "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
-            }
-        )
+        session = {
+            **workbook_session,
+            **schedule[number],
+            "slug": slug,
+            "url": f"/mat101/seances/{number:02d}-{slug}/",
+            "shortTitle": title,
+            "block": block_slug,
+            "blockLabel": block_label,
+            "skillsPlain": [plain_text(skill) for skill in skills],
+            "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
+            "room": None,
+        }
+        apply_outcome(session, outcomes.get(number, {}))
+        sessions.append(session)
+
+    assert_no_exam_week_sessions(sessions)
 
     COLLECTION.mkdir(parents=True, exist_ok=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)

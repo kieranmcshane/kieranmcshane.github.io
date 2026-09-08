@@ -23,11 +23,29 @@ test.describe("MAT101 nineteen-session student path", () => {
       page.locator('a[href$="parcours-19-seances-mat101-ima02.pdf"]')
     ).toHaveCount(0);
     await expect(
-      page.locator('[data-session-number="18"] .mat101-session-date-state.is-pending')
-    ).toContainText("À confirmer");
+      page.locator('[data-session-number="1"] .mat101-session-date-state.is-done')
+    ).toContainText("Faite");
+    await expect(page.locator('[data-session-number="1"]')).toHaveClass(/is-done/);
     await expect(
-      page.locator('[data-session-number="19"] .mat101-session-date-state.is-pending')
-    ).toContainText("À confirmer");
+      page.locator('[data-session-number="2"] .mat101-session-date-state.is-upcoming')
+    ).toContainText("À venir");
+    await expect(page.locator('[data-session-number="2"]')).toHaveClass(/is-upcoming/);
+    await expect(
+      page.locator('[data-session-number="18"] .mat101-session-date-state.is-upcoming')
+    ).toContainText("À venir");
+    await expect(
+      page.locator('[data-session-number="18"] .mat101-session-date')
+    ).toContainText("ven. 16 oct. 2026");
+    await expect(
+      page.locator('[data-session-number="19"] .mat101-session-date-state.is-upcoming')
+    ).toContainText("À venir");
+    await expect(
+      page.locator('[data-session-number="19"] .mat101-session-date')
+    ).toContainText("mar. 27 oct. 2026");
+    await expect(
+      page.locator('[data-session-number="1"] .mat101-session-room')
+    ).toContainText("Salle à confirmer");
+    await expect(page.getByText("Pas de cours-TD du 19 au 25 octobre.")).toBeVisible();
     await expect(page.locator(".mat101-course-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-course-status")).toHaveCount(0);
     await expect(page.getByText("19 séances pour progresser en MAT101")).toHaveCount(0);
@@ -74,6 +92,24 @@ test.describe("MAT101 nineteen-session student path", () => {
 
     await expect(page).toHaveURL(/\/mat101\/seances\/01-forme-algebrique\/$/);
     await expect(page.locator("[data-mat101-session-number='1']")).toBeVisible();
+    await expect(page.locator(".mat101-session-detail-status.is-done")).toContainText(
+      "Séance faite"
+    );
+    await expect(page.locator(".mat101-session-room")).toContainText("Salle à confirmer");
+    await expect(page.locator(".mat101-session-detail-status")).not.toContainText(
+      "Créneau planifié"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText("Fait.");
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Ensembles N, Z, D, Q, R, C"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText("Module.");
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Plan complexe"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Exercice 1.1 ; exercice 1.2 questions 1–2."
+    );
     await expect(page.getByRole("heading", { name: "À savoir faire" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Parcours" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Contrôle rapide" })).toBeVisible();
@@ -88,18 +124,24 @@ test.describe("MAT101 nineteen-session student path", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
-  test("labels the two unresolved schedule slots instead of inventing dates", async ({
+  test("places séances 18 and 19 around the 20 October exam week", async ({
     page,
   }) => {
     await page.goto("/mat101/seances/18-recurrence/");
     await expect(page.locator("[data-mat101-session-number='18']")).toBeVisible({
       timeout: 12000,
     });
-    await expect(page.locator(".mat101-session-detail-status.is-pending")).toContainText(
-      "Date à confirmer"
+    await expect(page.locator(".mat101-session-detail-status.is-upcoming")).toContainText(
+      "À venir"
     );
-    await expect(page.locator(".mat101-session-detail-status.is-pending")).toContainText(
-      "Date et salle à confirmer"
+    await expect(page.locator(".mat101-session-when")).toContainText("ven. 16 oct. 2026");
+    await expect(page.locator(".mat101-session-room")).toContainText("Salle à confirmer");
+
+    await page.goto("/mat101/seances/19-analyse-synthese-revision/");
+    await expect(page.locator("[data-mat101-session-number='19']")).toBeVisible();
+    await expect(page.locator(".mat101-session-when")).toContainText("mar. 27 oct. 2026");
+    await expect(page.locator(".mat101-session-detail-status.is-upcoming")).toContainText(
+      "À venir"
     );
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });

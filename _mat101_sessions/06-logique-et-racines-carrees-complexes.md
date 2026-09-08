@@ -10,14 +10,15 @@ mat101_session_number: 6
 
 <!-- Generated from the public student workbook and provisional schedule. -->
 <div class="mat101-library mat101-session-page" data-mat101-session-number="6">
-  <header class="mat101-session-detail-hero">
+  <header class="mat101-session-detail-hero is-upcoming">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 1 · Nombres complexes</p>
       <h1>Racines carrées complexes</h1>
-      <p>ven. 18 sept. 2026</p>
+      <p class="mat101-session-when">ven. 18 sept. 2026</p>
+      <p class="mat101-session-room is-pending">Salle à confirmer</p>
     </div>
-    <div class="mat101-session-detail-status">
-      <span>Créneau planifié</span>
+    <div class="mat101-session-detail-status is-upcoming">
+      <span>À venir</span>
       <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>
