@@ -381,6 +381,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn('id="optional-reals-q12"', include)
         self.assertIn("mat101-optional-problem", include)
         self.assertIn("mat101-optional-question-star", include)
+        self.assertIn("mat101-optional-question-text", include)
+        self.assertNotIn("mat101-optional-question-body", include)
+        self.assertNotIn('<details class="mat101-optional-question"', include)
         self.assertIn("Note historique", include)
 
     def test_public_solutions_are_gated_by_config_flag(self):
