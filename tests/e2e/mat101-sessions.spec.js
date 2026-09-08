@@ -42,9 +42,9 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(
       page.locator('[data-session-number="19"] .mat101-session-date')
     ).toContainText("mar. 27 oct. 2026");
-    await expect(page.locator(".mat101-session-room").first).toContainText(
-      "Salle à confirmer"
-    );
+    await expect(
+      page.locator('[data-session-number="1"] .mat101-session-room')
+    ).toContainText("Salle à confirmer");
     await expect(page.getByText("Pas de cours-TD du 19 au 25 octobre.")).toBeVisible();
     await expect(page.locator(".mat101-course-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-course-status")).toHaveCount(0);
