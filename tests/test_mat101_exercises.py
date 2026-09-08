@@ -612,7 +612,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-mobile.js", head)
         self.assertIn("mat101-has-js", head)
         self.assertIn("page.layout == 'mat101'", head)
-        self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
+        self.assertNotIn("max-height: min(70vh, 42rem)", STYLES)
         self.assertIn(".mat101-shell", STYLES)
         self.assertIn(".mat101-swipe-hint", STYLES)
         self.assertIn("body.mat101-site", STYLES)

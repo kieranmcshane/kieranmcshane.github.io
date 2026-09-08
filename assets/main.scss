@@ -12671,10 +12671,7 @@ body.mat101-site .mat101-library.mat101-course {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  max-height: min(70vh, 42rem);
   padding: 1rem;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .mat101-difficulty-legend {
@@ -13985,10 +13982,6 @@ body.mat101-site .mat101-library.mat101-course {
     top: auto;
   }
 
-  html:not(.mat101-has-js) .mat101-toc-panel {
-    max-height: none;
-  }
-
   .mat101-browser {
     scroll-margin-top: 5.75rem;
   }
@@ -14007,7 +14000,6 @@ body.mat101-site .mat101-library.mat101-course {
 
   .mat101-toc-panel {
     grid-template-columns: 1fr;
-    max-height: min(68vh, 34rem);
   }
 
   .mat101-credit-grid article:last-child {
