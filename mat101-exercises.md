@@ -13,6 +13,7 @@ math: true
 {% assign solution_pdf_url = '/assets/documents/mat101/corrige-exercices-mat101.pdf' | relative_url %}
 {% assign solution_tex_url = '/assets/documents/mat101/corrige-exercices-mat101.tex' | relative_url %}
 {% assign solution_archive_url = '/assets/documents/mat101/corrige-exercices-mat101-sources.zip' | relative_url %}
+{% assign optional_reals_pdf_url = '/assets/documents/mat101/construction_reels_courte_histoire_v2.pdf' | relative_url %}
 
 <div class="mat101-library">
   <header class="mat101-page-heading">
@@ -20,6 +21,7 @@ math: true
     <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
       <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
       <a href="#informations">Informations</a>
+      <a href="#facultatif">Facultatif</a>
       <a href="#errata">Errata</a>
       <a href="#telechargements">Téléchargements</a>
       <a href="#credits">Crédits</a>
@@ -254,6 +256,43 @@ math: true
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les corrections MAT101</a>
   </section>
 
+  <section class="mat101-optional-stack" id="facultatif" aria-labelledby="mat101-optional-title">
+    <h2 id="mat101-optional-title">Facultatif</h2>
+
+    <article class="mat101-optional-resource" aria-labelledby="mat101-optional-reals-title">
+      <header class="mat101-optional-resource-header">
+        <div>
+          <h3 id="mat101-optional-reals-title">Construction de R par les suites de Cauchy</h3>
+          <p>Problème guidé en 12 questions (version courte)&nbsp;: suites de Cauchy, classes d’équivalence, opérations et complétude de <span class="math inline">$\mathbb R$</span>. Prérequis&nbsp;: calcul dans <span class="math inline">$\mathbb Q$</span>, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
+        </div>
+        <a class="mat101-optional-pdf-link" href="{{ optional_reals_pdf_url }}" download>
+          <strong>construction_reels_courte_histoire_v2.pdf</strong>
+          <span>3 pages · énoncé seul</span>
+        </a>
+      </header>
+
+      {% include mat101-optional-reals-problem.html %}
+    </article>
+
+    <article class="mat101-video-resource" aria-labelledby="mat101-optional-video-title">
+      <div class="mat101-video-resource-copy">
+        <h3 id="mat101-optional-video-title">Fondamentaux des nombres complexes</h3>
+        <p>Conférence 3Blue1Brown sur la géométrie de <span class="math inline">$\mathbb C$</span> et la règle de multiplication. Complément au chapitre 1.</p>
+        <p><a href="https://www.youtube.com/watch?v=5PcpBw5Hbwo">Voir sur YouTube</a></p>
+      </div>
+      <div class="mat101-video-embed">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/5PcpBw5Hbwo"
+          title="Complex number fundamentals · 3Blue1Brown"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </article>
+  </section>
+
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
     <h2 id="mat101-errata-title">Errata du polycopié source</h2>
     <div class="mat101-errata-list">
@@ -292,6 +331,13 @@ math: true
         <li><a href="{{ source_pdf_url }}" download><strong>mat_101_20251001.pdf</strong><span>Polycopié source · 1er octobre 2025</span></a></li>
         <li><a href="{{ statement_tex_url }}" download><strong>Source LaTeX</strong><span>Sélection par <code>pdfpages</code></span></a></li>
         <li><a href="{{ statement_archive_url }}" download><strong>Archive complète</strong><span>LaTeX + PDF source</span></a></li>
+      </ul>
+    </div>
+
+    <div class="mat101-file-group">
+      <p class="mat101-file-label">Facultatif</p>
+      <ul>
+        <li><a href="{{ optional_reals_pdf_url }}" download><strong>Construction de R</strong><span>Suites de Cauchy · 3 pages · énoncé seul</span></a></li>
       </ul>
     </div>
 

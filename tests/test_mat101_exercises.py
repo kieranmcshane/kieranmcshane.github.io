@@ -21,6 +21,9 @@ ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
 SOLUTION_PDF = ROOT / "assets/documents/mat101/corrige-exercices-mat101.pdf"
 SOLUTION_TEX = ROOT / "assets/documents/mat101/corrige-exercices-mat101.tex"
 SOLUTION_ARCHIVE = ROOT / "assets/documents/mat101/corrige-exercices-mat101-sources.zip"
+OPTIONAL_REALS_PDF = (
+    ROOT / "assets/documents/mat101/construction_reels_courte_histoire_v2.pdf"
+)
 BIB = ROOT / "assets/documents/mat101/mat101-citations.bib"
 
 
@@ -316,6 +319,29 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn('<h2 id="mat101-downloads-title">Téléchargements</h2>', PAGE)
         self.assertIn("mat_101_20251001.pdf", PAGE)
         self.assertIn("source_pdf_url", PAGE)
+        self.assertIn('id="facultatif"', PAGE)
+        self.assertIn('id="mat101-optional-title">Facultatif</h2>', PAGE)
+        self.assertIn("Construction de R par les suites de Cauchy", PAGE)
+        self.assertIn("construction_reels_courte_histoire_v2.pdf", PAGE)
+        self.assertIn('href="#facultatif">Facultatif</a>', PAGE)
+        self.assertIn("mat101-optional-resource", PAGE)
+        self.assertIn('include mat101-optional-reals-problem.html', PAGE)
+        self.assertIn("mat101-video-embed", PAGE)
+        self.assertIn("youtube-nocookie.com/embed/5PcpBw5Hbwo", PAGE)
+        self.assertIn("Fondamentaux des nombres complexes", PAGE)
+
+    def test_optional_reals_construction_pdf_is_available(self):
+        self.assertTrue(OPTIONAL_REALS_PDF.is_file())
+        self.assertTrue(OPTIONAL_REALS_PDF.read_bytes().startswith(b"%PDF-"))
+        self.assertGreater(OPTIONAL_REALS_PDF.stat().st_size, 100_000)
+
+    def test_optional_reals_native_problem_include_has_twelve_questions(self):
+        include = (ROOT / "_includes/mat101-optional-reals-problem.html").read_text()
+        self.assertIn('id="optional-reals-q1"', include)
+        self.assertIn('id="optional-reals-q12"', include)
+        self.assertIn("mat101-optional-problem", include)
+        self.assertIn("mat101-optional-question-star", include)
+        self.assertIn("Note historique", include)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
