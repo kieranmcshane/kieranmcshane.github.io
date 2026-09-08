@@ -16,6 +16,8 @@ math: true
     </nav>
   </header>
 
+  <p class="mat101-session-notice">Partiel prévu la semaine du 20 octobre.</p>
+
   <section class="mat101-session-browser" id="seances" aria-labelledby="mat101-session-browser-title">
     <div class="mat101-session-browser-heading">
       <div>
