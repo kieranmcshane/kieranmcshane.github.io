@@ -11,9 +11,6 @@ math: true
 <div class="mat101-library mat101-course" data-mat101-course>
   <header class="mat101-page-heading">
     <h1>Séances MAT101</h1>
-    <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
-      <a href="{{ '/mat101/exercices/' | relative_url }}">Exercices</a>
-    </nav>
   </header>
 
   <p class="mat101-session-notice">Partiel prévu la semaine du 20 octobre.</p>
