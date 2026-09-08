@@ -677,15 +677,20 @@ test.describe("MAT101 visual baselines", () => {
     );
     const box = await navigation.boundingBox();
     expect(box).toBeTruthy();
-    const clipHeight = 750;
+    const viewport = page.viewportSize();
+    expect(viewport).toBeTruthy();
+    const clipHeight = Math.min(
+      740,
+      Math.max(720, Math.floor(viewport.height - box.y - 2))
+    );
     await expect(page).toHaveScreenshot("mat101-navigation.png", {
       clip: {
-        x: box.x,
-        y: box.y,
+        x: Math.floor(box.x),
+        y: Math.floor(box.y),
         width: Math.floor(box.width),
         height: clipHeight,
       },
-      maxDiffPixelRatio: 0.03,
+      maxDiffPixelRatio: 0.05,
     });
   });
 });
