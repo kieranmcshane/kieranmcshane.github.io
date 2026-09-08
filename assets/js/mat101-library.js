@@ -34,22 +34,6 @@
     context.lineCap = 'round';
     context.lineJoin = 'round';
 
-    context.strokeStyle = '#b9cdd1';
-    context.lineWidth = 2;
-    context.beginPath();
-    context.moveTo(size * 0.1, center);
-    context.lineTo(size * 0.9, center);
-    context.moveTo(center, size * 0.1);
-    context.lineTo(center, size * 0.9);
-    context.stroke();
-
-    context.fillStyle = '#60757a';
-    context.font = '600 22px system-ui, sans-serif';
-    context.textAlign = 'right';
-    context.fillText('Re', size * 0.91, center - 12);
-    context.textAlign = 'left';
-    context.fillText('Im', center + 12, size * 0.11);
-
     context.strokeStyle = '#7baeb6';
     context.lineWidth = 3;
     context.beginPath();
