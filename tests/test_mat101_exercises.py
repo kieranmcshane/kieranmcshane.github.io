@@ -15,6 +15,7 @@ STYLES = (ROOT / "assets/main.scss").read_text()
 SCRIPT = (ROOT / "assets/js/mat101-library.js").read_text()
 ISSUE_FORM = (ROOT / ".github/ISSUE_TEMPLATE/mat101-correction.yml").read_text()
 ERRATA = json.loads((ROOT / "_data/mat101_errata.json").read_text())
+VIDEOS = json.loads((ROOT / "_data/mat101_videos.json").read_text())
 PDF = ROOT / "assets/documents/mat101/recueil-exercices-mat101.pdf"
 TEX = ROOT / "assets/documents/mat101/recueil-exercices-mat101.tex"
 ARCHIVE = ROOT / "assets/documents/mat101/recueil-exercices-mat101-sources.zip"
@@ -332,8 +333,26 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat101-optional-resource", PAGE)
         self.assertIn('include mat101-optional-reals-problem.html', PAGE)
         self.assertIn("mat101-video-embed", PAGE)
-        self.assertIn("youtube-nocookie.com/embed/5PcpBw5Hbwo", PAGE)
-        self.assertIn("Fondamentaux des nombres complexes", PAGE)
+        self.assertIn("mat101-video-grid", PAGE)
+        self.assertIn("Vidéos complémentaires", PAGE)
+        self.assertIn("site.data.mat101_videos", PAGE)
+        self.assertIn("youtube-nocookie.com/embed/{{ video.id }}", PAGE)
+
+    def test_facultatif_videos_data_lists_six_complementary_embeds(self):
+        self.assertEqual(len(VIDEOS), 6)
+        self.assertEqual(
+            [video["id"] for video in VIDEOS],
+            [
+                "5PcpBw5Hbwo",
+                "ZxYOEwM6Wbk",
+                "v0YEaeIClKY",
+                "bOXCLR3Wric",
+                "6bDm5z5Z60c",
+                "L3LMbpZIKhQ",
+            ],
+        )
+        self.assertEqual(VIDEOS[0]["title"], "Fondamentaux des nombres complexes")
+        self.assertEqual(VIDEOS[3]["title"], "Dénombrement et fonctions génératrices")
 
     def test_archive_pdfs_are_available(self):
         for group in ARCHIVES["groups"]:
