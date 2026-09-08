@@ -320,9 +320,13 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("mat_101_20251001.pdf", PAGE)
         self.assertIn("source_pdf_url", PAGE)
         self.assertIn('id="facultatif"', PAGE)
-        self.assertIn("Problème facultatif · Construction de R", PAGE)
+        self.assertIn('id="mat101-optional-title">Facultatif</h2>', PAGE)
+        self.assertIn("Construction de R par les suites de Cauchy", PAGE)
         self.assertIn("construction_reels_courte_histoire_v2.pdf", PAGE)
         self.assertIn('href="#facultatif">Facultatif</a>', PAGE)
+        self.assertIn("mat101-video-embed", PAGE)
+        self.assertIn("youtube-nocookie.com/embed/5PcpBw5Hbwo", PAGE)
+        self.assertIn("Fondamentaux des nombres complexes", PAGE)
 
     def test_optional_reals_construction_pdf_is_available(self):
         self.assertTrue(OPTIONAL_REALS_PDF.is_file())

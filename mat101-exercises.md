@@ -256,15 +256,37 @@ math: true
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les corrections MAT101</a>
   </section>
 
-  <section class="mat101-course-download" id="facultatif" aria-labelledby="mat101-optional-title">
-    <div>
-      <h2 id="mat101-optional-title">Problème facultatif · Construction de R</h2>
-      <p>Problème guidé en 12 questions (version courte) : suites de Cauchy, classes d’équivalence, opérations et complétude de R. Prérequis : calcul dans Q, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
-    </div>
-    <a href="{{ optional_reals_pdf_url }}" download>
-      <strong>construction_reels_courte_histoire_v2.pdf</strong>
-      <span>3 pages · énoncé seul</span>
-    </a>
+  <section class="mat101-optional-stack" id="facultatif" aria-labelledby="mat101-optional-title">
+    <h2 id="mat101-optional-title">Facultatif</h2>
+
+    <article class="mat101-course-download" aria-labelledby="mat101-optional-reals-title">
+      <div>
+        <h3 id="mat101-optional-reals-title">Construction de R par les suites de Cauchy</h3>
+        <p>Problème guidé en 12 questions (version courte) : suites de Cauchy, classes d’équivalence, opérations et complétude de R. Prérequis : calcul dans Q, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
+      </div>
+      <a href="{{ optional_reals_pdf_url }}" download>
+        <strong>construction_reels_courte_histoire_v2.pdf</strong>
+        <span>3 pages · énoncé seul</span>
+      </a>
+    </article>
+
+    <article class="mat101-video-resource" aria-labelledby="mat101-optional-video-title">
+      <div class="mat101-video-resource-copy">
+        <h3 id="mat101-optional-video-title">Fondamentaux des nombres complexes</h3>
+        <p>Conférence 3Blue1Brown sur la géométrie de <span class="math inline">$\mathbb C$</span> et la règle de multiplication. Complément au chapitre 1.</p>
+        <p><a href="https://www.youtube.com/watch?v=5PcpBw5Hbwo">Voir sur YouTube</a></p>
+      </div>
+      <div class="mat101-video-embed">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/5PcpBw5Hbwo"
+          title="Complex number fundamentals · 3Blue1Brown"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </article>
   </section>
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
