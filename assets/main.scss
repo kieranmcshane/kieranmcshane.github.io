@@ -12310,6 +12310,12 @@ body:has(.mat101-library) {
 body.mat101-site .page-content {
   max-width: none;
   padding-top: 0;
+  padding-inline: 1rem;
+}
+
+body.mat101-site .mat101-library {
+  max-width: 820px;
+  margin-inline: auto;
 }
 
 .mat101-shell {
