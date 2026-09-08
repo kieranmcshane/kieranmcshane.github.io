@@ -211,11 +211,14 @@
       "Utiliser extension, compréhension et description en fonction",
       "Distinguer ∈ et ⊂, ensemble vide et singleton"
     ],
-    "search": "décrire un ensemble chapitre 2 · ensembles et langage mathématique utiliser extension, compréhension et description en fonction distinguer ∈ et ⊂, ensemble vide et singleton ## à savoir faire {: #competences} - utiliser extension, compréhension et description en fonction. - distinguer ∈ et ⊂, ensemble vide et singleton. ## parcours {: #parcours} - poly p. 37–40. - exercice 2.1 : questions 1, 5, 9 et 11. - exercice 2.2 : questions 1 à 6. - exercice 2.5 : questions 1, 4 et 6. ## questions {: #questions} pour a={1,{2}}, décider : 2∈a, {2}∈a, {2}⊂a, {{2}}⊂a.",
+    "search": "décrire un ensemble chapitre 2 · ensembles et langage mathématique utiliser extension, compréhension et description en fonction distinguer ∈ et ⊂, ensemble vide et singleton ## à savoir faire {: #competences} - utiliser extension, compréhension et description en fonction. - distinguer ∈ et ⊂, ensemble vide et singleton. ## parcours {: #parcours} - poly p. 37–40. - exercice 2.1 : questions 1, 5, 9 et 11. - exercice 2.2 : questions 1 à 6. - exercice 2.5 : questions 1, 4 et 6. ## questions {: #questions} pour a={1,{2}}, décider : 2∈a, {2}∈a, {2}⊂a, {{2}}⊂a. interro 1 h tiers temps 1 h 20",
     "skillsHtml": [
       "Utiliser extension, compréhension et description en fonction",
       "Distinguer <span class=\"math inline\">\\(∈\\)</span> et <span class=\"math inline\">\\(⊂\\)</span>, ensemble vide et singleton"
-    ]
+    ],
+    "kind": "interro",
+    "statusBadge": "Interro",
+    "statusDetail": "1 h · tiers temps 1 h 20"
   },
   {
     "number": 11,

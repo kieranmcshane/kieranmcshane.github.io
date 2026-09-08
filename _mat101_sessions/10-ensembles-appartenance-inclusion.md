@@ -16,9 +16,9 @@ mat101_session_number: 10
       <h1>Décrire un ensemble</h1>
       <p>mar. 29 sept. 2026</p>
     </div>
-    <div class="mat101-session-detail-status">
-      <span>Créneau planifié</span>
-      <small>Cours-TD intégré · 90 min</small>
+    <div class="mat101-session-detail-status is-interro">
+      <span>Interro</span>
+      <small>1 h · tiers temps 1 h 20</small>
     </div>
   </header>
 
@@ -31,7 +31,7 @@ mat101_session_number: 10
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
-    <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
+    <p><strong>Interro.</strong> Durée 1 h · tiers temps 1 h 20.</p>
   </aside>
 
   <article class="mat101-session-content" markdown="1">

@@ -112,6 +112,20 @@ class Mat101SessionsTests(unittest.TestCase):
             ).exists()
         )
 
+    def test_session_status_supports_interro_overrides(self):
+        badge, css_class, detail = GENERATOR.session_status(
+            {
+                "number": 10,
+                "scheduleConfirmed": True,
+                "kind": "interro",
+                "statusBadge": "Interro",
+                "statusDetail": "1 h · tiers temps 1 h 20",
+            }
+        )
+        self.assertEqual(badge, "Interro")
+        self.assertEqual(css_class, " is-interro")
+        self.assertEqual(detail, "1 h · tiers temps 1 h 20")
+
     def test_skill_markup_turns_backticks_into_mathjax_html(self):
         rendered = GENERATOR.skill_to_html(
             "Calculer `\\bar z`, `|z|` et poser `z=x+iy`"
@@ -170,6 +184,20 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertNotIn('class="mat101-course-status"', PAGE)
         self.assertNotIn('class="mat101-stats"', PAGE)
 
+    def test_session_ten_is_marked_as_an_interro(self):
+        session = next(item for item in DATA if item["number"] == 10)
+        self.assertEqual(session["kind"], "interro")
+        self.assertEqual(session["statusBadge"], "Interro")
+        self.assertEqual(session["statusDetail"], "1 h · tiers temps 1 h 20")
+        self.assertIn("interro", session["search"])
+
+        page = (SESSION_DIR / "10-ensembles-appartenance-inclusion.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('class="mat101-session-detail-status is-interro"', page)
+        self.assertIn("1 h · tiers temps 1 h 20", page)
+        self.assertIn("<strong>Interro.</strong>", page)
+
     def test_hub_exposes_fast_search_filters_and_student_cards(self):
         self.assertIn("data-mat101-course", PAGE)
         self.assertIn("data-mat101-session-card", PAGE)
@@ -178,7 +206,9 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('data-mat101-session-filter="langage"', PAGE)
         self.assertIn('data-mat101-session-filter="synthese"', PAGE)
         self.assertIn("session.skillsHtml", PAGE)
-        self.assertIn("mat101-session-skills", PAGE)
+        self.assertIn("session.statusDetail", PAGE)
+        self.assertIn('session.kind == "interro"', PAGE)
+        self.assertIn("mat101-session-format", PAGE)
         self.assertNotIn("session.skillsPlain", PAGE)
         self.assertIn("page.layout == 'mat101'", HEAD)
         self.assertIn("mat101-sessions.js", HEAD)

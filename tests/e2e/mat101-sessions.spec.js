@@ -61,6 +61,30 @@ test.describe("MAT101 nineteen-session student path", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("marks session 10 as a one-hour interro with extended time", async ({ page }) => {
+    await gotoSessions(page);
+
+    const card = page.locator('[data-session-number="10"]');
+    await expect(card.locator(".mat101-session-date-state.is-interro")).toHaveText(
+      "Interro"
+    );
+    await expect(card.locator(".mat101-session-format")).toHaveText(
+      "1 h · tiers temps 1 h 20"
+    );
+
+    await card.locator(":scope > a").click();
+    await expect(page).toHaveURL(/\/mat101\/seances\/10-ensembles-appartenance-inclusion\/$/);
+    await expect(page.locator(".mat101-session-detail-status.is-interro")).toContainText(
+      "Interro"
+    );
+    await expect(page.locator(".mat101-session-detail-status.is-interro")).toContainText(
+      "1 h · tiers temps 1 h 20"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Durée 1 h · tiers temps 1 h 20"
+    );
+  });
+
   test("filters and searches without losing shareable state", async ({ page }) => {
     await gotoSessions(page);
 

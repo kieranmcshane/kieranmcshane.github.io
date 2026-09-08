@@ -14237,7 +14237,17 @@ body:has(.mat101-session-page) {
   background: #fff1ca;
 }
 
-.mat101-session-date {
+.mat101-session-date-state.is-interro {
+  color: #7a3f12;
+  background: #ffe8d6;
+}
+
+.mat101-session-format {
+  margin: 0.35rem 0 0;
+  color: #7a3f12;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
   margin: 0.7rem 0 0;
   color: #3d5661;
   font-size: 0.76rem;
@@ -14408,6 +14418,17 @@ body:has(.mat101-session-page) {
 .mat101-session-detail-status.is-pending > span {
   color: #7a520d;
   background: #ffedbd;
+}
+
+.mat101-session-detail-status.is-interro {
+  border-color: #efc7a8;
+  color: #7a3f12;
+  background: rgba(255, 244, 236, 0.96);
+}
+
+.mat101-session-detail-status.is-interro > span {
+  color: #7a3f12;
+  background: #ffd8bf;
 }
 
 .mat101-session-local-nav {

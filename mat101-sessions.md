@@ -57,13 +57,18 @@ math: true
               <p>{{ session.blockLabel }}</p>
               <h3>{{ session.shortTitle }}</h3>
             </div>
-            {% if session.scheduleConfirmed %}
+            {% if session.kind == "interro" %}
+              <span class="mat101-session-date-state is-interro">{{ session.statusBadge | default: "Interro" }}</span>
+            {% elsif session.scheduleConfirmed %}
               <span class="mat101-session-date-state">Planifiée</span>
             {% else %}
               <span class="mat101-session-date-state is-pending">À confirmer</span>
             {% endif %}
           </header>
           <p class="mat101-session-date">{{ session.dateLabel }}</p>
+          {% if session.statusDetail %}
+            <p class="mat101-session-format">{{ session.statusDetail }}</p>
+          {% endif %}
           <ul class="mat101-session-skills">
             {% for skill in session.skillsHtml limit: 3 %}
               <li>{{ skill }}</li>

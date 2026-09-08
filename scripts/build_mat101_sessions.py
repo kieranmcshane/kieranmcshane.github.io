@@ -55,6 +55,13 @@ HEADING_IDS = {
     "Ticket": "questions",
 }
 REQUIRED_HEADINGS = {"À savoir faire", "Parcours", "Ticket"}
+SESSION_FORMATS: dict[int, dict[str, str]] = {
+    10: {
+        "kind": "interro",
+        "statusBadge": "Interro",
+        "statusDetail": "1 h · tiers temps 1 h 20",
+    },
+}
 FORBIDDEN_PUBLIC_MARKERS = (
     "fiche enseignant",
     "réponses et corrections",
@@ -221,6 +228,19 @@ def block_for(number: int) -> tuple[str, str]:
     return "synthese", "Synthèse · Révision"
 
 
+def session_status(session: dict[str, object]) -> tuple[str, str, str]:
+    override = SESSION_FORMATS.get(int(session["number"]))
+    if override:
+        return (
+            override["statusBadge"],
+            " is-interro",
+            override["statusDetail"],
+        )
+    if session["scheduleConfirmed"]:
+        return ("Créneau planifié", "", "Cours-TD intégré · 90 min")
+    return ("Date à confirmer", " is-pending", "Date et salle à confirmer")
+
+
 def render_page(
     session: dict[str, object],
     previous: dict[str, object] | None,
@@ -232,14 +252,11 @@ def render_page(
     date_label = html.escape(str(session["dateLabel"]))
     block_label = html.escape(str(session["blockLabel"]))
     body = str(session["body"])
-    schedule_badge = (
-        "Créneau planifié" if session["scheduleConfirmed"] else "Date à confirmer"
-    )
-    schedule_class = "" if session["scheduleConfirmed"] else " is-pending"
-    schedule_detail = (
-        "Cours-TD intégré · 90 min"
-        if session["scheduleConfirmed"]
-        else "Date et salle à confirmer"
+    schedule_badge, schedule_class, schedule_detail = session_status(session)
+    source_note = (
+        f"<p><strong>Interro.</strong> {html.escape(schedule_detail.rstrip('.'))}.</p>"
+        if session.get("kind") == "interro"
+        else "<p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>"
     )
 
     previous_link = ""
@@ -297,7 +314,7 @@ mat101_session_number: {number}
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
-    <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
+    {source_note}
   </aside>
 
   <article class="mat101-session-content" markdown="1">
@@ -352,7 +369,19 @@ def main() -> None:
                 "blockLabel": block_label,
                 "skillsPlain": [plain_text(skill) for skill in skills],
                 "skillsHtml": [skill_to_html(skill) for skill in skills],
-                "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
+                **SESSION_FORMATS.get(number, {}),
+                "search": plain_text(
+                    " ".join(
+                        [
+                            title,
+                            block_label,
+                            *skills,
+                            body,
+                            SESSION_FORMATS.get(number, {}).get("statusBadge", ""),
+                            SESSION_FORMATS.get(number, {}).get("statusDetail", ""),
+                        ]
+                    )
+                ).lower(),
             }
         )
 
