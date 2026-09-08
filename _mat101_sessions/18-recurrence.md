@@ -10,15 +10,16 @@ mat101_session_number: 18
 
 <!-- Generated from the public student workbook and provisional schedule. -->
 <div class="mat101-library mat101-session-page" data-mat101-session-number="18">
-  <header class="mat101-session-detail-hero">
+  <header class="mat101-session-detail-hero is-upcoming">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Récurrence</h1>
-      <p>Date et salle à confirmer</p>
+      <p class="mat101-session-when">ven. 16 oct. 2026</p>
+      <p class="mat101-session-room is-pending">Salle à confirmer</p>
     </div>
-    <div class="mat101-session-detail-status is-pending">
-      <span>Date à confirmer</span>
-      <small>Date et salle à confirmer</small>
+    <div class="mat101-session-detail-status is-upcoming">
+      <span>À venir</span>
+      <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>
 

@@ -10,11 +10,12 @@ mat101_session_number: 1
 
 <!-- Generated from the public student workbook and provisional schedule. -->
 <div class="mat101-library mat101-session-page" data-mat101-session-number="1">
-  <header class="mat101-session-detail-hero">
+  <header class="mat101-session-detail-hero is-done">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 1 · Nombres complexes</p>
       <h1>Forme algébrique</h1>
-      <p>mar. 8 sept. 2026</p>
+      <p class="mat101-session-when">mar. 8 sept. 2026</p>
+      <p class="mat101-session-room is-pending">Salle à confirmer</p>
     </div>
     <div class="mat101-session-detail-status is-done">
       <span>Séance faite</span>

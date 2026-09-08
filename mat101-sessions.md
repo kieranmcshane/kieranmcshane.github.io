@@ -16,7 +16,7 @@ math: true
     </nav>
   </header>
 
-  <p class="mat101-session-notice">Partiel prévu la semaine du 20 octobre.</p>
+  <p class="mat101-session-notice">Partiel prévu la semaine du 20 octobre. Pas de cours-TD du 19 au 25 octobre.</p>
 
   <section class="mat101-session-browser" id="seances" aria-labelledby="mat101-session-browser-title">
     <div class="mat101-session-browser-heading">
@@ -47,7 +47,7 @@ math: true
   <ol class="mat101-session-grid" aria-label="Les 19 séances MAT101">
     {% for session in sessions %}
       <li
-        class="mat101-session-card"
+        class="mat101-session-card{% if session.done %} is-done{% else %} is-upcoming{% endif %}"
         data-mat101-session-card
         data-session-number="{{ session.number }}"
         data-session-block="{{ session.block }}"
@@ -62,13 +62,16 @@ math: true
             </div>
             {% if session.done %}
               <span class="mat101-session-date-state is-done">Faite</span>
-            {% elsif session.scheduleConfirmed %}
-              <span class="mat101-session-date-state">Planifiée</span>
             {% else %}
-              <span class="mat101-session-date-state is-pending">À confirmer</span>
+              <span class="mat101-session-date-state is-upcoming">À venir</span>
             {% endif %}
           </header>
           <p class="mat101-session-date">{{ session.dateLabel }}</p>
+          {% if session.room %}
+            <p class="mat101-session-room">{{ session.room }}</p>
+          {% elsif session.scheduleConfirmed %}
+            <p class="mat101-session-room is-pending">Salle à confirmer</p>
+          {% endif %}
           <ul>
             {% for skill in session.skillsPlain limit: 3 %}
               <li>{{ skill }}</li>

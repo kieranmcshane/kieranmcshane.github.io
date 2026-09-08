@@ -12,6 +12,7 @@ import argparse
 import html
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 
@@ -52,6 +53,26 @@ HEADING_IDS = {
     "Ticket": "ticket",
 }
 REQUIRED_HEADINGS = {"À savoir faire", "Parcours", "Ticket"}
+EXAM_WEEK_START = date(2026, 10, 19)
+EXAM_WEEK_END = date(2026, 10, 25)
+DATE_LABEL_RE = re.compile(
+    r"^(lun|mar|mer|jeu|ven|sam|dim)\.\s+(\d{1,2})\s+"
+    r"(janv|févr|mars|avr|mai|juin|juil|août|sept|oct|nov|déc)\.\s+(\d{4})$"
+)
+MONTHS = {
+    "janv": 1,
+    "févr": 2,
+    "mars": 3,
+    "avr": 4,
+    "mai": 5,
+    "juin": 6,
+    "juil": 7,
+    "août": 8,
+    "sept": 9,
+    "oct": 10,
+    "nov": 11,
+    "déc": 12,
+}
 FORBIDDEN_PUBLIC_MARKERS = (
     "fiche enseignant",
     "réponses et corrections",
@@ -228,10 +249,52 @@ def apply_outcome(session: dict[str, object], outcome: dict[str, object]) -> Non
         session["search"] = search
     if outcome.get("done"):
         session["done"] = True
+    if "dateLabel" in outcome:
+        session["dateLabel"] = str(outcome["dateLabel"])
+    if "scheduleConfirmed" in outcome:
+        session["scheduleConfirmed"] = bool(outcome["scheduleConfirmed"])
+    if "room" in outcome:
+        session["room"] = outcome["room"]
     note = outcome.get("note")
     if note:
         session["doneNote"] = str(note)
         session["search"] = plain_text(f"{session['search']} fait {note}").lower()
+
+
+def parse_date_label(label: str) -> date | None:
+    """Parse a public French date label such as ``mar. 8 sept. 2026``."""
+
+    match = DATE_LABEL_RE.match(label.strip())
+    if not match:
+        return None
+    return date(int(match.group(4)), MONTHS[match.group(3)], int(match.group(2)))
+
+
+def assert_no_exam_week_sessions(sessions: list[dict[str, object]]) -> None:
+    """Refuse any créneau in the 19–25 October 2026 midterm week."""
+
+    for session in sessions:
+        parsed = parse_date_label(str(session.get("dateLabel") or ""))
+        if parsed and EXAM_WEEK_START <= parsed <= EXAM_WEEK_END:
+            raise ValueError(
+                f"session {session['number']}: {session['dateLabel']} "
+                "falls in the 20 Oct exam week"
+            )
+
+
+def room_markup(session: dict[str, object]) -> str:
+    """Return the hero room line, or empty if the date itself is still open."""
+
+    room = session.get("room")
+    if isinstance(room, str) and room.strip():
+        return (
+            '<p class="mat101-session-room">'
+            + html.escape(room.strip())
+            + "</p>\n      "
+        )
+    if session.get("scheduleConfirmed"):
+        return '<p class="mat101-session-room is-pending">Salle à confirmer</p>\n      '
+    return ""
 
 
 def block_for(number: int) -> tuple[str, str]:
@@ -258,14 +321,18 @@ def render_page(
         schedule_badge = "Séance faite"
         schedule_class = " is-done"
         schedule_detail = "Cours-TD intégré · 90 min"
+        hero_class = " is-done"
     elif session["scheduleConfirmed"]:
-        schedule_badge = "Créneau planifié"
-        schedule_class = ""
+        schedule_badge = "À venir"
+        schedule_class = " is-upcoming"
         schedule_detail = "Cours-TD intégré · 90 min"
+        hero_class = " is-upcoming"
     else:
         schedule_badge = "Date à confirmer"
         schedule_class = " is-pending"
         schedule_detail = "Date et salle à confirmer"
+        hero_class = " is-pending"
+    room_block = room_markup(session)
     done_note = html.escape(str(session.get("doneNote") or "").strip())
     fait_block = (
         f"<p><strong>Fait.</strong> {done_note}</p>\n    " if done_note else ""
@@ -305,12 +372,12 @@ mat101_session_number: {number}
 
 <!-- Generated from the public student workbook and provisional schedule. -->
 <div class="mat101-library mat101-session-page" data-mat101-session-number="{number}">
-  <header class="mat101-session-detail-hero">
+  <header class="mat101-session-detail-hero{hero_class}">
     <div>
       <p class="mat101-session-eyebrow">{block_label}</p>
       <h1>{title}</h1>
-      <p>{date_label}</p>
-    </div>
+      <p class="mat101-session-when">{date_label}</p>
+      {room_block}</div>
     <div class="mat101-session-detail-status{schedule_class}">
       <span>{schedule_badge}</span>
       <small>{schedule_detail}</small>
@@ -381,9 +448,12 @@ def main() -> None:
             "blockLabel": block_label,
             "skillsPlain": [plain_text(skill) for skill in skills],
             "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
+            "room": None,
         }
         apply_outcome(session, outcomes.get(number, {}))
         sessions.append(session)
+
+    assert_no_exam_week_sessions(sessions)
 
     COLLECTION.mkdir(parents=True, exist_ok=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)

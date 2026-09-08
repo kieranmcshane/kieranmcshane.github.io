@@ -14269,6 +14269,17 @@ body:has(.mat101-session-page) {
   box-shadow: 0 5px 18px rgba(22, 48, 58, 0.045);
 }
 
+.mat101-session-card.is-upcoming {
+  border-color: #d8dfe2;
+  background: #f5f7f8;
+  box-shadow: none;
+}
+
+.mat101-session-card.is-upcoming .mat101-session-number {
+  color: #5c6d74;
+  background: #c5d0d4;
+}
+
 .mat101-session-card > a {
   display: flex;
   min-height: 100%;
@@ -14343,6 +14354,11 @@ body:has(.mat101-session-page) {
   background: #fff1ca;
 }
 
+.mat101-session-date-state.is-upcoming {
+  color: #5c6570;
+  background: #e4e9ec;
+}
+
 .mat101-session-date-state.is-done {
   color: #24573a;
   background: #d7eadf;
@@ -14353,6 +14369,13 @@ body:has(.mat101-session-page) {
   color: #3d5661;
   font-size: 0.76rem;
   font-weight: 700;
+}
+
+.mat101-session-room {
+  margin: 0.2rem 0 0;
+  color: #6a7a82;
+  font-size: 0.72rem;
+  font-weight: 650;
 }
 
 .mat101-session-card ul {
@@ -14445,6 +14468,11 @@ body:has(.mat101-session-page) {
     #fbfdfd;
 }
 
+.mat101-session-detail-hero.is-upcoming {
+  border-color: #d5dde0;
+  background: #f6f8f8;
+}
+
 .mat101-session-detail-hero h1 {
   max-width: 24ch;
   margin: 0;
@@ -14453,11 +14481,15 @@ body:has(.mat101-session-page) {
   letter-spacing: -0.03em;
 }
 
-.mat101-session-detail-hero > div:first-child > p:last-child {
+.mat101-session-when {
   margin: 0.85rem 0 0;
   color: var(--mat101-muted);
   font-size: 0.88rem;
   font-weight: 700;
+}
+
+.mat101-session-detail-hero .mat101-session-room {
+  font-size: 0.8rem;
 }
 
 .mat101-session-eyebrow {
@@ -14508,6 +14540,21 @@ body:has(.mat101-session-page) {
 .mat101-session-detail-status.is-pending > span {
   color: #7a520d;
   background: #ffedbd;
+}
+
+.mat101-session-detail-status.is-upcoming {
+  border-color: #d4dce0;
+  color: #5c6570;
+  background: #f3f5f6;
+}
+
+.mat101-session-detail-status.is-upcoming > span {
+  color: #5c6570;
+  background: #e4e9ec;
+}
+
+.mat101-session-detail-status.is-upcoming small {
+  color: #6e7c83;
 }
 
 .mat101-session-detail-status.is-done > span {

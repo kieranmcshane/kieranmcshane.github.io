@@ -5,5 +5,13 @@
     "textReplacements": {
       "N⊂Z⊂Q⊂R⊂C": "N⊂Z⊂D⊂Q⊂R⊂C"
     }
+  },
+  "18": {
+    "dateLabel": "ven. 16 oct. 2026",
+    "scheduleConfirmed": true
+  },
+  "19": {
+    "dateLabel": "mar. 27 oct. 2026",
+    "scheduleConfirmed": true
   }
 }

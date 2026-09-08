@@ -2,6 +2,7 @@ import importlib.util
 import json
 import re
 import unittest
+from datetime import date
 from pathlib import Path
 
 
@@ -136,8 +137,11 @@ class Mat101SessionsTests(unittest.TestCase):
                 if number in {18, 19}
             )
         )
-        self.assertIn('class="mat101-session-date-state is-pending"', PAGE)
+        self.assertIn('class="mat101-session-date-state is-upcoming"', PAGE)
+        self.assertIn("À venir", PAGE)
         self.assertIn("{{ session.dateLabel }}", PAGE)
+        self.assertIn("session.room", PAGE)
+        self.assertIn("Salle à confirmer", PAGE)
         self.assertNotIn("17 + 2", PAGE)
         self.assertNotIn("La date et la salle des séances 18 et 19 restent à confirmer.", PAGE)
 
@@ -145,6 +149,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Séances MAT101</h1>', PAGE)
         self.assertIn("Partiel prévu la semaine du 20 octobre.", PAGE)
+        self.assertIn("Pas de cours-TD du 19 au 25 octobre.", PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
         self.assertIn("'/mat101/exercices/' | relative_url", PAGE)
         self.assertNotIn("Feuille de route", PAGE)
@@ -172,6 +177,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("session.skillsPlain", PAGE)
         self.assertIn("session.done", PAGE)
         self.assertIn("Faite", PAGE)
+        self.assertIn("À venir", PAGE)
         self.assertIn("page.layout == 'mat101'", HEAD)
         self.assertIn("mat101-sessions.js", HEAD)
         self.assertIn("cards.length !== 19", SCRIPT)
@@ -179,6 +185,56 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn(".mat101-session-content", STYLES)
         self.assertIn(".mat101-session-date-state.is-done", STYLES)
         self.assertIn(".mat101-session-detail-status.is-done", STYLES)
+        self.assertIn(".mat101-session-card.is-upcoming", STYLES)
+        self.assertIn(".mat101-session-date-state.is-upcoming", STYLES)
+        self.assertIn(".mat101-session-detail-status.is-upcoming", STYLES)
+
+    def test_upcoming_sessions_use_a_quieter_tone_than_done(self):
+        done_page = (SESSION_DIR / "01-forme-algebrique.md").read_text(encoding="utf-8")
+        upcoming_page = (SESSION_DIR / "02-conjugue-module-quotient.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('class="mat101-session-detail-hero is-done"', done_page)
+        self.assertIn("Séance faite", done_page)
+        self.assertNotIn("is-upcoming", done_page)
+        self.assertIn('class="mat101-session-detail-hero is-upcoming"', upcoming_page)
+        self.assertIn(">À venir</span>", upcoming_page)
+        self.assertNotIn("Créneau planifié", upcoming_page)
+        self.assertNotIn("Planifiée", PAGE)
+        self.assertIn('class="mat101-session-card{% if session.done %} is-done{% else %} is-upcoming{% endif %}"', PAGE)
+
+    def test_no_session_falls_in_the_20_october_exam_week(self):
+        GENERATOR.assert_no_exam_week_sessions(DATA)
+        dates = {
+            item["number"]: GENERATOR.parse_date_label(item["dateLabel"]) for item in DATA
+        }
+        self.assertEqual(dates[17], date(2026, 10, 15))
+        self.assertEqual(dates[18], date(2026, 10, 16))
+        self.assertEqual(dates[19], date(2026, 10, 27))
+        self.assertTrue(all(item["scheduleConfirmed"] for item in DATA))
+        self.assertTrue(all(parsed is not None for parsed in dates.values()))
+        exam_week = [
+            number
+            for number, parsed in dates.items()
+            if date(2026, 10, 19) <= parsed <= date(2026, 10, 25)
+        ]
+        self.assertEqual(exam_week, [])
+        self.assertEqual(DATA[17]["dateLabel"], "ven. 16 oct. 2026")
+        self.assertEqual(DATA[18]["dateLabel"], "mar. 27 oct. 2026")
+
+    def test_room_field_is_wired_without_invented_codes(self):
+        for item in DATA:
+            self.assertIn("room", item)
+            self.assertIsNone(item["room"])
+        done_page = (SESSION_DIR / "01-forme-algebrique.md").read_text(encoding="utf-8")
+        upcoming_page = (SESSION_DIR / "18-recurrence.md").read_text(encoding="utf-8")
+        self.assertIn("Salle à confirmer", done_page)
+        self.assertIn("Salle à confirmer", upcoming_page)
+        self.assertIn("session.room", PAGE)
+        public_rooms = " ".join(
+            str(item.get("room") or "") for item in DATA
+        )
+        self.assertNotRegex(public_rooms, r"[A-Z]{1,3}\s?\d")
 
     def test_session_one_records_completion_without_replacing_the_parcours(self):
         session = DATA[0]
@@ -195,6 +251,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("Séance faite", page)
         self.assertNotIn("Créneau planifié", page)
         self.assertIn("<strong>Fait.</strong>", page)
+        self.assertIn("Salle à confirmer", page)
         self.assertIn("Ensembles N, Z, D, Q, R, C.", page)
         self.assertIn("Exercice 1.1 ; exercice 1.2 questions 1–2.", page)
         self.assertIn("`N⊂Z⊂D⊂Q⊂R⊂C`", page)
@@ -220,7 +277,24 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("Séance faite", page)
         self.assertNotIn("Créneau planifié", page)
         self.assertIn("<strong>Fait.</strong>", page)
+        self.assertIn("Salle à confirmer", page)
         self.assertIn("Exercice 1.1 ; exercice 1.2 questions 1–2.", page)
+        self.assertIn("À venir", GENERATOR.render_page(
+            {
+                "number": 2,
+                "title": "Conjugué, module et quotient",
+                "url": "/mat101/seances/02-conjugue-module-quotient/",
+                "dateLabel": "jeu. 10 sept. 2026",
+                "blockLabel": "Chapitre 1 · Nombres complexes",
+                "body": "- Compétence.\n",
+                "skillsPlain": ["Compétence"],
+                "search": "module",
+                "scheduleConfirmed": True,
+                "room": None,
+            },
+            None,
+            None,
+        ))
 
     def test_mat101_is_the_single_global_entry_and_pages_cross_link(self):
         header_block = CONFIG.split("header_pages:", 1)[1].split("plugins:", 1)[0]
