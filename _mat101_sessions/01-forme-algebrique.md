@@ -16,8 +16,8 @@ mat101_session_number: 1
       <h1>Forme algébrique</h1>
       <p>mar. 8 sept. 2026</p>
     </div>
-    <div class="mat101-session-detail-status">
-      <span>Créneau planifié</span>
+    <div class="mat101-session-detail-status is-done">
+      <span>Séance faite</span>
       <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>
@@ -31,6 +31,7 @@ mat101_session_number: 1
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
+    <p><strong>Fait.</strong> Ensembles N, Z, D, Q, R, C. Partie réelle et imaginaire. Module. Plan complexe. Exercice 1.1 ; exercice 1.2 questions 1–2.</p>
     <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
   </aside>
 
@@ -40,7 +41,7 @@ mat101_session_number: 1
 ## À savoir faire
 {: #competences}
 
-- Situer un nombre dans `N⊂Z⊂Q⊂R⊂C`.
+- Situer un nombre dans `N⊂Z⊂D⊂Q⊂R⊂C`.
 - Écrire `z=a+ib`, puis donner `Re(z)` et `Im(z)`.
 - Additionner et multiplier en utilisant `i²=−1`.
 

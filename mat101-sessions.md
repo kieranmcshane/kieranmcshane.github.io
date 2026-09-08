@@ -60,7 +60,9 @@ math: true
               <p>{{ session.blockLabel }}</p>
               <h3>{{ session.shortTitle }}</h3>
             </div>
-            {% if session.scheduleConfirmed %}
+            {% if session.done %}
+              <span class="mat101-session-date-state is-done">Faite</span>
+            {% elsif session.scheduleConfirmed %}
               <span class="mat101-session-date-state">Planifiée</span>
             {% else %}
               <span class="mat101-session-date-state is-pending">À confirmer</span>

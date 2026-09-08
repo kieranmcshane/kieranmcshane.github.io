@@ -14343,6 +14343,11 @@ body:has(.mat101-session-page) {
   background: #fff1ca;
 }
 
+.mat101-session-date-state.is-done {
+  color: #24573a;
+  background: #d7eadf;
+}
+
 .mat101-session-date {
   margin: 0.7rem 0 0;
   color: #3d5661;
@@ -14503,6 +14508,11 @@ body:has(.mat101-session-page) {
 .mat101-session-detail-status.is-pending > span {
   color: #7a520d;
   background: #ffedbd;
+}
+
+.mat101-session-detail-status.is-done > span {
+  color: #24573a;
+  background: #d4eadc;
 }
 
 .mat101-session-local-nav {

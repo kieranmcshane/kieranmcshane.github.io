@@ -23,6 +23,9 @@ test.describe("MAT101 nineteen-session student path", () => {
       page.locator('a[href$="parcours-19-seances-mat101-ima02.pdf"]')
     ).toHaveCount(0);
     await expect(
+      page.locator('[data-session-number="1"] .mat101-session-date-state.is-done')
+    ).toContainText("Faite");
+    await expect(
       page.locator('[data-session-number="18"] .mat101-session-date-state.is-pending')
     ).toContainText("À confirmer");
     await expect(
@@ -74,6 +77,23 @@ test.describe("MAT101 nineteen-session student path", () => {
 
     await expect(page).toHaveURL(/\/mat101\/seances\/01-forme-algebrique\/$/);
     await expect(page.locator("[data-mat101-session-number='1']")).toBeVisible();
+    await expect(page.locator(".mat101-session-detail-status.is-done")).toContainText(
+      "Séance faite"
+    );
+    await expect(page.locator(".mat101-session-detail-status")).not.toContainText(
+      "Créneau planifié"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText("Fait.");
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Ensembles N, Z, D, Q, R, C"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText("Module.");
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Plan complexe"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Exercice 1.1 ; exercice 1.2 questions 1–2."
+    );
     await expect(page.getByRole("heading", { name: "À savoir faire" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Parcours" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Contrôle rapide" })).toBeVisible();

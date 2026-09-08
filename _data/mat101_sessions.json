@@ -4,17 +4,19 @@
     "title": "Forme algébrique",
     "dateLabel": "mar. 8 sept. 2026",
     "scheduleConfirmed": true,
+    "done": true,
+    "doneNote": "Ensembles N, Z, D, Q, R, C. Partie réelle et imaginaire. Module. Plan complexe. Exercice 1.1 ; exercice 1.2 questions 1–2.",
     "slug": "forme-algebrique",
     "url": "/mat101/seances/01-forme-algebrique/",
     "shortTitle": "Forme algébrique",
     "block": "complexes",
     "blockLabel": "Chapitre 1 · Nombres complexes",
     "skillsPlain": [
-      "Situer un nombre dans N⊂Z⊂Q⊂R⊂C",
+      "Situer un nombre dans N⊂Z⊂D⊂Q⊂R⊂C",
       "Écrire z=a+ib, puis donner Re(z) et Im(z)",
       "Additionner et multiplier en utilisant i²=−1"
     ],
-    "search": "forme algébrique chapitre 1 · nombres complexes situer un nombre dans n⊂z⊂q⊂r⊂c écrire z=a+ib, puis donner re(z) et im(z) additionner et multiplier en utilisant i²=−1 ## à savoir faire {: #competences} - situer un nombre dans n⊂z⊂q⊂r⊂c. - écrire z=a+ib, puis donner re(z) et im(z). - additionner et multiplier en utilisant i²=−1. ## parcours {: #parcours} - poly p. 11–13. - exercice 1.1 : questions 1, 3, 4, 5, 6 et 7. ## contrôle rapide {: #controle} calculer (1+2i)(−4+6i) et indiquer séparément partie réelle et partie imaginaire. ## ticket {: #ticket} 1. (3−2i)+(−5+7i) ; 2. (1+i)²."
+    "search": "forme algébrique chapitre 1 · nombres complexes situer un nombre dans n⊂z⊂d⊂q⊂r⊂c écrire z=a+ib, puis donner re(z) et im(z) additionner et multiplier en utilisant i²=−1 ## à savoir faire {: #competences} - situer un nombre dans n⊂z⊂d⊂q⊂r⊂c. - écrire z=a+ib, puis donner re(z) et im(z). - additionner et multiplier en utilisant i²=−1. ## parcours {: #parcours} - poly p. 11–13. - exercice 1.1 : questions 1, 3, 4, 5, 6 et 7. ## contrôle rapide {: #controle} calculer (1+2i)(−4+6i) et indiquer séparément partie réelle et partie imaginaire. ## ticket {: #ticket} 1. (3−2i)+(−5+7i) ; 2. (1+i)². fait ensembles n, z, d, q, r, c. partie réelle et imaginaire. module. plan complexe. exercice 1.1 ; exercice 1.2 questions 1–2."
   },
   {
     "number": 2,

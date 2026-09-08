@@ -170,11 +170,57 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('data-mat101-session-filter="langage"', PAGE)
         self.assertIn('data-mat101-session-filter="synthese"', PAGE)
         self.assertIn("session.skillsPlain", PAGE)
+        self.assertIn("session.done", PAGE)
+        self.assertIn("Faite", PAGE)
         self.assertIn("page.layout == 'mat101'", HEAD)
         self.assertIn("mat101-sessions.js", HEAD)
         self.assertIn("cards.length !== 19", SCRIPT)
         self.assertIn(".mat101-session-grid", STYLES)
         self.assertIn(".mat101-session-content", STYLES)
+        self.assertIn(".mat101-session-date-state.is-done", STYLES)
+        self.assertIn(".mat101-session-detail-status.is-done", STYLES)
+
+    def test_session_one_records_completion_without_replacing_the_parcours(self):
+        session = DATA[0]
+        page = (SESSION_DIR / "01-forme-algebrique.md").read_text(encoding="utf-8")
+        self.assertTrue(session["done"])
+        self.assertEqual(
+            session["doneNote"],
+            "Ensembles N, Z, D, Q, R, C. Partie réelle et imaginaire. Module. Plan complexe. Exercice 1.1 ; exercice 1.2 questions 1–2.",
+        )
+        self.assertIn("N⊂Z⊂D⊂Q⊂R⊂C", session["skillsPlain"][0])
+        self.assertIn("exercice 1.2 questions 1–2", session["search"])
+        self.assertFalse(any(item.get("done") for item in DATA[1:]))
+        self.assertIn('class="mat101-session-detail-status is-done"', page)
+        self.assertIn("Séance faite", page)
+        self.assertNotIn("Créneau planifié", page)
+        self.assertIn("<strong>Fait.</strong>", page)
+        self.assertIn("Ensembles N, Z, D, Q, R, C.", page)
+        self.assertIn("Exercice 1.1 ; exercice 1.2 questions 1–2.", page)
+        self.assertIn("`N⊂Z⊂D⊂Q⊂R⊂C`", page)
+        self.assertIn("Exercice 1.1 : questions 1, 3, 4, 5, 6 et 7.", page)
+
+    def test_generator_applies_a_done_outcome_to_the_rendered_page(self):
+        session = {
+            "number": 1,
+            "title": "Forme algébrique",
+            "url": "/mat101/seances/01-forme-algebrique/",
+            "dateLabel": "mar. 8 sept. 2026",
+            "blockLabel": "Chapitre 1 · Nombres complexes",
+            "body": "- Situer un nombre dans `N⊂Z⊂Q⊂R⊂C`.\n",
+            "skillsPlain": ["Situer un nombre dans N⊂Z⊂Q⊂R⊂C"],
+            "search": "n⊂z⊂q⊂r⊂c",
+            "scheduleConfirmed": True,
+        }
+        GENERATOR.apply_outcome(session, GENERATOR.load_outcomes()[1])
+        page = GENERATOR.render_page(session, None, None)
+        self.assertTrue(session["done"])
+        self.assertIn("N⊂Z⊂D⊂Q⊂R⊂C", session["skillsPlain"][0])
+        self.assertIn("`N⊂Z⊂D⊂Q⊂R⊂C`", session["body"])
+        self.assertIn("Séance faite", page)
+        self.assertNotIn("Créneau planifié", page)
+        self.assertIn("<strong>Fait.</strong>", page)
+        self.assertIn("Exercice 1.1 ; exercice 1.2 questions 1–2.", page)
 
     def test_mat101_is_the_single_global_entry_and_pages_cross_link(self):
         header_block = CONFIG.split("header_pages:", 1)[1].split("plugins:", 1)[0]

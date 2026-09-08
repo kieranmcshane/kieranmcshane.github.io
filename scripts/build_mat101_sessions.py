@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 COLLECTION = ROOT / "_mat101_sessions"
 DATA_FILE = ROOT / "_data" / "mat101_sessions.json"
+OUTCOMES_FILE = ROOT / "_data" / "mat101_session_outcomes.json"
 
 SESSION_SLUGS = {
     1: "forme-algebrique",
@@ -190,6 +191,49 @@ def parse_schedule(text: str) -> dict[int, dict[str, object]]:
     return rows
 
 
+def load_outcomes() -> dict[int, dict[str, object]]:
+    """Load optional post-séance records keyed by session number."""
+
+    if not OUTCOMES_FILE.is_file():
+        return {}
+    raw = json.loads(OUTCOMES_FILE.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("session outcomes must be an object keyed by session number")
+    outcomes: dict[int, dict[str, object]] = {}
+    for key, value in raw.items():
+        number = int(key)
+        if not isinstance(value, dict):
+            raise ValueError(f"session {number}: outcome must be an object")
+        outcomes[number] = value
+    return outcomes
+
+
+def apply_outcome(session: dict[str, object], outcome: dict[str, object]) -> None:
+    """Merge a post-séance record into a generated session (in place)."""
+
+    replacements = outcome.get("textReplacements") or {}
+    if replacements:
+        if not isinstance(replacements, dict):
+            raise ValueError("textReplacements must be an object")
+        body = str(session["body"])
+        skills = list(session["skillsPlain"])
+        search = str(session["search"])
+        for old, new in replacements.items():
+            old_text, new_text = str(old), str(new)
+            body = body.replace(old_text, new_text)
+            skills = [skill.replace(old_text, new_text) for skill in skills]
+            search = search.replace(old_text.lower(), new_text.lower())
+        session["body"] = body
+        session["skillsPlain"] = skills
+        session["search"] = search
+    if outcome.get("done"):
+        session["done"] = True
+    note = outcome.get("note")
+    if note:
+        session["doneNote"] = str(note)
+        session["search"] = plain_text(f"{session['search']} fait {note}").lower()
+
+
 def block_for(number: int) -> tuple[str, str]:
     if number <= 9:
         return "complexes", "Chapitre 1 · Nombres complexes"
@@ -209,14 +253,22 @@ def render_page(
     date_label = html.escape(str(session["dateLabel"]))
     block_label = html.escape(str(session["blockLabel"]))
     body = str(session["body"])
-    schedule_badge = (
-        "Créneau planifié" if session["scheduleConfirmed"] else "Date à confirmer"
-    )
-    schedule_class = "" if session["scheduleConfirmed"] else " is-pending"
-    schedule_detail = (
-        "Cours-TD intégré · 90 min"
-        if session["scheduleConfirmed"]
-        else "Date et salle à confirmer"
+    done = bool(session.get("done"))
+    if done:
+        schedule_badge = "Séance faite"
+        schedule_class = " is-done"
+        schedule_detail = "Cours-TD intégré · 90 min"
+    elif session["scheduleConfirmed"]:
+        schedule_badge = "Créneau planifié"
+        schedule_class = ""
+        schedule_detail = "Cours-TD intégré · 90 min"
+    else:
+        schedule_badge = "Date à confirmer"
+        schedule_class = " is-pending"
+        schedule_detail = "Date et salle à confirmer"
+    done_note = html.escape(str(session.get("doneNote") or "").strip())
+    fait_block = (
+        f"<p><strong>Fait.</strong> {done_note}</p>\n    " if done_note else ""
     )
 
     previous_link = ""
@@ -274,7 +326,7 @@ mat101_session_number: {number}
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
-    <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
+    {fait_block}<p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
   </aside>
 
   <article class="mat101-session-content" markdown="1">
@@ -309,6 +361,7 @@ def main() -> None:
 
     workbook_sessions = parse_workbook(workbook.read_text(encoding="utf-8"))
     schedule = parse_schedule(schedule_file.read_text(encoding="utf-8"))
+    outcomes = load_outcomes()
 
     sessions: list[dict[str, object]] = []
     for workbook_session in workbook_sessions:
@@ -318,19 +371,19 @@ def main() -> None:
         title = str(workbook_session["title"])
         skills = list(workbook_session["skills"])
         body = str(workbook_session["body"])
-        sessions.append(
-            {
-                **workbook_session,
-                **schedule[number],
-                "slug": slug,
-                "url": f"/mat101/seances/{number:02d}-{slug}/",
-                "shortTitle": title,
-                "block": block_slug,
-                "blockLabel": block_label,
-                "skillsPlain": [plain_text(skill) for skill in skills],
-                "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
-            }
-        )
+        session = {
+            **workbook_session,
+            **schedule[number],
+            "slug": slug,
+            "url": f"/mat101/seances/{number:02d}-{slug}/",
+            "shortTitle": title,
+            "block": block_slug,
+            "blockLabel": block_label,
+            "skillsPlain": [plain_text(skill) for skill in skills],
+            "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
+        }
+        apply_outcome(session, outcomes.get(number, {}))
+        sessions.append(session)
 
     COLLECTION.mkdir(parents=True, exist_ok=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
