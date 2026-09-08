@@ -12,7 +12,7 @@ mat101_session_number: 9
 <div class="mat101-library mat101-session-page" data-mat101-session-number="9">
   <header class="mat101-session-detail-hero">
     <div>
-      <p class="mat101-session-eyebrow">Chapitre 1 · Nombres complexes</p>
+      <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Géométrie et rédaction</h1>
       <p>ven. 25 sept. 2026</p>
     </div>
@@ -68,6 +68,6 @@ Pour `z_A=2−i` et `z_B=−2+3i`, donner le milieu de `[AB]` et la distance `AB
 
   <nav class="mat101-session-pager" aria-label="Séances précédente et suivante">
     <a rel="prev" href="{{ "/mat101/seances/08-racines-niemes-unite/" | relative_url }}"><span>← Séance 8</span><strong>Racines n-ièmes</strong></a>
-    <a rel="next" href="{{ "/mat101/seances/10-ensembles-appartenance-inclusion/" | relative_url }}"><span>Séance 10 →</span><strong>Décrire un ensemble</strong></a>
+    <a rel="next" href="{{ "/mat101/seances/10-ensembles-appartenance-inclusion/" | relative_url }}"><span>Séance 10 →</span><strong>Interro · nombres complexes</strong></a>
   </nav>
 </div>

@@ -101,12 +101,19 @@ test.describe("MAT101 nineteen-session student path", () => {
     await gotoSessions(page);
 
     await page.locator('[data-mat101-session-filter="complexes"]').click();
-    await expect(page.locator("[data-mat101-session-card]:visible")).toHaveCount(9);
+    await expect(page.locator("[data-mat101-session-card]:visible")).toHaveCount(8);
     await expect(page.locator("#mat101-session-count")).toHaveText(
-      "9 séances affichées"
+      "8 séances affichées"
     );
     await expect(page).toHaveURL(/bloc=complexes/);
 
+    await page.locator('[data-mat101-session-filter="langage"]').click();
+    await expect(page.locator("[data-mat101-session-card]:visible")).toHaveCount(11);
+    await expect(page.locator("#mat101-session-count")).toHaveText(
+      "11 séances affichées"
+    );
+
+    await page.locator('[data-mat101-session-filter="complexes"]').click();
     await page.locator("#mat101-session-search-input").fill("racines n-ièmes");
     await expect(page.locator("[data-mat101-session-card]:visible")).toHaveCount(1);
     await expect(page.locator('[data-session-number="8"]')).toBeVisible();

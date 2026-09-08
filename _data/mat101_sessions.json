@@ -183,14 +183,14 @@
     "slug": "geometrie-redaction-synthese",
     "url": "/mat101/seances/09-geometrie-redaction-synthese/",
     "shortTitle": "Géométrie et rédaction",
-    "block": "complexes",
-    "blockLabel": "Chapitre 1 · Nombres complexes",
+    "block": "langage",
+    "blockLabel": "Chapitre 2 · Ensembles et langage mathématique",
     "skillsPlain": [
       "Traduire vecteur, distance, milieu et angle en affixes",
       "Utiliser « arrivée moins départ »",
       "Rédiger une chaîne d'équivalences et une conclusion"
     ],
-    "search": "géométrie et rédaction chapitre 1 · nombres complexes traduire vecteur, distance, milieu et angle en affixes utiliser « arrivée moins départ » rédiger une chaîne d'équivalences et une conclusion ## à savoir faire {: #competences} - traduire vecteur, distance, milieu et angle en affixes. - utiliser « arrivée moins départ ». - rédiger une chaîne d'équivalences et une conclusion. ## parcours {: #parcours} - poly p. 27–29. - exercices 1.15 et 1.16. - exercice 1.17 en prolongement. ## contrôle formatif {: #controle} 1. mettre (2+i)/(1−i) sous forme algébrique. 2. calculer (1−i)^6 par forme exponentielle. 3. résoudre z²+2z+2=0. ## questions {: #questions} pour z_a=2−i et z_b=−2+3i, donner le milieu de [ab] et la distance ab.",
+    "search": "géométrie et rédaction chapitre 2 · ensembles et langage mathématique traduire vecteur, distance, milieu et angle en affixes utiliser « arrivée moins départ » rédiger une chaîne d'équivalences et une conclusion ## à savoir faire {: #competences} - traduire vecteur, distance, milieu et angle en affixes. - utiliser « arrivée moins départ ». - rédiger une chaîne d'équivalences et une conclusion. ## parcours {: #parcours} - poly p. 27–29. - exercices 1.15 et 1.16. - exercice 1.17 en prolongement. ## contrôle formatif {: #controle} 1. mettre (2+i)/(1−i) sous forme algébrique. 2. calculer (1−i)^6 par forme exponentielle. 3. résoudre z²+2z+2=0. ## questions {: #questions} pour z_a=2−i et z_b=−2+3i, donner le milieu de [ab] et la distance ab.",
     "skillsHtml": [
       "Traduire vecteur, distance, milieu et angle en affixes",
       "Utiliser « arrivée moins départ »",
@@ -199,22 +199,26 @@
   },
   {
     "number": 10,
-    "title": "Décrire un ensemble",
+    "title": "Interro · nombres complexes",
     "dateLabel": "mar. 29 sept. 2026",
     "scheduleConfirmed": true,
     "slug": "ensembles-appartenance-inclusion",
     "url": "/mat101/seances/10-ensembles-appartenance-inclusion/",
-    "shortTitle": "Décrire un ensemble",
+    "shortTitle": "Interro · nombres complexes",
     "block": "langage",
     "blockLabel": "Chapitre 2 · Ensembles et langage mathématique",
     "skillsPlain": [
-      "Utiliser extension, compréhension et description en fonction",
-      "Distinguer ∈ et ⊂, ensemble vide et singleton"
+      "Forme algébrique, conjugué, module et quotient (séances 1–2)",
+      "Argument, forme exponentielle, Moivre et Euler (séances 3–4)",
+      "Polynômes, paramètres, racines carrées et second degré (séances 5–7)",
+      "Racines n-ièmes (séance 8)"
     ],
-    "search": "décrire un ensemble chapitre 2 · ensembles et langage mathématique utiliser extension, compréhension et description en fonction distinguer ∈ et ⊂, ensemble vide et singleton ## à savoir faire {: #competences} - utiliser extension, compréhension et description en fonction. - distinguer ∈ et ⊂, ensemble vide et singleton. ## parcours {: #parcours} - poly p. 37–40. - exercice 2.1 : questions 1, 5, 9 et 11. - exercice 2.2 : questions 1 à 6. - exercice 2.5 : questions 1, 4 et 6. ## questions {: #questions} pour a={1,{2}}, décider : 2∈a, {2}∈a, {2}⊂a, {{2}}⊂a. interro 1 h tiers temps 1 h 20",
+    "search": "interro · nombres complexes chapitre 2 · ensembles et langage mathématique forme algébrique, conjugué, module et quotient (séances 1–2) argument, forme exponentielle, moivre et euler (séances 3–4) polynômes, paramètres, racines carrées et second degré (séances 5–7) racines n-ièmes et géométrie dans le plan (séance 8) ## à savoir faire {: #competences} - forme algébrique, conjugué, module et quotient (séances 1–2). - argument, forme exponentielle, moivre et euler (séances 3–4). - polynômes, paramètres, racines carrées et second degré (séances 5–7). - racines n-ièmes et géométrie dans le plan (séance 8). ## parcours {: #parcours} - révision des séances 1 à 8 et des exercices du chapitre 1 déjà travaillés. ## questions {: #questions} interro portant sur l'ensemble du chapitre 1 · nombres complexes (séances 1 à 8). interro 1 h tiers temps 1 h 20",
     "skillsHtml": [
-      "Utiliser extension, compréhension et description en fonction",
-      "Distinguer <span class=\"math inline\">\\(∈\\)</span> et <span class=\"math inline\">\\(⊂\\)</span>, ensemble vide et singleton"
+      "Forme algébrique, conjugué, module et quotient (séances 1–2)",
+      "Argument, forme exponentielle, Moivre et Euler (séances 3–4)",
+      "Polynômes, paramètres, racines carrées et second degré (séances 5–7)",
+      "Racines n-ièmes (séance 8)"
     ],
     "kind": "interro",
     "statusBadge": "Interro",
@@ -222,21 +226,25 @@
   },
   {
     "number": 11,
-    "title": "Calcul ensembliste",
+    "title": "Décrire un ensemble",
     "dateLabel": "jeu. 1 oct. 2026",
     "scheduleConfirmed": true,
     "slug": "operations-lois-ensemblistes",
     "url": "/mat101/seances/11-operations-lois-ensemblistes/",
-    "shortTitle": "Calcul ensembliste",
+    "shortTitle": "Décrire un ensemble",
     "block": "langage",
     "blockLabel": "Chapitre 2 · Ensembles et langage mathématique",
     "skillsPlain": [
+      "Utiliser extension, compréhension et description en fonction",
+      "Distinguer ∈ et ⊂, ensemble vide et singleton",
       "Calculer ∪, ∩, différence et complémentaire",
       "Utiliser Morgan et démontrer une égalité par appartenance",
       "Traduire une valeur absolue en intervalle"
     ],
-    "search": "calcul ensembliste chapitre 2 · ensembles et langage mathématique calculer ∪, ∩, différence et complémentaire utiliser morgan et démontrer une égalité par appartenance traduire une valeur absolue en intervalle ## à savoir faire {: #competences} - calculer ∪, ∩, différence et complémentaire. - utiliser morgan et démontrer une égalité par appartenance. - traduire une valeur absolue en intervalle. ## parcours {: #parcours} - poly p. 40–42. - exercice 2.3. - exercice 2.4 : questions 2, 3, 6 et 8. - exercice 2.10 : questions 1 et 2. ## questions {: #questions} compléter et justifier e\\(a∩b)=….",
+    "search": "décrire un ensemble chapitre 2 · ensembles et langage mathématique utiliser extension, compréhension et description en fonction distinguer ∈ et ⊂, ensemble vide et singleton calculer ∪, ∩, différence et complémentaire utiliser morgan et démontrer une égalité par appartenance traduire une valeur absolue en intervalle ## à savoir faire {: #competences} - utiliser extension, compréhension et description en fonction. - distinguer ∈ et ⊂, ensemble vide et singleton. - calculer ∪, ∩, différence et complémentaire. - utiliser morgan et démontrer une égalité par appartenance. - traduire une valeur absolue en intervalle. ## parcours {: #parcours} - poly p. 37–40. - exercice 2.1 : questions 1, 5, 9 et 11. - exercice 2.2 : questions 1 à 6. - exercice 2.5 : questions 1, 4 et 6. - poly p. 40–42. - exercice 2.3. - exercice 2.4 : questions 2, 3, 6 et 8. - exercice 2.10 : questions 1 et 2. ## questions {: #questions} pour a={1,{2}}, décider : 2∈a, {2}∈a, {2}⊂a, {{2}}⊂a.",
     "skillsHtml": [
+      "Utiliser extension, compréhension et description en fonction",
+      "Distinguer <span class=\"math inline\">\\(∈\\)</span> et <span class=\"math inline\">\\(⊂\\)</span>, ensemble vide et singleton",
       "Calculer <span class=\"math inline\">\\(∪\\)</span>, <span class=\"math inline\">\\(∩\\)</span>, différence et complémentaire",
       "Utiliser Morgan et démontrer une égalité par appartenance",
       "Traduire une valeur absolue en intervalle"
@@ -404,14 +412,14 @@
     "slug": "analyse-synthese-revision",
     "url": "/mat101/seances/19-analyse-synthese-revision/",
     "shortTitle": "Analyse-synthèse et révision",
-    "block": "synthese",
-    "blockLabel": "Synthèse · Révision",
+    "block": "langage",
+    "blockLabel": "Chapitre 2 · Ensembles et langage mathématique",
     "skillsPlain": [
       "Distinguer candidats et solutions",
       "Vérifier les conditions de signe avant de mettre au carré",
       "Prouver les deux sens d'une équivalence"
     ],
-    "search": "analyse-synthèse et révision synthèse · révision distinguer candidats et solutions vérifier les conditions de signe avant de mettre au carré prouver les deux sens d'une équivalence ## à savoir faire {: #competences} - distinguer candidats et solutions. - vérifier les conditions de signe avant de mettre au carré. - prouver les deux sens d'une équivalence. ## parcours {: #parcours} - exercices 2.37 et 2.38, questions 1 et 3. ## révision mixte {: #revision} 1. simplifier (a∩b^c)^c. 2. nier ∀x∈r,∃y∈r,x<y. 3. prouver : n² impair implique n impair. ## questions {: #questions} résoudre par analyse-synthèse √(x+6)=x.",
+    "search": "analyse-synthèse et révision chapitre 2 · ensembles et langage mathématique distinguer candidats et solutions vérifier les conditions de signe avant de mettre au carré prouver les deux sens d'une équivalence ## à savoir faire {: #competences} - distinguer candidats et solutions. - vérifier les conditions de signe avant de mettre au carré. - prouver les deux sens d'une équivalence. ## parcours {: #parcours} - exercices 2.37 et 2.38, questions 1 et 3. ## révision mixte {: #revision} 1. simplifier (a∩b^c)^c. 2. nier ∀x∈r,∃y∈r,x<y. 3. prouver : n² impair implique n impair. ## questions {: #questions} résoudre par analyse-synthèse √(x+6)=x.",
     "skillsHtml": [
       "Distinguer candidats et solutions",
       "Vérifier les conditions de signe avant de mettre au carré",

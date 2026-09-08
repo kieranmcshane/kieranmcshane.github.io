@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = (ROOT / "mat101-sessions.md").read_text(encoding="utf-8")
+INFORMATIONS = (ROOT / "_includes" / "mat101-informations.html").read_text(encoding="utf-8")
 DATA_TEXT = (ROOT / "_data" / "mat101_sessions.json").read_text(encoding="utf-8")
 DATA = json.loads(DATA_TEXT)
 SESSION_DIR = ROOT / "_mat101_sessions"
@@ -167,7 +168,15 @@ class Mat101SessionsTests(unittest.TestCase):
     def test_hub_intro_is_compact(self):
         self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Séances MAT101</h1>', PAGE)
-        self.assertIn("Partiel prévu la semaine du 20 octobre.", PAGE)
+        self.assertIn('id="informations"', INFORMATIONS)
+        self.assertIn("Informations", INFORMATIONS)
+        self.assertIn("Partiel prévu la semaine du 20 octobre.", INFORMATIONS)
+        self.assertIn("mat101-informations.html", PAGE)
+        self.assertIn("Note UE", INFORMATIONS)
+        self.assertIn("Tutorat", INFORMATIONS)
+        self.assertIn("Contrôle continu", INFORMATIONS)
+        self.assertIn("12 h 30 à 13 h 30", INFORMATIONS)
+        self.assertIn(".mat101-informations", STYLES)
         self.assertNotIn('class="mat101-page-links"', PAGE)
         self.assertNotIn("Feuille de route", PAGE)
         self.assertNotIn("parcours-19-seances-mat101-ima02.pdf", PAGE)
@@ -187,9 +196,13 @@ class Mat101SessionsTests(unittest.TestCase):
     def test_session_ten_is_marked_as_an_interro(self):
         session = next(item for item in DATA if item["number"] == 10)
         self.assertEqual(session["kind"], "interro")
+        self.assertEqual(session["title"], "Interro · nombres complexes")
+        self.assertEqual(session["block"], "langage")
         self.assertEqual(session["statusBadge"], "Interro")
         self.assertEqual(session["statusDetail"], "1 h · tiers temps 1 h 20")
         self.assertIn("interro", session["search"])
+        self.assertNotIn("exercice 2.1", session["search"])
+        self.assertIn("séances 1 à 8", session["search"])
 
         page = (SESSION_DIR / "10-ensembles-appartenance-inclusion.md").read_text(
             encoding="utf-8"
@@ -197,6 +210,29 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('class="mat101-session-detail-status is-interro"', page)
         self.assertIn("1 h · tiers temps 1 h 20", page)
         self.assertIn("<strong>Interro.</strong>", page)
+        self.assertIn("séances 1 à 8", page)
+
+    def test_planning_splits_eight_complex_sessions_and_eleven_language_sessions(self):
+        complexes = [item for item in DATA if item["block"] == "complexes"]
+        langage = [item for item in DATA if item["block"] == "langage"]
+        self.assertEqual(len(complexes), 8)
+        self.assertEqual(len(langage), 11)
+        self.assertEqual([item["number"] for item in complexes], list(range(1, 9)))
+        self.assertEqual([item["number"] for item in langage], list(range(9, 20)))
+        self.assertEqual(DATA[8]["title"], "Géométrie et rédaction")
+        self.assertEqual(DATA[18]["title"], "Analyse-synthèse et révision")
+        self.assertIn('data-mat101-session-filter="complexes"', PAGE)
+        self.assertIn('data-mat101-session-filter="langage"', PAGE)
+        self.assertIn("Nombres complexes <span>8</span>", PAGE)
+        self.assertIn("Ensembles et logique <span>11</span>", PAGE)
+        self.assertNotIn('data-mat101-session-filter="synthese"', PAGE)
+
+    def test_session_eleven_carries_describe_sets_content(self):
+        session = next(item for item in DATA if item["number"] == 11)
+        self.assertEqual(session["title"], "Décrire un ensemble")
+        self.assertIn("extension, compréhension", session["search"])
+        self.assertIn("exercice 2.1", session["search"])
+        self.assertIn("exercice 2.3", session["search"])
 
     def test_hub_exposes_fast_search_filters_and_student_cards(self):
         self.assertIn("data-mat101-course", PAGE)
@@ -204,7 +240,7 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("mat101-session-search-input", PAGE)
         self.assertIn('data-mat101-session-filter="complexes"', PAGE)
         self.assertIn('data-mat101-session-filter="langage"', PAGE)
-        self.assertIn('data-mat101-session-filter="synthese"', PAGE)
+        self.assertNotIn('data-mat101-session-filter="synthese"', PAGE)
         self.assertIn("session.skillsHtml", PAGE)
         self.assertIn("session.statusDetail", PAGE)
         self.assertIn('session.kind == "interro"', PAGE)
