@@ -517,10 +517,12 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
         head = (ROOT / "_includes/head-custom.html").read_text()
         self.assertIn("mat101-library.js", head)
+        self.assertIn("mat101-mobile.js", head)
         self.assertIn("mat101-has-js", head)
         self.assertIn("page.layout == 'mat101'", head)
         self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
         self.assertIn(".mat101-shell", STYLES)
+        self.assertIn(".mat101-swipe-hint", STYLES)
         self.assertIn("body.mat101-site", STYLES)
 
     def test_mat101_uses_a_dedicated_layout_without_main_site_chrome(self):

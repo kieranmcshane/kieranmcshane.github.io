@@ -211,10 +211,12 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("mat101-session-format", PAGE)
         self.assertNotIn("session.skillsPlain", PAGE)
         self.assertIn("page.layout == 'mat101'", HEAD)
+        self.assertIn("mat101-mobile.js", HEAD)
         self.assertIn("mat101-sessions.js", HEAD)
         self.assertIn("cards.length !== 19", SCRIPT)
         self.assertIn(".mat101-session-grid", STYLES)
         self.assertIn(".mat101-session-content", STYLES)
+        self.assertIn(".mat101-swipe-hint", STYLES)
 
     def test_mat101_is_the_single_global_entry_and_pages_cross_link(self):
         header_block = CONFIG.split("header_pages:", 1)[1].split("plugins:", 1)[0]

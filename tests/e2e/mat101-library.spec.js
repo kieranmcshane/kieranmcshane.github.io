@@ -642,6 +642,16 @@ test.describe("MAT101 native library", () => {
       "Vérification effectuée sur le document source"
     );
   });
+
+  test("exposes exercise swipe affordances on compact screens", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-390", "mobile viewport only");
+
+    await gotoLibrary(page);
+    await expect(page.locator('[data-mat101-swipe="exercises"]')).toBeVisible();
+    await expect(page.locator(".mat101-swipe-hint")).toContainText("énoncé ouvert");
+  });
 });
 
 test.describe("MAT101 visual baselines", () => {

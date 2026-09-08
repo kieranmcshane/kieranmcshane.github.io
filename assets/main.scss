@@ -14677,6 +14677,39 @@ body:has(.mat101-session-page) {
   .mat101-session-pager > a:last-child {
     text-align: left;
   }
+
+  .mat101-swipe-hint {
+    margin: 0.75rem 0 0;
+    padding: 0.55rem 0.75rem;
+    border: 1px dashed #c8d5d8;
+    border-radius: 6px;
+    color: #5d7278;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  .mat101-session-browser .mat101-swipe-hint {
+    margin-top: 0.55rem;
+  }
+
+  html.mat101-swipe-left .mat101-session-page,
+  html.mat101-swipe-right .mat101-session-page,
+  html.mat101-swipe-left .mat101-library[data-mat101-swipe="exercises"],
+  html.mat101-swipe-right .mat101-library[data-mat101-swipe="exercises"] {
+    transition: transform 0.18s ease-out;
+  }
+
+  html.mat101-swipe-left .mat101-session-page,
+  html.mat101-swipe-left .mat101-library[data-mat101-swipe="exercises"] {
+    transform: translateX(-10px);
+  }
+
+  html.mat101-swipe-right .mat101-session-page,
+  html.mat101-swipe-right .mat101-library[data-mat101-swipe="exercises"] {
+    transform: translateX(10px);
+  }
 }
 
 /* Rating Lab focused overview: immediate data, direct comparison, progressive detail. */
