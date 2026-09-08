@@ -13553,15 +13553,32 @@ body:has(.mat101-library) {
   font-weight: 850;
 }
 
-.mat101-errata-list header span,
-.mat101-errata-list small {
+.mat101-errata-list header span {
   color: var(--mat101-muted);
   font-size: 0.75rem;
 }
 
-.mat101-errata-list p {
-  margin: 0.55rem 0;
+.mat101-errata-change {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.mat101-errata-change p {
+  margin: 0;
   font-size: 0.8rem;
+}
+
+.mat101-errata-change span {
+  color: var(--mat101-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mat101-errata-change span::after {
+  content: " ·";
 }
 
 .mat101-downloads {
@@ -13667,26 +13684,6 @@ body:has(.mat101-library) {
   margin: 0;
   color: var(--mat101-muted);
   font-size: 0.8rem;
-}
-
-.mat101-review-ledger {
-  margin-top: 0.85rem;
-  padding: 1rem;
-  border: 1px solid #c8d9ce;
-  border-left: 4px solid #2d8a58;
-  border-radius: 5px;
-  background: #f3faf6;
-  color: #354a3c;
-  font-size: 0.82rem;
-}
-
-.mat101-review-ledger ul {
-  margin: 0.55rem 0;
-  padding-left: 1.15rem;
-}
-
-.mat101-review-ledger p {
-  margin: 0.55rem 0 0;
 }
 
 .mat101-citation {

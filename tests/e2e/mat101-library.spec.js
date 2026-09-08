@@ -94,6 +94,11 @@ test.describe("MAT101 native library", () => {
     ).toHaveClass(/is-active/);
     await expect(page).toHaveURL(/notion=invariants/);
 
+    await invariantTag.click();
+    await expect(invariantTag).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
+    await expect(page).not.toHaveURL(/notion=invariants/);
+
     await page.locator('[data-mat101-tag=""]').click();
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
   });

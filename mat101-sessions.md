@@ -19,8 +19,7 @@ math: true
   <section class="mat101-session-browser" id="seances" aria-labelledby="mat101-session-browser-title">
     <div class="mat101-session-browser-heading">
       <div>
-        <p class="mat101-kicker">Parcours chronologique</p>
-        <h2 id="mat101-session-browser-title">Retrouver une séance</h2>
+        <h2 id="mat101-session-browser-title">Séances</h2>
       </div>
       <p id="mat101-session-count" aria-live="polite">19 séances affichées</p>
     </div>

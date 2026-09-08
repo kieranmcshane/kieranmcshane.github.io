@@ -73,7 +73,8 @@ class Mat101SessionsTests(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             headings = set(re.findall(r"^## (.+?)\s*$", text, re.MULTILINE))
             self.assertIn(f"mat101_session_number: {number}", text)
-            self.assertIn("Parcours étudiant", text)
+            self.assertNotIn('class="mat101-kicker"', text)
+            self.assertNotIn("<strong>Parcours étudiant</strong>", text)
             self.assertIn('class="mat101-session-content"', text)
             self.assertTrue(required <= headings, path.name)
             self.assertTrue(headings <= allowed, f"{path.name}: {headings - allowed}")
@@ -150,10 +151,9 @@ class Mat101SessionsTests(unittest.TestCase):
             "Retrouvez pour chaque cours-TD les compétences à acquérir",
             PAGE,
         )
-        self.assertNotIn(
-            "Retrouvez pour chaque cours-TD les compétences à acquérir",
-            PAGE,
-        )
+        self.assertNotIn("Parcours chronologique", PAGE)
+        self.assertNotIn("Retrouver une séance", PAGE)
+        self.assertIn('<h2 id="mat101-session-browser-title">Séances</h2>', PAGE)
         self.assertNotIn("Choisir une séance", PAGE)
         self.assertNotIn('class="mat101-course-hero"', PAGE)
         self.assertNotIn('class="mat101-course-status"', PAGE)
