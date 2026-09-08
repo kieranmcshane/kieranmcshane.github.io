@@ -13563,16 +13563,16 @@ body.mat101-site .mat101-library {
 
 .mat101-errata-change {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.55rem;
   margin-top: 0.55rem;
 }
 
-.mat101-errata-change p {
-  margin: 0;
-  font-size: 0.8rem;
+.mat101-errata-snippet {
+  display: grid;
+  gap: 0.25rem;
 }
 
-.mat101-errata-change span {
+.mat101-errata-snippet > span {
   color: var(--mat101-muted);
   font-size: 0.72rem;
   font-weight: 800;
@@ -13580,8 +13580,30 @@ body.mat101-site .mat101-library {
   text-transform: uppercase;
 }
 
-.mat101-errata-change span::after {
-  content: " ·";
+.mat101-errata-text {
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.mat101-errata-snippet-before .mat101-errata-text {
+  border-left: 3px solid #c0392b;
+}
+
+.mat101-errata-snippet-after .mat101-errata-text {
+  border-left: 3px solid #1e8449;
+}
+
+.mat101-errata-mark {
+  padding: 0.05em 0.15em;
+  border-radius: 2px;
+  background: rgba(241, 196, 15, 0.35);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .mat101-downloads {

@@ -2,71 +2,71 @@
   {
     "exercise": "1.7",
     "kind": "Paramètre non défini",
-    "problem": "La seconde équation utilise le symbole b sans l’avoir introduit.",
-    "correction": "La question est traitée avec deux paramètres complexes a et b.",
+    "beforeHtml": "Soit \\(a\\) un paramètre complexe. … \\(az^2+<mark class=\"mat101-errata-mark\">b</mark>z=0\\).",
+    "afterHtml": "Soit \\(a\\) et \\(b\\) deux paramètres complexes. … \\(az^2+bz=0\\).",
     "version": "2026-07-28"
   },
   {
     "exercise": "2.12",
     "kind": "Inégalité incohérente",
-    "problem": "Dans la dernière assertion, la conclusion stricte conduit à imposer y > y.",
-    "correction": "Remplacer la conclusion y > z par y ≥ z pour exprimer la partie entière stricte.",
+    "beforeHtml": "\\(\\forall x\\in\\mathbb R,\\ \\exists y\\in\\mathbb Z,\\ \\bigl(x\\ge y\\ \\text{et}\\ (\\forall z\\in\\mathbb Z,\\ x\\ge z\\Rightarrow <mark class=\"mat101-errata-mark\">y&gt; z</mark>)\\bigr)\\).",
+    "afterHtml": "\\(\\forall x\\in\\mathbb R,\\ \\exists y\\in\\mathbb Z,\\ \\bigl(x\\ge y\\ \\text{et}\\ (\\forall z\\in\\mathbb Z,\\ x\\ge z\\Rightarrow <mark class=\"mat101-errata-mark\">y\\ge z</mark>)\\bigr)\\).",
     "version": "2026-07-28"
   },
   {
     "exercise": "2.29",
     "kind": "Assertion fausse",
-    "problem": "La conclusion « strictement inférieur à 1/n » est contredite lorsque tous les termes valent 1/n.",
-    "correction": "Écrire qu’au moins un terme est inférieur ou égal à 1/n.",
+    "beforeHtml": "… l’un de ces réels est <mark class=\"mat101-errata-mark\">strictement inférieur à</mark> \\(1/n\\).",
+    "afterHtml": "… l’un de ces réels est <mark class=\"mat101-errata-mark\">inférieur ou égal à</mark> \\(1/n\\).",
     "version": "2026-07-28"
   },
   {
     "exercise": "2.31",
     "kind": "Récurrence incomplète",
-    "problem": "Avec n ≥ 2, les termes u₂ et u₃ ne sont pas déterminés.",
-    "correction": "Imposer la relation de récurrence pour tout n ≥ 0.",
+    "beforeHtml": "\\[\\forall <mark class=\"mat101-errata-mark\">n\\ge2</mark>,\\quad u_{n+2}=5u_{n+1}-6u_n.\\]",
+    "afterHtml": "\\[\\forall <mark class=\"mat101-errata-mark\">n\\ge0</mark>,\\quad u_{n+2}=5u_{n+1}-6u_n.\\]",
     "version": "2026-07-28"
   },
   {
     "exercise": "3.16",
     "kind": "Transformation incorrecte",
-    "problem": "La formule imprimée ne définit pas la symétrie orthogonale annoncée et n’admet pas le point fixe attendu.",
-    "correction": "Le corrigé diagnostique la formule imprimée avant d’indiquer la condition nécessaire à une symétrie cohérente.",
+    "beforeHtml": "\\(f(z)=e^{i\\pi/3}\\overline z+1\\). Montrer que \\(f(z)\\) est l’image de \\(z\\) par la <mark class=\"mat101-errata-mark\">symétrie orthogonale</mark> d’axe \\(\\Delta\\).",
+    "afterHtml": "Avec cette formule, \\(f\\) n’a aucun point fixe&nbsp;: l’assertion sur la <mark class=\"mat101-errata-mark\">symétrie orthogonale</mark> est donc incohérente. Une application \\(z\\mapsto\\alpha\\overline z+b\\) est une symétrie orthogonale seulement si \\(b+\\alpha\\overline b=0\\).",
     "version": "2026-07-28"
   },
   {
     "exercise": "3.17",
     "kind": "Hypothèse manquante",
-    "problem": "Pour a = 0, toutes les images coïncident et les angles considérés ne sont pas définis.",
-    "correction": "Ajouter l’hypothèse a ≠ 0.",
+    "beforeHtml": "Soient \\(a,b\\in\\mathbb C\\). On pose \\(f:\\mathbb C\\to\\mathbb C\\), \\(f(z)=a\\overline z+b\\).",
+    "afterHtml": "Soient \\(a,b\\in\\mathbb C\\) <mark class=\"mat101-errata-mark\">avec \\(a\\ne0\\)</mark>. On pose \\(f:\\mathbb C\\to\\mathbb C\\), \\(f(z)=a\\overline z+b\\).",
     "version": "2026-07-28"
   },
   {
     "exercise": "3.27",
     "kind": "Domaine de validité",
-    "problem": "Deux identités sont annoncées pour n = 0 alors que leur valeur au rang zéro ne convient pas.",
-    "correction": "Dans les questions concernées, supposer n ≥ 1.",
+    "beforeHtml": "Démontrer, pour <mark class=\"mat101-errata-mark\">tout entier naturel \\(n\\)</mark>, les égalités&nbsp;: \\(\\displaystyle\\sum_{k=0}^{n}(-1)^k\\binom nk=0\\)&nbsp;; \\(\\displaystyle\\sum_{k=0}^{n}\\binom{2n}{2k}=2^{2n-1}\\).",
+    "afterHtml": "Démontrer, pour <mark class=\"mat101-errata-mark\">tout entier naturel \\(n\\ge1\\)</mark>, les égalités&nbsp;: \\(\\displaystyle\\sum_{k=0}^{n}(-1)^k\\binom nk=0\\)&nbsp;; \\(\\displaystyle\\sum_{k=0}^{n}\\binom{2n}{2k}=2^{2n-1}\\).",
     "version": "2026-07-28"
   },
   {
     "exercise": "3.31",
     "kind": "Compatibilité sur un quotient",
-    "problem": "La condition imprimée exige l’égalité des représentants obtenus, ce qui est trop fort et faux.",
-    "correction": "Exiger que les résultats soient équivalents pour la relation R.",
+    "beforeHtml": "\\((x,x')\\in\\mathcal R\\ \\text{et}\\ (y,y')\\in\\mathcal R \\Rightarrow <mark class=\"mat101-errata-mark\">f(x,y)=f(x',y')</mark>.\\) \\((29)\\)",
+    "afterHtml": "\\((x,x')\\in\\mathcal R\\ \\text{et}\\ (y,y')\\in\\mathcal R \\Rightarrow <mark class=\"mat101-errata-mark\">f(x,y)\\ \\mathcal R\\ f(x',y')</mark>.\\) \\((29)\\)",
     "version": "2026-07-28"
   },
   {
     "exercise": "4.15",
     "kind": "Indice initial",
-    "problem": "Si la relation n’est imposée que pour n ∈ N*, le terme u₁ n’est pas défini.",
-    "correction": "Imposer uₙ₊₁ = 1 + 1/uₙ dès n = 0.",
+    "beforeHtml": "\\(u_0=2\\) et, pour tout \\(n\\in<mark class=\"mat101-errata-mark\">\\mathbb N^*</mark>\\), \\[u_{n+1}=1+\\frac1{u_n}.\\]",
+    "afterHtml": "\\(u_0=2\\) et, pour tout \\(n\\in<mark class=\"mat101-errata-mark\">\\mathbb N</mark>\\), \\[u_{n+1}=1+\\frac1{u_n}.\\]",
     "version": "2026-07-28"
   },
   {
     "exercise": "4.17",
     "kind": "Variable de parité",
-    "problem": "La parité porte sur l’indice n dans l’énoncé imprimé, ce qui rend la conclusion fausse.",
-    "correction": "Faire dépendre la définition de la parité de la valeur uₙ.",
+    "beforeHtml": "\\[u_{n+1}= \\begin{cases} u_n+1,&\\text{si }<mark class=\"mat101-errata-mark\">n</mark>\\text{ est impair},\\\\ u_n/2,&\\text{si }<mark class=\"mat101-errata-mark\">n</mark>\\text{ est pair}. \\end{cases}\\]",
+    "afterHtml": "\\[u_{n+1}= \\begin{cases} u_n+1,&\\text{si }<mark class=\"mat101-errata-mark\">u_n</mark>\\text{ est impair},\\\\ u_n/2,&\\text{si }<mark class=\"mat101-errata-mark\">u_n</mark>\\text{ est pair}. \\end{cases}\\]",
     "version": "2026-07-28"
   }
 ]

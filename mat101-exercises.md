@@ -260,8 +260,14 @@ math: true
             <span>{{ erratum.kind }}</span>
           </header>
           <div class="mat101-errata-change">
-            <p><span>Avant</span> {{ erratum.problem }}</p>
-            <p><span>Après</span> {{ erratum.correction }}</p>
+            <div class="mat101-errata-snippet mat101-errata-snippet-before">
+              <span>Avant</span>
+              <div class="mat101-errata-text">{{ erratum.beforeHtml }}</div>
+            </div>
+            <div class="mat101-errata-snippet mat101-errata-snippet-after">
+              <span>Après</span>
+              <div class="mat101-errata-text">{{ erratum.afterHtml }}</div>
+            </div>
           </div>
         </article>
       {% endfor %}
