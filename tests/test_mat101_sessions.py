@@ -80,6 +80,11 @@ class Mat101SessionsTests(unittest.TestCase):
             self.assertIn('class="mat101-session-content"', text)
             self.assertTrue(required <= headings, path.name)
             self.assertTrue(headings <= allowed, f"{path.name}: {headings - allowed}")
+            if number == 19:
+                self.assertIn(
+                    "[construction de R par les suites de Cauchy](/mat101/exercices/#facultatif)",
+                    text,
+                )
 
     def test_public_output_contains_no_instructor_or_assessment_material(self):
         public_text = "\n".join(

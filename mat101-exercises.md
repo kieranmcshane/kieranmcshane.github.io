@@ -13,6 +13,7 @@ math: true
 {% assign solution_pdf_url = '/assets/documents/mat101/corrige-exercices-mat101.pdf' | relative_url %}
 {% assign solution_tex_url = '/assets/documents/mat101/corrige-exercices-mat101.tex' | relative_url %}
 {% assign solution_archive_url = '/assets/documents/mat101/corrige-exercices-mat101-sources.zip' | relative_url %}
+{% assign optional_reals_pdf_url = '/assets/documents/mat101/construction_reels_courte_histoire_v2.pdf' | relative_url %}
 
 <div class="mat101-library">
   <header class="mat101-page-heading">
@@ -20,6 +21,7 @@ math: true
     <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
       <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
       <a href="#informations">Informations</a>
+      <a href="#facultatif">Facultatif</a>
       <a href="#errata">Errata</a>
       <a href="#telechargements">Téléchargements</a>
       <a href="#credits">Crédits</a>
@@ -254,6 +256,17 @@ math: true
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les corrections MAT101</a>
   </section>
 
+  <section class="mat101-course-download" id="facultatif" aria-labelledby="mat101-optional-title">
+    <div>
+      <h2 id="mat101-optional-title">Problème facultatif · Construction de R</h2>
+      <p>Problème guidé en 12 questions (version courte) : suites de Cauchy, classes d’équivalence, opérations et complétude de R. Prérequis : calcul dans Q, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
+    </div>
+    <a href="{{ optional_reals_pdf_url }}" download>
+      <strong>construction_reels_courte_histoire_v2.pdf</strong>
+      <span>3 pages · énoncé seul</span>
+    </a>
+  </section>
+
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
     <h2 id="mat101-errata-title">Errata du polycopié source</h2>
     <div class="mat101-errata-list">
@@ -292,6 +305,13 @@ math: true
         <li><a href="{{ source_pdf_url }}" download><strong>mat_101_20251001.pdf</strong><span>Polycopié source · 1er octobre 2025</span></a></li>
         <li><a href="{{ statement_tex_url }}" download><strong>Source LaTeX</strong><span>Sélection par <code>pdfpages</code></span></a></li>
         <li><a href="{{ statement_archive_url }}" download><strong>Archive complète</strong><span>LaTeX + PDF source</span></a></li>
+      </ul>
+    </div>
+
+    <div class="mat101-file-group">
+      <p class="mat101-file-label">Facultatif</p>
+      <ul>
+        <li><a href="{{ optional_reals_pdf_url }}" download><strong>Construction de R</strong><span>Suites de Cauchy · 3 pages · énoncé seul</span></a></li>
       </ul>
     </div>
 

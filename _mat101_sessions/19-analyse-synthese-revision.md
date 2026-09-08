@@ -48,6 +48,7 @@ mat101_session_number: 19
 {: #parcours}
 
 - Exercices 2.37 et 2.38, questions 1 et 3.
+- Problème facultatif : [construction de R par les suites de Cauchy](/mat101/exercices/#facultatif) (PDF, 12 questions).
 
 ## Révision mixte
 {: #revision}
