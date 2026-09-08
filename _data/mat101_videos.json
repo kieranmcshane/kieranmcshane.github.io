@@ -1,0 +1,37 @@
+[
+  {
+    "id": "5PcpBw5Hbwo",
+    "title": "Fondamentaux des nombres complexes",
+    "source": "3Blue1Brown · Lockdown live math, ép. 3",
+    "description": "Géométrie de \\(\\mathbb C\\) et règle de multiplication. Complément au chapitre 1.",
+    "iframeTitle": "Complex number fundamentals · 3Blue1Brown"
+  },
+  {
+    "id": "ZxYOEwM6Wbk",
+    "title": "Que dit vraiment la formule d’Euler ?",
+    "source": "3Blue1Brown · Lockdown live math, ép. 4",
+    "description": "Interprétation géométrique de \\(e^{i\\theta}\\) et lien avec cosinus et sinus. Complément au chapitre 1.",
+    "iframeTitle": "What is Euler's formula actually saying? · 3Blue1Brown"
+  },
+  {
+    "id": "v0YEaeIClKY",
+    "title": "Identité d'Euler en 3,14 minutes",
+    "source": "3Blue1Brown · Essence of calculus",
+    "description": "Identité d’Euler visualisée par une dynamique simple. Complément au chapitre 1.",
+    "iframeTitle": "e^(iπ) in 3.14 minutes · 3Blue1Brown"
+  },
+  {
+    "id": "6bDm5z5Z60c",
+    "title": "Introduction aux mathématiques universitaires (cours 6)",
+    "source": "Oxford Mathematics · 1re année",
+    "description": "Conférence introductive sur le raisonnement et les objets usuels en licence. Hors programme, mais utile en amont.",
+    "iframeTitle": "Introduction to University Mathematics: Lecture 6 · Oxford Mathematics"
+  },
+  {
+    "id": "L3LMbpZIKhQ",
+    "title": "Mathématiques pour l’informatique (cours 1)",
+    "source": "MIT OpenCourseWare · 6.042J",
+    "description": "Logique, preuves et ensembles — échos possibles avec le chapitre 4 (langage mathématique).",
+    "iframeTitle": "MIT 6.042J Mathematics for Computer Science, Lecture 1"
+  }
+]
