@@ -41,8 +41,8 @@ mat101_session_number: 5
 {: #competences}
 
 - Donner degré et coefficient dominant.
-- Vérifier qu'un nombre est une racine.
-- Discuter les valeurs d'un paramètre avant de diviser.
+- Vérifier qu&#x27;un nombre est une racine.
+- Discuter les valeurs d&#x27;un paramètre avant de diviser.
 
 ## Parcours
 {: #parcours}
@@ -53,12 +53,12 @@ mat101_session_number: 5
 ## Activité
 {: #activite}
 
-Classer comme polynôme ou non-polynôme en `z` : `3z⁴−iz+7`, `(z−1)(z+2)`, `5`, `0`, `1/z+2`, `e^z+z`.
+Classer comme polynôme ou non-polynôme en <span class="math inline">\(z\)</span> : <span class="math inline">\(3z⁴−iz+7\)</span>, <span class="math inline">\((z−1)(z+2)\)</span>, <span class="math inline">\(5\)</span>, <span class="math inline">\(0\)</span>, <span class="math inline">\(1/z+2\)</span>, <span class="math inline">\(e^z+z\)</span>.
 
 ## Questions
 {: #questions}
 
-Résoudre dans `C`, selon `λ∈C`, l'équation `(λ−1)z=2`.
+Résoudre dans <span class="math inline">\(C\)</span>, selon <span class="math inline">\(λ∈C\)</span>, l&#x27;équation <span class="math inline">\((λ−1)z=2\)</span>.
 {% endraw %}
 
   </article>

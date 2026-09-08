@@ -40,9 +40,9 @@ mat101_session_number: 7
 ## À savoir faire
 {: #competences}
 
-- Calculer `Δ=b²−4ac`.
-- Trouver `δ` tel que `δ²=Δ`.
-- Utiliser `z=(-b±δ)/(2a)` et contrôler somme/produit.
+- Calculer <span class="math inline">\(Δ=b²−4ac\)</span>.
+- Trouver <span class="math inline">\(δ\)</span> tel que <span class="math inline">\(δ²=Δ\)</span>.
+- Utiliser <span class="math inline">\(z=(-b±δ)/(2a)\)</span> et contrôler somme/produit.
 
 ## Parcours
 {: #parcours}
@@ -54,7 +54,7 @@ mat101_session_number: 7
 ## Questions
 {: #questions}
 
-Résoudre `z²−2z+5=0` dans `C`.
+Résoudre <span class="math inline">\(z²−2z+5=0\)</span> dans <span class="math inline">\(C\)</span>.
 {% endraw %}
 
   </article>

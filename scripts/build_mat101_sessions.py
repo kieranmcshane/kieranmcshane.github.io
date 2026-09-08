@@ -97,7 +97,7 @@ def plain_text(value: str) -> str:
 BACKTICK = re.compile(r"`([^`]+)`")
 
 
-def skill_to_html(value: str) -> str:
+def inline_math_html(value: str) -> str:
     """Turn workbook backtick math into MathJax-ready inline markup."""
 
     chunks: list[str] = []
@@ -110,6 +110,10 @@ def skill_to_html(value: str) -> str:
     if index < len(value):
         chunks.append(html.escape(value[index:]))
     return "".join(chunks)
+
+
+def skill_to_html(value: str) -> str:
+    return inline_math_html(value)
 
 
 def assert_student_safe(value: str, context: str) -> None:
@@ -249,7 +253,7 @@ def render_page(
     url = str(session["url"])
     date_label = html.escape(str(session["dateLabel"]))
     block_label = html.escape(str(session["blockLabel"]))
-    body = str(session["body"])
+    body = inline_math_html(str(session["body"]))
     schedule_badge, schedule_class, schedule_detail = session_status(session)
     source_note = (
         f"<p><strong>Interro.</strong> {html.escape(schedule_detail.rstrip('.'))}.</p>"

@@ -42,7 +42,7 @@ mat101_session_number: 19
 
 - Distinguer candidats et solutions.
 - Vérifier les conditions de signe avant de mettre au carré.
-- Prouver les deux sens d'une équivalence.
+- Prouver les deux sens d&#x27;une équivalence.
 
 ## Parcours
 {: #parcours}
@@ -52,14 +52,14 @@ mat101_session_number: 19
 ## Révision mixte
 {: #revision}
 
-1. Simplifier `(A∩B^c)^c`.
-2. Nier `∀x∈R,∃y∈R,x<y`.
-3. Prouver : `n²` impair implique `n` impair.
+1. Simplifier <span class="math inline">\((A∩B^c)^c\)</span>.
+2. Nier <span class="math inline">\(∀x∈R,∃y∈R,x<y\)</span>.
+3. Prouver : <span class="math inline">\(n²\)</span> impair implique <span class="math inline">\(n\)</span> impair.
 
 ## Questions
 {: #questions}
 
-Résoudre par analyse-synthèse `√(x+6)=x`.
+Résoudre par analyse-synthèse <span class="math inline">\(√(x+6)=x\)</span>.
 {% endraw %}
 
   </article>
