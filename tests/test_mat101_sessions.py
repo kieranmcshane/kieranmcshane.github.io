@@ -144,6 +144,7 @@ class Mat101SessionsTests(unittest.TestCase):
     def test_hub_intro_is_compact(self):
         self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Séances MAT101</h1>', PAGE)
+        self.assertIn("Partiel prévu la semaine du 20 octobre.", PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
         self.assertIn("'/mat101/exercices/' | relative_url", PAGE)
         self.assertNotIn("Feuille de route", PAGE)
