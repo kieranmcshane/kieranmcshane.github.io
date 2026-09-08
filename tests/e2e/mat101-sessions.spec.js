@@ -92,7 +92,6 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(page.locator('[data-mat101-swipe="session-hub"]')).toBeVisible();
     await expect(page.locator(".mat101-swipe-hint")).toContainText("Glisser");
 
-    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/mat101/seances/02-conjugue-module-quotient/");
     await expect(page.locator('[data-mat101-swipe="session-detail"]')).toBeVisible();
     await expect(page.locator(".mat101-swipe-hint")).toContainText("séance");
