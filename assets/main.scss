@@ -14004,6 +14004,7 @@ body.mat101-site .mat101-library.mat101-course {
   }
 
   .mat101-statement-transcription,
+  .mat101-optional-transcription,
   .mat101-solution-body,
   .mat101-session-content,
   .mat101-session-card ul {
@@ -14527,6 +14528,7 @@ body:has(.mat101-session-page) {
 .mat101-optional-resource-header {
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .mat101-optional-resource-header h3 {
@@ -14556,6 +14558,7 @@ body:has(.mat101-session-page) {
 }
 
 .mat101-optional-pdf-link strong {
+  overflow-wrap: anywhere;
   font-size: 0.88rem;
 }
 
@@ -14566,6 +14569,39 @@ body:has(.mat101-session-page) {
 
 .mat101-optional-problem {
   min-width: 0;
+}
+
+.mat101-optional-transcription {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: clamp(0.85rem, 2vw, 1.2rem);
+  border: 1px solid #d5d2c9;
+  border-radius: 4px;
+  color: #202a34;
+  background: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 1.5vw, 1.08rem);
+  line-height: 1.62;
+}
+
+.mat101-optional-transcription p {
+  margin: 0 0 0.72rem;
+}
+
+.mat101-optional-transcription p:last-child {
+  margin-bottom: 0;
+}
+
+.mat101-optional-transcription mjx-container[display="true"] {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0.8rem 0 !important;
+  padding: 0.15rem 0 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-optional-problem-heading {
@@ -14710,7 +14746,7 @@ body:has(.mat101-session-page) {
   margin-top: 0;
 }
 
-@media (min-width: 720px) {
+@media (min-width: 960px) {
   .mat101-optional-resource-header {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
