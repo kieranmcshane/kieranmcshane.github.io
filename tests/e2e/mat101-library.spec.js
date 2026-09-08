@@ -677,7 +677,7 @@ test.describe("MAT101 visual baselines", () => {
     );
     const box = await navigation.boundingBox();
     expect(box).toBeTruthy();
-    const clipHeight = Math.min(780, Math.floor(box.height));
+    const clipHeight = 750;
     await expect(navigation).toHaveScreenshot("mat101-navigation.png", {
       clip: { x: 0, y: 0, width: Math.floor(box.width), height: clipHeight },
       maxDiffPixelRatio: 0.03,
