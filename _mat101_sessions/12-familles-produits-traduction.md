@@ -61,7 +61,7 @@ mat101_session_number: 12
   </article>
 
   <nav class="mat101-session-pager" aria-label="Séances précédente et suivante">
-    <a rel="prev" href="{{ "/mat101/seances/11-operations-lois-ensemblistes/" | relative_url }}"><span>← Séance 11</span><strong>Calcul ensembliste</strong></a>
+    <a rel="prev" href="{{ "/mat101/seances/11-operations-lois-ensemblistes/" | relative_url }}"><span>← Séance 11</span><strong>Décrire un ensemble</strong></a>
     <a rel="next" href="{{ "/mat101/seances/13-assertions-variables/" | relative_url }}"><span>Séance 13 →</span><strong>Assertions et variables</strong></a>
   </nav>
 </div>

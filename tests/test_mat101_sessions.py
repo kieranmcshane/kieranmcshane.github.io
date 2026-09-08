@@ -187,9 +187,12 @@ class Mat101SessionsTests(unittest.TestCase):
     def test_session_ten_is_marked_as_an_interro(self):
         session = next(item for item in DATA if item["number"] == 10)
         self.assertEqual(session["kind"], "interro")
+        self.assertEqual(session["title"], "Interro · nombres complexes")
+        self.assertEqual(session["block"], "complexes")
         self.assertEqual(session["statusBadge"], "Interro")
         self.assertEqual(session["statusDetail"], "1 h · tiers temps 1 h 20")
         self.assertIn("interro", session["search"])
+        self.assertNotIn("exercice 2.1", session["search"])
 
         page = (SESSION_DIR / "10-ensembles-appartenance-inclusion.md").read_text(
             encoding="utf-8"
@@ -197,6 +200,14 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('class="mat101-session-detail-status is-interro"', page)
         self.assertIn("1 h · tiers temps 1 h 20", page)
         self.assertIn("<strong>Interro.</strong>", page)
+        self.assertIn("séances 1 à 9", page)
+
+    def test_session_eleven_carries_describe_sets_content(self):
+        session = next(item for item in DATA if item["number"] == 11)
+        self.assertEqual(session["title"], "Décrire un ensemble")
+        self.assertIn("extension, compréhension", session["search"])
+        self.assertIn("exercice 2.1", session["search"])
+        self.assertIn("exercice 2.3", session["search"])
 
     def test_hub_exposes_fast_search_filters_and_student_cards(self):
         self.assertIn("data-mat101-course", PAGE)
