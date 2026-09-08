@@ -339,6 +339,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         include = (ROOT / "_includes/mat101-optional-reals-problem.html").read_text()
         self.assertIn('id="optional-reals-q1"', include)
         self.assertIn('id="optional-reals-q12"', include)
+        self.assertIn("mat101-optional-problem", include)
         self.assertIn("mat101-optional-question-star", include)
         self.assertIn("Note historique", include)
 
