@@ -53,12 +53,12 @@ mat101_session_number: 5
 ## Activité
 {: #activite}
 
-Classer comme polynôme ou non-polynôme en <span class="math inline">\(z\)</span> : <span class="math inline">\(3z⁴−iz+7\)</span>, <span class="math inline">\((z−1)(z+2)\)</span>, <span class="math inline">\(5\)</span>, <span class="math inline">\(0\)</span>, <span class="math inline">\(1/z+2\)</span>, <span class="math inline">\(e^z+z\)</span>.
+Classer comme polynôme ou non-polynôme en <span class="math inline">$z$</span> : <span class="math inline">$3z⁴−iz+7$</span>, <span class="math inline">$(z−1)(z+2)$</span>, <span class="math inline">$5$</span>, <span class="math inline">$0$</span>, <span class="math inline">$1/z+2$</span>, <span class="math inline">$e^z+z$</span>.
 
 ## Questions
 {: #questions}
 
-Résoudre dans <span class="math inline">\(C\)</span>, selon <span class="math inline">\(λ∈C\)</span>, l&#x27;équation <span class="math inline">\((λ−1)z=2\)</span>.
+Résoudre dans <span class="math inline">$C$</span>, selon <span class="math inline">$λ∈C$</span>, l&#x27;équation <span class="math inline">$(λ−1)z=2$</span>.
 {% endraw %}
 
   </article>

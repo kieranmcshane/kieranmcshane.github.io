@@ -54,14 +54,14 @@ mat101_session_number: 9
 ## Contrôle formatif
 {: #controle}
 
-1. Mettre <span class="math inline">\((2+i)/(1−i)\)</span> sous forme algébrique.
-2. Calculer <span class="math inline">\((1−i)^6\)</span> par forme exponentielle.
-3. Résoudre <span class="math inline">\(z²+2z+2=0\)</span>.
+1. Mettre <span class="math inline">$(2+i)/(1−i)$</span> sous forme algébrique.
+2. Calculer <span class="math inline">$(1−i)^6$</span> par forme exponentielle.
+3. Résoudre <span class="math inline">$z²+2z+2=0$</span>.
 
 ## Questions
 {: #questions}
 
-Pour <span class="math inline">\(z_A=2−i\)</span> et <span class="math inline">\(z_B=−2+3i\)</span>, donner le milieu de <span class="math inline">\([AB]\)</span> et la distance <span class="math inline">\(AB\)</span>.
+Pour <span class="math inline">$z_A=2−i$</span> et <span class="math inline">$z_B=−2+3i$</span>, donner le milieu de <span class="math inline">$[AB]$</span> et la distance <span class="math inline">$AB$</span>.
 {% endraw %}
 
   </article>

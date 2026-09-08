@@ -41,8 +41,8 @@ mat101_session_number: 11
 {: #competences}
 
 - Utiliser extension, compréhension et description en fonction.
-- Distinguer <span class="math inline">\(∈\)</span> et <span class="math inline">\(⊂\)</span>, ensemble vide et singleton.
-- Calculer <span class="math inline">\(∪\)</span>, <span class="math inline">\(∩\)</span>, différence et complémentaire.
+- Distinguer <span class="math inline">$∈$</span> et <span class="math inline">$⊂$</span>, ensemble vide et singleton.
+- Calculer <span class="math inline">$∪$</span>, <span class="math inline">$∩$</span>, différence et complémentaire.
 - Utiliser Morgan et démontrer une égalité par appartenance.
 - Traduire une valeur absolue en intervalle.
 
@@ -61,7 +61,7 @@ mat101_session_number: 11
 ## Questions
 {: #questions}
 
-Pour <span class="math inline">\(A={1,{2}}\)</span>, décider : <span class="math inline">\(2∈A\)</span>, <span class="math inline">\({2}∈A\)</span>, <span class="math inline">\({2}⊂A\)</span>, <span class="math inline">\({{2}}⊂A\)</span>.
+Pour <span class="math inline">$A={1,{2}}$</span>, décider : <span class="math inline">$2∈A$</span>, <span class="math inline">${2}∈A$</span>, <span class="math inline">${2}⊂A$</span>, <span class="math inline">${{2}}⊂A$</span>.
 {% endraw %}
 
   </article>

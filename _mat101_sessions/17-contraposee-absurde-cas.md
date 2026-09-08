@@ -40,7 +40,7 @@ mat101_session_number: 17
 ## À savoir faire
 {: #competences}
 
-- Transformer <span class="math inline">\(P⇒Q\)</span> en <span class="math inline">\(¬Q⇒¬P\)</span>.
+- Transformer <span class="math inline">$P⇒Q$</span> en <span class="math inline">$¬Q⇒¬P$</span>.
 - Identifier une contradiction.
 - Choisir des cas qui couvrent tout le domaine.
 
@@ -55,7 +55,7 @@ mat101_session_number: 17
 ## Questions
 {: #questions}
 
-Prouver par contraposée : <span class="math inline">\(n²\)</span> pair implique <span class="math inline">\(n\)</span> pair.
+Prouver par contraposée : <span class="math inline">$n²$</span> pair implique <span class="math inline">$n$</span> pair.
 {% endraw %}
 
   </article>

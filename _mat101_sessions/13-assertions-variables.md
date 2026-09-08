@@ -53,7 +53,7 @@ mat101_session_number: 13
 ## Questions
 {: #questions}
 
-Classer : <span class="math inline">\(x²≥0\)</span>, <span class="math inline">\(∀x∈R,x²≥0\)</span>, <span class="math inline">\(∀x∈R,x²≥a\)</span>, <span class="math inline">\(∃x∈R,x²=−1\)</span>.
+Classer : <span class="math inline">$x²≥0$</span>, <span class="math inline">$∀x∈R,x²≥0$</span>, <span class="math inline">$∀x∈R,x²≥a$</span>, <span class="math inline">$∃x∈R,x²=−1$</span>.
 {% endraw %}
 
   </article>

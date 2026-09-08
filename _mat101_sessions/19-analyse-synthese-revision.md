@@ -52,14 +52,14 @@ mat101_session_number: 19
 ## Révision mixte
 {: #revision}
 
-1. Simplifier <span class="math inline">\((A∩B^c)^c\)</span>.
-2. Nier <span class="math inline">\(∀x∈R,∃y∈R,x<y\)</span>.
-3. Prouver : <span class="math inline">\(n²\)</span> impair implique <span class="math inline">\(n\)</span> impair.
+1. Simplifier <span class="math inline">$(A∩B^c)^c$</span>.
+2. Nier <span class="math inline">$∀x∈R,∃y∈R,x<y$</span>.
+3. Prouver : <span class="math inline">$n²$</span> impair implique <span class="math inline">$n$</span> impair.
 
 ## Questions
 {: #questions}
 
-Résoudre par analyse-synthèse <span class="math inline">\(√(x+6)=x\)</span>.
+Résoudre par analyse-synthèse <span class="math inline">$√(x+6)=x$</span>.
 {% endraw %}
 
   </article>

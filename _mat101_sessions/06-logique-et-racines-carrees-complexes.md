@@ -40,8 +40,8 @@ mat101_session_number: 6
 ## À savoir faire
 {: #competences}
 
-- Poser <span class="math inline">\(δ=x+iy\)</span> et comparer les parties réelle et imaginaire de <span class="math inline">\(δ²\)</span>.
-- Utiliser <span class="math inline">\(x²+y²=|δ²|\)</span> puis le signe de <span class="math inline">\(xy\)</span>.
+- Poser <span class="math inline">$δ=x+iy$</span> et comparer les parties réelle et imaginaire de <span class="math inline">$δ²$</span>.
+- Utiliser <span class="math inline">$x²+y²=|δ²|$</span> puis le signe de <span class="math inline">$xy$</span>.
 - Donner les deux racines opposées et vérifier.
 
 ## Parcours
@@ -53,7 +53,7 @@ mat101_session_number: 6
 ## Questions
 {: #questions}
 
-Trouver toutes les racines carrées de <span class="math inline">\(5−12i\)</span>.
+Trouver toutes les racines carrées de <span class="math inline">$5−12i$</span>.
 {% endraw %}
 
   </article>

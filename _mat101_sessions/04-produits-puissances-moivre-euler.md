@@ -55,8 +55,8 @@ mat101_session_number: 4
 ## Questions
 {: #questions}
 
-1. Calculer <span class="math inline">\((√3+i)^6\)</span>.
-2. Écrire <span class="math inline">\(cos(3x)\)</span> en fonction de <span class="math inline">\(cos x\)</span>.
+1. Calculer <span class="math inline">$(√3+i)^6$</span>.
+2. Écrire <span class="math inline">$cos(3x)$</span> en fonction de <span class="math inline">$cos x$</span>.
 {% endraw %}
 
   </article>

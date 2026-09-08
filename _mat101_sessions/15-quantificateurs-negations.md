@@ -40,7 +40,7 @@ mat101_session_number: 15
 ## À savoir faire
 {: #competences}
 
-- Lire <span class="math inline">\(∀\)</span> et <span class="math inline">\(∃\)</span> dans l&#x27;ordre.
+- Lire <span class="math inline">$∀$</span> et <span class="math inline">$∃$</span> dans l&#x27;ordre.
 - Choisir un témoin dépendant des variables précédentes.
 - Nier en échangeant les quantificateurs.
 
@@ -55,7 +55,7 @@ mat101_session_number: 15
 ## Questions
 {: #questions}
 
-Nier <span class="math inline">\(∀x∈R,∃n∈N,n>x\)</span>.
+Nier <span class="math inline">$∀x∈R,∃n∈N,n>x$</span>.
 {% endraw %}
 
   </article>

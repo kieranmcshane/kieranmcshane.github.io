@@ -40,9 +40,9 @@ mat101_session_number: 12
 ## À savoir faire
 {: #competences}
 
-- Distinguer <span class="math inline">\({a,b}\)</span> de <span class="math inline">\((a,b)\)</span>.
-- Énumérer <span class="math inline">\(E×F\)</span>.
-- Lire union/intersection indexées avec <span class="math inline">\(∃/∀\)</span>.
+- Distinguer <span class="math inline">${a,b}$</span> de <span class="math inline">$(a,b)$</span>.
+- Énumérer <span class="math inline">$E×F$</span>.
+- Lire union/intersection indexées avec <span class="math inline">$∃/∀$</span>.
 
 ## Parcours
 {: #parcours}
@@ -55,7 +55,7 @@ mat101_session_number: 12
 ## Questions
 {: #questions}
 
-Écrire <span class="math inline">\({0,1}×{a,b,c}\)</span> en extension et donner son nombre d&#x27;éléments.
+Écrire <span class="math inline">${0,1}×{a,b,c}$</span> en extension et donner son nombre d&#x27;éléments.
 {% endraw %}
 
   </article>

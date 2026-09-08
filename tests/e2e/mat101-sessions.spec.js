@@ -158,9 +158,9 @@ test.describe("MAT101 nineteen-session student path", () => {
       { timeout: 15000 }
     );
 
-    const competences = page.locator("#competences").locator("xpath=..").locator("ul").first();
+    const competences = page.locator("#competences + ul");
     await expect(competences).toContainText("Situer un nombre");
-    await expect(competences.locator("mjx-container")).toHaveCount(4);
+    await expect(competences.locator("mjx-container")).toHaveCount(5);
     await expect(competences.locator("code")).toHaveCount(0);
   });
 

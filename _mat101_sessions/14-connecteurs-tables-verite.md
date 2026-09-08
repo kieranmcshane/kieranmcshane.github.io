@@ -40,7 +40,7 @@ mat101_session_number: 14
 ## À savoir faire
 {: #competences}
 
-- Utiliser <span class="math inline">\(¬\)</span>, <span class="math inline">\(∧\)</span>, <span class="math inline">\(∨\)</span> et <span class="math inline">\(⇒\)</span>.
+- Utiliser <span class="math inline">$¬$</span>, <span class="math inline">$∧$</span>, <span class="math inline">$∨$</span> et <span class="math inline">$⇒$</span>.
 - Construire toutes les lignes d&#x27;une table.
 - Vérifier une tautologie ou une équivalence.
 
@@ -53,7 +53,7 @@ mat101_session_number: 14
 ## Questions
 {: #questions}
 
-Comparer par table <span class="math inline">\(¬(P∨Q)\)</span> et <span class="math inline">\((¬P)∧(¬Q)\)</span>.
+Comparer par table <span class="math inline">$¬(P∨Q)$</span> et <span class="math inline">$(¬P)∧(¬Q)$</span>.
 {% endraw %}
 
   </article>

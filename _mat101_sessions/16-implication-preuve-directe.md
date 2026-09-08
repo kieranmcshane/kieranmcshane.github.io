@@ -55,7 +55,7 @@ mat101_session_number: 16
 ## Questions
 {: #questions}
 
-Prouver <span class="math inline">\(∀x∈R,x²+2x+2>0\)</span>.
+Prouver <span class="math inline">$∀x∈R,x²+2x+2>0$</span>.
 {% endraw %}
 
   </article>
