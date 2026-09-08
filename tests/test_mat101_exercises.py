@@ -486,6 +486,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("data-mat101-exercise", PAGE)
         self.assertIn("normalize('NFD')", SCRIPT)
         self.assertIn("activeTag", SCRIPT)
+        self.assertIn("activeTag === nextTag ? '' : nextTag", SCRIPT)
         self.assertIn("searchParams.set('notion'", SCRIPT)
         self.assertIn("initializeRootDiagrams", SCRIPT)
         self.assertIn("data-mat101-root-diagram", SCRIPT)

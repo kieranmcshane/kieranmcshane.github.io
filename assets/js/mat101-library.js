@@ -417,7 +417,8 @@
     input.addEventListener('input', filterExercises);
     tagButtons.forEach(function (button) {
       button.addEventListener('click', function () {
-        activeTag = button.dataset.mat101Tag || '';
+        var nextTag = button.dataset.mat101Tag || '';
+        activeTag = activeTag === nextTag ? '' : nextTag;
         updateTagButtons();
         updateTagUrl();
         filterExercises();
