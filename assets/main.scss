@@ -12954,7 +12954,7 @@ body.mat101-site .mat101-library {
 .mat101-native-card {
   min-width: 0;
   max-width: 100%;
-  overflow: clip;
+  overflow: hidden;
   border: 1px solid var(--mat101-line);
   border-radius: 7px;
   background: #fff;
@@ -13144,6 +13144,9 @@ body.mat101-site .mat101-library {
 }
 
 .mat101-statement-transcription {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: clamp(0.85rem, 2vw, 1.2rem);
   border: 1px solid #d5d2c9;
   border-radius: 4px;
@@ -13152,6 +13155,8 @@ body.mat101-site .mat101-library {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1rem, 1.5vw, 1.08rem);
   line-height: 1.62;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-statement-transcription p {
@@ -13254,12 +13259,33 @@ body.mat101-site .mat101-library {
   background: #fffdfb;
   font-size: 0.91rem;
   line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
 }
 
-.mat101-solution-body mjx-container[display="true"] {
+.mat101-statement-transcription mjx-container[display="true"],
+.mat101-solution-body mjx-container[display="true"],
+.mat101-session-content mjx-container[display="true"] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 0.8rem 0 !important;
+  padding: 0.15rem 0 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mat101-statement-transcription mjx-container:not([display="true"]),
+.mat101-solution-body mjx-container:not([display="true"]),
+.mat101-session-content mjx-container:not([display="true"]) {
+  display: inline-block;
+  box-sizing: border-box;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  vertical-align: middle;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-solution-body > :first-child {
@@ -14264,12 +14290,24 @@ body:has(.mat101-session-page) {
   color: var(--mat101-muted);
   font-size: 0.76rem;
   line-height: 1.42;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mat101-session-card li {
+  min-width: 0;
 }
 
 .mat101-session-card mjx-container {
-  display: inline;
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
   font-size: inherit;
   margin: 0;
+  vertical-align: middle;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-session-card mjx-container[jax="CHTML"][display="true"] {
@@ -14561,12 +14599,6 @@ body:has(.mat101-session-page) {
 
 .mat101-session-content code {
   overflow-wrap: normal;
-}
-
-.mat101-session-content mjx-container[display="true"] {
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
 }
 
 .mat101-session-pager {

@@ -216,6 +216,10 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("cards.length !== 19", SCRIPT)
         self.assertIn(".mat101-session-grid", STYLES)
         self.assertIn(".mat101-session-content", STYLES)
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-session-card mjx-container[\s\S]*?overflow-x: auto;",
+        )
         self.assertIn(".mat101-swipe-hint", STYLES)
 
     def test_mat101_is_the_single_global_entry_and_pages_cross_link(self):

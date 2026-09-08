@@ -501,6 +501,18 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-root-geometry", STYLES)
         self.assertIn(".mat101-root-diagram", STYLES)
         self.assertIn(".mat101-statement-transcription", STYLES)
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-statement-transcription[\s\S]*?overflow-x: auto;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-statement-transcription mjx-container\[display=\"true\"\][\s\S]*?overflow-x: auto;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-statement-transcription mjx-container:not\(\[display=\"true\"\]\)[\s\S]*?overflow-x: auto;",
+        )
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
         self.assertIn("min-height: 44px", STYLES)
