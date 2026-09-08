@@ -19,14 +19,13 @@ math: true
 <div class="mat101-library">
   <header class="mat101-page-heading">
     <h1>Exercices MAT101</h1>
-    <nav class="mat101-page-links" aria-label="Autres ressources MAT101">
-      <a href="{{ '/mat101/seances/' | relative_url }}">Séances</a>
-      <a href="#informations">Informations</a>
+    <nav class="mat101-page-links" aria-label="Sections de la page exercices">
+      <a href="#informations">Infos cours</a>
+      <a href="#bibliotheque">103 exercices</a>
       <a href="#facultatif">Facultatif</a>
-      <a href="#annales">Annales</a>
       <a href="#errata">Errata</a>
-      <a href="#telechargements">Téléchargements</a>
-      <a href="#credits">Crédits</a>
+      <a href="#annales">Annales</a>
+      <a href="#telechargements">PDFs</a>
     </nav>
   </header>
 

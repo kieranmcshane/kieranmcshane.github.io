@@ -456,7 +456,10 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator(".site-header")).toHaveCount(0);
     await expect(page.locator(".site-footer")).toHaveCount(0);
     await expect(page.locator('.site-nav a[href="/rating-lab/"]')).toHaveCount(0);
-    await expect(page.locator(".mat101-page-links a")).toHaveCount(7);
+    await expect(page.locator(".mat101-page-links a")).toHaveCount(6);
+    await expect(
+      page.locator(".mat101-page-links a[href='#bibliotheque']")
+    ).toHaveText("103 exercices");
     await expect(
       page.locator(".mat101-page-links a[href='#annales']")
     ).toHaveText("Annales");
@@ -465,10 +468,13 @@ test.describe("MAT101 native library", () => {
     ).toHaveText("Facultatif");
     await expect(
       page.locator(".mat101-page-links a[href='#informations']")
-    ).toHaveText("Informations");
+    ).toHaveText("Infos cours");
     await expect(page.locator(".mat101-page-links a[href='#errata']")).toHaveText(
       "Errata"
     );
+    await expect(
+      page.locator(".mat101-page-links a[href='#telechargements']")
+    ).toHaveText("PDFs");
     await expect(page.locator(".mat101-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-stats")).toHaveCount(0);
     await expect(page.locator(".mat101-verification")).toHaveCount(0);
