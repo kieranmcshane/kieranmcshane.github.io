@@ -30,9 +30,8 @@ math: true
 
     <div class="mat101-session-filters" aria-label="Filtrer les séances par bloc">
       <button class="mat101-session-filter is-active" type="button" data-mat101-session-filter="" aria-pressed="true">Tout <span>19</span></button>
-      <button class="mat101-session-filter" type="button" data-mat101-session-filter="complexes" aria-pressed="false">Nombres complexes <span>9</span></button>
-      <button class="mat101-session-filter" type="button" data-mat101-session-filter="langage" aria-pressed="false">Ensembles et logique <span>9</span></button>
-      <button class="mat101-session-filter" type="button" data-mat101-session-filter="synthese" aria-pressed="false">Synthèse <span>1</span></button>
+      <button class="mat101-session-filter" type="button" data-mat101-session-filter="complexes" aria-pressed="false">Nombres complexes <span>8</span></button>
+      <button class="mat101-session-filter" type="button" data-mat101-session-filter="langage" aria-pressed="false">Ensembles et logique <span>11</span></button>
     </div>
   </section>
 

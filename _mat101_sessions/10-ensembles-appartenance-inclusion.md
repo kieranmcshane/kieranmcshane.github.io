@@ -12,7 +12,7 @@ mat101_session_number: 10
 <div class="mat101-library mat101-session-page" data-mat101-session-number="10">
   <header class="mat101-session-detail-hero">
     <div>
-      <p class="mat101-session-eyebrow">Chapitre 1 · Nombres complexes</p>
+      <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Interro · nombres complexes</h1>
       <p>mar. 29 sept. 2026</p>
     </div>
@@ -43,17 +43,17 @@ mat101_session_number: 10
 - Forme algébrique, conjugué, module et quotient (séances 1–2).
 - Argument, forme exponentielle, Moivre et Euler (séances 3–4).
 - Polynômes, paramètres, racines carrées et second degré (séances 5–7).
-- Racines n-ièmes et géométrie dans le plan (séances 8–9).
+- Racines n-ièmes (séance 8).
 
 ## Parcours
 {: #parcours}
 
-- Révision des séances 1 à 9 et des exercices du chapitre 1 déjà travaillés.
+- Révision des séances 1 à 8 et des exercices du chapitre 1 déjà travaillés.
 
 ## Questions
 {: #questions}
 
-Interro portant sur l’ensemble du chapitre 1 · nombres complexes (séances 1 à 9).
+Interro portant sur l’ensemble du chapitre 1 · nombres complexes (séances 1 à 8).
 {% endraw %}
 
   </article>

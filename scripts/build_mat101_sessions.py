@@ -221,11 +221,9 @@ def parse_schedule(text: str) -> dict[int, dict[str, object]]:
 
 
 def block_for(number: int) -> tuple[str, str]:
-    if number <= 9:
+    if number <= 8:
         return "complexes", "Chapitre 1 · Nombres complexes"
-    if number <= 18:
-        return "langage", "Chapitre 2 · Ensembles et langage mathématique"
-    return "synthese", "Synthèse · Révision"
+    return "langage", "Chapitre 2 · Ensembles et langage mathématique"
 
 
 def session_status(session: dict[str, object]) -> tuple[str, str, str]:

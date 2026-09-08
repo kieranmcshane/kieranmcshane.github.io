@@ -12,7 +12,7 @@ mat101_session_number: 9
 <div class="mat101-library mat101-session-page" data-mat101-session-number="9">
   <header class="mat101-session-detail-hero">
     <div>
-      <p class="mat101-session-eyebrow">Chapitre 1 · Nombres complexes</p>
+      <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Géométrie et rédaction</h1>
       <p>ven. 25 sept. 2026</p>
     </div>

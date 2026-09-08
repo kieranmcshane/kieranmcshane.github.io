@@ -12,7 +12,7 @@ mat101_session_number: 19
 <div class="mat101-library mat101-session-page" data-mat101-session-number="19">
   <header class="mat101-session-detail-hero">
     <div>
-      <p class="mat101-session-eyebrow">Synthèse · Révision</p>
+      <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Analyse-synthèse et révision</h1>
       <p>Date et salle à confirmer</p>
     </div>
