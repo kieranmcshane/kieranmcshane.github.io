@@ -1,0 +1,13 @@
+<header class="mat101-shell" aria-label="MAT101">
+  <a class="mat101-shell-title" href="{{ '/mat101/seances/' | relative_url }}">MAT101</a>
+  <nav class="mat101-shell-links" aria-label="Navigation MAT101">
+    <a
+      href="{{ '/mat101/seances/' | relative_url }}"
+      {% if page.url == '/mat101/seances/' or page.mat101_session %}aria-current="page"{% endif %}
+    >Séances</a>
+    <a
+      href="{{ '/mat101/exercices/' | relative_url }}"
+      {% if page.url == '/mat101/exercices/' %}aria-current="page"{% endif %}
+    >Exercices</a>
+  </nav>
+</header>

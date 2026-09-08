@@ -94,6 +94,11 @@ test.describe("MAT101 native library", () => {
     ).toHaveClass(/is-active/);
     await expect(page).toHaveURL(/notion=invariants/);
 
+    await invariantTag.click();
+    await expect(invariantTag).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
+    await expect(page).not.toHaveURL(/notion=invariants/);
+
     await page.locator('[data-mat101-tag=""]').click();
     await expect(page.locator("[data-mat101-exercise]:visible")).toHaveCount(103);
   });
@@ -447,6 +452,10 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator(".mat101-page-heading h1")).toHaveText(
       "Exercices MAT101"
     );
+    await expect(page.locator(".mat101-shell")).toBeVisible();
+    await expect(page.locator(".site-header")).toHaveCount(0);
+    await expect(page.locator(".site-footer")).toHaveCount(0);
+    await expect(page.locator('.site-nav a[href="/rating-lab/"]')).toHaveCount(0);
     await expect(page.locator(".mat101-page-links a")).toHaveCount(4);
     await expect(page.locator(".mat101-page-links a[href='#errata']")).toHaveText(
       "Errata"

@@ -27,8 +27,9 @@ class ContactPageTests(unittest.TestCase):
         self.assertIn("Message", CONTACT_FORM)
         self.assertIn("publicly visible", CONTACT_FORM)
 
-    def test_mat101_rights_link_targets_contact_section(self):
-        self.assertIn("'/about/#contact'", MAT101)
+    def test_mat101_corrections_use_github_not_about_contact(self):
+        self.assertIn("mat101-correction.yml", MAT101)
+        self.assertNotIn("'/about/#contact'", MAT101)
 
     def test_contact_routes_have_responsive_and_accessible_styles(self):
         self.assertIn(".contact-routes", STYLES)

@@ -264,11 +264,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn('class="mat101-page-heading"', PAGE)
         self.assertIn("103 solutions · niveau L1", PAGE)
         self.assertNotIn("103 solutions · 59 pages", PAGE)
-        self.assertIn(
-            "ils ne constituent pas une vérification indépendante de chaque "
-            "démonstration",
-            PAGE,
-        )
+        self.assertNotIn("Contrôles effectués avant publication", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         self.assertIn("mat101-difficulty", PAGE)
         self.assertIn("Difficulté : {{ difficulty_label }}", PAGE)
@@ -289,6 +285,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("permalink: /mat101/exercices/", PAGE)
 
     def test_exercise_page_intro_is_compact(self):
+        self.assertRegex(PAGE, r"(?m)^layout: mat101$")
         self.assertIn('<h1>Exercices MAT101</h1>', PAGE)
         self.assertIn('class="mat101-page-links"', PAGE)
         self.assertIn('href="#errata">Errata</a>', PAGE)
@@ -307,6 +304,14 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn('class="mat101-verification"', PAGE)
         self.assertNotIn('class="mat101-reading-note"', PAGE)
         self.assertNotIn(".mat101-reading-note", STYLES)
+        self.assertNotIn("Bibliothèque interactive", PAGE)
+        self.assertNotIn("Un ticket précis pour chaque correction", PAGE)
+        self.assertNotIn("Relecture ouverte", PAGE)
+        self.assertNotIn("Registre versionné", PAGE)
+        self.assertNotIn("Lire hors ligne ou recompiler", PAGE)
+        self.assertNotIn("Contrôles effectués avant publication", PAGE)
+        self.assertIn('<h2 id="mat101-review-title">Corrections</h2>', PAGE)
+        self.assertIn('<h2 id="mat101-downloads-title">Téléchargements</h2>', PAGE)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
@@ -330,6 +335,11 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertTrue(all(entry["version"] == "2026-07-28" for entry in ERRATA))
         self.assertIn("Errata du polycopié source", PAGE)
         self.assertIn("site.data.mat101_errata", PAGE)
+        self.assertIn('class="mat101-errata-change"', PAGE)
+        self.assertIn("<span>Avant</span> {{ erratum.problem }}", PAGE)
+        self.assertIn("<span>Après</span> {{ erratum.correction }}", PAGE)
+        self.assertNotIn("Problème.", PAGE)
+        self.assertNotIn("Formulation retenue.", PAGE)
 
     def test_credits_distinguish_original_and_solution(self):
         self.assertIn("Énoncés originaux", PAGE)
@@ -341,14 +351,16 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("méthode de George Pólya", PAGE)
         self.assertIn("Rédaction initiale assistée par OpenAI ChatGPT", PAGE)
         self.assertIn("ni d’un corrigé officiel de l’UGA", PAGE)
-        self.assertIn("'/about/#contact'", PAGE)
+        self.assertNotIn("Droits et rectifications.", PAGE)
+        self.assertNotIn("Aucune licence de réutilisation explicite", PAGE)
         self.assertNotIn("Découpe fidèle des énoncés", PAGE)
 
     def test_citation_and_rights_language_is_precise(self):
         self.assertNotIn("Citations bibliographiques recommandées", PAGE)
         self.assertNotIn("Télécharger les références BibTeX", PAGE)
-        self.assertIn("Aucune licence de réutilisation explicite", PAGE)
-        self.assertIn("ne constituent pas une publication de l’UGA", PAGE)
+        self.assertNotIn("Droits et rectifications.", PAGE)
+        self.assertNotIn("Aucune licence de réutilisation explicite", PAGE)
+        self.assertNotIn("ne constituent pas une publication de l’UGA", PAGE)
         bib = BIB.read_text()
         self.assertIn("@misc{collectif_mat101_2022", bib)
         self.assertIn("@misc{mcshane_recueil_mat101_2026", bib)
@@ -475,6 +487,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("data-mat101-exercise", PAGE)
         self.assertIn("normalize('NFD')", SCRIPT)
         self.assertIn("activeTag", SCRIPT)
+        self.assertIn("activeTag === nextTag ? '' : nextTag", SCRIPT)
         self.assertIn("searchParams.set('notion'", SCRIPT)
         self.assertIn("initializeRootDiagrams", SCRIPT)
         self.assertIn("data-mat101-root-diagram", SCRIPT)
@@ -482,7 +495,25 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         head = (ROOT / "_includes/head-custom.html").read_text()
         self.assertIn("mat101-library.js", head)
         self.assertIn("mat101-has-js", head)
+        self.assertIn("page.layout == 'mat101'", head)
         self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
+        self.assertIn(".mat101-shell", STYLES)
+        self.assertIn("body.mat101-site", STYLES)
+
+    def test_mat101_uses_a_dedicated_layout_without_main_site_chrome(self):
+        layout = (ROOT / "_layouts" / "mat101.html").read_text(encoding="utf-8")
+        shell = (ROOT / "_includes" / "mat101-shell.html").read_text(encoding="utf-8")
+        index = (ROOT / "mat101" / "index.md").read_text(encoding="utf-8")
+        self.assertIn("mat101-shell.html", layout)
+        self.assertNotIn("header.html", layout)
+        self.assertNotIn("footer.html", layout)
+        self.assertIn("body class=\"mat101-site\"", layout)
+        self.assertIn("'/mat101/seances/' | relative_url", shell)
+        self.assertIn("'/mat101/exercices/' | relative_url", shell)
+        self.assertNotIn("rating-lab", shell)
+        self.assertNotIn("repertoire", shell)
+        self.assertRegex(index, r"(?m)^layout: mat101$")
+        self.assertRegex(index, r"(?m)^permalink: /mat101/$")
 
     def test_interactive_table_of_contents_covers_and_tracks_exercises(self):
         self.assertIn("Sommaire interactif", PAGE)

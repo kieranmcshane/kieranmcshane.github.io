@@ -1,5 +1,5 @@
 <script>
-  {% if page.url == '/mat101/exercices/' %}
+  {% if page.layout == 'mat101' and page.url == '/mat101/exercices/' %}
   document.documentElement.classList.add('mat101-has-js');
   {% endif %}
 
@@ -33,10 +33,10 @@
 {% if page.url == '/2026/07/18/x-ens-2026-mathematics-b-complete-correction/' or page.url == '/2026/07/27/galois-theory-without-detours/' %}
 <script defer src="{{ '/assets/js/correction-navigation.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
 {% endif %}
-{% if page.url == '/mat101/exercices/' %}
+{% if page.layout == 'mat101' and page.url == '/mat101/exercices/' %}
 <script defer src="{{ '/assets/js/mat101-library.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
 {% endif %}
-{% if page.url == '/mat101/seances/' %}
+{% if page.layout == 'mat101' and page.url == '/mat101/seances/' %}
 <script defer src="{{ '/assets/js/mat101-sessions.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
 {% endif %}
 {% if page.url == '/repertoire-raisonne/' %}

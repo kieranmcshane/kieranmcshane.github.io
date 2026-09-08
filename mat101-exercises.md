@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: Exercices MAT101
 permalink: /mat101/exercices/
 description: "Bibliothèque de 103 exercices MAT101 de niveau L1 avec énoncés lisibles directement en ligne."
@@ -101,7 +101,6 @@ math: true
   <section class="mat101-browser" id="bibliotheque" aria-labelledby="mat101-browser-title">
     <div class="mat101-browser-heading">
       <div>
-        <p class="mat101-kicker">Bibliothèque interactive</p>
         <h2 id="mat101-browser-title">Trouver un exercice</h2>
       </div>
       <p id="mat101-result-count" aria-live="polite">103 exercices affichés</p>
@@ -239,21 +238,14 @@ math: true
   {% endfor %}
 
   <section class="mat101-community-review" aria-labelledby="mat101-review-title">
-    <p class="mat101-kicker">Relecture ouverte</p>
-    <h2 id="mat101-review-title">Un ticket précis pour chaque correction</h2>
+    <h2 id="mat101-review-title">Corrections</h2>
     <p>Les corrections sont publiques sur GitHub. Un compte gratuit est nécessaire pour en proposer une.</p>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction</a>
     <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les tickets MAT101</a>
   </section>
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">
-    <p class="mat101-kicker">Registre versionné</p>
     <h2 id="mat101-errata-title">Errata du polycopié source</h2>
-    {% if site.mat101_show_solutions %}
-    <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : le corrigé explique le problème, puis traite la formulation mathématiquement cohérente lorsqu’elle est identifiable.</p>
-    {% else %}
-    <p>Ces difficultés appartiennent à l’édition source du 13 septembre 2022. Elles ne sont pas masquées : chaque fiche indique le problème, puis la formulation mathématiquement cohérente retenue lorsqu’elle est identifiable.</p>
-    {% endif %}
     <div class="mat101-errata-list">
       {% for erratum in site.data.mat101_errata %}
         <article id="erratum-{{ erratum.exercise | replace: '.', '-' }}">
@@ -261,9 +253,10 @@ math: true
             <a href="#exercice-{{ erratum.exercise | replace: '.', '-' }}">Exercice {{ erratum.exercise }}</a>
             <span>{{ erratum.kind }}</span>
           </header>
-          <p><strong>Problème.</strong> {{ erratum.problem }}</p>
-          <p><strong>Formulation retenue.</strong> {{ erratum.correction }}</p>
-          <small>Version {{ erratum.version }}</small>
+          <div class="mat101-errata-change">
+            <p><span>Avant</span> {{ erratum.problem }}</p>
+            <p><span>Après</span> {{ erratum.correction }}</p>
+          </div>
         </article>
       {% endfor %}
     </div>
@@ -271,11 +264,9 @@ math: true
     </div>
   </div>
 
-  <section class="mat101-downloads" id="telechargements">
+  <section class="mat101-downloads" id="telechargements" aria-labelledby="mat101-downloads-title">
     <div class="mat101-download-intro">
-      <p class="mat101-kicker">Fichiers complémentaires</p>
-      <h2>Lire hors ligne ou recompiler</h2>
-      <p>La bibliothèque ci-dessus est la lecture principale. Les PDF et les sources LaTeX restent disponibles pour l’impression, l’archivage et la réutilisation personnelle.</p>
+      <h2 id="mat101-downloads-title">Téléchargements</h2>
     </div>
 
     <div class="mat101-file-group">
@@ -315,30 +306,8 @@ math: true
       {% endif %}
     </div>
 
-    <div class="mat101-review-ledger">
-      <strong>Contrôles effectués avant publication</strong>
-      <ul>
-        <li>103 énoncés structurés, sélectionnables et indexés pour la recherche ;</li>
-        {% if site.mat101_show_solutions %}
-        <li>103 blocs de solutions distincts, de 1.1 à 4.17, rendus directement dans la page ;</li>
-        {% endif %}
-        <li>correspondance des quatre chapitres, numéros et fichiers sources ;</li>
-        <li>crédits, statut non officiel, errata et formulaire de rectification intégrés.</li>
-      </ul>
-      {% if site.mat101_show_solutions %}
-      <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance ; ils ne constituent pas une vérification indépendante de chaque démonstration.</p>
-      {% else %}
-      <p><strong>Limite actuelle :</strong> ces contrôles portent sur l’exhaustivité, la structure et la provenance des énoncés.</p>
-      {% endif %}
-    </div>
-
     <div class="mat101-rights-note">
       <p><strong>Source faisant autorité.</strong> Le recueil utilise l’édition fournie du 13 septembre 2022. Une <a href="https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/ens_files/mat_101_20221201.pdf">version institutionnelle datée du 1er décembre 2022</a> est hébergée par l’Institut Fourier.</p>
-      {% if site.mat101_show_solutions %}
-      <p><strong>Droits et rectifications.</strong> Aucune licence de réutilisation explicite n’a été identifiée dans le PDF du 13 septembre 2022 ; les droits sur les pages originales restent attachés à leurs titulaires. Cette sélection éducative et son corrigé non officiel ne constituent pas une publication de l’UGA. Toute demande d’attribution, de rectification ou de retrait peut être déposée dans le registre public ci-dessus ou adressée via la <a href="{{ '/about/#contact' | relative_url }}">page de contact</a>.</p>
-      {% else %}
-      <p><strong>Droits et rectifications.</strong> Aucune licence de réutilisation explicite n’a été identifiée dans le PDF du 13 septembre 2022 ; les droits sur les pages originales restent attachés à leurs titulaires. Cette sélection éducative ne constitue pas une publication de l’UGA. Toute demande d’attribution, de rectification ou de retrait peut être déposée dans le registre public ci-dessus ou adressée via la <a href="{{ '/about/#contact' | relative_url }}">page de contact</a>.</p>
-      {% endif %}
     </div>
   </section>
 </div>

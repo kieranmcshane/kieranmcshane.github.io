@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: mat101
 title: MAT101
 permalink: /mat101/seances/
 description: "Les 19 séances MAT101 du groupe IMA02 : compétences, parcours dans le polycopié, exercices et tickets de sortie."
@@ -16,11 +16,12 @@ math: true
     </nav>
   </header>
 
+  <p class="mat101-session-notice">Partiel prévu la semaine du 20 octobre.</p>
+
   <section class="mat101-session-browser" id="seances" aria-labelledby="mat101-session-browser-title">
     <div class="mat101-session-browser-heading">
       <div>
-        <p class="mat101-kicker">Parcours chronologique</p>
-        <h2 id="mat101-session-browser-title">Retrouver une séance</h2>
+        <h2 id="mat101-session-browser-title">Séances</h2>
       </div>
       <p id="mat101-session-count" aria-live="polite">19 séances affichées</p>
     </div>
