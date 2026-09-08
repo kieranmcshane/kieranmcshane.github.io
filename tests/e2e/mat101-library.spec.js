@@ -657,9 +657,18 @@ test.describe("MAT101 native library", () => {
 test.describe("MAT101 visual baselines", () => {
   test("navigation layout @visual", async ({ page }) => {
     await gotoLibrary(page);
-    await page.locator("#bibliotheque").evaluate((element) =>
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+    await page.addStyleTag({
+      content: ".mat101-swipe-hint { visibility: hidden !important; }",
+    });
+    const navigation = page.locator(".mat101-toc");
+    await navigation.evaluate((element) =>
       element.scrollIntoView({ block: "start" })
     );
-    await expect(page).toHaveScreenshot("mat101-navigation.png");
+    await expect(navigation).toHaveScreenshot("mat101-navigation.png");
   });
 });
