@@ -42,6 +42,25 @@ test.describe("MAT101 nineteen-session student path", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("renders competency math on session cards", async ({ page }) => {
+    await gotoSessions(page);
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+
+    const card = page.locator('[data-session-number="1"]');
+    await expect(card.locator("mjx-container")).not.toHaveCount(0);
+    await expect(card.locator(".mat101-session-skills")).toContainText("Situer un nombre");
+
+    await page.locator('[data-mat101-session-filter="complexes"]').click();
+    const card2 = page.locator('[data-session-number="2"]');
+    await expect(card2.locator("mjx-container")).not.toHaveCount(0);
+    await expect(card2.locator(".mat101-session-skills")).not.toContainText("\\bar");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   test("filters and searches without losing shareable state", async ({ page }) => {
     await gotoSessions(page);
 

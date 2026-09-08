@@ -87,6 +87,24 @@ def plain_text(value: str) -> str:
     return value.strip()
 
 
+BACKTICK = re.compile(r"`([^`]+)`")
+
+
+def skill_to_html(value: str) -> str:
+    """Turn workbook backtick math into MathJax-ready inline markup."""
+
+    chunks: list[str] = []
+    index = 0
+    for match in BACKTICK.finditer(value):
+        if match.start() > index:
+            chunks.append(html.escape(value[index : match.start()]))
+        chunks.append(f'<span class="math inline">\\({match.group(1)}\\)</span>')
+        index = match.end()
+    if index < len(value):
+        chunks.append(html.escape(value[index:]))
+    return "".join(chunks)
+
+
 def assert_student_safe(value: str, context: str) -> None:
     normalized = value.casefold()
     for marker in FORBIDDEN_PUBLIC_MARKERS:
@@ -333,6 +351,7 @@ def main() -> None:
                 "block": block_slug,
                 "blockLabel": block_label,
                 "skillsPlain": [plain_text(skill) for skill in skills],
+                "skillsHtml": [skill_to_html(skill) for skill in skills],
                 "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
             }
         )

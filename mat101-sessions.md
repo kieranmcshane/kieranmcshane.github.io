@@ -64,13 +64,13 @@ math: true
             {% endif %}
           </header>
           <p class="mat101-session-date">{{ session.dateLabel }}</p>
-          <ul>
-            {% for skill in session.skillsPlain limit: 3 %}
+          <ul class="mat101-session-skills">
+            {% for skill in session.skillsHtml limit: 3 %}
               <li>{{ skill }}</li>
             {% endfor %}
           </ul>
           <footer>
-            <span>Compétences · exercices · questions</span>
+            <span>Compétences · exercices</span>
             <strong>Voir la séance <span aria-hidden="true">→</span></strong>
           </footer>
         </a>

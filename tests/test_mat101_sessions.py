@@ -112,6 +112,15 @@ class Mat101SessionsTests(unittest.TestCase):
             ).exists()
         )
 
+    def test_skill_markup_turns_backticks_into_mathjax_html(self):
+        rendered = GENERATOR.skill_to_html(
+            "Calculer `\\bar z`, `|z|` et poser `z=x+iy`"
+        )
+        self.assertIn('<span class="math inline">\\(\\bar z\\)</span>', rendered)
+        self.assertIn('<span class="math inline">\\(|z|\\)</span>', rendered)
+        self.assertIn('<span class="math inline">\\(z=x+iy\\)</span>', rendered)
+        self.assertNotIn("`", rendered)
+
     def test_generator_rejects_a_new_unreviewed_public_section(self):
         modified = WORKBOOK_TEXT.replace(
             "### Ticket\n", "### Corrigé\n\nContenu privé.\n\n### Ticket\n", 1
@@ -168,7 +177,9 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('data-mat101-session-filter="complexes"', PAGE)
         self.assertIn('data-mat101-session-filter="langage"', PAGE)
         self.assertIn('data-mat101-session-filter="synthese"', PAGE)
-        self.assertIn("session.skillsPlain", PAGE)
+        self.assertIn("session.skillsHtml", PAGE)
+        self.assertIn("mat101-session-skills", PAGE)
+        self.assertNotIn("session.skillsPlain", PAGE)
         self.assertIn("page.layout == 'mat101'", HEAD)
         self.assertIn("mat101-sessions.js", HEAD)
         self.assertIn("cards.length !== 19", SCRIPT)

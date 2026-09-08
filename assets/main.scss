@@ -14254,6 +14254,17 @@ body:has(.mat101-session-page) {
   line-height: 1.42;
 }
 
+.mat101-session-card mjx-container {
+  display: inline;
+  font-size: inherit;
+  margin: 0;
+}
+
+.mat101-session-card mjx-container[jax="CHTML"][display="true"] {
+  display: inline;
+  margin: 0;
+}
+
 .mat101-session-card li p {
   display: inline;
   margin: 0;
