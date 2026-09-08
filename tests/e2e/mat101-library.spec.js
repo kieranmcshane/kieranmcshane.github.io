@@ -112,13 +112,10 @@ test.describe("MAT101 native library", () => {
     const toc = page.locator("[data-mat101-toc]");
     const wide = page.viewportSize().width >= 1240;
     if (wide) {
-      await expect(toc).toHaveAttribute("open", "");
       await expect(toc).toHaveAttribute("data-mat101-toc-locked", "");
-    } else {
-      await expect(toc).not.toHaveAttribute("open", "");
-      await toc.locator(":scope > summary").click();
     }
 
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
     await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
     await expect(toc.locator(".mat101-difficulty-legend")).toContainText(
       "Niveau examen"
@@ -134,8 +131,7 @@ test.describe("MAT101 native library", () => {
     await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
 
     await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
-    if (wide) await expect(toc).toHaveAttribute("open", "");
-    else await expect(toc).not.toHaveAttribute("open", "");
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
     await expect(
       toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]')
     ).toHaveAttribute("aria-current", "location");
@@ -169,15 +165,8 @@ test.describe("MAT101 native library", () => {
     const toc = page.locator("[data-mat101-toc]");
     const rail = page.locator(".mat101-toc");
     const content = page.locator(".mat101-study-content");
-    await expect(toc).toHaveAttribute("open", "");
-    await expect(toc.locator(":scope > summary")).toHaveAttribute(
-      "aria-disabled",
-      "true"
-    );
-    await expect(toc.locator(":scope > summary")).toHaveAttribute(
-      "tabindex",
-      "-1"
-    );
+    await expect(toc).toHaveAttribute("data-mat101-toc-locked", "");
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
     await expect(toc.locator("[data-mat101-toc-chapter-link]")).toHaveCount(4);
     await expect(toc.locator("[data-mat101-toc-chapter-link]:visible")).toHaveCount(4);
     await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
@@ -207,9 +196,6 @@ test.describe("MAT101 native library", () => {
     const stickyRail = await rail.boundingBox();
     expect(Math.abs(stickyRail.y - initialRail.y)).toBeLessThanOrEqual(1);
 
-    await toc.locator(":scope > summary").click();
-    await expect(toc).toHaveAttribute("open", "");
-
     await page.locator("#telechargements").evaluate((element) =>
       element.scrollIntoView({ block: "start" })
     );
@@ -226,19 +212,14 @@ test.describe("MAT101 native library", () => {
     expect(stopped.railBottom).toBeLessThanOrEqual(stopped.downloadsTop + 1);
   });
 
-  test("keeps the compact disclosure keyboard-safe below the rail breakpoint", async ({
+  test("keeps the always-visible sommaire keyboard-safe below the rail breakpoint", async ({
     page,
   }) => {
-    test.skip(page.viewportSize().width >= 1240, "compact disclosure only");
+    test.skip(page.viewportSize().width >= 1240, "compact sommaire only");
     await gotoLibrary(page);
 
     const toc = page.locator("[data-mat101-toc]");
-    const summary = toc.locator(":scope > summary");
-    await expect(toc).not.toHaveAttribute("open", "");
-    await expect(summary).not.toHaveAttribute("aria-disabled", "true");
-    await expect(summary).not.toHaveAttribute("tabindex", "-1");
-    await summary.click();
-    await expect(toc).toHaveAttribute("open", "");
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
     await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
 
     const panelBox = await toc.locator(".mat101-toc-panel").boundingBox();
@@ -247,19 +228,13 @@ test.describe("MAT101 native library", () => {
       page.viewportSize().width
     );
 
-    await page.keyboard.press("Escape");
-    await expect(toc).not.toHaveAttribute("open", "");
-    await expect(summary).toBeFocused();
-
-    await summary.click();
     await toc.locator('[data-mat101-toc-link][data-exercise-id="3.16"]').click();
-    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
     await expect(page.locator("#exercice-3-16")).toHaveAttribute("open", "");
     await expect(page.locator("#exercice-3-16 > summary")).toBeFocused();
 
-    await summary.click();
     await toc.locator('[data-mat101-toc-chapter-link][href="#limites"]').click();
-    await expect(toc).not.toHaveAttribute("open", "");
+    await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
     await expect(page.locator("#limites")).toBeFocused();
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
@@ -412,9 +387,6 @@ test.describe("MAT101 native library", () => {
 
     const toc = noScriptPage.locator("[data-mat101-toc]");
     await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
-    if ((await toc.getAttribute("open")) === null) {
-      await toc.locator(":scope > summary").click();
-    }
     await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
 
     const exercise = noScriptPage.locator("#exercice-1-1");

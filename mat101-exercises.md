@@ -26,14 +26,10 @@ math: true
 
   <div class="mat101-study-area" data-mat101-study-area>
     <nav class="mat101-toc" aria-label="Sommaire des exercices">
-      <details data-mat101-toc>
-      <summary>
-        <span>
-          <small>Sommaire interactif</small>
-          <strong id="mat101-toc-current" aria-live="polite">4 chapitres · 103 exercices</strong>
-        </span>
-        <span class="mat101-toc-action">Parcourir</span>
-      </summary>
+      <div class="mat101-toc-shell" data-mat101-toc>
+      <p class="mat101-toc-status" id="mat101-toc-current" aria-live="polite">
+        4 chapitres · 103 exercices
+      </p>
 
       <div class="mat101-toc-panel">
         <div class="mat101-difficulty-legend" aria-label="Légende des niveaux de difficulté">
@@ -93,7 +89,7 @@ math: true
           </section>
         {% endfor %}
         </div>
-      </details>
+      </div>
     </nav>
 
     <div class="mat101-study-content">
