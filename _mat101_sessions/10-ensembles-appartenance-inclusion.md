@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 10 — Décrire un ensemble"
 permalink: "/mat101/seances/10-ensembles-appartenance-inclusion/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 10 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 10 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 10
@@ -16,9 +16,9 @@ mat101_session_number: 10
       <h1>Décrire un ensemble</h1>
       <p>mar. 29 sept. 2026</p>
     </div>
-    <div class="mat101-session-detail-status">
-      <span>Créneau planifié</span>
-      <small>Cours-TD intégré · 90 min</small>
+    <div class="mat101-session-detail-status is-interro">
+      <span>Interro</span>
+      <small>1 h · tiers temps 1 h 20</small>
     </div>
   </header>
 
@@ -27,11 +27,11 @@ mat101_session_number: 10
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
-    <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
+    <p><strong>Interro.</strong> Durée 1 h · tiers temps 1 h 20.</p>
   </aside>
 
   <article class="mat101-session-content" markdown="1">
@@ -51,8 +51,8 @@ mat101_session_number: 10
 - Exercice 2.2 : questions 1 à 6.
 - Exercice 2.5 : questions 1, 4 et 6.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Pour `A={1,{2}}`, décider : `2∈A`, `{2}∈A`, `{2}⊂A`, `{{2}}⊂A`.
 {% endraw %}

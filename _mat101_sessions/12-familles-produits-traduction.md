@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 12 — Familles et produits"
 permalink: "/mat101/seances/12-familles-produits-traduction/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 12 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 12 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 12
@@ -27,7 +27,7 @@ mat101_session_number: 12
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -52,8 +52,8 @@ mat101_session_number: 12
 - Exercice 2.9 : questions 1 à 4.
 - Exercice 2.11 : questions 1, 2, 4 et 5.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Écrire `{0,1}×{a,b,c}` en extension et donner son nombre d'éléments.
 {% endraw %}

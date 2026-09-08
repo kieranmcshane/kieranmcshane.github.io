@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 2 — Conjugué, module et quotient"
 permalink: "/mat101/seances/02-conjugue-module-quotient/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 2 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 2 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 2
@@ -27,7 +27,7 @@ mat101_session_number: 2
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -51,8 +51,8 @@ mat101_session_number: 2
 - Exercice 1.1 : questions 9, 10 et 12.
 - Exercice 1.2 : questions 1, 2 et 3.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Pour `z=1−2i`, calculer `\bar z`, `|z|` et `1/z` sous forme algébrique.
 {% endraw %}

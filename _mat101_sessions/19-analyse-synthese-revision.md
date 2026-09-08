@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 19 — Analyse-synthèse et révision"
 permalink: "/mat101/seances/19-analyse-synthese-revision/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 19 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 19 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 19
@@ -27,7 +27,7 @@ mat101_session_number: 19
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -56,8 +56,8 @@ mat101_session_number: 19
 2. Nier `∀x∈R,∃y∈R,x<y`.
 3. Prouver : `n²` impair implique `n` impair.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Résoudre par analyse-synthèse `√(x+6)=x`.
 {% endraw %}

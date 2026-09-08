@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 5 — Polynômes et paramètres"
 permalink: "/mat101/seances/05-polynomes-racines-parametres/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 5 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 5 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 5
@@ -27,7 +27,7 @@ mat101_session_number: 5
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -55,8 +55,8 @@ mat101_session_number: 5
 
 Classer comme polynôme ou non-polynôme en `z` : `3z⁴−iz+7`, `(z−1)(z+2)`, `5`, `0`, `1/z+2`, `e^z+z`.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Résoudre dans `C`, selon `λ∈C`, l'équation `(λ−1)z=2`.
 {% endraw %}

@@ -12954,7 +12954,7 @@ body.mat101-site .mat101-library {
 .mat101-native-card {
   min-width: 0;
   max-width: 100%;
-  overflow: clip;
+  overflow: hidden;
   border: 1px solid var(--mat101-line);
   border-radius: 7px;
   background: #fff;
@@ -13144,6 +13144,9 @@ body.mat101-site .mat101-library {
 }
 
 .mat101-statement-transcription {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: clamp(0.85rem, 2vw, 1.2rem);
   border: 1px solid #d5d2c9;
   border-radius: 4px;
@@ -13152,6 +13155,8 @@ body.mat101-site .mat101-library {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1rem, 1.5vw, 1.08rem);
   line-height: 1.62;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-statement-transcription p {
@@ -13254,12 +13259,33 @@ body.mat101-site .mat101-library {
   background: #fffdfb;
   font-size: 0.91rem;
   line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
 }
 
-.mat101-solution-body mjx-container[display="true"] {
+.mat101-statement-transcription mjx-container[display="true"],
+.mat101-solution-body mjx-container[display="true"],
+.mat101-session-content mjx-container[display="true"] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 0.8rem 0 !important;
+  padding: 0.15rem 0 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mat101-statement-transcription mjx-container:not([display="true"]),
+.mat101-solution-body mjx-container:not([display="true"]),
+.mat101-session-content mjx-container:not([display="true"]) {
+  display: inline-block;
+  box-sizing: border-box;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  vertical-align: middle;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mat101-solution-body > :first-child {
@@ -14237,6 +14263,18 @@ body:has(.mat101-session-page) {
   background: #fff1ca;
 }
 
+.mat101-session-date-state.is-interro {
+  color: #7a3f12;
+  background: #ffe8d6;
+}
+
+.mat101-session-format {
+  margin: 0.35rem 0 0;
+  color: #7a3f12;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
 .mat101-session-date {
   margin: 0.7rem 0 0;
   color: #3d5661;
@@ -14252,6 +14290,29 @@ body:has(.mat101-session-page) {
   color: var(--mat101-muted);
   font-size: 0.76rem;
   line-height: 1.42;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mat101-session-card li {
+  min-width: 0;
+}
+
+.mat101-session-card mjx-container {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: inherit;
+  margin: 0;
+  vertical-align: middle;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mat101-session-card mjx-container[jax="CHTML"][display="true"] {
+  display: inline;
+  margin: 0;
 }
 
 .mat101-session-card li p {
@@ -14399,6 +14460,17 @@ body:has(.mat101-session-page) {
   background: #ffedbd;
 }
 
+.mat101-session-detail-status.is-interro {
+  border-color: #efc7a8;
+  color: #7a3f12;
+  background: rgba(255, 244, 236, 0.96);
+}
+
+.mat101-session-detail-status.is-interro > span {
+  color: #7a3f12;
+  background: #ffd8bf;
+}
+
 .mat101-session-local-nav {
   position: sticky;
   z-index: 30;
@@ -14529,12 +14601,6 @@ body:has(.mat101-session-page) {
   overflow-wrap: normal;
 }
 
-.mat101-session-content mjx-container[display="true"] {
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
 .mat101-session-pager {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -14644,6 +14710,39 @@ body:has(.mat101-session-page) {
 
   .mat101-session-pager > a:last-child {
     text-align: left;
+  }
+
+  .mat101-swipe-hint {
+    margin: 0.75rem 0 0;
+    padding: 0.55rem 0.75rem;
+    border: 1px dashed #c8d5d8;
+    border-radius: 6px;
+    color: #5d7278;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  .mat101-session-browser .mat101-swipe-hint {
+    margin-top: 0.55rem;
+  }
+
+  html.mat101-swipe-left .mat101-session-page,
+  html.mat101-swipe-right .mat101-session-page,
+  html.mat101-swipe-left .mat101-library[data-mat101-swipe="exercises"],
+  html.mat101-swipe-right .mat101-library[data-mat101-swipe="exercises"] {
+    transition: transform 0.18s ease-out;
+  }
+
+  html.mat101-swipe-left .mat101-session-page,
+  html.mat101-swipe-left .mat101-library[data-mat101-swipe="exercises"] {
+    transform: translateX(-10px);
+  }
+
+  html.mat101-swipe-right .mat101-session-page,
+  html.mat101-swipe-right .mat101-library[data-mat101-swipe="exercises"] {
+    transform: translateX(10px);
   }
 }
 

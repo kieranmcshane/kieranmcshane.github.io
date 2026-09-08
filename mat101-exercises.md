@@ -216,6 +216,16 @@ math: true
                   {{ exercise.solutionHtml }}
                 </div>
               </details>
+              {% elsif exercise.publicSolutionHtml %}
+              <details class="mat101-native-solution">
+                <summary>
+                  <span>Afficher le corrigé détaillé</span>
+                  <small>Solution non officielle · niveau L1</small>
+                </summary>
+                <div class="mat101-solution-body">
+                  {{ exercise.publicSolutionHtml }}
+                </div>
+              </details>
               {% endif %}
 
               {% capture issue_title %}[MAT101 {{ exercise.id }}] Correction proposée{% endcapture %}
@@ -236,8 +246,8 @@ math: true
   <section class="mat101-community-review" aria-labelledby="mat101-review-title">
     <h2 id="mat101-review-title">Corrections</h2>
     <p>Les corrections sont publiques sur GitHub. Un compte gratuit est nécessaire pour en proposer une.</p>
-    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Ouvrir un ticket de correction</a>
-    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les tickets MAT101</a>
+    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues/new?template=mat101-correction.yml">Proposer une correction</a>
+    <a href="https://github.com/kieranmcshane/kieranmcshane.github.io/issues?q=is%3Aissue%20MAT101">Consulter les corrections MAT101</a>
   </section>
 
   <section class="mat101-errata" id="errata" aria-labelledby="mat101-errata-title">

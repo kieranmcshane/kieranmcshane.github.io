@@ -2,7 +2,7 @@
 layout: mat101
 title: "Séance 14 — Tables de vérité"
 permalink: "/mat101/seances/14-connecteurs-tables-verite/"
-description: "Parcours étudiant MAT101 IMA02 pour la séance 14 : compétences, références, exercices et ticket de sortie."
+description: "Parcours étudiant MAT101 IMA02 pour la séance 14 : compétences, références, exercices et questions de sortie."
 math: true
 mat101_session: true
 mat101_session_number: 14
@@ -27,7 +27,7 @@ mat101_session_number: 14
     <a href="{{ '/mat101/exercices/' | relative_url }}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
@@ -50,8 +50,8 @@ mat101_session_number: 14
 - Poly p. 48–50 et 54–56.
 - Exercices 2.18 et 2.19.
 
-## Ticket
-{: #ticket}
+## Questions
+{: #questions}
 
 Comparer par table `¬(P∨Q)` et `(¬P)∧(¬Q)`.
 {% endraw %}

@@ -41,6 +41,10 @@ SESSION_SLUGS = {
     19: "analyse-synthese-revision",
 }
 
+DISPLAY_HEADINGS = {
+    "Ticket": "Questions",
+}
+
 HEADING_IDS = {
     "À savoir faire": "competences",
     "Parcours": "parcours",
@@ -48,9 +52,16 @@ HEADING_IDS = {
     "Contrôle rapide": "controle",
     "Contrôle formatif": "controle",
     "Révision mixte": "revision",
-    "Ticket": "ticket",
+    "Ticket": "questions",
 }
 REQUIRED_HEADINGS = {"À savoir faire", "Parcours", "Ticket"}
+SESSION_FORMATS: dict[int, dict[str, str]] = {
+    10: {
+        "kind": "interro",
+        "statusBadge": "Interro",
+        "statusDetail": "1 h · tiers temps 1 h 20",
+    },
+}
 FORBIDDEN_PUBLIC_MARKERS = (
     "fiche enseignant",
     "réponses et corrections",
@@ -81,6 +92,24 @@ def plain_text(value: str) -> str:
     value = value.replace("**", "")
     value = re.sub(r"\s+", " ", value)
     return value.strip()
+
+
+BACKTICK = re.compile(r"`([^`]+)`")
+
+
+def skill_to_html(value: str) -> str:
+    """Turn workbook backtick math into MathJax-ready inline markup."""
+
+    chunks: list[str] = []
+    index = 0
+    for match in BACKTICK.finditer(value):
+        if match.start() > index:
+            chunks.append(html.escape(value[index : match.start()]))
+        chunks.append(f'<span class="math inline">\\({match.group(1)}\\)</span>')
+        index = match.end()
+    if index < len(value):
+        chunks.append(html.escape(value[index:]))
+    return "".join(chunks)
 
 
 def assert_student_safe(value: str, context: str) -> None:
@@ -148,8 +177,9 @@ def parse_workbook(text: str) -> list[dict[str, object]]:
 
         body_parts = []
         for heading, content in sections:
+            display_heading = DISPLAY_HEADINGS.get(heading, heading)
             body_parts.append(
-                f"## {heading}\n{{: #{HEADING_IDS[heading]}}}\n\n{content}"
+                f"## {display_heading}\n{{: #{HEADING_IDS[heading]}}}\n\n{content}"
             )
         body = "\n\n".join(body_parts).rstrip() + "\n"
         assert_student_safe(title + "\n" + body, f"session {number}")
@@ -198,6 +228,19 @@ def block_for(number: int) -> tuple[str, str]:
     return "synthese", "Synthèse · Révision"
 
 
+def session_status(session: dict[str, object]) -> tuple[str, str, str]:
+    override = SESSION_FORMATS.get(int(session["number"]))
+    if override:
+        return (
+            override["statusBadge"],
+            " is-interro",
+            override["statusDetail"],
+        )
+    if session["scheduleConfirmed"]:
+        return ("Créneau planifié", "", "Cours-TD intégré · 90 min")
+    return ("Date à confirmer", " is-pending", "Date et salle à confirmer")
+
+
 def render_page(
     session: dict[str, object],
     previous: dict[str, object] | None,
@@ -209,14 +252,11 @@ def render_page(
     date_label = html.escape(str(session["dateLabel"]))
     block_label = html.escape(str(session["blockLabel"]))
     body = str(session["body"])
-    schedule_badge = (
-        "Créneau planifié" if session["scheduleConfirmed"] else "Date à confirmer"
-    )
-    schedule_class = "" if session["scheduleConfirmed"] else " is-pending"
-    schedule_detail = (
-        "Cours-TD intégré · 90 min"
-        if session["scheduleConfirmed"]
-        else "Date et salle à confirmer"
+    schedule_badge, schedule_class, schedule_detail = session_status(session)
+    source_note = (
+        f"<p><strong>Interro.</strong> {html.escape(schedule_detail.rstrip('.'))}.</p>"
+        if session.get("kind") == "interro"
+        else "<p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>"
     )
 
     previous_link = ""
@@ -245,7 +285,7 @@ def render_page(
 layout: mat101
 title: {yaml_string(f"Séance {number} — {session['title']}")}
 permalink: {yaml_string(url)}
-description: {yaml_string(f"Parcours étudiant MAT101 IMA02 pour la séance {number} : compétences, références, exercices et ticket de sortie.")}
+description: {yaml_string(f"Parcours étudiant MAT101 IMA02 pour la séance {number} : compétences, références, exercices et questions de sortie.")}
 math: true
 mat101_session: true
 mat101_session_number: {number}
@@ -270,11 +310,11 @@ mat101_session_number: {number}
     <a href="{{{{ '/mat101/exercices/' | relative_url }}}}">103 exercices</a>
     <a href="#competences">Compétences</a>
     <a href="#parcours">Parcours</a>
-    <a href="#ticket">Ticket</a>
+    <a href="#questions">Questions</a>
   </nav>
 
   <aside class="mat101-session-source" aria-label="Repères de la séance">
-    <p><strong>Support.</strong> Les pages du polycopié et les exercices à travailler sont indiqués dans le parcours.</p>
+    {source_note}
   </aside>
 
   <article class="mat101-session-content" markdown="1">
@@ -328,7 +368,20 @@ def main() -> None:
                 "block": block_slug,
                 "blockLabel": block_label,
                 "skillsPlain": [plain_text(skill) for skill in skills],
-                "search": plain_text(" ".join([title, block_label, *skills, body])).lower(),
+                "skillsHtml": [skill_to_html(skill) for skill in skills],
+                **SESSION_FORMATS.get(number, {}),
+                "search": plain_text(
+                    " ".join(
+                        [
+                            title,
+                            block_label,
+                            *skills,
+                            body,
+                            SESSION_FORMATS.get(number, {}).get("statusBadge", ""),
+                            SESSION_FORMATS.get(number, {}).get("statusDetail", ""),
+                        ]
+                    )
+                ).lower(),
             }
         )
 

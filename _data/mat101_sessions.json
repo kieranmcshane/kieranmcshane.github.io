@@ -14,7 +14,12 @@
       "Écrire z=a+ib, puis donner Re(z) et Im(z)",
       "Additionner et multiplier en utilisant i²=−1"
     ],
-    "search": "forme algébrique chapitre 1 · nombres complexes situer un nombre dans n⊂z⊂q⊂r⊂c écrire z=a+ib, puis donner re(z) et im(z) additionner et multiplier en utilisant i²=−1 ## à savoir faire {: #competences} - situer un nombre dans n⊂z⊂q⊂r⊂c. - écrire z=a+ib, puis donner re(z) et im(z). - additionner et multiplier en utilisant i²=−1. ## parcours {: #parcours} - poly p. 11–13. - exercice 1.1 : questions 1, 3, 4, 5, 6 et 7. ## contrôle rapide {: #controle} calculer (1+2i)(−4+6i) et indiquer séparément partie réelle et partie imaginaire. ## ticket {: #ticket} 1. (3−2i)+(−5+7i) ; 2. (1+i)²."
+    "search": "forme algébrique chapitre 1 · nombres complexes situer un nombre dans n⊂z⊂q⊂r⊂c écrire z=a+ib, puis donner re(z) et im(z) additionner et multiplier en utilisant i²=−1 ## à savoir faire {: #competences} - situer un nombre dans n⊂z⊂q⊂r⊂c. - écrire z=a+ib, puis donner re(z) et im(z). - additionner et multiplier en utilisant i²=−1. ## parcours {: #parcours} - poly p. 11–13. - exercice 1.1 : questions 1, 3, 4, 5, 6 et 7. ## contrôle rapide {: #controle} calculer (1+2i)(−4+6i) et indiquer séparément partie réelle et partie imaginaire. ## questions {: #questions} 1. (3−2i)+(−5+7i) ; 2. (1+i)².",
+    "skillsHtml": [
+      "Situer un nombre dans <span class=\"math inline\">\\(N⊂Z⊂Q⊂R⊂C\\)</span>",
+      "Écrire <span class=\"math inline\">\\(z=a+ib\\)</span>, puis donner <span class=\"math inline\">\\(Re(z)\\)</span> et <span class=\"math inline\">\\(Im(z)\\)</span>",
+      "Additionner et multiplier en utilisant <span class=\"math inline\">\\(i²=−1\\)</span>"
+    ]
   },
   {
     "number": 2,
@@ -31,7 +36,12 @@
       "Rendre réel le dénominateur d'un quotient",
       "Poser z=x+iy lorsqu'une équation contient z et \\bar z"
     ],
-    "search": "conjugué, module et quotient chapitre 1 · nombres complexes calculer \\bar z, |z| et 1/z rendre réel le dénominateur d'un quotient poser z=x+iy lorsqu'une équation contient z et \\bar z ## à savoir faire {: #competences} - calculer \\bar z, |z| et 1/z. - rendre réel le dénominateur d'un quotient. - poser z=x+iy lorsqu'une équation contient z et \\bar z. ## parcours {: #parcours} - poly p. 13–16. - exercice 1.1 : questions 9, 10 et 12. - exercice 1.2 : questions 1, 2 et 3. ## ticket {: #ticket} pour z=1−2i, calculer \\bar z, |z| et 1/z sous forme algébrique."
+    "search": "conjugué, module et quotient chapitre 1 · nombres complexes calculer \\bar z, |z| et 1/z rendre réel le dénominateur d'un quotient poser z=x+iy lorsqu'une équation contient z et \\bar z ## à savoir faire {: #competences} - calculer \\bar z, |z| et 1/z. - rendre réel le dénominateur d'un quotient. - poser z=x+iy lorsqu'une équation contient z et \\bar z. ## parcours {: #parcours} - poly p. 13–16. - exercice 1.1 : questions 9, 10 et 12. - exercice 1.2 : questions 1, 2 et 3. ## questions {: #questions} pour z=1−2i, calculer \\bar z, |z| et 1/z sous forme algébrique.",
+    "skillsHtml": [
+      "Calculer <span class=\"math inline\">\\(\\bar z\\)</span>, <span class=\"math inline\">\\(|z|\\)</span> et <span class=\"math inline\">\\(1/z\\)</span>",
+      "Rendre réel le dénominateur d&#x27;un quotient",
+      "Poser <span class=\"math inline\">\\(z=x+iy\\)</span> lorsqu&#x27;une équation contient <span class=\"math inline\">\\(z\\)</span> et <span class=\"math inline\">\\(\\bar z\\)</span>"
+    ]
   },
   {
     "number": 3,
@@ -48,7 +58,12 @@
       "Passer de a+ib à ρe^{iθ} et réciproquement",
       "Se souvenir que arg(0) n'est pas défini et qu'un argument l'est modulo 2π"
     ],
-    "search": "argument et forme exponentielle chapitre 1 · nombres complexes déterminer module, quadrant et argument passer de a+ib à ρe^{iθ} et réciproquement se souvenir que arg(0) n'est pas défini et qu'un argument l'est modulo 2π ## à savoir faire {: #competences} - déterminer module, quadrant et argument. - passer de a+ib à ρe^{iθ} et réciproquement. - se souvenir que arg(0) n'est pas défini et qu'un argument l'est modulo 2π. ## parcours {: #parcours} - poly p. 13 et 16–18. - exercice 1.3 : questions 1 à 8, 11 et 12. - exercice 1.4 : affirmations 2, 5, 7 et 8. ## ticket {: #ticket} 1. écrire −√3−i sous forme exponentielle avec un angle dans [0,2π[. 2. écrire 2e^{-iπ/3} sous forme algébrique."
+    "search": "argument et forme exponentielle chapitre 1 · nombres complexes déterminer module, quadrant et argument passer de a+ib à ρe^{iθ} et réciproquement se souvenir que arg(0) n'est pas défini et qu'un argument l'est modulo 2π ## à savoir faire {: #competences} - déterminer module, quadrant et argument. - passer de a+ib à ρe^{iθ} et réciproquement. - se souvenir que arg(0) n'est pas défini et qu'un argument l'est modulo 2π. ## parcours {: #parcours} - poly p. 13 et 16–18. - exercice 1.3 : questions 1 à 8, 11 et 12. - exercice 1.4 : affirmations 2, 5, 7 et 8. ## questions {: #questions} 1. écrire −√3−i sous forme exponentielle avec un angle dans [0,2π[. 2. écrire 2e^{-iπ/3} sous forme algébrique.",
+    "skillsHtml": [
+      "Déterminer module, quadrant et argument",
+      "Passer de <span class=\"math inline\">\\(a+ib\\)</span> à <span class=\"math inline\">\\(ρe^{iθ}\\)</span> et réciproquement",
+      "Se souvenir que <span class=\"math inline\">\\(arg(0)\\)</span> n&#x27;est pas défini et qu&#x27;un argument l&#x27;est modulo <span class=\"math inline\">\\(2π\\)</span>"
+    ]
   },
   {
     "number": 4,
@@ -65,7 +80,12 @@
       "Appliquer Moivre et identifier parties réelle et imaginaire",
       "Linéariser une petite puissance avec Euler"
     ],
-    "search": "puissances, moivre et euler chapitre 1 · nombres complexes multiplier et élever à une puissance en forme exponentielle appliquer moivre et identifier parties réelle et imaginaire linéariser une petite puissance avec euler ## à savoir faire {: #competences} - multiplier et élever à une puissance en forme exponentielle. - appliquer moivre et identifier parties réelle et imaginaire. - linéariser une petite puissance avec euler. ## parcours {: #parcours} - poly p. 17–19. - exercice 1.3 : questions 9, 10 et 13. - exercice 1.7. - exercice 1.8 : questions 1 et 2. ## ticket {: #ticket} 1. calculer (√3+i)^6. 2. écrire cos(3x) en fonction de cos x."
+    "search": "puissances, moivre et euler chapitre 1 · nombres complexes multiplier et élever à une puissance en forme exponentielle appliquer moivre et identifier parties réelle et imaginaire linéariser une petite puissance avec euler ## à savoir faire {: #competences} - multiplier et élever à une puissance en forme exponentielle. - appliquer moivre et identifier parties réelle et imaginaire. - linéariser une petite puissance avec euler. ## parcours {: #parcours} - poly p. 17–19. - exercice 1.3 : questions 9, 10 et 13. - exercice 1.7. - exercice 1.8 : questions 1 et 2. ## questions {: #questions} 1. calculer (√3+i)^6. 2. écrire cos(3x) en fonction de cos x.",
+    "skillsHtml": [
+      "Multiplier et élever à une puissance en forme exponentielle",
+      "Appliquer Moivre et identifier parties réelle et imaginaire",
+      "Linéariser une petite puissance avec Euler"
+    ]
   },
   {
     "number": 5,
@@ -82,7 +102,12 @@
       "Vérifier qu'un nombre est une racine",
       "Discuter les valeurs d'un paramètre avant de diviser"
     ],
-    "search": "polynômes et paramètres chapitre 1 · nombres complexes donner degré et coefficient dominant vérifier qu'un nombre est une racine discuter les valeurs d'un paramètre avant de diviser ## à savoir faire {: #competences} - donner degré et coefficient dominant. - vérifier qu'un nombre est une racine. - discuter les valeurs d'un paramètre avant de diviser. ## parcours {: #parcours} - poly p. 19–21. - exercice 1.9 en entier. ## activité {: #activite} classer comme polynôme ou non-polynôme en z : 3z⁴−iz+7, (z−1)(z+2), 5, 0, 1/z+2, e^z+z. ## ticket {: #ticket} résoudre dans c, selon λ∈c, l'équation (λ−1)z=2."
+    "search": "polynômes et paramètres chapitre 1 · nombres complexes donner degré et coefficient dominant vérifier qu'un nombre est une racine discuter les valeurs d'un paramètre avant de diviser ## à savoir faire {: #competences} - donner degré et coefficient dominant. - vérifier qu'un nombre est une racine. - discuter les valeurs d'un paramètre avant de diviser. ## parcours {: #parcours} - poly p. 19–21. - exercice 1.9 en entier. ## activité {: #activite} classer comme polynôme ou non-polynôme en z : 3z⁴−iz+7, (z−1)(z+2), 5, 0, 1/z+2, e^z+z. ## questions {: #questions} résoudre dans c, selon λ∈c, l'équation (λ−1)z=2.",
+    "skillsHtml": [
+      "Donner degré et coefficient dominant",
+      "Vérifier qu&#x27;un nombre est une racine",
+      "Discuter les valeurs d&#x27;un paramètre avant de diviser"
+    ]
   },
   {
     "number": 6,
@@ -99,7 +124,12 @@
       "Utiliser x²+y²=|δ²| puis le signe de xy",
       "Donner les deux racines opposées et vérifier"
     ],
-    "search": "racines carrées complexes chapitre 1 · nombres complexes poser δ=x+iy et comparer les parties réelle et imaginaire de δ² utiliser x²+y²=|δ²| puis le signe de xy donner les deux racines opposées et vérifier ## à savoir faire {: #competences} - poser δ=x+iy et comparer les parties réelle et imaginaire de δ². - utiliser x²+y²=|δ²| puis le signe de xy. - donner les deux racines opposées et vérifier. ## parcours {: #parcours} - poly p. 21–24. - exercice 1.10 : questions 1, 2, 6 et 7. ## ticket {: #ticket} trouver toutes les racines carrées de 5−12i."
+    "search": "racines carrées complexes chapitre 1 · nombres complexes poser δ=x+iy et comparer les parties réelle et imaginaire de δ² utiliser x²+y²=|δ²| puis le signe de xy donner les deux racines opposées et vérifier ## à savoir faire {: #competences} - poser δ=x+iy et comparer les parties réelle et imaginaire de δ². - utiliser x²+y²=|δ²| puis le signe de xy. - donner les deux racines opposées et vérifier. ## parcours {: #parcours} - poly p. 21–24. - exercice 1.10 : questions 1, 2, 6 et 7. ## questions {: #questions} trouver toutes les racines carrées de 5−12i.",
+    "skillsHtml": [
+      "Poser <span class=\"math inline\">\\(δ=x+iy\\)</span> et comparer les parties réelle et imaginaire de <span class=\"math inline\">\\(δ²\\)</span>",
+      "Utiliser <span class=\"math inline\">\\(x²+y²=|δ²|\\)</span> puis le signe de <span class=\"math inline\">\\(xy\\)</span>",
+      "Donner les deux racines opposées et vérifier"
+    ]
   },
   {
     "number": 7,
@@ -116,7 +146,12 @@
       "Trouver δ tel que δ²=Δ",
       "Utiliser z=(-b±δ)/(2a) et contrôler somme/produit"
     ],
-    "search": "second degré dans c chapitre 1 · nombres complexes calculer δ=b²−4ac trouver δ tel que δ²=δ utiliser z=(-b±δ)/(2a) et contrôler somme/produit ## à savoir faire {: #competences} - calculer δ=b²−4ac. - trouver δ tel que δ²=δ. - utiliser z=(-b±δ)/(2a) et contrôler somme/produit. ## parcours {: #parcours} - poly p. 22–25. - exercice 1.12 : questions 1, 4, 6 et 8. - exercice 1.13, question 1 en prolongement. ## ticket {: #ticket} résoudre z²−2z+5=0 dans c."
+    "search": "second degré dans c chapitre 1 · nombres complexes calculer δ=b²−4ac trouver δ tel que δ²=δ utiliser z=(-b±δ)/(2a) et contrôler somme/produit ## à savoir faire {: #competences} - calculer δ=b²−4ac. - trouver δ tel que δ²=δ. - utiliser z=(-b±δ)/(2a) et contrôler somme/produit. ## parcours {: #parcours} - poly p. 22–25. - exercice 1.12 : questions 1, 4, 6 et 8. - exercice 1.13, question 1 en prolongement. ## questions {: #questions} résoudre z²−2z+5=0 dans c.",
+    "skillsHtml": [
+      "Calculer <span class=\"math inline\">\\(Δ=b²−4ac\\)</span>",
+      "Trouver <span class=\"math inline\">\\(δ\\)</span> tel que <span class=\"math inline\">\\(δ²=Δ\\)</span>",
+      "Utiliser <span class=\"math inline\">\\(z=(-b±δ)/(2a)\\)</span> et contrôler somme/produit"
+    ]
   },
   {
     "number": 8,
@@ -133,7 +168,12 @@
       "Placer les racines de l'unité sur un cercle",
       "Revenir d'un changement d'inconnue sans perdre les restrictions"
     ],
-    "search": "racines n-ièmes chapitre 1 · nombres complexes résoudre z^n=ρe^{iθ} avec k=0,…,n−1 placer les racines de l'unité sur un cercle revenir d'un changement d'inconnue sans perdre les restrictions ## à savoir faire {: #competences} - résoudre z^n=ρe^{iθ} avec k=0,…,n−1. - placer les racines de l'unité sur un cercle. - revenir d'un changement d'inconnue sans perdre les restrictions. ## parcours {: #parcours} - poly p. 25–27. - exercice 1.14 : questions 3, 4, 5 et 6. ## ticket {: #ticket} résoudre z³=−8 sous forme algébrique."
+    "search": "racines n-ièmes chapitre 1 · nombres complexes résoudre z^n=ρe^{iθ} avec k=0,…,n−1 placer les racines de l'unité sur un cercle revenir d'un changement d'inconnue sans perdre les restrictions ## à savoir faire {: #competences} - résoudre z^n=ρe^{iθ} avec k=0,…,n−1. - placer les racines de l'unité sur un cercle. - revenir d'un changement d'inconnue sans perdre les restrictions. ## parcours {: #parcours} - poly p. 25–27. - exercice 1.14 : questions 3, 4, 5 et 6. ## questions {: #questions} résoudre z³=−8 sous forme algébrique.",
+    "skillsHtml": [
+      "Résoudre <span class=\"math inline\">\\(z^n=ρe^{iθ}\\)</span> avec <span class=\"math inline\">\\(k=0,…,n−1\\)</span>",
+      "Placer les racines de l&#x27;unité sur un cercle",
+      "Revenir d&#x27;un changement d&#x27;inconnue sans perdre les restrictions"
+    ]
   },
   {
     "number": 9,
@@ -150,7 +190,12 @@
       "Utiliser « arrivée moins départ »",
       "Rédiger une chaîne d'équivalences et une conclusion"
     ],
-    "search": "géométrie et rédaction chapitre 1 · nombres complexes traduire vecteur, distance, milieu et angle en affixes utiliser « arrivée moins départ » rédiger une chaîne d'équivalences et une conclusion ## à savoir faire {: #competences} - traduire vecteur, distance, milieu et angle en affixes. - utiliser « arrivée moins départ ». - rédiger une chaîne d'équivalences et une conclusion. ## parcours {: #parcours} - poly p. 27–29. - exercices 1.15 et 1.16. - exercice 1.17 en prolongement. ## contrôle formatif {: #controle} 1. mettre (2+i)/(1−i) sous forme algébrique. 2. calculer (1−i)^6 par forme exponentielle. 3. résoudre z²+2z+2=0. ## ticket {: #ticket} pour z_a=2−i et z_b=−2+3i, donner le milieu de [ab] et la distance ab."
+    "search": "géométrie et rédaction chapitre 1 · nombres complexes traduire vecteur, distance, milieu et angle en affixes utiliser « arrivée moins départ » rédiger une chaîne d'équivalences et une conclusion ## à savoir faire {: #competences} - traduire vecteur, distance, milieu et angle en affixes. - utiliser « arrivée moins départ ». - rédiger une chaîne d'équivalences et une conclusion. ## parcours {: #parcours} - poly p. 27–29. - exercices 1.15 et 1.16. - exercice 1.17 en prolongement. ## contrôle formatif {: #controle} 1. mettre (2+i)/(1−i) sous forme algébrique. 2. calculer (1−i)^6 par forme exponentielle. 3. résoudre z²+2z+2=0. ## questions {: #questions} pour z_a=2−i et z_b=−2+3i, donner le milieu de [ab] et la distance ab.",
+    "skillsHtml": [
+      "Traduire vecteur, distance, milieu et angle en affixes",
+      "Utiliser « arrivée moins départ »",
+      "Rédiger une chaîne d&#x27;équivalences et une conclusion"
+    ]
   },
   {
     "number": 10,
@@ -166,7 +211,14 @@
       "Utiliser extension, compréhension et description en fonction",
       "Distinguer ∈ et ⊂, ensemble vide et singleton"
     ],
-    "search": "décrire un ensemble chapitre 2 · ensembles et langage mathématique utiliser extension, compréhension et description en fonction distinguer ∈ et ⊂, ensemble vide et singleton ## à savoir faire {: #competences} - utiliser extension, compréhension et description en fonction. - distinguer ∈ et ⊂, ensemble vide et singleton. ## parcours {: #parcours} - poly p. 37–40. - exercice 2.1 : questions 1, 5, 9 et 11. - exercice 2.2 : questions 1 à 6. - exercice 2.5 : questions 1, 4 et 6. ## ticket {: #ticket} pour a={1,{2}}, décider : 2∈a, {2}∈a, {2}⊂a, {{2}}⊂a."
+    "search": "décrire un ensemble chapitre 2 · ensembles et langage mathématique utiliser extension, compréhension et description en fonction distinguer ∈ et ⊂, ensemble vide et singleton ## à savoir faire {: #competences} - utiliser extension, compréhension et description en fonction. - distinguer ∈ et ⊂, ensemble vide et singleton. ## parcours {: #parcours} - poly p. 37–40. - exercice 2.1 : questions 1, 5, 9 et 11. - exercice 2.2 : questions 1 à 6. - exercice 2.5 : questions 1, 4 et 6. ## questions {: #questions} pour a={1,{2}}, décider : 2∈a, {2}∈a, {2}⊂a, {{2}}⊂a. interro 1 h tiers temps 1 h 20",
+    "skillsHtml": [
+      "Utiliser extension, compréhension et description en fonction",
+      "Distinguer <span class=\"math inline\">\\(∈\\)</span> et <span class=\"math inline\">\\(⊂\\)</span>, ensemble vide et singleton"
+    ],
+    "kind": "interro",
+    "statusBadge": "Interro",
+    "statusDetail": "1 h · tiers temps 1 h 20"
   },
   {
     "number": 11,
@@ -183,7 +235,12 @@
       "Utiliser Morgan et démontrer une égalité par appartenance",
       "Traduire une valeur absolue en intervalle"
     ],
-    "search": "calcul ensembliste chapitre 2 · ensembles et langage mathématique calculer ∪, ∩, différence et complémentaire utiliser morgan et démontrer une égalité par appartenance traduire une valeur absolue en intervalle ## à savoir faire {: #competences} - calculer ∪, ∩, différence et complémentaire. - utiliser morgan et démontrer une égalité par appartenance. - traduire une valeur absolue en intervalle. ## parcours {: #parcours} - poly p. 40–42. - exercice 2.3. - exercice 2.4 : questions 2, 3, 6 et 8. - exercice 2.10 : questions 1 et 2. ## ticket {: #ticket} compléter et justifier e\\(a∩b)=…."
+    "search": "calcul ensembliste chapitre 2 · ensembles et langage mathématique calculer ∪, ∩, différence et complémentaire utiliser morgan et démontrer une égalité par appartenance traduire une valeur absolue en intervalle ## à savoir faire {: #competences} - calculer ∪, ∩, différence et complémentaire. - utiliser morgan et démontrer une égalité par appartenance. - traduire une valeur absolue en intervalle. ## parcours {: #parcours} - poly p. 40–42. - exercice 2.3. - exercice 2.4 : questions 2, 3, 6 et 8. - exercice 2.10 : questions 1 et 2. ## questions {: #questions} compléter et justifier e\\(a∩b)=….",
+    "skillsHtml": [
+      "Calculer <span class=\"math inline\">\\(∪\\)</span>, <span class=\"math inline\">\\(∩\\)</span>, différence et complémentaire",
+      "Utiliser Morgan et démontrer une égalité par appartenance",
+      "Traduire une valeur absolue en intervalle"
+    ]
   },
   {
     "number": 12,
@@ -200,7 +257,12 @@
       "Énumérer E×F",
       "Lire union/intersection indexées avec ∃/∀"
     ],
-    "search": "familles et produits chapitre 2 · ensembles et langage mathématique distinguer {a,b} de (a,b) énumérer e×f lire union/intersection indexées avec ∃/∀ ## à savoir faire {: #competences} - distinguer {a,b} de (a,b). - énumérer e×f. - lire union/intersection indexées avec ∃/∀. ## parcours {: #parcours} - poly p. 43–44. - exercice 2.6, question 5. - exercice 2.9 : questions 1 à 4. - exercice 2.11 : questions 1, 2, 4 et 5. ## ticket {: #ticket} écrire {0,1}×{a,b,c} en extension et donner son nombre d'éléments."
+    "search": "familles et produits chapitre 2 · ensembles et langage mathématique distinguer {a,b} de (a,b) énumérer e×f lire union/intersection indexées avec ∃/∀ ## à savoir faire {: #competences} - distinguer {a,b} de (a,b). - énumérer e×f. - lire union/intersection indexées avec ∃/∀. ## parcours {: #parcours} - poly p. 43–44. - exercice 2.6, question 5. - exercice 2.9 : questions 1 à 4. - exercice 2.11 : questions 1, 2, 4 et 5. ## questions {: #questions} écrire {0,1}×{a,b,c} en extension et donner son nombre d'éléments.",
+    "skillsHtml": [
+      "Distinguer <span class=\"math inline\">\\({a,b}\\)</span> de <span class=\"math inline\">\\((a,b)\\)</span>",
+      "Énumérer <span class=\"math inline\">\\(E×F\\)</span>",
+      "Lire union/intersection indexées avec <span class=\"math inline\">\\(∃/∀\\)</span>"
+    ]
   },
   {
     "number": 13,
@@ -217,7 +279,12 @@
       "Identifier variables libres/liées ; assertion ouverte/close",
       "Réfuter un universel par contre-exemple"
     ],
-    "search": "assertions et variables chapitre 2 · ensembles et langage mathématique distinguer objet, expression, question et assertion identifier variables libres/liées ; assertion ouverte/close réfuter un universel par contre-exemple ## à savoir faire {: #competences} - distinguer objet, expression, question et assertion. - identifier variables libres/liées ; assertion ouverte/close. - réfuter un universel par contre-exemple. ## parcours {: #parcours} - poly p. 44–48. - exercice 2.15 en entier. ## ticket {: #ticket} classer : x²≥0, ∀x∈r,x²≥0, ∀x∈r,x²≥a, ∃x∈r,x²=−1."
+    "search": "assertions et variables chapitre 2 · ensembles et langage mathématique distinguer objet, expression, question et assertion identifier variables libres/liées ; assertion ouverte/close réfuter un universel par contre-exemple ## à savoir faire {: #competences} - distinguer objet, expression, question et assertion. - identifier variables libres/liées ; assertion ouverte/close. - réfuter un universel par contre-exemple. ## parcours {: #parcours} - poly p. 44–48. - exercice 2.15 en entier. ## questions {: #questions} classer : x²≥0, ∀x∈r,x²≥0, ∀x∈r,x²≥a, ∃x∈r,x²=−1.",
+    "skillsHtml": [
+      "Distinguer objet, expression, question et assertion",
+      "Identifier variables libres/liées ; assertion ouverte/close",
+      "Réfuter un universel par contre-exemple"
+    ]
   },
   {
     "number": 14,
@@ -234,7 +301,12 @@
       "Construire toutes les lignes d'une table",
       "Vérifier une tautologie ou une équivalence"
     ],
-    "search": "tables de vérité chapitre 2 · ensembles et langage mathématique utiliser ¬, ∧, ∨ et ⇒ construire toutes les lignes d'une table vérifier une tautologie ou une équivalence ## à savoir faire {: #competences} - utiliser ¬, ∧, ∨ et ⇒. - construire toutes les lignes d'une table. - vérifier une tautologie ou une équivalence. ## parcours {: #parcours} - poly p. 48–50 et 54–56. - exercices 2.18 et 2.19. ## ticket {: #ticket} comparer par table ¬(p∨q) et (¬p)∧(¬q)."
+    "search": "tables de vérité chapitre 2 · ensembles et langage mathématique utiliser ¬, ∧, ∨ et ⇒ construire toutes les lignes d'une table vérifier une tautologie ou une équivalence ## à savoir faire {: #competences} - utiliser ¬, ∧, ∨ et ⇒. - construire toutes les lignes d'une table. - vérifier une tautologie ou une équivalence. ## parcours {: #parcours} - poly p. 48–50 et 54–56. - exercices 2.18 et 2.19. ## questions {: #questions} comparer par table ¬(p∨q) et (¬p)∧(¬q).",
+    "skillsHtml": [
+      "Utiliser <span class=\"math inline\">\\(¬\\)</span>, <span class=\"math inline\">\\(∧\\)</span>, <span class=\"math inline\">\\(∨\\)</span> et <span class=\"math inline\">\\(⇒\\)</span>",
+      "Construire toutes les lignes d&#x27;une table",
+      "Vérifier une tautologie ou une équivalence"
+    ]
   },
   {
     "number": 15,
@@ -251,7 +323,12 @@
       "Choisir un témoin dépendant des variables précédentes",
       "Nier en échangeant les quantificateurs"
     ],
-    "search": "quantificateurs chapitre 2 · ensembles et langage mathématique lire ∀ et ∃ dans l'ordre choisir un témoin dépendant des variables précédentes nier en échangeant les quantificateurs ## à savoir faire {: #competences} - lire ∀ et ∃ dans l'ordre. - choisir un témoin dépendant des variables précédentes. - nier en échangeant les quantificateurs. ## parcours {: #parcours} - poly p. 50–54. - exercice 2.12. - exercice 2.14 : questions 1 à 4. - exercice 2.16 : questions 3, 4, 6 et 7. ## ticket {: #ticket} nier ∀x∈r,∃n∈n,n>x."
+    "search": "quantificateurs chapitre 2 · ensembles et langage mathématique lire ∀ et ∃ dans l'ordre choisir un témoin dépendant des variables précédentes nier en échangeant les quantificateurs ## à savoir faire {: #competences} - lire ∀ et ∃ dans l'ordre. - choisir un témoin dépendant des variables précédentes. - nier en échangeant les quantificateurs. ## parcours {: #parcours} - poly p. 50–54. - exercice 2.12. - exercice 2.14 : questions 1 à 4. - exercice 2.16 : questions 3, 4, 6 et 7. ## questions {: #questions} nier ∀x∈r,∃n∈n,n>x.",
+    "skillsHtml": [
+      "Lire <span class=\"math inline\">\\(∀\\)</span> et <span class=\"math inline\">\\(∃\\)</span> dans l&#x27;ordre",
+      "Choisir un témoin dépendant des variables précédentes",
+      "Nier en échangeant les quantificateurs"
+    ]
   },
   {
     "number": 16,
@@ -268,7 +345,12 @@
       "Partir des hypothèses et viser la conclusion",
       "Introduire un élément arbitraire dans une preuve universelle"
     ],
-    "search": "implication et preuve directe chapitre 2 · ensembles et langage mathématique distinguer implication, réciproque et équivalence partir des hypothèses et viser la conclusion introduire un élément arbitraire dans une preuve universelle ## à savoir faire {: #competences} - distinguer implication, réciproque et équivalence. - partir des hypothèses et viser la conclusion. - introduire un élément arbitraire dans une preuve universelle. ## parcours {: #parcours} - poly p. 54–58. - exercice 2.17 : questions 1, 2, 4, 5, 8 et 11. - exercice 2.21, question 2. - exercice 2.22, question 1. ## ticket {: #ticket} prouver ∀x∈r,x²+2x+2>0."
+    "search": "implication et preuve directe chapitre 2 · ensembles et langage mathématique distinguer implication, réciproque et équivalence partir des hypothèses et viser la conclusion introduire un élément arbitraire dans une preuve universelle ## à savoir faire {: #competences} - distinguer implication, réciproque et équivalence. - partir des hypothèses et viser la conclusion. - introduire un élément arbitraire dans une preuve universelle. ## parcours {: #parcours} - poly p. 54–58. - exercice 2.17 : questions 1, 2, 4, 5, 8 et 11. - exercice 2.21, question 2. - exercice 2.22, question 1. ## questions {: #questions} prouver ∀x∈r,x²+2x+2>0.",
+    "skillsHtml": [
+      "Distinguer implication, réciproque et équivalence",
+      "Partir des hypothèses et viser la conclusion",
+      "Introduire un élément arbitraire dans une preuve universelle"
+    ]
   },
   {
     "number": 17,
@@ -285,7 +367,12 @@
       "Identifier une contradiction",
       "Choisir des cas qui couvrent tout le domaine"
     ],
-    "search": "contraposée, absurde et cas chapitre 2 · ensembles et langage mathématique transformer p⇒q en ¬q⇒¬p identifier une contradiction choisir des cas qui couvrent tout le domaine ## à savoir faire {: #competences} - transformer p⇒q en ¬q⇒¬p. - identifier une contradiction. - choisir des cas qui couvrent tout le domaine. ## parcours {: #parcours} - poly p. 58–60. - exercices 2.26 et 2.27. - exercice 2.28, question 1. - exercice 2.30, questions 3 et 4. ## ticket {: #ticket} prouver par contraposée : n² pair implique n pair."
+    "search": "contraposée, absurde et cas chapitre 2 · ensembles et langage mathématique transformer p⇒q en ¬q⇒¬p identifier une contradiction choisir des cas qui couvrent tout le domaine ## à savoir faire {: #competences} - transformer p⇒q en ¬q⇒¬p. - identifier une contradiction. - choisir des cas qui couvrent tout le domaine. ## parcours {: #parcours} - poly p. 58–60. - exercices 2.26 et 2.27. - exercice 2.28, question 1. - exercice 2.30, questions 3 et 4. ## questions {: #questions} prouver par contraposée : n² pair implique n pair.",
+    "skillsHtml": [
+      "Transformer <span class=\"math inline\">\\(P⇒Q\\)</span> en <span class=\"math inline\">\\(¬Q⇒¬P\\)</span>",
+      "Identifier une contradiction",
+      "Choisir des cas qui couvrent tout le domaine"
+    ]
   },
   {
     "number": 18,
@@ -302,7 +389,12 @@
       "Rédiger initialisation, hérédité et conclusion",
       "Diagnostiquer une hérédité qui ne fonctionne pas au premier rang"
     ],
-    "search": "récurrence chapitre 2 · ensembles et langage mathématique formuler h(n) et le premier indice rédiger initialisation, hérédité et conclusion diagnostiquer une hérédité qui ne fonctionne pas au premier rang ## à savoir faire {: #competences} - formuler h(n) et le premier indice. - rédiger initialisation, hérédité et conclusion. - diagnostiquer une hérédité qui ne fonctionne pas au premier rang. ## parcours {: #parcours} - poly p. 60–61. - exercice 2.32. - exercice 2.34, question 1. - exercice 2.36. ## ticket {: #ticket} compléter l'hérédité de 1+3+⋯+(2n−1)=n²."
+    "search": "récurrence chapitre 2 · ensembles et langage mathématique formuler h(n) et le premier indice rédiger initialisation, hérédité et conclusion diagnostiquer une hérédité qui ne fonctionne pas au premier rang ## à savoir faire {: #competences} - formuler h(n) et le premier indice. - rédiger initialisation, hérédité et conclusion. - diagnostiquer une hérédité qui ne fonctionne pas au premier rang. ## parcours {: #parcours} - poly p. 60–61. - exercice 2.32. - exercice 2.34, question 1. - exercice 2.36. ## questions {: #questions} compléter l'hérédité de 1+3+⋯+(2n−1)=n².",
+    "skillsHtml": [
+      "Formuler <span class=\"math inline\">\\(H(n)\\)</span> et le premier indice",
+      "Rédiger initialisation, hérédité et conclusion",
+      "Diagnostiquer une hérédité qui ne fonctionne pas au premier rang"
+    ]
   },
   {
     "number": 19,
@@ -319,6 +411,11 @@
       "Vérifier les conditions de signe avant de mettre au carré",
       "Prouver les deux sens d'une équivalence"
     ],
-    "search": "analyse-synthèse et révision synthèse · révision distinguer candidats et solutions vérifier les conditions de signe avant de mettre au carré prouver les deux sens d'une équivalence ## à savoir faire {: #competences} - distinguer candidats et solutions. - vérifier les conditions de signe avant de mettre au carré. - prouver les deux sens d'une équivalence. ## parcours {: #parcours} - exercices 2.37 et 2.38, questions 1 et 3. ## révision mixte {: #revision} 1. simplifier (a∩b^c)^c. 2. nier ∀x∈r,∃y∈r,x<y. 3. prouver : n² impair implique n impair. ## ticket {: #ticket} résoudre par analyse-synthèse √(x+6)=x."
+    "search": "analyse-synthèse et révision synthèse · révision distinguer candidats et solutions vérifier les conditions de signe avant de mettre au carré prouver les deux sens d'une équivalence ## à savoir faire {: #competences} - distinguer candidats et solutions. - vérifier les conditions de signe avant de mettre au carré. - prouver les deux sens d'une équivalence. ## parcours {: #parcours} - exercices 2.37 et 2.38, questions 1 et 3. ## révision mixte {: #revision} 1. simplifier (a∩b^c)^c. 2. nier ∀x∈r,∃y∈r,x<y. 3. prouver : n² impair implique n impair. ## questions {: #questions} résoudre par analyse-synthèse √(x+6)=x.",
+    "skillsHtml": [
+      "Distinguer candidats et solutions",
+      "Vérifier les conditions de signe avant de mettre au carré",
+      "Prouver les deux sens d&#x27;une équivalence"
+    ]
   }
 ]

@@ -318,12 +318,35 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("site.mat101_show_solutions", PAGE)
         self.assertIn("{% if site.mat101_show_solutions %}", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
+        self.assertIn("exercise.publicSolutionHtml", PAGE)
+        self.assertIn("{% elsif exercise.publicSolutionHtml %}", PAGE)
         self.assertIn("mat101-file-group-solution", PAGE)
         self.assertIn("corrige-exercices-mat101.pdf", PAGE)
         self.assertIn("Afficher le corrigé détaillé", PAGE)
         about = (ROOT / "about.md").read_text()
         self.assertIn("site.mat101_show_solutions", about)
         self.assertIn("Exercise correction", about)
+
+    def test_selective_public_solutions_are_revealed_in_native_data(self):
+        revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
+        self.assertEqual([item["id"] for item in revealed], ["1.1", "1.2"])
+
+        exercise_11 = next(item for item in NATIVE if item["id"] == "1.1")
+        exercise_12 = next(item for item in NATIVE if item["id"] == "1.2")
+        self.assertEqual(
+            exercise_11["publicSolutionHtml"],
+            exercise_11["solutionHtml"],
+        )
+        self.assertEqual(exercise_11["publicSolutionHtml"].count("<li>"), 15)
+        self.assertEqual(exercise_12["publicSolutionHtml"].count("<li>"), 2)
+        self.assertLess(
+            len(exercise_12["publicSolutionHtml"]),
+            len(exercise_12["solutionHtml"]),
+        )
+
+        for item in NATIVE:
+            if item["id"] not in {"1.1", "1.2"}:
+                self.assertIsNone(item.get("publicSolutionHtml"))
 
     def test_errata_register_is_versioned_and_linked(self):
         exercises = [entry["exercise"] for entry in ERRATA]
@@ -478,6 +501,18 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn(".mat101-root-geometry", STYLES)
         self.assertIn(".mat101-root-diagram", STYLES)
         self.assertIn(".mat101-statement-transcription", STYLES)
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-statement-transcription[\s\S]*?overflow-x: auto;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-statement-transcription mjx-container\[display=\"true\"\][\s\S]*?overflow-x: auto;",
+        )
+        self.assertRegex(
+            STYLES,
+            r"\.mat101-statement-transcription mjx-container:not\(\[display=\"true\"\]\)[\s\S]*?overflow-x: auto;",
+        )
         self.assertIn("body:has(.mat101-library) .post-header", STYLES)
         self.assertIn("@media screen and (max-width: 440px)", STYLES)
         self.assertIn("min-height: 44px", STYLES)
@@ -494,10 +529,12 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("window.location.hash.startsWith('#exercice-')", SCRIPT)
         head = (ROOT / "_includes/head-custom.html").read_text()
         self.assertIn("mat101-library.js", head)
+        self.assertIn("mat101-mobile.js", head)
         self.assertIn("mat101-has-js", head)
         self.assertIn("page.layout == 'mat101'", head)
         self.assertIn("html:not(.mat101-has-js) .mat101-toc-panel", STYLES)
         self.assertIn(".mat101-shell", STYLES)
+        self.assertIn(".mat101-swipe-hint", STYLES)
         self.assertIn("body.mat101-site", STYLES)
 
     def test_mat101_uses_a_dedicated_layout_without_main_site_chrome(self):
@@ -561,6 +598,9 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
             "Un compte gratuit est nécessaire pour en proposer une.",
             PAGE,
         )
+        self.assertIn("Proposer une correction", PAGE)
+        self.assertIn("Consulter les corrections MAT101", PAGE)
+        self.assertNotIn("ticket", PAGE.casefold())
         self.assertNotIn("Community Notes", PAGE)
 
 

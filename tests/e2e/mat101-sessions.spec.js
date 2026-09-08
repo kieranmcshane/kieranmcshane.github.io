@@ -42,6 +42,61 @@ test.describe("MAT101 nineteen-session student path", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("renders competency math on session cards", async ({ page }) => {
+    await gotoSessions(page);
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 12000 }
+    );
+
+    const card = page.locator('[data-session-number="1"]');
+    await expect(card.locator("mjx-container")).not.toHaveCount(0);
+    await expect(card.locator(".mat101-session-skills")).toContainText("Situer un nombre");
+
+    await page.locator('[data-mat101-session-filter="complexes"]').click();
+    const card2 = page.locator('[data-session-number="2"]');
+    await expect(card2.locator("mjx-container")).not.toHaveCount(0);
+    await expect(card2.locator(".mat101-session-skills")).not.toContainText("\\bar");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
+  test("marks session 10 as a one-hour interro with extended time", async ({ page }) => {
+    await gotoSessions(page);
+
+    const card = page.locator('[data-session-number="10"]');
+    await expect(card.locator(".mat101-session-date-state.is-interro")).toHaveText(
+      "Interro"
+    );
+    await expect(card.locator(".mat101-session-format")).toHaveText(
+      "1 h · tiers temps 1 h 20"
+    );
+
+    await card.locator(":scope > a").click();
+    await expect(page).toHaveURL(/\/mat101\/seances\/10-ensembles-appartenance-inclusion\/$/);
+    await expect(page.locator(".mat101-session-detail-status.is-interro")).toContainText(
+      "Interro"
+    );
+    await expect(page.locator(".mat101-session-detail-status.is-interro")).toContainText(
+      "1 h · tiers temps 1 h 20"
+    );
+    await expect(page.locator(".mat101-session-source")).toContainText(
+      "Durée 1 h · tiers temps 1 h 20"
+    );
+  });
+
+  test("exposes mobile swipe affordances on small screens", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-390", "mobile viewport only");
+
+    await gotoSessions(page);
+    await expect(page.locator('[data-mat101-swipe="session-hub"]')).toBeVisible();
+    await expect(page.locator(".mat101-swipe-hint")).toContainText("Glisser");
+
+    await page.goto("/mat101/seances/02-conjugue-module-quotient/");
+    await expect(page.locator('[data-mat101-swipe="session-detail"]')).toBeVisible();
+    await expect(page.locator(".mat101-swipe-hint")).toContainText("séance");
+  });
+
   test("filters and searches without losing shareable state", async ({ page }) => {
     await gotoSessions(page);
 
@@ -77,7 +132,7 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(page.getByRole("heading", { name: "À savoir faire" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Parcours" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Contrôle rapide" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Ticket" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Questions" })).toBeVisible();
     await expect(page.locator(".mat101-session-content")).not.toContainText(
       "Déroulé minute par minute"
     );

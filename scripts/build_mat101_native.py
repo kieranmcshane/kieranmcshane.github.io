@@ -64,6 +64,15 @@ EXERCISE_DIFFICULTIES = {
     "4.16": "**", "4.17": "**",
 }
 
+# Public corrigés revealed while mat101_show_solutions stays false.
+# Use "all" for the full solution, or a list of 1-based question numbers.
+REVEALED_SOLUTIONS: dict[str, str | list[int]] = {
+    "1.1": "all",
+    "1.2": [1, 2],
+}
+
+LI_ITEM = re.compile(r"<li\b.*?</li>", re.DOTALL)
+
 STATEMENT_HEADING = re.compile(
     r"^Exercice\s+([1-4]\.\d+)\.\s*(?:\((?:\*{1,3}|\*/\*\*)\))?",
     re.MULTILINE,
@@ -545,6 +554,38 @@ def build_solution_html() -> dict[str, str]:
     return solutions
 
 
+def slice_solution_html(html: str, reveal: str | list[int]) -> str:
+    if reveal == "all":
+        return html
+
+    items = LI_ITEM.findall(html)
+    if not items:
+        raise RuntimeError("Expected a numbered solution list to slice")
+
+    selected = [items[index - 1] for index in reveal]
+    ol_match = re.search(r"<ol\b", html)
+    intro = html[: ol_match.start()].strip() if ol_match else ""
+    body = "<ol>\n" + "\n".join(selected) + "\n</ol>"
+    return f"{intro}\n{body}".strip() if intro else body
+
+
+def build_public_solution_html(
+    solutions: dict[str, str],
+) -> dict[str, str | None]:
+    public: dict[str, str | None] = {}
+    for exercise_id, solution_html in solutions.items():
+        reveal = REVEALED_SOLUTIONS.get(exercise_id)
+        if reveal is None:
+            public[exercise_id] = None
+            continue
+        public[exercise_id] = slice_solution_html(solution_html, reveal)
+
+    unexpected = sorted(set(REVEALED_SOLUTIONS) - set(solutions))
+    if unexpected:
+        raise RuntimeError(f"Unknown revealed exercise ids: {unexpected}")
+    return public
+
+
 def main() -> None:
     chapters = json.loads(EXERCISE_DATA.read_text())
     tag_index = json.loads(TAG_DATA.read_text())["tags"]
@@ -576,6 +617,7 @@ def main() -> None:
 
     statements = build_statement_text()
     solutions = build_solution_html()
+    public_solutions = build_public_solution_html(solutions)
     records = []
     for chapter in chapters:
         for page in chapter["pages"]:
@@ -599,6 +641,7 @@ def main() -> None:
                             "mathematicalReviewStatus", "pending"
                         ),
                         "solutionHtml": solutions[exercise_id],
+                        "publicSolutionHtml": public_solutions[exercise_id],
                     }
                 )
     OUTPUT_DATA.write_text(
