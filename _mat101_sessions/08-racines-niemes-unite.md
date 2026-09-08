@@ -40,9 +40,9 @@ mat101_session_number: 8
 ## À savoir faire
 {: #competences}
 
-- Résoudre `z^n=ρe^{iθ}` avec `k=0,…,n−1`.
-- Placer les racines de l'unité sur un cercle.
-- Revenir d'un changement d'inconnue sans perdre les restrictions.
+- Résoudre <span class="math inline">$z^n=ρe^{iθ}$</span> avec <span class="math inline">$k=0,…,n−1$</span>.
+- Placer les racines de l&#x27;unité sur un cercle.
+- Revenir d&#x27;un changement d&#x27;inconnue sans perdre les restrictions.
 
 ## Parcours
 {: #parcours}
@@ -53,7 +53,7 @@ mat101_session_number: 8
 ## Questions
 {: #questions}
 
-Résoudre `z³=−8` sous forme algébrique.
+Résoudre <span class="math inline">$z³=−8$</span> sous forme algébrique.
 {% endraw %}
 
   </article>

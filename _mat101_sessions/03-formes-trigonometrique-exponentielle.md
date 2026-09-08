@@ -41,8 +41,8 @@ mat101_session_number: 3
 {: #competences}
 
 - Déterminer module, quadrant et argument.
-- Passer de `a+ib` à `ρe^{iθ}` et réciproquement.
-- Se souvenir que `arg(0)` n'est pas défini et qu'un argument l'est modulo `2π`.
+- Passer de <span class="math inline">$a+ib$</span> à <span class="math inline">$ρe^{iθ}$</span> et réciproquement.
+- Se souvenir que <span class="math inline">$arg(0)$</span> n&#x27;est pas défini et qu&#x27;un argument l&#x27;est modulo <span class="math inline">$2π$</span>.
 
 ## Parcours
 {: #parcours}
@@ -54,8 +54,8 @@ mat101_session_number: 3
 ## Questions
 {: #questions}
 
-1. Écrire `−√3−i` sous forme exponentielle avec un angle dans `[0,2π[`.
-2. Écrire `2e^{-iπ/3}` sous forme algébrique.
+1. Écrire <span class="math inline">$−√3−i$</span> sous forme exponentielle avec un angle dans <span class="math inline">$[0,2π[$</span>.
+2. Écrire <span class="math inline">$2e^{-iπ/3}$</span> sous forme algébrique.
 {% endraw %}
 
   </article>

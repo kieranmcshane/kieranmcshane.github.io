@@ -136,6 +136,18 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn('<span class="math inline">\\(z=x+iy\\)</span>', rendered)
         self.assertNotIn("`", rendered)
 
+    def test_session_detail_pages_render_competency_math_with_mathjax_markup(self):
+        session_one = (SESSION_DIR / "01-forme-algebrique.md").read_text(encoding="utf-8")
+        self.assertIn(
+            '<span class="math inline">$N⊂Z⊂Q⊂R⊂C$</span>',
+            session_one,
+        )
+        self.assertNotIn("`N⊂Z⊂Q⊂R⊂C`", session_one)
+        self.assertNotRegex(
+            session_one,
+            r"## À savoir faire[\s\S]*?`[^`]+`",
+        )
+
     def test_generator_rejects_a_new_unreviewed_public_section(self):
         modified = WORKBOOK_TEXT.replace(
             "### Ticket\n", "### Corrigé\n\nContenu privé.\n\n### Ticket\n", 1

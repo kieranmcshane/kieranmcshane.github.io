@@ -150,6 +150,20 @@ test.describe("MAT101 nineteen-session student path", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("renders competency math on session detail pages", async ({ page }) => {
+    await page.goto("/mat101/seances/01-forme-algebrique/");
+    await page.waitForFunction(
+      () => !document.documentElement.classList.contains("math-pending"),
+      null,
+      { timeout: 15000 }
+    );
+
+    const competences = page.locator("#competences + ul");
+    await expect(competences).toContainText("Situer un nombre");
+    await expect(competences.locator("mjx-container")).toHaveCount(5);
+    await expect(competences.locator("code")).toHaveCount(0);
+  });
+
   test("labels the two unresolved schedule slots instead of inventing dates", async ({
     page,
   }) => {

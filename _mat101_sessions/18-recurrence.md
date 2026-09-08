@@ -40,7 +40,7 @@ mat101_session_number: 18
 ## À savoir faire
 {: #competences}
 
-- Formuler `H(n)` et le premier indice.
+- Formuler <span class="math inline">$H(n)$</span> et le premier indice.
 - Rédiger initialisation, hérédité et conclusion.
 - Diagnostiquer une hérédité qui ne fonctionne pas au premier rang.
 
@@ -55,7 +55,7 @@ mat101_session_number: 18
 ## Questions
 {: #questions}
 
-Compléter l'hérédité de `1+3+⋯+(2n−1)=n²`.
+Compléter l&#x27;hérédité de <span class="math inline">$1+3+⋯+(2n−1)=n²$</span>.
 {% endraw %}
 
   </article>

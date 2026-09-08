@@ -40,9 +40,9 @@ mat101_session_number: 2
 ## À savoir faire
 {: #competences}
 
-- Calculer `\bar z`, `|z|` et `1/z`.
-- Rendre réel le dénominateur d'un quotient.
-- Poser `z=x+iy` lorsqu'une équation contient `z` et `\bar z`.
+- Calculer <span class="math inline">$\bar z$</span>, <span class="math inline">$|z|$</span> et <span class="math inline">$1/z$</span>.
+- Rendre réel le dénominateur d&#x27;un quotient.
+- Poser <span class="math inline">$z=x+iy$</span> lorsqu&#x27;une équation contient <span class="math inline">$z$</span> et <span class="math inline">$\bar z$</span>.
 
 ## Parcours
 {: #parcours}
@@ -54,7 +54,7 @@ mat101_session_number: 2
 ## Questions
 {: #questions}
 
-Pour `z=1−2i`, calculer `\bar z`, `|z|` et `1/z` sous forme algébrique.
+Pour <span class="math inline">$z=1−2i$</span>, calculer <span class="math inline">$\bar z$</span>, <span class="math inline">$|z|$</span> et <span class="math inline">$1/z$</span> sous forme algébrique.
 {% endraw %}
 
   </article>

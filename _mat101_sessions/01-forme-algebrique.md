@@ -40,9 +40,9 @@ mat101_session_number: 1
 ## À savoir faire
 {: #competences}
 
-- Situer un nombre dans `N⊂Z⊂Q⊂R⊂C`.
-- Écrire `z=a+ib`, puis donner `Re(z)` et `Im(z)`.
-- Additionner et multiplier en utilisant `i²=−1`.
+- Situer un nombre dans <span class="math inline">$N⊂Z⊂Q⊂R⊂C$</span>.
+- Écrire <span class="math inline">$z=a+ib$</span>, puis donner <span class="math inline">$Re(z)$</span> et <span class="math inline">$Im(z)$</span>.
+- Additionner et multiplier en utilisant <span class="math inline">$i²=−1$</span>.
 
 ## Parcours
 {: #parcours}
@@ -53,13 +53,13 @@ mat101_session_number: 1
 ## Contrôle rapide
 {: #controle}
 
-Calculer `(1+2i)(−4+6i)` et indiquer séparément partie réelle et partie imaginaire.
+Calculer <span class="math inline">$(1+2i)(−4+6i)$</span> et indiquer séparément partie réelle et partie imaginaire.
 
 ## Questions
 {: #questions}
 
-1. `(3−2i)+(−5+7i)` ;
-2. `(1+i)²`.
+1. <span class="math inline">$(3−2i)+(−5+7i)$</span> ;
+2. <span class="math inline">$(1+i)²$</span>.
 {% endraw %}
 
   </article>

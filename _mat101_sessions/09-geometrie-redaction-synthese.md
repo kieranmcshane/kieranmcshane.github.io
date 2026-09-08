@@ -42,7 +42,7 @@ mat101_session_number: 9
 
 - Traduire vecteur, distance, milieu et angle en affixes.
 - Utiliser « arrivée moins départ ».
-- Rédiger une chaîne d'équivalences et une conclusion.
+- Rédiger une chaîne d&#x27;équivalences et une conclusion.
 
 ## Parcours
 {: #parcours}
@@ -54,14 +54,14 @@ mat101_session_number: 9
 ## Contrôle formatif
 {: #controle}
 
-1. Mettre `(2+i)/(1−i)` sous forme algébrique.
-2. Calculer `(1−i)^6` par forme exponentielle.
-3. Résoudre `z²+2z+2=0`.
+1. Mettre <span class="math inline">$(2+i)/(1−i)$</span> sous forme algébrique.
+2. Calculer <span class="math inline">$(1−i)^6$</span> par forme exponentielle.
+3. Résoudre <span class="math inline">$z²+2z+2=0$</span>.
 
 ## Questions
 {: #questions}
 
-Pour `z_A=2−i` et `z_B=−2+3i`, donner le milieu de `[AB]` et la distance `AB`.
+Pour <span class="math inline">$z_A=2−i$</span> et <span class="math inline">$z_B=−2+3i$</span>, donner le milieu de <span class="math inline">$[AB]$</span> et la distance <span class="math inline">$AB$</span>.
 {% endraw %}
 
   </article>
