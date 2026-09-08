@@ -314,6 +314,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertNotIn("Contrôles effectués avant publication", PAGE)
         self.assertIn('<h2 id="mat101-review-title">Corrections</h2>', PAGE)
         self.assertIn('<h2 id="mat101-downloads-title">Téléchargements</h2>', PAGE)
+        self.assertIn("mat_101_20251001.pdf", PAGE)
+        self.assertIn("source_pdf_url", PAGE)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
@@ -358,11 +360,21 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("3.31", exercises)
         self.assertIn("4.17", exercises)
         self.assertTrue(all(entry["version"] == "2026-07-28" for entry in ERRATA))
+        for entry in ERRATA:
+            self.assertIn("beforeHtml", entry)
+            self.assertIn("afterHtml", entry)
+            self.assertTrue(entry["beforeHtml"].strip())
+            self.assertTrue(entry["afterHtml"].strip())
         self.assertIn("Errata du polycopié source", PAGE)
         self.assertIn("site.data.mat101_errata", PAGE)
         self.assertIn('class="mat101-errata-change"', PAGE)
-        self.assertIn("<span>Avant</span> {{ erratum.problem }}", PAGE)
-        self.assertIn("<span>Après</span> {{ erratum.correction }}", PAGE)
+        self.assertIn("mat101-errata-snippet-before", PAGE)
+        self.assertIn("mat101-errata-snippet-after", PAGE)
+        self.assertIn("<span>Avant</span>", PAGE)
+        self.assertIn("<span>Après</span>", PAGE)
+        self.assertIn("{{ erratum.beforeHtml }}", PAGE)
+        self.assertIn("{{ erratum.afterHtml }}", PAGE)
+        self.assertIn(".mat101-errata-mark", STYLES)
         self.assertNotIn("Problème.", PAGE)
         self.assertNotIn("Formulation retenue.", PAGE)
 
