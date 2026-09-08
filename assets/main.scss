@@ -14725,22 +14725,72 @@ body:has(.mat101-session-page) {
 
 .mat101-optional-question {
   margin-top: 0.95rem;
+  padding: 0.75rem 0.85rem 0.85rem;
+  border: 1px solid #e2ddd3;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.88);
 }
 
-.mat101-optional-question-text {
+.mat101-optional-question-heading {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
   margin: 0;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid #ece7df;
 }
 
 .mat101-optional-question-number {
+  flex: 0 0 auto;
+  min-width: 1.35rem;
   color: var(--mat101-accent-dark);
+  font-family: $base-font-family;
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+
+  &::before {
+    content: "Q";
+    margin-right: 0.08rem;
+    color: var(--mat101-muted);
+    font-weight: 600;
+  }
+}
+
+.mat101-optional-question-label {
+  margin: 0;
+  color: var(--mat101-ink);
+  font-family: $base-font-family;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.mat101-optional-question-body {
+  margin-top: 0.65rem;
+  color: #202a34;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: inherit;
+  line-height: 1.62;
+}
+
+.mat101-optional-question-body > p {
+  margin: 0;
+}
+
+.mat101-optional-question-body > p + p,
+.mat101-optional-question-body > p + .mat101-statement-list {
+  margin-top: 0.55rem;
 }
 
 .mat101-optional-question .mat101-statement-list {
-  margin: 0.55rem 0 0;
+  margin: 0;
 }
 
-.mat101-optional-question > p:not(.mat101-optional-question-text):not(.mat101-optional-hint) {
+.mat101-optional-question > p:not(.mat101-optional-hint) {
   margin: 0.55rem 0 0;
 }
 
