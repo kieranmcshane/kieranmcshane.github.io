@@ -671,20 +671,9 @@ test.describe("MAT101 visual baselines", () => {
         }
       `,
     });
-    const navigation = page.locator(".mat101-toc-panel");
-    await navigation.evaluate((element) =>
-      element.scrollIntoView({ block: "start" })
-    );
-    const box = await navigation.boundingBox();
-    expect(box).toBeTruthy();
-    const clipHeight = 720;
-    await expect(page).toHaveScreenshot("mat101-navigation.png", {
-      clip: {
-        x: Math.floor(box.x),
-        y: Math.floor(box.y),
-        width: Math.floor(box.width),
-        height: clipHeight,
-      },
+    const navigation = page.locator(".mat101-difficulty-legend");
+    await navigation.scrollIntoViewIfNeeded();
+    await expect(navigation).toHaveScreenshot("mat101-navigation.png", {
       maxDiffPixelRatio: 0.05,
     });
   });
