@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import re
 import unittest
 import zipfile
 
@@ -463,6 +464,13 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("{{ erratum.beforeHtml }}", PAGE)
         self.assertIn("{{ erratum.afterHtml }}", PAGE)
         self.assertIn(".mat101-errata-mark", STYLES)
+        for entry in ERRATA:
+            for field in ("beforeHtml", "afterHtml"):
+                html = entry[field]
+                for match in re.finditer(r"\\\((.*?)\\\)", html, re.DOTALL):
+                    self.assertNotIn("<mark", match.group(1), field)
+                for match in re.finditer(r"\\\[(.*?)\\\]", html, re.DOTALL):
+                    self.assertNotIn("<mark", match.group(1), field)
         self.assertNotIn("Problème.", PAGE)
         self.assertNotIn("Formulation retenue.", PAGE)
 

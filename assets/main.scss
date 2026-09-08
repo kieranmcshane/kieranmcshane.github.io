@@ -13678,6 +13678,18 @@ body.mat101-site .mat101-library.mat101-course {
   background: rgba(255, 255, 255, 0.55);
   font-size: 0.82rem;
   line-height: 1.45;
+  overflow-x: auto;
+}
+
+.mat101-errata-text mjx-container {
+  margin: 0 0.08em !important;
+  font-size: 100%;
+}
+
+.mat101-errata-text mjx-container[display="true"] {
+  display: block;
+  margin: 0.35rem 0 !important;
+  overflow-x: auto;
 }
 
 .mat101-errata-snippet-before .mat101-errata-text {
