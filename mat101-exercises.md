@@ -259,15 +259,19 @@ math: true
   <section class="mat101-optional-stack" id="facultatif" aria-labelledby="mat101-optional-title">
     <h2 id="mat101-optional-title">Facultatif</h2>
 
-    <article class="mat101-course-download" aria-labelledby="mat101-optional-reals-title">
-      <div>
-        <h3 id="mat101-optional-reals-title">Construction de R par les suites de Cauchy</h3>
-        <p>Problème guidé en 12 questions (version courte) : suites de Cauchy, classes d’équivalence, opérations et complétude de R. Prérequis : calcul dans Q, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
-      </div>
-      <a href="{{ optional_reals_pdf_url }}" download>
-        <strong>construction_reels_courte_histoire_v2.pdf</strong>
-        <span>3 pages · énoncé seul</span>
-      </a>
+    <article class="mat101-optional-resource" aria-labelledby="mat101-optional-reals-title">
+      <header class="mat101-optional-resource-header">
+        <div>
+          <h3 id="mat101-optional-reals-title">Construction de R par les suites de Cauchy</h3>
+          <p>Problème guidé en 12 questions (version courte)&nbsp;: suites de Cauchy, classes d’équivalence, opérations et complétude de <span class="math inline">$\mathbb R$</span>. Prérequis&nbsp;: calcul dans <span class="math inline">$\mathbb Q$</span>, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
+        </div>
+        <a class="mat101-optional-pdf-link" href="{{ optional_reals_pdf_url }}" download>
+          <strong>construction_reels_courte_histoire_v2.pdf</strong>
+          <span>3 pages · énoncé seul</span>
+        </a>
+      </header>
+
+      {% include mat101-optional-reals-problem.html %}
     </article>
 
     <article class="mat101-video-resource" aria-labelledby="mat101-optional-video-title">

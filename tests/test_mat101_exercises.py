@@ -324,6 +324,8 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("Construction de R par les suites de Cauchy", PAGE)
         self.assertIn("construction_reels_courte_histoire_v2.pdf", PAGE)
         self.assertIn('href="#facultatif">Facultatif</a>', PAGE)
+        self.assertIn("mat101-optional-resource", PAGE)
+        self.assertIn('include mat101-optional-reals-problem.html', PAGE)
         self.assertIn("mat101-video-embed", PAGE)
         self.assertIn("youtube-nocookie.com/embed/5PcpBw5Hbwo", PAGE)
         self.assertIn("Fondamentaux des nombres complexes", PAGE)
@@ -332,6 +334,13 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertTrue(OPTIONAL_REALS_PDF.is_file())
         self.assertTrue(OPTIONAL_REALS_PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(OPTIONAL_REALS_PDF.stat().st_size, 100_000)
+
+    def test_optional_reals_native_problem_include_has_twelve_questions(self):
+        include = (ROOT / "_includes/mat101-optional-reals-problem.html").read_text()
+        self.assertIn('id="optional-reals-q1"', include)
+        self.assertIn('id="optional-reals-q12"', include)
+        self.assertIn("mat101-optional-question-star", include)
+        self.assertIn("Note historique", include)
 
     def test_public_solutions_are_gated_by_config_flag(self):
         self.assertRegex(CONFIG, r"(?m)^mat101_show_solutions:\s+false\s*$")
