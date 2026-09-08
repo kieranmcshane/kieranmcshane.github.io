@@ -139,7 +139,7 @@ class Mat101SessionsTests(unittest.TestCase):
     def test_session_detail_pages_render_competency_math_with_mathjax_markup(self):
         session_one = (SESSION_DIR / "01-forme-algebrique.md").read_text(encoding="utf-8")
         self.assertIn(
-            '<span class="math inline">\\(N⊂Z⊂Q⊂R⊂C\\)</span>',
+            '<span class="math inline">$N⊂Z⊂Q⊂R⊂C$</span>',
             session_one,
         )
         self.assertNotIn("`N⊂Z⊂Q⊂R⊂C`", session_one)
