@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 1 : compétences, 
 math: true
 mat101_session: true
 mat101_session_number: 1
+image: "/assets/images/social/mat101-seances-01-forme-algebrique.png"
+image_alt: "Séance 1 — Forme algébrique"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

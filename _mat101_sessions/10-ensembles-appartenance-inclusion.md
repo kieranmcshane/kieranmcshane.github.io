@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 10 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 10
+image: "/assets/images/social/mat101-seances-10-ensembles-appartenance-inclusion.png"
+image_alt: "Séance 10 — Interro · nombres complexes"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

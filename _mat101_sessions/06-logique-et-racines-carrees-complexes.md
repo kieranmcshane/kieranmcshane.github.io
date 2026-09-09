@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 6 : compétences, 
 math: true
 mat101_session: true
 mat101_session_number: 6
+image: "/assets/images/social/mat101-seances-06-logique-et-racines-carrees-complexes.png"
+image_alt: "Séance 6 — Racines carrées complexes"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

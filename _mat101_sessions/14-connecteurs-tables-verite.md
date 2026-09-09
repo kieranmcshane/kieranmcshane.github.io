@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 14 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 14
+image: "/assets/images/social/mat101-seances-14-connecteurs-tables-verite.png"
+image_alt: "Séance 14 — Tables de vérité"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

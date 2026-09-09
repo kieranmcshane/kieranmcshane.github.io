@@ -4,6 +4,9 @@ lang: en
 author: Kieran McShane
 url: "https://kieranmcshane.github.io"
 baseurl: ""
+image: /assets/images/og-default.png
+twitter:
+  card: summary_large_image
 theme: minima
 markdown: kramdown
 permalink: /:year/:month/:day/:title/

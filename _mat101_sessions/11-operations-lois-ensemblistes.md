@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 11 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 11
+image: "/assets/images/social/mat101-seances-11-operations-lois-ensemblistes.png"
+image_alt: "Séance 11 — Décrire un ensemble"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

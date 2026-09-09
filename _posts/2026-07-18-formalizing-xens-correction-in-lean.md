@@ -7,6 +7,8 @@ date: 2026-07-18 10:00:00 +0200
 categories: [formalization]
 tags: [Lean, mathlib, random-matrices, semicircle-law, concours]
 excerpt: "A field report from turning an X/ENS 2026 Mathematics B correction into a no-sorry Lean project."
+image: "/assets/images/social/2026-07-18-formalizing-xens-correction-in-lean.png"
+image_alt: "Formalizing an X/ENS Correction in Lean"
 ---
 
 I have been working on a Lean formalization of an X/ENS 2026 Mathematics B correction. The project began as a scaffold: a way of translating a long written solution into named definitions, lemmas and theorem targets. It has now become something more useful. Large parts of the argument compile, the remaining assumptions are explicit, and the last Wigner-model probability suppliers have been moved from informal labels to Mathlib-usable hypotheses.

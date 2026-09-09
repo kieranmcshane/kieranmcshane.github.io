@@ -8,6 +8,8 @@ last_modified_at: 2026-07-22 08:49:00 +0200
 categories: [quantum-information]
 tags: [entanglement, separability, tensor-norms, Bloch-representation]
 excerpt: "How the usual correlation-tensor separability test becomes a marginal-dependent covariance bound after centering."
+image: "/assets/images/social/2026-07-17-centered-correlation-tensors-separability.png"
+image_alt: "Centered Correlation Tensors and Quantum Separability"
 ---
 
 Deciding whether a mixed quantum state is separable is difficult. Even so, a useful necessary test follows from a short piece of linear algebra. Write the state in local operator bases, collect its two-body correlations in a matrix <a class="notation-ref" href="#definition-correlation-matrix" data-definition="Correlation matrix T: the coefficients of traceless observables on both subsystems." aria-describedby="glossary-correlation-desc">$T$</a>, and ask how large that matrix can be if the state is a mixture of product states.

@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 9 : compétences, 
 math: true
 mat101_session: true
 mat101_session_number: 9
+image: "/assets/images/social/mat101-seances-09-geometrie-redaction-synthese.png"
+image_alt: "Séance 9 — Géométrie et rédaction"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

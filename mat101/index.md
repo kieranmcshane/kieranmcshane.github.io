@@ -2,6 +2,8 @@
 layout: mat101
 title: MAT101
 permalink: /mat101/
+image: "/assets/images/social/mat101.png"
+image_alt: "MAT101"
 ---
 
 <meta http-equiv="refresh" content="0; url={{ '/mat101/seances/' | relative_url }}">

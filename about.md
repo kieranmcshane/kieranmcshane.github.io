@@ -3,6 +3,8 @@ layout: page
 title: About & contact
 permalink: /about/
 description: "About Kieran McShane’s research notes and the public contact routes for corrections, rights requests, and site feedback."
+image: "/assets/images/social/about.png"
+image_alt: "About & contact"
 ---
 
 This site collects research notes, mathematical writing, and interactive resources. I use it to work through ideas, record calculations, and publish material that can be read, checked, and improved. I try to distinguish established results from interpretation or open questions.

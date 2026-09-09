@@ -4,6 +4,8 @@ title: Répertoire raisonné
 permalink: /repertoire-raisonne/
 description: "Une bibliothèque interactive de 127 problèmes corrigés d’algèbre, d’analyse, de topologie et de probabilités."
 math: true
+image: "/assets/images/social/repertoire-raisonne.png"
+image_alt: "Répertoire raisonné"
 ---
 
 {% assign repertoire_pdf = '/assets/documents/repertoire-raisonne-algebre-analyse.pdf' | relative_url %}

@@ -3,6 +3,8 @@ layout: page
 title: "Centered Correlations: Proof Campaign"
 permalink: /play/centered-correlations/
 description: "A no-typing mathematical strategy game for reconstructing the centered-correlation separability argument, with FSRS return missions."
+image: "/assets/images/social/play-centered-correlations.png"
+image_alt: "Centered Correlations: Proof Campaign"
 ---
 
 <div class="proof-game" data-storage-key="centered-correlation-game-v1">

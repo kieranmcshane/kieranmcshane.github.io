@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 4 : compétences, 
 math: true
 mat101_session: true
 mat101_session_number: 4
+image: "/assets/images/social/mat101-seances-04-produits-puissances-moivre-euler.png"
+image_alt: "Séance 4 — Puissances, Moivre et Euler"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

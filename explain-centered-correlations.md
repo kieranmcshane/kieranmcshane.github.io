@@ -3,6 +3,8 @@ layout: page
 title: "Reconstruct the Centered-Correlation Argument"
 permalink: /explain/centered-correlations/
 description: "A click-based FSRS learning companion to the article on centered correlation tensors and quantum separability."
+image: "/assets/images/social/explain-centered-correlations.png"
+image_alt: "Reconstruct the Centered-Correlation Argument"
 ---
 
 <div class="explain-lab" data-storage-key="centered-correlation-explain-v2">

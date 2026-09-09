@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 17 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 17
+image: "/assets/images/social/mat101-seances-17-contraposee-absurde-cas.png"
+image_alt: "Séance 17 — Contraposée, absurde et cas"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

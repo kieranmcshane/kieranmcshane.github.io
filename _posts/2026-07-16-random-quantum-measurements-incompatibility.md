@@ -7,6 +7,8 @@ date: 2026-07-16 09:00:00 +0200
 categories: [quantum-information]
 tags: [POVMs, incompatibility, random-matrices, free-probability]
 excerpt: "A guided introduction to joint measurability and the asymptotic incompatibility of random binary projections."
+image: "/assets/images/social/2026-07-16-random-quantum-measurements-incompatibility.png"
+image_alt: "Random Binary Projective Measurements and Incompatibility"
 ---
 
 Two quantum measurements are compatible when both can be recovered from a single measurement. If the joint measurement reports a pair of outcomes $(i,j)$, ignoring $j$ should reproduce the statistics of the first measurement, while ignoring $i$ should reproduce those of the second. This must hold for every input state.

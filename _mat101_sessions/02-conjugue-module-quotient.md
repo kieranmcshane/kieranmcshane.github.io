@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 2 : compétences, 
 math: true
 mat101_session: true
 mat101_session_number: 2
+image: "/assets/images/social/mat101-seances-02-conjugue-module-quotient.png"
+image_alt: "Séance 2 — Conjugué, module et quotient"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->
