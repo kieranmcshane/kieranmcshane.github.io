@@ -4,6 +4,34 @@ lang: en
 author: Kieran McShane
 url: "https://kieranmcshane.github.io"
 baseurl: ""
+image: /assets/images/og-default.png
+mat101_image: /assets/images/og-mat101.png
+twitter:
+  card: summary_large_image
+defaults:
+  - scope:
+      path: "mat101"
+      type: "pages"
+    values:
+      image: /assets/images/og-mat101.png
+      image_alt: "MAT101 — IMA02"
+  - scope:
+      type: "mat101_sessions"
+    values:
+      image: /assets/images/og-mat101.png
+      image_alt: "MAT101 — IMA02"
+  - scope:
+      path: "mat101-sessions.md"
+      type: "pages"
+    values:
+      image: /assets/images/og-mat101.png
+      image_alt: "MAT101 — IMA02"
+  - scope:
+      path: "mat101-exercises.md"
+      type: "pages"
+    values:
+      image: /assets/images/og-mat101.png
+      image_alt: "MAT101 — IMA02"
 theme: minima
 markdown: kramdown
 permalink: /:year/:month/:day/:title/

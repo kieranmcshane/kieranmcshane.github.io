@@ -7,6 +7,8 @@ date: 2026-07-27 09:00:00 +0200
 categories: [cryptography]
 tags: [SHA-1, SHA-256, digital-signatures, certificates, collision-resistance]
 excerpt: "Why replacing SHA-1 by SHA-256 in a certificate matters, how the birthday bound enters, and why a hash function is only one component of a digital signature."
+image: "/assets/images/social/2026-07-27-sha1-sha256-certificate-signatures.png"
+image_alt: "From SHA-1 to SHA-256 in a Certificate Signature"
 ---
 
 I recently inspected the self-signed certificate of an old network printer. One line read

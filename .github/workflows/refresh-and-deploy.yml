@@ -127,6 +127,10 @@ jobs:
             rm -rf .cache/rating-lab-output/audit
             cp -R assets/data/rating-lab/audit .cache/rating-lab-output/audit
           fi
+      - name: Install social preview generator
+        run: python -m pip install pillow
+      - name: Generate social preview images
+        run: python scripts/generate_social_previews.py
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:

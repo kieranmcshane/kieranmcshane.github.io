@@ -4,6 +4,8 @@ title: Exercices MAT101
 permalink: /mat101/exercices/
 description: "Bibliothèque de 103 exercices MAT101 de niveau L1 avec énoncés lisibles directement en ligne."
 math: true
+image: "/assets/images/og-mat101.png"
+image_alt: "MAT101 — IMA02"
 ---
 
 {% assign statement_pdf_url = '/assets/documents/mat101/recueil-exercices-mat101.pdf' | relative_url %}

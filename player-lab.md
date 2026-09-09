@@ -3,6 +3,8 @@ layout: page
 title: Historical Player Lab
 permalink: /rating-lab/players/
 description: Outcome-only historical men's and women's football player ratings across complete tournaments and league seasons using RAPM, Lineup TrueSkill, pairwise chemistry, HAPM, and LAPM.
+image: "/assets/images/social/rating-lab-players.png"
+image_alt: "Historical Player Lab"
 ---
 
 <div class="rating-lab player-lab" data-player-data="{{ '/assets/data/rating-lab/player-football.json' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}">

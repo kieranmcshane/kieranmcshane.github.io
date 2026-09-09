@@ -8,6 +8,8 @@ last_modified_at: 2026-07-28 02:15:00 +0200
 categories: [mathematics]
 tags: [algebra, field-theory, group-theory, Galois-theory]
 excerpt: "A self-contained route from undergraduate algebra to the fundamental theorem of Galois theory, with a rigorous proof and complete V4 and A4 correspondence diagrams."
+image: "/assets/images/social/2026-07-27-galois-theory-without-detours.png"
+image_alt: "Galois Theory Without Detours"
 ---
 
 <div class="longform-post galois-post" markdown="1">

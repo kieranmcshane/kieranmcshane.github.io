@@ -6,6 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 16 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 16
+image: "/assets/images/og-mat101.png"
+image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

@@ -8,6 +8,8 @@ last_modified_at: 2026-07-19 16:14:00 +0200
 categories: [mathematics]
 tags: [concours, tridiagonal-matrices, arcsine-law, Weierstrass-approximation, probability, Wigner-matrices, semicircle-law]
 excerpt: "A question-by-question correction of the École Polytechnique–ESPCI 2026 Mathematics B paper, from tridiagonal spectra and constructive Weierstrass approximation to the arcsine and Wigner semicircle laws."
+image: "/assets/images/social/2026-07-18-x-ens-2026-mathematics-b-complete-correction.png"
+image_alt: "École Polytechnique–ESPCI 2026 Mathematics B (MP–MPI): Complete Correction"
 ---
 
 <div class="correction-post" markdown="1">

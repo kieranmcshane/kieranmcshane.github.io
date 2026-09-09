@@ -3,6 +3,8 @@ layout: page
 title: Rating Lab
 permalink: /rating-lab/
 description: Live alternative ratings for tennis, club and national-team football, and chess, tested against real match outcomes.
+image: "/assets/images/social/rating-lab.png"
+image_alt: "Rating Lab"
 ---
 
 <div class="rating-lab" data-data-root="{{ '/assets/data/rating-lab' | relative_url }}" data-flag-root="{{ '/assets/vendor/flag-icons/4x3' | relative_url }}" data-default-sport="{{ site.data.rating_lab_default.sport }}" data-default-model="{{ site.data.rating_lab_default.model }}">
