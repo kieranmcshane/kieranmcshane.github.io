@@ -3,13 +3,22 @@
   canonical URL, and JSON-LD; this include ensures image dimensions and alt text
   are present for large-image cards.
 {%- endcomment -%}
-{%- assign preview_image = page.image | default: site.image -%}
+{%- if page.layout == 'mat101' or page.mat101_session -%}
+  {%- assign preview_image = page.image | default: site.mat101_image | default: site.image -%}
+  {%- assign preview_alt = page.image_alt | default: "MAT101 — IMA02" -%}
+{%- else -%}
+  {%- assign preview_image = page.image | default: site.image -%}
+  {%- assign preview_alt = page.image_alt | default: page.title | default: site.title -%}
+{%- endif -%}
 {%- if preview_image -%}
   {%- assign preview_image_url = preview_image | absolute_url -%}
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="{{ page.image_alt | default: page.title | default: site.title | xml_escape }}">
+  <meta property="og:image:alt" content="{{ preview_alt | xml_escape }}">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image:alt" content="{{ page.image_alt | default: page.title | default: site.title | xml_escape }}">
+  <meta name="twitter:image:alt" content="{{ preview_alt | xml_escape }}">
   <link rel="image_src" href="{{ preview_image_url }}">
+{%- endif -%}
+{%- if page.layout == 'mat101' or page.mat101_session -%}
+  <meta property="og:locale" content="fr_FR">
 {%- endif -%}

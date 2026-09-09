@@ -6,8 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 19 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 19
-image: "/assets/images/social/mat101-seances-19-analyse-synthese-revision.png"
-image_alt: "Séance 19 — Analyse-synthèse et révision"
+image: "/assets/images/og-mat101.png"
+image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

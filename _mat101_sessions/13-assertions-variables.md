@@ -6,8 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 13 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 13
-image: "/assets/images/social/mat101-seances-13-assertions-variables.png"
-image_alt: "Séance 13 — Assertions et variables"
+image: "/assets/images/og-mat101.png"
+image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->

@@ -4,8 +4,8 @@ title: MAT101
 permalink: /mat101/seances/
 description: "Les 19 séances MAT101 du groupe IMA02 : compétences, parcours dans le polycopié, exercices et questions de sortie."
 math: true
-image: "/assets/images/social/mat101-seances.png"
-image_alt: "MAT101"
+image: "/assets/images/og-mat101.png"
+image_alt: "MAT101 — IMA02"
 ---
 
 {% assign sessions = site.data.mat101_sessions %}

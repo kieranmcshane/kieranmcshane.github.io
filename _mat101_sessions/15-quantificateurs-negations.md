@@ -6,8 +6,8 @@ description: "Parcours étudiant MAT101 IMA02 pour la séance 15 : compétences,
 math: true
 mat101_session: true
 mat101_session_number: 15
-image: "/assets/images/social/mat101-seances-15-quantificateurs-negations.png"
-image_alt: "Séance 15 — Quantificateurs"
+image: "/assets/images/og-mat101.png"
+image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->
