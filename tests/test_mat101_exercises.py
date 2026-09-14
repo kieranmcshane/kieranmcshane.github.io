@@ -428,23 +428,22 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_selective_public_solutions_are_revealed_in_native_data(self):
         revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
-        self.assertEqual([item["id"] for item in revealed], ["1.1", "1.2"])
+        self.assertEqual([item["id"] for item in revealed], ["1.1", "1.2", "1.3"])
+
+        for exercise_id in ("1.1", "1.2", "1.3"):
+            exercise = next(item for item in NATIVE if item["id"] == exercise_id)
+            self.assertEqual(
+                exercise["publicSolutionHtml"],
+                exercise["solutionHtml"],
+            )
 
         exercise_11 = next(item for item in NATIVE if item["id"] == "1.1")
         exercise_12 = next(item for item in NATIVE if item["id"] == "1.2")
-        self.assertEqual(
-            exercise_11["publicSolutionHtml"],
-            exercise_11["solutionHtml"],
-        )
         self.assertEqual(exercise_11["publicSolutionHtml"].count("<li>"), 15)
-        self.assertEqual(exercise_12["publicSolutionHtml"].count("<li>"), 2)
-        self.assertLess(
-            len(exercise_12["publicSolutionHtml"]),
-            len(exercise_12["solutionHtml"]),
-        )
+        self.assertEqual(exercise_12["publicSolutionHtml"].count("<li>"), 6)
 
         for item in NATIVE:
-            if item["id"] not in {"1.1", "1.2"}:
+            if item["id"] not in {"1.1", "1.2", "1.3"}:
                 self.assertIsNone(item.get("publicSolutionHtml"))
 
     def test_errata_register_is_versioned_and_linked(self):

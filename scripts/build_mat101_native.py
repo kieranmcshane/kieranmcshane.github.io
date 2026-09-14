@@ -68,7 +68,8 @@ EXERCISE_DIFFICULTIES = {
 # Use "all" for the full solution, or a list of 1-based question numbers.
 REVEALED_SOLUTIONS: dict[str, str | list[int]] = {
     "1.1": "all",
-    "1.2": [1, 2],
+    "1.2": "all",
+    "1.3": "all",
 }
 
 LI_ITEM = re.compile(r"<li\b.*?</li>", re.DOTALL)
