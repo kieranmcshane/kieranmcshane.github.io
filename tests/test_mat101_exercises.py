@@ -428,7 +428,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_selective_public_solutions_are_revealed_in_native_data(self):
         revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
-        revealed_ids = [f"1.{index}" for index in range(1, 10)]
+        revealed_ids = [f"1.{index}" for index in range(1, 8)]
         self.assertEqual([item["id"] for item in revealed], revealed_ids)
 
         for exercise_id in revealed_ids:
@@ -446,6 +446,22 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         for item in NATIVE:
             if item["id"] not in set(revealed_ids):
                 self.assertIsNone(item.get("publicSolutionHtml"))
+
+    def test_owner_solution_payload_supports_github_unlock(self):
+        owner_data = json.loads(
+            (ROOT / "assets/data/mat101-owner-solutions.json").read_text()
+        )
+        owner_script = (ROOT / "assets/js/mat101-owner-access.js").read_text()
+        head = (ROOT / "_includes/head-custom.html").read_text()
+
+        self.assertEqual(len(owner_data), 103)
+        self.assertEqual(owner_data["1.8"], next(item for item in NATIVE if item["id"] == "1.8")["solutionHtml"])
+        self.assertIn("mat101_owner_github_logins", CONFIG)
+        self.assertIn("mat101_github_oauth_client_id", CONFIG)
+        self.assertIn("data-mat101-owner-access", PAGE)
+        self.assertIn("mat101-owner-access.js", head)
+        self.assertIn("device/code", owner_script)
+        self.assertIn("mat101-owner-solutions.json", PAGE)
 
     def test_errata_register_is_versioned_and_linked(self):
         exercises = [entry["exercise"] for entry in ERRATA]

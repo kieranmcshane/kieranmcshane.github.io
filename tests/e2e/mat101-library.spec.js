@@ -35,8 +35,8 @@ test.describe("MAT101 native library", () => {
     await expect(page.locator(".mat101-exercise-tags")).toHaveCount(103);
     await expect(page.locator(".mat101-statement img")).toHaveCount(0);
     await expect(page.locator(".mat101-statement-transcription")).toHaveCount(103);
-    await expect(page.locator(".mat101-native-solution")).toHaveCount(2);
-    await expect(page.locator(".mat101-solution-body")).toHaveCount(2);
+    await expect(page.locator(".mat101-native-solution")).toHaveCount(7);
+    await expect(page.locator(".mat101-solution-body")).toHaveCount(7);
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
@@ -395,12 +395,12 @@ test.describe("MAT101 native library", () => {
       exercise.locator(".mat101-statement-transcription")
     ).toBeVisible();
     await expect(exercise.locator(".mat101-native-solution")).toHaveCount(0);
-    await expect(noScriptPage.locator(".mat101-native-solution")).toHaveCount(2);
-    await expect(noScriptPage.locator(".mat101-solution-body")).toHaveCount(2);
+    await expect(noScriptPage.locator(".mat101-native-solution")).toHaveCount(7);
+    await expect(noScriptPage.locator(".mat101-solution-body")).toHaveCount(7);
     await context.close();
   });
 
-  test("reveals exercise 1.1 fully and only questions 1 and 2 of exercise 1.2", async ({
+  test("reveals exercises 1.1 through 1.7 and keeps 1.8 hidden", async ({
     page,
   }) => {
     await gotoLibrary(page);
@@ -419,13 +419,20 @@ test.describe("MAT101 native library", () => {
     await exercise12.locator(":scope > summary").click();
     await expect(exercise12.locator(".mat101-native-solution")).toHaveCount(1);
     await exercise12.locator(".mat101-native-solution summary").click();
-    await expect(exercise12.locator(".mat101-solution-body li")).toHaveCount(2);
+    await expect(exercise12.locator(".mat101-solution-body li")).toHaveCount(6);
     await expect(exercise12.locator(".mat101-solution-body")).toContainText(
       "4+3"
     );
-    await expect(exercise12.locator(".mat101-solution-body")).not.toContainText(
-      "Posons"
-    );
+
+    await page.locator("#mat101-search-input").fill("1.7");
+    const exercise17 = page.locator("#exercice-1-7");
+    await exercise17.locator(":scope > summary").click();
+    await expect(exercise17.locator(".mat101-native-solution")).toHaveCount(1);
+
+    await page.locator("#mat101-search-input").fill("1.8");
+    const exercise18 = page.locator("#exercice-1-8");
+    await exercise18.locator(":scope > summary").click();
+    await expect(exercise18.locator(".mat101-native-solution")).toHaveCount(0);
   });
 
   test("does not publish bulk corrigé UI or solution downloads", async ({
@@ -434,8 +441,8 @@ test.describe("MAT101 native library", () => {
     await gotoLibrary(page);
     const html = await page.content();
 
-    await expect(page.locator(".mat101-native-solution")).toHaveCount(2);
-    await expect(page.locator(".mat101-solution-body")).toHaveCount(2);
+    await expect(page.locator(".mat101-native-solution")).toHaveCount(7);
+    await expect(page.locator(".mat101-solution-body")).toHaveCount(7);
     await expect(page.locator(".mat101-file-group-solution")).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Corrigé PDF/i })).toHaveCount(0);
     expect(html).not.toContain("corrige-exercices-mat101.pdf");
@@ -503,7 +510,7 @@ test.describe("MAT101 native library", () => {
     ).toHaveCount(0);
   });
 
-  test("keeps the complex-number statement usable without a solution table", async ({
+  test("keeps the complex-number statement public and reveals its solution table only after opening the corrigé", async ({
     page,
   }) => {
     await gotoLibrary(page);
@@ -512,8 +519,10 @@ test.describe("MAT101 native library", () => {
     const exercise = page.locator("#exercice-1-3");
     await exercise.locator(":scope > summary").click();
     await expect(exercise.locator(".mat101-statement-transcription")).toBeVisible();
-    await expect(exercise.locator(".mat101-native-solution")).toHaveCount(0);
+    await expect(exercise.locator(".mat101-native-solution")).toHaveCount(1);
     await expect(exercise.locator(".mat101-math-table")).toHaveCount(0);
+    await exercise.locator(".mat101-native-solution summary").click();
+    await expect(exercise.locator(".mat101-solution-body .mat101-math-table")).toHaveCount(1);
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 

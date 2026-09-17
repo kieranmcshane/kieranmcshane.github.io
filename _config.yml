@@ -54,3 +54,8 @@ collections:
 # download links, and the copy that announces them. Solution data and
 # assets stay in the repository either way.
 mat101_show_solutions: false
+# OAuth app client id (device flow) for editor-only full corrigé access on /mat101/exercices/.
+# Set the repository secret MAT101_GITHUB_OAUTH_CLIENT_ID for GitHub Pages builds.
+mat101_github_oauth_client_id: ""
+mat101_owner_github_logins:
+  - kieranmcshane

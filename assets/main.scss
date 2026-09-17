@@ -13603,6 +13603,62 @@ body.mat101-site .mat101-library.mat101-course {
   text-decoration: none;
 }
 
+.mat101-owner-access {
+  margin: 0 0 1.5rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgba(8, 127, 140, 0.28);
+  border-left: 4px solid var(--mat101-accent, #006f7b);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(8, 127, 140, 0.1), rgba(255, 255, 255, 0.92) 58%),
+    #f7fcfd;
+}
+
+.mat101-owner-access h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.05rem;
+}
+
+.mat101-owner-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.mat101-owner-button {
+  display: inline-flex;
+  min-height: 44px;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--mat101-accent-dark, #04535c);
+  border-radius: 6px;
+  color: #fff;
+  background: var(--mat101-accent-dark, #04535c);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mat101-owner-button-quiet {
+  border-color: var(--mat101-line, #cad6dc);
+  color: var(--mat101-accent-dark, #04535c);
+  background: #fff;
+}
+
+.mat101-owner-device-prompt {
+  margin-top: 0.85rem;
+  color: var(--mat101-muted, #5d6778);
+  font-size: 0.92rem;
+}
+
+.mat101-owner-device-prompt a {
+  color: var(--mat101-accent-dark, #04535c);
+  font-weight: 700;
+}
+
 .mat101-errata {
   margin: 1.5rem 0 2rem;
   padding: 1.25rem;
