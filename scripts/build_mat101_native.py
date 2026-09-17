@@ -27,6 +27,7 @@ SOLUTION_TEX = ROOT / "assets/documents/mat101/corrige-exercices-mat101.tex"
 EXERCISE_DATA = ROOT / "_data/mat101_exercises.json"
 TAG_DATA = ROOT / "_data/mat101_tags.json"
 OUTPUT_DATA = ROOT / "_data/mat101_native.json"
+OWNER_SOLUTIONS_DATA = ROOT / "assets/data/mat101-owner-solutions.json"
 
 CHAPTER_SOURCE_STARTS = {
     "complexes": 30,
@@ -74,8 +75,6 @@ REVEALED_SOLUTIONS: dict[str, str | list[int]] = {
     "1.5": "all",
     "1.6": "all",
     "1.7": "all",
-    "1.8": "all",
-    "1.9": "all",
 }
 
 LI_ITEM = re.compile(r"<li\b.*?</li>", re.DOTALL)
@@ -654,10 +653,19 @@ def main() -> None:
     OUTPUT_DATA.write_text(
         json.dumps(records, ensure_ascii=False, indent=2) + "\n"
     )
+    owner_payload = {
+        exercise_id: solutions[exercise_id]
+        for exercise_id in sorted(solutions, key=lambda value: tuple(map(int, value.split("."))))
+    }
+    OWNER_SOLUTIONS_DATA.parent.mkdir(parents=True, exist_ok=True)
+    OWNER_SOLUTIONS_DATA.write_text(
+        json.dumps(owner_payload, ensure_ascii=False, indent=2) + "\n"
+    )
     print(
         f"Built {len(records)} native exercises with semantic statements "
         "and MathJax-ready solutions"
     )
+    print(f"Wrote owner solution payload to {OWNER_SOLUTIONS_DATA}")
 
 
 if __name__ == "__main__":

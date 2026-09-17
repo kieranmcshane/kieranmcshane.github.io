@@ -18,7 +18,13 @@ image_alt: "MAT101 — IMA02"
 {% assign optional_reals_pdf_url = '/assets/documents/mat101/construction_reels_courte_histoire_v2.pdf' | relative_url %}
 {% assign mat101_archive_base = '/assets/documents/mat101/archives/' | relative_url %}
 
-<div class="mat101-library">
+<div
+  class="mat101-library"
+  data-mat101-owner-access
+  data-owner-client-id="{{ site.mat101_github_oauth_client_id | default: '' | xml_escape }}"
+  data-owner-logins="{{ site.mat101_owner_github_logins | join: ',' | xml_escape }}"
+  data-owner-solutions-url="{{ '/assets/data/mat101-owner-solutions.json' | relative_url }}"
+>
   <header class="mat101-page-heading">
     <h1>Exercices MAT101</h1>
     <nav class="mat101-page-links" aria-label="Sections de la page exercices">
@@ -32,6 +38,32 @@ image_alt: "MAT101 — IMA02"
   </header>
 
   {% include mat101-informations.html %}
+
+  {% if site.mat101_github_oauth_client_id != '' %}
+  <section
+    class="mat101-owner-access"
+    id="mat101-owner-access-panel"
+    aria-labelledby="mat101-owner-access-title"
+    hidden
+  >
+    <div>
+      <p class="mat101-kicker">Accès éditeur</p>
+      <h2 id="mat101-owner-access-title">Corrigés complets</h2>
+      <p id="mat101-owner-access-status">
+        Connectez votre compte GitHub autorisé pour afficher tous les corrigés sur cette page.
+      </p>
+      <div class="mat101-owner-access-actions">
+        <button type="button" class="mat101-owner-button" id="mat101-owner-login">
+          Se connecter avec GitHub
+        </button>
+        <button type="button" class="mat101-owner-button mat101-owner-button-quiet" id="mat101-owner-logout" hidden>
+          Se déconnecter
+        </button>
+      </div>
+      <div class="mat101-owner-device-prompt" id="mat101-owner-device-prompt" hidden></div>
+    </div>
+  </section>
+  {% endif %}
 
   <div class="mat101-study-area" data-mat101-study-area>
     <nav class="mat101-toc" aria-label="Sommaire des exercices">
@@ -363,6 +395,15 @@ image_alt: "MAT101 — IMA02"
         <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
       </ul>
     </div>
+    {% elsif site.mat101_github_oauth_client_id != '' %}
+    <div class="mat101-file-group mat101-file-group-solution" id="mat101-owner-downloads" hidden>
+      <p class="mat101-file-label">Corrigé détaillé · accès éditeur</p>
+      <ul>
+        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · niveau L1</span></a></li>
+        <li><a href="{{ solution_tex_url }}" download><strong>Source LaTeX autonome</strong><span>Un seul fichier compilable</span></a></li>
+        <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
+      </ul>
+    </div>
     {% endif %}
   </section>
 
@@ -376,6 +417,11 @@ image_alt: "MAT101 — IMA02"
       </article>
       {% if site.mat101_show_solutions %}
       <article>
+        <h3>Rédaction du corrigé</h3>
+        <p><strong>Rédaction initiale assistée par OpenAI ChatGPT ; édition et publication par Kieran McShane, avec OpenAI Codex.</strong> Les encadrés « Idée et plan » s’inspirent de la méthode de George Pólya. Version du 27 juillet 2026. Il ne s’agit ni d’un corrigé officiel de l’UGA ni d’une validation institutionnelle.</p>
+      </article>
+      {% elsif site.mat101_github_oauth_client_id != '' %}
+      <article id="mat101-owner-credits" hidden>
         <h3>Rédaction du corrigé</h3>
         <p><strong>Rédaction initiale assistée par OpenAI ChatGPT ; édition et publication par Kieran McShane, avec OpenAI Codex.</strong> Les encadrés « Idée et plan » s’inspirent de la méthode de George Pólya. Version du 27 juillet 2026. Il ne s’agit ni d’un corrigé officiel de l’UGA ni d’une validation institutionnelle.</p>
       </article>

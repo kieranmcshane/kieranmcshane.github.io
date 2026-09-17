@@ -38,6 +38,7 @@
 {% endif %}
 {% if page.layout == 'mat101' and page.url == '/mat101/exercices/' %}
 <script defer src="{{ '/assets/js/mat101-library.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
+<script defer src="{{ '/assets/js/mat101-owner-access.js' | relative_url }}?v={{ site.github.build_revision }}"></script>
 {% endif %}
 {% if page.layout == 'mat101' and page.url == '/mat101/seances/' %}
 <script defer src="{{ '/assets/js/mat101-sessions.js' | relative_url }}?v={{ site.github.build_revision }}"></script>

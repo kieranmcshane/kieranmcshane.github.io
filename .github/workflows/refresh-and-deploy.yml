@@ -131,6 +131,27 @@ jobs:
         run: python -m pip install pillow
       - name: Generate social preview images
         run: python scripts/generate_social_previews.py
+      - name: Configure MAT101 editor OAuth client id
+        env:
+          MAT101_GITHUB_OAUTH_CLIENT_ID: ${{ secrets.MAT101_GITHUB_OAUTH_CLIENT_ID }}
+        run: |
+          if [ -n "${MAT101_GITHUB_OAUTH_CLIENT_ID}" ]; then
+            python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          client_id = os.environ["MAT101_GITHUB_OAUTH_CLIENT_ID"].strip()
+          path = Path("_config.yml")
+          text = path.read_text(encoding="utf-8")
+          needle = 'mat101_github_oauth_client_id: ""'
+          if needle not in text:
+              raise SystemExit("Expected empty mat101_github_oauth_client_id placeholder in _config.yml")
+          path.write_text(
+              text.replace(needle, f'mat101_github_oauth_client_id: "{client_id}"', 1),
+              encoding="utf-8",
+          )
+          PY
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
         with:
