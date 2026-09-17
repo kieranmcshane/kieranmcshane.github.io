@@ -12369,6 +12369,159 @@ body.mat101-site .mat101-library.mat101-course {
   font-weight: 700;
 }
 
+.mat101-demonstrations-intro {
+  margin: 0 0 1.5rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--mat101-line);
+  border-left: 4px solid var(--mat101-accent);
+  border-radius: 0.75rem;
+  background: var(--mat101-soft);
+}
+
+.mat101-demonstrations-intro h2 {
+  margin: 0.2rem 0 0.55rem;
+  font-size: 1.2rem;
+}
+
+.mat101-demonstrations-intro p {
+  margin: 0;
+  max-width: 62ch;
+}
+
+.mat101-demonstrations-intro p + p {
+  margin-top: 0.65rem;
+}
+
+.mat101-demonstrations-count {
+  color: var(--mat101-muted);
+  font-size: 0.95rem;
+}
+
+.mat101-demonstrations-toc {
+  display: grid;
+  gap: 1rem;
+  margin: 0 0 2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--mat101-line);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.mat101-demonstrations-toc h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+
+.mat101-demonstrations-toc h3 a {
+  color: var(--mat101-accent-dark);
+  text-decoration: none;
+}
+
+.mat101-demonstrations-toc h3 a:hover,
+.mat101-demonstrations-toc h3 a:focus-visible {
+  text-decoration: underline;
+}
+
+.mat101-demonstrations-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mat101-demonstrations-toc li + li {
+  margin-top: 0.35rem;
+}
+
+.mat101-demonstrations-toc li a {
+  color: var(--mat101-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mat101-demonstrations-toc li a:hover,
+.mat101-demonstrations-toc li a:focus-visible {
+  color: var(--mat101-accent-dark);
+  text-decoration: underline;
+}
+
+.mat101-demonstrations-toc li span {
+  display: block;
+  color: var(--mat101-muted);
+  font-size: 0.92rem;
+}
+
+.mat101-demonstrations-chapter {
+  margin: 0 0 2.25rem;
+}
+
+.mat101-demonstrations-chapter-heading {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  margin: 0 0 1rem;
+}
+
+.mat101-demonstrations-chapter-heading h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.mat101-demonstrations-chapter-heading p {
+  margin: 0.2rem 0 0;
+  color: var(--mat101-muted);
+}
+
+.mat101-demonstrations-empty {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--mat101-line);
+  border-radius: 0.65rem;
+  color: var(--mat101-muted);
+  background: #fafcfd;
+}
+
+.mat101-demonstrations-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.mat101-demonstration-card {
+  border: 1px solid var(--mat101-line);
+  border-radius: 0.85rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.mat101-demonstration-header {
+  padding: 1rem 1.1rem 0.35rem;
+}
+
+.mat101-demonstration-header h3 {
+  margin: 0.15rem 0 0;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.mat101-demonstration-card .mat101-statement,
+.mat101-demonstration-proof {
+  padding: 0 1.1rem 1rem;
+}
+
+.mat101-demonstration-proof {
+  border-top: 1px solid var(--mat101-line);
+  background: var(--mat101-solution-soft);
+}
+
+.mat101-demonstration-proof .mat101-content-heading h4 {
+  color: var(--mat101-solution);
+}
+
+@media (min-width: 760px) {
+  .mat101-demonstrations-toc {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .mat101-library > :first-child {
   margin-top: 0;
 }

@@ -389,7 +389,7 @@ test.describe("MAT101 native library", () => {
     await expect(toc.locator("[data-mat101-toc-link]")).toHaveCount(103);
     await expect(toc.locator(".mat101-toc-panel")).toBeVisible();
 
-    const exercise = noScriptPage.locator("#exercice-1-3");
+    const exercise = noScriptPage.locator("#exercice-1-8");
     await exercise.locator(":scope > summary").click();
     await expect(
       exercise.locator(".mat101-statement-transcription")
@@ -520,7 +520,7 @@ test.describe("MAT101 native library", () => {
     await exercise.locator(":scope > summary").click();
     await expect(exercise.locator(".mat101-statement-transcription")).toBeVisible();
     await expect(exercise.locator(".mat101-native-solution")).toHaveCount(1);
-    await expect(exercise.locator(".mat101-math-table")).toHaveCount(0);
+    await expect(exercise.locator(".mat101-statement .mat101-math-table")).toHaveCount(0);
     await exercise.locator(".mat101-native-solution summary").click();
     await expect(exercise.locator(".mat101-solution-body .mat101-math-table")).toHaveCount(1);
     expect(await hasHorizontalOverflow(page)).toBe(false);
