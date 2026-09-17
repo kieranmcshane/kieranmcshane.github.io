@@ -428,9 +428,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_selective_public_solutions_are_revealed_in_native_data(self):
         revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
-        self.assertEqual([item["id"] for item in revealed], ["1.1", "1.2", "1.3"])
+        revealed_ids = [f"1.{index}" for index in range(1, 10)]
+        self.assertEqual([item["id"] for item in revealed], revealed_ids)
 
-        for exercise_id in ("1.1", "1.2", "1.3"):
+        for exercise_id in revealed_ids:
             exercise = next(item for item in NATIVE if item["id"] == exercise_id)
             self.assertEqual(
                 exercise["publicSolutionHtml"],
@@ -443,7 +444,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertEqual(exercise_12["publicSolutionHtml"].count("<li>"), 6)
 
         for item in NATIVE:
-            if item["id"] not in {"1.1", "1.2", "1.3"}:
+            if item["id"] not in set(revealed_ids):
                 self.assertIsNone(item.get("publicSolutionHtml"))
 
     def test_errata_register_is_versioned_and_linked(self):

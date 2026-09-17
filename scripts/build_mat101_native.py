@@ -70,6 +70,12 @@ REVEALED_SOLUTIONS: dict[str, str | list[int]] = {
     "1.1": "all",
     "1.2": "all",
     "1.3": "all",
+    "1.4": "all",
+    "1.5": "all",
+    "1.6": "all",
+    "1.7": "all",
+    "1.8": "all",
+    "1.9": "all",
 }
 
 LI_ITEM = re.compile(r"<li\b.*?</li>", re.DOTALL)
