@@ -61,6 +61,16 @@ class Mat101DemonstrationsTests(unittest.TestCase):
         self.assertRegex(BUILDER, r'"id": "1\.3"')
         self.assertRegex(BUILDER, r'"id": "4\.14"')
 
+    def test_theorem_1_14_statement_does_not_concatenate_latex_commands(self):
+        theorem = next(
+            demo
+            for chapter in DATA["chapters"]
+            for demo in chapter["demonstrations"]
+            if demo["id"] == "1.14"
+        )
+        self.assertNotIn("\\qquadz_2", theorem["statementHtml"])
+        self.assertIn("\\qquad z_2", theorem["statementHtml"])
+
 
 if __name__ == "__main__":
     unittest.main()

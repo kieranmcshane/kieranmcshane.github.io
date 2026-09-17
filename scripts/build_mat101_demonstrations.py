@@ -123,7 +123,7 @@ DEMONSTRATIONS = {
                         " admet pour racines ",
                         m_display(
                             "z_1=\\frac{-b+\\delta}{2a}"
-                            "\\qquad\\text{et}\\qquad"
+                            "\\qquad\\text{et}\\qquad "
                             "z_2=\\frac{-b-\\delta}{2a},"
                         ),
                         " et se factorise sous la forme ",
