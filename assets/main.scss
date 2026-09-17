@@ -12486,10 +12486,10 @@ body.mat101-site .mat101-library.mat101-course {
 }
 
 .mat101-demonstration-card {
+  min-width: 0;
   border: 1px solid var(--mat101-line);
   border-radius: 0.85rem;
   background: #fff;
-  overflow: hidden;
 }
 
 .mat101-demonstration-header {
@@ -12508,8 +12508,13 @@ body.mat101-site .mat101-library.mat101-course {
 }
 
 .mat101-demonstration-proof {
+  min-width: 0;
   border-top: 1px solid var(--mat101-line);
   background: var(--mat101-solution-soft);
+}
+
+.mat101-demonstration-proof .mat101-solution-body {
+  overflow-x: auto;
 }
 
 .mat101-demonstration-proof .mat101-content-heading h4 {

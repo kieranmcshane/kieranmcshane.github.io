@@ -71,6 +71,17 @@ class Mat101DemonstrationsTests(unittest.TestCase):
         self.assertNotIn("\\qquadz_2", theorem["statementHtml"])
         self.assertIn("\\qquad z_2", theorem["statementHtml"])
 
+    def test_proposition_4_13_splits_bound_definitions_for_narrow_layouts(self):
+        proposition = next(
+            demo
+            for chapter in DATA["chapters"]
+            for demo in chapter["demonstrations"]
+            if demo["id"] == "4.13"
+        )
+        self.assertIn("M=\\max", proposition["proofHtml"])
+        self.assertIn("m=\\min", proposition["proofHtml"])
+        self.assertNotIn("M=\\max\\bigl(S\\cup\\{\\ell+1\\}\\bigr),\\qquad m=", proposition["proofHtml"])
+
 
 if __name__ == "__main__":
     unittest.main()
