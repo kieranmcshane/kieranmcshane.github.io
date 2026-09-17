@@ -12474,6 +12474,15 @@ body.mat101-site .mat101-library.mat101-course {
   margin-top: 0.25rem;
 }
 
+.mat101-informations-files {
+  margin: 0.85rem 0 0;
+}
+
+.mat101-informations-files li span {
+  color: var(--mat101-muted);
+  font-size: 0.72rem;
+}
+
 .mat101-session-notice {
   margin: -0.35rem 0 1.15rem;
   color: var(--mat101-muted);
