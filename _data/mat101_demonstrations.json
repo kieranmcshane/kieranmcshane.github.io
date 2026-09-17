@@ -1,0 +1,104 @@
+{
+  "chapters": [
+    {
+      "id": "complexes",
+      "number": "1",
+      "title": "Nombres complexes",
+      "demonstrations": [
+        {
+          "id": "1.3",
+          "kind": "proposition",
+          "label": "Proposition 1.3",
+          "subtitle": "Conjugué de la somme et du produit, module du produit",
+          "statementHtml": "<p>Soient <span class=\"math inline\">\\(z_1\\)</span> et <span class=\"math inline\">\\(z_2\\)</span> deux nombres complexes. Alors&nbsp;:</p><ol><li><span class=\"math inline\">\\(\\overline{z_1+z_2}=\\overline{z_1}+\\overline{z_2}\\)</span></li><li><span class=\"math inline\">\\(\\overline{z_1 z_2}=\\overline{z_1}\\,\\overline{z_2}\\)</span></li><li><span class=\"math inline\">\\(|z_1 z_2|=|z_1|\\,|z_2|\\)</span></li></ol>",
+          "proofHtml": "<p>On écrit <span class=\"math inline\">\\(z_1=a_1+\\mathrm ib_1\\)</span> et <span class=\"math inline\">\\(z_2=a_2+\\mathrm ib_2\\)</span> avec <span class=\"math inline\">\\(a_1,a_2,b_1,b_2\\in\\mathbb R\\)</span>.</p><ol><li><p>On a <span class=\"math display\">\\[\\overline{z_1+z_2}=\\overline{(a_1+a_2)+\\mathrm i(b_1+b_2)}=(a_1+a_2)-\\mathrm i(b_1+b_2)=(a_1-\\mathrm ib_1)+(a_2-\\mathrm ib_2)=\\overline{z_1}+\\overline{z_2}.\\]</span></p></li><li><p>On calcule <span class=\"math display\">\\[z_1 z_2=(a_1+\\mathrm ib_1)(a_2+\\mathrm ib_2)=a_1a_2-b_1b_2+\\mathrm i(a_1b_2+a_2b_1).\\]</span> Donc <span class=\"math display\">\\[\\overline{z_1 z_2}=a_1a_2-b_1b_2-\\mathrm i(a_1b_2+a_2b_1).\\]</span> D’autre part <span class=\"math display\">\\[\\overline{z_1}\\,\\overline{z_2}=(a_1-\\mathrm ib_1)(a_2-\\mathrm ib_2)=a_1a_2-b_1b_2-\\mathrm i(a_1b_2+a_2b_1).\\]</span> Ainsi <span class=\"math inline\">\\(\\overline{z_1 z_2}=\\overline{z_1}\\,\\overline{z_2}\\)</span>.</p></li><li><p>On obtient <span class=\"math display\">\\[|z_1 z_2|^2=(a_1a_2-b_1b_2)^2+(a_1b_2+a_2b_1)^2=a_1^2a_2^2+b_1^2a_2^2+a_1^2b_2^2+b_1^2b_2^2.\\]</span> Et <span class=\"math display\">\\[(|z_1|\\,|z_2|)^2=(a_1^2+b_1^2)(a_2^2+b_2^2)=a_1^2a_2^2+b_1^2a_2^2+a_1^2b_2^2+b_1^2b_2^2.\\]</span> Les deux carrés sont égaux et les modules sont positifs ou nuls, donc <span class=\"math inline\">\\(|z_1 z_2|=|z_1|\\,|z_2|\\)</span>.</p></li></ol>"
+        },
+        {
+          "id": "1.14",
+          "kind": "theorem",
+          "label": "Théorème 1.14",
+          "subtitle": "Racines des polynômes de degré 2",
+          "statementHtml": "<p>Soient <span class=\"math inline\">\\(a,b,c\\in\\mathbb C\\)</span> avec <span class=\"math inline\">\\(a\\neq0\\)</span>. Notons <span class=\"math inline\">\\(\\delta\\)</span> un nombre complexe tel que <span class=\"math inline\">\\(\\delta^2=b^2-4ac\\)</span>. Alors le polynôme <span class=\"math inline\">\\(az^2+bz+c\\)</span> admet pour racines <span class=\"math display\">\\[z_1=\\frac{-b+\\delta}{2a}\\qquad\\text{et}\\qquadz_2=\\frac{-b-\\delta}{2a},\\]</span> et se factorise sous la forme <span class=\"math inline\">\\(az^2+bz+c=a(z-z_1)(z-z_2)\\)</span>. Le discriminant est <span class=\"math inline\">\\(\\Delta=b^2-4ac\\)</span>.</p>",
+          "proofHtml": "<p>Pour tout <span class=\"math inline\">\\(z\\in\\mathbb C\\)</span>, on complète le carré&nbsp;:</p><span class=\"math display\">\\[\\begin{aligned}az^2+bz+c&=a\\left(z^2+\\frac{b}{a}z+\\frac{c}{a}\\right)\\\\&=a\\left(\\left(z+\\frac{b}{2a}\\right)^2-\\frac{\\Delta}{4a^2}\\right)\\\\&=a\\left(\\left(z+\\frac{b}{2a}\\right)^2-\\left(\\frac{\\delta}{2a}\\right)^2\\right)\\\\&=a\\left(z+\\frac{b}{2a}-\\frac{\\delta}{2a}\\right)\\left(z+\\frac{b}{2a}+\\frac{\\delta}{2a}\\right)\\\\&=a(z-z_1)(z-z_2).\\end{aligned}\\]</span><p>Un produit est nul si et seulement si l’un de ses facteurs est nul. Comme <span class=\"math inline\">\\(a\\neq0\\)</span>, on en déduit <span class=\"math display\">\\[az^2+bz+c=0\\iff z=z_1\\text{ ou }z=z_2.\\]</span></p>"
+        },
+        {
+          "id": "1.18",
+          "kind": "theorem",
+          "label": "Théorème 1.18",
+          "subtitle": "Racines n-ièmes complexes",
+          "statementHtml": "<p>Soit <span class=\"math inline\">\\(z_0=\\rho\\mathrm e^{\\mathrm i\\theta}\\)</span> un nombre complexe non nul écrit sous forme polaire et <span class=\"math inline\">\\(n\\in\\mathbb N^*\\)</span>. L’équation <span class=\"math inline\">\\(z^n=z_0\\)</span> admet pour solutions les <span class=\"math inline\">\\(n\\)</span> nombres <span class=\"math display\">\\[\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n},\\qquad k=0,1,\\ldots,n-1.\\]</span><p>En particulier, les solutions de <span class=\"math inline\">\\(z^n=1\\)</span> sont les racines <span class=\"math inline\">\\(n\\)</span>-ièmes de l’unité <span class=\"math display\">\\[\\mathrm e^{2\\mathrm ik\\pi/n},\\qquad k=0,1,\\ldots,n-1.\\]</span></p>",
+          "proofHtml": "<p>Pour <span class=\"math inline\">\\(k\\in\\{0,\\ldots,n-1\\}\\)</span>, on vérifie <span class=\"math display\">\\[\\left(\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n}\\right)^n=\\rho\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)}=\\rho\\mathrm e^{\\mathrm i\\theta}=z_0.\\]</span><p>Comme <span class=\"math inline\">\\(z_0\\neq0\\)</span>, ces <span class=\"math inline\">\\(n\\)</span> nombres sont deux à deux distincts&nbsp;: si <span class=\"math inline\">\\(k\\neq j\\)</span> dans <span class=\"math inline\">\\(\\{0,\\ldots,n-1\\}\\)</span>, alors <span class=\"math display\">\\[\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n}=\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2j\\pi)/n}\\iff \\mathrm e^{2\\mathrm i(k-j)\\pi/n}=1\\iff \\frac{k-j}{n}\\in\\mathbb Z\\iff k=j.\\]</span><p>On a ainsi <span class=\"math inline\">\\(n\\)</span> racines distinctes du polynôme <span class=\"math inline\">\\(P(z)=z^n-z_0\\)</span> de degré <span class=\"math inline\">\\(n\\)</span>, donc ce sont toutes ses racines.</p>"
+        }
+      ]
+    },
+    {
+      "id": "ensembles",
+      "number": "2",
+      "title": "Ensembles et langage mathématique",
+      "demonstrations": [],
+      "emptyMessage": "Aucune démonstration essentielle n’est retenue pour ce chapitre dans le polycopié."
+    },
+    {
+      "id": "fonctions",
+      "number": "3",
+      "title": "Fonctions et dénombrement",
+      "demonstrations": [
+        {
+          "id": "3.36",
+          "kind": "proposition",
+          "label": "Proposition 3.36",
+          "subtitle": "Formule du triangle de Pascal",
+          "statementHtml": "<p>Pour tout <span class=\"math inline\">\\(n\\in\\mathbb N\\)</span> et pour <span class=\"math inline\">\\(k\\in\\{1,\\ldots,n-1\\}\\)</span>, on a <span class=\"math display\">\\[\\binom{n}{k}=\\binom{n-1}{k-1}+\\binom{n-1}{k}.\\]</span></p>",
+          "proofHtml": "<p><strong>Justification combinatoire.</strong> Parmi <span class=\"math inline\">\\(n\\)</span> objets, on doit en choisir <span class=\"math inline\">\\(k\\)</span>. Supposons qu’un objet soit distingué (rouge). Les choix de <span class=\"math inline\">\\(k\\)</span> objets se répartissent en deux cas&nbsp;:</p><ul><li>l’objet rouge n’est pas choisi&nbsp;: on choisit <span class=\"math inline\">\\(k\\)</span> objets parmi les <span class=\"math inline\">\\(n-1\\)</span> restants, soit <span class=\"math inline\">\\(\\binom{n-1}{k}\\)</span> possibilités&nbsp;;</li><li>l’objet rouge est choisi&nbsp;: il reste <span class=\"math inline\">\\(k-1\\)</span> objets à choisir parmi les <span class=\"math inline\">\\(n-1\\)</span> autres, soit <span class=\"math inline\">\\(\\binom{n-1}{k-1}\\)</span> possibilités.</li></ul><p>En comptant toutes les possibilités, on obtient la formule annoncée.</p><p><strong>Justification calculatoire.</strong> À partir des expressions <span class=\"math inline\">\\(\\binom{n}{k}=\\dfrac{n!}{k!(n-k)!}\\)</span> et <span class=\"math inline\">\\(\\binom{n}{k}=\\dfrac{n}{k}\\binom{n-1}{k-1}\\)</span>, on calcule <span class=\"math display\">\\[\\binom{n-1}{k-1}+\\binom{n-1}{k}=\\frac{(n-1)!}{(k-1)!(n-k)!}+\\frac{(n-1)!}{k!(n-k-1)!}=\\frac{(n-1)!}{k!(n-k)!}\\,(k+n-k)=\\binom{n}{k}.\\]</span></p>"
+        },
+        {
+          "id": "3.37",
+          "kind": "theorem",
+          "label": "Théorème 3.37",
+          "subtitle": "Somme des entiers de 1 à n",
+          "statementHtml": "<p>Pour tout <span class=\"math inline\">\\(n\\geqslant1\\)</span>, la somme des <span class=\"math inline\">\\(n\\)</span> premiers entiers vaut <span class=\"math display\">\\[\\sum_{k=1}^{n}k=1+2+\\cdots+n=\\frac{n(n+1)}{2}.\\]</span></p>",
+          "proofHtml": "<p>On pose, pour <span class=\"math inline\">\\(n\\in\\mathbb N^*\\)</span>, <span class=\"math display\">\\[H(n):\\quad \\sum_{k=1}^{n}k=\\frac{n(n+1)}{2}.\\]</span><p><strong>Initialisation.</strong> Pour <span class=\"math inline\">\\(n=1\\)</span>, <span class=\"math inline\">\\(\\sum_{k=1}^{1}k=1=\\dfrac{1\\cdot2}{2}\\)</span>.</p><p><strong>Hérédité.</strong> Supposons <span class=\"math inline\">\\(H(n)\\)</span> vraie. Alors <span class=\"math display\">\\[\\sum_{k=1}^{n+1}k=\\sum_{k=1}^{n}k+(n+1)=\\frac{n(n+1)}{2}+(n+1)=\\frac{(n+1)(n+2)}{2}.\\]</span> Donc <span class=\"math inline\">\\(H(n+1)\\)</span> est vraie.</p><p><strong>Conclusion.</strong> Par récurrence, <span class=\"math inline\">\\(H(n)\\)</span> est vraie pour tout <span class=\"math inline\">\\(n\\in\\mathbb N^*\\)</span>.</p>"
+        },
+        {
+          "id": "3.38",
+          "kind": "theorem",
+          "label": "Théorème 3.38",
+          "subtitle": "Identité remarquable généralisée",
+          "statementHtml": "<p>Pour tout <span class=\"math inline\">\\(n\\in\\mathbb N\\)</span> et pour tous <span class=\"math inline\">\\(a,b\\)</span> (réels, complexes, ou plus généralement commutatifs), <span class=\"math display\">\\[a^{n+1}-b^{n+1}=(a-b)\\sum_{k=0}^{n}a^{n-k}b^k=(a-b)\\left(a^n+a^{n-1}b+\\cdots+ab^{n-1}+b^n\\right).\\]</span> On convient que <span class=\"math inline\">\\(a^0=b^0=1\\)</span>.</p>",
+          "proofHtml": "<p>On pose, pour <span class=\"math inline\">\\(n\\in\\mathbb N\\)</span>, <span class=\"math display\">\\[H(n):\\quad a^{n+1}-b^{n+1}=(a-b)\\sum_{k=0}^{n}a^{n-k}b^k.\\]</span><p><strong>Initialisation.</strong> Pour <span class=\"math inline\">\\(n=0\\)</span>, les deux membres valent <span class=\"math inline\">\\(a-b\\)</span>.</p><p><strong>Hérédité.</strong> Supposons <span class=\"math inline\">\\(H(n)\\)</span> vraie. Alors <span class=\"math display\">\\[(a-b)\\sum_{k=0}^{n+1}a^{n+1-k}b^k=a(a-b)\\sum_{k=0}^{n}a^{n-k}b^k+b^{n+1}=a(a^{n+1}-b^{n+1})+(a-b)b^{n+1}=a^{n+2}-b^{n+2}.\\]</span> Donc <span class=\"math inline\">\\(H(n+1)\\)</span> est vraie.</p><p><strong>Conclusion.</strong> Par récurrence, <span class=\"math inline\">\\(H(n)\\)</span> est vraie pour tout <span class=\"math inline\">\\(n\\in\\mathbb N\\)</span>.</p>"
+        },
+        {
+          "id": "3.40",
+          "kind": "theorem",
+          "label": "Théorème 3.40",
+          "subtitle": "Formule du binôme de Newton",
+          "statementHtml": "<p>Pour tout <span class=\"math inline\">\\(n\\geqslant1\\)</span> et pour tous <span class=\"math inline\">\\(a,b\\)</span>, <span class=\"math display\">\\[(a+b)^n=\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k}=b^n+nb^{n-1}a+\\cdots+nba^{n-1}+a^n.\\]</span></p>",
+          "proofHtml": "<p>On pose, pour <span class=\"math inline\">\\(n\\in\\mathbb N^*\\)</span>, <span class=\"math display\">\\[H(n):\\quad (a+b)^n=\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k}.\\]</span><p><strong>Initialisation.</strong> Pour <span class=\"math inline\">\\(n=1\\)</span>, <span class=\"math inline\">\\((a+b)^1=a+b\\)</span>.</p><p><strong>Hérédité.</strong> Supposons <span class=\"math inline\">\\(H(n)\\)</span> vraie. Alors <span class=\"math display\">\\[\\begin{aligned}(a+b)^{n+1}&=(a+b)(a+b)^n\\\\&=(a+b)\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k}\\\\&=\\sum_{k=0}^{n}\\binom{n}{k}a^{k+1}b^{n-k}+\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k+1}\\\\&=a^{n+1}+b^{n+1}+\\sum_{k=1}^{n}\\left(\\binom{n}{k-1}+\\binom{n}{k}\\right)a^k b^{n+1-k}\\\\&=\\sum_{k=0}^{n+1}\\binom{n+1}{k}a^k b^{n+1-k},\\end{aligned}\\]</span> en utilisant la formule du triangle de Pascal. Donc <span class=\"math inline\">\\(H(n+1)\\)</span> est vraie.</p><p><strong>Conclusion.</strong> Par récurrence, <span class=\"math inline\">\\(H(n)\\)</span> est vraie pour tout <span class=\"math inline\">\\(n\\in\\mathbb N^*\\)</span>.</p>"
+        }
+      ]
+    },
+    {
+      "id": "suites",
+      "number": "4",
+      "title": "Limites de suites",
+      "demonstrations": [
+        {
+          "id": "4.13",
+          "kind": "proposition",
+          "label": "Proposition 4.13",
+          "subtitle": "Toute suite convergente est bornée",
+          "statementHtml": "<p>Soit <span class=\"math inline\">\\((u_n)_{n\\in\\mathbb N}\\)</span> une suite convergente. Alors <span class=\"math inline\">\\((u_n)_{n\\in\\mathbb N}\\)</span> est bornée.</p>",
+          "proofHtml": "<p>Notons <span class=\"math inline\">\\(\\ell\\in\\mathbb R\\)</span> la limite de <span class=\"math inline\">\\((u_n)\\)</span>. Comme la suite converge, il existe <span class=\"math inline\">\\(n_0\\in\\mathbb N\\)</span> tel que, pour tout <span class=\"math inline\">\\(n\\geqslant n_0\\)</span>, <span class=\"math inline\">\\(u_n\\in]\\ell-1,\\ell+1[\\)</span>.</p><p>Avant le rang <span class=\"math inline\">\\(n_0\\)</span>, la suite ne prend qu’un nombre fini de valeurs. Posons <span class=\"math inline\">\\(S=\\{u_0,\\ldots,u_{n_0-1}\\}\\)</span> et <span class=\"math display\">\\[M=\\max\\bigl(S\\cup\\{\\ell+1\\}\\bigr),\\qquad m=\\min\\bigl(S\\cup\\{\\ell-1\\}\\bigr).\\]</span><p>Pour <span class=\"math inline\">\\(n\\geqslant n_0\\)</span>, on a <span class=\"math inline\">\\(\\ell-1\\leqslant u_n\\leqslant\\ell+1\\)</span>, donc <span class=\"math inline\">\\(m\\leqslant u_n\\leqslant M\\)</span>. Pour <span class=\"math inline\">\\(n\\leqslant n_0-1\\)</span>, <span class=\"math inline\">\\(u_n\\in S\\)</span>, donc encore <span class=\"math inline\">\\(m\\leqslant u_n\\leqslant M\\)</span>. La suite est bornée.</p>"
+        },
+        {
+          "id": "4.14",
+          "kind": "theorem",
+          "label": "Théorème 4.14",
+          "subtitle": "Théorème des gendarmes",
+          "statementHtml": "<p>Soient <span class=\"math inline\">\\((u_n)\\)</span>, <span class=\"math inline\">\\((v_n)\\)</span> et <span class=\"math inline\">\\((w_n)\\)</span> des suites réelles et <span class=\"math inline\">\\(\\ell\\in\\mathbb R\\)</span>. On suppose&nbsp;:</p><ol><li>il existe <span class=\"math inline\">\\(N\\in\\mathbb N\\)</span> tel que, pour tout <span class=\"math inline\">\\(n\\geqslant N\\)</span>, <span class=\"math inline\">\\(u_n\\leqslant v_n\\leqslant w_n\\)</span>&nbsp;;</li><li><span class=\"math inline\">\\((u_n)\\)</span> et <span class=\"math inline\">\\((w_n)\\)</span> convergent vers <span class=\"math inline\">\\(\\ell\\)</span>.</li></ol><p>Alors <span class=\"math inline\">\\((v_n)\\)</span> converge et <span class=\"math inline\">\\(\\lim_{n\\to\\infty} v_n=\\ell\\)</span>.</p>",
+          "proofHtml": "<p>Soit <span class=\"math inline\">\\(\\varepsilon>0\\)</span>. Par définition de la limite, il existe <span class=\"math inline\">\\(n_1\\)</span> et <span class=\"math inline\">\\(n_2\\)</span> tels que, pour <span class=\"math inline\">\\(n\\geqslant n_1\\)</span>, <span class=\"math inline\">\\(|u_n-\\ell|<\\varepsilon\\)</span>, et pour <span class=\"math inline\">\\(n\\geqslant n_2\\)</span>, <span class=\"math inline\">\\(|w_n-\\ell|<\\varepsilon\\)</span>.</p><p>Posons <span class=\"math inline\">\\(n_0=\\max(n_1,n_2,N)\\)</span>. Pour <span class=\"math inline\">\\(n\\geqslant n_0\\)</span>, on a <span class=\"math inline\">\\(u_n\\leqslant v_n\\leqslant w_n\\)</span>, donc <span class=\"math display\">\\[u_n-\\ell\\leqslant v_n-\\ell\\leqslant w_n-\\ell.\\]</span><p>Il en résulte <span class=\"math display\">\\[|v_n-\\ell|\\leqslant\\max\\bigl(|u_n-\\ell|,|w_n-\\ell|\\bigr)<\\varepsilon.\\]</span><p>Donc <span class=\"math inline\">\\((v_n)\\)</span> converge vers <span class=\"math inline\">\\(\\ell\\)</span>.</p>"
+        }
+      ]
+    }
+  ]
+}
