@@ -12517,6 +12517,21 @@ body.mat101-site .mat101-library.mat101-course {
   overflow-x: auto;
 }
 
+.mat101-demonstrations mjx-container[jax="CHTML"][display="true"] {
+  // Keep the start of a wide formula reachable when scrolling on small screens.
+  text-align: left;
+}
+
+.mat101-demonstration-card:target {
+  outline: 2px solid var(--mat101-accent);
+  outline-offset: 3px;
+}
+
+.mat101-demonstration-card,
+.mat101-demonstrations-chapter {
+  scroll-margin-top: 5rem;
+}
+
 .mat101-demonstration-proof .mat101-content-heading h4 {
   color: var(--mat101-solution);
 }

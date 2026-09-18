@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,11 +12,11 @@ OUTPUT = ROOT / "_data/mat101_demonstrations.json"
 
 
 def m_inline(tex: str) -> str:
-    return f'<span class="math inline">\\({tex}\\)</span>'
+    return f'<span class="math inline">\\({escape(tex, quote=False)}\\)</span>'
 
 
 def m_display(tex: str) -> str:
-    return f'<span class="math display">\\[{tex}\\]</span>'
+    return f'<span class="math display">\\[{escape(tex, quote=False)}\\]</span>'
 
 
 def p(*parts: str) -> str:
@@ -63,17 +64,17 @@ DEMONSTRATIONS = {
                         "<ol>",
                         "<li><p>On a ",
                         m_display(
-                            "\\overline{z_1+z_2}"
-                            "=\\overline{(a_1+a_2)+\\mathrm i(b_1+b_2)}"
-                            "=(a_1+a_2)-\\mathrm i(b_1+b_2)"
-                            "=(a_1-\\mathrm ib_1)+(a_2-\\mathrm ib_2)"
-                            "=\\overline{z_1}+\\overline{z_2}."
+                            "\\begin{aligned}\\overline{z_1+z_2}"
+                            "&=\\overline{(a_1+a_2)+\\mathrm i(b_1+b_2)}\\\\"
+                            "&=(a_1+a_2)-\\mathrm i(b_1+b_2)\\\\"
+                            "&=(a_1-\\mathrm ib_1)+(a_2-\\mathrm ib_2)\\\\"
+                            "&=\\overline{z_1}+\\overline{z_2}.\\end{aligned}"
                         ),
                         "</p></li>",
                         "<li><p>On calcule ",
                         m_display(
-                            "z_1 z_2=(a_1+\\mathrm ib_1)(a_2+\\mathrm ib_2)"
-                            "=a_1a_2-b_1b_2+\\mathrm i(a_1b_2+a_2b_1)."
+                            "\\begin{aligned}z_1 z_2&=(a_1+\\mathrm ib_1)(a_2+\\mathrm ib_2)\\\\"
+                            "&=a_1a_2-b_1b_2+\\mathrm i(a_1b_2+a_2b_1).\\end{aligned}"
                         ),
                         " Donc ",
                         m_display(
@@ -81,22 +82,23 @@ DEMONSTRATIONS = {
                         ),
                         " D’autre part ",
                         m_display(
-                            "\\overline{z_1}\\,\\overline{z_2}"
-                            "=(a_1-\\mathrm ib_1)(a_2-\\mathrm ib_2)"
-                            "=a_1a_2-b_1b_2-\\mathrm i(a_1b_2+a_2b_1)."
+                            "\\begin{aligned}\\overline{z_1}\\,\\overline{z_2}"
+                            "&=(a_1-\\mathrm ib_1)(a_2-\\mathrm ib_2)\\\\"
+                            "&=a_1a_2-b_1b_2-\\mathrm i(a_1b_2+a_2b_1).\\end{aligned}"
                         ),
                         " Ainsi ",
                         m_inline("\\overline{z_1 z_2}=\\overline{z_1}\\,\\overline{z_2}"),
                         ".</p></li>",
                         "<li><p>On obtient ",
                         m_display(
-                            "|z_1 z_2|^2=(a_1a_2-b_1b_2)^2+(a_1b_2+a_2b_1)^2"
-                            "=a_1^2a_2^2+b_1^2a_2^2+a_1^2b_2^2+b_1^2b_2^2."
+                            "\\begin{aligned}|z_1 z_2|^2"
+                            "&=(a_1a_2-b_1b_2)^2+(a_1b_2+a_2b_1)^2\\\\"
+                            "&=a_1^2a_2^2+b_1^2a_2^2+a_1^2b_2^2+b_1^2b_2^2.\\end{aligned}"
                         ),
                         " Et ",
                         m_display(
-                            "(|z_1|\\,|z_2|)^2=(a_1^2+b_1^2)(a_2^2+b_2^2)"
-                            "=a_1^2a_2^2+b_1^2a_2^2+a_1^2b_2^2+b_1^2b_2^2."
+                            "\\begin{aligned}(|z_1|\\,|z_2|)^2&=(a_1^2+b_1^2)(a_2^2+b_2^2)\\\\"
+                            "&=a_1^2a_2^2+b_1^2a_2^2+a_1^2b_2^2+b_1^2b_2^2.\\end{aligned}"
                         ),
                         " Les deux carrés sont égaux et les modules sont positifs ou nuls, donc ",
                         m_inline("|z_1 z_2|=|z_1|\\,|z_2|"),
@@ -165,7 +167,11 @@ DEMONSTRATIONS = {
                     "statementHtml": p(
                         "<p>Soit ",
                         m_inline("z_0=\\rho\\mathrm e^{\\mathrm i\\theta}"),
-                        " un nombre complexe non nul écrit sous forme polaire et ",
+                        " un nombre complexe non nul écrit sous forme polaire, avec ",
+                        m_inline("\\rho>0"),
+                        " et ",
+                        m_inline("\\theta\\in\\mathbb R"),
+                        ", et soit ",
                         m_inline("n\\in\\mathbb N^*"),
                         ". L’équation ",
                         m_inline("z^n=z_0"),
@@ -189,27 +195,30 @@ DEMONSTRATIONS = {
                         m_inline("k\\in\\{0,\\ldots,n-1\\}"),
                         ", on vérifie ",
                         m_display(
+                            "\\begin{aligned}"
                             "\\left(\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n}\\right)^n"
-                            "=\\rho\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)}"
-                            "=\\rho\\mathrm e^{\\mathrm i\\theta}=z_0."
+                            "&=\\rho\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)}\\\\"
+                            "&=\\rho\\mathrm e^{\\mathrm i\\theta}=z_0.\\end{aligned}"
                         ),
                         "</p><p>Comme ",
                         m_inline("z_0\\neq0"),
                         ", ces ",
                         m_inline("n"),
-                        " nombres sont deux à deux distincts&nbsp;: si ",
-                        m_inline("k\\neq j"),
+                        " nombres sont deux à deux distincts. En effet, pour ",
+                        m_inline("k,j"),
                         " dans ",
                         m_inline("\\{0,\\ldots,n-1\\}"),
                         ", alors ",
                         m_display(
-                            "\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n}"
+                            "\\begin{aligned}&\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2k\\pi)/n}"
                             "=\\sqrt[n]{\\rho}\\,\\mathrm e^{\\mathrm i(\\theta+2j\\pi)/n}"
-                            "\\iff \\mathrm e^{2\\mathrm i(k-j)\\pi/n}=1"
-                            "\\iff \\frac{k-j}{n}\\in\\mathbb Z"
-                            "\\iff k=j."
+                            "\\\\&\\iff \\mathrm e^{2\\mathrm i(k-j)\\pi/n}=1"
+                            "\\\\&\\iff \\frac{k-j}{n}\\in\\mathbb Z"
+                            "\\\\&\\iff k=j.\\end{aligned}"
                         ),
-                        "</p><p>On a ainsi ",
+                        " La dernière équivalence utilise ",
+                        m_inline("|k-j|<n"),
+                        ".</p><p>On a ainsi ",
                         m_inline("n"),
                         " racines distinctes du polynôme ",
                         m_inline("P(z)=z^n-z_0"),
@@ -239,7 +248,7 @@ DEMONSTRATIONS = {
                     "subtitle": "Formule du triangle de Pascal",
                     "statementHtml": p(
                         "<p>Pour tout ",
-                        m_inline("n\\in\\mathbb N"),
+                        m_inline("n\\in\\mathbb N,\\ n\\geqslant2"),
                         " et pour ",
                         m_inline("k\\in\\{1,\\ldots,n-1\\}"),
                         ", on a ",
@@ -280,11 +289,11 @@ DEMONSTRATIONS = {
                         m_inline("\\binom{n}{k}=\\dfrac{n}{k}\\binom{n-1}{k-1}"),
                         ", on calcule ",
                         m_display(
-                            "\\binom{n-1}{k-1}+\\binom{n-1}{k}"
-                            "=\\frac{(n-1)!}{(k-1)!(n-k)!}"
+                            "\\begin{aligned}\\binom{n-1}{k-1}+\\binom{n-1}{k}"
+                            "&=\\frac{(n-1)!}{(k-1)!(n-k)!}"
                             "+\\frac{(n-1)!}{k!(n-k-1)!}"
-                            "=\\frac{(n-1)!}{k!(n-k)!}\\,(k+n-k)"
-                            "=\\binom{n}{k}."
+                            "\\\\&=\\frac{(n-1)!}{k!(n-k)!}\\,(k+n-k)"
+                            "\\\\&=\\binom{n}{k}.\\end{aligned}"
                         ),
                         "</p>",
                     ),
@@ -296,7 +305,7 @@ DEMONSTRATIONS = {
                     "subtitle": "Somme des entiers de 1 à n",
                     "statementHtml": p(
                         "<p>Pour tout ",
-                        m_inline("n\\geqslant1"),
+                        m_inline("n\\in\\mathbb N^*"),
                         ", la somme des ",
                         m_inline("n"),
                         " premiers entiers vaut ",
@@ -310,6 +319,7 @@ DEMONSTRATIONS = {
                         m_inline("n\\in\\mathbb N^*"),
                         ", ",
                         m_display("H(n):\\quad \\sum_{k=1}^{n}k=\\frac{n(n+1)}{2}."),
+                        "</p>",
                         "<p><strong>Initialisation.</strong> Pour ",
                         m_inline("n=1"),
                         ", ",
@@ -319,10 +329,10 @@ DEMONSTRATIONS = {
                         m_inline("H(n)"),
                         " vraie. Alors ",
                         m_display(
-                            "\\sum_{k=1}^{n+1}k"
-                            "=\\sum_{k=1}^{n}k+(n+1)"
-                            "=\\frac{n(n+1)}{2}+(n+1)"
-                            "=\\frac{(n+1)(n+2)}{2}."
+                            "\\begin{aligned}\\sum_{k=1}^{n+1}k"
+                            "&=\\sum_{k=1}^{n}k+(n+1)\\\\"
+                            "&=\\frac{n(n+1)}{2}+(n+1)\\\\"
+                            "&=\\frac{(n+1)(n+2)}{2}.\\end{aligned}"
                         ),
                         " Donc ",
                         m_inline("H(n+1)"),
@@ -343,13 +353,14 @@ DEMONSTRATIONS = {
                         "<p>Pour tout ",
                         m_inline("n\\in\\mathbb N"),
                         " et pour tous ",
-                        m_inline("a,b"),
-                        " (réels, complexes, ou plus généralement commutatifs), ",
+                        m_inline("a,b\\in\\mathbb C"),
+                        ", ",
                         m_display(
-                            "a^{n+1}-b^{n+1}=(a-b)\\sum_{k=0}^{n}a^{n-k}b^k"
-                            "=(a-b)\\left(a^n+a^{n-1}b+\\cdots+ab^{n-1}+b^n\\right)."
+                            "a^{n+1}-b^{n+1}=(a-b)\\sum_{k=0}^{n}a^{n-k}b^k."
                         ),
-                        " On convient que ",
+                        " La somme comporte exactement ",
+                        m_inline("n+1"),
+                        " termes. On convient que ",
                         m_inline("a^0=b^0=1"),
                         ".</p>",
                     ),
@@ -361,6 +372,7 @@ DEMONSTRATIONS = {
                             "H(n):\\quad a^{n+1}-b^{n+1}"
                             "=(a-b)\\sum_{k=0}^{n}a^{n-k}b^k."
                         ),
+                        "</p>",
                         "<p><strong>Initialisation.</strong> Pour ",
                         m_inline("n=0"),
                         ", les deux membres valent ",
@@ -370,10 +382,10 @@ DEMONSTRATIONS = {
                         m_inline("H(n)"),
                         " vraie. Alors ",
                         m_display(
-                            "(a-b)\\sum_{k=0}^{n+1}a^{n+1-k}b^k"
-                            "=a(a-b)\\sum_{k=0}^{n}a^{n-k}b^k+b^{n+1}"
-                            "=a(a^{n+1}-b^{n+1})+(a-b)b^{n+1}"
-                            "=a^{n+2}-b^{n+2}."
+                            "\\begin{aligned}&(a-b)\\sum_{k=0}^{n+1}a^{n+1-k}b^k\\\\"
+                            "&=a(a-b)\\sum_{k=0}^{n}a^{n-k}b^k+(a-b)b^{n+1}\\\\"
+                            "&=a(a^{n+1}-b^{n+1})+(a-b)b^{n+1}\\\\"
+                            "&=a^{n+2}-b^{n+2}.\\end{aligned}"
                         ),
                         " Donc ",
                         m_inline("H(n+1)"),
@@ -392,14 +404,16 @@ DEMONSTRATIONS = {
                     "subtitle": "Formule du binôme de Newton",
                     "statementHtml": p(
                         "<p>Pour tout ",
-                        m_inline("n\\geqslant1"),
+                        m_inline("n\\in\\mathbb N^*"),
                         " et pour tous ",
-                        m_inline("a,b"),
+                        m_inline("a,b\\in\\mathbb C"),
                         ", ",
                         m_display(
-                            "(a+b)^n=\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k}"
-                            "=b^n+nb^{n-1}a+\\cdots+nba^{n-1}+a^n."
+                            "(a+b)^n=\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k}."
                         ),
+                        " On convient que ",
+                        m_inline("a^0=b^0=1"),
+                        ".",
                         "</p>",
                     ),
                     "proofHtml": p(
@@ -407,6 +421,7 @@ DEMONSTRATIONS = {
                         m_inline("n\\in\\mathbb N^*"),
                         ", ",
                         m_display("H(n):\\quad (a+b)^n=\\sum_{k=0}^{n}\\binom{n}{k}a^k b^{n-k}."),
+                        "</p>",
                         "<p><strong>Initialisation.</strong> Pour ",
                         m_inline("n=1"),
                         ", ",
@@ -452,7 +467,7 @@ DEMONSTRATIONS = {
                     "statementHtml": p(
                         "<p>Soit ",
                         m_inline("(u_n)_{n\\in\\mathbb N}"),
-                        " une suite convergente. Alors ",
+                        " une suite réelle convergente. Alors ",
                         m_inline("(u_n)_{n\\in\\mathbb N}"),
                         " est bornée.</p>",
                     ),
@@ -471,10 +486,13 @@ DEMONSTRATIONS = {
                         "<p>Avant le rang ",
                         m_inline("n_0"),
                         ", la suite ne prend qu’un nombre fini de valeurs. Posons ",
-                        m_inline("S=\\{u_0,\\ldots,u_{n_0-1}\\}"),
-                        " et ",
+                        m_inline("S=\\{u_k\\mid k\\in\\mathbb N,\\ k<n_0\\}"),
+                        " (ensemble vide si ",
+                        m_inline("n_0=0"),
+                        ") et ",
                         m_display("M=\\max\\bigl(S\\cup\\{\\ell+1\\}\\bigr),"),
                         m_display("m=\\min\\bigl(S\\cup\\{\\ell-1\\}\\bigr)."),
+                        " Ces deux extrema existent car les ensembles sont finis et non vides.</p>",
                         "<p>Pour ",
                         m_inline("n\\geqslant n_0"),
                         ", on a ",
@@ -482,7 +500,7 @@ DEMONSTRATIONS = {
                         ", donc ",
                         m_inline("m\\leqslant u_n\\leqslant M"),
                         ". Pour ",
-                        m_inline("n\\leqslant n_0-1"),
+                        m_inline("0\\leqslant n<n_0"),
                         ", ",
                         m_inline("u_n\\in S"),
                         ", donc encore ",
@@ -531,9 +549,9 @@ DEMONSTRATIONS = {
                         "<p>Soit ",
                         m_inline("\\varepsilon>0"),
                         ". Par définition de la limite, il existe ",
-                        m_inline("n_1"),
+                        m_inline("n_1\\in\\mathbb N"),
                         " et ",
-                        m_inline("n_2"),
+                        m_inline("n_2\\in\\mathbb N"),
                         " tels que, pour ",
                         m_inline("n\\geqslant n_1"),
                         ", ",
@@ -551,8 +569,10 @@ DEMONSTRATIONS = {
                         m_inline("u_n\\leqslant v_n\\leqslant w_n"),
                         ", donc ",
                         m_display("u_n-\\ell\\leqslant v_n-\\ell\\leqslant w_n-\\ell."),
+                        "</p>",
                         "<p>Il en résulte ",
                         m_display("|v_n-\\ell|\\leqslant\\max\\bigl(|u_n-\\ell|,|w_n-\\ell|\\bigr)<\\varepsilon."),
+                        "</p>",
                         "<p>Donc ",
                         m_inline("(v_n)"),
                         " converge vers ",

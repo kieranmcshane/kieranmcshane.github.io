@@ -11,11 +11,15 @@ image_alt: "MAT101 — IMA02"
 {% assign source_pdf_url = '/assets/documents/mat101/mat_101_20251001.pdf' | relative_url %}
 {% assign demonstrations = site.data.mat101_demonstrations.chapters %}
 {% assign total_demonstrations = 0 %}
+{% assign chapters_with_demonstrations = 0 %}
 {% for chapter in demonstrations %}
   {% assign total_demonstrations = total_demonstrations | plus: chapter.demonstrations.size %}
+  {% if chapter.demonstrations.size > 0 %}
+    {% assign chapters_with_demonstrations = chapters_with_demonstrations | plus: 1 %}
+  {% endif %}
 {% endfor %}
 
-<div class="mat101-library mat101-demonstrations" data-mat101-demonstrations>
+<div class="mat101-library mat101-demonstrations" data-mat101-demonstrations markdown="0">
   <header class="mat101-page-heading">
     <h1>Démonstrations essentielles</h1>
     <nav class="mat101-page-links" aria-label="Sections de la page démonstrations">
@@ -35,9 +39,9 @@ image_alt: "MAT101 — IMA02"
     <h2 id="mat101-demonstrations-intro-title">Preuves à maîtriser</h2>
     <p>
       Cette page rassemble les démonstrations essentielles signalées dans le polycopié officiel.
-      Les énoncés et preuves sont retranscrits pour une lecture directe en ligne.
+      Les énoncés et preuves sont adaptés pour une lecture directe en ligne, avec les coquilles corrigées.
     </p>
-    <p class="mat101-demonstrations-count">{{ total_demonstrations }} démonstrations sur 4 chapitres</p>
+    <p class="mat101-demonstrations-count">{{ total_demonstrations }} démonstrations dans {{ chapters_with_demonstrations }} chapitres du cours</p>
   </section>
 
   <nav class="mat101-demonstrations-toc" aria-label="Sommaire des démonstrations">
