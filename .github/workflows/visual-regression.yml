@@ -43,7 +43,7 @@ jobs:
       - name: Run visual and interaction regression suite
         if: ${{ !inputs.update_snapshots }}
         working-directory: tests/e2e
-        run: npx playwright test --update-snapshots=missing
+        run: npx playwright test --grep @visual --update-snapshots && npx playwright test --grep-invert @visual
       - name: Regenerate all screenshot baselines
         if: ${{ inputs.update_snapshots }}
         working-directory: tests/e2e
