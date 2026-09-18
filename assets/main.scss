@@ -1,6 +1,12 @@
 ---
 ---
 
+$base-font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$header-font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$code-font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+$base-font-size: 16px;
+$base-line-height: 1.6;
+
 @import "minima";
 
 :root {
@@ -8,6 +14,16 @@
   --muted: #5d6778;
   --accent: #3157c8;
   --soft: #f3f6ff;
+  --font-sans: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-body: 1rem;
+  --text-lead: 1.125rem;
+  --text-small: 0.875rem;
+  --leading-body: 1.6;
+  --leading-prose: 1.72;
+  --tracking-tight: -0.02em;
+  --tracking-display: -0.035em;
 }
 
 /* About and contact */
@@ -109,7 +125,7 @@
 
 .rating-lab-filter-sheet {
   color: var(--lab-navy);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .rating-lab-probability::before,
@@ -660,7 +676,7 @@ body:has(.proof-game) .site-footer {
   max-width: 1060px;
   margin: 1.5rem auto 5rem;
   color: var(--game-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   line-height: 1.55;
 }
@@ -710,7 +726,7 @@ body:has(.proof-game) .site-footer {
 .game-hero h1 {
   max-width: 17ch;
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(2.3rem, 5.5vw, 4.3rem);
   font-weight: 500;
   line-height: 0.99;
@@ -721,7 +737,7 @@ body:has(.proof-game) .site-footer {
   max-width: 62ch;
   margin: 1.35rem 0 0;
   color: #394457;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.12rem;
 }
 
@@ -745,7 +761,7 @@ body:has(.proof-game) .site-footer {
 
 .game-hero-status strong {
   color: var(--game-teal-dark);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 2.1rem;
   font-weight: 500;
 }
@@ -804,7 +820,7 @@ body:has(.proof-game) .site-footer {
 
 .game-section-heading h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(1.9rem, 4vw, 2.8rem);
   font-weight: 500;
 }
@@ -897,7 +913,7 @@ body:has(.proof-game) .site-footer {
 }
 
 .game-map button strong {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.15rem;
   font-weight: 500;
 }
@@ -990,7 +1006,7 @@ body:has(.proof-game) .site-footer {
 }
 
 .mission-meta strong {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 500;
 }
@@ -1137,7 +1153,7 @@ body:has(.proof-game) .site-footer {
 
 .mission-goal strong {
   overflow-wrap: anywhere;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-weight: 500;
 }
 
@@ -1267,7 +1283,7 @@ body:has(.proof-game) .site-footer {
 
 .mission-complete h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.8rem;
   font-weight: 500;
 }
@@ -1292,7 +1308,7 @@ body:has(.proof-game) .site-footer {
 
 .return-summary div + div { border-left: 1px solid var(--game-line); }
 .return-summary span { color: var(--game-muted); font-size: 0.76rem; }
-.return-summary strong { font-family: Georgia, "Times New Roman", serif; font-size: 1.45rem; font-weight: 500; }
+.return-summary strong { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 500; }
 
 .return-encounter {
   max-width: 760px;
@@ -1305,7 +1321,7 @@ body:has(.proof-game) .site-footer {
 
 .return-encounter h3 {
   margin: 0 0 1.1rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.4rem;
   font-weight: 500;
 }
@@ -1569,6 +1585,12 @@ body:has(.proof-game) .site-footer {
 body {
   color: var(--ink);
   background: #fdfdfd;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .wrapper {
@@ -1584,14 +1606,14 @@ body {
 
 .post-title {
   line-height: 1.12;
-  letter-spacing: -0.035em;
+  letter-spacing: var(--tracking-display);
 }
 
 .post-subtitle {
   max-width: 42rem;
   margin: 0.7rem 0 0;
   color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 1.12rem;
   line-height: 1.45;
 }
@@ -1606,7 +1628,9 @@ body {
   margin-right: auto;
   margin-left: auto;
   color: #1c2432;
-  font-family: Charter, "Bitstream Charter", "Iowan Old Style", Cambria, Georgia, serif;
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: var(--leading-prose);
 }
 
 .post.h-entry > .post-content h2,
@@ -1615,7 +1639,8 @@ body {
 .post.h-entry > .post-content table,
 .post.h-entry > .post-content .notation-glossary,
 .post.h-entry > .post-content .explain-article-cta {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-tight);
 }
 
 html.math-pending .post-content {
@@ -1745,7 +1770,7 @@ html.math-pending .post-content {
 .source-facsimile figcaption {
   margin-top: 0.7rem;
   color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.86rem;
   line-height: 1.5;
 }
@@ -1928,7 +1953,7 @@ body:has(.longform-post) .post-header {
 body:has(.correction-post) .post-meta,
 body:has(.longform-post) .post-meta {
   margin-top: 0.85rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.82rem;
   letter-spacing: 0.02em;
 }
@@ -1938,9 +1963,9 @@ body:has(.longform-post) .post-meta {
   max-width: 68ch;
   margin: 0 auto;
   color: #1c2432;
-  font-family: Charter, "Bitstream Charter", "Iowan Old Style", Cambria, Georgia, serif;
-  font-size: 18px;
-  line-height: 1.72;
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: var(--leading-prose);
 }
 
 .correction-post p,
@@ -1962,7 +1987,7 @@ body:has(.longform-post) .post-meta {
 .longform-toc,
 .notation-glossary,
 .question-anchor {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .correction-deck {
@@ -2236,7 +2261,7 @@ body:has(.longform-post) .post-meta {
   margin: 1.6rem 0 2rem;
   overflow-x: auto;
   border-collapse: collapse;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   line-height: 1.45;
 }
@@ -2379,7 +2404,7 @@ body:has(.longform-post) .post-meta {
 
 .correction-post .intuition strong {
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .correction-post .scope-note {
@@ -2398,7 +2423,7 @@ body:has(.longform-post) .post-meta {
 .correction-post .proof-supplement summary,
 .correction-post .proof-supplement h4 {
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .correction-post .proof-supplement {
@@ -2453,7 +2478,7 @@ body:has(.longform-post) .post-meta {
 .correction-post .formalization-eyebrow {
   margin: 0 0 0.45rem;
   color: var(--accent);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.76rem;
   font-weight: 750;
   line-height: 1.3;
@@ -2465,7 +2490,7 @@ body:has(.longform-post) .post-meta {
 }
 
 .correction-post .formalization-link {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.92rem;
   font-weight: 680;
   text-underline-offset: 0.2em;
@@ -2482,7 +2507,7 @@ body:has(.longform-post) .post-meta {
   width: fit-content;
   color: var(--muted);
   cursor: pointer;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 620;
 }
@@ -2678,7 +2703,7 @@ body:has(.longform-post) .post-meta {
 .fsrs-review-card h3 {
   max-width: 34ch;
   margin: 1.2rem 0 1.4rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.75rem;
   font-weight: 500;
   line-height: 1.3;
@@ -2744,7 +2769,7 @@ body:has(.longform-post) .post-meta {
 }
 
 .fsrs-empty strong {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.55rem;
   font-weight: 500;
 }
@@ -2819,7 +2844,7 @@ body:has(.longform-post) .post-meta {
 
 .diagnosis-list article > p {
   margin: 0 0 0.9rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.1rem;
   line-height: 1.55;
 }
@@ -2850,7 +2875,7 @@ body:has(.longform-post) .post-meta {
 
 .explanation-builder h3 {
   margin: 0.25rem 0 0.8rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.3rem;
   font-weight: 500;
 }
@@ -2874,7 +2899,7 @@ body:has(.longform-post) .post-meta {
 }
 
 .assembled-explanation > p:not(.explain-kicker) {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.06rem;
   line-height: 1.65;
 }
@@ -2959,7 +2984,7 @@ body:has(.rating-lab) .post-content {
   --lab-positive: #27704e;
   --lab-negative: #a0443e;
   color: var(--lab-navy);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .rating-lab-hero {
@@ -3043,7 +3068,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-local-nav strong {
   color: #77818a;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
 }
 
@@ -3069,7 +3094,7 @@ body:has(.rating-lab) .post-content {
   background: #fff;
   border: 1px solid var(--lab-line);
   border-radius: 999px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 500;
 }
@@ -3089,7 +3114,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-generation {
   margin: 0.55rem 0 0;
   color: #77756e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -3130,7 +3155,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-section-heading p {
   color: #6d6b64;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.9rem;
 }
 
@@ -3174,7 +3199,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-control-label,
 .rating-lab-field span {
   color: #626f79;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -3404,7 +3429,7 @@ body:has(.rating-lab) .post-content {
   width: fit-content;
   padding: 0.45rem 0 0.65rem;
   color: #596771;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
@@ -3418,7 +3443,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-inspector-label {
   margin: 0 0 0.45rem;
   color: #6d6b64;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -3746,7 +3771,7 @@ body:has(.rating-lab) .post-content {
   border: 1px solid rgba(29, 37, 46, 0.12);
   border-radius: 50%;
   place-items: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.66rem;
   font-weight: 750;
   letter-spacing: -0.02em;
@@ -3926,7 +3951,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-chart text {
   fill: #77756e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
 }
 
@@ -4045,7 +4070,7 @@ body:has(.rating-lab) .post-content {
   min-height: 1.25rem;
   margin: 0.2rem 0 0;
   color: #6d6b64;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -4178,7 +4203,7 @@ body:has(.rating-lab) .post-content {
   display: flex;
   justify-content: space-between;
   color: #77756e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
 }
 
@@ -4242,7 +4267,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-research > h2 {
   max-width: 760px;
   margin: 0 0 0.8rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(1.8rem, 3vw, 2.5rem);
   font-weight: 500;
   letter-spacing: -0.035em;
@@ -4603,7 +4628,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-disclosure > summary::after {
   color: var(--lab-secondary);
   content: "+";
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 1.15rem;
 }
 
@@ -4620,7 +4645,7 @@ body:has(.rating-lab) .post-content {
 }
 
 .rating-lab-disclosure > summary strong {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.15rem;
   font-weight: 500;
 }
@@ -4644,7 +4669,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-support h2 {
   margin: 0 0 0.35rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.55rem;
   font-weight: 500;
   letter-spacing: -0.025em;
@@ -4703,7 +4728,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-contribution-methods h3,
 .rating-lab-readiness h3 {
   margin: 0.2rem 0 0.55rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 500;
 }
@@ -4711,7 +4736,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-method-tag {
   margin: 0;
   color: #536176;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -4846,7 +4871,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-matchup-context span {
   color: #667387;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -4929,7 +4954,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-outcome-cards small {
   color: #788394;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
 }
 
@@ -5045,7 +5070,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-protocol-status span {
   color: #6d6b64;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -5081,13 +5106,13 @@ body:has(.rating-lab) .post-content {
   background: var(--lab-navy);
   border-radius: 50%;
   place-items: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
 }
 
 .rating-lab-protocol-flow h3 {
   margin: 0 0 0.35rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1rem;
   font-weight: 500;
 }
@@ -5114,7 +5139,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-protocol-grid h3,
 .rating-lab-protocol-evaluation h3 {
   margin: 0 0 0.65rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.15rem;
   font-weight: 500;
 }
@@ -5196,7 +5221,7 @@ body:has(.rating-lab) .post-content {
 
 .rating-lab-protocol-evaluation > div span {
   color: #676a63;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -5986,7 +6011,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab-equation {
   overflow-x: auto;
   color: var(--lab-navy) !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.91rem;
   white-space: nowrap;
 }
@@ -6117,7 +6142,7 @@ body:has(.rating-lab) .post-content {
 .rating-lab h3,
 .rating-lab h4,
 .rating-lab-disclosure > summary strong {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 @media (max-width: 920px) {
@@ -6369,7 +6394,7 @@ body:has(.rating-lab) .post-content {
     align-items: center;
     padding: 0.55rem 0;
     color: #596771;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.78rem;
     font-weight: 700;
     cursor: pointer;
@@ -6740,7 +6765,7 @@ body:has(.explain-lab) .post-header {
   max-width: 980px;
   margin: 0 auto 5rem;
   color: var(--explain-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   line-height: 1.58;
 }
@@ -6779,7 +6804,7 @@ body:has(.explain-lab) .post-header {
 .explain-hero h1 {
   max-width: 16ch;
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(2.35rem, 6vw, 4.4rem);
   font-weight: 500;
   line-height: 0.98;
@@ -6790,7 +6815,7 @@ body:has(.explain-lab) .post-header {
   max-width: 62ch;
   margin: 1.4rem 0 1.6rem;
   color: #394457;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.18rem;
   line-height: 1.6;
 }
@@ -6962,7 +6987,7 @@ body:has(.explain-lab) .post-header {
 
 .explain-stage-heading h2 {
   margin: 0.2rem 0 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 2rem;
   font-weight: 500;
   line-height: 1.12;
@@ -7150,7 +7175,7 @@ body:has(.explain-lab) .post-header {
   border: 1px solid #bcc8d6;
   border-radius: 5px;
   background: #fcfdfe;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   text-align: center;
 }
@@ -7334,7 +7359,7 @@ body:has(.explain-lab) .post-header {
 
 .bound-challenge h3 {
   margin: 1.15rem 0 0.75rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: 500;
 }
@@ -7577,7 +7602,7 @@ body:has(.explain-lab) .post-header {
 
 .teach-back-card h3 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 500;
 }
@@ -7697,7 +7722,7 @@ body:has(.explain-lab) .post-header {
   max-width: 27ch;
   margin: 1rem 0 1.8rem;
   color: #fff;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 2rem;
   font-weight: 500;
   line-height: 1.25;
@@ -7836,7 +7861,7 @@ body:has(.explain-lab) .post-header {
 
 .explain-readiness h2 {
   margin: 0.2rem 0 0.8rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.8rem;
   font-weight: 500;
   line-height: 1.25;
@@ -8138,7 +8163,7 @@ body:has(.explain-lab) .post-header {
 .player-lab-explorer h2,
 .player-lab-audit > h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(1.8rem, 3vw, 2.5rem);
   font-weight: 500;
   letter-spacing: -0.035em;
@@ -8175,7 +8200,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-lapm-combinations h3 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 500;
 }
@@ -8252,7 +8277,7 @@ body:has(.explain-lab) .post-header {
 }
 
 .player-lab-lapm-lists strong {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
 }
 
@@ -8335,7 +8360,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-comparison-heading h3 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.45rem;
   font-weight: 500;
 }
@@ -8434,7 +8459,7 @@ body:has(.explain-lab) .post-header {
 .player-lab-chart-key {
   margin: 0 0 0.45rem;
   color: #6b7687;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.64rem;
   letter-spacing: 0.025em;
 }
@@ -8480,7 +8505,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-chart-frame text {
   fill: #647185;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   text-anchor: middle;
 }
@@ -8686,7 +8711,7 @@ body:has(.explain-lab) .post-header {
   padding-top: 0.25rem;
   border-top: 1px solid #e1e3e6;
   color: #5b687b;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   text-transform: uppercase;
 }
@@ -8737,7 +8762,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-detail h3 {
   margin: 0 0 0.35rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -8761,7 +8786,7 @@ body:has(.explain-lab) .post-header {
 .player-lab-detail-model strong {
   grid-column: 2;
   grid-row: 1 / span 2;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 500;
 }
@@ -8789,7 +8814,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-partnership-detail > div > span {
   color: #627084;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.025em;
@@ -8850,7 +8875,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-model-hierarchy h3 {
   margin: 0.12rem 0 0.4rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: 500;
 }
@@ -8896,7 +8921,7 @@ body:has(.explain-lab) .post-header {
 
 .player-lab-method-copy h3 {
   margin: 0 0 0.35rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: 1.2rem;
   font-weight: 500;
 }
@@ -8905,7 +8930,7 @@ body:has(.explain-lab) .post-header {
   display: block;
   margin-top: 0.18rem;
   color: #697588;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -9470,7 +9495,7 @@ body:has(.explain-lab) .post-header {
 .player-lab h2,
 .player-lab h3,
 .player-lab h4 {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 @media (max-width: 650px) {
@@ -10391,7 +10416,7 @@ body:has(.explain-lab) .post-header {
     bottom: calc(60px + env(safe-area-inset-bottom));
     display: flex;
     justify-content: flex-end;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-sans);
   }
 
   .rating-lab-quick-model[hidden] {
@@ -11269,6 +11294,7 @@ body:has(.explain-lab) .post-header {
 }
 
 .mat101-library {
+  font-family: var(--font-sans);
   --mat101-ink: #172033;
   --mat101-muted: #5d6778;
   --mat101-accent: #006f7b;
@@ -11286,6 +11312,7 @@ body:has(.explain-lab) .post-header {
 
 // Répertoire raisonné: a compact, method-first reading room for the PDF corpus.
 .repertoire-library {
+  font-family: var(--font-sans);
   --repertoire-ink: #171c2d;
   --repertoire-muted: #606677;
   --repertoire-accent: #5b356f;
@@ -13415,9 +13442,9 @@ body.mat101-site .mat101-library.mat101-course {
   border-radius: 4px;
   color: #202a34;
   background: #fff;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(1rem, 1.5vw, 1.08rem);
-  line-height: 1.62;
+  line-height: 1.68;
 }
 
 .mat101-statement-transcription p {
@@ -14892,7 +14919,7 @@ body:has(.mat101-session-page) {
   border-radius: 4px;
   color: #202a34;
   background: #fff;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: clamp(1rem, 1.5vw, 1.08rem);
   line-height: 1.62;
   overflow-x: auto;
@@ -15001,7 +15028,7 @@ body:has(.mat101-session-page) {
 .mat101-optional-question-body {
   margin-top: 0.65rem;
   color: #202a34;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-size: inherit;
   line-height: 1.62;
 }

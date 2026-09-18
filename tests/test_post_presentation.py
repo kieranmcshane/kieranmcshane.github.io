@@ -6,7 +6,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 ARTICLE = (ROOT / "_posts/2026-07-17-centered-correlation-tensors-separability.md").read_text()
 FLOW = (ROOT / "assets/images/centered-correlation-flow.svg").read_text()
-HEAD = (ROOT / "_includes/head-custom.html").read_text()
+HEAD = (ROOT / "_includes/head.html").read_text()
+HEAD_CUSTOM = (ROOT / "_includes/head-custom.html").read_text()
+FONTS = (ROOT / "_includes/fonts.html").read_text()
 LAYOUT = (ROOT / "_layouts/post.html").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
 
@@ -19,8 +21,9 @@ class PostPresentationTests(unittest.TestCase):
 
     def test_math_posts_hide_raw_tex_until_mathjax_is_ready(self):
         self.assertIn("math: true", ARTICLE)
-        self.assertIn("document.documentElement.classList.add('math-pending')", HEAD)
-        self.assertIn("MathJax.startup.defaultPageReady()", HEAD)
+        self.assertIn('include fonts.html', HEAD)
+        self.assertIn("document.documentElement.classList.add('math-pending')", HEAD_CUSTOM)
+        self.assertIn("MathJax.startup.defaultPageReady()", HEAD_CUSTOM)
         self.assertIn("html.math-pending .post-content", STYLES)
 
     def test_display_math_and_tables_scroll_inside_article_width(self):
@@ -38,7 +41,11 @@ class PostPresentationTests(unittest.TestCase):
             STYLES,
             r"\.post\.h-entry > \.post-content[\s\S]*?max-width: 68ch;",
         )
-        self.assertIn('font-family: Charter, "Bitstream Charter"', STYLES)
+        self.assertIn("--font-serif:", STYLES)
+        self.assertIn("Source Serif 4", STYLES)
+        self.assertIn("Source+Sans+3", FONTS)
+        self.assertIn("Source+Serif+4", FONTS)
+        self.assertIn("IBM+Plex+Mono", FONTS)
 
     def test_figure_captions_use_semantic_markup(self):
         self.assertEqual(ARTICLE.count('<figure class="post-figure">'), 2)
