@@ -26,6 +26,7 @@ SOLUTION_ARCHIVE = ROOT / "assets/documents/mat101/corrige-exercices-mat101-sour
 OPTIONAL_REALS_PDF = (
     ROOT / "assets/documents/mat101/construction_reels_courte_histoire_v2.pdf"
 )
+QCM_SEANCES_PDF = ROOT / "assets/documents/mat101/sujet-qcm-seances-1-3-mat101.pdf"
 ARCHIVES_DIR = ROOT / "assets/documents/mat101/archives"
 ARCHIVES = json.loads((ROOT / "_data/mat101_archives.json").read_text())
 BIB = ROOT / "assets/documents/mat101/mat101-citations.bib"
@@ -331,6 +332,10 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn('id="mat101-optional-title">Facultatif</h2>', PAGE)
         self.assertIn("Construction de R par les suites de Cauchy", PAGE)
         self.assertIn("construction_reels_courte_histoire_v2.pdf", PAGE)
+        self.assertIn("qcm_seances_pdf_url", PAGE)
+        self.assertIn("sujet-qcm-seances-1-3-mat101.pdf", PAGE)
+        self.assertIn("Sujet QCM séances 1–3", PAGE)
+        self.assertNotIn("Corrigé QCM séances 1–3", PAGE)
         self.assertIn('href="#facultatif">Facultatif</a>', PAGE)
         self.assertIn('href="#annales">Annales</a>', PAGE)
         self.assertIn("include mat101-archives.html", PAGE)
@@ -398,6 +403,16 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertTrue(OPTIONAL_REALS_PDF.is_file())
         self.assertTrue(OPTIONAL_REALS_PDF.read_bytes().startswith(b"%PDF-"))
         self.assertGreater(OPTIONAL_REALS_PDF.stat().st_size, 100_000)
+
+    def test_qcm_seances_1_3_sujet_pdf_is_available_without_corrige(self):
+        self.assertTrue(QCM_SEANCES_PDF.is_file())
+        self.assertTrue(QCM_SEANCES_PDF.read_bytes().startswith(b"%PDF-"))
+        self.assertGreater(QCM_SEANCES_PDF.stat().st_size, 10_000)
+        self.assertFalse(
+            (
+                ROOT / "assets/documents/mat101/corrige-qcm-seances-1-3-mat101.pdf"
+            ).exists()
+        )
 
     def test_optional_reals_native_problem_include_has_twelve_questions(self):
         include = (ROOT / "_includes/mat101-optional-reals-problem.html").read_text()
