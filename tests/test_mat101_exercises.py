@@ -428,7 +428,7 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
 
     def test_selective_public_solutions_are_revealed_in_native_data(self):
         revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
-        revealed_ids = [f"1.{index}" for index in range(1, 8)]
+        revealed_ids = [f"1.{index}" for index in range(1, 21)]
         self.assertEqual([item["id"] for item in revealed], revealed_ids)
 
         for exercise_id in revealed_ids:
