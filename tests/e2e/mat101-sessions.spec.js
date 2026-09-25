@@ -22,6 +22,12 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(
       page.locator('a[href$="parcours-19-seances-mat101-ima02.pdf"]')
     ).toHaveCount(0);
+    const qcmLink = page.locator(
+      'a[href$="sujet-qcm-seances-1-3-mat101.pdf"]'
+    );
+    await expect(qcmLink).toHaveCount(1);
+    await expect(qcmLink).toContainText("Sujet QCM séances 1–3");
+    await expect(qcmLink).not.toContainText("Corrigé");
     await expect(
       page.locator('[data-session-number="18"] .mat101-session-date-state.is-pending')
     ).toContainText("À confirmer");

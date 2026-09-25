@@ -199,6 +199,12 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertIn("Contrôle continu", INFORMATIONS)
         self.assertIn("12 h 30 à 13 h 30", INFORMATIONS)
         self.assertIn(".mat101-informations", STYLES)
+        self.assertIn(".mat101-informations-files", STYLES)
+        self.assertIn("Sujet QCM séances 1–3", INFORMATIONS)
+        self.assertIn("sujet-qcm-seances-1-3-mat101.pdf", INFORMATIONS)
+        self.assertIn("15 questions · 20 minutes", INFORMATIONS)
+        self.assertNotIn("Corrigé QCM", INFORMATIONS)
+        self.assertNotIn("corrige-qcm", INFORMATIONS.casefold())
         self.assertNotIn('class="mat101-page-links"', PAGE)
         self.assertNotIn("Feuille de route", PAGE)
         self.assertNotIn("parcours-19-seances-mat101-ima02.pdf", PAGE)
@@ -329,6 +335,29 @@ class Mat101SessionsTests(unittest.TestCase):
             self.assertRegex(
                 item["url"], rf"^/mat101/seances/{item['number']:02d}-[^/]+/$"
             )
+
+    def test_qcm_seances_1_3_sujet_pdf_is_public_without_corrige(self):
+        sujet = (
+            ROOT
+            / "assets"
+            / "documents"
+            / "mat101"
+            / "sujet-qcm-seances-1-3-mat101.pdf"
+        )
+        self.assertTrue(sujet.is_file())
+        self.assertTrue(sujet.read_bytes().startswith(b"%PDF"))
+        self.assertGreater(sujet.stat().st_size, 10_000)
+        self.assertFalse(
+            (
+                ROOT
+                / "assets"
+                / "documents"
+                / "mat101"
+                / "corrige-qcm-seances-1-3-mat101.pdf"
+            ).exists()
+        )
+        self.assertIn("download", INFORMATIONS)
+        self.assertIn("Nombres complexes", INFORMATIONS)
 
 
 if __name__ == "__main__":

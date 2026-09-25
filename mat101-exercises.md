@@ -16,6 +16,7 @@ image_alt: "MAT101 — IMA02"
 {% assign solution_tex_url = '/assets/documents/mat101/corrige-exercices-mat101.tex' | relative_url %}
 {% assign solution_archive_url = '/assets/documents/mat101/corrige-exercices-mat101-sources.zip' | relative_url %}
 {% assign optional_reals_pdf_url = '/assets/documents/mat101/construction_reels_courte_histoire_v2.pdf' | relative_url %}
+{% assign qcm_seances_pdf_url = '/assets/documents/mat101/sujet-qcm-seances-1-3-mat101.pdf' | relative_url %}
 {% assign mat101_archive_base = '/assets/documents/mat101/archives/' | relative_url %}
 
 <div
@@ -383,6 +384,13 @@ image_alt: "MAT101 — IMA02"
       <p class="mat101-file-label">Facultatif</p>
       <ul>
         <li><a href="{{ optional_reals_pdf_url }}" download><strong>Construction de R</strong><span>Suites de Cauchy · 3 pages · énoncé seul</span></a></li>
+      </ul>
+    </div>
+
+    <div class="mat101-file-group">
+      <p class="mat101-file-label">QCM</p>
+      <ul>
+        <li><a href="{{ qcm_seances_pdf_url }}" download><strong>Sujet QCM séances 1–3</strong><span>Nombres complexes · 15 questions · 20 minutes</span></a></li>
       </ul>
     </div>
 
