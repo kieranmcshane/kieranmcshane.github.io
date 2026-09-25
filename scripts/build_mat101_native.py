@@ -68,13 +68,7 @@ EXERCISE_DIFFICULTIES = {
 # Public corrigés revealed while mat101_show_solutions stays false.
 # Use "all" for the full solution, or a list of 1-based question numbers.
 REVEALED_SOLUTIONS: dict[str, str | list[int]] = {
-    "1.1": "all",
-    "1.2": "all",
-    "1.3": "all",
-    "1.4": "all",
-    "1.5": "all",
-    "1.6": "all",
-    "1.7": "all",
+    **{f"1.{index}": "all" for index in range(1, 21)},
 }
 
 LI_ITEM = re.compile(r"<li\b.*?</li>", re.DOTALL)
