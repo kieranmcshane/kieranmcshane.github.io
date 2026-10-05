@@ -1,0 +1,22 @@
+{% assign mat101_resource_base = '/assets/documents/mat101/' | relative_url %}
+<section class="mat101-resources mat101-downloads" id="documents" aria-labelledby="mat101-resources-title">
+  <div class="mat101-download-intro">
+    <h2 id="mat101-resources-title">Documents</h2>
+  </div>
+
+  {% for group in site.data.mat101_resources.groups %}
+    <div class="mat101-file-group">
+      <p class="mat101-file-label">{{ group.title }}</p>
+      <ul>
+        {% for item in group.items %}
+          <li>
+            <a href="{{ mat101_resource_base }}{{ item.file }}" target="_blank" rel="noopener">
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.meta }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</section>

@@ -91,4 +91,6 @@ image_alt: "MAT101 — IMA02"
       </li>
     {% endfor %}
   </ol>
+
+  {% include mat101-resources.html %}
 </div>

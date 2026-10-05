@@ -11,7 +11,7 @@
         {% for item in group.items %}
           <li>
             {% if item.file %}
-              <a href="{{ mat101_archive_base }}{{ item.file }}" download>
+              <a href="{{ mat101_archive_base }}{{ item.file }}" target="_blank" rel="noopener">
                 <strong>{{ item.label }}</strong>
                 <span>{{ item.meta }}</span>
               </a>

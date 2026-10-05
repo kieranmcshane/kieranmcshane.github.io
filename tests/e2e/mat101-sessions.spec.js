@@ -37,6 +37,30 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(page.locator('[data-session-number="13"]')).toContainText("DLST E201");
     await expect(page.locator('[data-session-number="2"]')).toContainText("DLST B007");
     await expect(page.locator('[data-session-number="3"]')).toContainText("DLST D104");
+    const documents = page.locator("#documents");
+    await expect(documents.locator("h2")).toHaveText("Documents");
+    await expect(documents.getByRole("link", { name: /Bonus 1/ })).toHaveAttribute(
+      "href",
+      /interrogation-bonus-1-sujet\.pdf$/
+    );
+    await expect(documents.getByRole("link", { name: /Bonus 2/ })).toHaveAttribute(
+      "href",
+      /interrogation-bonus-2-2026-09-22-sujet\.pdf$/
+    );
+    await expect(documents.getByRole("link", { name: /Bonus 3/ })).toHaveAttribute(
+      "href",
+      /interrogation-bonus-3-2026-09-29-sujet\.pdf$/
+    );
+    await expect(
+      documents.getByRole("link", { name: /Interrogation du 2 octobre 2026/ })
+    ).toHaveAttribute("href", /interrogation-2026-10-02-sujet\.pdf$/);
+    await expect(
+      documents.getByRole("link", { name: /29 méthodes avec exemples corrigés/ })
+    ).toHaveAttribute("href", /nombres-complexes-29-methodes\.pdf$/);
+    await expect(
+      documents.getByRole("link", { name: /De la logique à Tetris/ })
+    ).toHaveAttribute("href", /fiche-nand\.pdf$/);
+    await expect(documents.getByText("Afficher le corrigé")).toHaveCount(0);
     await expect(page.locator(".mat101-course-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-course-status")).toHaveCount(0);
     await expect(page.getByText("19 séances pour progresser en MAT101")).toHaveCount(0);

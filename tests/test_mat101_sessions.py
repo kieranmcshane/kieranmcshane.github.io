@@ -334,6 +334,78 @@ class Mat101SessionsTests(unittest.TestCase):
                 }
             )
 
+    def test_student_resources_are_linked_from_the_seances_page(self):
+        resources = json.loads(
+            (ROOT / "_data" / "mat101_resources.json").read_text(encoding="utf-8")
+        )
+        include = (ROOT / "_includes" / "mat101-resources.html").read_text(encoding="utf-8")
+        archives = json.loads(
+            (ROOT / "_data" / "mat101_archives.json").read_text(encoding="utf-8")
+        )
+        self.assertIn("include mat101-resources.html", PAGE)
+        self.assertIn('id="documents"', include)
+        self.assertIn("site.data.mat101_resources", include)
+        self.assertIn('id="mat101-resources-title">Documents</h2>', include)
+        self.assertNotIn("Afficher le corrigé", include)
+        self.assertNotIn("corrige-exercices", include)
+        self.assertNotIn("mat101_resources", (ROOT / "_data" / "mat101_archives.json").read_text())
+        archive_files = [
+            item.get("file")
+            for group in archives["groups"]
+            for item in group.get("items", [])
+        ]
+        self.assertEqual(
+            sorted(archive_files),
+            sorted(
+                [
+                    "ds1_2021_correction.pdf",
+                    "partiel_2122_correction.pdf",
+                    "MAT101_2020_CC1.pdf",
+                    "MAT101_2020_CC1_corr.pdf",
+                ]
+            ),
+        )
+
+        items = [item for group in resources["groups"] for item in group["items"]]
+        labels = [item["label"] for item in items]
+        titles = [group["title"] for group in resources["groups"]]
+        self.assertEqual(
+            titles,
+            [
+                "Sujets d’interrogations",
+                "Nombres complexes",
+                "Fiche NAND (facultatif)",
+            ],
+        )
+        self.assertEqual(
+            labels,
+            [
+                "Bonus 1",
+                "Bonus 2",
+                "Bonus 3",
+                "Interrogation du 2 octobre 2026",
+                "Nombres complexes — 29 méthodes avec exemples corrigés",
+                "De la logique à Tetris",
+            ],
+        )
+        self.assertEqual(
+            [item["file"] for item in items],
+            [
+                "interros/interrogation-bonus-1-sujet.pdf",
+                "interros/interrogation-bonus-2-2026-09-22-sujet.pdf",
+                "interros/interrogation-bonus-3-2026-09-29-sujet.pdf",
+                "interros/interrogation-2026-10-02-sujet.pdf",
+                "supports/nombres-complexes-29-methodes.pdf",
+                "supports/fiche-nand.pdf",
+            ],
+        )
+        for item in items:
+            path = ROOT / "assets" / "documents" / "mat101" / item["file"]
+            self.assertTrue(path.is_file(), item["file"])
+            self.assertTrue(path.read_bytes().startswith(b"%PDF-"), item["file"])
+            self.assertGreater(path.stat().st_size, 10_000, item["file"])
+        self.assertIn(".mat101-course > .mat101-resources", STYLES)
+
     def test_planning_splits_eight_complex_sessions_and_eleven_language_sessions(self):
         complexes = [item for item in DATA if item["block"] == "complexes"]
         langage = [item for item in DATA if item["block"] == "langage"]

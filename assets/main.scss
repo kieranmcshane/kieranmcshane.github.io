@@ -13979,8 +13979,13 @@ body.mat101-site .mat101-library.mat101-course {
   margin: 0;
 }
 
-.mat101-archives {
+.mat101-archives,
+.mat101-resources {
   scroll-margin-top: 1rem;
+}
+
+.mat101-resources {
+  margin-top: 1.5rem;
 }
 
 .mat101-archives .mat101-download-intro p {
@@ -14598,6 +14603,11 @@ body:has(.mat101-session-page) {
   .mat101-course > .mat101-session-grid {
     grid-column: 2;
     grid-row: 2;
+  }
+
+  .mat101-course > .mat101-resources {
+    grid-column: 1 / -1;
+    grid-row: 4;
   }
 
   .mat101-course:has(#mat101-session-no-results:not([hidden])) > .mat101-session-grid {

@@ -370,6 +370,38 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 self.assertTrue(path.read_bytes().startswith(b"%PDF-"), filename)
                 self.assertGreater(path.stat().st_size, 10_000, filename)
 
+    def test_mat101_pdf_links_preview_in_the_browser(self):
+        archives = (ROOT / "_includes/mat101-archives.html").read_text()
+        resources = (ROOT / "_includes/mat101-resources.html").read_text()
+        demonstrations = (ROOT / "mat101-demonstrations.md").read_text()
+        anchors = re.findall(
+            r"<a\b[^>]*>",
+            "\n".join([PAGE, archives, resources, demonstrations]),
+        )
+        pdf_anchors = [
+            anchor
+            for anchor in anchors
+            if any(
+                token in anchor
+                for token in (
+                    ".pdf",
+                    "mat101_archive_base",
+                    "mat101_resource_base",
+                    "statement_pdf_url",
+                    "source_pdf_url",
+                    "optional_reals_pdf_url",
+                    "solution_pdf_url",
+                )
+            )
+        ]
+        self.assertGreaterEqual(len(pdf_anchors), 10)
+        for anchor in pdf_anchors:
+            self.assertNotRegex(anchor, r"(?:^|\s)download(?:\s|=|>)")
+            self.assertIn('target="_blank"', anchor)
+            self.assertIn('rel="noopener"', anchor)
+        self.assertIn('href="{{ statement_tex_url }}" download', PAGE)
+        self.assertIn('href="{{ statement_archive_url }}" download', PAGE)
+
     def test_archive_catalog_lists_expected_documents(self):
         include = (ROOT / "_includes/mat101-archives.html").read_text()
         self.assertIn('id="annales"', include)
