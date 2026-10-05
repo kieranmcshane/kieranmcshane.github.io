@@ -257,16 +257,6 @@ image_alt: "MAT101 — IMA02"
                   {{ exercise.solutionHtml }}
                 </div>
               </details>
-              {% elsif exercise.publicSolutionHtml %}
-              <details class="mat101-native-solution">
-                <summary>
-                  <span>Afficher le corrigé détaillé</span>
-                  <small>Solution non officielle · niveau L1</small>
-                </summary>
-                <div class="mat101-solution-body">
-                  {{ exercise.publicSolutionHtml }}
-                </div>
-              </details>
               {% endif %}
 
               {% capture issue_title %}[MAT101 {{ exercise.id }}] Correction proposée{% endcapture %}

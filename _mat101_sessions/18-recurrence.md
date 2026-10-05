@@ -11,16 +11,16 @@ image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->
-<div class="mat101-library mat101-session-page" data-mat101-session-number="18">
+<div class="mat101-library mat101-session-page is-past" data-mat101-session-number="18">
   <header class="mat101-session-detail-hero">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
       <h1>Récurrence</h1>
-      <p>Date et salle à confirmer</p>
+      <p>mer. 23 sept. 2026<span class="mat101-session-room"> · 13:30–15:00 · DLST E204</span></p>
     </div>
-    <div class="mat101-session-detail-status is-pending">
-      <span>Date à confirmer</span>
-      <small>Date et salle à confirmer</small>
+    <div class="mat101-session-detail-status is-past">
+      <span>Séance faite</span>
+      <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>
 

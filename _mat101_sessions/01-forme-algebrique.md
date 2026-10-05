@@ -11,15 +11,15 @@ image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->
-<div class="mat101-library mat101-session-page" data-mat101-session-number="1">
+<div class="mat101-library mat101-session-page is-past" data-mat101-session-number="1">
   <header class="mat101-session-detail-hero">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 1 · Nombres complexes</p>
       <h1>Forme algébrique</h1>
-      <p>mar. 8 sept. 2026</p>
+      <p>mar. 8 sept. 2026<span class="mat101-session-room"> · 09:45–11:15 · DLST E201</span></p>
     </div>
-    <div class="mat101-session-detail-status">
-      <span>Créneau planifié</span>
+    <div class="mat101-session-detail-status is-past">
+      <span>Séance faite</span>
       <small>Cours-TD intégré · 90 min</small>
     </div>
   </header>

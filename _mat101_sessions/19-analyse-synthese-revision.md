@@ -11,7 +11,7 @@ image_alt: "MAT101 — IMA02"
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->
-<div class="mat101-library mat101-session-page" data-mat101-session-number="19">
+<div class="mat101-library mat101-session-page is-pending" data-mat101-session-number="19">
   <header class="mat101-session-detail-hero">
     <div>
       <p class="mat101-session-eyebrow">Chapitre 2 · Ensembles et langage mathématique</p>
