@@ -343,21 +343,19 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("site.data.mat101_videos", PAGE)
         self.assertIn("youtube-nocookie.com/embed/{{ video.id }}", PAGE)
 
-    def test_facultatif_videos_data_lists_six_complementary_embeds(self):
-        self.assertEqual(len(VIDEOS), 6)
+    def test_facultatif_videos_data_lists_five_complementary_embeds(self):
+        self.assertEqual(len(VIDEOS), 5)
         self.assertEqual(
             [video["id"] for video in VIDEOS],
             [
                 "5PcpBw5Hbwo",
                 "ZxYOEwM6Wbk",
                 "v0YEaeIClKY",
-                "bOXCLR3Wric",
                 "6bDm5z5Z60c",
                 "L3LMbpZIKhQ",
             ],
         )
         self.assertEqual(VIDEOS[0]["title"], "Fondamentaux des nombres complexes")
-        self.assertEqual(VIDEOS[3]["title"], "Dénombrement et fonctions génératrices")
 
     def test_archive_pdfs_are_available(self):
         for group in ARCHIVES["groups"]:
