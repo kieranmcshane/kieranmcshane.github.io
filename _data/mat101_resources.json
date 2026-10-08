@@ -1,0 +1,49 @@
+{
+  "groups": [
+    {
+      "title": "Sujets d’interrogations",
+      "items": [
+        {
+          "label": "Bonus 1",
+          "meta": "Sujet · 2 pages",
+          "file": "interros/interrogation-bonus-1-sujet.pdf"
+        },
+        {
+          "label": "Bonus 2",
+          "meta": "Sujet · 22 septembre 2026 · 2 pages",
+          "file": "interros/interrogation-bonus-2-2026-09-22-sujet.pdf"
+        },
+        {
+          "label": "Bonus 3",
+          "meta": "Sujet · 29 septembre 2026 · 1 page",
+          "file": "interros/interrogation-bonus-3-2026-09-29-sujet.pdf"
+        },
+        {
+          "label": "Interrogation du 2 octobre 2026",
+          "meta": "Sujet · 1 page",
+          "file": "interros/interrogation-2026-10-02-sujet.pdf"
+        }
+      ]
+    },
+    {
+      "title": "Nombres complexes",
+      "items": [
+        {
+          "label": "Nombres complexes — 29 méthodes avec exemples corrigés",
+          "meta": "7 pages",
+          "file": "supports/nombres-complexes-29-methodes.pdf"
+        }
+      ]
+    },
+    {
+      "title": "Fiche NAND (facultatif)",
+      "items": [
+        {
+          "label": "De la logique à Tetris",
+          "meta": "1 page",
+          "file": "supports/fiche-nand.pdf"
+        }
+      ]
+    }
+  ]
+}

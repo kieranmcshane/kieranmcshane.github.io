@@ -45,10 +45,11 @@ image_alt: "MAT101 — IMA02"
   <ol class="mat101-session-grid" aria-label="Les 19 séances MAT101">
     {% for session in sessions %}
       <li
-        class="mat101-session-card"
+        class="mat101-session-card{% if session.status == 'past' %} is-past{% elsif session.status == 'upcoming' %} is-upcoming{% elsif session.scheduleConfirmed == false %} is-pending{% endif %}"
         data-mat101-session-card
         data-session-number="{{ session.number }}"
         data-session-block="{{ session.block }}"
+        data-session-status="{{ session.status }}"
         data-session-search="séance {{ session.number }} {{ session.search | escape }}"
       >
         <a href="{{ session.url | relative_url }}">
@@ -58,8 +59,12 @@ image_alt: "MAT101 — IMA02"
               <p>{{ session.blockLabel }}</p>
               <h3>{{ session.shortTitle }}</h3>
             </div>
-            {% if session.kind == "interro" %}
+            {% if session.status == "past" %}
+              <span class="mat101-session-date-state is-past">{{ session.statusBadge | default: "Séance faite" }}</span>
+            {% elsif session.kind == "interro" %}
               <span class="mat101-session-date-state is-interro">{{ session.statusBadge | default: "Interro" }}</span>
+            {% elsif session.status == "upcoming" %}
+              <span class="mat101-session-date-state is-upcoming">{{ session.statusBadge | default: "À venir" }}</span>
             {% elsif session.scheduleConfirmed %}
               <span class="mat101-session-date-state">Planifiée</span>
             {% else %}
@@ -67,6 +72,9 @@ image_alt: "MAT101 — IMA02"
             {% endif %}
           </header>
           <p class="mat101-session-date">{{ session.dateLabel }}</p>
+          {% if session.room %}
+            <p class="mat101-session-room">{{ session.timeLabel }} · {{ session.room }}</p>
+          {% endif %}
           {% if session.statusDetail %}
             <p class="mat101-session-format">{{ session.statusDetail }}</p>
           {% endif %}
@@ -83,4 +91,6 @@ image_alt: "MAT101 — IMA02"
       </li>
     {% endfor %}
   </ol>
+
+  {% include mat101-resources.html %}
 </div>

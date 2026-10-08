@@ -370,6 +370,38 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
                 self.assertTrue(path.read_bytes().startswith(b"%PDF-"), filename)
                 self.assertGreater(path.stat().st_size, 10_000, filename)
 
+    def test_mat101_pdf_links_preview_in_the_browser(self):
+        archives = (ROOT / "_includes/mat101-archives.html").read_text()
+        resources = (ROOT / "_includes/mat101-resources.html").read_text()
+        demonstrations = (ROOT / "mat101-demonstrations.md").read_text()
+        anchors = re.findall(
+            r"<a\b[^>]*>",
+            "\n".join([PAGE, archives, resources, demonstrations]),
+        )
+        pdf_anchors = [
+            anchor
+            for anchor in anchors
+            if any(
+                token in anchor
+                for token in (
+                    ".pdf",
+                    "mat101_archive_base",
+                    "mat101_resource_base",
+                    "statement_pdf_url",
+                    "source_pdf_url",
+                    "optional_reals_pdf_url",
+                    "solution_pdf_url",
+                )
+            )
+        ]
+        self.assertGreaterEqual(len(pdf_anchors), 10)
+        for anchor in pdf_anchors:
+            self.assertNotRegex(anchor, r"(?:^|\s)download(?:\s|=|>)")
+            self.assertIn('target="_blank"', anchor)
+            self.assertIn('rel="noopener"', anchor)
+        self.assertIn('href="{{ statement_tex_url }}" download', PAGE)
+        self.assertIn('href="{{ statement_archive_url }}" download', PAGE)
+
     def test_archive_catalog_lists_expected_documents(self):
         include = (ROOT / "_includes/mat101-archives.html").read_text()
         self.assertIn('id="annales"', include)
@@ -417,35 +449,36 @@ class Mat101ExerciseLibraryTests(unittest.TestCase):
         self.assertIn("site.mat101_show_solutions", PAGE)
         self.assertIn("{% if site.mat101_show_solutions %}", PAGE)
         self.assertIn("exercise.solutionHtml", PAGE)
-        self.assertIn("exercise.publicSolutionHtml", PAGE)
-        self.assertIn("{% elsif exercise.publicSolutionHtml %}", PAGE)
+        self.assertNotIn("exercise.publicSolutionHtml", PAGE)
+        self.assertNotIn("{% elsif exercise.publicSolutionHtml %}", PAGE)
+        self.assertNotIn("publicSolutionHtml", PAGE)
+        self.assertEqual(PAGE.count("Afficher le corrigé détaillé"), 1)
+        solution_branch = PAGE.split("{% if site.mat101_show_solutions %}")[-3]
+        solution_branch = solution_branch.split("{% endif %}", 1)[0]
+        self.assertIn("Afficher le corrigé détaillé", solution_branch)
+        self.assertIn("exercise.solutionHtml", solution_branch)
         self.assertIn("mat101-file-group-solution", PAGE)
         self.assertIn("corrige-exercices-mat101.pdf", PAGE)
-        self.assertIn("Afficher le corrigé détaillé", PAGE)
         about = (ROOT / "about.md").read_text()
         self.assertIn("site.mat101_show_solutions", about)
         self.assertIn("Exercise correction", about)
+        builder = (ROOT / "scripts/build_mat101_native.py").read_text()
+        self.assertNotIn("publicSolutionHtml", builder)
+        self.assertNotIn("REVEALED_SOLUTIONS", builder)
 
-    def test_selective_public_solutions_are_revealed_in_native_data(self):
-        revealed = [item for item in NATIVE if item.get("publicSolutionHtml")]
-        revealed_ids = [f"1.{index}" for index in range(1, 21)]
-        self.assertEqual([item["id"] for item in revealed], revealed_ids)
-
-        for exercise_id in revealed_ids:
-            exercise = next(item for item in NATIVE if item["id"] == exercise_id)
-            self.assertEqual(
-                exercise["publicSolutionHtml"],
-                exercise["solutionHtml"],
-            )
+    def test_solution_data_stays_in_repo_but_is_not_published(self):
+        self.assertEqual(
+            [item for item in NATIVE if item.get("publicSolutionHtml")],
+            [],
+        )
+        for item in NATIVE:
+            self.assertNotIn("publicSolutionHtml", item)
+            self.assertGreater(len(item["solutionHtml"]), 100)
 
         exercise_11 = next(item for item in NATIVE if item["id"] == "1.1")
         exercise_12 = next(item for item in NATIVE if item["id"] == "1.2")
-        self.assertEqual(exercise_11["publicSolutionHtml"].count("<li>"), 15)
-        self.assertEqual(exercise_12["publicSolutionHtml"].count("<li>"), 6)
-
-        for item in NATIVE:
-            if item["id"] not in set(revealed_ids):
-                self.assertIsNone(item.get("publicSolutionHtml"))
+        self.assertEqual(exercise_11["solutionHtml"].count("<li>"), 15)
+        self.assertEqual(exercise_12["solutionHtml"].count("<li>"), 6)
 
     def test_owner_solution_payload_supports_github_unlock(self):
         owner_data = json.loads(

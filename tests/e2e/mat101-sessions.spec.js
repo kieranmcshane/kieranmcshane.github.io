@@ -23,11 +23,44 @@ test.describe("MAT101 nineteen-session student path", () => {
       page.locator('a[href$="parcours-19-seances-mat101-ima02.pdf"]')
     ).toHaveCount(0);
     await expect(
-      page.locator('[data-session-number="18"] .mat101-session-date-state.is-pending')
-    ).toContainText("À confirmer");
+      page.locator('[data-session-number="18"].is-past .mat101-session-date-state.is-past')
+    ).toContainText("Séance faite");
+    await expect(page.locator('[data-session-number="18"]')).toContainText("DLST E204");
+    await expect(page.locator('[data-session-number="18"]')).toContainText("mer. 23 sept. 2026");
     await expect(
       page.locator('[data-session-number="19"] .mat101-session-date-state.is-pending')
     ).toContainText("À confirmer");
+    await expect(page.locator('[data-session-number="1"].is-past')).toContainText("DLST E201");
+    await expect(page.locator('[data-session-number="13"].is-upcoming')).toContainText(
+      "À venir"
+    );
+    await expect(page.locator('[data-session-number="13"]')).toContainText("DLST E201");
+    await expect(page.locator('[data-session-number="2"]')).toContainText("DLST B007");
+    await expect(page.locator('[data-session-number="3"]')).toContainText("DLST D104");
+    const documents = page.locator("#documents");
+    await expect(documents.locator("h2")).toHaveText("Documents");
+    await expect(documents.getByRole("link", { name: /Bonus 1/ })).toHaveAttribute(
+      "href",
+      /interrogation-bonus-1-sujet\.pdf$/
+    );
+    await expect(documents.getByRole("link", { name: /Bonus 2/ })).toHaveAttribute(
+      "href",
+      /interrogation-bonus-2-2026-09-22-sujet\.pdf$/
+    );
+    await expect(documents.getByRole("link", { name: /Bonus 3/ })).toHaveAttribute(
+      "href",
+      /interrogation-bonus-3-2026-09-29-sujet\.pdf$/
+    );
+    await expect(
+      documents.getByRole("link", { name: /Interrogation du 2 octobre 2026/ })
+    ).toHaveAttribute("href", /interrogation-2026-10-02-sujet\.pdf$/);
+    await expect(
+      documents.getByRole("link", { name: /29 méthodes avec exemples corrigés/ })
+    ).toHaveAttribute("href", /nombres-complexes-29-methodes\.pdf$/);
+    await expect(
+      documents.getByRole("link", { name: /De la logique à Tetris/ })
+    ).toHaveAttribute("href", /fiche-nand\.pdf$/);
+    await expect(documents.getByText("Afficher le corrigé")).toHaveCount(0);
     await expect(page.locator(".mat101-course-hero")).toHaveCount(0);
     await expect(page.locator(".mat101-course-status")).toHaveCount(0);
     await expect(page.getByText("19 séances pour progresser en MAT101")).toHaveCount(0);
@@ -65,19 +98,20 @@ test.describe("MAT101 nineteen-session student path", () => {
     await gotoSessions(page);
 
     const card = page.locator('[data-session-number="10"]');
-    await expect(card.locator(".mat101-session-date-state.is-interro")).toHaveText(
-      "Interro"
+    await expect(card.locator(".mat101-session-date-state.is-past")).toHaveText(
+      "Séance faite"
     );
     await expect(card.locator(".mat101-session-format")).toHaveText(
       "1 h · tiers temps 1 h 20"
     );
+    await expect(card).toContainText("DLST E201");
 
     await card.locator(":scope > a").click();
     await expect(page).toHaveURL(/\/mat101\/seances\/10-ensembles-appartenance-inclusion\/$/);
-    await expect(page.locator(".mat101-session-detail-status.is-interro")).toContainText(
-      "Interro"
+    await expect(page.locator(".mat101-session-detail-status.is-past")).toContainText(
+      "Séance faite"
     );
-    await expect(page.locator(".mat101-session-detail-status.is-interro")).toContainText(
+    await expect(page.locator(".mat101-session-detail-status.is-past")).toContainText(
       "1 h · tiers temps 1 h 20"
     );
     await expect(page.locator(".mat101-session-source")).toContainText(
@@ -164,19 +198,32 @@ test.describe("MAT101 nineteen-session student path", () => {
     await expect(competences.locator("code")).toHaveCount(0);
   });
 
-  test("labels the two unresolved schedule slots instead of inventing dates", async ({
+  test("shows the confirmed extra séance and leaves séance 19 unresolved", async ({
     page,
   }) => {
     await page.goto("/mat101/seances/18-recurrence/");
     await expect(page.locator("[data-mat101-session-number='18']")).toBeVisible({
       timeout: 12000,
     });
+    await expect(page.locator(".mat101-session-page.is-past")).toBeVisible();
+    await expect(page.locator(".mat101-session-detail-status.is-past")).toContainText(
+      "Séance faite"
+    );
+    await expect(page.locator(".mat101-session-detail-hero")).toContainText(
+      "mer. 23 sept. 2026"
+    );
+    await expect(page.locator(".mat101-session-detail-hero")).toContainText("DLST E204");
+    await expect(page.locator(".mat101-session-detail-hero")).toContainText("13:30–15:00");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+
+    await page.goto("/mat101/seances/19-analyse-synthese-revision/");
     await expect(page.locator(".mat101-session-detail-status.is-pending")).toContainText(
       "Date à confirmer"
     );
     await expect(page.locator(".mat101-session-detail-status.is-pending")).toContainText(
       "Date et salle à confirmer"
     );
+    await expect(page.locator(".mat101-session-detail-hero")).not.toContainText("DLST");
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 

@@ -220,8 +220,11 @@ class Mat101SessionsTests(unittest.TestCase):
         self.assertEqual(session["kind"], "interro")
         self.assertEqual(session["title"], "Interro · nombres complexes")
         self.assertEqual(session["block"], "langage")
-        self.assertEqual(session["statusBadge"], "Interro")
+        self.assertEqual(session["dateIso"], "2026-09-29")
+        self.assertEqual(session["status"], "past")
+        self.assertEqual(session["statusBadge"], "Séance faite")
         self.assertEqual(session["statusDetail"], "1 h · tiers temps 1 h 20")
+        self.assertEqual(session["room"], "DLST E201")
         self.assertIn("interro", session["search"])
         self.assertNotIn("exercice 2.1", session["search"])
         self.assertIn("séances 1 à 8", session["search"])
@@ -229,10 +232,179 @@ class Mat101SessionsTests(unittest.TestCase):
         page = (SESSION_DIR / "10-ensembles-appartenance-inclusion.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn('class="mat101-session-detail-status is-interro"', page)
+        self.assertIn('class="mat101-session-detail-status is-past"', page)
+        self.assertIn("Séance faite", page)
         self.assertIn("1 h · tiers temps 1 h 20", page)
+        self.assertIn("DLST E201", page)
         self.assertIn("<strong>Interro.</strong>", page)
         self.assertIn("séances 1 à 8", page)
+
+    def test_public_schedule_has_rooms_past_tone_extra_session_and_no_partiel_td(self):
+        by_number = {item["number"]: item for item in DATA}
+        rooms_by_weekday = {1: "DLST E201", 3: "DLST B007", 4: "DLST D104"}
+        times_by_weekday = {
+            1: "09:45–11:15",
+            3: "13:30–15:00",
+            4: "15:15–16:45",
+        }
+        for item in DATA:
+            iso = item.get("dateIso")
+            if item["number"] == 19:
+                self.assertIsNone(iso)
+                self.assertFalse(item["scheduleConfirmed"])
+                self.assertEqual(item["status"], "pending")
+                self.assertIsNone(item["room"])
+                self.assertEqual(item["dateLabel"], "Date et salle à confirmer")
+                continue
+            self.assertIsNotNone(iso, item["number"])
+            self.assertFalse(
+                "2026-10-19" <= iso <= "2026-10-25",
+                f"session {item['number']} implies TD during the partiel week",
+            )
+            if iso < "2026-10-05":
+                self.assertEqual(item["status"], "past")
+                self.assertEqual(item["statusBadge"], "Séance faite")
+            else:
+                self.assertEqual(item["status"], "upcoming")
+                self.assertEqual(item["statusBadge"], "À venir")
+            if item["number"] != 18:
+                weekday = GENERATOR.date.fromisoformat(iso).weekday()
+                self.assertEqual(item["room"], rooms_by_weekday[weekday])
+                self.assertEqual(item["timeLabel"], times_by_weekday[weekday])
+
+        extra = by_number[18]
+        self.assertEqual(extra["dateIso"], "2026-09-23")
+        self.assertEqual(extra["dateLabel"], "mer. 23 sept. 2026")
+        self.assertEqual(extra["timeLabel"], "13:30–15:00")
+        self.assertEqual(extra["room"], "DLST E204")
+        self.assertTrue(extra["scheduleConfirmed"])
+        self.assertEqual(extra["status"], "past")
+
+        self.assertEqual(by_number[1]["status"], "past")
+        self.assertEqual(by_number[13]["dateIso"], "2026-10-06")
+        self.assertEqual(by_number[13]["status"], "upcoming")
+        self.assertEqual(by_number[13]["room"], "DLST E201")
+
+        session_one = (SESSION_DIR / "01-forme-algebrique.md").read_text(encoding="utf-8")
+        self.assertIn("mat101-session-page is-past", session_one)
+        self.assertIn("Séance faite", session_one)
+        self.assertIn("DLST E201", session_one)
+        self.assertIn("09:45–11:15", session_one)
+        self.assertIn("N⊂Z⊂Q⊂R⊂C", session_one)
+        self.assertNotIn("plan complexe", session_one.casefold())
+
+        session_eighteen = (SESSION_DIR / "18-recurrence.md").read_text(encoding="utf-8")
+        self.assertIn("mer. 23 sept. 2026", session_eighteen)
+        self.assertIn("DLST E204", session_eighteen)
+        self.assertIn("mat101-session-page is-past", session_eighteen)
+        self.assertNotIn("Date et salle à confirmer", session_eighteen)
+
+        session_nineteen = (SESSION_DIR / "19-analyse-synthese-revision.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("mat101-session-page is-pending", session_nineteen)
+        self.assertIn("Date et salle à confirmer", session_nineteen)
+        self.assertNotIn("DLST", session_nineteen)
+
+        upcoming = (SESSION_DIR / "13-assertions-variables.md").read_text(encoding="utf-8")
+        self.assertIn("mat101-session-page is-upcoming", upcoming)
+        self.assertIn("À venir", upcoming)
+        self.assertIn("DLST E201", upcoming)
+
+        self.assertIn("session.room", PAGE)
+        self.assertIn('session.status == "past"', PAGE)
+        self.assertIn('session.status == "upcoming"', PAGE)
+        self.assertIn('class="mat101-session-date-state is-past"', PAGE)
+        self.assertIn('class="mat101-session-date-state is-upcoming"', PAGE)
+        self.assertIn('class="mat101-session-date-state is-pending"', PAGE)
+        self.assertIn(".mat101-session-card.is-past", STYLES)
+        self.assertIn(".mat101-session-card.is-upcoming", STYLES)
+        self.assertIn("background: #f3f5f6;", STYLES)
+        self.assertIn("border-color: #8fc9d0;", STYLES)
+        self.assertIn("Partiel prévu la semaine du 20 octobre.", INFORMATIONS)
+        self.assertIn("semaine du 19 octobre", INFORMATIONS)
+
+        with self.assertRaisesRegex(ValueError, "partiel week"):
+            GENERATOR.attach_public_schedule(
+                {
+                    "number": 16,
+                    "dateLabel": "mar. 20 oct. 2026",
+                    "scheduleConfirmed": True,
+                    "search": "",
+                }
+            )
+
+    def test_student_resources_are_linked_from_the_seances_page(self):
+        resources = json.loads(
+            (ROOT / "_data" / "mat101_resources.json").read_text(encoding="utf-8")
+        )
+        include = (ROOT / "_includes" / "mat101-resources.html").read_text(encoding="utf-8")
+        archives = json.loads(
+            (ROOT / "_data" / "mat101_archives.json").read_text(encoding="utf-8")
+        )
+        self.assertIn("include mat101-resources.html", PAGE)
+        self.assertIn('id="documents"', include)
+        self.assertIn("site.data.mat101_resources", include)
+        self.assertIn('id="mat101-resources-title">Documents</h2>', include)
+        self.assertNotIn("Afficher le corrigé", include)
+        self.assertNotIn("corrige-exercices", include)
+        self.assertNotIn("mat101_resources", (ROOT / "_data" / "mat101_archives.json").read_text())
+        archive_files = [
+            item.get("file")
+            for group in archives["groups"]
+            for item in group.get("items", [])
+        ]
+        self.assertEqual(
+            sorted(archive_files),
+            sorted(
+                [
+                    "ds1_2021_correction.pdf",
+                    "partiel_2122_correction.pdf",
+                    "MAT101_2020_CC1.pdf",
+                    "MAT101_2020_CC1_corr.pdf",
+                ]
+            ),
+        )
+
+        items = [item for group in resources["groups"] for item in group["items"]]
+        labels = [item["label"] for item in items]
+        titles = [group["title"] for group in resources["groups"]]
+        self.assertEqual(
+            titles,
+            [
+                "Sujets d’interrogations",
+                "Nombres complexes",
+                "Fiche NAND (facultatif)",
+            ],
+        )
+        self.assertEqual(
+            labels,
+            [
+                "Bonus 1",
+                "Bonus 2",
+                "Bonus 3",
+                "Interrogation du 2 octobre 2026",
+                "Nombres complexes — 29 méthodes avec exemples corrigés",
+                "De la logique à Tetris",
+            ],
+        )
+        self.assertEqual(
+            [item["file"] for item in items],
+            [
+                "interros/interrogation-bonus-1-sujet.pdf",
+                "interros/interrogation-bonus-2-2026-09-22-sujet.pdf",
+                "interros/interrogation-bonus-3-2026-09-29-sujet.pdf",
+                "interros/interrogation-2026-10-02-sujet.pdf",
+                "supports/nombres-complexes-29-methodes.pdf",
+                "supports/fiche-nand.pdf",
+            ],
+        )
+        for item in items:
+            path = ROOT / "assets" / "documents" / "mat101" / item["file"]
+            self.assertTrue(path.is_file(), item["file"])
+            self.assertTrue(path.read_bytes().startswith(b"%PDF-"), item["file"])
+            self.assertGreater(path.stat().st_size, 10_000, item["file"])
+        self.assertIn(".mat101-course > .mat101-resources", STYLES)
 
     def test_planning_splits_eight_complex_sessions_and_eleven_language_sessions(self):
         complexes = [item for item in DATA if item["block"] == "complexes"]

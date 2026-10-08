@@ -101,7 +101,7 @@ image_alt: "MAT101 — IMA02"
               <section class="mat101-statement" aria-labelledby="statement-{{ demo.id | replace: '.', '-' }}">
                 <div class="mat101-content-heading">
                   <h4 id="statement-{{ demo.id | replace: '.', '-' }}">Énoncé</h4>
-                  <a href="{{ source_pdf_url }}">Consulter le polycopié</a>
+                  <a href="{{ source_pdf_url }}" target="_blank" rel="noopener">Consulter le polycopié</a>
                 </div>
                 <div class="mat101-statement-transcription mat101-statement-curated" lang="fr">
                   {{ demo.statementHtml }}

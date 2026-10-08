@@ -12,6 +12,7 @@ import argparse
 import html
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 
@@ -62,6 +63,66 @@ SESSION_FORMATS: dict[int, dict[str, str]] = {
         "statusDetail": "1 h · tiers temps 1 h 20",
     },
 }
+
+# Static past/upcoming split for the published site. Séances strictly before
+# this date are marked done; later confirmed séances stay upcoming.
+PUBLISHED_AS_OF = date(2026, 10, 5)
+# Week of the partiel (semaine du 19/20 octobre 2026): no regular TD.
+PARTIEL_WEEK = (date(2026, 10, 19), date(2026, 10, 25))
+WEEKDAY_LABELS = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."]
+MONTH_LABELS = [
+    "janv.",
+    "févr.",
+    "mars",
+    "avr.",
+    "mai",
+    "juin",
+    "juil.",
+    "août",
+    "sept.",
+    "oct.",
+    "nov.",
+    "déc.",
+]
+# IMA-2 / IMA-S1-02 rooms from ADE, keyed by date.weekday().
+WEEKDAY_SLOTS = {
+    1: ("09:45–11:15", "DLST E201"),
+    3: ("13:30–15:00", "DLST B007"),
+    4: ("15:15–16:45", "DLST D104"),
+}
+# First of the two extra séances. Séance 19 stays unconfirmed.
+EXTRA_CONFIRMED = {
+    18: {
+        "date": date(2026, 9, 23),
+        "timeLabel": "13:30–15:00",
+        "room": "DLST E204",
+    }
+}
+DATE_LABEL_RE = re.compile(
+    r"^(lun\.|mar\.|mer\.|jeu\.|ven\.|sam\.|dim\.) (\d{1,2}) "
+    r"(janv\.|févr\.|mars|avr\.|mai|juin|juil\.|août|sept\.|oct\.|nov\.|déc\.) (\d{4})$"
+)
+FIELD_ORDER = [
+    "number",
+    "title",
+    "dateLabel",
+    "dateIso",
+    "timeLabel",
+    "room",
+    "status",
+    "scheduleConfirmed",
+    "slug",
+    "url",
+    "shortTitle",
+    "block",
+    "blockLabel",
+    "skillsPlain",
+    "search",
+    "skillsHtml",
+    "kind",
+    "statusBadge",
+    "statusDetail",
+]
 FORBIDDEN_PUBLIC_MARKERS = (
     "fiche enseignant",
     "réponses et corrections",
@@ -234,7 +295,155 @@ def block_for(number: int) -> tuple[str, str]:
     return "langage", "Chapitre 2 · Ensembles et langage mathématique"
 
 
+def french_date_label(value: date) -> str:
+    return (
+        f"{WEEKDAY_LABELS[value.weekday()]} {value.day} "
+        f"{MONTH_LABELS[value.month - 1]} {value.year}"
+    )
+
+
+def parse_french_date(label: str) -> date:
+    match = DATE_LABEL_RE.fullmatch(label.strip())
+    if not match:
+        raise ValueError(f"unrecognized session date label: {label!r}")
+    weekday, day, month, year = match.groups()
+    parsed = date(int(year), MONTH_LABELS.index(month) + 1, int(day))
+    if WEEKDAY_LABELS[parsed.weekday()] != weekday:
+        raise ValueError(f"weekday mismatch in {label!r}")
+    return parsed
+
+
+def reject_partiel_week(when: date, number: int) -> None:
+    start, end = PARTIEL_WEEK
+    if start <= when <= end:
+        raise ValueError(
+            f"session {number}: {when.isoformat()} falls in the partiel week "
+            f"({start.isoformat()}–{end.isoformat()}); no regular TD that week"
+        )
+
+
+def merge_search(search: str, *bits: str | None) -> str:
+    extra = " ".join(str(bit) for bit in bits if bit)
+    if not extra:
+        return search
+    lowered = extra.casefold()
+    if lowered in search:
+        return search
+    return f"{search} {lowered}".strip()
+
+
+def reorder_session(session: dict[str, object]) -> dict[str, object]:
+    ordered = {key: session[key] for key in FIELD_ORDER if key in session}
+    for key, value in session.items():
+        if key not in ordered:
+            ordered[key] = value
+    return ordered
+
+
+def attach_public_schedule(
+    session: dict[str, object], today: date = PUBLISHED_AS_OF
+) -> dict[str, object]:
+    """Add room, time, and past/upcoming status without inventing lesson content."""
+
+    number = int(session["number"])
+    updated = dict(session)
+    when: date | None
+    if number in EXTRA_CONFIRMED:
+        extra = EXTRA_CONFIRMED[number]
+        when = extra["date"]
+        reject_partiel_week(when, number)
+        updated.update(
+            {
+                "dateIso": when.isoformat(),
+                "dateLabel": french_date_label(when),
+                "timeLabel": extra["timeLabel"],
+                "room": extra["room"],
+                "scheduleConfirmed": True,
+            }
+        )
+    elif updated.get("scheduleConfirmed"):
+        when = parse_french_date(str(updated["dateLabel"]))
+        reject_partiel_week(when, number)
+        slot = WEEKDAY_SLOTS.get(when.weekday())
+        if slot is None:
+            raise ValueError(
+                f"session {number}: no ADE room for {when.isoformat()}"
+            )
+        time_label, room = slot
+        updated.update(
+            {
+                "dateIso": when.isoformat(),
+                "dateLabel": french_date_label(when),
+                "timeLabel": time_label,
+                "room": room,
+                "scheduleConfirmed": True,
+            }
+        )
+    else:
+        when = None
+        updated.update(
+            {
+                "dateIso": None,
+                "dateLabel": "Date et salle à confirmer",
+                "timeLabel": None,
+                "room": None,
+                "scheduleConfirmed": False,
+            }
+        )
+
+    kind = updated.get("kind") or SESSION_FORMATS.get(number, {}).get("kind")
+    if when is None:
+        updated["status"] = "pending"
+        updated["statusBadge"] = "À confirmer"
+    elif when < today:
+        updated["status"] = "past"
+        updated["statusBadge"] = "Séance faite"
+    else:
+        updated["status"] = "upcoming"
+        if kind == "interro":
+            updated["statusBadge"] = "Interro"
+        else:
+            updated["statusBadge"] = "À venir"
+            updated.pop("statusDetail", None)
+
+    if kind == "interro":
+        updated["kind"] = "interro"
+        updated["statusDetail"] = str(
+            updated.get("statusDetail")
+            or SESSION_FORMATS[number]["statusDetail"]
+        )
+    elif updated["status"] != "pending":
+        updated.pop("statusDetail", None)
+
+    updated["search"] = merge_search(
+        str(updated.get("search") or ""),
+        str(updated.get("room") or ""),
+        str(updated.get("timeLabel") or ""),
+        str(updated.get("dateLabel") or ""),
+    )
+    return reorder_session(updated)
+
+
 def session_status(session: dict[str, object]) -> tuple[str, str, str]:
+    status = session.get("status")
+    if status == "past":
+        detail = str(session.get("statusDetail") or "Cours-TD intégré · 90 min")
+        return ("Séance faite", " is-past", detail)
+    if status == "upcoming":
+        if session.get("kind") == "interro":
+            return (
+                "Interro",
+                " is-upcoming is-interro",
+                str(session.get("statusDetail") or ""),
+            )
+        return (
+            "À venir",
+            " is-upcoming",
+            str(session.get("statusDetail") or "Cours-TD intégré · 90 min"),
+        )
+    if status == "pending":
+        return ("Date à confirmer", " is-pending", "Date et salle à confirmer")
+
     override = SESSION_FORMATS.get(int(session["number"]))
     if override:
         return (
@@ -247,6 +456,33 @@ def session_status(session: dict[str, object]) -> tuple[str, str, str]:
     return ("Date à confirmer", " is-pending", "Date et salle à confirmer")
 
 
+def schedule_markup(session: dict[str, object]) -> tuple[str, str, str]:
+    badge, css_class, detail = session_status(session)
+    status_class = "mat101-session-detail-status" + css_class
+    when_bits = [
+        str(bit) for bit in (session.get("timeLabel"), session.get("room")) if bit
+    ]
+    room_html = ""
+    if when_bits:
+        room_html = (
+            '<span class="mat101-session-room"> · '
+            + html.escape(" · ".join(when_bits))
+            + "</span>"
+        )
+    date_html = f"      <p>{html.escape(str(session['dateLabel']))}{room_html}</p>"
+    status_html = (
+        f'<div class="{status_class}">\n'
+        f"      <span>{html.escape(badge)}</span>\n"
+        f"      <small>{html.escape(detail)}</small>\n"
+        "    </div>"
+    )
+    page_state = ""
+    status = session.get("status")
+    if status in {"past", "upcoming", "pending"}:
+        page_state = f" is-{status}"
+    return page_state, date_html, status_html
+
+
 def render_page(
     session: dict[str, object],
     previous: dict[str, object] | None,
@@ -255,10 +491,9 @@ def render_page(
     number = int(session["number"])
     title = html.escape(str(session["title"]))
     url = str(session["url"])
-    date_label = html.escape(str(session["dateLabel"]))
     block_label = html.escape(str(session["blockLabel"]))
     body = inline_math_html(str(session["body"]), delimiter="dollar")
-    schedule_badge, schedule_class, schedule_detail = session_status(session)
+    page_state, date_html, status_html = schedule_markup(session)
     source_note = (
         f"<p><strong>Interro.</strong> {html.escape(schedule_detail.rstrip('.'))}.</p>"
         if session.get("kind") == "interro"
@@ -298,17 +533,14 @@ mat101_session_number: {number}
 ---
 
 <!-- Generated from the public student workbook and provisional schedule. -->
-<div class="mat101-library mat101-session-page" data-mat101-session-number="{number}">
+<div class="mat101-library mat101-session-page{page_state}" data-mat101-session-number="{number}">
   <header class="mat101-session-detail-hero">
     <div>
       <p class="mat101-session-eyebrow">{block_label}</p>
       <h1>{title}</h1>
-      <p>{date_label}</p>
+{date_html}
     </div>
-    <div class="mat101-session-detail-status{schedule_class}">
-      <span>{schedule_badge}</span>
-      <small>{schedule_detail}</small>
-    </div>
+    {status_html}
   </header>
 
   <nav class="mat101-session-local-nav" aria-label="Navigation MAT101">
@@ -339,14 +571,79 @@ mat101_session_number: {number}
     return page
 
 
+def patch_session_page(text: str, session: dict[str, object]) -> str:
+    page_state, date_html, status_html = schedule_markup(session)
+    updated, page_count = re.subn(
+        r'<div class="mat101-library mat101-session-page(?: is-(?:past|upcoming|pending))?"',
+        f'<div class="mat101-library mat101-session-page{page_state}"',
+        text,
+        count=1,
+    )
+    updated, date_count = re.subn(
+        r"(<h1>.*?</h1>)\s*<p>.*?</p>",
+        lambda match: f"{match.group(1)}\n{date_html}",
+        updated,
+        count=1,
+        flags=re.DOTALL,
+    )
+    updated, status_count = re.subn(
+        r'<div class="mat101-session-detail-status[^"]*">\s*<span>.*?</span>\s*<small>.*?</small>\s*</div>',
+        status_html,
+        updated,
+        count=1,
+        flags=re.DOTALL,
+    )
+    if page_count != 1 or date_count != 1 or status_count != 1:
+        raise ValueError(
+            f"session {session['number']}: could not patch the public schedule "
+            f"(page={page_count}, date={date_count}, status={status_count})"
+        )
+    assert_student_safe(updated, f"patched session {session['number']}")
+    return updated
+
+
+def refresh_committed(today: date = PUBLISHED_AS_OF) -> None:
+    """Refresh rooms, dates, and past/upcoming status on the committed pages."""
+
+    sessions = [
+        attach_public_schedule(session, today)
+        for session in json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    ]
+    public_sessions = [
+        {key: value for key, value in session.items() if key not in {"body", "skills"}}
+        for session in sessions
+    ]
+    data_text = json.dumps(public_sessions, ensure_ascii=False, indent=2) + "\n"
+    assert_student_safe(data_text, "public session data")
+    DATA_FILE.write_text(data_text, encoding="utf-8")
+    for session in sessions:
+        path = COLLECTION / f"{int(session['number']):02d}-{session['slug']}.md"
+        path.write_text(
+            patch_session_page(path.read_text(encoding="utf-8"), session),
+            encoding="utf-8",
+        )
+    print(f"Refreshed {len(sessions)} committed sessions in {DATA_FILE.relative_to(ROOT)}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "source",
+        nargs="?",
         type=Path,
         help="Path to the MAT101-2026-course-pack repository",
     )
+    parser.add_argument(
+        "--refresh-committed",
+        action="store_true",
+        help="Apply the public schedule to the committed session data and pages",
+    )
     args = parser.parse_args()
+    if args.refresh_committed:
+        refresh_committed()
+        return
+    if args.source is None:
+        raise SystemExit("source course pack is required unless --refresh-committed is set")
     source = args.source.resolve()
     workbook = source / "handouts" / "ima02-student-workbook.md"
     schedule_file = source / "SCHEDULE.md"
@@ -365,30 +662,32 @@ def main() -> None:
         skills = list(workbook_session["skills"])
         body = str(workbook_session["body"])
         sessions.append(
-            {
-                **workbook_session,
-                **schedule[number],
-                "slug": slug,
-                "url": f"/mat101/seances/{number:02d}-{slug}/",
-                "shortTitle": title,
-                "block": block_slug,
-                "blockLabel": block_label,
-                "skillsPlain": [plain_text(skill) for skill in skills],
-                "skillsHtml": [skill_to_html(skill) for skill in skills],
-                **SESSION_FORMATS.get(number, {}),
-                "search": plain_text(
-                    " ".join(
-                        [
-                            title,
-                            block_label,
-                            *skills,
-                            body,
-                            SESSION_FORMATS.get(number, {}).get("statusBadge", ""),
-                            SESSION_FORMATS.get(number, {}).get("statusDetail", ""),
-                        ]
-                    )
-                ).lower(),
-            }
+            attach_public_schedule(
+                {
+                    **workbook_session,
+                    **schedule[number],
+                    "slug": slug,
+                    "url": f"/mat101/seances/{number:02d}-{slug}/",
+                    "shortTitle": title,
+                    "block": block_slug,
+                    "blockLabel": block_label,
+                    "skillsPlain": [plain_text(skill) for skill in skills],
+                    "skillsHtml": [skill_to_html(skill) for skill in skills],
+                    **SESSION_FORMATS.get(number, {}),
+                    "search": plain_text(
+                        " ".join(
+                            [
+                                title,
+                                block_label,
+                                *skills,
+                                body,
+                                SESSION_FORMATS.get(number, {}).get("statusBadge", ""),
+                                SESSION_FORMATS.get(number, {}).get("statusDetail", ""),
+                            ]
+                        )
+                    ).lower(),
+                }
+            )
         )
 
     COLLECTION.mkdir(parents=True, exist_ok=True)

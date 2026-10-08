@@ -242,7 +242,7 @@ image_alt: "MAT101 — IMA02"
               <section class="mat101-statement" aria-labelledby="statement-{{ exercise.id | replace: '.', '-' }}">
                 <div class="mat101-content-heading">
                   <h3 id="statement-{{ exercise.id | replace: '.', '-' }}">Énoncé</h3>
-                  <a href="{{ statement_pdf_url }}#page={{ exercise.statementPdfPage }}">Consulter la page source</a>
+                  <a href="{{ statement_pdf_url }}#page={{ exercise.statementPdfPage }}" target="_blank" rel="noopener">Consulter la page source</a>
                 </div>
                 {{ exercise.statementHtml }}
               </section>
@@ -255,16 +255,6 @@ image_alt: "MAT101 — IMA02"
                 </summary>
                 <div class="mat101-solution-body">
                   {{ exercise.solutionHtml }}
-                </div>
-              </details>
-              {% elsif exercise.publicSolutionHtml %}
-              <details class="mat101-native-solution">
-                <summary>
-                  <span>Afficher le corrigé détaillé</span>
-                  <small>Solution non officielle · niveau L1</small>
-                </summary>
-                <div class="mat101-solution-body">
-                  {{ exercise.publicSolutionHtml }}
                 </div>
               </details>
               {% endif %}
@@ -300,7 +290,7 @@ image_alt: "MAT101 — IMA02"
           <h3 id="mat101-optional-reals-title">Construction de R par les suites de Cauchy</h3>
           <p>Problème guidé en 12 questions (version courte)&nbsp;: suites de Cauchy, classes d’équivalence, opérations et complétude de <span class="math inline">$\mathbb R$</span>. Prérequis&nbsp;: calcul dans <span class="math inline">$\mathbb Q$</span>, inégalités, quantificateurs et ensembles. Les questions ★ sont les plus délicates. Hors programme MAT101.</p>
         </div>
-        <a class="mat101-optional-pdf-link" href="{{ optional_reals_pdf_url }}" download>
+        <a class="mat101-optional-pdf-link" href="{{ optional_reals_pdf_url }}" target="_blank" rel="noopener">
           <strong>construction_reels_courte_histoire_v2.pdf</strong>
           <span>3 pages · énoncé seul</span>
         </a>
@@ -372,8 +362,8 @@ image_alt: "MAT101 — IMA02"
     <div class="mat101-file-group">
       <p class="mat101-file-label">Énoncés originaux</p>
       <ul>
-        <li><a href="{{ statement_pdf_url }}" download><strong>Recueil PDF</strong><span>103 exercices · 34 pages</span></a></li>
-        <li><a href="{{ source_pdf_url }}" download><strong>mat_101_20251001.pdf</strong><span>Polycopié source · 1er octobre 2025</span></a></li>
+        <li><a href="{{ statement_pdf_url }}" target="_blank" rel="noopener"><strong>Recueil PDF</strong><span>103 exercices · 34 pages</span></a></li>
+        <li><a href="{{ source_pdf_url }}" target="_blank" rel="noopener"><strong>mat_101_20251001.pdf</strong><span>Polycopié source · 1er octobre 2025</span></a></li>
         <li><a href="{{ statement_tex_url }}" download><strong>Source LaTeX</strong><span>Sélection par <code>pdfpages</code></span></a></li>
         <li><a href="{{ statement_archive_url }}" download><strong>Archive complète</strong><span>LaTeX + PDF source</span></a></li>
       </ul>
@@ -382,7 +372,7 @@ image_alt: "MAT101 — IMA02"
     <div class="mat101-file-group">
       <p class="mat101-file-label">Facultatif</p>
       <ul>
-        <li><a href="{{ optional_reals_pdf_url }}" download><strong>Construction de R</strong><span>Suites de Cauchy · 3 pages · énoncé seul</span></a></li>
+        <li><a href="{{ optional_reals_pdf_url }}" target="_blank" rel="noopener"><strong>Construction de R</strong><span>Suites de Cauchy · 3 pages · énoncé seul</span></a></li>
       </ul>
     </div>
 
@@ -390,7 +380,7 @@ image_alt: "MAT101 — IMA02"
     <div class="mat101-file-group mat101-file-group-solution">
       <p class="mat101-file-label">Corrigé détaillé</p>
       <ul>
-        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · niveau L1</span></a></li>
+        <li><a href="{{ solution_pdf_url }}" target="_blank" rel="noopener"><strong>Corrigé PDF</strong><span>103 solutions · niveau L1</span></a></li>
         <li><a href="{{ solution_tex_url }}" download><strong>Source LaTeX autonome</strong><span>Un seul fichier compilable</span></a></li>
         <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
       </ul>
@@ -399,7 +389,7 @@ image_alt: "MAT101 — IMA02"
     <div class="mat101-file-group mat101-file-group-solution" id="mat101-owner-downloads" hidden>
       <p class="mat101-file-label">Corrigé détaillé · accès éditeur</p>
       <ul>
-        <li><a href="{{ solution_pdf_url }}" download><strong>Corrigé PDF</strong><span>103 solutions · niveau L1</span></a></li>
+        <li><a href="{{ solution_pdf_url }}" target="_blank" rel="noopener"><strong>Corrigé PDF</strong><span>103 solutions · niveau L1</span></a></li>
         <li><a href="{{ solution_tex_url }}" download><strong>Source LaTeX autonome</strong><span>Un seul fichier compilable</span></a></li>
         <li><a href="{{ solution_archive_url }}" download><strong>Archive modulaire</strong><span>Fichier principal + 4 chapitres</span></a></li>
       </ul>
@@ -429,7 +419,7 @@ image_alt: "MAT101 — IMA02"
     </div>
 
     <div class="mat101-rights-note">
-      <p><strong>Source faisant autorité.</strong> Le recueil utilise l’édition fournie du 13 septembre 2022. Une <a href="https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/ens_files/mat_101_20221201.pdf">version institutionnelle datée du 1er décembre 2022</a> est hébergée par l’Institut Fourier.</p>
+      <p><strong>Source faisant autorité.</strong> Le recueil utilise l’édition fournie du 13 septembre 2022. Une <a href="https://www-fourier.univ-grenoble-alpes.fr/~rossigno/Enseignement/ens_files/mat_101_20221201.pdf" target="_blank" rel="noopener">version institutionnelle datée du 1er décembre 2022</a> est hébergée par l’Institut Fourier.</p>
     </div>
   </section>
 </div>

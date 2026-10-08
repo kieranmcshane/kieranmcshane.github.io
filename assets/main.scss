@@ -13979,8 +13979,13 @@ body.mat101-site .mat101-library.mat101-course {
   margin: 0;
 }
 
-.mat101-archives {
+.mat101-archives,
+.mat101-resources {
   scroll-margin-top: 1rem;
+}
+
+.mat101-resources {
+  margin-top: 1.5rem;
 }
 
 .mat101-archives .mat101-download-intro p {
@@ -14600,6 +14605,11 @@ body:has(.mat101-session-page) {
     grid-row: 2;
   }
 
+  .mat101-course > .mat101-resources {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
   .mat101-course:has(#mat101-session-no-results:not([hidden])) > .mat101-session-grid {
     grid-row: 3;
   }
@@ -14638,6 +14648,38 @@ body:has(.mat101-session-page) {
   border-color: var(--mat101-accent);
   box-shadow: 0 9px 26px rgba(22, 85, 92, 0.11);
   transform: translateY(-1px);
+}
+
+.mat101-session-card.is-past {
+  background: #f3f5f6;
+  border-color: #d5dee2;
+  box-shadow: none;
+}
+
+.mat101-session-card.is-past > a,
+.mat101-session-card.is-past h3,
+.mat101-session-card.is-past .mat101-session-date,
+.mat101-session-card.is-past .mat101-session-room,
+.mat101-session-card.is-past header p,
+.mat101-session-card.is-past footer > strong {
+  color: #6a787f;
+}
+
+.mat101-session-card.is-past .mat101-session-number {
+  background: #8b9aa3;
+}
+
+.mat101-session-card.is-past:hover,
+.mat101-session-card.is-past:focus-within {
+  border-color: #c5d0d4;
+  box-shadow: none;
+  transform: none;
+}
+
+.mat101-session-card.is-upcoming {
+  background: #fff;
+  border-color: #8fc9d0;
+  box-shadow: 0 8px 22px rgba(0, 111, 123, 0.1);
 }
 
 .mat101-session-card > a:focus-visible {
@@ -14697,6 +14739,16 @@ body:has(.mat101-session-page) {
   background: #fff1ca;
 }
 
+.mat101-session-date-state.is-past {
+  color: #5c6b73;
+  background: #e4eaec;
+}
+
+.mat101-session-date-state.is-upcoming {
+  color: #04535c;
+  background: #d7f1f4;
+}
+
 .mat101-session-date-state.is-interro {
   color: #7a3f12;
   background: #ffe8d6;
@@ -14713,6 +14765,13 @@ body:has(.mat101-session-page) {
   margin: 0.7rem 0 0;
   color: #3d5661;
   font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.mat101-session-room {
+  margin: 0.2rem 0 0;
+  color: #3d5661;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
@@ -15271,6 +15330,44 @@ body:has(.mat101-session-page) {
 .mat101-session-detail-status small {
   color: #64786b;
   font-size: 0.66rem;
+}
+
+.mat101-session-page.is-past .mat101-session-detail-hero {
+  border-color: #d5dee2;
+  background: #f4f6f7;
+}
+
+.mat101-session-page.is-past .mat101-session-room {
+  color: #6a787f;
+}
+
+.mat101-session-page.is-upcoming .mat101-session-detail-hero {
+  border-color: #8fc9d0;
+  background:
+    linear-gradient(135deg, rgba(8, 127, 140, 0.16), transparent 62%),
+    #f7fefe;
+}
+
+.mat101-session-detail-status.is-past {
+  border-color: #d5dee2;
+  color: #5c6b73;
+  background: #f4f6f7;
+}
+
+.mat101-session-detail-status.is-past > span {
+  color: #5c6b73;
+  background: #e4eaec;
+}
+
+.mat101-session-detail-status.is-upcoming {
+  border-color: #8fc9d0;
+  color: #04535c;
+  background: rgba(236, 249, 250, 0.96);
+}
+
+.mat101-session-detail-status.is-upcoming > span {
+  color: #04535c;
+  background: #d7f1f4;
 }
 
 .mat101-session-detail-status.is-pending {
