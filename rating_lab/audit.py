@@ -260,16 +260,15 @@ def audit_packet(packet: dict, sport_payload: dict, *, full_replay: bool = True)
                 else min(1, len(evidence["candidates"]) - 1)
             )
         elif model_name == "ensemble":
+            # The fitter minimizes unrounded loss; published metrics have only
+            # four decimals.  These artifacts can establish membership in the
+            # rounded minimum, but cannot break a rounding-induced tie.  The
+            # full replay below verifies the exact winning weights and index.
             internal_selected = min(
                 selectable,
                 key=lambda index: (
                     evidence["candidates"][index]["metrics"]["log_loss"],
-                    tuple(
-                        evidence["candidates"][index]["parameters"][
-                            f"weight_{name}"
-                        ]
-                        for name in MODEL_NAMES
-                    ),
+                    index != evidence["selected_index"],
                 ),
             )
         else:
@@ -375,26 +374,18 @@ def audit_packet(packet: dict, sport_payload: dict, *, full_replay: bool = True)
                 for row in validation_rows
             ]
             ensemble_candidate_metrics.append(_metrics(rows, validation_start))
-        ensemble_selectable = [
-            index
-            for index, metrics in enumerate(ensemble_candidate_metrics)
-            if metrics["log_loss"] is not None
-        ]
-        ensemble_selected_index = (
-            min(
-                ensemble_selectable,
-                key=lambda index: (
-                    ensemble_candidate_metrics[index]["log_loss"],
-                    tuple(
-                        ensemble_evidence["candidates"][index]["parameters"][
-                            f"weight_{name}"
-                        ]
-                        for name in MODEL_NAMES
-                    ),
-                ),
-            )
-            if ensemble_selectable
-            else ensemble_evidence["selected_index"]
+        # Recover the index from the freshly fitted, full-precision winner,
+        # never from the rounded metrics used for display.
+        ensemble_selected_index = next(
+            (
+                index
+                for index, candidate in enumerate(ensemble_evidence["candidates"])
+                if all(
+                    candidate["parameters"][f"weight_{name}"] == weights[name]
+                    for name in MODEL_NAMES
+                )
+            ),
+            -1,
         )
         check(
             "validation_selection:ensemble",
