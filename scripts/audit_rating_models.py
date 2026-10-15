@@ -110,6 +110,9 @@ def main() -> int:
             f"{sport['sport']}: {sport['status']} "
             f"({passed}/{len(sport['checks'])} checks)"
         )
+        for check in sport["checks"]:
+            if not check["passed"]:
+                print(f"  FAIL {check['id']}: {check['evidence']}")
     return 1 if args.strict and report["status"] != "pass" else 0
 
 
