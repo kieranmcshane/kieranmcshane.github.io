@@ -4,7 +4,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTICLE = (ROOT / "_posts/2026-07-17-centered-correlation-tensors-separability.md").read_text()
+ARTICLE = (ROOT / "_drafts/2026-07-17-centered-correlation-tensors-separability.md").read_text()
 FLOW = (ROOT / "assets/images/centered-correlation-flow.svg").read_text()
 HEAD = (ROOT / "_includes/head.html").read_text()
 HEAD_CUSTOM = (ROOT / "_includes/head-custom.html").read_text()

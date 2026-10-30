@@ -22,7 +22,7 @@ image_alt: "Centered Correlations: Proof Campaign"
     </div>
   </header>
 
-  <noscript><p class="game-notice">The proof campaign needs JavaScript. The <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">mathematical article</a> remains fully readable without it.</p></noscript>
+  <noscript><p class="game-notice">The proof campaign needs JavaScript.</p></noscript>
 
   <nav class="game-tabs" aria-label="Game views">
     <button type="button" aria-pressed="true" data-game-view="campaign"><span class="game-tab-icon" aria-hidden="true">⌂</span><span class="game-tab-long">Campaign map</span><span class="game-tab-short">Map</span></button>
@@ -131,9 +131,7 @@ image_alt: "Centered Correlations: Proof Campaign"
 
   <footer class="game-footer">
     <div>
-      <strong>Need the full exposition?</strong>
-      <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Read the article</a>
-      <span aria-hidden="true">·</span>
+      <strong>Want the click-based reconstruction?</strong>
       <a href="{{ '/explain/centered-correlations/' | relative_url }}">Open the study companion</a>
     </div>
     <button type="button" class="game-quiet-button" id="game-reset-save">Reset campaign save</button>

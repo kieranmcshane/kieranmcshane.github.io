@@ -1,58 +1,44 @@
 const { test, expect } = require("@playwright/test");
-const { hasHorizontalOverflow } = require("./helpers");
 
-const ARTICLE =
-  "/2026/07/27/sha1-sha256-certificate-signatures/";
+// These articles live in _drafts/ and must stay out of the built site.
+// The facsimile checks that used to render the SHA-1 article now live in
+// tests/test_sha_signature_post.py, which reads the unpublished source.
+const UNPUBLISHED_ARTICLES = [
+  "/2026/07/16/random-quantum-measurements-incompatibility/",
+  "/2026/07/17/centered-correlation-tensors-separability/",
+  "/2026/07/18/formalizing-xens-correction-in-lean/",
+  "/2026/07/18/x-ens-2026-mathematics-b-complete-correction/",
+  "/2026/07/27/galois-theory-without-detours/",
+  "/2026/07/27/sha1-sha256-certificate-signatures/",
+];
 
-test.describe("primary-source facsimiles", () => {
-  test("remain selective, readable, and clickable without overflowing the page", async ({
-    page,
-  }) => {
-    await page.goto(ARTICLE);
-    await expect(page.locator("html")).not.toHaveClass(/math-pending/);
+test.describe("unpublished articles stay offline", () => {
+  for (const url of UNPUBLISHED_ARTICLES) {
+    test(`${url} is not served`, async ({ request }) => {
+      const response = await request.get(url);
+      expect(response.status()).toBe(404);
+    });
+  }
 
-    const previews = page.locator(".source-facsimile");
-    await expect(previews).toHaveCount(5);
-    await expect(page.locator(".source-facsimile figcaption")).toHaveCount(5);
+  test("home, feed, and sitemap do not link to them", async ({ request }) => {
+    const home = await request.get("/");
+    expect(home.status()).toBe(200);
+    const homeBody = await home.text();
 
-    for (let index = 0; index < 5; index += 1) {
-      const preview = previews.nth(index);
-      await preview.scrollIntoViewIfNeeded();
-      const link = preview.locator(".source-facsimile-link");
-      await expect(link).toHaveAttribute("href", /^https:\/\//);
-      await expect(link).toHaveAttribute("target", "_blank");
-      await expect(link).toHaveAttribute("rel", /noopener/);
-      const image = preview.locator("img");
-      await expect(image).toBeVisible();
-      expect(await image.evaluate((node) => node.naturalWidth)).toBeGreaterThan(
-        500
-      );
-      await expect(preview.locator("figcaption")).toContainText(
-        "Source excerpt."
-      );
-      await expect(preview.locator("figcaption")).toContainText(
-        "Yellow highlighting added."
-      );
-      await expect(preview.locator("figcaption a")).toHaveAttribute(
-        "href",
-        /^https:\/\//
-      );
+    const feed = await request.get("/feed.xml");
+    expect(feed.status()).toBe(200);
+    const feedBody = await feed.text();
+
+    const sitemap = await request.get("/sitemap.xml");
+    expect(sitemap.status()).toBe(200);
+    const sitemapBody = await sitemap.text();
+
+    for (const url of UNPUBLISHED_ARTICLES) {
+      expect(homeBody).not.toContain(url);
+      expect(feedBody).not.toContain(url);
+      expect(sitemapBody).not.toContain(url);
     }
 
-    const firstLink = previews.first().locator(".source-facsimile-link");
-    await firstLink.focus();
-    await expect(firstLink).toBeFocused();
-
-    expect(await hasHorizontalOverflow(page)).toBe(false);
-
-    const viewportWidth = page.viewportSize().width;
-    const frameWidths = await page
-      .locator(".source-facsimile-viewport")
-      .evaluateAll((frames) =>
-        frames.map((frame) => frame.getBoundingClientRect().width)
-      );
-    for (const width of frameWidths) {
-      expect(width).toBeLessThanOrEqual(viewportWidth);
-    }
+    expect(homeBody).not.toContain("post-list");
   });
 });

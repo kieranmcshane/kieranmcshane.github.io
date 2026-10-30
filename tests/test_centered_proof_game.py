@@ -7,7 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = (ROOT / "play-centered-correlations.md").read_text()
 SCRIPT = (ROOT / "assets/js/centered-correlation-game.js").read_text()
 HEAD = (ROOT / "_includes/head-custom.html").read_text()
-ARTICLE = (ROOT / "_posts/2026-07-17-centered-correlation-tensors-separability.md").read_text()
+ARTICLE = (ROOT / "_drafts/2026-07-17-centered-correlation-tensors-separability.md").read_text()
+EXPLAIN = (ROOT / "explain-centered-correlations.md").read_text()
 STYLES = (ROOT / "assets/main.scss").read_text()
 
 
@@ -45,9 +46,12 @@ class CenteredProofGameTests(unittest.TestCase):
         ):
             self.assertIn(phrase, SCRIPT)
 
-    def test_article_links_to_game_and_game_links_back(self):
+    def test_draft_keeps_companion_links_and_public_pages_do_not_link_back(self):
+        unpublished = "/2026/07/17/centered-correlation-tensors-separability/"
         self.assertIn("'/play/centered-correlations/'", ARTICLE)
-        self.assertIn("'/2026/07/17/centered-correlation-tensors-separability/'", PAGE)
+        self.assertIn("'/explain/centered-correlations/'", ARTICLE)
+        self.assertNotIn(unpublished, PAGE)
+        self.assertNotIn(unpublished, EXPLAIN)
 
     def test_html_ids_are_unique(self):
         ids = re.findall(r'\bid="([^"]+)"', PAGE)

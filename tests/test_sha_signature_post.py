@@ -6,7 +6,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-POST = ROOT / "_posts" / "2026-07-27-sha1-sha256-certificate-signatures.md"
+POST = ROOT / "_drafts" / "2026-07-27-sha1-sha256-certificate-signatures.md"
 STYLES = ROOT / "assets" / "main.scss"
 SOURCE_EXCERPTS = ROOT / "assets" / "images" / "source-excerpts"
 

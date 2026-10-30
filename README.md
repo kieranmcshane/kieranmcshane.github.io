@@ -2,7 +2,7 @@
 
 Source for the GitHub Pages site at <https://kieranmcshane.github.io>.
 
-The site uses GitHub Pages, Jekyll, and the Minima theme. Long-form posts live in `_posts/`.
+The site uses GitHub Pages, Jekyll, and the Minima theme. Published long-form posts live in `_posts/`. Articles that are not ready to publish live in `_drafts/` and are omitted from the site build.
 
 ## Rating Lab
 

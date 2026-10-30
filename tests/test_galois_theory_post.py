@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
-POST = ROOT / "_posts" / "2026-07-27-galois-theory-without-detours.md"
+POST = ROOT / "_drafts" / "2026-07-27-galois-theory-without-detours.md"
 HEAD = ROOT / "_includes" / "head-custom.html"
 NAVIGATION = ROOT / "assets" / "js" / "correction-navigation.js"
 STYLES = ROOT / "assets" / "main.scss"
