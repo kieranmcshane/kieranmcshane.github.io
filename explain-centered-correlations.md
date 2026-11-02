@@ -14,7 +14,6 @@ image_alt: "Reconstruct the Centered-Correlation Argument"
     <p class="explain-deck">Everything is click-based. Rebuild the proof, choose the missing steps, and diagnose plausible mistakes. FSRS then decides which ideas should return and when.</p>
     <div class="explain-hero-actions">
       <a class="explain-primary-link" href="#learn-puzzle">Start the proof puzzle</a>
-      <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Return to the article</a>
     </div>
     <div class="explain-progress" aria-labelledby="explain-progress-label">
       <div class="explain-progress-copy">
@@ -36,7 +35,7 @@ image_alt: "Reconstruct the Centered-Correlation Argument"
     <a href="#build-explanation"><strong>5</strong><span>Assemble</span></a>
   </nav>
 
-  <noscript><p class="explain-notice">This learning companion needs JavaScript. The mathematical article remains fully readable without it.</p></noscript>
+  <noscript><p class="explain-notice">This learning companion needs JavaScript.</p></noscript>
 
   <section class="explain-stage" id="learn-puzzle" aria-labelledby="learn-heading">
     <div class="explain-stage-heading">
@@ -218,6 +217,4 @@ image_alt: "Reconstruct the Centered-Correlation Argument"
     </div>
     <p id="readiness-status" role="status" aria-live="polite"></p>
   </section>
-
-  <p class="explain-source-note">Need to verify a detail? Return to <a href="{{ '/2026/07/17/centered-correlation-tensors-separability/' | relative_url }}">Centered Correlation Tensors and Quantum Separability</a>, then come back to the due queue.</p>
 </div>
