@@ -32,6 +32,12 @@ defaults:
     values:
       image: /assets/images/og-mat101.png
       image_alt: "MAT101 — IMA02"
+  # jekyll-sitemap lists static HTML. Keep the deck out of sitemap.xml
+  # without adding front matter to JIQ2026/index.html.
+  - scope:
+      path: "JIQ2026"
+    values:
+      sitemap: false
 theme: minima
 markdown: kramdown
 permalink: /:year/:month/:day/:title/
@@ -45,6 +51,10 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
+# GitHub Pages loads jekyll-optional-front-matter by default. That plugin
+# turns Markdown without front matter into a themed page. JIQ2026.md is
+# Marp source and must be copied unchanged, same as JIQ2026/index.html.
+optional_front_matter: false
 collections:
   mat101_sessions:
     output: true
